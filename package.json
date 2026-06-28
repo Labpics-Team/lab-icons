@@ -1,0 +1,26 @@
+{
+  "name": "@labpics/icons",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Labpics icon library — 444 SVG (Filled + Outline), tree-shakeable ESM",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "sideEffects": false,
+  "scripts": {
+    "build": "node scripts/build.js",
+    "check:parity": "node scripts/check-parity.js",
+    "check:colors": "node scripts/check-colors.js"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "svgo": "^3.3.2"
+  }
+}
