@@ -118,25 +118,29 @@ if (!existsSync(DIST_INDEX)) {
     ok(`dist/index.js exports: 444`);
   }
 
-  // Verify each Filled name appears as export
-  for (const name of filledNames.slice(0, 5)) { // sample check
+  // Verify every Filled name appears as export (full set, not sampled)
+  let missingFilled = 0;
+  for (const name of filledNames) {
     const camel = name.replace(/[-_](.)/g, (_, c) => c.toUpperCase()).replace(/^(.)/, (_, c) => c.toLowerCase());
     const exportName = `${camel}Filled`;
     if (!src.includes(`export const ${exportName}`)) {
       fail(`Missing export: ${exportName} (from Filled/${name}_filled.svg)`);
+      missingFilled++;
     }
   }
+  if (missingFilled === 0) ok(`All 222 Filled export names verified in dist/index.js`);
 
-  // Verify each Outline name appears as export
-  for (const name of outlineNames.slice(0, 5)) { // sample check
+  // Verify every Outline name appears as export (full set, not sampled)
+  let missingOutline = 0;
+  for (const name of outlineNames) {
     const camel = name.replace(/[-_](.)/g, (_, c) => c.toUpperCase()).replace(/^(.)/, (_, c) => c.toLowerCase());
     const exportName = `${camel}Outline`;
     if (!src.includes(`export const ${exportName}`)) {
       fail(`Missing export: ${exportName} (from Outline/${name}.svg)`);
+      missingOutline++;
     }
   }
-
-  if (errors === 0) ok(`Sampled export names verified in dist/index.js`);
+  if (missingOutline === 0) ok(`All 222 Outline export names verified in dist/index.js`);
 }
 
 // ── result ────────────────────────────────────────────────────────────────────

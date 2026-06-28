@@ -13,7 +13,7 @@
  *   svg/Outline/<name>.svg        →  export <camelCase>Outline
  */
 
-import { readFileSync, writeFileSync, mkdirSync, readdirSync } from 'fs';
+import { readFileSync, writeFileSync, mkdirSync, readdirSync, rmSync, existsSync } from 'fs';
 import { join, basename, dirname } from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';
 import { createRequire } from 'module';
@@ -30,6 +30,13 @@ const svgoConfig = require(join(ROOT, 'svgo.config.cjs'));
 const SVG_DIR = join(ROOT, 'svg');
 const DIST_DIR = join(ROOT, 'dist');
 const DIST_SVG_DIR = join(DIST_DIR, 'svg');
+
+// ── clean stale artifacts ─────────────────────────────────────────────────────
+
+if (existsSync(DIST_SVG_DIR)) {
+  rmSync(DIST_SVG_DIR, { recursive: true, force: true });
+  console.log('⚙  Cleaned dist/svg (stale artifacts removed)');
+}
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 

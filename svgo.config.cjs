@@ -20,6 +20,14 @@ module.exports = {
     'removeXMLNS',
     'removeDimensions',
     {
+      name: 'convertColors',
+      params: { currentColor: '#101012' },
+    },
+    {
+      name: 'removeAttrs',
+      params: { attrs: ['fill'] },
+    },
+    {
       name: 'addAttributesToSVGElement',
       params: {
         attributes: [
@@ -30,14 +38,6 @@ module.exports = {
           { fill: 'currentColor' },
         ],
       },
-    },
-    {
-      name: 'convertColors',
-      params: { currentColor: '#101012' },
-    },
-    {
-      name: 'removeAttrs',
-      params: { attrs: ['fill'] },
     },
   ],
 };
