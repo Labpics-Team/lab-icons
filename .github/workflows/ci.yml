@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  build-and-verify:
+    name: Build, parity, colours, tree-shaking
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build (svgo optimise + generate ESM index)
+        run: pnpm build
+
+      - name: Parity check (222 × 2 = 444 exports)
+        run: pnpm check:parity
+
+      - name: Colour check (no hardcoded hex in optimised SVGs)
+        run: pnpm check:colors
+
+      - name: Tree-shaking proof
+        run: pnpm check:treeshake
+
+      # Bite test: inject a missing SVG and assert parity fails
+      - name: Parity guard bites on missing icon
+        run: |
+          cp svg/Filled/accessibility_filled.svg svg/Filled/_EXTRA_TEST_filled.svg
+          pnpm check:parity && echo "ERROR: parity should have failed" && exit 1 || echo "OK: parity correctly failed on extra file"
+          rm svg/Filled/_EXTRA_TEST_filled.svg
+
+      # Bite test: inject hardcoded colour and assert colors fails
+      - name: Colour guard bites on hardcoded hex
+        run: |
+          echo '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#101012"><path d="M0 0"/></svg>' \
+            > dist/svg/Filled/_colour_test.svg
+          pnpm check:colors && echo "ERROR: colours should have failed" && exit 1 || echo "OK: colour check correctly failed on injected hex"
+          rm dist/svg/Filled/_colour_test.svg
