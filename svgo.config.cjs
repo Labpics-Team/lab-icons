@@ -1,4 +1,4 @@
-// SVGO config for Lab Icons
+// SVGO config for Lab Icons (CommonJS, works with type:module)
 // - preserve viewBox (нужно для адаптивного размера через CSS width/height)
 // - сжать числа координат с 5 знаков до 2 (визуально не отличить, файл -30-50%)
 // - заменить хардкод #101012 на currentColor (цвет через CSS наследуется)
@@ -20,6 +20,14 @@ module.exports = {
     'removeXMLNS',
     'removeDimensions',
     {
+      name: 'convertColors',
+      params: { currentColor: '#101012' },
+    },
+    {
+      name: 'removeAttrs',
+      params: { attrs: ['fill'] },
+    },
+    {
       name: 'addAttributesToSVGElement',
       params: {
         attributes: [
@@ -30,14 +38,6 @@ module.exports = {
           { fill: 'currentColor' },
         ],
       },
-    },
-    {
-      name: 'convertColors',
-      params: { currentColor: '#101012' },
-    },
-    {
-      name: 'removeAttrs',
-      params: { attrs: ['fill'] },
     },
   ],
 };
