@@ -8,15 +8,15 @@
 svg/
   Filled/   — 222 иконки (*_filled.svg)
   Outline/  — 222 иконки (*.svg)
-svgo.config.js — конфиг оптимизации (currentColor, 24×24 viewBox)
+svgo.config.cjs — конфиг оптимизации (currentColor, 24×24 viewBox)
 ```
 
 ## Конвенция имён
 
-| Вариант | Файл           | Экспорт              |
-|---------|----------------|----------------------|
-| Filled  | `arrow_filled.svg` | `IconArrowFilled`    |
-| Outline | `arrow.svg`        | `IconArrowOutline`   |
+| Вариант | Файл                       | Экспорт                |
+|---------|----------------------------|------------------------|
+| Filled  | `accessibility_filled.svg` | `accessibilityFilled`  |
+| Outline | `accessibility.svg`        | `accessibilityOutline` |
 
 ## Как собрать
 
@@ -28,7 +28,7 @@ pnpm build       # svgo-оптимизация + генерация dist/index.j
 ## Как потреблять
 
 ```ts
-import { IconArrowFilled, IconArrowOutline } from '@labpics/icons'
+import { accessibilityFilled, accessibilityOutline } from '@labpics/icons'
 ```
 
 Только используемые иконки попадают в бандл (tree-shaking через `sideEffects: false`).
