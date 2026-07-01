@@ -10,7 +10,7 @@
    "byDir": {
     "right": [
      {
-      "role": "whole",
+      "role": "glyph",
       "origin": "50% 50%",
       "keyframes": [
        {
@@ -126,7 +126,7 @@
     ],
     "left": [
      {
-      "role": "whole",
+      "role": "glyph",
       "origin": "50% 50%",
       "keyframes": [
        {
@@ -242,7 +242,7 @@
     ],
     "up": [
      {
-      "role": "whole",
+      "role": "glyph",
       "origin": "50% 50%",
       "keyframes": [
        {
@@ -358,7 +358,7 @@
     ],
     "down": [
      {
-      "role": "whole",
+      "role": "glyph",
       "origin": "50% 50%",
       "keyframes": [
        {
@@ -474,7 +474,7 @@
     ],
     "left-right": [
      {
-      "role": "whole",
+      "role": "glyph",
       "origin": "50% 50%",
       "keyframes": [
        {
@@ -590,7 +590,7 @@
     ],
     "up-down": [
      {
-      "role": "whole",
+      "role": "glyph",
       "origin": "50% 50%",
       "keyframes": [
        {
@@ -709,7 +709,7 @@
   "spin": {
    "parts": [
     {
-     "role": "whole",
+     "role": "glyph",
      "origin": "50% 50%",
      "keyframes": [
       {
@@ -1832,103 +1832,107 @@
      "keyframes": [
       {
        "offset": 0,
-       "transform": "scale(0, 0)"
+       "transform": "scale(1, 1)"
       },
       {
        "offset": 0.041666666666666664,
-       "transform": "scale(0.1984206281719037, 0.1984206281719037)"
+       "transform": "scale(0.9805555555555555, 0.9805555555555555)"
       },
       {
        "offset": 0.08333333333333333,
-       "transform": "scale(0.37324937911672607, 0.37324937911672607)"
+       "transform": "scale(0.9611111111111111, 0.9611111111111111)"
       },
       {
        "offset": 0.125,
-       "transform": "scale(0.5259794096209914, 0.5259794096209914)"
+       "transform": "scale(0.9416666666666667, 0.9416666666666667)"
       },
       {
        "offset": 0.16666666666666666,
-       "transform": "scale(0.6581038764712236, 0.6581038764712236)"
+       "transform": "scale(0.9222222222222222, 0.9222222222222222)"
       },
       {
        "offset": 0.20833333333333334,
-       "transform": "scale(0.7711159364539466, 0.7711159364539466)"
+       "transform": "scale(0.9027777777777778, 0.9027777777777778)"
       },
       {
        "offset": 0.25,
-       "transform": "scale(0.8665087463556852, 0.8665087463556852)"
+       "transform": "scale(0.8833333333333333, 0.8833333333333333)"
       },
       {
        "offset": 0.2916666666666667,
-       "transform": "scale(0.9457754629629631, 0.9457754629629631)"
+       "transform": "scale(0.8638888888888889, 0.8638888888888889)"
+      },
+      {
+       "offset": 0.3,
+       "transform": "scale(0.86, 0.86)"
       },
       {
        "offset": 0.3333333333333333,
-       "transform": "scale(1.0104092430623044, 1.0104092430623044)"
+       "transform": "scale(0.8828571428571429, 0.8828571428571429)"
       },
       {
        "offset": 0.375,
-       "transform": "scale(1.0619032434402331, 1.0619032434402331)"
+       "transform": "scale(0.9114285714285715, 0.9114285714285715)"
       },
       {
        "offset": 0.4166666666666667,
-       "transform": "scale(1.101750620883274, 1.101750620883274)"
+       "transform": "scale(0.9400000000000001, 0.9400000000000001)"
       },
       {
        "offset": 0.4583333333333333,
-       "transform": "scale(1.1314445321779505, 1.1314445321779505)"
+       "transform": "scale(0.9685714285714286, 0.9685714285714286)"
       },
       {
        "offset": 0.5,
-       "transform": "scale(1.152478134110787, 1.152478134110787)"
+       "transform": "scale(0.9971428571428572, 0.9971428571428572)"
       },
       {
        "offset": 0.5416666666666666,
-       "transform": "scale(1.166344583468308, 1.166344583468308)"
+       "transform": "scale(1.0257142857142858, 1.0257142857142858)"
       },
       {
        "offset": 0.5833333333333334,
-       "transform": "scale(1.174537037037037, 1.174537037037037)"
+       "transform": "scale(1.0542857142857143, 1.0542857142857143)"
       },
       {
        "offset": 0.625,
-       "transform": "scale(1.1785486516034984, 1.1785486516034984)"
+       "transform": "scale(1.082857142857143, 1.082857142857143)"
+      },
+      {
+       "offset": 0.65,
+       "transform": "scale(1.1, 1.1)"
       },
       {
        "offset": 0.6666666666666666,
-       "transform": "scale(1.1798725839542166, 1.1798725839542166)"
-      },
-      {
-       "offset": 0.7,
-       "transform": "scale(1.18, 1.18)"
+       "transform": "scale(1.0952380952380953, 1.0952380952380953)"
       },
       {
        "offset": 0.7083333333333334,
-       "transform": "scale(1.179657522828257, 1.179657522828257)"
+       "transform": "scale(1.0833333333333335, 1.0833333333333335)"
       },
       {
        "offset": 0.75,
-       "transform": "scale(1.1679422863405995, 1.1679422863405995)"
+       "transform": "scale(1.0714285714285714, 1.0714285714285714)"
       },
       {
        "offset": 0.7916666666666666,
-       "transform": "scale(1.1416218792715942, 1.1416218792715942)"
+       "transform": "scale(1.0595238095238095, 1.0595238095238095)"
       },
       {
        "offset": 0.8333333333333334,
-       "transform": "scale(1.1056283359900236, 1.1056283359900236)"
+       "transform": "scale(1.0476190476190477, 1.0476190476190477)"
       },
       {
        "offset": 0.875,
-       "transform": "scale(1.0667062859407732, 1.0667062859407732)"
+       "transform": "scale(1.0357142857142858, 1.0357142857142858)"
       },
       {
        "offset": 0.9166666666666666,
-       "transform": "scale(1.0321491151282114, 1.0321491151282114)"
+       "transform": "scale(1.023809523809524, 1.023809523809524)"
       },
       {
        "offset": 0.9583333333333334,
-       "transform": "scale(1.0084322991667014, 1.0084322991667014)"
+       "transform": "scale(1.0119047619047619, 1.0119047619047619)"
       },
       {
        "offset": 1,
@@ -1936,7 +1940,7 @@
       }
      ],
      "timing": {
-      "duration": 450,
+      "duration": 500,
       "delay": 0,
       "iterations": 1,
       "direction": "normal",
@@ -2554,111 +2558,123 @@
    "parts": [
     {
      "role": "whole",
-     "origin": "50% 50%",
+     "origin": "50% 100%",
      "keyframes": [
       {
        "offset": 0,
-       "transform": "scale(1, 1)"
+       "transform": "translate(0px, 0px) scale(1, 1)"
       },
       {
        "offset": 0.041666666666666664,
-       "transform": "scale(1.0010222252113279, 1.0010222252113279)"
+       "transform": "translate(0px, -0.22135416666666663px) scale(1, 1.0078125)"
       },
       {
        "offset": 0.08333333333333333,
-       "transform": "scale(1.0040192378864667, 1.0040192378864667)"
+       "transform": "translate(0px, -0.44270833333333326px) scale(1, 1.015625)"
       },
       {
        "offset": 0.125,
-       "transform": "scale(1.0087867965644035, 1.0087867965644035)"
+       "transform": "translate(0px, -0.6640625px) scale(1, 1.0234375)"
       },
       {
        "offset": 0.16666666666666666,
-       "transform": "scale(1.015, 1.015)"
+       "transform": "translate(0px, -0.8854166666666665px) scale(1, 1.03125)"
       },
       {
        "offset": 0.20833333333333334,
-       "transform": "scale(1.0222354286469244, 1.0222354286469244)"
+       "transform": "translate(0px, -1.1067708333333333px) scale(1, 1.0390625)"
       },
       {
        "offset": 0.25,
-       "transform": "scale(1.03, 1.03)"
+       "transform": "translate(0px, -1.328125px) scale(1, 1.046875)"
       },
       {
        "offset": 0.2916666666666667,
-       "transform": "scale(1.0377645713530756, 1.0377645713530756)"
+       "transform": "translate(0px, -1.5494791666666667px) scale(1, 1.0546875)"
+      },
+      {
+       "offset": 0.32,
+       "transform": "translate(0px, -1.7px) scale(1, 1.06)"
       },
       {
        "offset": 0.3333333333333333,
-       "transform": "scale(1.045, 1.045)"
+       "transform": "translate(0px, -1.6244444444444446px) scale(1, 1.053777777777778)"
       },
       {
        "offset": 0.375,
-       "transform": "scale(1.0512132034355965, 1.0512132034355965)"
+       "transform": "translate(0px, -1.3883333333333332px) scale(1, 1.0343333333333333)"
       },
       {
        "offset": 0.4166666666666667,
-       "transform": "scale(1.0559807621135333, 1.0559807621135333)"
+       "transform": "translate(0px, -1.152222222222222px) scale(1, 1.014888888888889)"
       },
       {
        "offset": 0.4583333333333333,
-       "transform": "scale(1.0589777747886722, 1.0589777747886722)"
+       "transform": "translate(0px, -0.9161111111111112px) scale(1, 0.9954444444444445)"
       },
       {
        "offset": 0.5,
-       "transform": "scale(1.06, 1.06)"
+       "transform": "translate(0px, -0.6799999999999999px) scale(1, 0.9760000000000001)"
       },
       {
        "offset": 0.5416666666666666,
-       "transform": "scale(1.0589777747886722, 1.0589777747886722)"
+       "transform": "translate(0px, -0.443888888888889px) scale(1, 0.9565555555555556)"
       },
       {
        "offset": 0.5833333333333334,
-       "transform": "scale(1.0559807621135333, 1.0559807621135333)"
+       "transform": "translate(0px, -0.20777777777777762px) scale(1, 0.9371111111111111)"
+      },
+      {
+       "offset": 0.62,
+       "transform": "translate(0px, 0px) scale(1, 0.92)"
       },
       {
        "offset": 0.625,
-       "transform": "scale(1.0512132034355965, 1.0512132034355965)"
+       "transform": "translate(0px, -0.00875000000000001px) scale(1, 0.9225000000000001)"
       },
       {
        "offset": 0.6666666666666666,
-       "transform": "scale(1.0450000000000002, 1.0450000000000002)"
+       "transform": "translate(0px, -0.08166666666666662px) scale(1, 0.9433333333333334)"
       },
       {
        "offset": 0.7083333333333334,
-       "transform": "scale(1.0377645713530756, 1.0377645713530756)"
+       "transform": "translate(0px, -0.15458333333333343px) scale(1, 0.9641666666666667)"
       },
       {
        "offset": 0.75,
-       "transform": "scale(1.03, 1.03)"
+       "transform": "translate(0px, -0.22750000000000004px) scale(1, 0.9850000000000001)"
       },
       {
        "offset": 0.7916666666666666,
-       "transform": "scale(1.0222354286469244, 1.0222354286469244)"
+       "transform": "translate(0px, -0.30041666666666667px) scale(1, 1.0058333333333334)"
+      },
+      {
+       "offset": 0.82,
+       "transform": "translate(0px, -0.35px) scale(1, 1.02)"
       },
       {
        "offset": 0.8333333333333334,
-       "transform": "scale(1.015, 1.015)"
+       "transform": "translate(0px, -0.3240740740740739px) scale(1, 1.0185185185185186)"
       },
       {
        "offset": 0.875,
-       "transform": "scale(1.0087867965644035, 1.0087867965644035)"
+       "transform": "translate(0px, -0.24305555555555547px) scale(1, 1.0138888888888888)"
       },
       {
        "offset": 0.9166666666666666,
-       "transform": "scale(1.004019237886467, 1.004019237886467)"
+       "transform": "translate(0px, -0.16203703703703703px) scale(1, 1.0092592592592593)"
       },
       {
        "offset": 0.9583333333333334,
-       "transform": "scale(1.0010222252113279, 1.0010222252113279)"
+       "transform": "translate(0px, -0.08101851851851843px) scale(1, 1.0046296296296295)"
       },
       {
        "offset": 1,
-       "transform": "scale(1, 1)"
+       "transform": "translate(0px, 0px) scale(1, 1)"
       }
      ],
      "timing": {
-      "duration": 700,
+      "duration": 550,
       "delay": 0,
       "iterations": 1,
       "direction": "normal",

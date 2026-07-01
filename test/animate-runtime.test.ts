@@ -10,7 +10,12 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { animatableNames, animateIcon, iconClass } from '../src/animate/index.js';
+import {
+  animatableNames,
+  animateIcon,
+  iconClass,
+  type IconAnimationHandle,
+} from '../src/animate/index.js';
 
 // ─── Фейковый DOM ────────────────────────────────────────────────────────────
 
@@ -168,6 +173,88 @@ describe('animateIcon — оркестровка по классам', () => {
       matchMedia: noPreference,
     });
     expect(svg.calls[0]!.options.iterations).toBe(Infinity);
+  });
+});
+
+describe('animateIcon — фиксы фидбека владельца 2026-07-02', () => {
+  it('А: pop стартует С ЕДИНИЦЫ (сквош), не с нуля — иконка не «исчезает» на hover', () => {
+    // Mutation proof: вернуть scale-с-нуля в данных → первый кейфрейм scale(0 → RED
+    const svg = svgFor('single');
+    animateIcon(svg as unknown as SVGSVGElement, { name: 'checkmark', matchMedia: noPreference });
+    const kf = svg.calls[0]!.keyframes;
+    expect(String(kf[0]!.transform)).toContain('scale(1, 1)');
+    // Провал сквоша ~0.86 присутствует
+    const scales = kf
+      .map((k) => /scale\(([\d.]+)/.exec(String(k.transform)))
+      .filter(Boolean)
+      .map((m) => Number(m![1]));
+    expect(Math.min(...scales)).toBeLessThan(0.9);
+    expect(Math.min(...scales)).toBeGreaterThan(0.7);
+  });
+
+  it('А: generic — живой bounce (треки y и scaleY), не мёртвый микропульс', () => {
+    const svg = svgFor('single');
+    animateIcon(svg as unknown as SVGSVGElement, { name: 'folder', matchMedia: noPreference });
+    const kf = svg.calls[0]!.keyframes;
+    const transforms = kf.map((k) => String(k.transform));
+    expect(transforms.some((t) => /translate\([\d.-]+px, -[\d.]+px\)/.test(t))).toBe(true); // подскок вверх
+    expect(transforms.some((t) => /scale\(1, 0\.9[\d]*\)/.test(t) || /scale\(1, 0\.9\d+\)/.test(t))).toBe(
+      true,
+    ); // сквош по Y
+    expect(svg.style['transformOrigin']).toBe('50% 100%'); // от «земли»
+  });
+
+  it('А: direction у enclosure (стрелка В круге) двигает ГЛИФ, круг стоит', () => {
+    // Mutation proof: убрать glyph-ветку резолвера → едет весь svg → RED
+    const svg = new FakeSvg([
+      { x: 8, y: 9, width: 8, height: 6 }, // стрелка (глиф, внутри круга)
+      { x: 1, y: 1, width: 22, height: 22 }, // круг (enclosure)
+    ]);
+    animateIcon(svg as unknown as SVGSVGElement, {
+      name: 'arrow-back-circle',
+      matchMedia: noPreference,
+    });
+    expect(svg.calls).toHaveLength(1);
+    expect(svg.calls[0]!.target).toBe(svg.paths[0]); // именно глиф
+    expect(svg.paths[0]!.style['transformBox']).toBe('fill-box');
+  });
+
+  it('А: spin у слоистого (compas) вращает внутренний глиф', () => {
+    const svg = new FakeSvg([
+      { x: 7, y: 7, width: 10, height: 10 }, // игла внутри
+      { x: 1, y: 1, width: 22, height: 22 }, // корпус
+    ]);
+    animateIcon(svg as unknown as SVGSVGElement, { name: 'compas', matchMedia: noPreference });
+    expect(svg.calls[0]!.target).toBe(svg.paths[0]);
+    expect(String(svg.calls[0]!.keyframes.at(-1)!.transform)).toContain('rotate(360deg)');
+  });
+
+  it('Б: getBBox бросает (detached/hidden) → деградация в whole, БЕЗ исключения наружу', () => {
+    // Mutation proof: убрать try/catch в collectLayers → throw наружу → RED
+    const svg = svgFor('bell');
+    for (const p of svg.paths) {
+      p.getBBox = () => {
+        throw new Error('нет layout');
+      };
+    }
+    let h: IconAnimationHandle | undefined;
+    expect(() => {
+      h = animateIcon(svg as unknown as SVGSVGElement, {
+        name: 'notifications',
+        matchMedia: noPreference,
+      });
+    }).not.toThrow();
+    // Слои неизмеримы → анимация целиком (body-часть на whole)
+    expect(h!.animations.length).toBeGreaterThan(0);
+    expect(svg.calls.every((c) => c.target === svg)).toBe(true);
+  });
+
+  it('А: хендл несёт pause/play/reverse (будущие hover-триггеры)', () => {
+    const svg = svgFor('single');
+    const h = animateIcon(svg as unknown as SVGSVGElement, { name: 'heart', matchMedia: noPreference });
+    expect(typeof h.pause).toBe('function');
+    expect(typeof h.play).toBe('function');
+    expect(typeof h.reverse).toBe('function');
   });
 });
 

@@ -48,7 +48,7 @@ interface WaapiTimingData {
   readonly easing: 'linear';
 }
 
-type PartRole = 'whole' | 'body' | 'rest' | 'smallest';
+type PartRole = 'whole' | 'glyph' | 'body' | 'rest' | 'smallest';
 
 interface ChoreographyPart {
   readonly role: PartRole;
@@ -99,6 +99,12 @@ export interface IconAnimationHandle {
   readonly finished: Promise<void>;
   /** Отменить все анимации (слои вернутся к статике). */
   cancel(): void;
+  /** Поставить все анимации на паузу (hover-leave и т.п.). */
+  pause(): void;
+  /** Возобновить после pause(). */
+  play(): void;
+  /** Развернуть направление всех анимаций (hover-leave с откатом). */
+  reverse(): void;
 }
 
 /** Слой иконки, как его видит резолвер ролей (минимальный контракт DOM). */
@@ -143,6 +149,9 @@ export function animateIcon(svg: SVGSVGElement, opts: AnimateIconOptions): IconA
       animations: [],
       finished: Promise.resolve(),
       cancel() {},
+      pause() {},
+      play() {},
+      reverse() {},
     };
   }
 
@@ -156,7 +165,7 @@ export function animateIcon(svg: SVGSVGElement, opts: AnimateIconOptions): IconA
     const targets = resolveRole(part.role, root, layers, layered);
     for (let i = 0; i < targets.length; i++) {
       const target = targets[i]!;
-      applyOrigin(target, part.role, part.origin);
+      applyOrigin(target, target !== (root as unknown), part.origin);
       const staggerDelay = (part.staggerGapMs ?? 0) * i;
       animations.push(
         target.animate(part.keyframes as unknown as Keyframe[], {
@@ -190,12 +199,32 @@ export function animateIcon(svg: SVGSVGElement, opts: AnimateIconOptions): IconA
     );
   }
 
+  // Все хореографии identity-краевые: cancel после естественного завершения
+  // визуально бесшовен и освобождает композитор от завершённых Animation
+  // (важно при десятках hover-иконок). allSettled: ручной cancel() реджектит
+  // WAAPI a.finished — хендловый finished при этом всё равно резолвится
+  // («всё закончилось»), а повторная очистка не выполняется.
+  const finished = Promise.allSettled(animations.map((a) => a.finished)).then((results) => {
+    if (results.every((r) => r.status === 'fulfilled')) {
+      for (const a of animations) a.cancel();
+    }
+  });
+
   return {
     reduced: false,
     animations,
-    finished: Promise.all(animations.map((a) => a.finished)).then(() => undefined),
+    finished,
     cancel() {
       for (const a of animations) a.cancel();
+    },
+    pause() {
+      for (const a of animations) a.pause();
+    },
+    play() {
+      for (const a of animations) a.play();
+    },
+    reverse() {
+      for (const a of animations) a.reverse();
     },
   };
 }
@@ -226,19 +255,34 @@ interface MeasuredLayer {
   readonly area: number;
   readonly cx: number;
   readonly cy: number;
+  readonly bbox: { x: number; y: number; width: number; height: number };
 }
 
+/**
+ * Слои иконки. Инвариант разметки: path — ПРЯМЫЕ дети svg (наши иконки
+ * плоские; обёртка в <g> честно деградирует в whole-анимацию).
+ * getBBox() на detached/скрытом SVG бросает или даёт нули (браузерозависимо) —
+ * неизмеримый слой отбрасывается, при нуле измеримых иконка анимируется
+ * целиком (whole): деградация вместо исключения из публичного API.
+ */
 function collectLayers(root: IconRootLike): MeasuredLayer[] {
   const paths = root.querySelectorAll(':scope > path');
   const layers: MeasuredLayer[] = [];
   for (let i = 0; i < paths.length; i++) {
     const el = paths[i] as unknown as LayerLike;
-    const b = el.getBBox();
+    let b: { x: number; y: number; width: number; height: number };
+    try {
+      b = el.getBBox();
+    } catch {
+      continue;
+    }
+    if (!(b.width > 0 && b.height > 0)) continue;
     layers.push({
       el,
       area: b.width * b.height,
       cx: b.x + b.width / 2,
       cy: b.y + b.height / 2,
+      bbox: b,
     });
   }
   return layers;
@@ -281,6 +325,21 @@ function resolveRole(
     return [root];
   }
   const byArea = [...layers].sort((a, b) => b.area - a.area);
+  if (role === 'glyph') {
+    // Глиф внутри enclosure (стрелка В круге, игла В компасе): существенно
+    // меньший слой (≤50% площади), чей центр лежит внутри bbox наибольшего.
+    // Иначе — вся иконка (обычная стрелка без круга движется целиком).
+    const enclosure = byArea[0]!;
+    const glyph = byArea[byArea.length - 1]!;
+    const e = enclosure.bbox;
+    const inside =
+      glyph.area <= enclosure.area * 0.5 &&
+      glyph.cx >= e.x &&
+      glyph.cx <= e.x + e.width &&
+      glyph.cy >= e.y &&
+      glyph.cy <= e.y + e.height;
+    return inside ? [glyph.el] : [root];
+  }
   if (role === 'body') return [byArea[0]!.el];
   if (role === 'smallest') return [byArea[byArea.length - 1]!.el];
   // rest: все кроме body, каскад от ближнего к дальнему относительно body.
@@ -292,9 +351,10 @@ function resolveRole(
     .map(({ l }) => l.el);
 }
 
-function applyOrigin(target: LayerLike | IconRootLike, role: PartRole, origin: string): void {
+/** fill-box ставится только НА СЛОЙ (path); корневой svg живёт в border-box. */
+function applyOrigin(target: LayerLike | IconRootLike, isLayer: boolean, origin: string): void {
   const style = target.style as CSSStyleDeclaration & { transformBox?: string };
-  if (role !== 'whole') {
+  if (isLayer) {
     style.transformBox = 'fill-box';
   }
   style.transformOrigin = origin;

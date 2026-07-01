@@ -11,8 +11,9 @@
  *
  * Почему генерат КОММИТИТСЯ: CI не имеет доступа к несмерженной ветке
  * lab-motion; хореографии — детерминированные чистые данные (пресеты без
- * Math.random/Date.now), валидируются гейтом check-choreographies. Провенанс
- * (SHA lab-motion) пишется в заголовок файла.
+ * Math.random/Date.now). Дрифт и структуру ловит scripts/check-choreographies.js
+ * (в verify и CI): провенанс, конечность чисел, покрытие ВСЕХ классов
+ * semantics.json. Провенанс (SHA lab-motion) пишется в файл.
  *
  * Роли слоёв (резолвит рантайм по геометрии):
  *   whole    — вся иконка (single-path / wholeOnly)
@@ -44,13 +45,16 @@ try {
   // dist вне git-клона — провенанс останется unknown, гейт это подсветит
 }
 
-/** Пресет → WAAPI-часть хореографии. extra позволяет переопределить repeat и пр. */
+/**
+ * Пресет → WAAPI-часть хореографии. extra позволяет переопределить repeat и пр.
+ * progressTrack на уровне части НЕ эмитится (рантайм читает его только из
+ * clip-блока хореографии — finding арх-ревью: мёртвое поле = дрифт формы).
+ */
 function part(role, origin, spec, opts = {}) {
   const { staggerGapMs, ...specPatch } = opts;
   const w = p.presetToWaapi({ ...spec, ...specPatch });
   const out = { role, origin, keyframes: w.keyframes, timing: w.timing };
   if (staggerGapMs !== undefined) out.staggerGapMs = staggerGapMs;
-  if (w.progressTrack) out.progressTrack = w.progressTrack;
   return out;
 }
 
@@ -70,21 +74,47 @@ const seesawY = {
   tracks: [{ property: 'y', values: [0, -2.5, 0, 2.5, 0] }],
 };
 
+/**
+ * Сквош-поп: акцент «нажали» ОТ единицы (фидбек владельца 2026-07-02:
+ * scale-с-нуля на hover читался как исчезновение — появление-с-нуля уместно
+ * только на mount-триггере, он придёт отдельной опцией).
+ */
+const squashPop = {
+  duration: 0.5,
+  tracks: [{ property: 'scale', values: [1, 0.86, 1.1, 1], times: [0, 0.3, 0.65, 1] }],
+};
+
+/**
+ * Живой generic: мягкий подскок со сквошем при приземлении — SF-подобный
+ * default вместо еле заметного пульса (фидбек владельца: «generic мёртвый»).
+ */
+const liveBounce = {
+  duration: 0.55,
+  tracks: [
+    { property: 'y', values: [0, -1.7, 0, -0.35, 0], times: [0, 0.32, 0.62, 0.82, 1] },
+    { property: 'scaleY', values: [1, 1.06, 0.92, 1.02, 1], times: [0, 0.32, 0.62, 0.82, 1] },
+  ],
+};
+
 const choreographies = {
   direction: {
     // Сдвиг в семантическом направлении и возврат — данные на каждое из
     // 6 направлений (генерим все: чище, чем зеркалить transform-строки в рантайме).
+    // Роль glyph: у enclosure-иконок (стрелка В круге) двигается ГЛИФ, круг
+    // стоит (фидбек владельца: ехал весь бейдж — дёшево); без вложенного
+    // глифа роль честно деградирует в whole.
     byDir: {
-      right: [part('whole', '50% 50%', p.drift({ dx: 2.5, dy: 0, duration: 0.55 }), { repeat: 0 })],
-      left: [part('whole', '50% 50%', p.drift({ dx: -2.5, dy: 0, duration: 0.55 }), { repeat: 0 })],
-      up: [part('whole', '50% 50%', p.drift({ dx: 0, dy: -2.5, duration: 0.55 }), { repeat: 0 })],
-      down: [part('whole', '50% 50%', p.drift({ dx: 0, dy: 2.5, duration: 0.55 }), { repeat: 0 })],
-      'left-right': [part('whole', '50% 50%', seesawX)],
-      'up-down': [part('whole', '50% 50%', seesawY)],
+      right: [part('glyph', '50% 50%', p.drift({ dx: 2.5, dy: 0, duration: 0.55 }), { repeat: 0 })],
+      left: [part('glyph', '50% 50%', p.drift({ dx: -2.5, dy: 0, duration: 0.55 }), { repeat: 0 })],
+      up: [part('glyph', '50% 50%', p.drift({ dx: 0, dy: -2.5, duration: 0.55 }), { repeat: 0 })],
+      down: [part('glyph', '50% 50%', p.drift({ dx: 0, dy: 2.5, duration: 0.55 }), { repeat: 0 })],
+      'left-right': [part('glyph', '50% 50%', seesawX)],
+      'up-down': [part('glyph', '50% 50%', seesawY)],
     },
   },
   spin: {
-    parts: [part('whole', '50% 50%', p.spin({ turns: 1, duration: 0.9 }))],
+    // Вращается внутренний глиф (игла компаса, стрелка таймера), корпус стоит.
+    parts: [part('glyph', '50% 50%', p.spin({ turns: 1, duration: 0.9 }))],
   },
   bell: {
     parts: [
@@ -124,7 +154,7 @@ const choreographies = {
     })(),
   },
   pop: {
-    parts: [part('whole', '50% 50%', p.pop({ duration: 0.45 }))],
+    parts: [part('whole', '50% 50%', squashPop)],
   },
   blink: {
     parts: [part('smallest', '50% 50%', p.blink({ min: 0, duration: 0.9 }), { repeat: 1 })],
@@ -141,7 +171,7 @@ const choreographies = {
     parts: [part('whole', '50% 50%', p.pulse({ amount: -0.08, duration: 0.6 }))],
   },
   generic: {
-    parts: [part('whole', '50% 50%', p.pulse({ amount: 0.06, duration: 0.7 }))],
+    parts: [part('whole', '50% 100%', liveBounce)],
   },
 };
 
