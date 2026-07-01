@@ -34,6 +34,12 @@ jobs:
       - name: Build (svgo optimise + generate ESM index)
         run: pnpm build
 
+      - name: Build animate subpath (tsup)
+        run: pnpm build:animate
+
+      - name: Typecheck (tsc strict)
+        run: pnpm typecheck
+
       - name: Parity check (222 × 2 = 444 exports)
         run: pnpm check:parity
 
