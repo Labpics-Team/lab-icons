@@ -1,0 +1,2672 @@
+{
+ "comment": "СГЕНЕРИРОВАНО scripts/gen-choreographies.mjs — НЕ править руками.",
+ "provenance": {
+  "source": "@labpics/motion/presets",
+  "motionSha": "846d613a08f1",
+  "generatedFrom": "feat/icon-effect-presets (lab-motion PR #24)"
+ },
+ "choreographies": {
+  "direction": {
+   "byDir": {
+    "right": [
+     {
+      "role": "whole",
+      "origin": "50% 50%",
+      "keyframes": [
+       {
+        "offset": 0,
+        "transform": "translate(0px, 0px)"
+       },
+       {
+        "offset": 0.041666666666666664,
+        "transform": "translate(0.04259271713866461px, 0px)"
+       },
+       {
+        "offset": 0.08333333333333333,
+        "transform": "translate(0.16746824526945162px, 0px)"
+       },
+       {
+        "offset": 0.125,
+        "transform": "translate(0.36611652351681556px, 0px)"
+       },
+       {
+        "offset": 0.16666666666666666,
+        "transform": "translate(0.6249999999999999px, 0px)"
+       },
+       {
+        "offset": 0.20833333333333334,
+        "transform": "translate(0.9264761936218491px, 0px)"
+       },
+       {
+        "offset": 0.25,
+        "transform": "translate(1.2499999999999998px, 0px)"
+       },
+       {
+        "offset": 0.2916666666666667,
+        "transform": "translate(1.573523806378151px, 0px)"
+       },
+       {
+        "offset": 0.3333333333333333,
+        "transform": "translate(1.8749999999999998px, 0px)"
+       },
+       {
+        "offset": 0.375,
+        "transform": "translate(2.1338834764831844px, 0px)"
+       },
+       {
+        "offset": 0.4166666666666667,
+        "transform": "translate(2.3325317547305486px, 0px)"
+       },
+       {
+        "offset": 0.4583333333333333,
+        "transform": "translate(2.457407282861335px, 0px)"
+       },
+       {
+        "offset": 0.5,
+        "transform": "translate(2.5px, 0px)"
+       },
+       {
+        "offset": 0.5416666666666666,
+        "transform": "translate(2.4574072828613356px, 0px)"
+       },
+       {
+        "offset": 0.5833333333333334,
+        "transform": "translate(2.332531754730548px, 0px)"
+       },
+       {
+        "offset": 0.625,
+        "transform": "translate(2.1338834764831844px, 0px)"
+       },
+       {
+        "offset": 0.6666666666666666,
+        "transform": "translate(1.8750000000000004px, 0px)"
+       },
+       {
+        "offset": 0.7083333333333334,
+        "transform": "translate(1.5735238063781507px, 0px)"
+       },
+       {
+        "offset": 0.75,
+        "transform": "translate(1.2500000000000002px, 0px)"
+       },
+       {
+        "offset": 0.7916666666666666,
+        "transform": "translate(0.9264761936218497px, 0px)"
+       },
+       {
+        "offset": 0.8333333333333334,
+        "transform": "translate(0.6249999999999998px, 0px)"
+       },
+       {
+        "offset": 0.875,
+        "transform": "translate(0.36611652351681556px, 0px)"
+       },
+       {
+        "offset": 0.9166666666666666,
+        "transform": "translate(0.16746824526945225px, 0px)"
+       },
+       {
+        "offset": 0.9583333333333334,
+        "transform": "translate(0.04259271713866486px, 0px)"
+       },
+       {
+        "offset": 1,
+        "transform": "translate(0px, 0px)"
+       }
+      ],
+      "timing": {
+       "duration": 550,
+       "delay": 0,
+       "iterations": 1,
+       "direction": "normal",
+       "fill": "both",
+       "easing": "linear"
+      }
+     }
+    ],
+    "left": [
+     {
+      "role": "whole",
+      "origin": "50% 50%",
+      "keyframes": [
+       {
+        "offset": 0,
+        "transform": "translate(0px, 0px)"
+       },
+       {
+        "offset": 0.041666666666666664,
+        "transform": "translate(-0.04259271713866461px, 0px)"
+       },
+       {
+        "offset": 0.08333333333333333,
+        "transform": "translate(-0.16746824526945162px, 0px)"
+       },
+       {
+        "offset": 0.125,
+        "transform": "translate(-0.36611652351681556px, 0px)"
+       },
+       {
+        "offset": 0.16666666666666666,
+        "transform": "translate(-0.6249999999999999px, 0px)"
+       },
+       {
+        "offset": 0.20833333333333334,
+        "transform": "translate(-0.9264761936218491px, 0px)"
+       },
+       {
+        "offset": 0.25,
+        "transform": "translate(-1.2499999999999998px, 0px)"
+       },
+       {
+        "offset": 0.2916666666666667,
+        "transform": "translate(-1.573523806378151px, 0px)"
+       },
+       {
+        "offset": 0.3333333333333333,
+        "transform": "translate(-1.8749999999999998px, 0px)"
+       },
+       {
+        "offset": 0.375,
+        "transform": "translate(-2.1338834764831844px, 0px)"
+       },
+       {
+        "offset": 0.4166666666666667,
+        "transform": "translate(-2.3325317547305486px, 0px)"
+       },
+       {
+        "offset": 0.4583333333333333,
+        "transform": "translate(-2.457407282861335px, 0px)"
+       },
+       {
+        "offset": 0.5,
+        "transform": "translate(-2.5px, 0px)"
+       },
+       {
+        "offset": 0.5416666666666666,
+        "transform": "translate(-2.4574072828613356px, 0px)"
+       },
+       {
+        "offset": 0.5833333333333334,
+        "transform": "translate(-2.332531754730548px, 0px)"
+       },
+       {
+        "offset": 0.625,
+        "transform": "translate(-2.1338834764831844px, 0px)"
+       },
+       {
+        "offset": 0.6666666666666666,
+        "transform": "translate(-1.8750000000000004px, 0px)"
+       },
+       {
+        "offset": 0.7083333333333334,
+        "transform": "translate(-1.5735238063781507px, 0px)"
+       },
+       {
+        "offset": 0.75,
+        "transform": "translate(-1.2500000000000002px, 0px)"
+       },
+       {
+        "offset": 0.7916666666666666,
+        "transform": "translate(-0.9264761936218497px, 0px)"
+       },
+       {
+        "offset": 0.8333333333333334,
+        "transform": "translate(-0.6249999999999998px, 0px)"
+       },
+       {
+        "offset": 0.875,
+        "transform": "translate(-0.36611652351681556px, 0px)"
+       },
+       {
+        "offset": 0.9166666666666666,
+        "transform": "translate(-0.16746824526945225px, 0px)"
+       },
+       {
+        "offset": 0.9583333333333334,
+        "transform": "translate(-0.04259271713866486px, 0px)"
+       },
+       {
+        "offset": 1,
+        "transform": "translate(0px, 0px)"
+       }
+      ],
+      "timing": {
+       "duration": 550,
+       "delay": 0,
+       "iterations": 1,
+       "direction": "normal",
+       "fill": "both",
+       "easing": "linear"
+      }
+     }
+    ],
+    "up": [
+     {
+      "role": "whole",
+      "origin": "50% 50%",
+      "keyframes": [
+       {
+        "offset": 0,
+        "transform": "translate(0px, 0px)"
+       },
+       {
+        "offset": 0.041666666666666664,
+        "transform": "translate(0px, -0.04259271713866461px)"
+       },
+       {
+        "offset": 0.08333333333333333,
+        "transform": "translate(0px, -0.16746824526945162px)"
+       },
+       {
+        "offset": 0.125,
+        "transform": "translate(0px, -0.36611652351681556px)"
+       },
+       {
+        "offset": 0.16666666666666666,
+        "transform": "translate(0px, -0.6249999999999999px)"
+       },
+       {
+        "offset": 0.20833333333333334,
+        "transform": "translate(0px, -0.9264761936218491px)"
+       },
+       {
+        "offset": 0.25,
+        "transform": "translate(0px, -1.2499999999999998px)"
+       },
+       {
+        "offset": 0.2916666666666667,
+        "transform": "translate(0px, -1.573523806378151px)"
+       },
+       {
+        "offset": 0.3333333333333333,
+        "transform": "translate(0px, -1.8749999999999998px)"
+       },
+       {
+        "offset": 0.375,
+        "transform": "translate(0px, -2.1338834764831844px)"
+       },
+       {
+        "offset": 0.4166666666666667,
+        "transform": "translate(0px, -2.3325317547305486px)"
+       },
+       {
+        "offset": 0.4583333333333333,
+        "transform": "translate(0px, -2.457407282861335px)"
+       },
+       {
+        "offset": 0.5,
+        "transform": "translate(0px, -2.5px)"
+       },
+       {
+        "offset": 0.5416666666666666,
+        "transform": "translate(0px, -2.4574072828613356px)"
+       },
+       {
+        "offset": 0.5833333333333334,
+        "transform": "translate(0px, -2.332531754730548px)"
+       },
+       {
+        "offset": 0.625,
+        "transform": "translate(0px, -2.1338834764831844px)"
+       },
+       {
+        "offset": 0.6666666666666666,
+        "transform": "translate(0px, -1.8750000000000004px)"
+       },
+       {
+        "offset": 0.7083333333333334,
+        "transform": "translate(0px, -1.5735238063781507px)"
+       },
+       {
+        "offset": 0.75,
+        "transform": "translate(0px, -1.2500000000000002px)"
+       },
+       {
+        "offset": 0.7916666666666666,
+        "transform": "translate(0px, -0.9264761936218497px)"
+       },
+       {
+        "offset": 0.8333333333333334,
+        "transform": "translate(0px, -0.6249999999999998px)"
+       },
+       {
+        "offset": 0.875,
+        "transform": "translate(0px, -0.36611652351681556px)"
+       },
+       {
+        "offset": 0.9166666666666666,
+        "transform": "translate(0px, -0.16746824526945225px)"
+       },
+       {
+        "offset": 0.9583333333333334,
+        "transform": "translate(0px, -0.04259271713866486px)"
+       },
+       {
+        "offset": 1,
+        "transform": "translate(0px, 0px)"
+       }
+      ],
+      "timing": {
+       "duration": 550,
+       "delay": 0,
+       "iterations": 1,
+       "direction": "normal",
+       "fill": "both",
+       "easing": "linear"
+      }
+     }
+    ],
+    "down": [
+     {
+      "role": "whole",
+      "origin": "50% 50%",
+      "keyframes": [
+       {
+        "offset": 0,
+        "transform": "translate(0px, 0px)"
+       },
+       {
+        "offset": 0.041666666666666664,
+        "transform": "translate(0px, 0.04259271713866461px)"
+       },
+       {
+        "offset": 0.08333333333333333,
+        "transform": "translate(0px, 0.16746824526945162px)"
+       },
+       {
+        "offset": 0.125,
+        "transform": "translate(0px, 0.36611652351681556px)"
+       },
+       {
+        "offset": 0.16666666666666666,
+        "transform": "translate(0px, 0.6249999999999999px)"
+       },
+       {
+        "offset": 0.20833333333333334,
+        "transform": "translate(0px, 0.9264761936218491px)"
+       },
+       {
+        "offset": 0.25,
+        "transform": "translate(0px, 1.2499999999999998px)"
+       },
+       {
+        "offset": 0.2916666666666667,
+        "transform": "translate(0px, 1.573523806378151px)"
+       },
+       {
+        "offset": 0.3333333333333333,
+        "transform": "translate(0px, 1.8749999999999998px)"
+       },
+       {
+        "offset": 0.375,
+        "transform": "translate(0px, 2.1338834764831844px)"
+       },
+       {
+        "offset": 0.4166666666666667,
+        "transform": "translate(0px, 2.3325317547305486px)"
+       },
+       {
+        "offset": 0.4583333333333333,
+        "transform": "translate(0px, 2.457407282861335px)"
+       },
+       {
+        "offset": 0.5,
+        "transform": "translate(0px, 2.5px)"
+       },
+       {
+        "offset": 0.5416666666666666,
+        "transform": "translate(0px, 2.4574072828613356px)"
+       },
+       {
+        "offset": 0.5833333333333334,
+        "transform": "translate(0px, 2.332531754730548px)"
+       },
+       {
+        "offset": 0.625,
+        "transform": "translate(0px, 2.1338834764831844px)"
+       },
+       {
+        "offset": 0.6666666666666666,
+        "transform": "translate(0px, 1.8750000000000004px)"
+       },
+       {
+        "offset": 0.7083333333333334,
+        "transform": "translate(0px, 1.5735238063781507px)"
+       },
+       {
+        "offset": 0.75,
+        "transform": "translate(0px, 1.2500000000000002px)"
+       },
+       {
+        "offset": 0.7916666666666666,
+        "transform": "translate(0px, 0.9264761936218497px)"
+       },
+       {
+        "offset": 0.8333333333333334,
+        "transform": "translate(0px, 0.6249999999999998px)"
+       },
+       {
+        "offset": 0.875,
+        "transform": "translate(0px, 0.36611652351681556px)"
+       },
+       {
+        "offset": 0.9166666666666666,
+        "transform": "translate(0px, 0.16746824526945225px)"
+       },
+       {
+        "offset": 0.9583333333333334,
+        "transform": "translate(0px, 0.04259271713866486px)"
+       },
+       {
+        "offset": 1,
+        "transform": "translate(0px, 0px)"
+       }
+      ],
+      "timing": {
+       "duration": 550,
+       "delay": 0,
+       "iterations": 1,
+       "direction": "normal",
+       "fill": "both",
+       "easing": "linear"
+      }
+     }
+    ],
+    "left-right": [
+     {
+      "role": "whole",
+      "origin": "50% 50%",
+      "keyframes": [
+       {
+        "offset": 0,
+        "transform": "translate(0px, 0px)"
+       },
+       {
+        "offset": 0.041666666666666664,
+        "transform": "translate(-0.41666666666666663px, 0px)"
+       },
+       {
+        "offset": 0.08333333333333333,
+        "transform": "translate(-0.8333333333333333px, 0px)"
+       },
+       {
+        "offset": 0.125,
+        "transform": "translate(-1.25px, 0px)"
+       },
+       {
+        "offset": 0.16666666666666666,
+        "transform": "translate(-1.6666666666666665px, 0px)"
+       },
+       {
+        "offset": 0.20833333333333334,
+        "transform": "translate(-2.0833333333333335px, 0px)"
+       },
+       {
+        "offset": 0.25,
+        "transform": "translate(-2.5px, 0px)"
+       },
+       {
+        "offset": 0.2916666666666667,
+        "transform": "translate(-2.083333333333333px, 0px)"
+       },
+       {
+        "offset": 0.3333333333333333,
+        "transform": "translate(-1.666666666666667px, 0px)"
+       },
+       {
+        "offset": 0.375,
+        "transform": "translate(-1.25px, 0px)"
+       },
+       {
+        "offset": 0.4166666666666667,
+        "transform": "translate(-0.833333333333333px, 0px)"
+       },
+       {
+        "offset": 0.4583333333333333,
+        "transform": "translate(-0.41666666666666696px, 0px)"
+       },
+       {
+        "offset": 0.5,
+        "transform": "translate(0px, 0px)"
+       },
+       {
+        "offset": 0.5416666666666666,
+        "transform": "translate(0.4166666666666663px, 0px)"
+       },
+       {
+        "offset": 0.5833333333333334,
+        "transform": "translate(0.8333333333333337px, 0px)"
+       },
+       {
+        "offset": 0.625,
+        "transform": "translate(1.25px, 0px)"
+       },
+       {
+        "offset": 0.6666666666666666,
+        "transform": "translate(1.6666666666666663px, 0px)"
+       },
+       {
+        "offset": 0.7083333333333334,
+        "transform": "translate(2.083333333333334px, 0px)"
+       },
+       {
+        "offset": 0.75,
+        "transform": "translate(2.5px, 0px)"
+       },
+       {
+        "offset": 0.7916666666666666,
+        "transform": "translate(2.083333333333334px, 0px)"
+       },
+       {
+        "offset": 0.8333333333333334,
+        "transform": "translate(1.6666666666666663px, 0px)"
+       },
+       {
+        "offset": 0.875,
+        "transform": "translate(1.25px, 0px)"
+       },
+       {
+        "offset": 0.9166666666666666,
+        "transform": "translate(0.8333333333333337px, 0px)"
+       },
+       {
+        "offset": 0.9583333333333334,
+        "transform": "translate(0.4166666666666661px, 0px)"
+       },
+       {
+        "offset": 1,
+        "transform": "translate(0px, 0px)"
+       }
+      ],
+      "timing": {
+       "duration": 700,
+       "delay": 0,
+       "iterations": 1,
+       "direction": "normal",
+       "fill": "both",
+       "easing": "linear"
+      }
+     }
+    ],
+    "up-down": [
+     {
+      "role": "whole",
+      "origin": "50% 50%",
+      "keyframes": [
+       {
+        "offset": 0,
+        "transform": "translate(0px, 0px)"
+       },
+       {
+        "offset": 0.041666666666666664,
+        "transform": "translate(0px, -0.41666666666666663px)"
+       },
+       {
+        "offset": 0.08333333333333333,
+        "transform": "translate(0px, -0.8333333333333333px)"
+       },
+       {
+        "offset": 0.125,
+        "transform": "translate(0px, -1.25px)"
+       },
+       {
+        "offset": 0.16666666666666666,
+        "transform": "translate(0px, -1.6666666666666665px)"
+       },
+       {
+        "offset": 0.20833333333333334,
+        "transform": "translate(0px, -2.0833333333333335px)"
+       },
+       {
+        "offset": 0.25,
+        "transform": "translate(0px, -2.5px)"
+       },
+       {
+        "offset": 0.2916666666666667,
+        "transform": "translate(0px, -2.083333333333333px)"
+       },
+       {
+        "offset": 0.3333333333333333,
+        "transform": "translate(0px, -1.666666666666667px)"
+       },
+       {
+        "offset": 0.375,
+        "transform": "translate(0px, -1.25px)"
+       },
+       {
+        "offset": 0.4166666666666667,
+        "transform": "translate(0px, -0.833333333333333px)"
+       },
+       {
+        "offset": 0.4583333333333333,
+        "transform": "translate(0px, -0.41666666666666696px)"
+       },
+       {
+        "offset": 0.5,
+        "transform": "translate(0px, 0px)"
+       },
+       {
+        "offset": 0.5416666666666666,
+        "transform": "translate(0px, 0.4166666666666663px)"
+       },
+       {
+        "offset": 0.5833333333333334,
+        "transform": "translate(0px, 0.8333333333333337px)"
+       },
+       {
+        "offset": 0.625,
+        "transform": "translate(0px, 1.25px)"
+       },
+       {
+        "offset": 0.6666666666666666,
+        "transform": "translate(0px, 1.6666666666666663px)"
+       },
+       {
+        "offset": 0.7083333333333334,
+        "transform": "translate(0px, 2.083333333333334px)"
+       },
+       {
+        "offset": 0.75,
+        "transform": "translate(0px, 2.5px)"
+       },
+       {
+        "offset": 0.7916666666666666,
+        "transform": "translate(0px, 2.083333333333334px)"
+       },
+       {
+        "offset": 0.8333333333333334,
+        "transform": "translate(0px, 1.6666666666666663px)"
+       },
+       {
+        "offset": 0.875,
+        "transform": "translate(0px, 1.25px)"
+       },
+       {
+        "offset": 0.9166666666666666,
+        "transform": "translate(0px, 0.8333333333333337px)"
+       },
+       {
+        "offset": 0.9583333333333334,
+        "transform": "translate(0px, 0.4166666666666661px)"
+       },
+       {
+        "offset": 1,
+        "transform": "translate(0px, 0px)"
+       }
+      ],
+      "timing": {
+       "duration": 700,
+       "delay": 0,
+       "iterations": 1,
+       "direction": "normal",
+       "fill": "both",
+       "easing": "linear"
+      }
+     }
+    ]
+   }
+  },
+  "spin": {
+   "parts": [
+    {
+     "role": "whole",
+     "origin": "50% 50%",
+     "keyframes": [
+      {
+       "offset": 0,
+       "transform": "rotate(0deg)"
+      },
+      {
+       "offset": 0.041666666666666664,
+       "transform": "rotate(1.5399249527141312deg)"
+      },
+      {
+       "offset": 0.08333333333333333,
+       "transform": "rotate(6.133351267967704deg)"
+      },
+      {
+       "offset": 0.125,
+       "transform": "rotate(13.701684147968386deg)"
+      },
+      {
+       "offset": 0.16666666666666666,
+       "transform": "rotate(24.115427318801032deg)"
+      },
+      {
+       "offset": 0.20833333333333334,
+       "transform": "rotate(37.19639874757767deg)"
+      },
+      {
+       "offset": 0.25,
+       "transform": "rotate(52.720779386421434deg)"
+      },
+      {
+       "offset": 0.2916666666666667,
+       "transform": "rotate(70.42294277843028deg)"
+      },
+      {
+       "offset": 0.3333333333333333,
+       "transform": "rotate(89.99999999999999deg)"
+      },
+      {
+       "offset": 0.375,
+       "transform": "rotate(111.11698217428383deg)"
+      },
+      {
+       "offset": 0.4166666666666667,
+       "transform": "rotate(133.41257188154626deg)"
+      },
+      {
+       "offset": 0.4583333333333333,
+       "transform": "rotate(156.5052854003907deg)"
+      },
+      {
+       "offset": 0.5,
+       "transform": "rotate(179.99999999999997deg)"
+      },
+      {
+       "offset": 0.5416666666666666,
+       "transform": "rotate(203.49471459960924deg)"
+      },
+      {
+       "offset": 0.5833333333333334,
+       "transform": "rotate(226.58742811845374deg)"
+      },
+      {
+       "offset": 0.625,
+       "transform": "rotate(248.88301782571614deg)"
+      },
+      {
+       "offset": 0.6666666666666666,
+       "transform": "rotate(269.99999999999994deg)"
+      },
+      {
+       "offset": 0.7083333333333334,
+       "transform": "rotate(289.5770572215697deg)"
+      },
+      {
+       "offset": 0.75,
+       "transform": "rotate(307.27922061357856deg)"
+      },
+      {
+       "offset": 0.7916666666666666,
+       "transform": "rotate(322.8036012524223deg)"
+      },
+      {
+       "offset": 0.8333333333333334,
+       "transform": "rotate(335.88457268119896deg)"
+      },
+      {
+       "offset": 0.875,
+       "transform": "rotate(346.29831585203164deg)"
+      },
+      {
+       "offset": 0.9166666666666666,
+       "transform": "rotate(353.8666487320323deg)"
+      },
+      {
+       "offset": 0.9583333333333334,
+       "transform": "rotate(358.4600750472859deg)"
+      },
+      {
+       "offset": 1,
+       "transform": "rotate(360deg)"
+      }
+     ],
+     "timing": {
+      "duration": 900,
+      "delay": 0,
+      "iterations": 1,
+      "direction": "normal",
+      "fill": "both",
+      "easing": "linear"
+     }
+    }
+   ]
+  },
+  "bell": {
+   "parts": [
+    {
+     "role": "body",
+     "origin": "50% 8%",
+     "keyframes": [
+      {
+       "offset": 0,
+       "transform": "rotate(0deg)"
+      },
+      {
+       "offset": 0.041666666666666664,
+       "transform": "rotate(0.6028856829700258deg)"
+      },
+      {
+       "offset": 0.08333333333333333,
+       "transform": "rotate(2.2499999999999996deg)"
+      },
+      {
+       "offset": 0.125,
+       "transform": "rotate(4.499999999999999deg)"
+      },
+      {
+       "offset": 0.16666666666666666,
+       "transform": "rotate(6.749999999999999deg)"
+      },
+      {
+       "offset": 0.20833333333333334,
+       "transform": "rotate(8.397114317029974deg)"
+      },
+      {
+       "offset": 0.25,
+       "transform": "rotate(9deg)"
+      },
+      {
+       "offset": 0.2916666666666667,
+       "transform": "rotate(7.99519052838329deg)"
+      },
+      {
+       "offset": 0.3333333333333333,
+       "transform": "rotate(5.250000000000003deg)"
+      },
+      {
+       "offset": 0.375,
+       "transform": "rotate(1.5000000000000009deg)"
+      },
+      {
+       "offset": 0.4166666666666667,
+       "transform": "rotate(-2.2500000000000018deg)"
+      },
+      {
+       "offset": 0.4583333333333333,
+       "transform": "rotate(-4.995190528383288deg)"
+      },
+      {
+       "offset": 0.5,
+       "transform": "rotate(-6deg)"
+      },
+      {
+       "offset": 0.5416666666666666,
+       "transform": "rotate(-5.397114317029975deg)"
+      },
+      {
+       "offset": 0.5833333333333334,
+       "transform": "rotate(-3.749999999999999deg)"
+      },
+      {
+       "offset": 0.625,
+       "transform": "rotate(-1.5000000000000009deg)"
+      },
+      {
+       "offset": 0.6666666666666666,
+       "transform": "rotate(0.7499999999999982deg)"
+      },
+      {
+       "offset": 0.7083333333333334,
+       "transform": "rotate(2.397114317029974deg)"
+      },
+      {
+       "offset": 0.75,
+       "transform": "rotate(3deg)"
+      },
+      {
+       "offset": 0.7916666666666666,
+       "transform": "rotate(2.7990381056766584deg)"
+      },
+      {
+       "offset": 0.8333333333333334,
+       "transform": "rotate(2.2499999999999996deg)"
+      },
+      {
+       "offset": 0.875,
+       "transform": "rotate(1.5000000000000002deg)"
+      },
+      {
+       "offset": 0.9166666666666666,
+       "transform": "rotate(0.7500000000000009deg)"
+      },
+      {
+       "offset": 0.9583333333333334,
+       "transform": "rotate(0.200961894323342deg)"
+      },
+      {
+       "offset": 1,
+       "transform": "rotate(0deg)"
+      }
+     ],
+     "timing": {
+      "duration": 900,
+      "delay": 0,
+      "iterations": 1,
+      "direction": "normal",
+      "fill": "both",
+      "easing": "linear"
+     }
+    },
+    {
+     "role": "smallest",
+     "origin": "50% 0%",
+     "keyframes": [
+      {
+       "offset": 0,
+       "transform": "rotate(0deg)"
+      },
+      {
+       "offset": 0.041666666666666664,
+       "transform": "rotate(0.937822173508929deg)"
+      },
+      {
+       "offset": 0.08333333333333333,
+       "transform": "rotate(3.499999999999999deg)"
+      },
+      {
+       "offset": 0.125,
+       "transform": "rotate(6.999999999999999deg)"
+      },
+      {
+       "offset": 0.16666666666666666,
+       "transform": "rotate(10.499999999999998deg)"
+      },
+      {
+       "offset": 0.20833333333333334,
+       "transform": "rotate(13.062177826491071deg)"
+      },
+      {
+       "offset": 0.25,
+       "transform": "rotate(14deg)"
+      },
+      {
+       "offset": 0.2916666666666667,
+       "transform": "rotate(12.436963044151783deg)"
+      },
+      {
+       "offset": 0.3333333333333333,
+       "transform": "rotate(8.16666666666667deg)"
+      },
+      {
+       "offset": 0.375,
+       "transform": "rotate(2.333333333333334deg)"
+      },
+      {
+       "offset": 0.4166666666666667,
+       "transform": "rotate(-3.5000000000000036deg)"
+      },
+      {
+       "offset": 0.4583333333333333,
+       "transform": "rotate(-7.770296377485117deg)"
+      },
+      {
+       "offset": 0.5,
+       "transform": "rotate(-9.333333333333334deg)"
+      },
+      {
+       "offset": 0.5416666666666666,
+       "transform": "rotate(-8.395511159824407deg)"
+      },
+      {
+       "offset": 0.5833333333333334,
+       "transform": "rotate(-5.833333333333332deg)"
+      },
+      {
+       "offset": 0.625,
+       "transform": "rotate(-2.333333333333335deg)"
+      },
+      {
+       "offset": 0.6666666666666666,
+       "transform": "rotate(1.1666666666666625deg)"
+      },
+      {
+       "offset": 0.7083333333333334,
+       "transform": "rotate(3.7288444931577374deg)"
+      },
+      {
+       "offset": 0.75,
+       "transform": "rotate(4.666666666666667deg)"
+      },
+      {
+       "offset": 0.7916666666666666,
+       "transform": "rotate(4.354059275497025deg)"
+      },
+      {
+       "offset": 0.8333333333333334,
+       "transform": "rotate(3.5deg)"
+      },
+      {
+       "offset": 0.875,
+       "transform": "rotate(2.333333333333334deg)"
+      },
+      {
+       "offset": 0.9166666666666666,
+       "transform": "rotate(1.1666666666666679deg)"
+      },
+      {
+       "offset": 0.9583333333333334,
+       "transform": "rotate(0.3126073911696432deg)"
+      },
+      {
+       "offset": 1,
+       "transform": "rotate(0deg)"
+      }
+     ],
+     "timing": {
+      "duration": 900,
+      "delay": 60,
+      "iterations": 1,
+      "direction": "normal",
+      "fill": "both",
+      "easing": "linear"
+     }
+    }
+   ]
+  },
+  "wave": {
+   "parts": [
+    {
+     "role": "body",
+     "origin": "50% 50%",
+     "keyframes": [
+      {
+       "offset": 0,
+       "transform": "scale(1, 1)"
+      },
+      {
+       "offset": 0.041666666666666664,
+       "transform": "scale(1.0006814834742186, 1.0006814834742186)"
+      },
+      {
+       "offset": 0.08333333333333333,
+       "transform": "scale(1.0026794919243112, 1.0026794919243112)"
+      },
+      {
+       "offset": 0.125,
+       "transform": "scale(1.005857864376269, 1.005857864376269)"
+      },
+      {
+       "offset": 0.16666666666666666,
+       "transform": "scale(1.01, 1.01)"
+      },
+      {
+       "offset": 0.20833333333333334,
+       "transform": "scale(1.0148236190979496, 1.0148236190979496)"
+      },
+      {
+       "offset": 0.25,
+       "transform": "scale(1.02, 1.02)"
+      },
+      {
+       "offset": 0.2916666666666667,
+       "transform": "scale(1.0251763809020504, 1.0251763809020504)"
+      },
+      {
+       "offset": 0.3333333333333333,
+       "transform": "scale(1.03, 1.03)"
+      },
+      {
+       "offset": 0.375,
+       "transform": "scale(1.034142135623731, 1.034142135623731)"
+      },
+      {
+       "offset": 0.4166666666666667,
+       "transform": "scale(1.0373205080756889, 1.0373205080756889)"
+      },
+      {
+       "offset": 0.4583333333333333,
+       "transform": "scale(1.0393185165257814, 1.0393185165257814)"
+      },
+      {
+       "offset": 0.5,
+       "transform": "scale(1.04, 1.04)"
+      },
+      {
+       "offset": 0.5416666666666666,
+       "transform": "scale(1.0393185165257814, 1.0393185165257814)"
+      },
+      {
+       "offset": 0.5833333333333334,
+       "transform": "scale(1.0373205080756889, 1.0373205080756889)"
+      },
+      {
+       "offset": 0.625,
+       "transform": "scale(1.034142135623731, 1.034142135623731)"
+      },
+      {
+       "offset": 0.6666666666666666,
+       "transform": "scale(1.03, 1.03)"
+      },
+      {
+       "offset": 0.7083333333333334,
+       "transform": "scale(1.0251763809020504, 1.0251763809020504)"
+      },
+      {
+       "offset": 0.75,
+       "transform": "scale(1.02, 1.02)"
+      },
+      {
+       "offset": 0.7916666666666666,
+       "transform": "scale(1.0148236190979496, 1.0148236190979496)"
+      },
+      {
+       "offset": 0.8333333333333334,
+       "transform": "scale(1.01, 1.01)"
+      },
+      {
+       "offset": 0.875,
+       "transform": "scale(1.005857864376269, 1.005857864376269)"
+      },
+      {
+       "offset": 0.9166666666666666,
+       "transform": "scale(1.0026794919243112, 1.0026794919243112)"
+      },
+      {
+       "offset": 0.9583333333333334,
+       "transform": "scale(1.0006814834742186, 1.0006814834742186)"
+      },
+      {
+       "offset": 1,
+       "transform": "scale(1, 1)"
+      }
+     ],
+     "timing": {
+      "duration": 900,
+      "delay": 0,
+      "iterations": 1,
+      "direction": "normal",
+      "fill": "both",
+      "easing": "linear"
+     }
+    },
+    {
+     "role": "rest",
+     "origin": "50% 50%",
+     "keyframes": [
+      {
+       "offset": 0,
+       "opacity": 1
+      },
+      {
+       "offset": 0.041666666666666664,
+       "opacity": 0.9872221848584006
+      },
+      {
+       "offset": 0.08333333333333333,
+       "opacity": 0.9497595264191645
+      },
+      {
+       "offset": 0.125,
+       "opacity": 0.8901650429449554
+      },
+      {
+       "offset": 0.16666666666666666,
+       "opacity": 0.8125
+      },
+      {
+       "offset": 0.20833333333333334,
+       "opacity": 0.7220571419134453
+      },
+      {
+       "offset": 0.25,
+       "opacity": 0.625
+      },
+      {
+       "offset": 0.2916666666666667,
+       "opacity": 0.5279428580865547
+      },
+      {
+       "offset": 0.3333333333333333,
+       "opacity": 0.4375000000000001
+      },
+      {
+       "offset": 0.375,
+       "opacity": 0.35983495705504476
+      },
+      {
+       "offset": 0.4166666666666667,
+       "opacity": 0.3002404735808355
+      },
+      {
+       "offset": 0.4583333333333333,
+       "opacity": 0.26277781514159937
+      },
+      {
+       "offset": 0.5,
+       "opacity": 0.25
+      },
+      {
+       "offset": 0.5416666666666666,
+       "opacity": 0.26277781514159937
+      },
+      {
+       "offset": 0.5833333333333334,
+       "opacity": 0.3002404735808355
+      },
+      {
+       "offset": 0.625,
+       "opacity": 0.35983495705504465
+      },
+      {
+       "offset": 0.6666666666666666,
+       "opacity": 0.4374999999999999
+      },
+      {
+       "offset": 0.7083333333333334,
+       "opacity": 0.5279428580865548
+      },
+      {
+       "offset": 0.75,
+       "opacity": 0.625
+      },
+      {
+       "offset": 0.7916666666666666,
+       "opacity": 0.7220571419134452
+      },
+      {
+       "offset": 0.8333333333333334,
+       "opacity": 0.8125000000000001
+      },
+      {
+       "offset": 0.875,
+       "opacity": 0.8901650429449552
+      },
+      {
+       "offset": 0.9166666666666666,
+       "opacity": 0.9497595264191644
+      },
+      {
+       "offset": 0.9583333333333334,
+       "opacity": 0.9872221848584006
+      },
+      {
+       "offset": 1,
+       "opacity": 1
+      }
+     ],
+     "timing": {
+      "duration": 900,
+      "delay": 0,
+      "iterations": 1,
+      "direction": "normal",
+      "fill": "both",
+      "easing": "linear"
+     },
+     "staggerGapMs": 100
+    }
+   ]
+  },
+  "sparkle": {
+   "parts": [
+    {
+     "role": "body",
+     "origin": "50% 50%",
+     "keyframes": [
+      {
+       "offset": 0,
+       "transform": "scale(1, 1)"
+      },
+      {
+       "offset": 0.041666666666666664,
+       "transform": "scale(1.0008518543427734, 1.0008518543427734)"
+      },
+      {
+       "offset": 0.08333333333333333,
+       "transform": "scale(1.003349364905389, 1.003349364905389)"
+      },
+      {
+       "offset": 0.125,
+       "transform": "scale(1.0073223304703363, 1.0073223304703363)"
+      },
+      {
+       "offset": 0.16666666666666666,
+       "transform": "scale(1.0125, 1.0125)"
+      },
+      {
+       "offset": 0.20833333333333334,
+       "transform": "scale(1.018529523872437, 1.018529523872437)"
+      },
+      {
+       "offset": 0.25,
+       "transform": "scale(1.025, 1.025)"
+      },
+      {
+       "offset": 0.2916666666666667,
+       "transform": "scale(1.031470476127563, 1.031470476127563)"
+      },
+      {
+       "offset": 0.3333333333333333,
+       "transform": "scale(1.0375, 1.0375)"
+      },
+      {
+       "offset": 0.375,
+       "transform": "scale(1.0426776695296638, 1.0426776695296638)"
+      },
+      {
+       "offset": 0.4166666666666667,
+       "transform": "scale(1.046650635094611, 1.046650635094611)"
+      },
+      {
+       "offset": 0.4583333333333333,
+       "transform": "scale(1.0491481456572267, 1.0491481456572267)"
+      },
+      {
+       "offset": 0.5,
+       "transform": "scale(1.05, 1.05)"
+      },
+      {
+       "offset": 0.5416666666666666,
+       "transform": "scale(1.0491481456572267, 1.0491481456572267)"
+      },
+      {
+       "offset": 0.5833333333333334,
+       "transform": "scale(1.046650635094611, 1.046650635094611)"
+      },
+      {
+       "offset": 0.625,
+       "transform": "scale(1.0426776695296638, 1.0426776695296638)"
+      },
+      {
+       "offset": 0.6666666666666666,
+       "transform": "scale(1.0375, 1.0375)"
+      },
+      {
+       "offset": 0.7083333333333334,
+       "transform": "scale(1.031470476127563, 1.031470476127563)"
+      },
+      {
+       "offset": 0.75,
+       "transform": "scale(1.0250000000000001, 1.0250000000000001)"
+      },
+      {
+       "offset": 0.7916666666666666,
+       "transform": "scale(1.018529523872437, 1.018529523872437)"
+      },
+      {
+       "offset": 0.8333333333333334,
+       "transform": "scale(1.0125, 1.0125)"
+      },
+      {
+       "offset": 0.875,
+       "transform": "scale(1.0073223304703363, 1.0073223304703363)"
+      },
+      {
+       "offset": 0.9166666666666666,
+       "transform": "scale(1.003349364905389, 1.003349364905389)"
+      },
+      {
+       "offset": 0.9583333333333334,
+       "transform": "scale(1.0008518543427734, 1.0008518543427734)"
+      },
+      {
+       "offset": 1,
+       "transform": "scale(1, 1)"
+      }
+     ],
+     "timing": {
+      "duration": 900,
+      "delay": 0,
+      "iterations": 1,
+      "direction": "normal",
+      "fill": "both",
+      "easing": "linear"
+     }
+    },
+    {
+     "role": "rest",
+     "origin": "50% 50%",
+     "keyframes": [
+      {
+       "offset": 0,
+       "transform": "scale(1, 1)"
+      },
+      {
+       "offset": 0.041666666666666664,
+       "transform": "scale(1.0076666890849597, 1.0076666890849597)"
+      },
+      {
+       "offset": 0.08333333333333333,
+       "transform": "scale(1.0301442841485013, 1.0301442841485013)"
+      },
+      {
+       "offset": 0.125,
+       "transform": "scale(1.0659009742330268, 1.0659009742330268)"
+      },
+      {
+       "offset": 0.16666666666666666,
+       "transform": "scale(1.1125, 1.1125)"
+      },
+      {
+       "offset": 0.20833333333333334,
+       "transform": "scale(1.1667657148519328, 1.1667657148519328)"
+      },
+      {
+       "offset": 0.25,
+       "transform": "scale(1.2249999999999999, 1.2249999999999999)"
+      },
+      {
+       "offset": 0.2916666666666667,
+       "transform": "scale(1.2832342851480671, 1.2832342851480671)"
+      },
+      {
+       "offset": 0.3333333333333333,
+       "transform": "scale(1.3375, 1.3375)"
+      },
+      {
+       "offset": 0.375,
+       "transform": "scale(1.3840990257669732, 1.3840990257669732)"
+      },
+      {
+       "offset": 0.4166666666666667,
+       "transform": "scale(1.4198557158514986, 1.4198557158514986)"
+      },
+      {
+       "offset": 0.4583333333333333,
+       "transform": "scale(1.4423333109150402, 1.4423333109150402)"
+      },
+      {
+       "offset": 0.5,
+       "transform": "scale(1.45, 1.45)"
+      },
+      {
+       "offset": 0.5416666666666666,
+       "transform": "scale(1.4423333109150402, 1.4423333109150402)"
+      },
+      {
+       "offset": 0.5833333333333334,
+       "transform": "scale(1.4198557158514986, 1.4198557158514986)"
+      },
+      {
+       "offset": 0.625,
+       "transform": "scale(1.3840990257669732, 1.3840990257669732)"
+      },
+      {
+       "offset": 0.6666666666666666,
+       "transform": "scale(1.3375000000000001, 1.3375000000000001)"
+      },
+      {
+       "offset": 0.7083333333333334,
+       "transform": "scale(1.2832342851480671, 1.2832342851480671)"
+      },
+      {
+       "offset": 0.75,
+       "transform": "scale(1.225, 1.225)"
+      },
+      {
+       "offset": 0.7916666666666666,
+       "transform": "scale(1.166765714851933, 1.166765714851933)"
+      },
+      {
+       "offset": 0.8333333333333334,
+       "transform": "scale(1.1124999999999998, 1.1124999999999998)"
+      },
+      {
+       "offset": 0.875,
+       "transform": "scale(1.0659009742330268, 1.0659009742330268)"
+      },
+      {
+       "offset": 0.9166666666666666,
+       "transform": "scale(1.0301442841485013, 1.0301442841485013)"
+      },
+      {
+       "offset": 0.9583333333333334,
+       "transform": "scale(1.0076666890849597, 1.0076666890849597)"
+      },
+      {
+       "offset": 1,
+       "transform": "scale(1, 1)"
+      }
+     ],
+     "timing": {
+      "duration": 700,
+      "delay": 0,
+      "iterations": 1,
+      "direction": "normal",
+      "fill": "both",
+      "easing": "linear"
+     },
+     "staggerGapMs": 100
+    }
+   ]
+  },
+  "pulse": {
+   "parts": [
+    {
+     "role": "whole",
+     "origin": "50% 50%",
+     "keyframes": [
+      {
+       "offset": 0,
+       "transform": "scale(1, 1)"
+      },
+      {
+       "offset": 0.041666666666666664,
+       "transform": "scale(1.002044450422656, 1.002044450422656)"
+      },
+      {
+       "offset": 0.08333333333333333,
+       "transform": "scale(1.0080384757729337, 1.0080384757729337)"
+      },
+      {
+       "offset": 0.125,
+       "transform": "scale(1.0175735931288072, 1.0175735931288072)"
+      },
+      {
+       "offset": 0.16666666666666666,
+       "transform": "scale(1.03, 1.03)"
+      },
+      {
+       "offset": 0.20833333333333334,
+       "transform": "scale(1.0444708572938488, 1.0444708572938488)"
+      },
+      {
+       "offset": 0.25,
+       "transform": "scale(1.06, 1.06)"
+      },
+      {
+       "offset": 0.2916666666666667,
+       "transform": "scale(1.0755291427061513, 1.0755291427061513)"
+      },
+      {
+       "offset": 0.3333333333333333,
+       "transform": "scale(1.09, 1.09)"
+      },
+      {
+       "offset": 0.375,
+       "transform": "scale(1.1024264068711929, 1.1024264068711929)"
+      },
+      {
+       "offset": 0.4166666666666667,
+       "transform": "scale(1.1119615242270664, 1.1119615242270664)"
+      },
+      {
+       "offset": 0.4583333333333333,
+       "transform": "scale(1.117955549577344, 1.117955549577344)"
+      },
+      {
+       "offset": 0.5,
+       "transform": "scale(1.12, 1.12)"
+      },
+      {
+       "offset": 0.5416666666666666,
+       "transform": "scale(1.117955549577344, 1.117955549577344)"
+      },
+      {
+       "offset": 0.5833333333333334,
+       "transform": "scale(1.1119615242270664, 1.1119615242270664)"
+      },
+      {
+       "offset": 0.625,
+       "transform": "scale(1.1024264068711929, 1.1024264068711929)"
+      },
+      {
+       "offset": 0.6666666666666666,
+       "transform": "scale(1.09, 1.09)"
+      },
+      {
+       "offset": 0.7083333333333334,
+       "transform": "scale(1.0755291427061513, 1.0755291427061513)"
+      },
+      {
+       "offset": 0.75,
+       "transform": "scale(1.06, 1.06)"
+      },
+      {
+       "offset": 0.7916666666666666,
+       "transform": "scale(1.0444708572938488, 1.0444708572938488)"
+      },
+      {
+       "offset": 0.8333333333333334,
+       "transform": "scale(1.03, 1.03)"
+      },
+      {
+       "offset": 0.875,
+       "transform": "scale(1.0175735931288072, 1.0175735931288072)"
+      },
+      {
+       "offset": 0.9166666666666666,
+       "transform": "scale(1.0080384757729337, 1.0080384757729337)"
+      },
+      {
+       "offset": 0.9583333333333334,
+       "transform": "scale(1.002044450422656, 1.002044450422656)"
+      },
+      {
+       "offset": 1,
+       "transform": "scale(1, 1)"
+      }
+     ],
+     "timing": {
+      "duration": 900,
+      "delay": 0,
+      "iterations": 1,
+      "direction": "normal",
+      "fill": "both",
+      "easing": "linear"
+     }
+    }
+   ]
+  },
+  "draw": {
+   "parts": [
+    {
+     "role": "whole",
+     "origin": "50% 85%",
+     "keyframes": [
+      {
+       "offset": 0,
+       "transform": "rotate(0deg)"
+      },
+      {
+       "offset": 0.041666666666666664,
+       "transform": "rotate(0.19030116872178315deg)"
+      },
+      {
+       "offset": 0.08333333333333333,
+       "transform": "rotate(0.7322330470336311deg)"
+      },
+      {
+       "offset": 0.125,
+       "transform": "rotate(1.5432914190872755deg)"
+      },
+      {
+       "offset": 0.16666666666666666,
+       "transform": "rotate(2.4999999999999996deg)"
+      },
+      {
+       "offset": 0.20833333333333334,
+       "transform": "rotate(3.456708580912725deg)"
+      },
+      {
+       "offset": 0.25,
+       "transform": "rotate(4.267766952966369deg)"
+      },
+      {
+       "offset": 0.2916666666666667,
+       "transform": "rotate(4.809698831278217deg)"
+      },
+      {
+       "offset": 0.3333333333333333,
+       "transform": "rotate(5deg)"
+      },
+      {
+       "offset": 0.375,
+       "transform": "rotate(4.714548246917325deg)"
+      },
+      {
+       "offset": 0.4166666666666667,
+       "transform": "rotate(3.9016504294495524deg)"
+      },
+      {
+       "offset": 0.4583333333333333,
+       "transform": "rotate(2.685062871369087deg)"
+      },
+      {
+       "offset": 0.5,
+       "transform": "rotate(1.2499999999999982deg)"
+      },
+      {
+       "offset": 0.5416666666666666,
+       "transform": "rotate(-0.1850628713690856deg)"
+      },
+      {
+       "offset": 0.5833333333333334,
+       "transform": "rotate(-1.401650429449555deg)"
+      },
+      {
+       "offset": 0.625,
+       "transform": "rotate(-2.2145482469173263deg)"
+      },
+      {
+       "offset": 0.6666666666666666,
+       "transform": "rotate(-2.5deg)"
+      },
+      {
+       "offset": 0.7083333333333334,
+       "transform": "rotate(-2.404849415639108deg)"
+      },
+      {
+       "offset": 0.75,
+       "transform": "rotate(-2.1338834764831844deg)"
+      },
+      {
+       "offset": 0.7916666666666666,
+       "transform": "rotate(-1.7283542904563625deg)"
+      },
+      {
+       "offset": 0.8333333333333334,
+       "transform": "rotate(-1.2499999999999996deg)"
+      },
+      {
+       "offset": 0.875,
+       "transform": "rotate(-0.771645709543638deg)"
+      },
+      {
+       "offset": 0.9166666666666666,
+       "transform": "rotate(-0.36611652351681645deg)"
+      },
+      {
+       "offset": 0.9583333333333334,
+       "transform": "rotate(-0.09515058436089152deg)"
+      },
+      {
+       "offset": 1,
+       "transform": "rotate(0deg)"
+      }
+     ],
+     "timing": {
+      "duration": 1200,
+      "delay": 0,
+      "iterations": 1,
+      "direction": "normal",
+      "fill": "both",
+      "easing": "linear"
+     }
+    }
+   ],
+   "clip": {
+    "progressTrack": {
+     "offsets": [
+      0,
+      0.041666666666666664,
+      0.08333333333333333,
+      0.125,
+      0.16666666666666666,
+      0.20833333333333334,
+      0.25,
+      0.2916666666666667,
+      0.3333333333333333,
+      0.375,
+      0.4166666666666667,
+      0.4583333333333333,
+      0.5,
+      0.5416666666666666,
+      0.5833333333333334,
+      0.625,
+      0.6666666666666666,
+      0.7083333333333334,
+      0.75,
+      0.7916666666666666,
+      0.8333333333333334,
+      0.875,
+      0.9166666666666666,
+      0.9583333333333334,
+      1
+     ],
+     "values": [
+      0,
+      0.004277569313094809,
+      0.017037086855465844,
+      0.03806023374435663,
+      0.06698729810778065,
+      0.10332332985438242,
+      0.1464466094067262,
+      0.19561928549563967,
+      0.24999999999999994,
+      0.3086582838174551,
+      0.37059047744873963,
+      0.43473690388997416,
+      0.49999999999999994,
+      0.5652630961100257,
+      0.6294095225512604,
+      0.6913417161825448,
+      0.7499999999999999,
+      0.8043807145043603,
+      0.8535533905932737,
+      0.8966766701456175,
+      0.9330127018922194,
+      0.9619397662556434,
+      0.9829629131445341,
+      0.9957224306869052,
+      1
+     ]
+    },
+    "timing": {
+     "duration": 1200,
+     "delay": 0,
+     "iterations": 1,
+     "direction": "normal",
+     "fill": "both",
+     "easing": "linear"
+    }
+   }
+  },
+  "pop": {
+   "parts": [
+    {
+     "role": "whole",
+     "origin": "50% 50%",
+     "keyframes": [
+      {
+       "offset": 0,
+       "transform": "scale(0, 0)"
+      },
+      {
+       "offset": 0.041666666666666664,
+       "transform": "scale(0.1984206281719037, 0.1984206281719037)"
+      },
+      {
+       "offset": 0.08333333333333333,
+       "transform": "scale(0.37324937911672607, 0.37324937911672607)"
+      },
+      {
+       "offset": 0.125,
+       "transform": "scale(0.5259794096209914, 0.5259794096209914)"
+      },
+      {
+       "offset": 0.16666666666666666,
+       "transform": "scale(0.6581038764712236, 0.6581038764712236)"
+      },
+      {
+       "offset": 0.20833333333333334,
+       "transform": "scale(0.7711159364539466, 0.7711159364539466)"
+      },
+      {
+       "offset": 0.25,
+       "transform": "scale(0.8665087463556852, 0.8665087463556852)"
+      },
+      {
+       "offset": 0.2916666666666667,
+       "transform": "scale(0.9457754629629631, 0.9457754629629631)"
+      },
+      {
+       "offset": 0.3333333333333333,
+       "transform": "scale(1.0104092430623044, 1.0104092430623044)"
+      },
+      {
+       "offset": 0.375,
+       "transform": "scale(1.0619032434402331, 1.0619032434402331)"
+      },
+      {
+       "offset": 0.4166666666666667,
+       "transform": "scale(1.101750620883274, 1.101750620883274)"
+      },
+      {
+       "offset": 0.4583333333333333,
+       "transform": "scale(1.1314445321779505, 1.1314445321779505)"
+      },
+      {
+       "offset": 0.5,
+       "transform": "scale(1.152478134110787, 1.152478134110787)"
+      },
+      {
+       "offset": 0.5416666666666666,
+       "transform": "scale(1.166344583468308, 1.166344583468308)"
+      },
+      {
+       "offset": 0.5833333333333334,
+       "transform": "scale(1.174537037037037, 1.174537037037037)"
+      },
+      {
+       "offset": 0.625,
+       "transform": "scale(1.1785486516034984, 1.1785486516034984)"
+      },
+      {
+       "offset": 0.6666666666666666,
+       "transform": "scale(1.1798725839542166, 1.1798725839542166)"
+      },
+      {
+       "offset": 0.7,
+       "transform": "scale(1.18, 1.18)"
+      },
+      {
+       "offset": 0.7083333333333334,
+       "transform": "scale(1.179657522828257, 1.179657522828257)"
+      },
+      {
+       "offset": 0.75,
+       "transform": "scale(1.1679422863405995, 1.1679422863405995)"
+      },
+      {
+       "offset": 0.7916666666666666,
+       "transform": "scale(1.1416218792715942, 1.1416218792715942)"
+      },
+      {
+       "offset": 0.8333333333333334,
+       "transform": "scale(1.1056283359900236, 1.1056283359900236)"
+      },
+      {
+       "offset": 0.875,
+       "transform": "scale(1.0667062859407732, 1.0667062859407732)"
+      },
+      {
+       "offset": 0.9166666666666666,
+       "transform": "scale(1.0321491151282114, 1.0321491151282114)"
+      },
+      {
+       "offset": 0.9583333333333334,
+       "transform": "scale(1.0084322991667014, 1.0084322991667014)"
+      },
+      {
+       "offset": 1,
+       "transform": "scale(1, 1)"
+      }
+     ],
+     "timing": {
+      "duration": 450,
+      "delay": 0,
+      "iterations": 1,
+      "direction": "normal",
+      "fill": "both",
+      "easing": "linear"
+     }
+    }
+   ]
+  },
+  "blink": {
+   "parts": [
+    {
+     "role": "smallest",
+     "origin": "50% 50%",
+     "keyframes": [
+      {
+       "offset": 0,
+       "opacity": 1
+      },
+      {
+       "offset": 0.041666666666666664,
+       "opacity": 0.9829629131445341
+      },
+      {
+       "offset": 0.08333333333333333,
+       "opacity": 0.9330127018922194
+      },
+      {
+       "offset": 0.125,
+       "opacity": 0.8535533905932737
+      },
+      {
+       "offset": 0.16666666666666666,
+       "opacity": 0.75
+      },
+      {
+       "offset": 0.20833333333333334,
+       "opacity": 0.6294095225512604
+      },
+      {
+       "offset": 0.25,
+       "opacity": 0.5
+      },
+      {
+       "offset": 0.2916666666666667,
+       "opacity": 0.37059047744873963
+      },
+      {
+       "offset": 0.3333333333333333,
+       "opacity": 0.2500000000000001
+      },
+      {
+       "offset": 0.375,
+       "opacity": 0.14644660940672627
+      },
+      {
+       "offset": 0.4166666666666667,
+       "opacity": 0.06698729810778059
+      },
+      {
+       "offset": 0.4583333333333333,
+       "opacity": 0.0170370868554659
+      },
+      {
+       "offset": 0.5,
+       "opacity": 0
+      },
+      {
+       "offset": 0.5416666666666666,
+       "opacity": 0.017037086855465844
+      },
+      {
+       "offset": 0.5833333333333334,
+       "opacity": 0.0669872981077807
+      },
+      {
+       "offset": 0.625,
+       "opacity": 0.1464466094067262
+      },
+      {
+       "offset": 0.6666666666666666,
+       "opacity": 0.24999999999999983
+      },
+      {
+       "offset": 0.7083333333333334,
+       "opacity": 0.37059047744873974
+      },
+      {
+       "offset": 0.75,
+       "opacity": 0.49999999999999994
+      },
+      {
+       "offset": 0.7916666666666666,
+       "opacity": 0.6294095225512601
+      },
+      {
+       "offset": 0.8333333333333334,
+       "opacity": 0.7500000000000001
+      },
+      {
+       "offset": 0.875,
+       "opacity": 0.8535533905932737
+      },
+      {
+       "offset": 0.9166666666666666,
+       "opacity": 0.9330127018922192
+      },
+      {
+       "offset": 0.9583333333333334,
+       "opacity": 0.9829629131445341
+      },
+      {
+       "offset": 1,
+       "opacity": 1
+      }
+     ],
+     "timing": {
+      "duration": 900,
+      "delay": 0,
+      "iterations": 2,
+      "direction": "normal",
+      "fill": "both",
+      "easing": "linear"
+     }
+    }
+   ],
+   "wholeFallback": [
+    {
+     "role": "whole",
+     "origin": "50% 50%",
+     "keyframes": [
+      {
+       "offset": 0,
+       "opacity": 1
+      },
+      {
+       "offset": 0.041666666666666664,
+       "opacity": 0.9889258935439472
+      },
+      {
+       "offset": 0.08333333333333333,
+       "opacity": 0.9564582562299426
+      },
+      {
+       "offset": 0.125,
+       "opacity": 0.904809703885628
+      },
+      {
+       "offset": 0.16666666666666666,
+       "opacity": 0.8375
+      },
+      {
+       "offset": 0.20833333333333334,
+       "opacity": 0.7591161896583192
+      },
+      {
+       "offset": 0.25,
+       "opacity": 0.675
+      },
+      {
+       "offset": 0.2916666666666667,
+       "opacity": 0.5908838103416807
+      },
+      {
+       "offset": 0.3333333333333333,
+       "opacity": 0.5125000000000001
+      },
+      {
+       "offset": 0.375,
+       "opacity": 0.4451902961143721
+      },
+      {
+       "offset": 0.4166666666666667,
+       "opacity": 0.39354174377005735
+      },
+      {
+       "offset": 0.4583333333333333,
+       "opacity": 0.36107410645605287
+      },
+      {
+       "offset": 0.5,
+       "opacity": 0.35
+      },
+      {
+       "offset": 0.5416666666666666,
+       "opacity": 0.36107410645605276
+      },
+      {
+       "offset": 0.5833333333333334,
+       "opacity": 0.39354174377005746
+      },
+      {
+       "offset": 0.625,
+       "opacity": 0.445190296114372
+      },
+      {
+       "offset": 0.6666666666666666,
+       "opacity": 0.5124999999999998
+      },
+      {
+       "offset": 0.7083333333333334,
+       "opacity": 0.5908838103416808
+      },
+      {
+       "offset": 0.75,
+       "opacity": 0.6749999999999999
+      },
+      {
+       "offset": 0.7916666666666666,
+       "opacity": 0.7591161896583191
+      },
+      {
+       "offset": 0.8333333333333334,
+       "opacity": 0.8375000000000001
+      },
+      {
+       "offset": 0.875,
+       "opacity": 0.9048097038856279
+      },
+      {
+       "offset": 0.9166666666666666,
+       "opacity": 0.9564582562299425
+      },
+      {
+       "offset": 0.9583333333333334,
+       "opacity": 0.9889258935439471
+      },
+      {
+       "offset": 1,
+       "opacity": 1
+      }
+     ],
+     "timing": {
+      "duration": 900,
+      "delay": 0,
+      "iterations": 2,
+      "direction": "normal",
+      "fill": "both",
+      "easing": "linear"
+     }
+    }
+   ]
+  },
+  "drift": {
+   "parts": [
+    {
+     "role": "whole",
+     "origin": "50% 50%",
+     "keyframes": [
+      {
+       "offset": 0,
+       "transform": "translate(0px, 0px)"
+      },
+      {
+       "offset": 0.041666666666666664,
+       "transform": "translate(0px, -0.020444504226559013px)"
+      },
+      {
+       "offset": 0.08333333333333333,
+       "transform": "translate(0px, -0.08038475772933677px)"
+      },
+      {
+       "offset": 0.125,
+       "transform": "translate(0px, -0.17573593128807144px)"
+      },
+      {
+       "offset": 0.16666666666666666,
+       "transform": "translate(0px, -0.29999999999999993px)"
+      },
+      {
+       "offset": 0.20833333333333334,
+       "transform": "translate(0px, -0.44470857293848753px)"
+      },
+      {
+       "offset": 0.25,
+       "transform": "translate(0px, -0.5999999999999999px)"
+      },
+      {
+       "offset": 0.2916666666666667,
+       "transform": "translate(0px, -0.7552914270615124px)"
+      },
+      {
+       "offset": 0.3333333333333333,
+       "transform": "translate(0px, -0.8999999999999998px)"
+      },
+      {
+       "offset": 0.375,
+       "transform": "translate(0px, -1.0242640687119284px)"
+      },
+      {
+       "offset": 0.4166666666666667,
+       "transform": "translate(0px, -1.1196152422706633px)"
+      },
+      {
+       "offset": 0.4583333333333333,
+       "transform": "translate(0px, -1.1795554957734409px)"
+      },
+      {
+       "offset": 0.5,
+       "transform": "translate(0px, -1.2px)"
+      },
+      {
+       "offset": 0.5416666666666666,
+       "transform": "translate(0px, -1.1795554957734409px)"
+      },
+      {
+       "offset": 0.5833333333333334,
+       "transform": "translate(0px, -1.1196152422706631px)"
+      },
+      {
+       "offset": 0.625,
+       "transform": "translate(0px, -1.0242640687119284px)"
+      },
+      {
+       "offset": 0.6666666666666666,
+       "transform": "translate(0px, -0.9000000000000001px)"
+      },
+      {
+       "offset": 0.7083333333333334,
+       "transform": "translate(0px, -0.7552914270615123px)"
+      },
+      {
+       "offset": 0.75,
+       "transform": "translate(0px, -0.6000000000000001px)"
+      },
+      {
+       "offset": 0.7916666666666666,
+       "transform": "translate(0px, -0.44470857293848776px)"
+      },
+      {
+       "offset": 0.8333333333333334,
+       "transform": "translate(0px, -0.2999999999999998px)"
+      },
+      {
+       "offset": 0.875,
+       "transform": "translate(0px, -0.17573593128807152px)"
+      },
+      {
+       "offset": 0.9166666666666666,
+       "transform": "translate(0px, -0.08038475772933706px)"
+      },
+      {
+       "offset": 0.9583333333333334,
+       "transform": "translate(0px, -0.02044450422655908px)"
+      },
+      {
+       "offset": 1,
+       "transform": "translate(0px, 0px)"
+      }
+     ],
+     "timing": {
+      "duration": 2200,
+      "delay": 0,
+      "iterations": 1,
+      "direction": "normal",
+      "fill": "both",
+      "easing": "linear"
+     }
+    }
+   ]
+  },
+  "shake": {
+   "parts": [
+    {
+     "role": "whole",
+     "origin": "50% 50%",
+     "keyframes": [
+      {
+       "offset": 0,
+       "transform": "rotate(0deg)"
+      },
+      {
+       "offset": 0.041666666666666664,
+       "transform": "rotate(0.6199399791262945deg)"
+      },
+      {
+       "offset": 0.08333333333333333,
+       "transform": "rotate(2.223542864692437deg)"
+      },
+      {
+       "offset": 0.125,
+       "transform": "rotate(4.148050297095269deg)"
+      },
+      {
+       "offset": 0.16666666666666666,
+       "transform": "rotate(5.598076211353315deg)"
+      },
+      {
+       "offset": 0.2,
+       "transform": "rotate(6deg)"
+      },
+      {
+       "offset": 0.20833333333333334,
+       "transform": "rotate(5.955085522212505deg)"
+      },
+      {
+       "offset": 0.25,
+       "transform": "rotate(4.462310601229375deg)"
+      },
+      {
+       "offset": 0.2916666666666667,
+       "transform": "rotate(1.4352625091552698deg)"
+      },
+      {
+       "offset": 0.3333333333333333,
+       "transform": "rotate(-1.8749999999999973deg)"
+      },
+      {
+       "offset": 0.375,
+       "transform": "rotate(-4.100367545684254deg)"
+      },
+      {
+       "offset": 0.4,
+       "transform": "rotate(-4.5deg)"
+      },
+      {
+       "offset": 0.4166666666666667,
+       "transform": "rotate(-4.372221848584006deg)"
+      },
+      {
+       "offset": 0.4583333333333333,
+       "transform": "rotate(-3.032855358782704deg)"
+      },
+      {
+       "offset": 0.5,
+       "transform": "rotate(-0.7500000000000004deg)"
+      },
+      {
+       "offset": 0.5416666666666666,
+       "transform": "rotate(1.5328553587827deg)"
+      },
+      {
+       "offset": 0.5833333333333334,
+       "transform": "rotate(2.8722218485840063deg)"
+      },
+      {
+       "offset": 0.6,
+       "transform": "rotate(3deg)"
+      },
+      {
+       "offset": 0.625,
+       "transform": "rotate(2.828728948150395deg)"
+      },
+      {
+       "offset": 0.6666666666666666,
+       "transform": "rotate(1.8750000000000009deg)"
+      },
+      {
+       "offset": 0.7083333333333334,
+       "transform": "rotate(0.4563160675048836deg)"
+      },
+      {
+       "offset": 0.75,
+       "transform": "rotate(-0.8409902576697306deg)"
+      },
+      {
+       "offset": 0.7916666666666666,
+       "transform": "rotate(-1.4807509380910728deg)"
+      },
+      {
+       "offset": 0.8,
+       "transform": "rotate(-1.5deg)"
+      },
+      {
+       "offset": 0.8333333333333334,
+       "transform": "rotate(-1.399519052838329deg)"
+      },
+      {
+       "offset": 0.875,
+       "transform": "rotate(-1.0370125742738177deg)"
+      },
+      {
+       "offset": 0.9166666666666666,
+       "transform": "rotate(-0.5558857161731101deg)"
+      },
+      {
+       "offset": 0.9583333333333334,
+       "transform": "rotate(-0.15498499478157335deg)"
+      },
+      {
+       "offset": 1,
+       "transform": "rotate(0deg)"
+      }
+     ],
+     "timing": {
+      "duration": 600,
+      "delay": 0,
+      "iterations": 1,
+      "direction": "normal",
+      "fill": "both",
+      "easing": "linear"
+     }
+    }
+   ]
+  },
+  "toggle": {
+   "parts": [
+    {
+     "role": "whole",
+     "origin": "50% 50%",
+     "keyframes": [
+      {
+       "offset": 0,
+       "transform": "scale(1, 1)"
+      },
+      {
+       "offset": 0.041666666666666664,
+       "transform": "scale(0.9986370330515627, 0.9986370330515627)"
+      },
+      {
+       "offset": 0.08333333333333333,
+       "transform": "scale(0.9946410161513776, 0.9946410161513776)"
+      },
+      {
+       "offset": 0.125,
+       "transform": "scale(0.9882842712474619, 0.9882842712474619)"
+      },
+      {
+       "offset": 0.16666666666666666,
+       "transform": "scale(0.98, 0.98)"
+      },
+      {
+       "offset": 0.20833333333333334,
+       "transform": "scale(0.9703527618041008, 0.9703527618041008)"
+      },
+      {
+       "offset": 0.25,
+       "transform": "scale(0.9600000000000001, 0.9600000000000001)"
+      },
+      {
+       "offset": 0.2916666666666667,
+       "transform": "scale(0.9496472381958992, 0.9496472381958992)"
+      },
+      {
+       "offset": 0.3333333333333333,
+       "transform": "scale(0.9400000000000001, 0.9400000000000001)"
+      },
+      {
+       "offset": 0.375,
+       "transform": "scale(0.9317157287525382, 0.9317157287525382)"
+      },
+      {
+       "offset": 0.4166666666666667,
+       "transform": "scale(0.9253589838486225, 0.9253589838486225)"
+      },
+      {
+       "offset": 0.4583333333333333,
+       "transform": "scale(0.9213629669484373, 0.9213629669484373)"
+      },
+      {
+       "offset": 0.5,
+       "transform": "scale(0.92, 0.92)"
+      },
+      {
+       "offset": 0.5416666666666666,
+       "transform": "scale(0.9213629669484373, 0.9213629669484373)"
+      },
+      {
+       "offset": 0.5833333333333334,
+       "transform": "scale(0.9253589838486225, 0.9253589838486225)"
+      },
+      {
+       "offset": 0.625,
+       "transform": "scale(0.9317157287525382, 0.9317157287525382)"
+      },
+      {
+       "offset": 0.6666666666666666,
+       "transform": "scale(0.9400000000000001, 0.9400000000000001)"
+      },
+      {
+       "offset": 0.7083333333333334,
+       "transform": "scale(0.9496472381958992, 0.9496472381958992)"
+      },
+      {
+       "offset": 0.75,
+       "transform": "scale(0.96, 0.96)"
+      },
+      {
+       "offset": 0.7916666666666666,
+       "transform": "scale(0.9703527618041008, 0.9703527618041008)"
+      },
+      {
+       "offset": 0.8333333333333334,
+       "transform": "scale(0.98, 0.98)"
+      },
+      {
+       "offset": 0.875,
+       "transform": "scale(0.9882842712474619, 0.9882842712474619)"
+      },
+      {
+       "offset": 0.9166666666666666,
+       "transform": "scale(0.9946410161513776, 0.9946410161513776)"
+      },
+      {
+       "offset": 0.9583333333333334,
+       "transform": "scale(0.9986370330515627, 0.9986370330515627)"
+      },
+      {
+       "offset": 1,
+       "transform": "scale(1, 1)"
+      }
+     ],
+     "timing": {
+      "duration": 600,
+      "delay": 0,
+      "iterations": 1,
+      "direction": "normal",
+      "fill": "both",
+      "easing": "linear"
+     }
+    }
+   ]
+  },
+  "generic": {
+   "parts": [
+    {
+     "role": "whole",
+     "origin": "50% 50%",
+     "keyframes": [
+      {
+       "offset": 0,
+       "transform": "scale(1, 1)"
+      },
+      {
+       "offset": 0.041666666666666664,
+       "transform": "scale(1.0010222252113279, 1.0010222252113279)"
+      },
+      {
+       "offset": 0.08333333333333333,
+       "transform": "scale(1.0040192378864667, 1.0040192378864667)"
+      },
+      {
+       "offset": 0.125,
+       "transform": "scale(1.0087867965644035, 1.0087867965644035)"
+      },
+      {
+       "offset": 0.16666666666666666,
+       "transform": "scale(1.015, 1.015)"
+      },
+      {
+       "offset": 0.20833333333333334,
+       "transform": "scale(1.0222354286469244, 1.0222354286469244)"
+      },
+      {
+       "offset": 0.25,
+       "transform": "scale(1.03, 1.03)"
+      },
+      {
+       "offset": 0.2916666666666667,
+       "transform": "scale(1.0377645713530756, 1.0377645713530756)"
+      },
+      {
+       "offset": 0.3333333333333333,
+       "transform": "scale(1.045, 1.045)"
+      },
+      {
+       "offset": 0.375,
+       "transform": "scale(1.0512132034355965, 1.0512132034355965)"
+      },
+      {
+       "offset": 0.4166666666666667,
+       "transform": "scale(1.0559807621135333, 1.0559807621135333)"
+      },
+      {
+       "offset": 0.4583333333333333,
+       "transform": "scale(1.0589777747886722, 1.0589777747886722)"
+      },
+      {
+       "offset": 0.5,
+       "transform": "scale(1.06, 1.06)"
+      },
+      {
+       "offset": 0.5416666666666666,
+       "transform": "scale(1.0589777747886722, 1.0589777747886722)"
+      },
+      {
+       "offset": 0.5833333333333334,
+       "transform": "scale(1.0559807621135333, 1.0559807621135333)"
+      },
+      {
+       "offset": 0.625,
+       "transform": "scale(1.0512132034355965, 1.0512132034355965)"
+      },
+      {
+       "offset": 0.6666666666666666,
+       "transform": "scale(1.0450000000000002, 1.0450000000000002)"
+      },
+      {
+       "offset": 0.7083333333333334,
+       "transform": "scale(1.0377645713530756, 1.0377645713530756)"
+      },
+      {
+       "offset": 0.75,
+       "transform": "scale(1.03, 1.03)"
+      },
+      {
+       "offset": 0.7916666666666666,
+       "transform": "scale(1.0222354286469244, 1.0222354286469244)"
+      },
+      {
+       "offset": 0.8333333333333334,
+       "transform": "scale(1.015, 1.015)"
+      },
+      {
+       "offset": 0.875,
+       "transform": "scale(1.0087867965644035, 1.0087867965644035)"
+      },
+      {
+       "offset": 0.9166666666666666,
+       "transform": "scale(1.004019237886467, 1.004019237886467)"
+      },
+      {
+       "offset": 0.9583333333333334,
+       "transform": "scale(1.0010222252113279, 1.0010222252113279)"
+      },
+      {
+       "offset": 1,
+       "transform": "scale(1, 1)"
+      }
+     ],
+     "timing": {
+      "duration": 700,
+      "delay": 0,
+      "iterations": 1,
+      "direction": "normal",
+      "fill": "both",
+      "easing": "linear"
+     }
+    }
+   ]
+  }
+ }
+}
