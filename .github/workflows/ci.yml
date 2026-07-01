@@ -43,6 +43,20 @@ jobs:
       - name: Tree-shaking proof
         run: pnpm check:treeshake
 
+      - name: Semantics check (100% покрытие анимационной семантикой)
+        run: pnpm check:semantics
+
+      - name: Tests (парсер геометрии: дифференциал по 444 SVG)
+        run: pnpm test
+
+      # Bite test: битый класс в семантике должен уронить гейт
+      - name: Semantics guard bites on invalid class
+        run: |
+          cp semantics/assignments.json /tmp/_assignments_backup.json
+          sed -i 's/"accessibility": {"class": "generic"}/"accessibility": {"class": "levitate"}/' semantics/assignments.json
+          pnpm check:semantics && echo "ERROR: semantics should have failed" && exit 1 || echo "OK: semantics correctly failed on invalid class"
+          cp /tmp/_assignments_backup.json semantics/assignments.json
+
       # Bite test: inject a missing SVG and assert parity fails
       - name: Parity guard bites on missing icon
         run: |
