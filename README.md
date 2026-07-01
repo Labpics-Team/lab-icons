@@ -4,44 +4,45 @@
 
 ## Установка
 
-Пакет публикуется в **GitHub Packages** (npm-регистри `npm.pkg.github.com`), а не в
-публичном npm. Репозиторий приватный — значит и пакет приватный: для установки нужно
-(1) направить scope `@labpics` на регистри GitHub Packages и (2) аутентифицироваться
-токеном со scope `read:packages`.
+Пакет **приватный** и НЕ публикуется в npm-реестры (в `package.json` стоит
+`private: true` — защита от случайного `npm/pnpm publish`). Он ставится как
+**git-зависимость** по иммутабельному тегу `<версия>-dist`, внутри которого лежит уже
+собранный `dist/`. Поле `files` в `package.json` оставляет в установке ровно
+`dist/index.js` + `dist/index.d.ts` (+ `package.json`, `README`) — без исходных SVG.
+Сборка на стороне потребителя не нужна.
 
-**Шаг 1 — `.npmrc` в проекте-потребителе** (маппинг scope → регистри):
+> Почему не GitHub Packages: реестр требует, чтобы scope пакета совпадал с
+> аккаунтом-владельцем, а бренд-scope `@labpics` занят неактивным User-сквоттером.
+> Для git-зависимостей имя пакета свободно, поэтому бренд `@labpics/icons`
+> сохраняется. Путь через GitHub Packages вернём, если GitHub освободит username
+> `labpics`.
 
-```ini
-@labpics:registry=https://npm.pkg.github.com
-//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}
+**В `package.json` потребителя:**
+
+```json
+{
+  "dependencies": {
+    "@labpics/icons": "github:Labpics-Team/lab-icons#v0.0.1-dist"
+  }
+}
 ```
 
-**Шаг 2 — аутентификация** (токен только в переменной окружения, НИКОГДА в git):
+Затем `pnpm install`.
 
-- **В CI (GitHub Actions):** встроенный `GITHUB_TOKEN` с правом `packages: read` —
-  ничего создавать не нужно:
+**Аутентификация** (репозиторий приватный, токен только в переменной окружения,
+НИКОГДА в git):
 
-  ```yaml
-  permissions:
-    packages: read
-  # ...
-  - uses: actions/setup-node@... # тот же пин, что в ci.yml
-    with:
-      node-version: '20'
-      registry-url: 'https://npm.pkg.github.com'
-      scope: '@labpics'
-  - run: pnpm install --frozen-lockfile
-    env:
-      NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  ```
+- **Локально:** отдельный токен не нужен — работает существующая авторизация
+  `gh`/`git` (если `git clone` приватного репозитория проходит, поставится и git-dep).
 
-- **Локально:** Personal Access Token (classic) со scope `read:packages`, прокинутый
-  через переменную окружения `NODE_AUTH_TOKEN` (в Labpics организационный
-  `read:packages` токен хранится в Infisical как SSOT — не хардкодь и не коммить его):
+- **В CI потребителя:** fine-grained PAT со scope `Contents: read` на
+  `Labpics-Team/lab-icons`, прокинутый в переменную окружения (напр. `GH_PAT`) и
+  подставленный в git через `insteadOf` (в Labpics токен хранится в Infisical как
+  SSOT — не хардкодь и не коммить его):
 
   ```bash
-  export NODE_AUTH_TOKEN=<PAT c read:packages>
-  pnpm add @labpics/icons
+  git config --global url."https://x-access-token:${GH_PAT}@github.com/".insteadOf "ssh://git@github.com/"
+  git config --global url."https://x-access-token:${GH_PAT}@github.com/".insteadOf "https://github.com/"
   ```
 
 ## Структура

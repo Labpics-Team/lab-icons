@@ -1,6 +1,7 @@
 {
   "name": "@labpics/icons",
   "version": "0.0.1",
+  "private": true,
   "description": "Labpics icon library — 444 SVG (Filled + Outline), tree-shakeable ESM",
   "repository": {
     "type": "git",
@@ -21,9 +22,6 @@
     "dist/index.js",
     "dist/index.d.ts"
   ],
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
-  },
   "scripts": {
     "build": "node scripts/build.js",
     "check:parity": "node scripts/check-parity.js",
