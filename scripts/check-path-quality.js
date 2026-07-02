@@ -257,8 +257,15 @@ if (isMain) {
   }
   const findings = validatePathQuality({ grid, files });
   if (findings.length > 0) {
-    console.log(`check-path-quality: REPORT — ${findings.length} находок (шум формы, ревизия):`);
-    for (const e of findings) console.log('  - ' + e);
+    // Расслоение: изломы 2–4° = систематический шум экспортного округления
+    // (чинится пере-фитом кривых пакетно), остальное = ревизия руками.
+    const minor = findings.filter((e) => /излом [23]\./.test(e));
+    const major = findings.filter((e) => !/излом [23]\./.test(e));
+    console.log(
+      `check-path-quality: REPORT — ${findings.length} находок: ` +
+        `${minor.length} minor (экспортный шум 2–4°), ${major.length} major (ревизия)`,
+    );
+    for (const e of major) console.log('  - ' + e);
   } else {
     console.log(`check-path-quality: OK — кривые ${files.length} файлов чисты`);
   }
