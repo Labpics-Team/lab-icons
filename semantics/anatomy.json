@@ -124,6 +124,23 @@
    "weights": {
     "outline": "base"
    }
+  },
+  "tablet-portrait": {
+   "archetype": "rounded-rect-container",
+   "status": {
+    "outline": "hand",
+    "filled": "hand"
+   },
+   "params": {
+    "cx": 0.5,
+    "cy": 0.5,
+    "w": 0.691667,
+    "h": 0.916667,
+    "rOuter": 0.103773
+   },
+   "weights": {
+    "outline": "base"
+   }
   }
  }
 }
