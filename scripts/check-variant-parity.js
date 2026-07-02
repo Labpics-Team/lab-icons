@@ -145,6 +145,7 @@ function analyze(svgContent, canvasWidth) {
 function glyphRegistration(oGlyphs, fGlyphs, tolReg) {
   const used = new Set();
   const offsets = [];
+  const gross = [];
   for (const og of oGlyphs) {
     const candidates = [];
     for (const fg of fGlyphs) {
@@ -153,20 +154,34 @@ function glyphRegistration(oGlyphs, fGlyphs, tolReg) {
       const sizeOk = Math.abs(og.bbox.w - fg.bbox.w) <= 0.5 && Math.abs(og.bbox.h - fg.bbox.h) <= 0.5;
       if (!areaOk || !sizeOk) continue;
       const off = Math.hypot(fg.bbox.cx - og.bbox.cx, fg.bbox.cy - og.bbox.cy);
-      if (off > 1.2) continue; // дальше = другой элемент, не съехавшая пара
+      if (off > 3) continue; // дальше даже как грубый разъезд не читается
       candidates.push({ off, dx: fg.bbox.cx - og.bbox.cx, dy: fg.bbox.cy - og.bbox.cy, fg });
     }
     if (!candidates.length) continue;
     candidates.sort((a, b) => a.off - b.off);
     // взаимозаменяемые элементы (точки dice, зубцы ticket): два кандидата
-    // с близким off = неоднозначное сопоставление — мерить нельзя
+    // с близким off = неоднозначное сопоставление — мерить нельзя.
+    // ИЗВЕСТНЫЙ КОМПРОМИСС: реальный дрейф может замаскироваться контуром-
+    // обманкой с близким off — принято осознанно (иначе ложные FAIL на
+    // каждой сетке точек).
     if (candidates.length > 1 && candidates[1].off - candidates[0].off < 0.5) continue;
-    used.add(candidates[0].fg);
-    offsets.push(candidates[0]);
+    const best = candidates[0];
+    if (best.off > 1.2) {
+      // однозначное совпадение сигнатуры, но слишком далеко для «съехал»:
+      // грубая рассинхронизация ЛИБО структурная разница — отдельная
+      // категория, не молчание (порог-фильтр не должен глотать грубое)
+      gross.push(best);
+      continue;
+    }
+    used.add(best.fg);
+    offsets.push(best);
   }
-  if (!offsets.length) return { matched: 0, worst: null };
-  const worst = offsets.reduce((a, b) => (b.off > a.off ? b : a));
-  return { matched: offsets.length, worst: worst.off > tolReg ? worst : null, worstOff: worst.off };
+  const worst = offsets.length ? offsets.reduce((a, b) => (b.off > a.off ? b : a)) : null;
+  return {
+    matched: offsets.length,
+    worst: worst && worst.off > tolReg ? worst : null,
+    gross,
+  };
 }
 
 /**
@@ -225,11 +240,15 @@ export function validateVariantParity({ grid, pairs }) {
       }
     }
 
-    // канон диска — для любого диска, претендующего на keyline-контейнер
-    // (близок к keyline): не зависит от детекции кольца в Outline
+    // канон диска: кандидат в keyline-контейнер определяется НЕЗАВИСИМЫМИ
+    // признаками (центр у центра сетки, размер ≥ 0.8 keyline) — критерий
+    // «близок к keyline» замыкался на проверяемое значение и глотал грубые
+    // разъезды (Ø20 «не кандидат» → молчание)
     if (f.disc) {
       const dDisc = f.disc.fit.r * 2;
-      if (Math.abs(dDisc - keylineD) <= 1.5) {
+      const centered =
+        Math.abs(f.disc.fit.cx - cw / 2) <= 1 && Math.abs(f.disc.fit.cy - cw / 2) <= 1;
+      if (centered && dDisc >= keylineD * 0.8) {
         stats.discs++;
         if (Math.abs(dDisc - keylineD) > tolD) {
           report.push(
@@ -246,6 +265,12 @@ export function validateVariantParity({ grid, pairs }) {
       report.push(
         `${name}: регистрация глифа между вариантами разъехалась на ${reg.worst.off.toFixed(2)} ` +
           `(Δx ${reg.worst.dx.toFixed(2)}, Δy ${reg.worst.dy.toFixed(2)})`,
+      );
+    }
+    for (const g of reg.gross) {
+      report.push(
+        `${name}: контур совпал по сигнатуре, но стоит в ${g.off.toFixed(2)} — ` +
+          `грубая рассинхронизация или структурная разница (глазами)`,
       );
     }
   }
