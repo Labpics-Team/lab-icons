@@ -260,7 +260,7 @@ function sandLayerMotions() {
     };
   };
   return {
-    'flip-hold-top': build(10.61, 0.15, 0.35),
+    'flip-hold-top': build(10.61, 0.15, 0.2),
     'flip-hold-bottom': build(18.98, 1.28),
   };
 }
