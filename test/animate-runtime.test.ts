@@ -364,10 +364,13 @@ describe('animateIcon — per-icon разметка (классы багов A/C
     });
     expect(outline.calls).toHaveLength(1);
     expect(outline.calls[0]!.target).toBe(outline.paths[0]);
-    // флип-зеркало: scaleX проходит через -1 (BL-008: вращение целого отвергнуто)
+    // аккуратный подворот со спрингом: rotate с пиком и identity-краями, без scale
     expect(
-      outline.calls[0]!.keyframes.some((k) => String(k.transform).includes('scale(-')),
+      outline.calls[0]!.keyframes.some((k) => String(k.transform).includes('rotate(')),
     ).toBe(true);
+    expect(
+      outline.calls[0]!.keyframes.some((k) => String(k.transform).includes('scale(')),
+    ).toBe(false);
 
     const filled = new FakeSvg([{ x: 1, y: 2, width: 22, height: 18 }]);
     animateIcon(filled as unknown as SVGSVGElement, {
