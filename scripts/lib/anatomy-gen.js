@@ -352,6 +352,25 @@ export function smoothCornerAny(V, uDir, wDir, R, zeta) {
   };
 }
 
+/**
+ * Скруглённый прямоугольник с ζ-углами (первый живой носитель токена
+ * cornerSmoothing): обход по часовой, углы — smoothCorner90.
+ */
+export function genRoundedRect(cx, cy, w, h, R, zeta) {
+  const x0 = cx - w / 2, y0 = cy - h / 2, x1 = cx + w / 2, y1 = cy + h / 2;
+  const corners = [
+    smoothCorner90([x1, y0], [1, 0], [0, 1], R, zeta),   // верх-право
+    smoothCorner90([x1, y1], [0, 1], [-1, 0], R, zeta),  // низ-право
+    smoothCorner90([x0, y1], [-1, 0], [0, -1], R, zeta), // низ-лево
+    smoothCorner90([x0, y0], [0, -1], [1, 0], R, zeta),  // верх-лево
+  ];
+  return (
+    `M${P(corners[3].end)}` +
+    corners.map((c) => `L${P(c.start)}${c.d}`).join('') +
+    'Z'
+  );
+}
+
 // ── контейнеры ──
 export function genRing(cx, cy, rOut, rIn) {
   const c = (r) =>
@@ -400,6 +419,17 @@ export function buildGlyph(entry, grid) {
     const anchors = { endL: Pt(a.endL), endR: Pt(a.endR), innerL: Pt(a.innerL), innerR: Pt(a.innerR) };
     if (entry.weights.outline) out.outline = genStrokeV(anchors, tok(entry.weights.outline));
     if (entry.weights.filled) out.filled = genStrokeV(anchors, tok(entry.weights.filled));
+  } else if (entry.archetype === 'rounded-rect-container') {
+    // контейнер-рамка: внешний rounded-rect (ζ из сетки) + внутренний офсет
+    // пером; filled = сплошной внешний. Внутренний радиус = R − перо.
+    const p2 = entry.params;
+    const zeta = grid.ratios.cornerSmoothing ?? 0;
+    const w = tok(entry.weights?.outline ?? 'base');
+    const [cx2, cy2, W, H, R] = [L(p2.cx), L(p2.cy), L(p2.w), L(p2.h), L(p2.rOuter)];
+    const outer = genRoundedRect(cx2, cy2, W, H, R, zeta);
+    const inner = genRoundedRect(cx2, cy2, W - 2 * w, H - 2 * w, Math.max(R - w, 0.1), zeta);
+    out.outline = outer + inner; // evenodd-вложение (честная дырка)
+    out.filled = outer;
   } else if (entry.archetype === 'container-glyph') {
     const center = [cw / 2, cw / 2];
     const rOut = (grid.ratios.keylines.circle * cw) / 2;
