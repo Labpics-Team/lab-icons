@@ -41,7 +41,7 @@ function areaCentroid(poly) {
 }
 
 /** Оценка круга: центр, средний радиус, некруглость (max-min радиуса). */
-function circleFit(poly) {
+export function circleFit(poly) {
   const { cx, cy } = areaCentroid(poly);
   let sum = 0;
   let min = Infinity;

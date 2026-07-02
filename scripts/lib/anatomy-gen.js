@@ -450,6 +450,15 @@ export function buildGlyph(entry, grid) {
           } else {
             chunks.push(outer);
           }
+        } else if (part.primitive === 'circle-dot') {
+          // точка/диск; mode frame = кольцо пером (редко), solid = диск
+          const [cx2, cy2, r] = [L(pp.cx), L(pp.cy), L(pp.r)];
+          if (mode === 'frame') {
+            const w = tok(part.weight ?? 'base');
+            chunks.push(genRing(cx2, cy2, r, Math.max(r - w, 0.05)));
+          } else {
+            chunks.push(genRing(cx2, cy2, r, 0));
+          }
         } else {
           throw new Error(`composite: неизвестный примитив «${part.primitive}»`);
         }
