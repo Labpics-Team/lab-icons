@@ -10,7 +10,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { cornerParams, smoothCorner90, smoothCornerAny } from '../scripts/lib/anatomy-gen.js';
+import { cornerParams, genRoundedRect, smoothCorner90, smoothCornerAny } from '../scripts/lib/anatomy-gen.js';
 import { inkIoU } from '../scripts/check-anatomy.js';
 import { samplePolylines } from '../scripts/lib/motion-geometry.js';
 
@@ -96,6 +96,24 @@ describe('smoothCornerAny — произвольный угол (обобщен�
       const s = (x - 10) * w[1] - y * w[0];
       expect(s, 'внутри клина от выходной грани').toBeLessThan(1e-3);
     }
+  });
+
+  it('А: genRoundedRect rotation=45° — центр на месте, диагонали bbox равны, 0° = регресс', () => {
+    const d0a = genRoundedRect(12, 12, 6, 6, 1.5, 0.6, 0);
+    const d0b = genRoundedRect(12, 12, 6, 6, 1.5, 0.6); // без аргумента — то же
+    expect(d0a).toBe(d0b);
+    const p45 = samplePolylines(genRoundedRect(12, 12, 6, 6, 1.5, 0.6, 45), 48)[0];
+    let minX = 1e9, minY = 1e9, maxX = -1e9, maxY = -1e9;
+    for (const [x, y] of p45) {
+      minX = Math.min(minX, x); minY = Math.min(minY, y);
+      maxX = Math.max(maxX, x); maxY = Math.max(maxY, y);
+    }
+    expect((minX + maxX) / 2).toBeCloseTo(12, 2);
+    expect((minY + maxY) / 2).toBeCloseTo(12, 2);
+    expect(maxX - minX).toBeCloseTo(maxY - minY, 2); // квадрат под 45° симметричен
+    // диагональ bbox = сторона·√2 − 2·срез: меньше острой, больше стороны
+    expect(maxX - minX).toBeGreaterThan(6);
+    expect(maxX - minX).toBeLessThan(6 * Math.SQRT2);
   });
 
   it('А: θ=60° (острее прямого) — симметрия хвостов и вписанность дуги', () => {

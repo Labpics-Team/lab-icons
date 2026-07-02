@@ -356,13 +356,18 @@ export function smoothCornerAny(V, uDir, wDir, R, zeta) {
  * Скруглённый прямоугольник с ζ-углами (первый живой носитель токена
  * cornerSmoothing): обход по часовой, углы — smoothCorner90.
  */
-export function genRoundedRect(cx, cy, w, h, R, zeta) {
-  const x0 = cx - w / 2, y0 = cy - h / 2, x1 = cx + w / 2, y1 = cy + h / 2;
+export function genRoundedRect(cx, cy, w, h, R, zeta, rotationDeg = 0) {
+  // повёрнутый контур бесплатно: углы векторные, вращаем базис
+  const t = rad(rotationDeg);
+  const ux = [Math.cos(t), Math.sin(t)];        // локальная ось X
+  const uy = [-Math.sin(t), Math.cos(t)];       // локальная ось Y
+  const at = (lx, ly) => [cx + ux[0] * lx + uy[0] * ly, cy + ux[1] * lx + uy[1] * ly];
+  const neg = (v) => [-v[0], -v[1]];
   const corners = [
-    smoothCorner90([x1, y0], [1, 0], [0, 1], R, zeta),   // верх-право
-    smoothCorner90([x1, y1], [0, 1], [-1, 0], R, zeta),  // низ-право
-    smoothCorner90([x0, y1], [-1, 0], [0, -1], R, zeta), // низ-лево
-    smoothCorner90([x0, y0], [0, -1], [1, 0], R, zeta),  // верх-лево
+    smoothCorner90(at(w / 2, -h / 2), ux, uy, R, zeta),        // верх-право
+    smoothCorner90(at(w / 2, h / 2), uy, neg(ux), R, zeta),    // низ-право
+    smoothCorner90(at(-w / 2, h / 2), neg(ux), neg(uy), R, zeta), // низ-лево
+    smoothCorner90(at(-w / 2, -h / 2), neg(uy), ux, R, zeta),  // верх-лево
   ];
   return (
     `M${P(corners[3].end)}` +
@@ -442,11 +447,12 @@ export function buildGlyph(entry, grid) {
         const pp = part.params?.[variant] ?? part.params;
         if (part.primitive === 'rounded-rect') {
           const [cx2, cy2, W, H, R] = [L(pp.cx), L(pp.cy), L(pp.w), L(pp.h), L(pp.rOuter)];
+          const rot = pp.rotation ?? 0; // градусы (конвенция единиц)
           const zeta = grid.ratios.cornerSmoothing ?? 0;
-          const outer = genRoundedRect(cx2, cy2, W, H, R, zeta);
+          const outer = genRoundedRect(cx2, cy2, W, H, R, zeta, rot);
           if (mode === 'frame') {
-            const w = tok(part.weight ?? 'base');
-            chunks.push(outer + genRoundedRect(cx2, cy2, W - 2 * w, H - 2 * w, Math.max(R - w, 0.1), zeta));
+            const w = typeof part.weight === 'number' ? part.weight * cw : tok(part.weight ?? 'base');
+            chunks.push(outer + genRoundedRect(cx2, cy2, W - 2 * w, H - 2 * w, Math.max(R - w, 0.1), zeta, rot));
           } else {
             chunks.push(outer);
           }
