@@ -7,7 +7,7 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { iconGeometry } from '../scripts/lib/icon-geometry.js';
+import { iconGeometry, renderedPathData } from '../scripts/lib/icon-geometry.js';
 
 const root = join(import.meta.dirname, '..', 'svg');
 
@@ -29,6 +29,35 @@ describe('icon-geometry — известная иконка notifications (ко�
     for (const p of g.paths) {
       expect(p.anchor.x).toBeCloseTo((p.bbox.minX + p.bbox.maxX) / 2, 12);
       expect(p.anchor.y).toBeCloseTo((p.bbox.minY + p.bbox.maxY) / 2, 12);
+    }
+  });
+});
+
+describe('icon-geometry — path внутри <defs> не геометрия (класс clipPath-фантома)', () => {
+  // 8 иконок корпуса (scan/timer/headphone/cog…) несут служебный clipPath
+  // с прямоугольником во всю канву — он числил их «руинами с нулевыми полями»
+  const withClip =
+    '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24">' +
+    '<g clip-path="url(#a)"><path d="M8 8h8v8H8z"/></g>' +
+    '<defs><clipPath id="a"><path d="M0 0h24v24H0z"/></clipPath></defs></svg>';
+
+  it('Д: renderedPathData видит только рендерящийся глиф', () => {
+    expect(renderedPathData(withClip)).toEqual(['M8 8h8v8H8z']);
+  });
+
+  it('Д: iconGeometry не отдаёт фантомный слой во всю канву', () => {
+    const g = iconGeometry(withClip);
+    expect(g.paths).toHaveLength(1);
+    expect(g.paths[0].bbox).toEqual({ minX: 8, minY: 8, maxX: 16, maxY: 16 });
+  });
+
+  it('Д: реальный scan_filled — ни один слой не лежит на краю канвы', () => {
+    const g = iconGeometry(readFileSync(join(root, 'Filled', 'scan_filled.svg'), 'utf8'));
+    for (const p of g.paths) {
+      expect(p.bbox.minX).toBeGreaterThan(0.5);
+      expect(p.bbox.minY).toBeGreaterThan(0.5);
+      expect(p.bbox.maxX).toBeLessThan(23.5);
+      expect(p.bbox.maxY).toBeLessThan(23.5);
     }
   });
 });

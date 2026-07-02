@@ -14,6 +14,17 @@ const VIEWBOX_RE = /viewBox="([\d.\s-]+)"/;
 const PATH_D_RE = /<path\b[^>]*?\bd="([^"]+)"/g;
 
 /**
+ * d-строки только РЕНДЕРЯЩИХСЯ path: содержимое <defs> (clipPath и т.п.) —
+ * служебная геометрия, не чернила. 8 иконок корпуса с clip-path числились
+ * «руинами с нулевыми полями» из-за фантомного прямоугольника M0 0h24v24z
+ * внутри defs — гейты обязаны его не видеть.
+ */
+export function renderedPathData(svgContent) {
+  const withoutDefs = svgContent.replace(/<defs\b[\s\S]*?<\/defs>/g, '');
+  return [...withoutDefs.matchAll(PATH_D_RE)].map((m) => m[1]);
+}
+
+/**
  * @param {string} svgContent — содержимое .svg файла
  * @returns {{
  *   viewBox: {x:number, y:number, width:number, height:number},
@@ -31,8 +42,8 @@ export function iconGeometry(svgContent) {
 
   const paths = [];
   let index = 0;
-  for (const m of svgContent.matchAll(PATH_D_RE)) {
-    const bbox = pathBBox(m[1]);
+  for (const d of renderedPathData(svgContent)) {
+    const bbox = pathBBox(d);
     const w = bbox.maxX - bbox.minX;
     const h = bbox.maxY - bbox.minY;
     paths.push({

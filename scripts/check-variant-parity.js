@@ -19,6 +19,7 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { renderedPathData } from './lib/icon-geometry.js';
 import { samplePolylines } from './lib/motion-geometry.js';
 
 /** Площадь и центроид замкнутой полилинии (Гаусс). */
@@ -95,7 +96,7 @@ function resampleEdges(poly, maxStep = 0.3) {
 
 /** Контуры SVG → круги-кандидаты, кольцо, диск, глиф-контуры (не контейнер). */
 function analyze(svgContent, canvasWidth) {
-  const ds = [...svgContent.matchAll(/<path\b[^>]*?\bd="([^"]+)"/g)].map((m) => m[1]);
+  const ds = renderedPathData(svgContent); // path из <defs> — не чернила
   const contours = ds
     .flatMap((d) => samplePolylines(d, 24))
     .filter((p) => p.length > 2)

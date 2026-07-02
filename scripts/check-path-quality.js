@@ -21,6 +21,7 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { renderedPathData } from './lib/icon-geometry.js';
 import { inkOverlap, samplePolylines } from './lib/motion-geometry.js';
 import { parsePathData } from './lib/path-data.js';
 
@@ -115,7 +116,8 @@ export function validatePathQuality({ grid, files }) {
 
   const findings = [];
   for (const { name, content } of files) {
-    const ds = [...content.matchAll(/<path\b[^>]*?\bd="([^"]+)"/g)].map((m) => m[1]);
+    const ds = renderedPathData(content); // path из <defs> — не чернила
+
     ds.forEach((d, layerIdx) => {
       let segs;
       try {
