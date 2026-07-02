@@ -28,8 +28,16 @@ export function validateStaticGrid({ grid, files }) {
   const hard = [];
   const report = [];
   const { width: cw, height: ch } = grid.canvas;
-  const m = grid.margin;
-  const tol = grid.tolerances;
+  // Токены сетки — доли канвы (grid v2): резолвим в юниты текущей канвы.
+  const u = (ratio) => ratio * cw;
+  const m = u(grid.ratios.margin);
+  const tol = {
+    canvas: u(grid.ratios.tolerances.canvas),
+    marginReport: u(grid.ratios.tolerances.marginReport),
+    marginHard: u(grid.ratios.tolerances.marginHard),
+    circleCenter: u(grid.ratios.tolerances.circleCenter),
+  };
+  const circleKeyline = u(grid.ratios.keylines.circle);
 
   for (const { name, content } of files) {
     let g;
@@ -70,7 +78,7 @@ export function validateStaticGrid({ grid, files }) {
     if (enclosure) {
       const w = enclosure.bbox.maxX - enclosure.bbox.minX;
       const h = enclosure.bbox.maxY - enclosure.bbox.minY;
-      const isRing = Math.abs(w - h) < 0.3 && Math.max(w, h) > grid.keylines.circle - 1.5;
+      const isRing = Math.abs(w - h) < 0.3 && Math.max(w, h) > circleKeyline - 1.5;
       if (isRing) {
         const cx = (enclosure.bbox.minX + enclosure.bbox.maxX) / 2;
         const cy = (enclosure.bbox.minY + enclosure.bbox.maxY) / 2;
