@@ -22,6 +22,7 @@
   "strokeWidth": {
    "base": 0.075,
    "bold": 0.1,
+   "containerGlyph": 0.08333333333333333,
    "enclosureRing": 0.0625,
    "capRadius": 0.0375,
    "tolerance": 0.0062499999999999995
