@@ -479,6 +479,30 @@ export function genSuperellipseStroke(cx, cy, a, b, n, rotationDeg, pen, side = 
   return emit(1) + emit(-1);
 }
 
+/**
+ * Стрелки часов (Г-глиф: вертикаль вверх + горизонталь вправо от общей
+ * оси) — семантическая деталь класса time/alarm/timer/history.
+ * Капсульные концы R=t/2; вогнутый угол ОСТРЫЙ (канон руки time);
+ * нижне-левый выпуклый угол — четверть-дуга R=t/2 (у руки там
+ * экспортная лесенка — генерат чистит класс).
+ * (cx,cy) — пересечение ОСЕЙ стрелок; up/right — длины осей до концов.
+ */
+export function genClockHands(cx, cy, up, right, t) {
+  const h = t / 2;
+  const yTop = cy - up;
+  const xRight = cx + right;
+  return (
+    `M${f3(cx - h)} ${f3(yTop)}` +
+    `A${f3(h)} ${f3(h)} 0 0 1 ${f3(cx + h)} ${f3(yTop)}` + // верхний кап
+    `L${f3(cx + h)} ${f3(cy - h)}` +                        // правая грань вниз, острый вогнутый
+    `L${f3(xRight)} ${f3(cy - h)}` +                        // верх горизонтали
+    `A${f3(h)} ${f3(h)} 0 0 1 ${f3(xRight)} ${f3(cy + h)}` + // правый кап
+    `L${f3(cx)} ${f3(cy + h)}` +                            // нижняя грань до начала скругления
+    `A${f3(h)} ${f3(h)} 0 0 1 ${f3(cx - h)} ${f3(cy)}` +    // нижне-левое скругление R=t/2
+    'Z'
+  );
+}
+
 // ── контейнеры ──
 export function genRing(cx, cy, rOut, rIn) {
   const c = (r) =>
@@ -569,11 +593,20 @@ export function buildGlyph(entry, grid) {
           // точка/диск; mode frame = кольцо пером (редко), solid = диск
           const [cx2, cy2, r] = [L(pp.cx), L(pp.cy), L(pp.r)];
           if (mode === 'frame') {
-            const w = tok(part.weight ?? 'base');
+            const w = typeof part.weight === 'number' ? part.weight * cw : tok(part.weight ?? 'base');
             chunks.push(genRing(cx2, cy2, r, Math.max(r - w, 0.05)));
           } else {
             chunks.push(genRing(cx2, cy2, r, 0));
           }
+        } else if (part.primitive === 'clock-hands') {
+          // Г-стрелки часов; в filled обычно вырез в диске (evenodd)
+          const [cx2, cy2, up2, right2, t2] = [L(pp.cx), L(pp.cy), L(pp.up), L(pp.right), L(pp.t)];
+          chunks.push(genClockHands(cx2, cy2, up2, right2, t2));
+        } else if (part.primitive === 'rounded-rect-cutout') {
+          // негатив: контур внутри сплошной части, evenodd вычитает
+          // (белые стрелки в диске filled-часов и подобные)
+          const [cx2, cy2, W, H, R] = [L(pp.cx), L(pp.cy), L(pp.w), L(pp.h), L(pp.rOuter)];
+          chunks.push(genRoundedRect(cx2, cy2, W, H, R, grid.ratios.cornerSmoothing ?? 0, pp.rotation ?? 0));
         } else {
           throw new Error(`composite: неизвестный примитив «${part.primitive}»`);
         }
