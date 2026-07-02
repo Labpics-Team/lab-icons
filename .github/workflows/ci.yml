@@ -64,6 +64,9 @@ jobs:
       - name: Motion collision check (движение не создаёт наслоений слоёв)
         run: pnpm check:motion-collision
 
+      - name: Variant parity check (контракт пары O↔F — каноны колец, регистрация; report до закрытия time, затем strict)
+        run: pnpm check:variant-parity
+
       - name: Tests (парсер геометрии — дифференциал по 444 SVG)
         run: pnpm test
 
