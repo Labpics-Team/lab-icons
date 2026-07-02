@@ -141,6 +141,63 @@
    "weights": {
     "outline": "base"
    }
+  },
+  "pause": {
+   "archetype": "composite",
+   "status": {
+    "outline": "hand",
+    "filled": "hand"
+   },
+   "parts": [
+    {
+     "primitive": "rounded-rect",
+     "mode": {
+      "outline": "frame",
+      "filled": "solid"
+     },
+     "weight": "base",
+     "params": {
+      "outline": {
+       "cx": 0.307708,
+       "cy": 0.501042,
+       "w": 0.32375,
+       "h": 0.707083,
+       "rOuter": 0.1
+      },
+      "filled": {
+       "cx": 0.286875,
+       "cy": 0.50125,
+       "w": 0.282083,
+       "h": 0.7075,
+       "rOuter": 0.1
+      }
+     }
+    },
+    {
+     "primitive": "rounded-rect",
+     "mode": {
+      "outline": "frame",
+      "filled": "solid"
+     },
+     "weight": "base",
+     "params": {
+      "outline": {
+       "cx": 0.692292,
+       "cy": 0.501042,
+       "w": 0.32375,
+       "h": 0.707083,
+       "rOuter": 0.1
+      },
+      "filled": {
+       "cx": 0.713125,
+       "cy": 0.50125,
+       "w": 0.282083,
+       "h": 0.7075,
+       "rOuter": 0.1
+      }
+     }
+    }
+   ]
   }
  }
 }

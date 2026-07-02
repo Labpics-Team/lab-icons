@@ -430,6 +430,32 @@ export function buildGlyph(entry, grid) {
     const inner = genRoundedRect(cx2, cy2, W - 2 * w, H - 2 * w, Math.max(R - w, 0.1), zeta);
     out.outline = outer + inner; // evenodd-вложение (честная дырка)
     out.filled = outer;
+  } else if (entry.archetype === 'composite') {
+    // композиция частей: каждая часть — примитив с режимом на вариант
+    // (frame = рамка пером, solid = заливка); параметры могут быть
+    // per-variant (законы инверсии выводятся по мере разметки корпуса)
+    for (const variant of ['outline', 'filled']) {
+      if (!entry.status?.[variant]) continue;
+      const chunks = [];
+      for (const part of entry.parts) {
+        const mode = part.mode?.[variant] ?? part.mode ?? 'solid';
+        const pp = part.params?.[variant] ?? part.params;
+        if (part.primitive === 'rounded-rect') {
+          const [cx2, cy2, W, H, R] = [L(pp.cx), L(pp.cy), L(pp.w), L(pp.h), L(pp.rOuter)];
+          const zeta = grid.ratios.cornerSmoothing ?? 0;
+          const outer = genRoundedRect(cx2, cy2, W, H, R, zeta);
+          if (mode === 'frame') {
+            const w = tok(part.weight ?? 'base');
+            chunks.push(outer + genRoundedRect(cx2, cy2, W - 2 * w, H - 2 * w, Math.max(R - w, 0.1), zeta));
+          } else {
+            chunks.push(outer);
+          }
+        } else {
+          throw new Error(`composite: неизвестный примитив «${part.primitive}»`);
+        }
+      }
+      out[variant] = chunks.join('');
+    }
   } else if (entry.archetype === 'container-glyph') {
     const center = [cw / 2, cw / 2];
     const rOut = (grid.ratios.keylines.circle * cw) / 2;
