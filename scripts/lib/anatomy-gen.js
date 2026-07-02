@@ -1,0 +1,312 @@
+/**
+ * scripts/lib/anatomy-gen.js — генераторы статики из анатомии (BL-014/015/017).
+ *
+ * Три доказанных архетипа (пилоты в epics/ds-icons/tools, IoU 98–99.9%):
+ *   radial-gear    — радиальный конструктор (cog): венец из токенов зуба ×
+ *                    повороты + вырезы с G1-fillet борт↔обод.
+ *   arc-terminal   — дуга-скелет × вес + терминал-актив (reload): кольцевая
+ *                    полоса, круглый кап, стык с активом by construction.
+ *   stroke-v       — штриховой V-знак × вес (chevron): чернильные якоря,
+ *                    сустав = дуга R=перо вокруг внутреннего острия.
+ *   container-glyph — композиция: контейнер из токенов сетки + глиф-генератор
+ *                    (Outline: кольцо+глиф; Filled: диск−глиф негативом).
+ *
+ * Законы весов (адверсариально верифицированы 2026-07-02): независимые
+ * абсолютные токены сетки — base 1.8 / bold 2.4 / containerGlyph 2.0 /
+ * enclosureRing 1.5. Части-массы (терминалы) инвариантны весу.
+ */
+
+import { parsePathData } from './path-data.js';
+
+const rad = (deg) => (deg * Math.PI) / 180;
+const deg2 = (r) => ((r * 180) / Math.PI + 360) % 360;
+const f3 = (v) => {
+  let s = v.toFixed(3).replace(/0+$/, '').replace(/\.$/, '');
+  s = s.replace(/^(-?)0\./, '$1.');
+  return s === '' || s === '-' ? '0' : s;
+};
+const P = (p) => `${f3(p[0])} ${f3(p[1])}`;
+const add = (a, b, k = 1) => [a[0] + b[0] * k, a[1] + b[1] * k];
+const sub = (a, b) => [a[0] - b[0], a[1] - b[1]];
+
+// ── radial-gear (cog) ──
+export function genRadialGear(p) {
+  const { cx, cy, teeth, rTip, rRoot, rRim, wTipDeg, wRootDeg, fTip, fRoot, spokes, spokeHW, rCO, rCI } = p;
+  const period = 360 / teeth;
+  const pt = (r, aDeg) => [cx + r * Math.cos(rad(aDeg)), cy + r * Math.sin(rad(aDeg))];
+  const fmt = (q) => P(q);
+  const lerpFlank = (rootA, tipA, dist, from) => {
+    const p1 = pt(rRoot, rootA);
+    const p2 = pt(rTip, tipA);
+    const len = Math.hypot(p2[0] - p1[0], p2[1] - p1[1]);
+    const t = from === 'root' ? dist / len : 1 - dist / len;
+    return [p1[0] + (p2[0] - p1[0]) * t, p1[1] + (p2[1] - p1[1]) * t];
+  };
+  let d = '';
+  for (let i = 0; i < teeth; i++) {
+    const c = i * period;
+    const rootIn = c - wRootDeg / 2;
+    const tipIn = c - wTipDeg / 2;
+    const tipOut = c + wTipDeg / 2;
+    const rootOut = c + wRootDeg / 2;
+    const valleyEnd = c + period - wRootDeg / 2;
+    const aFR = (fRoot / rRoot) * 57.2958;
+    const aFT = (fTip / rTip) * 57.2958;
+    if (i === 0) d += `M${fmt(pt(rRoot, rootIn - aFR))}`;
+    d += `Q${fmt(pt(rRoot, rootIn))} ${fmt(lerpFlank(rootIn, tipIn, fRoot, 'root'))}`;
+    d += `L${fmt(lerpFlank(rootIn, tipIn, fTip, 'tip'))}`;
+    d += `Q${fmt(pt(rTip, tipIn))} ${fmt(pt(rTip, tipIn + aFT))}`;
+    d += `A${f3(rTip)} ${f3(rTip)} 0 0 1 ${fmt(pt(rTip, tipOut - aFT))}`;
+    d += `Q${fmt(pt(rTip, tipOut))} ${fmt(lerpFlank(rootOut, tipOut, fTip, 'tip'))}`;
+    d += `L${fmt(lerpFlank(rootOut, tipOut, fRoot, 'root'))}`;
+    d += `Q${fmt(pt(rRoot, rootOut))} ${fmt(pt(rRoot, rootOut + aFR))}`;
+    d += `A${f3(rRoot)} ${f3(rRoot)} 0 0 1 ${fmt(pt(rRoot, valleyEnd - aFR))}`;
+  }
+  d += 'Z';
+  const rHub = spokeHW / Math.sin(rad(60));
+  const tF = Math.sqrt((rRim - rCO) ** 2 - (spokeHW + rCO) ** 2);
+  const cutout = (baseDeg) => {
+    const onSide = (axisDeg, sign, dist) => {
+      const [ox, oy] = [Math.cos(rad(axisDeg)), Math.sin(rad(axisDeg))];
+      const [nx, ny] = sign > 0 ? [-oy, ox] : [oy, -ox];
+      return [cx + ox * dist + nx * spokeHW, cy + oy * dist + ny * spokeHW];
+    };
+    const fillet = (axisDeg, sign) => {
+      const [ox, oy] = [Math.cos(rad(axisDeg)), Math.sin(rad(axisDeg))];
+      const [nx, ny] = sign > 0 ? [-oy, ox] : [oy, -ox];
+      const Cf = [cx + ox * tF + nx * (spokeHW + rCO), cy + oy * tF + ny * (spokeHW + rCO)];
+      const T1 = [cx + ox * tF + nx * spokeHW, cy + oy * tF + ny * spokeHW];
+      const dC = Math.hypot(Cf[0] - cx, Cf[1] - cy);
+      const T2 = [cx + ((Cf[0] - cx) / dC) * rRim, cy + ((Cf[1] - cy) / dC) * rRim];
+      return { T1, T2 };
+    };
+    const hub = [cx + rHub * Math.cos(rad(baseDeg + 60)), cy + rHub * Math.sin(rad(baseDeg + 60))];
+    const f0 = fillet(baseDeg, +1);
+    const f1 = fillet(baseDeg + 120, -1);
+    const h1 = onSide(baseDeg + 120, -1, rHub * Math.cos(rad(60)) + rCI);
+    const h2 = onSide(baseDeg, +1, rHub * Math.cos(rad(60)) + rCI);
+    return (
+      `M${fmt(h2)}L${fmt(f0.T1)}A${f3(rCO)} ${f3(rCO)} 0 0 1 ${fmt(f0.T2)}` +
+      `A${f3(rRim)} ${f3(rRim)} 0 0 1 ${fmt(f1.T2)}` +
+      `A${f3(rCO)} ${f3(rCO)} 0 0 1 ${fmt(f1.T1)}L${fmt(h1)}Q${fmt(hub)} ${fmt(h2)}Z`
+    );
+  };
+  return d + spokes.map(cutout).join('');
+}
+
+/**
+ * Масштабирование d-фрагмента (доли канвы → юниты): терминалы-активы
+ * хранятся КРИВЫМИ (полигонализация даёт видимые ступеньки на скруглениях —
+ * поймано владельцем), масштаб — через парсер, не текстом.
+ */
+export function scaleD(d, k) {
+  const f3 = (v) => {
+    let s = (v * k).toFixed(3).replace(/0+$/, '').replace(/\.$/, '');
+    s = s.replace(/^(-?)0\./, '$1.');
+    return s === '' || s === '-' ? '0' : s;
+  };
+  let out = '';
+  for (const s of parsePathData(d)) {
+    if (s.cmd === 'M') out += `M${f3(s.x)} ${f3(s.y)}`;
+    else if (s.cmd === 'L') out += `L${f3(s.x)} ${f3(s.y)}`;
+    else if (s.cmd === 'C') out += `C${f3(s.x1)} ${f3(s.y1)} ${f3(s.x2)} ${f3(s.y2)} ${f3(s.x)} ${f3(s.y)}`;
+    else if (s.cmd === 'Q') out += `Q${f3(s.x1)} ${f3(s.y1)} ${f3(s.x)} ${f3(s.y)}`;
+    else if (s.cmd === 'A') out += `A${f3(s.rx)} ${f3(s.ry)} ${s.rotation} ${s.largeArc} ${s.sweep} ${f3(s.x)} ${f3(s.y)}`;
+    else if (s.cmd === 'Z') out += 'Z';
+  }
+  return out;
+}
+
+/** Вершины d-фрагмента (концы сегментов) — для граней/центроида. */
+function dVertices(d) {
+  const pts = [];
+  for (const s of parsePathData(d)) if (s.cmd !== 'Z') pts.push([s.x, s.y]);
+  return pts;
+}
+
+// ── arc-terminal (reload) ──
+export function genArcTerminal(p, w) {
+  const { center, rAxis, thetaCap, headD } = p; // headD — d-фрагмент В ЮНИТАХ
+  const w2 = w / 2;
+  const C = center;
+  const pt = (r, th) => [C[0] + r * Math.cos(rad(th)), C[1] + r * Math.sin(rad(th))];
+  const thOf = (q) => deg2(Math.atan2(q[1] - C[1], q[0] - C[0]));
+  // 45°-грани головы: по ПРЯМЫМ сегментам d-фрагмента
+  const faces = [];
+  {
+    let cx = 0, cy = 0;
+    for (const s of parsePathData(headD)) {
+      if (s.cmd === 'L') {
+        const v = sub([s.x, s.y], [cx, cy]);
+        const len = Math.hypot(v[0], v[1]);
+        if (len > 1e-9 && Math.abs(v[0] / len - Math.SQRT1_2) < 0.03 && Math.abs(v[1] / len + Math.SQRT1_2) < 0.03) {
+          const prev = faces[faces.length - 1];
+          if (prev && Math.hypot(prev.to[0] - cx, prev.to[1] - cy) < 1e-6) {
+            prev.len += len;
+            prev.to = [s.x, s.y];
+          } else {
+            faces.push({ from: [cx, cy], to: [s.x, s.y], len });
+          }
+        }
+      }
+      if (s.cmd !== 'Z') { cx = s.x; cy = s.y; }
+    }
+  }
+  faces.sort((a, b) => b.len - a.len);
+  const [hypFace, wingFace] = faces;
+  const headVerts = dVertices(headD);
+  const headCx = headVerts.reduce((s, q) => s + q[0], 0) / headVerts.length;
+  const headCy = headVerts.reduce((s, q) => s + q[1], 0) / headVerts.length;
+  const shifted = (face, delta) => {
+    const n1 = [Math.SQRT1_2, Math.SQRT1_2];
+    const toHead = [headCx - face.from[0], headCy - face.from[1]];
+    const n = toHead[0] * n1[0] + toHead[1] * n1[1] > 0 ? n1 : [-n1[0], -n1[1]];
+    return [face.from[0] + n[0] * delta, face.from[1] + n[1] * delta];
+  };
+  const circleLineHit = (r, p0, guessTh) => {
+    const dDir = [Math.SQRT1_2, -Math.SQRT1_2];
+    const f = [p0[0] - C[0], p0[1] - C[1]];
+    const b = 2 * (f[0] * dDir[0] + f[1] * dDir[1]);
+    const c2 = f[0] * f[0] + f[1] * f[1] - r * r;
+    const disc = b * b - 4 * c2;
+    const roots = [(-b + Math.sqrt(disc)) / 2, (-b - Math.sqrt(disc)) / 2];
+    return roots
+      .map((t) => [p0[0] + dDir[0] * t, p0[1] + dDir[1] * t])
+      .reduce((best, q) => {
+        const dth = Math.abs(((thOf(q) - guessTh) % 360 + 540) % 360 - 180);
+        const bth = best ? Math.abs(((thOf(best) - guessTh) % 360 + 540) % 360 - 180) : Infinity;
+        return dth < bth ? q : best;
+      }, null);
+  };
+  const OVERLAP = 0.3;
+  const rO = rAxis + w2;
+  const rI = rAxis - w2;
+  const pOutEnd = circleLineHit(rO, shifted(hypFace, OVERLAP), p.thetaArrowOut);
+  const pInEnd = circleLineHit(rI, shifted(wingFace, OVERLAP), p.thetaArrowIn);
+  const spanOut = (thOf(pOutEnd) - thetaCap + 360) % 360;
+  const spanIn = (thOf(pInEnd) - thetaCap + 360) % 360;
+  const pOutStart = pt(rO, thetaCap);
+  const pInStart = pt(rI, thetaCap);
+  const bow =
+    `M${P(pOutStart)}` +
+    `A${f3(rO)} ${f3(rO)} 0 ${spanOut > 180 ? 1 : 0} 1 ${P(pOutEnd)}` +
+    `L${P(pInEnd)}` +
+    `A${f3(rI)} ${f3(rI)} 0 ${spanIn > 180 ? 1 : 0} 0 ${P(pInStart)}` +
+    `A${f3(w2)} ${f3(w2)} 0 0 1 ${P(pOutStart)}Z`; // кап наружу (sweep 1)
+  return bow + headD;
+}
+
+// ── stroke-v (chevron) ──
+/**
+ * Законы, снятые с руки на двух весах (chevron-пилот):
+ *  - ВНУТРЕННЯЯ (нижняя) грань ветви ФИКСИРОВАНА, вес растёт наружу;
+ *  - чернильный конец ветви вдоль оси — инвариант веса;
+ *  - сустав: внешняя дуга R = перо вокруг внутреннего острия (G1-касание
+ *    фиксированных внутренних граней).
+ * anchors: { endL, endR, innerL: [точка на нижней грани левой ветви],
+ *            innerR: [точка на нижней грани правой] } — направления ветвей 45°.
+ */
+export function genStrokeV(anchors, w) {
+  const w2 = w / 2;
+  const dL = [Math.SQRT1_2, Math.SQRT1_2];   // ось левой ветви к суставу
+  const dR2 = [Math.SQRT1_2, -Math.SQRT1_2]; // движение сустав→C
+  const nLup = [Math.SQRT1_2, -Math.SQRT1_2];
+  const nRup = [-Math.SQRT1_2, -Math.SQRT1_2];
+  const proj = (Pt, dir, X) => add(Pt, dir, (X[0] - Pt[0]) * dir[0] + (X[1] - Pt[1]) * dir[1]);
+  const lineHit = (p, dp, q, dq) => {
+    const den = dp[0] * dq[1] - dp[1] * dq[0];
+    const t = ((q[0] - p[0]) * dq[1] - (q[1] - p[1]) * dq[0]) / den;
+    return add(p, dp, t);
+  };
+  const { endL, endR, innerL, innerR } = anchors;
+  // наружные грани = внутренние + w по верхней нормали; остриё = их пересечение
+  const upL = add(innerL, nLup, w);
+  const upR = add(innerR, nRup, w);
+  const topTip = lineHit(upL, dL, upR, dR2);
+  // дуга сустава: R = w вокруг острия, касается фиксированных внутренних граней
+  const tanL = proj(innerL, dL, topTip);
+  const tanR = proj(innerR, dR2, topTip);
+  // концы: чернильный якорь вдоль оси; поперёк — на осевой (внутр. грань + w/2)
+  const axisPtL = add(innerL, nLup, w2);
+  const tA = endL[0] * dL[0] + endL[1] * dL[1] + w2;
+  const A = add(axisPtL, dL, tA - (axisPtL[0] * dL[0] + axisPtL[1] * dL[1]));
+  const axisPtR = add(innerR, nRup, w2);
+  const dCR = [-dR2[0], -dR2[1]];
+  const tC = endR[0] * dCR[0] + endR[1] * dCR[1] + w2;
+  const Cc = add(axisPtR, dCR, tC - (axisPtR[0] * dCR[0] + axisPtR[1] * dCR[1]));
+  const aUp = add(A, nLup, w2);
+  const cUp = add(Cc, nRup, w2);
+  const cDn = add(Cc, nRup, -w2);
+  const aDn = add(A, nLup, -w2);
+  return (
+    `M${P(aUp)}L${P(topTip)}L${P(cUp)}` +
+    `A${f3(w2)} ${f3(w2)} 0 0 1 ${P(cDn)}` +
+    `L${P(tanR)}A${f3(w)} ${f3(w)} 0 0 1 ${P(tanL)}` +
+    `L${P(aDn)}A${f3(w2)} ${f3(w2)} 0 0 1 ${P(aUp)}Z`
+  );
+}
+
+// ── контейнеры ──
+export function genRing(cx, cy, rOut, rIn) {
+  const c = (r) =>
+    `M${f3(cx - r)} ${f3(cy)}a${f3(r)} ${f3(r)} 0 1 0 ${f3(2 * r)} 0a${f3(r)} ${f3(r)} 0 1 0 ${f3(-2 * r)} 0Z`;
+  return c(rOut) + (rIn ? c(rIn) : '');
+}
+
+/**
+ * Сборка глифа из записи semantics/anatomy.json.
+ *
+ * КОНВЕНЦИЯ ЕДИНИЦ (закреплена владельцем 2026-07-02): все пространственные
+ * величины декларации — ОТНОСИТЕЛЬНЫЕ доли канвы (как grid v2); углы —
+ * градусы; счётчики — штуки. Резолв ×canvas.width — только здесь, в одной
+ * точке; генераторы работают уже в юнитах.
+ *
+ * @returns {{outline?: string, filled?: string}} d-строки вариантов
+ */
+export function buildGlyph(entry, grid) {
+  const cw = grid.canvas.width;
+  const L = (ratio) => ratio * cw;                       // длина: доля → юниты
+  const Pt = (q) => [q[0] * cw, q[1] * cw];              // точка
+  const Pts = (arr) => arr.map(Pt);                      // полилиния
+  const tok = (nameOrRatio) =>
+    typeof nameOrRatio === 'number' ? L(nameOrRatio) : grid.ratios.strokeWidth[nameOrRatio] * cw;
+  const out = {};
+  if (entry.archetype === 'radial-gear') {
+    const p = entry.params;
+    out.outline = genRadialGear({
+      cx: L(p.cx), cy: L(p.cy), teeth: p.teeth,
+      rTip: L(p.rTip), rRoot: L(p.rRoot), rRim: L(p.rRim),
+      wTipDeg: p.wTipDeg, wRootDeg: p.wRootDeg,
+      fTip: L(p.fTip), fRoot: L(p.fRoot),
+      spokes: p.spokes, spokeHW: L(p.spokeHW), rCO: L(p.rCO), rCI: L(p.rCI),
+    });
+  } else if (entry.archetype === 'arc-terminal') {
+    const s = entry.skeleton;
+    const skel = {
+      center: Pt(s.center), rAxis: L(s.rAxis),
+      thetaCap: s.thetaCap, thetaArrowOut: s.thetaArrowOut, thetaArrowIn: s.thetaArrowIn,
+      headD: scaleD(s.headD, cw), // терминал-актив кривыми, доли → юниты
+    };
+    if (entry.weights.outline) out.outline = genArcTerminal(skel, tok(entry.weights.outline));
+    if (entry.weights.filled) out.filled = genArcTerminal(skel, tok(entry.weights.filled));
+  } else if (entry.archetype === 'stroke-v') {
+    const a = entry.inkAnchors;
+    const anchors = { endL: Pt(a.endL), endR: Pt(a.endR), innerL: Pt(a.innerL), innerR: Pt(a.innerR) };
+    if (entry.weights.outline) out.outline = genStrokeV(anchors, tok(entry.weights.outline));
+    if (entry.weights.filled) out.filled = genStrokeV(anchors, tok(entry.weights.filled));
+  } else if (entry.archetype === 'container-glyph') {
+    const center = [cw / 2, cw / 2];
+    const rOut = (grid.ratios.keylines.circle * cw) / 2;
+    const ringWeight = grid.ratios.strokeWidth.enclosureRing * cw;
+    const a = entry.glyph.inkAnchors;
+    const glyphD = genStrokeV(
+      { endL: Pt(a.endL), endR: Pt(a.endR), innerL: Pt(a.innerL), innerR: Pt(a.innerR) },
+      tok(entry.glyph.weight),
+    );
+    out.outline = genRing(center[0], center[1], rOut, rOut - ringWeight) + glyphD;
+    out.filled = genRing(center[0], center[1], rOut, 0) + glyphD;
+  } else {
+    throw new Error(`anatomy-gen: неизвестный архетип «${entry.archetype}»`);
+  }
+  return out;
+}

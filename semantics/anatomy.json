@@ -1,0 +1,112 @@
+{
+ "version": 1,
+ "comment": "Анатомия глифов (BL-014/015/017): архетип + параметры → генератор scripts/lib/anatomy-gen.js строит d обоих весов. ЕДИНИЦЫ (конвенция владельца): все длины/координаты — ДОЛИ КАНВЫ (резолв ×canvas.width в buildGlyph), углы — градусы, счётчики — штуки. Терминалы-активы — КРИВЫМИ (d-фрагмент в долях; полигонализация даёт ступеньки на скруглениях — фидбек владельца). Веса — именами токенов grid.json. status: generated = файл создан генератором (гейт strict), hand = рука (report). Пилоты: epics/ds-icons/tools.",
+ "glyphs": {
+  "cog": {
+   "archetype": "radial-gear",
+   "status": {
+    "outline": "generated"
+   },
+   "params": {
+    "cx": 0.5,
+    "cy": 0.5,
+    "teeth": 18,
+    "rTip": 0.46375,
+    "rRoot": 0.380417,
+    "rRim": 0.313333,
+    "wTipDeg": 8.4,
+    "wRootDeg": 13,
+    "fTip": 0.029167,
+    "fRoot": 0.01875,
+    "spokes": [
+     0,
+     120,
+     240
+    ],
+    "spokeHW": 0.039167,
+    "rCO": 0.033333,
+    "rCI": 0.029167
+   }
+  },
+  "reload": {
+   "archetype": "arc-terminal",
+   "status": {
+    "outline": "hand",
+    "filled": "hand"
+   },
+   "skeleton": {
+    "center": [
+     0.487625,
+     0.500083
+    ],
+    "rAxis": 0.40425,
+    "thetaCap": 19.47,
+    "thetaArrowOut": 313.37,
+    "thetaArrowIn": 316.13,
+    "headD": "M0.790833 0.179167L0.806667 0.195L0.807083 0.195833L0.807917 0.19625L0.80875 0.197917L0.887917 0.119167A0.041667 0.041667 0 0 1 0.95875 0.148333L0.95875 0.354167A0.041667 0.041667 0 0 1 0.917083 0.395833L0.71125 0.395833A0.041667 0.041667 0 0 1 0.682083 0.325L0.755833 0.250833L0.751667 0.24625Z"
+   },
+   "weights": {
+    "outline": "base",
+    "filled": "bold"
+   }
+  },
+  "chevron-down": {
+   "archetype": "stroke-v",
+   "status": {
+    "outline": "hand",
+    "filled": "hand"
+   },
+   "inkAnchors": {
+    "endL": [
+     0.218333,
+     0.38
+    ],
+    "endR": [
+     0.781219,
+     0.379197
+    ],
+    "innerL": [
+     0.218333,
+     0.432969
+    ],
+    "innerR": [
+     0.781219,
+     0.432166
+    ]
+   },
+   "weights": {
+    "outline": "base",
+    "filled": "bold"
+   }
+  },
+  "chevron-down-circle": {
+   "archetype": "container-glyph",
+   "status": {
+    "outline": "hand",
+    "filled": "hand"
+   },
+   "glyph": {
+    "generator": "stroke-v",
+    "weight": "containerGlyph",
+    "inkAnchors": {
+     "endL": [
+      0.308333,
+      0.41875
+     ],
+     "endR": [
+      0.690296,
+      0.419704
+     ],
+     "innerL": [
+      0.441074,
+      0.610114
+     ],
+     "innerR": [
+      0.558926,
+      0.610114
+     ]
+    }
+   }
+  }
+ }
+}
