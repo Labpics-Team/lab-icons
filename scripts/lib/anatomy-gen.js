@@ -423,6 +423,64 @@ export function genSuperellipse(cx, cy, a, b, n, rotationDeg = 0) {
   return d + 'Z';
 }
 
+/**
+ * Строук вокруг оси-суперэллипса (класс ромбов component): рамка руки —
+ * ОФСЕТЫ осевого контура пером в обе стороны (офсет наружу скругляет
+ * вершины, внутрь — заостряет; два независимых суперэллипса эту пару
+ * не описывают — доказано свипами 75/84%). Возвращает {outer, inner}
+ * или один контур (side='outer'|'inner'); кривые кубиками Эрмита по
+ * конечным разностям офсет-точек.
+ */
+export function genSuperellipseStroke(cx, cy, a, b, n, rotationDeg, pen, side = 'both') {
+  const t0 = rad(rotationDeg);
+  const ux = [Math.cos(t0), Math.sin(t0)];
+  const uy = [-Math.sin(t0), Math.cos(t0)];
+  const world = (lx, ly) => [cx + ux[0] * lx + uy[0] * ly, cy + ux[1] * lx + uy[1] * ly];
+  const e = 2 / n;
+  const eps = 1e-9;
+  const axis = (t) => {
+    const c = Math.cos(t), s = Math.sin(t);
+    return [a * Math.sign(c) * Math.abs(c) ** e, b * Math.sign(s) * Math.abs(s) ** e];
+  };
+  const dAxis = (t) => {
+    const c = Math.cos(t), s = Math.sin(t);
+    return [
+      -a * e * Math.max(Math.abs(c), eps) ** (e - 1) * s,
+      b * e * Math.max(Math.abs(s), eps) ** (e - 1) * c,
+    ];
+  };
+  const offsetPt = (t, sign) => {
+    const p = axis(t);
+    const d = dAxis(t);
+    const len = Math.hypot(d[0], d[1]) || eps;
+    // нормаль наружу для обхода против часовой в локале: (dy, -dx)/|d|
+    return [p[0] + (sign * pen * d[1]) / len, p[1] - (sign * pen * d[0]) / len];
+  };
+  const emit = (sign) => {
+    const SEGS = 32;
+    const pts = [];
+    for (let i = 0; i < SEGS; i++) pts.push(offsetPt((i / SEGS) * 2 * Math.PI, sign));
+    let d = '';
+    for (let i = 0; i < SEGS; i++) {
+      const Pa = pts[i];
+      const Pb = pts[(i + 1) % SEGS];
+      // ручки Эрмита по центральным разностям
+      const prev = pts[(i - 1 + SEGS) % SEGS];
+      const next2 = pts[(i + 2) % SEGS];
+      const Da = [(Pb[0] - prev[0]) / 2, (Pb[1] - prev[1]) / 2];
+      const Db = [(next2[0] - Pa[0]) / 2, (next2[1] - Pa[1]) / 2];
+      const c1 = world(Pa[0] + Da[0] / 3, Pa[1] + Da[1] / 3);
+      const c2 = world(Pb[0] - Db[0] / 3, Pb[1] - Db[1] / 3);
+      if (i === 0) d += `M${P(world(Pa[0], Pa[1]))}`;
+      d += `C${P(c1)} ${P(c2)} ${P(world(Pb[0], Pb[1]))}`;
+    }
+    return d + 'Z';
+  };
+  if (side === 'outer') return emit(1);
+  if (side === 'inner') return emit(-1);
+  return emit(1) + emit(-1);
+}
+
 // ── контейнеры ──
 export function genRing(cx, cy, rOut, rIn) {
   const c = (r) =>

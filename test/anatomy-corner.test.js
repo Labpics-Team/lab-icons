@@ -10,7 +10,15 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { cornerParams, genRoundedRect, smoothCorner90, smoothCornerAny } from '../scripts/lib/anatomy-gen.js';
+import {
+  cornerParams,
+  genRing,
+  genRoundedRect,
+  genSuperellipse,
+  genSuperellipseStroke,
+  smoothCorner90,
+  smoothCornerAny,
+} from '../scripts/lib/anatomy-gen.js';
 import { inkIoU } from '../scripts/check-anatomy.js';
 import { samplePolylines } from '../scripts/lib/motion-geometry.js';
 
@@ -138,5 +146,39 @@ describe('smoothCornerAny — произвольный угол (обобщен�
     const arcMin = Math.hypot(tNom, R) - R; // расстояние вершина→дуга
     expect(minDist).toBeGreaterThan(arcMin - 0.02);
     expect(minDist).toBeLessThan(arcMin + 0.25); // хвосты не «раздувают» вершину
+  });
+});
+
+describe('genSuperellipse / genSuperellipseStroke — сквиркл-примитивы', () => {
+  it('B: n=2 вырождается в круг (совпадает с genRing), поворот-инвариантен', () => {
+    const circle = genRing(12, 12, 5, 0);
+    expect(inkIoU(genSuperellipse(12, 12, 5, 5, 2), circle, 24)).toBeGreaterThan(0.995);
+    expect(inkIoU(genSuperellipse(12, 12, 5, 5, 2, 45), circle, 24)).toBeGreaterThan(0.995);
+  });
+
+  it('А: кривая гладкая — изломы между кубик-сегментами < 2°', () => {
+    // дубликаты точек на стыках кубик (нулевые рёбра) не несут направления
+    const raw = samplePolylines(genSuperellipse(12, 12, 4, 4, 3.4, 45), 24)[0];
+    const poly = raw.filter((p, i) => i === 0 || Math.hypot(p[0] - raw[i - 1][0], p[1] - raw[i - 1][1]) > 1e-6);
+    for (let i = 1; i < poly.length - 1; i++) {
+      const a1 = Math.atan2(poly[i][1] - poly[i - 1][1], poly[i][0] - poly[i - 1][0]);
+      const a2 = Math.atan2(poly[i + 1][1] - poly[i][1], poly[i + 1][0] - poly[i][0]);
+      let diff = Math.abs(a2 - a1) * (180 / Math.PI);
+      if (diff > 180) diff = 360 - diff;
+      expect(diff, `точка ${i}`).toBeLessThan(2);
+    }
+  });
+
+  it('А: строук — зазор между офсет-контурами ≈ 2·перо всюду', () => {
+    const pen = 1.2;
+    const outer = samplePolylines(genSuperellipseStroke(12, 12, 3.2, 3.2, 3, 45, pen, 'outer'), 48)[0];
+    const inner = samplePolylines(genSuperellipseStroke(12, 12, 3.2, 3.2, 3, 45, pen, 'inner'), 48)[0];
+    for (let i = 0; i < outer.length; i += 4) {
+      const [ox, oy] = outer[i];
+      let min = 1e9;
+      for (const [ix, iy] of inner) min = Math.min(min, Math.hypot(ox - ix, oy - iy));
+      expect(min, `точка ${i}`).toBeGreaterThan(2 * pen - 0.12);
+      expect(min, `точка ${i}`).toBeLessThan(2 * pen + 0.12);
+    }
   });
 });
