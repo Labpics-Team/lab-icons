@@ -217,7 +217,7 @@ export function samplePolylines(d, stepsPerSeg = 8) {
 
 // ─── Пересечение чернил (even-odd) ───────────────────────────────────────────
 
-function segmentsCross(a1, a2, b1, b2) {
+export function segmentsCross(a1, a2, b1, b2) {
   const d = (p, q, r) => (q[0] - p[0]) * (r[1] - p[1]) - (q[1] - p[1]) * (r[0] - p[0]);
   const d1 = d(b1, b2, a1);
   const d2 = d(b1, b2, a2);

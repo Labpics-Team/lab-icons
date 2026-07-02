@@ -22,7 +22,7 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { renderedPathData } from './lib/icon-geometry.js';
-import { inkOverlap, samplePolylines } from './lib/motion-geometry.js';
+import { inkOverlap, samplePolylines, segmentsCross } from './lib/motion-geometry.js';
 import { parsePathData } from './lib/path-data.js';
 
 const DEFAULT_RATIOS = {
@@ -223,6 +223,86 @@ export function validatePathQuality({ grid, files }) {
       }
       flushChain(false);
     });
+
+    // 5. Фрагментация внутри evenodd-path (класс дырок cog): суб-пути
+    //    могут быть ВЛОЖЕНЫ (честная дырка), но не могут ПЕРЕСЕКАТЬСЯ —
+    //    у evenodd нахлёст фрагментов одного вещества ВЫЧИТАЕТСЯ в белую
+    //    дырку; стык-встык даёт волосяную щель. Атрибут fill-rule берём
+    //    из полного тега path (renderedPathData отдаёт только d).
+    const eoTags = [...content.replace(/<defs\b[\s\S]*?<\/defs>/g, '').matchAll(/<path\b[^>]*?>/g)]
+      .filter((m) => m[0].includes('fill-rule="evenodd"'))
+      .map((m) => /\bd="([^"]+)"/.exec(m[0])?.[1])
+      .filter(Boolean);
+    // 5а. Волосяные суб-пути (реальная механика дырок cog): фрагмент со
+    //     средней толщиной 2|S|/P меньше hairline — мусор экспорта при
+    //     ЛЮБОМ fill-rule (nonzero рисует чёрный волос, evenodd — белый).
+    ds.forEach((dOne, layerIdx) => {
+      const subs = samplePolylines(dOne, 16).filter((p) => p.length > 2);
+      if (subs.length < 2) return; // одиночный контур волосяным быть может лишь намеренно
+      subs.forEach((p, si) => {
+        let a = 0, per = 0;
+        for (let i = 0; i < p.length; i++) {
+          const [x1, y1] = p[i];
+          const [x2, y2] = p[(i + 1) % p.length];
+          a += x1 * y2 - x2 * y1;
+          per += Math.hypot(x2 - x1, y2 - y1);
+        }
+        a = Math.abs(a / 2);
+        if (per > 1e-9 && (2 * a) / per < 0.15 && per > 0.1) {
+          findings.push(
+            `${name} слой ${layerIdx}: волосяной суб-путь ${si} (ср. толщина ${((2 * a) / per).toFixed(3)}, ` +
+              `периметр ${per.toFixed(2)}) — фрагмент экспорта, при evenodd даёт белую дырку`,
+          );
+        }
+      });
+    });
+
+    for (const dEO of eoTags) {
+      const subs = samplePolylines(dEO, 8).filter((p) => p.length > 2);
+      if (subs.length < 2) continue;
+      const boxes = subs.map((p) => {
+        let a = Infinity, b = Infinity, c = -Infinity, d2 = -Infinity;
+        for (const [x, y] of p) {
+          a = Math.min(a, x); b = Math.min(b, y);
+          c = Math.max(c, x); d2 = Math.max(d2, y);
+        }
+        return [a, b, c, d2];
+      });
+      const HAIR = 0.05;
+      for (let i = 0; i < subs.length; i++) {
+        for (let j = i + 1; j < subs.length; j++) {
+          // bbox-префильтр с запасом на щель
+          if (
+            boxes[i][2] + HAIR < boxes[j][0] || boxes[j][2] + HAIR < boxes[i][0] ||
+            boxes[i][3] + HAIR < boxes[j][1] || boxes[j][3] + HAIR < boxes[i][1]
+          ) continue;
+          let crossed = false;
+          outer: for (let a = 0; a < subs[i].length; a++) {
+            const a1 = subs[i][a], a2 = subs[i][(a + 1) % subs[i].length];
+            for (let b = 0; b < subs[j].length; b++) {
+              if (segmentsCross(a1, a2, subs[j][b], subs[j][(b + 1) % subs[j].length])) {
+                crossed = true;
+                break outer;
+              }
+            }
+          }
+          if (crossed) {
+            findings.push(
+              `${name}: суб-пути ${i}×${j} evenodd-path пересекаются — вычитание = дырка ` +
+                `(фрагментация экспорта, у (${boxes[j][0].toFixed(1)},${boxes[j][1].toFixed(1)}))`,
+            );
+          } else {
+            const gap = minContourDistance([subs[i]], [subs[j]]);
+            if (gap > 1e-9 && gap < HAIR) {
+              findings.push(
+                `${name}: суб-пути ${i}×${j} evenodd-path встык (щель ${gap.toFixed(3)}) — ` +
+                  `волосяной просвет (фрагментация экспорта)`,
+              );
+            }
+          }
+        }
+      }
+    }
 
     // 4. Нулевые швы между слоями: близко, но без площадного нахлёста.
     if (ds.length > 1) {

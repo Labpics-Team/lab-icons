@@ -67,3 +67,43 @@ describe('validatePathQuality — шум кривых', () => {
     expect(run(wrap(['M6 4h12v6H6z', 'M6 12h12v8H6z']))).toEqual([]);
   });
 });
+
+describe('validatePathQuality — фрагментация внутри evenodd-path (класс дырок cog)', () => {
+  const wrapEO = (d) =>
+    '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24">' +
+    `<path fill-rule="evenodd" d="${d}"/></svg>`;
+
+  it('Д: пересекающиеся суб-пути одного evenodd-path → находка «дырка» (вычитание)', () => {
+    // два квадрата с нахлёстом: у evenodd зона нахлёста БЕЛАЯ — волосяная
+    // дырка класса cog (Figma-фрагментация)
+    const errors = run(wrapEO('M4 4h8v8H4zM10 10h8v8h-8z'));
+    expect(errors.some((e) => e.includes('evenodd') && e.includes('дырк'))).toBe(true);
+  });
+
+  it('А: вложенные суб-пути (честная дырка диск+глиф) → НЕ флагается', () => {
+    const errors = run(wrapEO('M4 4h16v16H4zM10 10h4v4h-4z'));
+    expect(errors.filter((e) => e.includes('evenodd'))).toEqual([]);
+  });
+
+  it('Д: суб-пути встык с волосяной щелью → находка «щель»', () => {
+    // фрагменты одного вещества встык (зазор 0.03) — рендер даёт волосок
+    const errors = run(wrapEO('M4 4h8v8H4zM12.03 4h8v8h-8z'));
+    expect(errors.some((e) => e.includes('щель'))).toBe(true);
+  });
+
+  it('А: nonzero-path с нахлёстом суб-путей → НЕ флагается (нахлёст = чернила)', () => {
+    const errors = run(wrap(['M4 4h8v8H4zM10 10h8v8h-8z']));
+    expect(errors.filter((e) => e.includes('evenodd') || e.includes('щель'))).toEqual([]);
+  });
+
+  it('Д: волосяной вложенный фрагмент (толщина 0.02) → находка «фрагмент» (реальная механика дырок cog)', () => {
+    // серп-заплатка внутри чернил: evenodd вычитает её в белый волосок
+    const errors = run(wrapEO('M4 4h16v16H4zM8 8h6v.02H8z'));
+    expect(errors.some((e) => e.includes('волосяной') && e.includes('фрагмент'))).toBe(true);
+  });
+
+  it('А: честная вложенная контрформа (толщина 4) → НЕ флагается', () => {
+    const errors = run(wrapEO('M4 4h16v16H4zM9 9h6v6H9z'));
+    expect(errors.filter((e) => e.includes('фрагмент'))).toEqual([]);
+  });
+});
