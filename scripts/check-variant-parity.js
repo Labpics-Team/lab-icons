@@ -8,10 +8,10 @@
  *      часы, смайл) или enclosureRing (круг-обрамление легче глифа, приём
  *      SF-уровня). Третьего канона нет — корпусный аудит 2026-07-02 нашёл
  *      ровно два (22×1.50 + 9×1.80), всё прочее = дрейф.
- *   3. Регистрация: глиф внутри обрамления обязан стоять одинаково в обоих
- *      вариантах (bbox-центр не-кольцевых контуров; допуск
- *      tolerances.variantRegistration; дрейф корпуса: chevron-down-circle
- *      0.31 по Y, time 0.17).
+ *   3. Регистрация: смысловые контуры глифа обязаны стоять одинаково в обоих
+ *      вариантах — сопоставление контуров по сигнатуре (площадь+габариты),
+ *      допуск tolerances.variantRegistration. Проверяется на всех парах,
+ *      не только кольценосных.
  *
  * Режимы: report (exit 0 — материал поштучных правок), --strict — exit 1.
  */
@@ -54,13 +54,60 @@ function circleFit(poly) {
   return { cx, cy, r: sum / poly.length, rondel: max - min };
 }
 
-/** Контуры SVG → круги-кандидаты, кольца, диск, bbox-центр глифа. */
+function contourBBox(poly) {
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+  for (const [x, y] of poly) {
+    minX = Math.min(minX, x);
+    minY = Math.min(minY, y);
+    maxX = Math.max(maxX, x);
+    maxY = Math.max(maxY, y);
+  }
+  return {
+    cx: (minX + maxX) / 2,
+    cy: (minY + maxY) / 2,
+    w: maxX - minX,
+    h: maxY - minY,
+  };
+}
+
+/**
+ * Пересэмплирование рёбер длиннее maxStep: samplePolylines кладёт для
+ * L-сегмента только конечную точку — квадрат 16×16 живёт как 4 вершины
+ * на равном радиусе и притворяется идеальным кругом для circleFit.
+ */
+function resampleEdges(poly, maxStep = 0.3) {
+  const out = [poly[0]];
+  for (let i = 1; i <= poly.length; i++) {
+    const a = poly[i - 1];
+    const b = poly[i % poly.length];
+    const len = Math.hypot(b[0] - a[0], b[1] - a[1]);
+    const parts = Math.max(1, Math.ceil(len / maxStep));
+    for (let j = 1; j <= parts; j++) {
+      out.push([a[0] + ((b[0] - a[0]) * j) / parts, a[1] + ((b[1] - a[1]) * j) / parts]);
+    }
+  }
+  out.pop(); // замыкающая точка = первая
+  return out;
+}
+
+/** Контуры SVG → круги-кандидаты, кольцо, диск, глиф-контуры (не контейнер). */
 function analyze(svgContent, canvasWidth) {
   const ds = [...svgContent.matchAll(/<path\b[^>]*?\bd="([^"]+)"/g)].map((m) => m[1]);
   const contours = ds
     .flatMap((d) => samplePolylines(d, 24))
     .filter((p) => p.length > 2)
-    .map((poly) => ({ poly, fit: circleFit(poly), area: Math.abs(areaCentroid(poly).area) }));
+    .map((raw) => {
+      const poly = resampleEdges(raw);
+      return {
+        poly,
+        fit: circleFit(poly),
+        area: Math.abs(areaCentroid(poly).area),
+        bbox: contourBBox(poly),
+      };
+    });
   // площадь > 3 и r в пределах канвы: обрезки руин дают нестабильный
   // centroid и фиктивные «круги» радиусом больше канвы
   const isCircle = (c) =>
@@ -83,41 +130,71 @@ function analyze(svgContent, canvasWidth) {
   const disc = circles.reduce((best, c) => (!best || c.fit.r > best.fit.r ? c : best), null);
 
   const ringParts = ring ? new Set([ring.outer, ring.inner]) : new Set(disc ? [disc] : []);
-  const glyphParts = contours.filter((c) => !ringParts.has(c));
-  let glyph = null;
-  if (glyphParts.length) {
-    let minX = Infinity;
-    let minY = Infinity;
-    let maxX = -Infinity;
-    let maxY = -Infinity;
-    for (const { poly } of glyphParts) {
-      for (const [x, y] of poly) {
-        minX = Math.min(minX, x);
-        minY = Math.min(minY, y);
-        maxX = Math.max(maxX, x);
-        maxY = Math.max(maxY, y);
-      }
+  const glyphs = contours.filter((c) => !ringParts.has(c));
+  return { ring, disc, glyphs };
+}
+
+/**
+ * Регистрация глифа между вариантами — сопоставлением КОНТУРОВ по сигнатуре
+ * (площадь ±30%, габариты ±0.5): состав глифа в Filled легально отличается
+ * (негативы сливаются с массами), сравнивать валовый bbox — ловить артефакты
+ * (person-circle: внутренний край кольца в Outline срастается с плечами и
+ * даёт мнимый разъезд > 3, при идеально совпадающей голове). Меряются только
+ * уверенно совпавшие контуры; несопоставленные — структурная разница, не дрейф.
+ */
+function glyphRegistration(oGlyphs, fGlyphs, tolReg) {
+  const used = new Set();
+  const offsets = [];
+  for (const og of oGlyphs) {
+    const candidates = [];
+    for (const fg of fGlyphs) {
+      if (used.has(fg)) continue;
+      const areaOk = Math.abs(og.area - fg.area) / Math.max(og.area, fg.area, 1e-9) <= 0.3;
+      const sizeOk = Math.abs(og.bbox.w - fg.bbox.w) <= 0.5 && Math.abs(og.bbox.h - fg.bbox.h) <= 0.5;
+      if (!areaOk || !sizeOk) continue;
+      const off = Math.hypot(fg.bbox.cx - og.bbox.cx, fg.bbox.cy - og.bbox.cy);
+      if (off > 1.2) continue; // дальше = другой элемент, не съехавшая пара
+      candidates.push({ off, dx: fg.bbox.cx - og.bbox.cx, dy: fg.bbox.cy - og.bbox.cy, fg });
     }
-    glyph = { cx: (minX + maxX) / 2, cy: (minY + maxY) / 2 };
+    if (!candidates.length) continue;
+    candidates.sort((a, b) => a.off - b.off);
+    // взаимозаменяемые элементы (точки dice, зубцы ticket): два кандидата
+    // с близким off = неоднозначное сопоставление — мерить нельзя
+    if (candidates.length > 1 && candidates[1].off - candidates[0].off < 0.5) continue;
+    used.add(candidates[0].fg);
+    offsets.push(candidates[0]);
   }
-  return { ring, disc, glyph };
+  if (!offsets.length) return { matched: 0, worst: null };
+  const worst = offsets.reduce((a, b) => (b.off > a.off ? b : a));
+  return { matched: offsets.length, worst: worst.off > tolReg ? worst : null, worstOff: worst.off };
 }
 
 /**
  * @param {{grid:any, pairs:Array<{name:string, outline:string, filled:string}>}} input
- * @returns {{hard:string[], report:string[]}}
+ * @returns {{hard:string[], report:string[], stats:{rings:number, discs:number, matchedGlyphs:number}}}
  */
 export function validateVariantParity({ grid, pairs }) {
   const hard = [];
   const report = [];
+  const stats = { rings: 0, discs: 0, matchedGlyphs: 0 };
   const cw = grid.canvas.width;
   const u = (ratio) => ratio * cw;
-  const keylineD = u(grid.ratios.keylines.circle);
-  const base = u(grid.ratios.strokeWidth.base);
-  const enclosure = u(grid.ratios.strokeWidth.enclosureRing);
-  const tolW = u(grid.ratios.tolerances.ringWeight);
-  const tolD = u(grid.ratios.tolerances.ringDiameter);
-  const tolReg = u(grid.ratios.tolerances.variantRegistration);
+  const thresholds = {
+    keylineD: u(grid.ratios.keylines?.circle),
+    base: u(grid.ratios.strokeWidth?.base),
+    enclosure: u(grid.ratios.strokeWidth?.enclosureRing),
+    tolW: u(grid.ratios.tolerances?.ringWeight),
+    tolD: u(grid.ratios.tolerances?.ringDiameter),
+    tolReg: u(grid.ratios.tolerances?.variantRegistration),
+  };
+  // fail-fast: пропавший токен даёт NaN, а сравнение с NaN всегда false —
+  // гейт молча перестал бы падать (тихий отказ хуже падения)
+  for (const [key, value] of Object.entries(thresholds)) {
+    if (!Number.isFinite(value)) {
+      throw new Error(`check-variant-parity: токен «${key}» отсутствует или не число в grid.json`);
+    }
+  }
+  const { keylineD, base, enclosure, tolW, tolD, tolReg } = thresholds;
 
   for (const { name, outline, filled } of pairs) {
     let o;
@@ -129,44 +206,50 @@ export function validateVariantParity({ grid, pairs }) {
       hard.push(`${name}: вариант не читается (${cause.message})`);
       continue;
     }
-    if (!o.ring) continue; // без кольца контракт колец не применим
 
-    const dOuter = o.ring.outer.fit.r * 2;
-    if (Math.abs(dOuter - keylineD) > tolD) {
-      report.push(
-        `${name}: Ø кольца ${dOuter.toFixed(2)} ≠ keyline ${keylineD.toFixed(2)} (Outline)`,
-      );
-    }
-    const t = o.ring.thick;
-    if (Math.abs(t - base) > tolW && Math.abs(t - enclosure) > tolW) {
-      report.push(
-        `${name}: толщина кольца ${t.toFixed(2)} вне канонов весов ` +
-          `(${enclosure.toFixed(2)} обрамление / ${base.toFixed(2)} предмет)`,
-      );
+    // каноны кольца — только при детектированном кольце в Outline
+    if (o.ring) {
+      stats.rings++;
+      const dOuter = o.ring.outer.fit.r * 2;
+      if (Math.abs(dOuter - keylineD) > tolD) {
+        report.push(
+          `${name}: Ø кольца ${dOuter.toFixed(2)} ≠ keyline ${keylineD.toFixed(2)} (Outline)`,
+        );
+      }
+      const t = o.ring.thick;
+      if (Math.abs(t - base) > tolW && Math.abs(t - enclosure) > tolW) {
+        report.push(
+          `${name}: толщина кольца ${t.toFixed(2)} вне канонов весов ` +
+            `(${enclosure.toFixed(2)} обрамление / ${base.toFixed(2)} предмет)`,
+        );
+      }
     }
 
+    // канон диска — для любого диска, претендующего на keyline-контейнер
+    // (близок к keyline): не зависит от детекции кольца в Outline
     if (f.disc) {
       const dDisc = f.disc.fit.r * 2;
-      if (Math.abs(dDisc - keylineD) > tolD) {
-        report.push(
-          `${name}: Ø диска ${dDisc.toFixed(2)} ≠ keyline ${keylineD.toFixed(2)} (Filled)`,
-        );
+      if (Math.abs(dDisc - keylineD) <= 1.5) {
+        stats.discs++;
+        if (Math.abs(dDisc - keylineD) > tolD) {
+          report.push(
+            `${name}: Ø диска ${dDisc.toFixed(2)} ≠ keyline ${keylineD.toFixed(2)} (Filled)`,
+          );
+        }
       }
     }
 
-    if (o.glyph && f.glyph) {
-      const dx = f.glyph.cx - o.glyph.cx;
-      const dy = f.glyph.cy - o.glyph.cy;
-      const off = Math.hypot(dx, dy);
-      if (off > tolReg) {
-        report.push(
-          `${name}: регистрация глифа между вариантами разъехалась на ${off.toFixed(2)} ` +
-            `(Δx ${dx.toFixed(2)}, Δy ${dy.toFixed(2)})`,
-        );
-      }
+    // регистрация — по совпавшим контурам, для ВСЕХ пар (не только колец)
+    const reg = glyphRegistration(o.glyphs, f.glyphs, tolReg);
+    stats.matchedGlyphs += reg.matched;
+    if (reg.worst) {
+      report.push(
+        `${name}: регистрация глифа между вариантами разъехалась на ${reg.worst.off.toFixed(2)} ` +
+          `(Δx ${reg.worst.dx.toFixed(2)}, Δy ${reg.worst.dy.toFixed(2)})`,
+      );
     }
   }
-  return { hard, report };
+  return { hard, report, stats };
 }
 
 const isMain = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
@@ -183,19 +266,22 @@ if (isMain) {
     });
   }
   const strict = process.argv.includes('--strict');
-  const { hard, report } = validateVariantParity({ grid, pairs });
+  const { hard, report, stats } = validateVariantParity({ grid, pairs });
+  const covered =
+    `проверено: ${stats.rings} колец, ${stats.discs} keyline-дисков, ` +
+    `${stats.matchedGlyphs} сопоставленных глиф-контуров из ${pairs.length} пар`;
   if (hard.length > 0) {
     console.error(`check-variant-parity: HARD — ${hard.length} нечитаемых пар:`);
     for (const e of hard) console.error('  - ' + e);
   }
   if (report.length > 0) {
     console.log(
-      `check-variant-parity: REPORT — ${report.length} отклонений контракта пары (ревизия):`,
+      `check-variant-parity: REPORT — ${report.length} отклонений контракта пары (${covered}):`,
     );
     for (const e of report) console.log('  - ' + e);
   }
   if (hard.length === 0 && report.length === 0) {
-    console.log(`check-variant-parity: OK — контракт пар держится (${pairs.length} пар)`);
+    console.log(`check-variant-parity: OK — контракт пар держится (${covered})`);
   }
   if (strict && (hard.length > 0 || report.length > 0)) process.exit(1);
   if (!strict && hard.length > 0) process.exit(1);
