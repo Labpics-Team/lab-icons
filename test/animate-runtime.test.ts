@@ -87,10 +87,10 @@ function svgFor(kind: 'bell' | 'wave' | 'single'): FakeSvg {
 // ─── Тесты ───────────────────────────────────────────────────────────────────
 
 describe('animateIcon — оркестровка по классам', () => {
-  it('А: pulse (heart, 1 слой) → одна анимация на whole (сам svg), scale в кейфреймах', () => {
+  it('А: pulse (alert, 1 слой, без per-icon разметки) → одна анимация на whole, scale в кейфреймах', () => {
     const svg = svgFor('single');
     const h = animateIcon(svg as unknown as SVGSVGElement, {
-      name: 'heart',
+      name: 'alert',
       matchMedia: noPreference,
     });
     expect(h.reduced).toBe(false);
@@ -101,9 +101,9 @@ describe('animateIcon — оркестровка по классам', () => {
     expect(svg.style['transformOrigin']).toBe('50% 50%');
   });
 
-  it('А: bell (notifications, 2 слоя) → корпус качается вокруг подвеса, язычок вдогонку', () => {
+  it('А: bell (notifications-unread, 2 слоя, без per-icon разметки) → корпус вокруг подвеса, язычок вдогонку', () => {
     const svg = svgFor('bell');
-    animateIcon(svg as unknown as SVGSVGElement, { name: 'notifications', matchMedia: noPreference });
+    animateIcon(svg as unknown as SVGSVGElement, { name: 'notifications-unread', matchMedia: noPreference });
     expect(svg.calls).toHaveLength(2);
     const [bodyCall, clapperCall] = svg.calls;
     // body = слой максимальной площади (корпус), origin 50% 8% (подвес)
@@ -117,9 +117,9 @@ describe('animateIcon — оркестровка по классам', () => {
     expect(String(bodyCall!.keyframes[1]!.transform)).toContain('rotate(');
   });
 
-  it('А: wave (volume-high, 4 слоя) → рупор пульсирует, волны каскадом 0/100/200мс от рупора', () => {
+  it('А: wave (volume-middle, 4 слоя, без per-icon разметки) → рупор пульсирует, волны каскадом 0/100/200мс', () => {
     const svg = svgFor('wave');
-    animateIcon(svg as unknown as SVGSVGElement, { name: 'volume-high', matchMedia: noPreference });
+    animateIcon(svg as unknown as SVGSVGElement, { name: 'volume-middle', matchMedia: noPreference });
     expect(svg.calls).toHaveLength(4);
     const bodyCall = svg.calls[0]!;
     expect(bodyCall.target).toBe(svg.paths[2]); // рупор — максимальная площадь
@@ -141,9 +141,9 @@ describe('animateIcon — оркестровка по классам', () => {
     expect(Number(m![1])).toBeLessThan(0);
   });
 
-  it('А: draw (brush) → clip-path раскрытие на whole + наклон инструмента (BL-002)', () => {
+  it('А: draw (pencil, без per-icon разметки) → clip-path раскрытие на whole + наклон инструмента (BL-002)', () => {
     const svg = svgFor('single');
-    animateIcon(svg as unknown as SVGSVGElement, { name: 'brush', matchMedia: noPreference });
+    animateIcon(svg as unknown as SVGSVGElement, { name: 'pencil', matchMedia: noPreference });
     const clipCall = svg.calls.find((c) => c.keyframes.some((k) => 'clipPath' in k));
     expect(clipCall).toBeDefined();
     const clipKf = clipCall!.keyframes;
@@ -180,7 +180,7 @@ describe('animateIcon — фиксы фидбека владельца 2026-07-0
   it('А: pop стартует С ЕДИНИЦЫ (сквош), не с нуля — иконка не «исчезает» на hover', () => {
     // Mutation proof: вернуть scale-с-нуля в данных → первый кейфрейм scale(0 → RED
     const svg = svgFor('single');
-    animateIcon(svg as unknown as SVGSVGElement, { name: 'checkmark', matchMedia: noPreference });
+    animateIcon(svg as unknown as SVGSVGElement, { name: 'checkmark-circle', matchMedia: noPreference });
     const kf = svg.calls[0]!.keyframes;
     expect(String(kf[0]!.transform)).toContain('scale(1, 1)');
     // Провал сквоша ~0.86 присутствует
@@ -211,7 +211,7 @@ describe('animateIcon — фиксы фидбека владельца 2026-07-0
       { x: 1, y: 1, width: 22, height: 22 }, // круг (enclosure)
     ]);
     animateIcon(svg as unknown as SVGSVGElement, {
-      name: 'arrow-back-circle',
+      name: 'arrow-forward-circle',
       matchMedia: noPreference,
     });
     expect(svg.calls).toHaveLength(1);
@@ -219,12 +219,12 @@ describe('animateIcon — фиксы фидбека владельца 2026-07-0
     expect(svg.paths[0]!.style['transformBox']).toBe('fill-box');
   });
 
-  it('А: spin у слоистого (compas) вращает внутренний глиф', () => {
+  it('А: spin у слоистого без per-icon разметки (timer) вращает внутренний глиф', () => {
     const svg = new FakeSvg([
       { x: 7, y: 7, width: 10, height: 10 }, // игла внутри
       { x: 1, y: 1, width: 22, height: 22 }, // корпус
     ]);
-    animateIcon(svg as unknown as SVGSVGElement, { name: 'compas', matchMedia: noPreference });
+    animateIcon(svg as unknown as SVGSVGElement, { name: 'timer', matchMedia: noPreference });
     expect(svg.calls[0]!.target).toBe(svg.paths[0]);
     expect(String(svg.calls[0]!.keyframes.at(-1)!.transform)).toContain('rotate(360deg)');
   });
@@ -240,7 +240,7 @@ describe('animateIcon — фиксы фидбека владельца 2026-07-0
     let h: IconAnimationHandle | undefined;
     expect(() => {
       h = animateIcon(svg as unknown as SVGSVGElement, {
-        name: 'notifications',
+        name: 'notifications-unread',
         matchMedia: noPreference,
       });
     }).not.toThrow();
@@ -292,5 +292,210 @@ describe('animateIcon — контракт reduced-motion и ошибок', () =
     expect(iconClass('notifications')).toBe('bell');
     expect(iconClass('brush')).toBe('draw');
     expect(iconClass('no-such')).toBeUndefined();
+  });
+});
+
+// ─── Per-icon данные (semantics/layers.json → icon-choreographies, реврейм) ──
+
+/** history: кольцо-стрелка (большое) + стрелки часов (малый слой внутри). */
+function svgHistory(): FakeSvg {
+  return new FakeSvg([
+    { x: 1, y: 1.4, width: 22, height: 21.2 },
+    { x: 11.1, y: 6, width: 6.2, height: 8.1 },
+  ]);
+}
+
+describe('animateIcon — per-icon разметка (классы багов A/C/D владельца)', () => {
+  it('А (класс A): history → стрелки со спрингом вокруг узла + вздрагивание циферблата', () => {
+    const svg = svgHistory();
+    animateIcon(svg as unknown as SVGSVGElement, { name: 'history', matchMedia: noPreference });
+    expect(svg.calls).toHaveLength(2);
+    const hands = svg.calls.find((c) => c.target === svg.paths[1])!;
+    expect(hands.target.style['transformBox']).toBe('view-box');
+    expect(hands.target.style['transformOrigin']).toBe('12.4px 13.2px');
+    // отмотка назад: отрицательный пик rotate, identity-края (v6: спринг, не -360)
+    const angles = hands.keyframes
+      .map((k) => {
+        const t = String(k.transform);
+        const i = t.indexOf('rotate(');
+        return i === -1 ? null : Number.parseFloat(t.slice(i + 7));
+      })
+      .filter((v): v is number => v !== null);
+    expect(Math.min(...angles)).toBeLessThan(-20);
+    expect(angles[angles.length - 1]).toBe(0);
+    // циферблат вздрагивает в противоход
+    const ring = svg.calls.find((c) => c.target === svg.paths[0])!;
+    expect(ring.target.style['transformOrigin']).toBe('12.36px 12px');
+  });
+
+  it('А (класс D): hourglass → переворот с паузой обоих слоёв синхронно (без стаггера)', () => {
+    const svg = new FakeSvg([
+      { x: 8.2, y: 6.9, width: 7.6, height: 12.1 },
+      { x: 4.9, y: 1.7, width: 14.2, height: 20.6 },
+    ]);
+    animateIcon(svg as unknown as SVGSVGElement, { name: 'hourglass', matchMedia: noPreference });
+    expect(svg.calls).toHaveLength(2);
+    expect(svg.calls[0]!.options.delay).toBe(svg.calls[1]!.options.delay);
+    expect(svg.calls[0]!.keyframes.some((k) => String(k.transform).includes('rotate(180'))).toBe(
+      true,
+    );
+    expect(svg.calls[0]!.target.style['transformOrigin']).toBe('12px 12px');
+  });
+
+  it('А: volume-high → волны в явном порядке данных (ближняя→дальняя) со стаггером 90мс от устья', () => {
+    const svg = svgFor('wave');
+    animateIcon(svg as unknown as SVGSVGElement, { name: 'volume-high', matchMedia: noPreference });
+    const waveCalls = svg.calls.filter((c) => c.target !== svg.paths[2]);
+    expect(waveCalls.map((c) => c.target)).toEqual([svg.paths[3], svg.paths[1], svg.paths[0]]);
+    expect(waveCalls.map((c) => Number(c.options.delay))).toEqual([0, 90, 180]);
+    // излучение: волны рождаются у общего якоря-устья, а не мерцают по своим центрам
+    expect(waveCalls[0]!.target.style['transformOrigin']).toBe('11.5px 12px');
+    expect(waveCalls[0]!.keyframes[0]!.opacity).toBeLessThan(1);
+  });
+
+  it('А (класс C): camera-reverse filled → ЗАМЕНА движения (сквош), не вращение целого', () => {
+    const outline = new FakeSvg([
+      { x: 5.3, y: 6.9, width: 13.4, height: 10.1 },
+      { x: 1, y: 2, width: 22, height: 18 },
+    ]);
+    animateIcon(outline as unknown as SVGSVGElement, {
+      name: 'camera-reverse',
+      matchMedia: noPreference,
+    });
+    expect(outline.calls).toHaveLength(1);
+    expect(outline.calls[0]!.target).toBe(outline.paths[0]);
+    // флип-зеркало: scaleX проходит через -1 (BL-008: вращение целого отвергнуто)
+    expect(
+      outline.calls[0]!.keyframes.some((k) => String(k.transform).includes('scale(-')),
+    ).toBe(true);
+
+    const filled = new FakeSvg([{ x: 1, y: 2, width: 22, height: 18 }]);
+    animateIcon(filled as unknown as SVGSVGElement, {
+      name: 'camera-reverse',
+      variant: 'filled',
+      matchMedia: noPreference,
+    });
+    expect(filled.calls).toHaveLength(1);
+    expect(filled.calls[0]!.target).toBe(filled.paths[0]);
+    expect(filled.calls[0]!.keyframes.some((k) => String(k.transform).includes('rotate('))).toBe(
+      false,
+    );
+    expect(filled.calls[0]!.keyframes.some((k) => String(k.transform).includes('scale('))).toBe(
+      true,
+    );
+  });
+
+  it('А (BL-009): checkmark → «поставили галочку» спрингом на слое, БЕЗ клипа (клип заморожен)', () => {
+    const svg = svgFor('single');
+    animateIcon(svg as unknown as SVGSVGElement, { name: 'checkmark', matchMedia: noPreference });
+    expect(svg.calls.filter((c) => c.target === svg)).toHaveLength(0);
+    const layerCalls = svg.calls.filter((c) => c.target === svg.paths[0]);
+    expect(layerCalls).toHaveLength(1);
+    expect(layerCalls[0]!.keyframes.some((k) => 'clipPath' in k)).toBe(false);
+    expect(layerCalls[0]!.keyframes.some((k) => String(k.transform).includes('rotate('))).toBe(true);
+    expect(layerCalls[0]!.target.style['transformOrigin']).toBe('10.9px 16.3px');
+  });
+
+  it('Б: слоёв меньше, чем требует разметка → честный фолбэк в классовую хореографию', () => {
+    // history требует path index 1; однослойный svg → классовый spin на whole
+    const svg = svgFor('single');
+    animateIcon(svg as unknown as SVGSVGElement, { name: 'history', matchMedia: noPreference });
+    expect(svg.calls).toHaveLength(1);
+    expect(svg.calls[0]!.target).toBe(svg);
+  });
+
+  it('Б: reduced-motion действует и на per-icon путь', async () => {
+    const svg = svgHistory();
+    const h = animateIcon(svg as unknown as SVGSVGElement, { name: 'history', matchMedia: reduce });
+    expect(h.reduced).toBe(true);
+    expect(svg.calls).toHaveLength(0);
+    await h.finished;
+  });
+});
+
+describe('animateIcon — SMIL-морфы формы (BL-007, песок hourglass)', () => {
+  class FakeAnimateEl {
+    tag: string;
+    attrs: Record<string, string> = {};
+    begun = false;
+    removed = false;
+    constructor(tag: string) {
+      this.tag = tag;
+    }
+    setAttribute(name: string, value: string) {
+      this.attrs[name] = value;
+    }
+    beginElement() {
+      this.begun = true;
+    }
+    remove() {
+      this.removed = true;
+    }
+  }
+
+  function withFakeDocument(run: (created: FakeAnimateEl[]) => void) {
+    const created: FakeAnimateEl[] = [];
+    (globalThis as Record<string, unknown>)['document'] = {
+      createElementNS: (_ns: string, tag: string) => {
+        const el = new FakeAnimateEl(tag);
+        created.push(el);
+        return el;
+      },
+    };
+    try {
+      run(created);
+    } finally {
+      delete (globalThis as Record<string, unknown>)['document'];
+    }
+  }
+
+  function svgHourglass(): FakeSvg & { appended: unknown[][] } {
+    const svg = new FakeSvg([
+      { x: 8.2, y: 6.9, width: 7.6, height: 12.1 },
+      { x: 4.9, y: 1.7, width: 14.2, height: 20.6 },
+    ]) as FakeSvg & { appended: unknown[][] };
+    svg.appended = svg.paths.map(() => []);
+    svg.paths.forEach((p, i) => {
+      (p as unknown as { appendChild: (el: unknown) => void }).appendChild = (el: unknown) => {
+        svg.appended[i]!.push(el);
+      };
+    });
+    return svg;
+  }
+
+  it('А: hourglass → SMIL <animate d> на слое песка, запущен, identity-края', () => {
+    withFakeDocument((created) => {
+      const svg = svgHourglass();
+      animateIcon(svg as unknown as SVGSVGElement, { name: 'hourglass', matchMedia: noPreference });
+      expect(created).toHaveLength(1);
+      const morph = created[0]!;
+      expect(morph.tag).toBe('animate');
+      expect(morph.attrs['attributeName']).toBe('d');
+      expect(morph.begun).toBe(true);
+      expect(svg.appended[0]).toHaveLength(1); // именно слой песка
+      const values = morph.attrs['values']!.split(';');
+      expect(values.length).toBeGreaterThanOrEqual(3);
+      expect(values[0]).toBe(values[values.length - 1]); // края = поза покоя
+    });
+  });
+
+  it('Б: cancel() снимает морф-элемент (слой возвращается к статике)', () => {
+    withFakeDocument((created) => {
+      const svg = svgHourglass();
+      const h = animateIcon(svg as unknown as SVGSVGElement, {
+        name: 'hourglass',
+        matchMedia: noPreference,
+      });
+      h.cancel();
+      expect(created[0]!.removed).toBe(true);
+    });
+  });
+
+  it('Б: reduced-motion → морф не создаётся', () => {
+    withFakeDocument((created) => {
+      const svg = svgHourglass();
+      animateIcon(svg as unknown as SVGSVGElement, { name: 'hourglass', matchMedia: reduce });
+      expect(created).toHaveLength(0);
+    });
   });
 });

@@ -21,6 +21,7 @@
 
 import assignmentsJson from '../../semantics/assignments.json' with { type: 'json' };
 import choreographiesJson from './choreographies.generated.json' with { type: 'json' };
+import iconChoreographiesJson from './icon-choreographies.generated.json' with { type: 'json' };
 
 // ─── Типы данных (форма generated-файлов) ────────────────────────────────────
 
@@ -70,12 +71,63 @@ interface Choreography {
   readonly clip?: ClipData;
 }
 
+/**
+ * Per-icon хореография (semantics/layers.json → generated): явные path-индексы
+ * и якорь ТОЧКОЙ в координатах viewBox — оптическая ось вращения из данных,
+ * не из bbox-эвристики (классы багов A/C/D владельца, реврейм BL-004/BL-005).
+ */
+interface IconPartData {
+  readonly paths: readonly number[];
+  readonly anchor: readonly number[];
+  readonly keyframes: readonly WaapiKeyframeData[];
+  readonly timing: WaapiTimingData;
+  readonly staggerGapMs?: number;
+}
+
+interface IconClipData {
+  readonly keyframes: ReadonlyArray<{ readonly offset: number; readonly clipPath: string }>;
+  readonly timing: WaapiTimingData;
+  /**
+   * Индекс слоя-цели. Для clip-path: path() обязателен: координаты path()
+   * пиксельные и читаются в юнитах слоя (fill-box), а на корне-html-боксе
+   * они зависели бы от отрендеренного размера иконки. Без path — корень
+   * (inset/polygon в процентах).
+   */
+  readonly path?: number;
+}
+
+/**
+ * SMIL-морф формы слоя (BL-007: «песок переливается»). WAAPI морфить d не
+ * умеет кросс-браузерно (CSS-свойство d отсутствует в WebKit), SMIL
+ * <animate attributeName="d"> работает во всех движках; структуру команд
+ * форм гарантирует генератор + гейт check-layers.
+ */
+interface IconMorphData {
+  readonly path: number;
+  readonly values: readonly string[];
+  readonly keyTimes: readonly number[];
+  readonly keySplines?: readonly string[];
+  readonly durationMs: number;
+}
+
+interface IconChoreography {
+  readonly parts: readonly IconPartData[];
+  readonly clip?: IconClipData;
+  readonly morphs?: readonly IconMorphData[];
+}
+
 const assignments = assignmentsJson as Readonly<Record<string, SemanticEntry>>;
 const choreographies = (choreographiesJson as {
   choreographies: Readonly<Record<string, Choreography>>;
 }).choreographies;
+const iconChoreographies = (iconChoreographiesJson as unknown as {
+  icons: Readonly<Record<string, Partial<Record<IconVariant, IconChoreography>>>>;
+}).icons;
 
 // ─── Публичный API ───────────────────────────────────────────────────────────
+
+/** Вариант начертания иконки — у каждого своя per-icon разметка слоёв. */
+export type IconVariant = 'outline' | 'filled';
 
 export interface AnimateIconOptions {
   /** kebab-имя иконки ('notifications', 'volume-high'). */
@@ -87,6 +139,11 @@ export interface AnimateIconOptions {
   readonly iterations?: number;
   /** Injectable matchMedia (тесты/SSR). По умолчанию window.matchMedia. */
   readonly matchMedia?: ((query: string) => { matches: boolean }) | undefined;
+  /**
+   * Начертание отрендеренного svg: per-icon разметка слоёв различает
+   * Outline/Filled (path-индексы и деградации разные). По умолчанию 'outline'.
+   */
+  readonly variant?: IconVariant;
 }
 
 /** Хендл запущенной анимации иконки. */
@@ -156,59 +213,36 @@ export function animateIcon(svg: SVGSVGElement, opts: AnimateIconOptions): IconA
   }
 
   const root = svg as unknown as IconRootLike;
-  const layers = collectLayers(root);
-  const layered = layers.length >= 2 && semantic.wholeOnly !== true;
-  const parts = resolveParts(choreography, semantic, layered);
-  const animations: Animation[] = [];
-
-  for (const part of parts) {
-    const targets = resolveRole(part.role, root, layers, layered);
-    for (let i = 0; i < targets.length; i++) {
-      const target = targets[i]!;
-      applyOrigin(target, target !== (root as unknown), part.origin);
-      const staggerDelay = (part.staggerGapMs ?? 0) * i;
-      animations.push(
-        target.animate(part.keyframes as unknown as Keyframe[], {
-          duration: part.timing.duration,
-          delay: part.timing.delay + staggerDelay,
-          iterations: opts.iterations ?? part.timing.iterations,
-          direction: part.timing.direction,
-          fill: part.timing.fill,
-          easing: part.timing.easing,
-        }),
-      );
-    }
-  }
-
-  // Класс draw: полотно «рисуется» — clip-path раскрытие слева направо (BL-002).
-  if (choreography.clip) {
-    const { progressTrack, timing } = choreography.clip;
-    const clipKeyframes: Keyframe[] = progressTrack.offsets.map((offset, i) => ({
-      offset,
-      clipPath: `inset(0 ${((1 - progressTrack.values[i]!) * 100).toFixed(2)}% 0 0)`,
-    }));
-    animations.push(
-      root.animate(clipKeyframes, {
-        duration: timing.duration,
-        delay: timing.delay,
-        iterations: opts.iterations ?? timing.iterations,
-        direction: timing.direction,
-        fill: timing.fill,
-        easing: timing.easing,
-      }),
-    );
-  }
+  // Приоритет — per-icon разметка (точные слои и якоря из данных); классовая
+  // хореография с гео-эвристиками остаётся фолбэком для неразмеченных иконок
+  // и для DOM, где слоёв меньше, чем требует разметка (честная деградация).
+  const perIcon = iconChoreographies[opts.name]?.[opts.variant ?? 'outline'];
+  const perIconPaths = perIcon ? perIconApplicableLayers(perIcon, root) : null;
+  const animations: Animation[] =
+    perIcon && perIconPaths
+      ? animatePerIcon(perIcon, perIconPaths, root, opts)
+      : animateByClass(choreography, semantic, root, opts);
+  const morphCleanups: Array<() => void> =
+    perIcon && perIconPaths && perIcon.morphs
+      ? startMorphs(perIcon.morphs, perIconPaths, opts)
+      : [];
 
   // Все хореографии identity-краевые: cancel после естественного завершения
   // визуально бесшовен и освобождает композитор от завершённых Animation
   // (важно при десятках hover-иконок). allSettled: ручной cancel() реджектит
   // WAAPI a.finished — хендловый finished при этом всё равно резолвится
   // («всё закончилось»), а повторная очистка не выполняется.
+  // Морф-элементы SMIL снимаются вместе с анимациями (fill=remove + remove()).
+  const cleanupMorphs = () => {
+    for (const cleanup of morphCleanups) cleanup();
+  };
   const finished = Promise.allSettled(animations.map((a) => a.finished)).then((results) => {
     if (results.every((r) => r.status === 'fulfilled')) {
       for (const a of animations) a.cancel();
+      cleanupMorphs();
     }
   });
+  const smil = svg as unknown as { pauseAnimations?: () => void; unpauseAnimations?: () => void };
 
   return {
     reduced: false,
@@ -216,14 +250,19 @@ export function animateIcon(svg: SVGSVGElement, opts: AnimateIconOptions): IconA
     finished,
     cancel() {
       for (const a of animations) a.cancel();
+      cleanupMorphs();
     },
     pause() {
       for (const a of animations) a.pause();
+      smil.pauseAnimations?.();
     },
     play() {
       for (const a of animations) a.play();
+      smil.unpauseAnimations?.();
     },
     reverse() {
+      // SMIL-морф не реверсится — реверс применяется к WAAPI-части
+      // (морф identity-краевой, расхождение краёв невозможно).
       for (const a of animations) a.reverse();
     },
   };
@@ -240,6 +279,167 @@ export function iconClass(name: string): string | undefined {
 }
 
 // ─── Внутреннее ──────────────────────────────────────────────────────────────
+
+/** timing из данных + стаггер + перекрытие iterations → опции WAAPI. */
+function waapiOptions(
+  timing: WaapiTimingData,
+  staggerDelayMs: number,
+  iterations: number | undefined,
+): KeyframeAnimationOptions {
+  return {
+    duration: timing.duration,
+    delay: timing.delay + staggerDelayMs,
+    iterations: iterations ?? timing.iterations,
+    direction: timing.direction,
+    fill: timing.fill,
+    easing: timing.easing,
+  };
+}
+
+/**
+ * Слои для per-icon разметки: у DOM должно хватать path-слоёв на максимальный
+ * индекс данных. Не хватает (svg обёрнут/урезан/не тот вариант с иным числом
+ * слоёв) → null: вызывающий уходит в классовый фолбэк, а не двигает не те слои.
+ */
+function perIconApplicableLayers(
+  choreo: IconChoreography,
+  root: IconRootLike,
+): ArrayLike<Element> | null {
+  const paths = root.querySelectorAll(':scope > path');
+  let maxIndex = choreo.clip?.path ?? -1;
+  for (const part of choreo.parts) {
+    for (const idx of part.paths) if (idx > maxIndex) maxIndex = idx;
+  }
+  return paths.length > maxIndex ? paths : null;
+}
+
+/**
+ * Per-icon путь: слои и якоря — из данных. transform-box: view-box + якорь
+ * в px координатах viewBox = оптическая ось (центр окружности, узел стрелок,
+ * подвес колокола), НЕ процент от bbox слоя. getBBox не нужен вовсе.
+ */
+function animatePerIcon(
+  choreo: IconChoreography,
+  paths: ArrayLike<Element>,
+  root: IconRootLike,
+  opts: AnimateIconOptions,
+): Animation[] {
+  const animations: Animation[] = [];
+  for (const part of choreo.parts) {
+    for (let i = 0; i < part.paths.length; i++) {
+      const el = paths[part.paths[i]!] as unknown as LayerLike;
+      const style = el.style as CSSStyleDeclaration & { transformBox?: string };
+      style.transformBox = 'view-box';
+      style.transformOrigin = `${part.anchor[0]}px ${part.anchor[1]}px`;
+      animations.push(
+        el.animate(
+          part.keyframes as unknown as Keyframe[],
+          waapiOptions(part.timing, (part.staggerGapMs ?? 0) * i, opts.iterations),
+        ),
+      );
+    }
+  }
+  // Draw-on: глиф «рисуется» — готовые clip-path кейфреймы (BL-002/BL-007).
+  // Лента вдоль направляющей мазка (path-координаты) живёт на СЛОЕ,
+  // процентные inset/polygon — на корне.
+  if (choreo.clip) {
+    const clipTarget =
+      choreo.clip.path !== undefined
+        ? (paths[choreo.clip.path] as unknown as LayerLike)
+        : root;
+    animations.push(
+      clipTarget.animate(
+        choreo.clip.keyframes as unknown as Keyframe[],
+        waapiOptions(choreo.clip.timing, 0, opts.iterations),
+      ),
+    );
+  }
+  return animations;
+}
+
+/** Минимальный контракт SMIL <animate> (браузерный SVGAnimateElement). */
+interface SmilAnimateLike {
+  setAttribute(name: string, value: string): void;
+  beginElement(): void;
+  remove(): void;
+}
+
+/**
+ * Запускает SMIL-морфы формы. SSR/тест-безопасно: без document или без
+ * appendChild у слоя морф честно пропускается (transform-хореография
+ * продолжает работать — прогрессивная деградация).
+ */
+function startMorphs(
+  morphs: readonly IconMorphData[],
+  paths: ArrayLike<Element>,
+  opts: AnimateIconOptions,
+): Array<() => void> {
+  if (typeof document === 'undefined') return [];
+  const cleanups: Array<() => void> = [];
+  for (const morph of morphs) {
+    const target = paths[morph.path] as unknown as {
+      appendChild?: (el: unknown) => void;
+    };
+    if (!target || typeof target.appendChild !== 'function') continue;
+    const el = document.createElementNS(
+      'http://www.w3.org/2000/svg',
+      'animate',
+    ) as unknown as SmilAnimateLike;
+    el.setAttribute('attributeName', 'd');
+    el.setAttribute('values', morph.values.join(';'));
+    el.setAttribute('keyTimes', morph.keyTimes.join(';'));
+    if (morph.keySplines) {
+      el.setAttribute('calcMode', 'spline');
+      el.setAttribute('keySplines', morph.keySplines.join(';'));
+    }
+    el.setAttribute('dur', `${morph.durationMs}ms`);
+    el.setAttribute('begin', 'indefinite');
+    el.setAttribute('fill', 'remove');
+    if (opts.iterations === Infinity) el.setAttribute('repeatCount', 'indefinite');
+    target.appendChild(el);
+    el.beginElement();
+    cleanups.push(() => el.remove());
+  }
+  return cleanups;
+}
+
+/** Классовый путь (фолбэк): роли слоёв по геометрии, origin в % от fill-box. */
+function animateByClass(
+  choreography: Choreography,
+  semantic: SemanticEntry,
+  root: IconRootLike,
+  opts: AnimateIconOptions,
+): Animation[] {
+  const layers = collectLayers(root);
+  const layered = layers.length >= 2 && semantic.wholeOnly !== true;
+  const parts = resolveParts(choreography, semantic, layered);
+  const animations: Animation[] = [];
+
+  for (const part of parts) {
+    const targets = resolveRole(part.role, root, layers, layered);
+    for (let i = 0; i < targets.length; i++) {
+      const target = targets[i]!;
+      applyOrigin(target, target !== (root as unknown), part.origin);
+      animations.push(
+        target.animate(
+          part.keyframes as unknown as Keyframe[],
+          waapiOptions(part.timing, (part.staggerGapMs ?? 0) * i, opts.iterations),
+        ),
+      );
+    }
+  }
+
+  // Класс draw: clip-path раскрытие слева направо (BL-002).
+  if (choreography.clip) {
+    const { progressTrack, timing } = choreography.clip;
+    const clipKeyframes: Keyframe[] = progressTrack.offsets.map((offset, i) => ({
+      offset,
+      clipPath: `inset(0 ${((1 - progressTrack.values[i]!) * 100).toFixed(2)}% 0 0)`,
+    }));
+    animations.push(root.animate(clipKeyframes, waapiOptions(timing, 0, opts.iterations)));
+  }
+  return animations;
+}
 
 function prefersReduced(mm: ((q: string) => { matches: boolean }) | undefined): boolean {
   if (typeof mm !== 'function') return false;

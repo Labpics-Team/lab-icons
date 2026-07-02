@@ -1,0 +1,184 @@
+{
+ "version": 1,
+ "comment": "SSOT per-icon разметки слоёв и хореографий (реврейм BL-004/BL-005): path index → часть, якорь ТОЧКОЙ в координатах viewBox (рантайм ставит transform-box: view-box + transform-origin Xpx Ypx), motion — id из словаря iconMotions в scripts/gen-choreographies.mjs. Черновик якорей — из scripts/lib/icon-geometry.js, правки — поштучно по раскадровкам. Вариант без записи = классовая хореография (фолбэк). Слитый Filled получает ЗАМЕНУ движения (класс C), не то же движение на целое.",
+ "icons": {
+  "hourglass": {
+   "outline": {
+    "parts": [
+     { "paths": [0, 1], "part": "песочные часы целиком (песок + рамка)", "anchor": [12, 12], "motion": "flip-hold" }
+    ],
+    "morphs": [
+     { "path": 0, "part": "песок — стекает вниз на паузе флипа (SMIL-морф d)", "motion": "sand-pour" }
+    ]
+   },
+   "filled": {
+    "parts": [
+     { "paths": [0], "part": "песочные часы целиком (слито) — деградация: флип без морфа песка", "anchor": [12, 12], "motion": "flip-hold" }
+    ]
+   }
+  },
+  "history": {
+   "outline": {
+    "parts": [
+     { "paths": [1], "part": "стрелки часов — спринг-отмотка назад (узел = центр циферблата)", "anchor": [12.4, 13.2], "motion": "rewind-spring" },
+     { "paths": [0], "part": "циферблат вздрагивает в противоход", "anchor": [12.36, 12], "motion": "dial-flinch" }
+    ]
+   },
+   "filled": {
+    "parts": [
+     { "paths": [1], "part": "стрелки часов — спринг-отмотка назад (узел = центр циферблата)", "anchor": [12.25, 13.3], "motion": "rewind-spring" },
+     { "paths": [0], "part": "циферблат вздрагивает в противоход", "anchor": [11.75, 12], "motion": "dial-flinch" }
+    ]
+   }
+  },
+  "camera-reverse": {
+   "outline": {
+    "parts": [
+     { "paths": [0], "part": "стрелки цикла — зеркальный флип (переключение камеры; BL-008: вращение и поджатие отвергнуты)", "anchor": [12, 11.9], "motion": "flip-x" }
+    ]
+   },
+   "filled": {
+    "parts": [
+     { "paths": [0], "part": "камера целиком (слито) — деградация: сквош-акцент вместо вращения", "anchor": [12, 11], "motion": "settle-pop" }
+    ]
+   }
+  },
+  "refresh": {
+   "outline": {
+    "parts": [
+     { "paths": [0], "part": "круг-стрелка (ось = центр окружности)", "anchor": [12, 12.03], "motion": "spin-cycle" }
+    ]
+   },
+   "filled": {
+    "parts": [
+     { "paths": [0], "part": "круг-стрелка (ось = центр окружности)", "anchor": [12, 12.1], "motion": "spin-cycle" }
+    ]
+   }
+  },
+  "reload": {
+   "outline": {
+    "parts": [
+     { "paths": [0], "part": "круг-стрелка (ось = центр окружности, НЕ bbox; наконечник дальше края канвы — оборот с поджатием)", "anchor": [11.7, 12], "motion": "spin-cycle-tucked" }
+    ]
+   },
+   "filled": {
+    "parts": [
+     { "paths": [0], "part": "круг-стрелка (ось = центр окружности, НЕ bbox; наконечник дальше края канвы — оборот с поджатием)", "anchor": [11.8, 12], "motion": "spin-cycle-tucked" }
+    ]
+   }
+  },
+  "brush": {
+   "outline": {
+    "parts": [
+     { "paths": [0], "part": "кисть рисует движением: замах и мазок вдоль оси, наклон от кончика ворса (клип заморожен BL-009)", "anchor": [4.5, 19.5], "motion": "brush-stroke" }
+    ]
+   },
+   "filled": {
+    "parts": [
+     { "paths": [0], "part": "кисть рисует движением: замах и мазок вдоль оси, наклон от кончика ворса (клип заморожен BL-009)", "anchor": [4.5, 19.5], "motion": "brush-stroke" }
+    ]
+   }
+  },
+  "notifications": {
+   "outline": {
+    "parts": [
+     { "paths": [1], "part": "корпус колокола (маятник вокруг подвеса)", "anchor": [12, 2.2], "motion": "bell-swing" },
+     { "paths": [0], "part": "язычок (маятник на том же подвесе, вдогонку)", "anchor": [12, 2.2], "motion": "clapper-swing" }
+    ]
+   },
+   "filled": {
+    "parts": [
+     { "paths": [0], "part": "колокол целиком (слито) — качается вокруг подвеса", "anchor": [12, 2.2], "motion": "bell-swing" }
+    ]
+   }
+  },
+  "volume-high": {
+   "outline": {
+    "parts": [
+     { "paths": [2], "part": "рупор", "anchor": [6.2, 12], "motion": "speaker-pulse" },
+     { "paths": [3, 1, 0], "part": "волны от ближней к дальней (излучение от рупора)", "anchor": [11.5, 12], "motion": "wave-emit", "staggerGapMs": 90 }
+    ]
+   },
+   "filled": {
+    "parts": [
+     { "paths": [1], "part": "рупор (слит с ближней волной)", "anchor": [10.3, 12], "motion": "speaker-pulse" },
+     { "paths": [2, 0], "part": "волны от ближней к дальней (излучение от рупора)", "anchor": [13, 12], "motion": "wave-emit", "staggerGapMs": 110 }
+    ]
+   }
+  },
+  "sparkles": {
+   "outline": {
+    "parts": [
+     { "paths": [0], "part": "три искры (слито) — мерцание", "anchor": [12, 12], "motion": "twinkle" }
+    ]
+   },
+   "filled": {
+    "parts": [
+     { "paths": [0], "part": "три искры (слито) — мерцание", "anchor": [12, 11.8], "motion": "twinkle" }
+    ]
+   }
+  },
+  "moon-sparkles": {
+   "outline": {
+    "parts": [
+     { "paths": [0], "part": "луна (мягкое покачивание)", "anchor": [12.6, 12.6], "motion": "moon-rock" },
+     { "paths": [1], "part": "звёзды (мерцание, амплитуда мала — не вылетать за viewBox)", "anchor": [6.1, 6.1], "motion": "twinkle" }
+    ]
+   },
+   "filled": {
+    "parts": [
+     { "paths": [0], "part": "луна (мягкое покачивание)", "anchor": [12.6, 12.6], "motion": "moon-rock" },
+     { "paths": [1], "part": "звёзды (мерцание)", "anchor": [6.1, 6.1], "motion": "twinkle" }
+    ]
+   }
+  },
+  "arrow-back-circle": {
+   "outline": {
+    "parts": [
+     { "paths": [0], "part": "стрелка внутри круга (нудж влево)", "anchor": [12, 12], "motion": "nudge-left" }
+    ]
+   },
+   "filled": {
+    "parts": [
+     { "paths": [0], "part": "бейдж целиком (слито) — мягкий нудж", "anchor": [12, 12], "motion": "nudge-left-soft" }
+    ]
+   }
+  },
+  "compas": {
+   "outline": {
+    "parts": [
+     { "paths": [0], "part": "игла (поиск севера вокруг втулки)", "anchor": [12, 12], "motion": "seek-north" }
+    ]
+   },
+   "filled": {
+    "parts": [
+     { "paths": [1], "part": "игла+кольцо (слито; кольцо ротационно-инвариантно — читается как поиск иглой)", "anchor": [12, 12], "motion": "seek-north" }
+    ]
+   }
+  },
+  "heart": {
+   "outline": {
+    "parts": [
+     { "paths": [0], "part": "сердце (тук-тук)", "anchor": [12, 12], "motion": "heart-beat" }
+    ]
+   },
+   "filled": {
+    "parts": [
+     { "paths": [0], "part": "сердце (тук-тук)", "anchor": [12, 12], "motion": "heart-beat" }
+    ]
+   }
+  },
+  "checkmark": {
+   "outline": {
+    "parts": [
+     { "paths": [0], "part": "галочку «поставили»: подскок и пружинная посадка вокруг нижней вершины (клип заморожен BL-009)", "anchor": [10.9, 16.3], "motion": "check-spring" }
+    ]
+   },
+   "filled": {
+    "parts": [
+     { "paths": [0], "part": "галочку «поставили»: подскок и пружинная посадка вокруг нижней вершины (клип заморожен BL-009)", "anchor": [10.9, 16.2], "motion": "check-spring" }
+    ]
+   }
+  }
+ }
+}

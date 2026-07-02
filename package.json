@@ -28,8 +28,11 @@
     "check:treeshake": "node scripts/check-treeshake.js",
     "check:semantics": "node scripts/check-semantics.js",
     "check:choreographies": "node scripts/check-choreographies.js",
+    "check:layers": "node scripts/check-layers.js",
+    "check:motion-bounds": "node scripts/check-motion-bounds.js",
+    "check:motion-collision": "node scripts/check-motion-collision.js",
     "test": "vitest run",
-    "verify": "node scripts/build.js && tsup && tsc --noEmit && node scripts/check-parity.js && node scripts/check-colors.js && node scripts/check-treeshake.js && node scripts/check-semantics.js && node scripts/check-choreographies.js && vitest run"
+    "verify": "node scripts/build.js && tsup && tsc --noEmit && node scripts/check-parity.js && node scripts/check-colors.js && node scripts/check-treeshake.js && node scripts/check-semantics.js && node scripts/check-choreographies.js && node scripts/check-layers.js && node scripts/check-motion-bounds.js && node scripts/check-motion-collision.js && vitest run"
   },
   "devDependencies": {
     "rollup": "^4.24.0",

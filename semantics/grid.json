@@ -1,0 +1,18 @@
+{
+ "version": 1,
+ "comment": "Сетка иконок (BL-008/BL-009, конституция моушна): канва, поля, keylines — выведены из фактического корпуса 444 SVG (2026-07-02: maxDim p50=21.99, p90=22.03 → круг Ø22; поля 1). Валидируется scripts/check-static-grid.js (режим report до ревизии статики владельцем, потом strict). square/wide/tall — черновик из перцентилей корпуса, уточняются владельцем при ревизии.",
+ "canvas": { "width": 24, "height": 24 },
+ "margin": 1,
+ "keylines": {
+  "circle": 22,
+  "square": 21,
+  "wide": { "width": 22, "height": 20 },
+  "tall": { "width": 20, "height": 22 }
+ },
+ "tolerances": {
+  "canvas": 0.01,
+  "marginReport": 0.05,
+  "marginHard": 0.7,
+  "circleCenter": 0.15
+ }
+}
