@@ -398,27 +398,24 @@ export function genSuperellipse(cx, cy, a, b, n, rotationDeg = 0) {
     const c = Math.cos(t), s = Math.sin(t);
     return [a * Math.sign(c) * Math.abs(c) ** e, b * Math.sign(s) * Math.abs(s) ** e];
   };
-  // производная по t (для |cos|^e ветви): d/dt [sign(c)|c|^e] = -e·|c|^(e-1)·sin
-  const dpt = (t) => {
-    const c = Math.cos(t), s = Math.sin(t);
-    const eps = 1e-9;
-    return [
-      -a * e * Math.max(Math.abs(c), eps) ** (e - 1) * s,
-      b * e * Math.max(Math.abs(s), eps) ** (e - 1) * c,
-    ];
-  };
+  // ручки Эрмита по ЦЕНТРАЛЬНЫМ РАЗНОСТЯМ точек: аналитическая производная
+  // содержит |cos|^(e−1) с e<1 при n>2 — взрывается у вершин (ловилось
+  // тестом гладкости как петли на сотни юнитов)
   const SEGS = 16;
+  const pts = [];
+  for (let i = 0; i < SEGS; i++) pts.push(pt((i / SEGS) * 2 * Math.PI));
   let d = '';
   for (let i = 0; i < SEGS; i++) {
-    const ta = (i / SEGS) * 2 * Math.PI;
-    const tb = ((i + 1) / SEGS) * 2 * Math.PI;
-    const h = (tb - ta) / 3; // Эрмит→Безье: ручки = производная·Δt/3
-    const Pa = pt(ta), Pb = pt(tb), Da = dpt(ta), Db = dpt(tb);
-    const c1 = world(Pa[0] + Da[0] * h, Pa[1] + Da[1] * h);
-    const c2 = world(Pb[0] - Db[0] * h, Pb[1] - Db[1] * h);
-    const Pw = world(Pb[0], Pb[1]);
+    const Pa = pts[i];
+    const Pb = pts[(i + 1) % SEGS];
+    const prev = pts[(i - 1 + SEGS) % SEGS];
+    const next2 = pts[(i + 2) % SEGS];
+    const Da = [(Pb[0] - prev[0]) / 2, (Pb[1] - prev[1]) / 2];
+    const Db = [(next2[0] - Pa[0]) / 2, (next2[1] - Pa[1]) / 2];
+    const c1 = world(Pa[0] + Da[0] / 3, Pa[1] + Da[1] / 3);
+    const c2 = world(Pb[0] - Db[0] / 3, Pb[1] - Db[1] / 3);
     if (i === 0) d += `M${P(world(Pa[0], Pa[1]))}`;
-    d += `C${P(c1)} ${P(c2)} ${P(Pw)}`;
+    d += `C${P(c1)} ${P(c2)} ${P(world(Pb[0], Pb[1]))}`;
   }
   return d + 'Z';
 }
