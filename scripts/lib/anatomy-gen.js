@@ -598,6 +598,18 @@ export function buildGlyph(entry, grid) {
           } else {
             chunks.push(genRing(cx2, cy2, r, 0));
           }
+        } else if (part.primitive === 'superellipse') {
+          // сквиркл-блоб |x/a|^n+|y/b|^n=1; mode frame = пара контуров
+          // (внешний aOut + внутренний aIn — рука рисует их порознь)
+          const rot = pp.rotation ?? 0;
+          if (mode === 'frame') {
+            chunks.push(
+              genSuperellipse(L(pp.cx), L(pp.cy), L(pp.aOut), L(pp.bOut ?? pp.aOut), pp.nOut, rot) +
+                genSuperellipse(L(pp.cx), L(pp.cy), L(pp.aIn), L(pp.bIn ?? pp.aIn), pp.nIn ?? pp.nOut, rot),
+            );
+          } else {
+            chunks.push(genSuperellipse(L(pp.cx), L(pp.cy), L(pp.aOut), L(pp.bOut ?? pp.aOut), pp.nOut, rot));
+          }
         } else if (part.primitive === 'clock-hands') {
           // Г-стрелки часов; в filled обычно вырез в диске (evenodd)
           const [cx2, cy2, up2, right2, t2] = [L(pp.cx), L(pp.cy), L(pp.up), L(pp.right), L(pp.t)];
