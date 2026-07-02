@@ -95,7 +95,7 @@ function resampleEdges(poly, maxStep = 0.3) {
 }
 
 /** Контуры SVG → круги-кандидаты, кольцо, диск, глиф-контуры (не контейнер). */
-function analyze(svgContent, canvasWidth) {
+export function analyze(svgContent, canvasWidth) {
   const ds = renderedPathData(svgContent); // path из <defs> — не чернила
   const contours = ds
     .flatMap((d) => samplePolylines(d, 24))
@@ -143,7 +143,7 @@ function analyze(svgContent, canvasWidth) {
  * даёт мнимый разъезд > 3, при идеально совпадающей голове). Меряются только
  * уверенно совпавшие контуры; несопоставленные — структурная разница, не дрейф.
  */
-function glyphRegistration(oGlyphs, fGlyphs, tolReg) {
+export function glyphRegistration(oGlyphs, fGlyphs, tolReg) {
   const used = new Set();
   const offsets = [];
   const gross = [];
@@ -182,6 +182,7 @@ function glyphRegistration(oGlyphs, fGlyphs, tolReg) {
     matched: offsets.length,
     worst: worst && worst.off > tolReg ? worst : null,
     gross,
+    pairs: offsets, // полный список совпавших пар — для инструмента правки
   };
 }
 
