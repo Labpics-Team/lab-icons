@@ -246,6 +246,49 @@ export function genStrokeV(anchors, w) {
   );
 }
 
+// ── суперэллипсное скругление 90° (ζ, Figma corner smoothing) ──
+/**
+ * Параметры углового профиля по формулам Figma (порт figma-squircle, MIT):
+ * радиус вершины НЕИЗМЕНЕН, ζ растягивает вход (кривизна плавно 0 → 1/R) —
+ * утверждено владельцем 2026-07-02: «не повышать радиусы, только сглаживать
+ * перепады». ζ — токен grid.cornerSmoothing.
+ */
+export function cornerParams(R, zeta) {
+  const p = (1 + zeta) * R;
+  const arcMeasure = 90 * (1 - zeta);
+  const arcLen = Math.sin(rad(arcMeasure / 2)) * R * Math.SQRT2;
+  const angleAlpha = (90 - arcMeasure) / 2;
+  const c = R * Math.tan(rad(angleAlpha / 2)) * Math.cos(rad(45 * zeta));
+  const d = c * Math.tan(rad(45 * zeta));
+  const b = (p - arcLen - c - d) / 3;
+  const a = 2 * b;
+  return { a, b, c, d, p, arcLen, R };
+}
+
+/**
+ * d-фрагмент скругления прямого угла: V — вершина; uDir — единичное
+ * направление ВХОДА (движения к вершине); wDir — ВЫХОДА (от вершины),
+ * uDir ⊥ wDir. Фрагмент начинается в V − uDir·p (вызывающий доводит грань
+ * до этой точки) и заканчивается в V + wDir·p.
+ * Применять ТОЛЬКО к задекларированным скруглениям (не пост-обработка).
+ */
+export function smoothCorner90(V, uDir, wDir, R, zeta) {
+  const { a, b, c, d, p, arcLen } = cornerParams(R, zeta);
+  const S = [V[0] - uDir[0] * p, V[1] - uDir[1] * p];
+  const at = (x, y) => [S[0] + uDir[0] * x + wDir[0] * y, S[1] + uDir[1] * x + wDir[1] * y];
+  const sweep = uDir[0] * wDir[1] - uDir[1] * wDir[0] > 0 ? 1 : 0;
+  // цепочка Figma в базисе (u, w); алгебра сходится: a+b+c+d+arcLen = p
+  const arcEndX = a + b + c + arcLen;
+  return {
+    start: S,
+    end: at(p, p),
+    d:
+      `C${P(at(a, 0))} ${P(at(a + b, 0))} ${P(at(a + b + c, d))}` +
+      `A${f3(R)} ${f3(R)} 0 0 ${sweep} ${P(at(arcEndX, d + arcLen))}` +
+      `C${P(at(arcEndX + d, d + arcLen + c))} ${P(at(arcEndX + d, d + arcLen + b + c))} ${P(at(p, p))}`,
+  };
+}
+
 // ── контейнеры ──
 export function genRing(cx, cy, rOut, rIn) {
   const c = (r) =>
