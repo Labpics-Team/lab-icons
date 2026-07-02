@@ -316,6 +316,13 @@ export function smoothCornerAny(V, uDir, wDir, R, zeta) {
   const nOut = [wDir[1] * sgn, -wDir[0] * sgn];
   // центр вписанной дуги: на биссектрисе, dist R от обеих граней
   const C = [V[0] - uDir[0] * tNom + nIn[0] * R, V[1] - uDir[1] * tNom + nIn[1] * R];
+  // ζ→0: хвосты вырождаются, а pересечение касательной с гранью — в 0/0
+  // (NaN-контроли, ревью верификатора) → честная чистая дуга
+  if (zeta < 1e-6) {
+    const S0 = [V[0] - uDir[0] * tNom, V[1] - uDir[1] * tNom];
+    const E0 = [V[0] + wDir[0] * tNom, V[1] + wDir[1] * tNom];
+    return { start: S0, end: E0, d: `A${f3(R)} ${f3(R)} 0 0 ${sweep} ${P(E0)}` };
+  }
   const delta = Math.PI - theta;          // полный поворот дуги при ζ=0
   const arcMeasure = delta * (1 - zeta);  // остающийся сектор
   const beta = (delta * zeta) / 2;        // срез с каждого конца
@@ -401,15 +408,24 @@ export function genSuperellipse(cx, cy, a, b, n, rotationDeg = 0) {
   // ручки Эрмита по ЦЕНТРАЛЬНЫМ РАЗНОСТЯМ точек: аналитическая производная
   // содержит |cos|^(e−1) с e<1 при n>2 — взрывается у вершин (ловилось
   // тестом гладкости как петли на сотни юнитов)
-  const SEGS = 16;
   const pts = [];
-  for (let i = 0; i < SEGS; i++) pts.push(pt((i / SEGS) * 2 * Math.PI));
+  for (let i = 0; i < 16; i++) pts.push(pt((i / 16) * 2 * Math.PI));
+  return emitClosedHermite(pts, world);
+}
+
+/**
+ * Замкнутая гладкая кривая через точки: кубики с ручками Эрмита по
+ * центральным разностям (общий эмиттер genSuperellipse / stroke —
+ * дублирование сняли по ревью верификатора).
+ */
+function emitClosedHermite(pts, world) {
+  const N = pts.length;
   let d = '';
-  for (let i = 0; i < SEGS; i++) {
+  for (let i = 0; i < N; i++) {
     const Pa = pts[i];
-    const Pb = pts[(i + 1) % SEGS];
-    const prev = pts[(i - 1 + SEGS) % SEGS];
-    const next2 = pts[(i + 2) % SEGS];
+    const Pb = pts[(i + 1) % N];
+    const prev = pts[(i - 1 + N) % N];
+    const next2 = pts[(i + 2) % N];
     const Da = [(Pb[0] - prev[0]) / 2, (Pb[1] - prev[1]) / 2];
     const Db = [(next2[0] - Pa[0]) / 2, (next2[1] - Pa[1]) / 2];
     const c1 = world(Pa[0] + Da[0] / 3, Pa[1] + Da[1] / 3);
@@ -454,24 +470,9 @@ export function genSuperellipseStroke(cx, cy, a, b, n, rotationDeg, pen, side = 
     return [p[0] + (sign * pen * d[1]) / len, p[1] - (sign * pen * d[0]) / len];
   };
   const emit = (sign) => {
-    const SEGS = 32;
     const pts = [];
-    for (let i = 0; i < SEGS; i++) pts.push(offsetPt((i / SEGS) * 2 * Math.PI, sign));
-    let d = '';
-    for (let i = 0; i < SEGS; i++) {
-      const Pa = pts[i];
-      const Pb = pts[(i + 1) % SEGS];
-      // ручки Эрмита по центральным разностям
-      const prev = pts[(i - 1 + SEGS) % SEGS];
-      const next2 = pts[(i + 2) % SEGS];
-      const Da = [(Pb[0] - prev[0]) / 2, (Pb[1] - prev[1]) / 2];
-      const Db = [(next2[0] - Pa[0]) / 2, (next2[1] - Pa[1]) / 2];
-      const c1 = world(Pa[0] + Da[0] / 3, Pa[1] + Da[1] / 3);
-      const c2 = world(Pb[0] - Db[0] / 3, Pb[1] - Db[1] / 3);
-      if (i === 0) d += `M${P(world(Pa[0], Pa[1]))}`;
-      d += `C${P(c1)} ${P(c2)} ${P(world(Pb[0], Pb[1]))}`;
-    }
-    return d + 'Z';
+    for (let i = 0; i < 32; i++) pts.push(offsetPt((i / 32) * 2 * Math.PI, sign));
+    return emitClosedHermite(pts, world);
   };
   if (side === 'outer') return emit(1);
   if (side === 'inner') return emit(-1);
@@ -533,6 +534,9 @@ export function buildGlyph(entry, grid) {
     const zeta = grid.ratios.cornerSmoothing ?? 0;
     const w = tok(entry.weights?.outline ?? 'base');
     const [cx2, cy2, W, H, R] = [L(p2.cx), L(p2.cy), L(p2.w), L(p2.h), L(p2.rOuter)];
+    if (W - 2 * w <= 0 || H - 2 * w <= 0) {
+      throw new Error(`rounded-rect-container: перо ${w} съедает габарит ${W}×${H} — рамка вырождена`);
+    }
     const outer = genRoundedRect(cx2, cy2, W, H, R, zeta);
     const inner = genRoundedRect(cx2, cy2, W - 2 * w, H - 2 * w, Math.max(R - w, 0.1), zeta);
     out.outline = outer + inner; // evenodd-вложение (честная дырка)
@@ -554,6 +558,9 @@ export function buildGlyph(entry, grid) {
           const outer = genRoundedRect(cx2, cy2, W, H, R, zeta, rot);
           if (mode === 'frame') {
             const w = typeof part.weight === 'number' ? part.weight * cw : tok(part.weight ?? 'base');
+            if (W - 2 * w <= 0 || H - 2 * w <= 0) {
+              throw new Error(`composite rounded-rect frame: перо ${w} съедает габарит ${W}×${H}`);
+            }
             chunks.push(outer + genRoundedRect(cx2, cy2, W - 2 * w, H - 2 * w, Math.max(R - w, 0.1), zeta, rot));
           } else {
             chunks.push(outer);
