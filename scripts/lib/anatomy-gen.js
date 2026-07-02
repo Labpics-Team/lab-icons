@@ -357,6 +357,12 @@ export function smoothCornerAny(V, uDir, wDir, R, zeta) {
  * cornerSmoothing): обход по часовой, углы — smoothCorner90.
  */
 export function genRoundedRect(cx, cy, w, h, R, zeta, rotationDeg = 0) {
+  // бюджет Figma (distributeAndNormalize при равных углах): вход в кривую
+  // p=(1+ζ)R не может съесть больше полустороны — иначе ζ-хвосты соседних
+  // углов перекрываются (капсула R=h/2 ⇒ ζ_eff=0, чистые полукруги)
+  const budget = Math.min(w, h) / 2;
+  R = Math.min(R, budget);
+  zeta = Math.max(0, Math.min(zeta, budget / R - 1));
   // повёрнутый контур бесплатно: углы векторные, вращаем базис
   const t = rad(rotationDeg);
   const ux = [Math.cos(t), Math.sin(t)];        // локальная ось X
@@ -374,6 +380,47 @@ export function genRoundedRect(cx, cy, w, h, R, zeta, rotationDeg = 0) {
     corners.map((c) => `L${P(c.start)}${c.d}`).join('') +
     'Z'
   );
+}
+
+/**
+ * Суперэллипс |x/a|^n + |y/b|^n = 1 (сквиркл-блоб: непрерывная кривизна,
+ * прямых граней нет — класс ромбов component). Сериализация КРИВЫМИ:
+ * 16 кубик-сегментов из аналитических производных (Эрмит→Безье),
+ * никакой полигонализации (закон BL-014: ступеньки запрещены).
+ */
+export function genSuperellipse(cx, cy, a, b, n, rotationDeg = 0) {
+  const t0 = rad(rotationDeg);
+  const ux = [Math.cos(t0), Math.sin(t0)];
+  const uy = [-Math.sin(t0), Math.cos(t0)];
+  const world = (lx, ly) => [cx + ux[0] * lx + uy[0] * ly, cy + ux[1] * lx + uy[1] * ly];
+  const e = 2 / n;
+  const pt = (t) => {
+    const c = Math.cos(t), s = Math.sin(t);
+    return [a * Math.sign(c) * Math.abs(c) ** e, b * Math.sign(s) * Math.abs(s) ** e];
+  };
+  // производная по t (для |cos|^e ветви): d/dt [sign(c)|c|^e] = -e·|c|^(e-1)·sin
+  const dpt = (t) => {
+    const c = Math.cos(t), s = Math.sin(t);
+    const eps = 1e-9;
+    return [
+      -a * e * Math.max(Math.abs(c), eps) ** (e - 1) * s,
+      b * e * Math.max(Math.abs(s), eps) ** (e - 1) * c,
+    ];
+  };
+  const SEGS = 16;
+  let d = '';
+  for (let i = 0; i < SEGS; i++) {
+    const ta = (i / SEGS) * 2 * Math.PI;
+    const tb = ((i + 1) / SEGS) * 2 * Math.PI;
+    const h = (tb - ta) / 3; // Эрмит→Безье: ручки = производная·Δt/3
+    const Pa = pt(ta), Pb = pt(tb), Da = dpt(ta), Db = dpt(tb);
+    const c1 = world(Pa[0] + Da[0] * h, Pa[1] + Da[1] * h);
+    const c2 = world(Pb[0] - Db[0] * h, Pb[1] - Db[1] * h);
+    const Pw = world(Pb[0], Pb[1]);
+    if (i === 0) d += `M${P(world(Pa[0], Pa[1]))}`;
+    d += `C${P(c1)} ${P(c2)} ${P(Pw)}`;
+  }
+  return d + 'Z';
 }
 
 // ── контейнеры ──
