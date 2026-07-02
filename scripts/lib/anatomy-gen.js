@@ -289,6 +289,69 @@ export function smoothCorner90(V, uDir, wDir, R, zeta) {
   };
 }
 
+/**
+ * Обобщение ζ-скругления на ПРОИЗВОЛЬНЫЙ угол между прямыми гранями.
+ * Конструкция (вывод из Figma-90°): вписанная дуга R та же, что при ζ=0
+ * (касается граней в R·cot(θ/2) от вершины) — радиус вершины неизменен;
+ * ζ режет дугу до центрального сектора Δ(1−ζ), Δ=180°−θ; хвост = кубика
+ * с P0,P1 на грани (κ=0 на входе), P2 = пересечение касательной дуги
+ * с гранью, P3 на дуге; вход в кривую на (1+ζ)·R·cot(θ/2) от вершины;
+ * |P0P2| делится a=2b (распределение Figma). На θ=90° тождественно
+ * smoothCorner90 (закреплено дифференциальным тестом).
+ */
+export function smoothCornerAny(V, uDir, wDir, R, zeta) {
+  const cross2 = (p, q) => p[0] * q[1] - p[1] * q[0];
+  const dot2 = (p, q) => p[0] * q[0] + p[1] * q[1];
+  // θ — внутренний угол клина между гранями: между (−u) и (w)
+  const cosT = dot2([-uDir[0], -uDir[1]], wDir);
+  const theta = Math.acos(Math.max(-1, Math.min(1, cosT)));
+  const half = theta / 2;
+  const cot = Math.cos(half) / Math.sin(half);
+  const tNom = R * cot;                  // касание дуги при ζ=0
+  const p = (1 + zeta) * tNom;           // вход в кривую от вершины
+  const sweep = cross2(uDir, wDir) > 0 ? 1 : 0;
+  const sgn = sweep === 1 ? 1 : -1;
+  // нормали граней внутрь клина
+  const nIn = [-uDir[1] * sgn, uDir[0] * sgn];
+  const nOut = [wDir[1] * sgn, -wDir[0] * sgn];
+  // центр вписанной дуги: на биссектрисе, dist R от обеих граней
+  const C = [V[0] - uDir[0] * tNom + nIn[0] * R, V[1] - uDir[1] * tNom + nIn[1] * R];
+  const delta = Math.PI - theta;          // полный поворот дуги при ζ=0
+  const arcMeasure = delta * (1 - zeta);  // остающийся сектор
+  const beta = (delta * zeta) / 2;        // срез с каждого конца
+  // T1: точка дуги, повернутая на β от касания входной грани (к середине)
+  const a0 = Math.atan2(-nIn[1], -nIn[0]); // направление центр→касание входа
+  const a1 = a0 + sgn * beta;
+  const a2 = a1 + sgn * arcMeasure;
+  const T1 = [C[0] + R * Math.cos(a1), C[1] + R * Math.sin(a1)];
+  const T2 = [C[0] + R * Math.cos(a2), C[1] + R * Math.sin(a2)];
+  // P2 = пересечение касательной дуги в T1 с входной гранью
+  const tan1 = [-Math.sin(a1) * sgn, Math.cos(a1) * sgn]; // касательная по ходу
+  const lineHit = (P, d1, Q, d2) => {
+    const den = d1[0] * d2[1] - d1[1] * d2[0];
+    const t = ((Q[0] - P[0]) * d2[1] - (Q[1] - P[1]) * d2[0]) / den;
+    return [P[0] + d1[0] * t, P[1] + d1[1] * t];
+  };
+  const P2 = lineHit(T1, tan1, V, uDir);
+  const P0 = [V[0] - uDir[0] * p, V[1] - uDir[1] * p];
+  const b = Math.hypot(P2[0] - P0[0], P2[1] - P0[1]) / 3;
+  const P1 = [P0[0] + uDir[0] * 2 * b, P0[1] + uDir[1] * 2 * b];
+  // симметричный хвост на выходе
+  const tan2 = [-Math.sin(a2) * sgn, Math.cos(a2) * sgn];
+  const Q2 = lineHit(T2, tan2, V, wDir);
+  const E0 = [V[0] + wDir[0] * p, V[1] + wDir[1] * p];
+  const b2 = Math.hypot(Q2[0] - E0[0], Q2[1] - E0[1]) / 3;
+  const E1 = [E0[0] - wDir[0] * 2 * b2, E0[1] - wDir[1] * 2 * b2];
+  return {
+    start: P0,
+    end: E0,
+    d:
+      `C${P(P1)} ${P(P2)} ${P(T1)}` +
+      `A${f3(R)} ${f3(R)} 0 0 ${sweep} ${P(T2)}` +
+      `C${P(Q2)} ${P(E1)} ${P(E0)}`,
+  };
+}
+
 // ── контейнеры ──
 export function genRing(cx, cy, rOut, rIn) {
   const c = (r) =>
