@@ -5,10 +5,9 @@
   "hourglass": {
    "outline": {
     "parts": [
-     { "paths": [0, 1], "part": "песочные часы целиком (песок + рамка)", "anchor": [12, 12], "motion": "flip-hold" }
-    ],
-    "morphs": [
-     { "path": 0, "part": "песок — стекает вниз на паузе флипа (SMIL-морф d)", "motion": "sand-pour" }
+     { "paths": [1, 3], "part": "струйка песка + рамка (флип с паузой)", "anchor": [12, 12], "motion": "flip-hold" },
+     { "paths": [0], "part": "верхняя куча — тает к горловине на флипе, восстанавливается на паузе (экранно: песок стекает)", "anchor": [12, 12], "motion": "flip-hold-top" },
+     { "paths": [2], "part": "нижняя куча — растёт от основания", "anchor": [12, 12], "motion": "flip-hold-bottom" }
     ]
    },
    "filled": {

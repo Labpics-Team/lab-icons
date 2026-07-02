@@ -46,6 +46,12 @@ describe('transformPoint — вокруг якоря, порядок функц�
     close(y, 13);
   });
 
+  it('А: scaleY вокруг якоря (12,12): (12,18) при 0.5 → (12,15)', () => {
+    const [x, y] = transformPoint([12, 18], parseTransformString('scaleY(0.5)'), [12, 12]);
+    close(x, 12);
+    close(y, 15);
+  });
+
   it('А: translate не зависит от якоря', () => {
     const [x, y] = transformPoint([5, 5], parseTransformString('translate(3px, -1px)'), [12, 12]);
     close(x, 8);

@@ -328,18 +328,35 @@ describe('animateIcon — per-icon разметка (классы багов A/C
     expect(ring.target.style['transformOrigin']).toBe('12.36px 12px');
   });
 
-  it('А (класс D): hourglass → переворот с паузой обоих слоёв синхронно (без стаггера)', () => {
+  it('А (класс D): hourglass → флип трёх частей синхронно, кучи песка дышат scaleY', () => {
     const svg = new FakeSvg([
-      { x: 8.2, y: 6.9, width: 7.6, height: 12.1 },
-      { x: 4.9, y: 1.7, width: 14.2, height: 20.6 },
+      { x: 9.6, y: 6.9, width: 4.8, height: 3.7 }, // верхняя куча
+      { x: 11.5, y: 10.6, width: 1.2, height: 2.8 }, // струйка
+      { x: 8.2, y: 13, width: 7.6, height: 6 }, // нижняя куча
+      { x: 4.9, y: 1.7, width: 14.2, height: 20.6 }, // рамка
     ]);
     animateIcon(svg as unknown as SVGSVGElement, { name: 'hourglass', matchMedia: noPreference });
-    expect(svg.calls).toHaveLength(2);
-    expect(svg.calls[0]!.options.delay).toBe(svg.calls[1]!.options.delay);
-    expect(svg.calls[0]!.keyframes.some((k) => String(k.transform).includes('rotate(180'))).toBe(
-      true,
-    );
-    expect(svg.calls[0]!.target.style['transformOrigin']).toBe('12px 12px');
+    expect(svg.calls).toHaveLength(4);
+    // все части — вокруг центра флипа, синхронно (без стаггера)
+    for (const c of svg.calls) {
+      expect(c.target.style['transformOrigin']).toBe('12px 12px');
+      expect(c.options.delay).toBe(svg.calls[0]!.options.delay);
+      expect(c.keyframes.some((k) => String(k.transform).includes('rotate(180'))).toBe(true);
+    }
+    // кучи несут scaleY-дыхание уровней, струйка и рамка — нет
+    // presetToWaapi сливает scale и scaleY в scale(a, b): ищем неравномерный масштаб
+    const hasScaleY = (el: FakeEl) =>
+      svg.calls.some((c) =>
+        c.target === el &&
+        c.keyframes.some((k) => {
+          const m = /scale\(([-\d.]+), ([-\d.]+)\)/.exec(String(k.transform));
+          return m !== null && Math.abs(Number(m[1]) - Number(m[2])) > 0.01;
+        }),
+      );
+    expect(hasScaleY(svg.paths[0]!)).toBe(true);
+    expect(hasScaleY(svg.paths[2]!)).toBe(true);
+    expect(hasScaleY(svg.paths[1]!)).toBe(false);
+    expect(hasScaleY(svg.paths[3]!)).toBe(false);
   });
 
   it('А: volume-high → волны в явном порядке данных (ближняя→дальняя) со стаггером 90мс от устья', () => {
@@ -413,92 +430,5 @@ describe('animateIcon — per-icon разметка (классы багов A/C
     expect(h.reduced).toBe(true);
     expect(svg.calls).toHaveLength(0);
     await h.finished;
-  });
-});
-
-describe('animateIcon — SMIL-морфы формы (BL-007, песок hourglass)', () => {
-  class FakeAnimateEl {
-    tag: string;
-    attrs: Record<string, string> = {};
-    begun = false;
-    removed = false;
-    constructor(tag: string) {
-      this.tag = tag;
-    }
-    setAttribute(name: string, value: string) {
-      this.attrs[name] = value;
-    }
-    beginElement() {
-      this.begun = true;
-    }
-    remove() {
-      this.removed = true;
-    }
-  }
-
-  function withFakeDocument(run: (created: FakeAnimateEl[]) => void) {
-    const created: FakeAnimateEl[] = [];
-    (globalThis as Record<string, unknown>)['document'] = {
-      createElementNS: (_ns: string, tag: string) => {
-        const el = new FakeAnimateEl(tag);
-        created.push(el);
-        return el;
-      },
-    };
-    try {
-      run(created);
-    } finally {
-      delete (globalThis as Record<string, unknown>)['document'];
-    }
-  }
-
-  function svgHourglass(): FakeSvg & { appended: unknown[][] } {
-    const svg = new FakeSvg([
-      { x: 8.2, y: 6.9, width: 7.6, height: 12.1 },
-      { x: 4.9, y: 1.7, width: 14.2, height: 20.6 },
-    ]) as FakeSvg & { appended: unknown[][] };
-    svg.appended = svg.paths.map(() => []);
-    svg.paths.forEach((p, i) => {
-      (p as unknown as { appendChild: (el: unknown) => void }).appendChild = (el: unknown) => {
-        svg.appended[i]!.push(el);
-      };
-    });
-    return svg;
-  }
-
-  it('А: hourglass → SMIL <animate d> на слое песка, запущен, identity-края', () => {
-    withFakeDocument((created) => {
-      const svg = svgHourglass();
-      animateIcon(svg as unknown as SVGSVGElement, { name: 'hourglass', matchMedia: noPreference });
-      expect(created).toHaveLength(1);
-      const morph = created[0]!;
-      expect(morph.tag).toBe('animate');
-      expect(morph.attrs['attributeName']).toBe('d');
-      expect(morph.begun).toBe(true);
-      expect(svg.appended[0]).toHaveLength(1); // именно слой песка
-      const values = morph.attrs['values']!.split(';');
-      expect(values.length).toBeGreaterThanOrEqual(3);
-      expect(values[0]).toBe(values[values.length - 1]); // края = поза покоя
-    });
-  });
-
-  it('Б: cancel() снимает морф-элемент (слой возвращается к статике)', () => {
-    withFakeDocument((created) => {
-      const svg = svgHourglass();
-      const h = animateIcon(svg as unknown as SVGSVGElement, {
-        name: 'hourglass',
-        matchMedia: noPreference,
-      });
-      h.cancel();
-      expect(created[0]!.removed).toBe(true);
-    });
-  });
-
-  it('Б: reduced-motion → морф не создаётся', () => {
-    withFakeDocument((created) => {
-      const svg = svgHourglass();
-      animateIcon(svg as unknown as SVGSVGElement, { name: 'hourglass', matchMedia: reduce });
-      expect(created).toHaveLength(0);
-    });
   });
 });

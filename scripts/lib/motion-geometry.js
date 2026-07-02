@@ -63,6 +63,10 @@ export function transformPoint(point, fns, anchor) {
       const sy = args.length > 1 ? args[1] : sx;
       x = ax + (x - ax) * sx;
       y = ay + (y - ay) * sy;
+    } else if (fn === 'scaleX') {
+      x = ax + (x - ax) * (args[0] ?? 1);
+    } else if (fn === 'scaleY') {
+      y = ay + (y - ay) * (args[0] ?? 1);
     } else {
       throw new Error(`motion-geometry: неизвестная transform-функция "${fn}"`);
     }

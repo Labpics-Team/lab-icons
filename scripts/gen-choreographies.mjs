@@ -200,7 +200,80 @@ const choreographies = {
 // разметка (какой path, какой якорь, какое движение) живёт в layers.json,
 // здесь — только сами движения. Все движения identity-краевые НА КОНЦЕ
 // (cancel после завершения бесшовен); rotate 360 = полный оборот к identity.
+/**
+ * Треки куч песка hourglass: синхронный флип (rotate+dip как flip-hold) +
+ * дыхание уровня scaleY(k) с ТОЧНОЙ фикс-точкой y0 (горловина верхней кучи /
+ * основание нижней) в локальной системе слоя. Компенсация — плотные x/y-треки
+ * из dv(t) = R(θ(t))·(0, (y0−ay)·(1−k(t))), т.к. translate в WAAPI-строке
+ * глобальный (внешний относительно rotate/scale).
+ */
+function sandLayerMotions() {
+  const AY = 12;
+  const N = 48;
+  const phase = (t) => (t <= 0.32 ? [180 * e.easeInOut(t / 0.32)]
+    : t <= 0.62 ? [180]
+    : [180 + 180 * e.easeInOut((t - 0.62) / 0.38)]);
+  const kAt = (t, kPeak) => {
+    if (t <= 0.32) return 1 + (kPeak - 1) * e.easeInOut(t / 0.32);
+    if (t <= 0.62) return kPeak + (1 - kPeak) * e.easeInOut((t - 0.32) / 0.3);
+    return 1;
+  };
+  const build = (y0, kPeak, kxPeak = 1) => {
+    const times = [];
+    const xs = [];
+    const ys = [];
+    const ks = [];
+    const kxs = [];
+    for (let i = 0; i <= N; i++) {
+      const t = i / N;
+      const [theta] = phase(t);
+      const k = kAt(t, kPeak);
+      const c = (y0 - AY) * (1 - k);
+      const rad = (theta * Math.PI) / 180;
+      times.push(t);
+      xs.push(-c * Math.sin(rad));
+      ys.push(c * Math.cos(rad)); // dv = R(θ)·(0, c): фикс-точка y0 в локальной системе
+      ks.push(k);
+      kxs.push(1 + (kxPeak - 1) * ((1 - k) / (1 - kPeak) || 0));
+    }
+    // в покое и в конце (k=1 → c=0): dv=0 ✓ identity-края
+    return {
+      duration: 1.5,
+      tracks: [
+        {
+          property: 'rotate',
+          values: [0, 180, 180, 360],
+          times: [0, 0.32, 0.62, 1],
+          easing: [e.easeInOut, e.linear, e.easeInOut],
+        },
+        {
+          property: 'scale',
+          values: [1, 0.97, 1, 1, 0.97, 1],
+          times: [0, 0.16, 0.32, 0.62, 0.81, 1],
+          easing: e.easeInOut,
+        },
+        { property: 'scaleY', values: ks, times },
+        ...(kxPeak !== 1 ? [{ property: 'scaleX', values: kxs, times }] : []),
+        { property: 'x', values: xs, times },
+        { property: 'y', values: ys, times },
+      ],
+    };
+  };
+  return {
+    'flip-hold-top': build(10.61, 0.15, 0.35),
+    'flip-hold-bottom': build(18.98, 1.28),
+  };
+}
+
 const iconMotions = {
+  // Песок слоями (BL-008: слойная статика вместо SMIL-морфа): верхняя куча
+  // тает к горловине НА ФЛИПЕ (песок «остаётся в колбе»), нижняя растёт;
+  // на паузе — обратно (экранно, вверх ногами: песок стекает вниз).
+  // Кучи — заливки-массы, scale разрешён. Фикс-точка (горловина/основание)
+  // держится ТОЧНО: компенсация глобального translate зависит от угла флипа
+  // (порядок функций presetToWaapi: translate → rotate → scale), поэтому
+  // треки печатаются плотно из формулы dv(t) = R(θ(t))·(I−S(t))·(p0−a).
+  ...sandLayerMotions(),
   // Физика песочных часов: переворот, пауза «песок сыплется», доворот (BL-005 D).
   // Подныривание масштаба в фазах вращения: угол глифа отстоит от центра на
   // ~12.5 units > 12 — без 0.9 углы срезаются краем viewBox (overflow: hidden).
@@ -550,19 +623,9 @@ function pointReflectPathD(d, cx, cy) {
 // Хронология синхронна flip-hold (1.5с): флип 0→0.32 — песок «удерживается
 // в колбе» (A→B); пауза 0.32→0.62 — песок стекает вниз (B→A на перевёрнутой
 // иконке); доворот 0.62→1 — форма покоя (A). Края = A = identity.
-const iconMorphs = {
-  'sand-pour': {
-    keyTimes: [0, 0.32, 0.62, 1],
-    durationMs: 1500,
-    // easeInOut на каждый сегмент (кубические сплайны SMIL)
-    keySplines: ['0.42 0 0.58 1', '0.42 0 0.58 1', '0.42 0 0.58 1'],
-    shapes(dRest) {
-      const b = pathBBox(dRest);
-      const flipped = pointReflectPathD(dRest, (b.minX + b.maxX) / 2, (b.minY + b.maxY) / 2);
-      return [dRest, flipped, dRest, dRest];
-    },
-  },
-};
+// Морфы формы: механизм (SMIL d) сохранён для модификаторов BL-010
+// (слэш прочерчивается морфом); песок hourglass переведён на слойную статику.
+const iconMorphs = {};
 
 const iconClips = {
   // Кисть: направляющая = ось мазка от кончика ворса к рукояти (контур кисти
