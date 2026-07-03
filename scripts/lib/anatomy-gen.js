@@ -710,6 +710,9 @@ export function buildGlyph(entry, grid) {
           } else {
             chunks.push(genSuperellipse(L(pp.cx), L(pp.cy), L(pp.aOut), L(pp.bOut ?? pp.aOut), pp.nOut, rot));
           }
+        } else if (part.primitive === 'arc-band') {
+          // волна: полоса вдоль дуги с капами (radio/volume/wifi, BL-020)
+          chunks.push(genArcBand(L(pp.cx), L(pp.cy), L(pp.r), pp.aCenter, pp.halfSpan, L(pp.t)));
         } else if (part.primitive === 'clock-hands') {
           // Г-стрелки часов; в filled обычно вырез в диске (evenodd)
           const [cx2, cy2, up2, right2, t2] = [L(pp.cx), L(pp.cy), L(pp.up), L(pp.right), L(pp.t)];

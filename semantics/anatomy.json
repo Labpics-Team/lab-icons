@@ -1068,6 +1068,164 @@
      }
     }
    ]
+  },
+  "radio": {
+   "archetype": "composite",
+   "status": {
+    "outline": "generated",
+    "filled": "generated"
+   },
+   "comment": "Волны-дуги от центра (BL-020: рука нарезала волны кусками по разным path — 4 встык-шва; генерат = чистые arc-band). Перо волн 1.6/1.9 — как рука (ревизия выравнивания на лестницу — отдельно).",
+   "parts": [
+    {
+     "primitive": "arc-band",
+     "mode": "solid",
+     "params": {
+      "outline": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.42,
+       "aCenter": 0,
+       "halfSpan": 40,
+       "t": 0.066667
+      },
+      "filled": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.42,
+       "aCenter": 0,
+       "halfSpan": 40,
+       "t": 0.079167
+      }
+     }
+    },
+    {
+     "primitive": "arc-band",
+     "mode": "solid",
+     "params": {
+      "outline": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.42,
+       "aCenter": 180,
+       "halfSpan": 40,
+       "t": 0.066667
+      },
+      "filled": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.42,
+       "aCenter": 180,
+       "halfSpan": 40,
+       "t": 0.079167
+      }
+     }
+    },
+    {
+     "primitive": "arc-band",
+     "mode": "solid",
+     "params": {
+      "outline": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.294167,
+       "aCenter": 0,
+       "halfSpan": 40,
+       "t": 0.066667
+      },
+      "filled": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.28125,
+       "aCenter": 0,
+       "halfSpan": 40,
+       "t": 0.079167
+      }
+     }
+    },
+    {
+     "primitive": "arc-band",
+     "mode": "solid",
+     "params": {
+      "outline": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.294167,
+       "aCenter": 180,
+       "halfSpan": 40,
+       "t": 0.066667
+      },
+      "filled": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.28125,
+       "aCenter": 180,
+       "halfSpan": 40,
+       "t": 0.079167
+      }
+     }
+    },
+    {
+     "primitive": "arc-band",
+     "mode": "solid",
+     "params": {
+      "outline": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.17125,
+       "aCenter": 0,
+       "halfSpan": 36,
+       "t": 0.066667
+      },
+      "filled": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.142083,
+       "aCenter": 0,
+       "halfSpan": 35,
+       "t": 0.079167
+      }
+     }
+    },
+    {
+     "primitive": "arc-band",
+     "mode": "solid",
+     "params": {
+      "outline": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.17125,
+       "aCenter": 180,
+       "halfSpan": 36,
+       "t": 0.066667
+      },
+      "filled": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.142083,
+       "aCenter": 180,
+       "halfSpan": 35,
+       "t": 0.079167
+      }
+     }
+    },
+    {
+     "primitive": "circle-dot",
+     "mode": "solid",
+     "params": {
+      "outline": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.058333
+      },
+      "filled": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.056667
+      }
+     }
+    }
+   ]
   }
  }
 }
