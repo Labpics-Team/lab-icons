@@ -3,6 +3,10 @@
   "version": "0.0.1",
   "private": true,
   "description": "Labpics icon library — 444 SVG (Filled + Outline), tree-shakeable ESM",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Labpics-Team/lab-icons.git"
+  },
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -14,17 +18,22 @@
     }
   },
   "sideEffects": false,
+  "files": [
+    "dist/index.js",
+    "dist/index.d.ts"
+  ],
   "scripts": {
     "build": "node scripts/build.js",
     "check:parity": "node scripts/check-parity.js",
     "check:colors": "node scripts/check-colors.js",
     "check:treeshake": "node scripts/check-treeshake.js",
+    "build:anatomy": "node scripts/build-anatomy.js",
     "check:anatomy": "node scripts/check-anatomy.js",
     "check:variant-parity": "node scripts/check-variant-parity.js",
     "check:path-quality": "node scripts/check-path-quality.js",
     "check:static-grid": "node scripts/check-static-grid.js",
     "test": "vitest run",
-    "verify": "node scripts/build.js && node scripts/check-parity.js && node scripts/check-colors.js && node scripts/check-treeshake.js && node scripts/check-variant-parity.js && node scripts/check-anatomy.js && node scripts/check-path-quality.js && node scripts/check-static-grid.js && vitest run"
+    "verify": "node scripts/build.js && node scripts/build-anatomy.js && node scripts/check-parity.js && node scripts/check-colors.js && node scripts/check-treeshake.js && node scripts/check-variant-parity.js && node scripts/check-anatomy.js && node scripts/check-path-quality.js && node scripts/check-static-grid.js && vitest run"
   },
   "dependencies": {},
   "devDependencies": {
