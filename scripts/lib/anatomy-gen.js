@@ -369,7 +369,7 @@ export function genRoundedRect(cx, cy, w, h, R, zeta, rotationDeg = 0) {
   // углов перекрываются (капсула R=h/2 ⇒ ζ_eff=0, чистые полукруги)
   const budget = Math.min(w, h) / 2;
   R = Math.min(R, budget);
-  zeta = Math.max(0, Math.min(zeta, budget / R - 1));
+  zeta = Math.max(0, Math.min(1, zeta, budget / R - 1)); // ζ>1 невалиден в Figma (фазз)
   // повёрнутый контур бесплатно: углы векторные, вращаем базис
   const t = rad(rotationDeg);
   const ux = [Math.cos(t), Math.sin(t)];        // локальная ось X
@@ -469,6 +469,26 @@ export function genSuperellipseStroke(cx, cy, a, b, n, rotationDeg, pen, side = 
     // нормаль наружу для обхода против часовой в локале: (dy, -dx)/|d|
     return [p[0] + (sign * pen * d[1]) / len, p[1] - (sign * pen * d[0]) / len];
   };
+  // guard офсет-вырождения (фазз): перо ≥ минимального радиуса кривизны
+  // оси → внутренний офсет самопересекается (петля-защип в углах сквиркла)
+  {
+    const probe = [];
+    for (let i = 0; i < 64; i++) probe.push(axis((i / 64) * 2 * Math.PI));
+    let minR = Infinity;
+    for (let i = 0; i < 64; i++) {
+      const A = probe[(i - 1 + 64) % 64], B = probe[i], C2 = probe[(i + 1) % 64];
+      const ab = Math.hypot(B[0] - A[0], B[1] - A[1]);
+      const bc = Math.hypot(C2[0] - B[0], C2[1] - B[1]);
+      const ca = Math.hypot(A[0] - C2[0], A[1] - C2[1]);
+      const area2 = Math.abs((B[0] - A[0]) * (C2[1] - A[1]) - (C2[0] - A[0]) * (B[1] - A[1]));
+      if (area2 > 1e-12) minR = Math.min(minR, (ab * bc * ca) / (2 * area2));
+    }
+    if (pen >= minR) {
+      throw new Error(
+        `genSuperellipseStroke: перо ${pen} ≥ мин. радиуса кривизны оси ${minR.toFixed(3)} — внутренний офсет самопересечётся`,
+      );
+    }
+  }
   const emit = (sign) => {
     const pts = [];
     for (let i = 0; i < 32; i++) pts.push(offsetPt((i / 32) * 2 * Math.PI, sign));

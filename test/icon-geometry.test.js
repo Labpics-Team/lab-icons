@@ -8,6 +8,7 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { iconGeometry, renderedPathData } from '../scripts/lib/icon-geometry.js';
+import { samplePolylines } from '../scripts/lib/motion-geometry.js';
 
 const root = join(import.meta.dirname, '..', 'svg');
 
@@ -58,6 +59,43 @@ describe('icon-geometry — path внутри <defs> не геометрия (к
       expect(p.bbox.minY).toBeGreaterThan(0.5);
       expect(p.bbox.maxX).toBeLessThan(23.5);
       expect(p.bbox.maxY).toBeLessThan(23.5);
+    }
+  });
+});
+
+describe('icon-geometry — join-безопасность d-строк (класс фантома за канвой)', () => {
+  // первый moveto path-элемента абсолютен по спеке даже при «m»; при
+  // join('') он продолжался от конца предыдущего path — у 6 файлов
+  // корпуса это давало фантомную «геометрию за канвой» (35..42 юнита)
+  const twoPaths =
+    '<svg viewBox="0 0 24 24"><path d="M2 2h4v4H2z"/>' +
+    '<path d="m10 10 2 0 0 2-2 0z"/></svg>';
+
+  it('Д: головы нормализованы — m→M с явной l перед неявным хвостом', () => {
+    const ds = renderedPathData(twoPaths);
+    expect(ds[1]).toMatch(/^M10 10/);
+  });
+
+  it('Д: join двух d даёт ту же геометрию, что path по отдельности', () => {
+    const ds = renderedPathData(twoPaths);
+    const joined = samplePolylines(ds.join(''), 16).filter((p) => p.length > 2);
+    for (const poly of joined) {
+      for (const [x, y] of poly) {
+        expect(x).toBeGreaterThan(1);
+        expect(x).toBeLessThan(15); // без нормализации второй квадрат уезжал к (16,16)+
+        expect(y).toBeLessThan(15);
+      }
+    }
+  });
+
+  it('Д: реальный headphone_filled — join без фантомов за канвой', () => {
+    const ds = renderedPathData(readFileSync(join(root, 'Filled', 'headphone_filled.svg'), 'utf8'));
+    const polys = samplePolylines(ds.join(''), 16).filter((p) => p.length > 2);
+    for (const poly of polys) {
+      for (const [x, y] of poly) {
+        expect(x).toBeLessThan(24.5);
+        expect(y).toBeLessThan(24.5);
+      }
     }
   });
 });

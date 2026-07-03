@@ -21,7 +21,22 @@ const PATH_D_RE = /<path\b[^>]*?\bd="([^"]+)"/g;
  */
 export function renderedPathData(svgContent) {
   const withoutDefs = svgContent.replace(/<defs\b[\s\S]*?<\/defs>/g, '');
-  return [...withoutDefs.matchAll(PATH_D_RE)].map((m) => m[1]);
+  return [...withoutDefs.matchAll(PATH_D_RE)].map((m) => normalizeHead(m[1]));
+}
+
+/**
+ * Первый moveto path-элемента по SVG-спеке АБСОЛЮТЕН даже при «m» —
+ * но при join('') нескольких d он перестаёт быть первым и продолжается
+ * от конца предыдущего path: класс фантомной «геометрии за канвой»
+ * (headphone/radio/translate, 6 файлов корпуса). Нормализация: m→M +
+ * явная l перед неявным относительным хвостом (ловушка absHead).
+ */
+function normalizeHead(d) {
+  return d.replace(
+    /^\s*m[\s,]*(-?[\d.eE+]+)[\s,]*(-?[\d.eE+]+)([\s,]*)(-?[\d.]|)/,
+    (whole, x, y, sep, tailStart) =>
+      `M${x} ${y}` + (tailStart ? `l${tailStart}` : sep + tailStart),
+  );
 }
 
 /**
