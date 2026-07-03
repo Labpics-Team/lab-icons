@@ -523,6 +523,29 @@ export function genClockHands(cx, cy, up, right, t) {
   );
 }
 
+/**
+ * Полоса вдоль дуги с полукруглыми капами (волны radio/volume/wifi —
+ * класс BL-020: рука нарезала волны встык по разным path, швы виднелись
+ * волосяными линиями). (cx,cy) — центр, r — осевой радиус, aCenterDeg —
+ * азимут середины, halfSpanDeg — полуохват ОСЕВОЙ дуги (до центров
+ * капов), t — перо.
+ */
+export function genArcBand(cx, cy, r, aCenterDeg, halfSpanDeg, t) {
+  const h = t / 2;
+  const a1 = rad(aCenterDeg - halfSpanDeg);
+  const a2 = rad(aCenterDeg + halfSpanDeg);
+  const pt = (rr, a) => [cx + rr * Math.cos(a), cy + rr * Math.sin(a)];
+  const large = halfSpanDeg > 90 ? 1 : 0;
+  return (
+    `M${P(pt(r + h, a1))}` +
+    `A${f3(r + h)} ${f3(r + h)} 0 ${large} 1 ${P(pt(r + h, a2))}` + // внешняя дуга
+    `A${f3(h)} ${f3(h)} 0 0 1 ${P(pt(r - h, a2))}` +               // кап конца
+    `A${f3(r - h)} ${f3(r - h)} 0 ${large} 0 ${P(pt(r - h, a1))}` + // внутренняя обратно
+    `A${f3(h)} ${f3(h)} 0 0 1 ${P(pt(r + h, a1))}` +               // кап начала
+    'Z'
+  );
+}
+
 // ── контейнеры ──
 export function genRing(cx, cy, rOut, rIn) {
   const c = (r) =>
