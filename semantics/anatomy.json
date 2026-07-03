@@ -962,6 +962,112 @@
      }
     }
    ]
+  },
+  "component": {
+   "archetype": "composite",
+   "status": {
+    "outline": "generated",
+    "filled": "generated"
+   },
+   "comment": "Ромбы-сквирклы (утверждено владельцем 2026-07-03): n=2.8, перо base по нормали (рука офсетила вдоль диагонали — ошибка направления, намерение 1.8 восстановлено; ink-ratio 24.8% ≈ рука 23.9%). Внешние чернила = инвариант руки (bbox 8.27/8.87), внутренний контур = офсет по нормали.",
+   "parts": [
+    {
+     "primitive": "superellipse-stroke",
+     "mode": {
+      "outline": "stroke",
+      "filled": "solid"
+     },
+     "weight": "base",
+     "params": {
+      "outline": {
+       "cx": 0.5,
+       "cy": 0.776458,
+       "axis": 0.1221,
+       "n": 2.8,
+       "rotation": 45
+      },
+      "filled": {
+       "cx": 0.5,
+       "cy": 0.776458,
+       "axis": 0.16737,
+       "n": 2.8,
+       "rotation": 45
+      }
+     }
+    },
+    {
+     "primitive": "superellipse-stroke",
+     "mode": {
+      "outline": "stroke",
+      "filled": "solid"
+     },
+     "weight": "base",
+     "params": {
+      "outline": {
+       "cx": 0.22375,
+       "cy": 0.5,
+       "axis": 0.1221,
+       "n": 2.8,
+       "rotation": 45
+      },
+      "filled": {
+       "cx": 0.22375,
+       "cy": 0.5,
+       "axis": 0.16737,
+       "n": 2.8,
+       "rotation": 45
+      }
+     }
+    },
+    {
+     "primitive": "superellipse-stroke",
+     "mode": {
+      "outline": "stroke",
+      "filled": "solid"
+     },
+     "weight": "base",
+     "params": {
+      "outline": {
+       "cx": 0.776458,
+       "cy": 0.5,
+       "axis": 0.1221,
+       "n": 2.8,
+       "rotation": 45
+      },
+      "filled": {
+       "cx": 0.776458,
+       "cy": 0.5,
+       "axis": 0.16737,
+       "n": 2.8,
+       "rotation": 45
+      }
+     }
+    },
+    {
+     "primitive": "superellipse-stroke",
+     "mode": {
+      "outline": "stroke",
+      "filled": "solid"
+     },
+     "weight": "base",
+     "params": {
+      "outline": {
+       "cx": 0.5,
+       "cy": 0.22375,
+       "axis": 0.1221,
+       "n": 2.8,
+       "rotation": 45
+      },
+      "filled": {
+       "cx": 0.5,
+       "cy": 0.22375,
+       "axis": 0.16737,
+       "n": 2.8,
+       "rotation": 45
+      }
+     }
+    }
+   ]
   }
  }
 }

@@ -408,9 +408,58 @@ export function genSuperellipse(cx, cy, a, b, n, rotationDeg = 0) {
   // ручки Эрмита по ЦЕНТРАЛЬНЫМ РАЗНОСТЯМ точек: аналитическая производная
   // содержит |cos|^(e−1) с e<1 при n>2 — взрывается у вершин (ловилось
   // тестом гладкости как петли на сотни юнитов)
-  const pts = [];
-  for (let i = 0; i < 16; i++) pts.push(pt((i / 16) * 2 * Math.PI));
-  return emitClosedHermite(pts, world);
+  return emitClosedHermite(resampleByArc(pt, 32), world);
+}
+
+/**
+ * Адаптивная выборка замкнутой параметрической кривой: мера = смесь
+ * длины дуги и ПОВОРОТА КАСАТЕЛЬНОЙ (кривизна). Равномерная по t или
+ * по дуге выборка теряет короткие вершинные дуги сквиркла — кубика
+ * срезала вершины фасками (октагон-класс, пойман глазами дважды).
+ */
+function resampleByArc(pt, count) {
+  const DENSE = 512;
+  const dense = [];
+  for (let i = 0; i < DENSE; i++) dense.push(pt((i / DENSE) * 2 * Math.PI));
+  const seg = [];
+  for (let i = 0; i < DENSE; i++) {
+    const a = dense[i];
+    const b = dense[(i + 1) % DENSE];
+    seg.push([b[0] - a[0], b[1] - a[1]]);
+  }
+  const cum = [0];
+  let totalArc = 0;
+  let totalTurn = 0;
+  const arcs = [];
+  const turns = [];
+  for (let i = 0; i < DENSE; i++) {
+    const len = Math.hypot(seg[i][0], seg[i][1]);
+    const prev = seg[(i - 1 + DENSE) % DENSE];
+    let dAng = Math.abs(
+      Math.atan2(seg[i][1], seg[i][0]) - Math.atan2(prev[1], prev[0]),
+    );
+    if (dAng > Math.PI) dAng = 2 * Math.PI - dAng;
+    arcs.push(len);
+    turns.push(dAng);
+    totalArc += len;
+    totalTurn += dAng;
+  }
+  for (let i = 0; i < DENSE; i++) {
+    const w = 0.35 * (arcs[i] / totalArc) + 0.65 * (turns[i] / totalTurn);
+    cum.push(cum[i] + w);
+  }
+  const total = cum[DENSE];
+  const out = [];
+  let j = 0;
+  for (let k = 0; k < count; k++) {
+    const target = (k / count) * total;
+    while (cum[j + 1] < target) j++;
+    const f = (target - cum[j]) / (cum[j + 1] - cum[j] || 1);
+    const a = dense[j];
+    const b = dense[(j + 1) % DENSE];
+    out.push([a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f]);
+  }
+  return out;
 }
 
 /**
@@ -489,11 +538,7 @@ export function genSuperellipseStroke(cx, cy, a, b, n, rotationDeg, pen, side = 
       );
     }
   }
-  const emit = (sign) => {
-    const pts = [];
-    for (let i = 0; i < 32; i++) pts.push(offsetPt((i / 32) * 2 * Math.PI, sign));
-    return emitClosedHermite(pts, world);
-  };
+  const emit = (sign) => emitClosedHermite(resampleByArc((t) => offsetPt(t, sign), 32), world);
   if (side === 'outer') return emit(1);
   if (side === 'inner') return emit(-1);
   return emit(1) + emit(-1);
@@ -640,6 +685,18 @@ export function buildGlyph(entry, grid) {
             chunks.push(genRing(cx2, cy2, r, Math.max(r - w, 0.05)));
           } else {
             chunks.push(genRing(cx2, cy2, r, 0));
+          }
+        } else if (part.primitive === 'superellipse-stroke') {
+          // сквиркл-рамка: контуры = офсеты ОСИ по нормали (перо константно,
+          // негатив-дырка следует форме); solid = внешний офсет оси
+          const rot = pp.rotation ?? 0;
+          const w = typeof part.weight === 'number' ? part.weight * cw : tok(part.weight ?? 'base');
+          const ax = L(pp.axis);
+          if (mode === 'stroke') {
+            chunks.push(genSuperellipseStroke(L(pp.cx), L(pp.cy), ax, ax, pp.n, rot, w / 2, 'both'));
+          } else {
+            // solid: сплошной сквиркл, axis = полная полуось силуэта
+            chunks.push(genSuperellipse(L(pp.cx), L(pp.cy), ax, ax, pp.n, rot));
           }
         } else if (part.primitive === 'superellipse') {
           // сквиркл-блоб |x/a|^n+|y/b|^n=1; mode frame = пара контуров
