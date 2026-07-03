@@ -27,7 +27,9 @@
     "check:parity": "node scripts/check-parity.js",
     "check:colors": "node scripts/check-colors.js",
     "check:treeshake": "node scripts/check-treeshake.js",
-    "verify": "node scripts/build.js && node scripts/check-parity.js && node scripts/check-colors.js && node scripts/check-treeshake.js"
+    "verify": "node scripts/build.js && node scripts/build-anatomy.js && node scripts/check-parity.js && node scripts/check-colors.js && node scripts/check-anatomy.js && node scripts/check-treeshake.js",
+    "build:anatomy": "node scripts/build-anatomy.js",
+    "check:anatomy": "node scripts/check-anatomy.js"
   },
   "dependencies": {},
   "devDependencies": {
