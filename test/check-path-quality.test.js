@@ -107,3 +107,23 @@ describe('validatePathQuality — фрагментация внутри evenodd-
     expect(errors.filter((e) => e.includes('фрагмент'))).toEqual([]);
   });
 });
+
+describe('validatePathQuality — встык-швы между path (класс BL-020, radio/earth)', () => {
+  const wrap2 = (d1, d2) =>
+    `<svg viewBox="0 0 24 24"><path d="${d1}"/><path d="${d2}"/></svg>`;
+
+  it('Д: два куска встык (зазор 0) в разных path → находка «встык-шов»', () => {
+    const errors = run(wrap2('M4 4h8v8H4z', 'M12 4h8v8h-8z'));
+    expect(errors.some((e) => e.includes('встык-шов'))).toBe(true);
+  });
+
+  it('А: куски с нахлёстом (пересечение) → НЕ флагается (нахлёст = правильная сшивка)', () => {
+    const errors = run(wrap2('M4 4h8.5v8H4z', 'M12 4h8v8h-8z'));
+    expect(errors.filter((e) => e.includes('встык-шов'))).toEqual([]);
+  });
+
+  it('А: куски с клиренсом (зазор 2) → НЕ флагается', () => {
+    const errors = run(wrap2('M4 4h6v6H4z', 'M12 4h8v8h-8z'));
+    expect(errors.filter((e) => e.includes('встык-шов'))).toEqual([]);
+  });
+});

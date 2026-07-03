@@ -257,6 +257,50 @@ export function validatePathQuality({ grid, files }) {
       });
     });
 
+    // 5б. Встык-швы МЕЖДУ path (класс BL-020, radio): куски одного
+    //     вещества в разных path с зазором ~0 — антиалиасинг рисует
+    //     волосяной шов через элемент. Report: часть касаний
+    //     конструкционные (invert/text) — триаж поштучно.
+    {
+      const polysByPath = ds.map((dOne) => samplePolylines(dOne, 16).filter((p) => p.length > 2));
+      for (let pi = 0; pi < polysByPath.length; pi++) {
+        for (let pj = pi + 1; pj < polysByPath.length; pj++) {
+          for (const A of polysByPath[pi]) {
+            for (const B of polysByPath[pj]) {
+              let min = Infinity;
+              let at = null;
+              for (const q of A) {
+                for (const w of B) {
+                  const dd = Math.hypot(q[0] - w[0], q[1] - w[1]);
+                  if (dd < min) {
+                    min = dd;
+                    at = q;
+                  }
+                }
+              }
+              if (min < 0.02) {
+                let cross = false;
+                outer: for (let a2 = 0; a2 < A.length; a2++) {
+                  for (let b2 = 0; b2 < B.length; b2++) {
+                    if (segmentsCross(A[a2], A[(a2 + 1) % A.length], B[b2], B[(b2 + 1) % B.length])) {
+                      cross = true;
+                      break outer;
+                    }
+                  }
+                }
+                if (!cross) {
+                  findings.push(
+                    `${name}: встык-шов между path ${pi}↔${pj} (зазор ${min.toFixed(4)}) ` +
+                      `у (${at[0].toFixed(1)},${at[1].toFixed(1)}) — куски встык рисуют волосяную линию`,
+                  );
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
     for (const dEO of eoTags) {
       const subs = samplePolylines(dEO, 8).filter((p) => p.length > 2);
       if (subs.length < 2) continue;
