@@ -32,8 +32,11 @@ export function renderedPathData(svgContent) {
  * явная l перед неявным относительным хвостом (ловушка absHead).
  */
 function normalizeHead(d) {
+  // СТРОГОЕ SVG-число: максимум одна точка, опц. экспонента — жадный
+  // [\d.]+ склеивал «7.57.62.5» в одно «число» и ломал radio (клин в канве)
+  const num = String.raw`-?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?`;
   return d.replace(
-    /^\s*m[\s,]*(-?[\d.eE+]+)[\s,]*(-?[\d.eE+]+)([\s,]*)(-?[\d.]|)/,
+    new RegExp(String.raw`^\s*m[\s,]*(${num})[\s,]*(${num})([\s,]*)(-?[\d.]|)`),
     (whole, x, y, sep, tailStart) =>
       `M${x} ${y}` + (tailStart ? `l${tailStart}` : sep + tailStart),
   );

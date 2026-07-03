@@ -88,6 +88,25 @@ describe('icon-geometry — join-безопасность d-строк (клас
     }
   });
 
+  it('Д: слитные SVG-числа в голове — «m6.5 7.57.62.5a…» не склеивается (класс radio)', () => {
+    // жадный [\d.]+ съедал «7.57.62.5» как одно «число» → клин в канве
+    const ds = renderedPathData('<svg viewBox="0 0 24 24"><path d="m6.5 7.57.62.5a1 1 0 0 1 1 1z"/></svg>');
+    expect(ds[0]).toMatch(/^M6\.5 7\.57l\.62/);
+  });
+
+  it('Д: radio через renderedPathData — все точки в канве (не битые, не за канвой)', () => {
+    const ds = renderedPathData(readFileSync(join(root, 'Outline', 'radio.svg'), 'utf8'));
+    const polys = samplePolylines(ds.join(''), 16).filter((p) => p.length > 2);
+    for (const poly of polys) {
+      for (const [x, y] of poly) {
+        expect(x).toBeGreaterThan(-0.5);
+        expect(x).toBeLessThan(24.5);
+        expect(y).toBeGreaterThan(-0.5);
+        expect(y).toBeLessThan(24.5);
+      }
+    }
+  });
+
   it('Д: реальный headphone_filled — join без фантомов за канвой', () => {
     const ds = renderedPathData(readFileSync(join(root, 'Filled', 'headphone_filled.svg'), 'utf8'));
     const polys = samplePolylines(ds.join(''), 16).filter((p) => p.length > 2);
