@@ -1,109 +1,121 @@
-#!/usr/bin/env node
 /**
- * Гард анатомии @labpics/icons (этап 1) — кусается, не украшает.
+ * scripts/check-anatomy.js — гейт дрейфа «анатомия ↔ файл» (BL-015).
  *
- * Проверяет dist/anatomy.json против dist/svg и модели этапа 1:
- *   1. Полнота: скелет есть у ВСЕХ иконок (444), лишних имён нет.
- *   2. Конечность: каждая метрика — конечное число (NaN в геометрии =
- *      битый парс, тихо пропускать нельзя).
- *   3. Домен: bbox внутри viewBox 0..24 с допуском 0.5px (артефакты
- *      кадрирования clipPath-иконок); площадь > 0; контуров ≥ 1.
- *   4. Детерминизм: пересборка в памяти байт-в-байт равна артефакту
- *      (артефакт не правился руками и не устарел).
- *   5. Биндинги (anatomy/bindings.json): каждое имя существует в анатомии,
- *      pivot-режим известен модели, оси конечны.
+ * Для каждого глифа semantics/anatomy.json генерат из декларации
+ * сверяется с файлом svg/ по IoU чернил:
+ *   status=generated — файл создан генератором: IoU ≥ 0.995 (hard);
+ *   status=hand      — рука ещё не заменена: IoU ≥ 0.95 (report при
+ *                      меньшем — анатомия или файл уехали).
  *
- * RED-proof: испортить любую метрику в anatomy.json → (4) падает;
- * удалить иконку из bindings-имён → (5) падает.
+ * Не задекларировано в анатомии = не проверяется (миграция поэтапная).
+ * Режимы: report / --strict (как у соседей).
  */
 
-import { execFileSync } from 'child_process';
-import { readFileSync, readdirSync } from 'fs';
-import { dirname, join } from 'path';
-import { fileURLToPath } from 'url';
+import { readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { buildGlyph } from './lib/anatomy-gen.js';
+import { renderedPathData } from './lib/icon-geometry.js';
+import { samplePolylines } from './lib/curve-sampling.js';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const ROOT = join(__dirname, '..');
-
-let errors = 0;
-const fail = (msg) => {
-  console.error(`✗  ${msg}`);
-  errors++;
-};
-
-const anatomy = JSON.parse(readFileSync(join(ROOT, 'dist', 'anatomy.json'), 'utf8'));
-const icons = anatomy.icons ?? {};
-
-// 1. Полнота против dist/svg
-const expected = new Set();
-for (const variant of ['Filled', 'Outline']) {
-  for (const f of readdirSync(join(ROOT, 'dist', 'svg', variant)).filter((f) =>
-    f.endsWith('.svg'),
-  )) {
-    const base = f.replace(/\.svg$/, '');
-    const camel = base.replace(/[-_](.)/g, (_, c) => c.toUpperCase());
-    expected.add(variant === 'Filled' ? camel : `${camel}Outline`);
+function inkAt(polys, x, y) {
+  let hits = 0;
+  for (const poly of polys) {
+    for (let i = 0; i < poly.length; i++) {
+      const [x1, y1] = poly[i];
+      const [x2, y2] = poly[(i + 1) % poly.length];
+      if (y1 > y !== y2 > y && x < x1 + ((y - y1) / (y2 - y1)) * (x2 - x1)) hits++;
+    }
   }
-}
-for (const name of expected) {
-  if (!icons[name]) fail(`нет скелета: ${name}`);
-}
-for (const name of Object.keys(icons)) {
-  if (!expected.has(name)) fail(`лишний скелет: ${name}`);
-}
-if (expected.size !== 444) fail(`ожидалось 444 иконки, в dist/svg ${expected.size}`);
-
-// 2-3. Конечность и домен
-const finite = (x) => typeof x === 'number' && Number.isFinite(x);
-for (const [name, a] of Object.entries(icons)) {
-  const nums = [
-    ...a.bbox,
-    a.area,
-    ...a.centroid,
-    a.symmetry.x,
-    a.symmetry.y,
-    ...a.subpaths.flatMap((s) => [...s.bbox, s.areaSigned, ...s.centroid, s.perimeter, s.points]),
-  ];
-  if (!nums.every(finite)) fail(`${name}: неконечная метрика`);
-  if (a.subpaths.length < 1) fail(`${name}: ноль контуров`);
-  if (!(a.area > 0)) fail(`${name}: неположительная площадь ${a.area}`);
-  const [x0, y0, x1, y1] = a.bbox;
-  if (x0 < -0.5 || y0 < -0.5 || x1 > 24.5 || y1 > 24.5) {
-    fail(`${name}: bbox вне viewBox±0.5: ${a.bbox}`);
-  }
-  if (!(a.symmetry.x >= 0 && a.symmetry.x <= 1 && a.symmetry.y >= 0 && a.symmetry.y <= 1)) {
-    fail(`${name}: symmetry вне [0,1]`);
-  }
+  return hits % 2 === 1;
 }
 
-// 4. Детерминизм: пересборка байт-в-байт
-execFileSync(process.execPath, [join(__dirname, 'build-anatomy.js')], { stdio: 'pipe' });
-const rebuilt = readFileSync(join(ROOT, 'dist', 'anatomy.json'), 'utf8');
-const doc = `${JSON.stringify(anatomy, null, 1)}\n`;
-if (rebuilt !== doc) {
-  // сравнение с нормализованной сериализацией исходного объекта: расхождение
-  // означает либо ручную правку артефакта, либо недетерминизм сборки
-  fail('anatomy.json не детерминистичен или правился руками (пересборка разошлась)');
+export function inkIoU(dA, dB, cw, step = 0.12) {
+  const A = samplePolylines(dA, 24).filter((p) => p.length > 2);
+  const B = samplePolylines(dB, 24).filter((p) => p.length > 2);
+  let both = 0, onlyA = 0, onlyB = 0;
+  for (let x = step / 2; x < cw; x += step) {
+    for (let y = step / 2; y < cw; y += step) {
+      const a = inkAt(A, x, y);
+      const b = inkAt(B, x, y);
+      if (a && b) both++;
+      else if (a) onlyA++;
+      else if (b) onlyB++;
+    }
+  }
+  return both / (both + onlyA + onlyB || 1);
 }
 
-// 5. Биндинги
-const bindings = JSON.parse(readFileSync(join(ROOT, 'anatomy', 'bindings.json'), 'utf8'));
-const PIVOTS = new Set(['centroid', 'bbox-center', 'point']);
-for (const [name, b] of Object.entries(bindings.icons ?? {})) {
-  if (!icons[name]) fail(`bindings: иконки ${name} нет в анатомии`);
-  if (!PIVOTS.has(b.pivot?.mode)) fail(`bindings ${name}: неизвестный pivot.mode ${b.pivot?.mode}`);
-  if (b.pivot?.mode === 'point' && !(finite(b.pivot.at?.[0]) && finite(b.pivot.at?.[1]))) {
-    fail(`bindings ${name}: pivot point без координат`);
+/**
+ * @param {{grid:any, anatomy:any, readSvg:(variant:string, name:string)=>string|null}} input
+ * @returns {{hard:string[], report:string[], checked:number}}
+ */
+export function validateAnatomy({ grid, anatomy, readSvg }) {
+  const hard = [];
+  const report = [];
+  let checked = 0;
+  const cw = grid.canvas.width;
+  for (const [name, entry] of Object.entries(anatomy.glyphs)) {
+    let built;
+    try {
+      built = buildGlyph(entry, grid);
+    } catch (cause) {
+      hard.push(`${name}: генератор упал (${cause.message})`);
+      continue;
+    }
+    for (const [variant, dGen] of Object.entries(built)) {
+      const status = entry.status?.[variant];
+      if (!status) continue;
+      const file = readSvg(variant, name);
+      if (!file) {
+        hard.push(`${name}/${variant}: файла нет, а анатомия заявлена`);
+        continue;
+      }
+      const dFile = renderedPathData(file).join('');
+      const iou = inkIoU(dGen, dFile, cw);
+      checked++;
+      if (status === 'generated' && iou < 0.995) {
+        hard.push(
+          `${name}/${variant}: дрейф генерата и файла — IoU ${(iou * 100).toFixed(2)}% < 99.5% (status=generated)`,
+        );
+      } else if (status === 'hand' && iou < 0.95) {
+        report.push(
+          `${name}/${variant}: анатомия разошлась с рукой — IoU ${(iou * 100).toFixed(2)}% < 95%`,
+        );
+      }
+    }
   }
-  if (typeof b.animation !== 'string' || b.animation.length === 0) {
-    fail(`bindings ${name}: пустая анимация`);
-  }
+  return { hard, report, checked };
 }
 
-if (errors > 0) {
-  console.error(`\nAnatomy check FAILED — ${errors} ошибок`);
-  process.exit(1);
+const isMain = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
+if (isMain) {
+  const root = join(dirname(fileURLToPath(import.meta.url)), '..');
+  const grid = JSON.parse(readFileSync(join(root, 'semantics', 'grid.json'), 'utf8'));
+  const anatomy = JSON.parse(readFileSync(join(root, 'semantics', 'anatomy.json'), 'utf8'));
+  const readSvg = (variant, name) => {
+    const file =
+      variant === 'outline'
+        ? join(root, 'svg', 'Outline', `${name}.svg`)
+        : join(root, 'svg', 'Filled', `${name}_filled.svg`);
+    try {
+      return readFileSync(file, 'utf8');
+    } catch {
+      return null;
+    }
+  };
+  const strict = process.argv.includes('--strict');
+  const { hard, report, checked } = validateAnatomy({ grid, anatomy, readSvg });
+  if (hard.length > 0) {
+    console.error(`check-anatomy: HARD — ${hard.length} дрейфов:`);
+    for (const e of hard) console.error('  - ' + e);
+  }
+  if (report.length > 0) {
+    console.log(`check-anatomy: REPORT — ${report.length} расхождений с рукой:`);
+    for (const e of report) console.log('  - ' + e);
+  }
+  if (hard.length === 0 && report.length === 0) {
+    console.log(`check-anatomy: OK — анатомия сходится с файлами (проверено ${checked} вариантов)`);
+  }
+  if (hard.length > 0 || (strict && report.length > 0)) process.exit(1);
 }
-console.info(
-  `✓  Anatomy check PASSED — ${Object.keys(icons).length} скелетов, ${Object.keys(bindings.icons).length} биндингов`,
-);

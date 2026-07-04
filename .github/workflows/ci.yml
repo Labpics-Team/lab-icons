@@ -48,6 +48,21 @@ jobs:
       - name: Tree-shaking proof
         run: pnpm check:treeshake
 
+      - name: Variant parity check (контракт пары O↔F — каноны колец, регистрация)
+        run: pnpm check:variant-parity
+
+      - name: Anatomy check (декларации анатомии сходятся с файлами, generated ≥99.5%)
+        run: pnpm check:anatomy
+
+      - name: Path quality check (шум кривых, волосяные фрагменты, встык-швы)
+        run: pnpm check:path-quality
+
+      - name: Static grid check (поля, keylines)
+        run: pnpm check:static-grid
+
+      - name: Tests (анатомия, примитивы, гейты, геометрия — дифференциал по 444 SVG)
+        run: pnpm test
+
       # Bite test: inject a missing SVG and assert parity fails
       - name: Parity guard bites on missing icon
         run: |

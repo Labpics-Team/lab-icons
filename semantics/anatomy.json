@@ -1,0 +1,1231 @@
+{
+ "version": 1,
+ "comment": "Анатомия глифов (BL-014/015/017): архетип + параметры → генератор scripts/lib/anatomy-gen.js строит d обоих весов. ЕДИНИЦЫ (конвенция владельца): все длины/координаты — ДОЛИ КАНВЫ (резолв ×canvas.width в buildGlyph), углы — градусы, счётчики — штуки. Терминалы-активы — КРИВЫМИ (d-фрагмент в долях; полигонализация даёт ступеньки на скруглениях — фидбек владельца). Веса — именами токенов grid.json. status: generated = файл создан генератором (гейт strict), hand = рука (report). Пилоты: epics/ds-icons/tools.",
+ "glyphs": {
+  "cog": {
+   "archetype": "radial-gear",
+   "status": {
+    "outline": "generated"
+   },
+   "params": {
+    "cx": 0.5,
+    "cy": 0.5,
+    "teeth": 18,
+    "rTip": 0.46375,
+    "rRoot": 0.380417,
+    "rRim": 0.313333,
+    "wTipDeg": 8.4,
+    "wRootDeg": 13,
+    "fTip": 0.029167,
+    "fRoot": 0.01875,
+    "spokes": [
+     0,
+     120,
+     240
+    ],
+    "spokeHW": 0.039167,
+    "rCO": 0.033333,
+    "rCI": 0.029167
+   }
+  },
+  "reload": {
+   "archetype": "arc-terminal",
+   "status": {
+    "outline": "hand",
+    "filled": "generated"
+   },
+   "skeleton": {
+    "center": [
+     0.487625,
+     0.500083
+    ],
+    "rAxis": 0.40425,
+    "thetaCap": 19.47,
+    "thetaArrowOut": 313.37,
+    "thetaArrowIn": 316.13,
+    "headD": "M0.790833 0.179167L0.80875 0.197917L0.887917 0.119167A0.041667 0.041667 0 0 1 0.95875 0.148333L0.95875 0.354167A0.041667 0.041667 0 0 1 0.917083 0.395833L0.71125 0.395833A0.041667 0.041667 0 0 1 0.682083 0.325L0.755833 0.250833L0.751667 0.24625Z"
+   },
+   "weights": {
+    "outline": "base",
+    "filled": "bold"
+   }
+  },
+  "chevron-down": {
+   "archetype": "stroke-v",
+   "status": {
+    "outline": "hand",
+    "filled": "hand"
+   },
+   "inkAnchors": {
+    "endL": [
+     0.218333,
+     0.38
+    ],
+    "endR": [
+     0.781219,
+     0.379197
+    ],
+    "innerL": [
+     0.218333,
+     0.432969
+    ],
+    "innerR": [
+     0.781219,
+     0.432166
+    ]
+   },
+   "weights": {
+    "outline": "base",
+    "filled": "bold"
+   }
+  },
+  "chevron-down-circle": {
+   "archetype": "container-glyph",
+   "status": {
+    "outline": "hand",
+    "filled": "hand"
+   },
+   "glyph": {
+    "generator": "stroke-v",
+    "weight": "containerGlyph",
+    "inkAnchors": {
+     "endL": [
+      0.308333,
+      0.41875
+     ],
+     "endR": [
+      0.690296,
+      0.419704
+     ],
+     "innerL": [
+      0.441074,
+      0.610114
+     ],
+     "innerR": [
+      0.558926,
+      0.610114
+     ]
+    }
+   }
+  },
+  "tablet-landscape": {
+   "archetype": "rounded-rect-container",
+   "status": {
+    "outline": "hand",
+    "filled": "hand"
+   },
+   "params": {
+    "cx": 0.5,
+    "cy": 0.5,
+    "w": 0.916667,
+    "h": 0.691667,
+    "rOuter": 0.121667
+   },
+   "weights": {
+    "outline": "base"
+   }
+  },
+  "tablet-portrait": {
+   "archetype": "rounded-rect-container",
+   "status": {
+    "outline": "hand",
+    "filled": "hand"
+   },
+   "params": {
+    "cx": 0.5,
+    "cy": 0.5,
+    "w": 0.691667,
+    "h": 0.916667,
+    "rOuter": 0.103773
+   },
+   "weights": {
+    "outline": "base"
+   }
+  },
+  "pause": {
+   "archetype": "composite",
+   "status": {
+    "outline": "hand",
+    "filled": "hand"
+   },
+   "parts": [
+    {
+     "primitive": "rounded-rect",
+     "mode": {
+      "outline": "frame",
+      "filled": "solid"
+     },
+     "weight": "base",
+     "params": {
+      "outline": {
+       "cx": 0.307708,
+       "cy": 0.501042,
+       "w": 0.32375,
+       "h": 0.707083,
+       "rOuter": 0.1
+      },
+      "filled": {
+       "cx": 0.286875,
+       "cy": 0.50125,
+       "w": 0.282083,
+       "h": 0.7075,
+       "rOuter": 0.1
+      }
+     }
+    },
+    {
+     "primitive": "rounded-rect",
+     "mode": {
+      "outline": "frame",
+      "filled": "solid"
+     },
+     "weight": "base",
+     "params": {
+      "outline": {
+       "cx": 0.692292,
+       "cy": 0.501042,
+       "w": 0.32375,
+       "h": 0.707083,
+       "rOuter": 0.1
+      },
+      "filled": {
+       "cx": 0.713125,
+       "cy": 0.50125,
+       "w": 0.282083,
+       "h": 0.7075,
+       "rOuter": 0.1
+      }
+     }
+    }
+   ]
+  },
+  "ellipsis-horizontal": {
+   "archetype": "composite",
+   "status": {
+    "outline": "hand",
+    "filled": "hand"
+   },
+   "parts": [
+    {
+     "primitive": "circle-dot",
+     "mode": "solid",
+     "params": {
+      "outline": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.083333
+      },
+      "filled": {
+       "cx": 0.749984,
+       "cy": 0.500021,
+       "r": 0.104167
+      }
+     }
+    },
+    {
+     "primitive": "circle-dot",
+     "mode": "solid",
+     "params": {
+      "outline": {
+       "cx": 0.791667,
+       "cy": 0.5,
+       "r": 0.083333
+      },
+      "filled": {
+       "cx": 0.249984,
+       "cy": 0.500021,
+       "r": 0.104167
+      }
+     }
+    },
+    {
+     "primitive": "circle-dot",
+     "mode": "solid",
+     "params": {
+      "outline": {
+       "cx": 0.208333,
+       "cy": 0.5,
+       "r": 0.083333
+      },
+      "filled": {
+       "cx": 0.499984,
+       "cy": 0.500021,
+       "r": 0.104167
+      }
+     }
+    }
+   ]
+  },
+  "ellipsis-vertical": {
+   "archetype": "composite",
+   "status": {
+    "outline": "hand",
+    "filled": "hand"
+   },
+   "parts": [
+    {
+     "primitive": "circle-dot",
+     "mode": "solid",
+     "params": {
+      "outline": {
+       "cx": 0.5,
+       "cy": 0.208333,
+       "r": 0.083333
+      },
+      "filled": {
+       "cx": 0.506401,
+       "cy": 0.251187,
+       "r": 0.104167
+      }
+     }
+    },
+    {
+     "primitive": "circle-dot",
+     "mode": "solid",
+     "params": {
+      "outline": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.083333
+      },
+      "filled": {
+       "cx": 0.505596,
+       "cy": 0.499297,
+       "r": 0.104167
+      }
+     }
+    },
+    {
+     "primitive": "circle-dot",
+     "mode": "solid",
+     "params": {
+      "outline": {
+       "cx": 0.5,
+       "cy": 0.791667,
+       "r": 0.083333
+      },
+      "filled": {
+       "cx": 0.506401,
+       "cy": 0.747021,
+       "r": 0.104167
+      }
+     }
+    }
+   ]
+  },
+  "menu": {
+   "archetype": "composite",
+   "status": {
+    "outline": "hand",
+    "filled": "hand"
+   },
+   "parts": [
+    {
+     "primitive": "rounded-rect",
+     "mode": "solid",
+     "params": {
+      "outline": {
+       "cx": 0.497917,
+       "cy": 0.370417,
+       "w": 0.655833,
+       "h": 0.075,
+       "rOuter": 0.0375
+      },
+      "filled": {
+       "cx": 0.497292,
+       "cy": 0.375833,
+       "w": 0.65625,
+       "h": 0.1,
+       "rOuter": 0.05
+      }
+     }
+    },
+    {
+     "primitive": "rounded-rect",
+     "mode": "solid",
+     "params": {
+      "outline": {
+       "cx": 0.497917,
+       "cy": 0.629583,
+       "w": 0.655833,
+       "h": 0.075,
+       "rOuter": 0.0375
+      },
+      "filled": {
+       "cx": 0.497292,
+       "cy": 0.624167,
+       "w": 0.65625,
+       "h": 0.1,
+       "rOuter": 0.05
+      }
+     }
+    }
+   ]
+  },
+  "minus": {
+   "archetype": "composite",
+   "status": {
+    "outline": "hand",
+    "filled": "hand"
+   },
+   "parts": [
+    {
+     "primitive": "rounded-rect",
+     "mode": "solid",
+     "params": {
+      "outline": {
+       "cx": 0.502083,
+       "cy": 0.5,
+       "w": 0.579167,
+       "h": 0.075,
+       "rOuter": 0.0375
+      },
+      "filled": {
+       "cx": 0.500429,
+       "cy": 0.5,
+       "w": 0.60169,
+       "h": 0.1,
+       "rOuter": 0.05
+      }
+     }
+    }
+   ]
+  },
+  "ellipse": {
+   "archetype": "composite",
+   "status": {
+    "outline": "hand",
+    "filled": "hand"
+   },
+   "parts": [
+    {
+     "primitive": "circle-dot",
+     "mode": {
+      "outline": "frame",
+      "filled": "solid"
+     },
+     "weight": 0.075,
+     "params": {
+      "outline": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.458333
+      },
+      "filled": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.458333
+      }
+     }
+    }
+   ]
+  },
+  "filter": {
+   "archetype": "composite",
+   "status": {
+    "outline": "hand",
+    "filled": "hand"
+   },
+   "parts": [
+    {
+     "primitive": "rounded-rect",
+     "mode": "solid",
+     "params": {
+      "outline": {
+       "cx": 0.501875,
+       "cy": 0.291667,
+       "w": 0.807917,
+       "h": 0.075,
+       "rOuter": 0.0375
+      },
+      "filled": {
+       "cx": 0.5025,
+       "cy": 0.291667,
+       "w": 0.834167,
+       "h": 0.1,
+       "rOuter": 0.05
+      }
+     }
+    },
+    {
+     "primitive": "rounded-rect",
+     "mode": "solid",
+     "params": {
+      "outline": {
+       "cx": 0.502083,
+       "cy": 0.5,
+       "w": 0.589167,
+       "h": 0.075,
+       "rOuter": 0.0375
+      },
+      "filled": {
+       "cx": 0.502708,
+       "cy": 0.5,
+       "w": 0.615417,
+       "h": 0.1,
+       "rOuter": 0.05
+      }
+     }
+    },
+    {
+     "primitive": "rounded-rect",
+     "mode": "solid",
+     "params": {
+      "outline": {
+       "cx": 0.502083,
+       "cy": 0.708333,
+       "w": 0.370833,
+       "h": 0.075,
+       "rOuter": 0.0375
+      },
+      "filled": {
+       "cx": 0.5025,
+       "cy": 0.708333,
+       "w": 0.396667,
+       "h": 0.1,
+       "rOuter": 0.05
+      }
+     }
+    }
+   ]
+  },
+  "list": {
+   "archetype": "composite",
+   "status": {
+    "outline": "hand",
+    "filled": "hand"
+   },
+   "parts": [
+    {
+     "primitive": "rounded-rect",
+     "mode": "solid",
+     "params": {
+      "outline": {
+       "cx": 0.595208,
+       "cy": 0.5,
+       "w": 0.590417,
+       "h": 0.075,
+       "rOuter": 0.0375
+      },
+      "filled": {
+       "cx": 0.591667,
+       "cy": 0.5,
+       "w": 0.6,
+       "h": 0.1,
+       "rOuter": 0.05
+      }
+     }
+    },
+    {
+     "primitive": "rounded-rect",
+     "mode": "solid",
+     "params": {
+      "outline": {
+       "cx": 0.595208,
+       "cy": 0.73,
+       "w": 0.590417,
+       "h": 0.075,
+       "rOuter": 0.0375
+      },
+      "filled": {
+       "cx": 0.591667,
+       "cy": 0.722917,
+       "w": 0.6,
+       "h": 0.1,
+       "rOuter": 0.05
+      }
+     }
+    },
+    {
+     "primitive": "rounded-rect",
+     "mode": "solid",
+     "params": {
+      "outline": {
+       "cx": 0.595208,
+       "cy": 0.27,
+       "w": 0.590417,
+       "h": 0.075,
+       "rOuter": 0.0375
+      },
+      "filled": {
+       "cx": 0.591667,
+       "cy": 0.277083,
+       "w": 0.6,
+       "h": 0.1,
+       "rOuter": 0.05
+      }
+     }
+    },
+    {
+     "primitive": "circle-dot",
+     "mode": {
+      "outline": "solid",
+      "filled": "solid"
+     },
+     "params": {
+      "outline": {
+       "cx": 0.158081,
+       "cy": 0.730069,
+       "r": 0.050114
+      },
+      "filled": {
+       "cx": 0.168418,
+       "cy": 0.72306,
+       "r": 0.058572
+      }
+     }
+    },
+    {
+     "primitive": "circle-dot",
+     "mode": {
+      "outline": "solid",
+      "filled": "solid"
+     },
+     "params": {
+      "outline": {
+       "cx": 0.158307,
+       "cy": 0.500033,
+       "r": 0.050004
+      },
+      "filled": {
+       "cx": 0.168498,
+       "cy": 0.500036,
+       "r": 0.058298
+      }
+     }
+    },
+    {
+     "primitive": "circle-dot",
+     "mode": {
+      "outline": "solid",
+      "filled": "solid"
+     },
+     "params": {
+      "outline": {
+       "cx": 0.158281,
+       "cy": 0.270053,
+       "r": 0.04996
+      },
+      "filled": {
+       "cx": 0.16848,
+       "cy": 0.277103,
+       "r": 0.058284
+      }
+     }
+    }
+   ]
+  },
+  "minus-circle": {
+   "archetype": "composite",
+   "status": {
+    "outline": "hand",
+    "filled": "hand"
+   },
+   "parts": [
+    {
+     "primitive": "rounded-rect",
+     "mode": "solid",
+     "params": {
+      "outline": {
+       "cx": 0.502083,
+       "cy": 0.5,
+       "w": 0.4525,
+       "h": 0.083333,
+       "rOuter": 0.041667
+      },
+      "filled": {
+       "cx": 0.502083,
+       "cy": 0.5,
+       "w": 0.429167,
+       "h": 0.083333,
+       "rOuter": 0.041667
+      }
+     }
+    },
+    {
+     "primitive": "circle-dot",
+     "mode": {
+      "outline": "frame",
+      "filled": "solid"
+     },
+     "weight": 0.0625,
+     "params": {
+      "outline": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.458333
+      },
+      "filled": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.458333
+      }
+     }
+    }
+   ]
+  },
+  "pause-circle": {
+   "archetype": "composite",
+   "status": {
+    "outline": "hand",
+    "filled": "hand"
+   },
+   "parts": [
+    {
+     "primitive": "rounded-rect",
+     "mode": "solid",
+     "params": {
+      "outline": {
+       "cx": 0.589583,
+       "cy": 0.50125,
+       "w": 0.138333,
+       "h": 0.3025,
+       "rOuter": 0.069167
+      },
+      "filled": {
+       "cx": 0.589583,
+       "cy": 0.50125,
+       "w": 0.1375,
+       "h": 0.3025,
+       "rOuter": 0.06875
+      }
+     }
+    },
+    {
+     "primitive": "rounded-rect",
+     "mode": "solid",
+     "params": {
+      "outline": {
+       "cx": 0.410625,
+       "cy": 0.50125,
+       "w": 0.137917,
+       "h": 0.3025,
+       "rOuter": 0.068958
+      },
+      "filled": {
+       "cx": 0.410833,
+       "cy": 0.50125,
+       "w": 0.138333,
+       "h": 0.3025,
+       "rOuter": 0.069167
+      }
+     }
+    },
+    {
+     "primitive": "circle-dot",
+     "mode": {
+      "outline": "frame",
+      "filled": "solid"
+     },
+     "weight": 0.0625,
+     "params": {
+      "outline": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.458333
+      },
+      "filled": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.458333
+      }
+     }
+    }
+   ]
+  },
+  "sun-low": {
+   "archetype": "composite",
+   "status": {
+    "outline": "hand",
+    "filled": "hand"
+   },
+   "parts": [
+    {
+     "primitive": "circle-dot",
+     "mode": {
+      "outline": "frame",
+      "filled": "solid"
+     },
+     "weight": 0.075111,
+     "params": {
+      "outline": {
+       "cx": 0.500103,
+       "cy": 0.500024,
+       "r": 0.208444
+      },
+      "filled": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.208333
+      }
+     }
+    },
+    {
+     "primitive": "circle-dot",
+     "mode": {
+      "outline": "solid",
+      "filled": "solid"
+     },
+     "params": {
+      "outline": {
+       "cx": 0.797566,
+       "cy": 0.797538,
+       "r": 0.037685
+      },
+      "filled": {
+       "cx": 0.797566,
+       "cy": 0.797538,
+       "r": 0.037685
+      }
+     }
+    },
+    {
+     "primitive": "circle-dot",
+     "mode": {
+      "outline": "solid",
+      "filled": "solid"
+     },
+     "params": {
+      "outline": {
+       "cx": 0.202292,
+       "cy": 0.7975,
+       "r": 0.037565
+      },
+      "filled": {
+       "cx": 0.203196,
+       "cy": 0.796696,
+       "r": 0.036791
+      }
+     }
+    },
+    {
+     "primitive": "circle-dot",
+     "mode": {
+      "outline": "solid",
+      "filled": "solid"
+     },
+     "params": {
+      "outline": {
+       "cx": 0.5,
+       "cy": 0.079167,
+       "r": 0.0375
+      },
+      "filled": {
+       "cx": 0.5,
+       "cy": 0.079167,
+       "r": 0.0375
+      }
+     }
+    },
+    {
+     "primitive": "circle-dot",
+     "mode": {
+      "outline": "solid",
+      "filled": "solid"
+     },
+     "params": {
+      "outline": {
+       "cx": 0.920833,
+       "cy": 0.5,
+       "r": 0.0375
+      },
+      "filled": {
+       "cx": 0.920833,
+       "cy": 0.5,
+       "r": 0.0375
+      }
+     }
+    },
+    {
+     "primitive": "circle-dot",
+     "mode": {
+      "outline": "solid",
+      "filled": "solid"
+     },
+     "params": {
+      "outline": {
+       "cx": 0.079167,
+       "cy": 0.5,
+       "r": 0.0375
+      },
+      "filled": {
+       "cx": 0.079167,
+       "cy": 0.5,
+       "r": 0.0375
+      }
+     }
+    },
+    {
+     "primitive": "circle-dot",
+     "mode": {
+      "outline": "solid",
+      "filled": "solid"
+     },
+     "params": {
+      "outline": {
+       "cx": 0.5,
+       "cy": 0.920833,
+       "r": 0.0375
+      },
+      "filled": {
+       "cx": 0.5,
+       "cy": 0.920833,
+       "r": 0.0375
+      }
+     }
+    },
+    {
+     "primitive": "circle-dot",
+     "mode": {
+      "outline": "solid",
+      "filled": "solid"
+     },
+     "params": {
+      "outline": {
+       "cx": 0.203571,
+       "cy": 0.201627,
+       "r": 0.03682
+      },
+      "filled": {
+       "cx": 0.203571,
+       "cy": 0.201627,
+       "r": 0.03682
+      }
+     }
+    },
+    {
+     "primitive": "circle-dot",
+     "mode": {
+      "outline": "solid",
+      "filled": "solid"
+     },
+     "params": {
+      "outline": {
+       "cx": 0.798508,
+       "cy": 0.201383,
+       "r": 0.036699
+      },
+      "filled": {
+       "cx": 0.7975,
+       "cy": 0.2025,
+       "r": 0.037712
+      }
+     }
+    }
+   ]
+  },
+  "time": {
+   "archetype": "composite",
+   "status": {
+    "outline": "hand",
+    "filled": "hand"
+   },
+   "parts": [
+    {
+     "primitive": "circle-dot",
+     "mode": {
+      "outline": "frame",
+      "filled": "solid"
+     },
+     "weight": 0.075,
+     "params": {
+      "outline": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.458333
+      },
+      "filled": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.458333
+      }
+     }
+    },
+    {
+     "primitive": "clock-hands",
+     "mode": "solid",
+     "params": {
+      "outline": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "up": 0.260833,
+       "right": 0.18625,
+       "t": 0.075
+      },
+      "filled": {
+       "cx": 0.507083,
+       "cy": 0.494583,
+       "up": 0.25,
+       "right": 0.171667,
+       "t": 0.083333
+      }
+     }
+    }
+   ]
+  },
+  "component": {
+   "archetype": "composite",
+   "status": {
+    "outline": "generated",
+    "filled": "generated"
+   },
+   "comment": "Ромбы-сквирклы (утверждено владельцем 2026-07-03): n=2.8, перо base по нормали (рука офсетила вдоль диагонали — ошибка направления, намерение 1.8 восстановлено; ink-ratio 24.8% ≈ рука 23.9%). Внешние чернила = инвариант руки (bbox 8.27/8.87), внутренний контур = офсет по нормали.",
+   "parts": [
+    {
+     "primitive": "superellipse-stroke",
+     "mode": {
+      "outline": "stroke",
+      "filled": "solid"
+     },
+     "weight": "base",
+     "params": {
+      "outline": {
+       "cx": 0.5,
+       "cy": 0.776458,
+       "axis": 0.1221,
+       "n": 2.8,
+       "rotation": 45
+      },
+      "filled": {
+       "cx": 0.5,
+       "cy": 0.776458,
+       "axis": 0.16737,
+       "n": 2.8,
+       "rotation": 45
+      }
+     }
+    },
+    {
+     "primitive": "superellipse-stroke",
+     "mode": {
+      "outline": "stroke",
+      "filled": "solid"
+     },
+     "weight": "base",
+     "params": {
+      "outline": {
+       "cx": 0.22375,
+       "cy": 0.5,
+       "axis": 0.1221,
+       "n": 2.8,
+       "rotation": 45
+      },
+      "filled": {
+       "cx": 0.22375,
+       "cy": 0.5,
+       "axis": 0.16737,
+       "n": 2.8,
+       "rotation": 45
+      }
+     }
+    },
+    {
+     "primitive": "superellipse-stroke",
+     "mode": {
+      "outline": "stroke",
+      "filled": "solid"
+     },
+     "weight": "base",
+     "params": {
+      "outline": {
+       "cx": 0.776458,
+       "cy": 0.5,
+       "axis": 0.1221,
+       "n": 2.8,
+       "rotation": 45
+      },
+      "filled": {
+       "cx": 0.776458,
+       "cy": 0.5,
+       "axis": 0.16737,
+       "n": 2.8,
+       "rotation": 45
+      }
+     }
+    },
+    {
+     "primitive": "superellipse-stroke",
+     "mode": {
+      "outline": "stroke",
+      "filled": "solid"
+     },
+     "weight": "base",
+     "params": {
+      "outline": {
+       "cx": 0.5,
+       "cy": 0.22375,
+       "axis": 0.1221,
+       "n": 2.8,
+       "rotation": 45
+      },
+      "filled": {
+       "cx": 0.5,
+       "cy": 0.22375,
+       "axis": 0.16737,
+       "n": 2.8,
+       "rotation": 45
+      }
+     }
+    }
+   ]
+  },
+  "radio": {
+   "archetype": "composite",
+   "status": {
+    "outline": "generated",
+    "filled": "generated"
+   },
+   "comment": "Волны-дуги от центра (BL-020: рука нарезала волны кусками по разным path — 4 встык-шва; генерат = чистые arc-band). Перо волн 1.6/1.9 — как рука (ревизия выравнивания на лестницу — отдельно).",
+   "parts": [
+    {
+     "primitive": "arc-band",
+     "mode": "solid",
+     "params": {
+      "outline": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.42,
+       "aCenter": 0,
+       "halfSpan": 40,
+       "t": 0.066667
+      },
+      "filled": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.42,
+       "aCenter": 0,
+       "halfSpan": 40,
+       "t": 0.079167
+      }
+     }
+    },
+    {
+     "primitive": "arc-band",
+     "mode": "solid",
+     "params": {
+      "outline": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.42,
+       "aCenter": 180,
+       "halfSpan": 40,
+       "t": 0.066667
+      },
+      "filled": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.42,
+       "aCenter": 180,
+       "halfSpan": 40,
+       "t": 0.079167
+      }
+     }
+    },
+    {
+     "primitive": "arc-band",
+     "mode": "solid",
+     "params": {
+      "outline": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.294167,
+       "aCenter": 0,
+       "halfSpan": 40,
+       "t": 0.066667
+      },
+      "filled": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.28125,
+       "aCenter": 0,
+       "halfSpan": 40,
+       "t": 0.079167
+      }
+     }
+    },
+    {
+     "primitive": "arc-band",
+     "mode": "solid",
+     "params": {
+      "outline": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.294167,
+       "aCenter": 180,
+       "halfSpan": 40,
+       "t": 0.066667
+      },
+      "filled": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.28125,
+       "aCenter": 180,
+       "halfSpan": 40,
+       "t": 0.079167
+      }
+     }
+    },
+    {
+     "primitive": "arc-band",
+     "mode": "solid",
+     "params": {
+      "outline": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.17125,
+       "aCenter": 0,
+       "halfSpan": 36,
+       "t": 0.066667
+      },
+      "filled": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.142083,
+       "aCenter": 0,
+       "halfSpan": 35,
+       "t": 0.079167
+      }
+     }
+    },
+    {
+     "primitive": "arc-band",
+     "mode": "solid",
+     "params": {
+      "outline": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.17125,
+       "aCenter": 180,
+       "halfSpan": 36,
+       "t": 0.066667
+      },
+      "filled": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.142083,
+       "aCenter": 180,
+       "halfSpan": 35,
+       "t": 0.079167
+      }
+     }
+    },
+    {
+     "primitive": "circle-dot",
+     "mode": "solid",
+     "params": {
+      "outline": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.058333
+      },
+      "filled": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.056667
+      }
+     }
+    }
+   ]
+  }
+ }
+}
