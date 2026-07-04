@@ -3,7 +3,7 @@
 Библиотека иконок Labpics. 444 SVG: 222 Filled + 222 Outline.
 Статика систематизирована анатомией: токены сетки и весов — в
 `semantics/grid.json`, декларации глифов — в `semantics/anatomy.json`,
-производные файлы держатся гейтом дрейфа. Подробно: [docs/anatomy.md](docs/anatomy.md).
+производные файлы держатся гейтом дрейфа. Подробно: [docs/anatomy.md](docs/anatomy.md), грамматика начертания: [docs/grammar.md](docs/grammar.md).
 
 ## Установка
 
