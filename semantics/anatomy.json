@@ -1226,6 +1226,195 @@
      }
     }
    ]
+  },
+  "apps": {
+   "archetype": "composite",
+   "status": {
+    "outline": "hand",
+    "filled": "hand"
+   },
+   "parts": [
+    {
+     "primitive": "circle-dot",
+     "mode": {
+      "outline": "frame",
+      "filled": "solid"
+     },
+     "weight": 0.074984,
+     "params": {
+      "outline": {
+       "cx": 0.251801,
+       "cy": 0.500097,
+       "r": 0.104115
+      },
+      "filled": {
+       "cx": 0.252083,
+       "cy": 0.5,
+       "r": 0.104167
+      }
+     }
+    },
+    {
+     "primitive": "circle-dot",
+     "mode": {
+      "outline": "frame",
+      "filled": "solid"
+     },
+     "weight": 0.074984,
+     "params": {
+      "outline": {
+       "cx": 0.501801,
+       "cy": 0.500097,
+       "r": 0.104115
+      },
+      "filled": {
+       "cx": 0.502083,
+       "cy": 0.5,
+       "r": 0.104167
+      }
+     }
+    },
+    {
+     "primitive": "circle-dot",
+     "mode": {
+      "outline": "frame",
+      "filled": "solid"
+     },
+     "weight": 0.074984,
+     "params": {
+      "outline": {
+       "cx": 0.751801,
+       "cy": 0.500097,
+       "r": 0.104115
+      },
+      "filled": {
+       "cx": 0.752083,
+       "cy": 0.5,
+       "r": 0.104167
+      }
+     }
+    },
+    {
+     "primitive": "circle-dot",
+     "mode": {
+      "outline": "frame",
+      "filled": "solid"
+     },
+     "weight": 0.074968,
+     "params": {
+      "outline": {
+       "cx": 0.501811,
+       "cy": 0.74803,
+       "r": 0.104099
+      },
+      "filled": {
+       "cx": 0.502083,
+       "cy": 0.747917,
+       "r": 0.104167
+      }
+     }
+    },
+    {
+     "primitive": "circle-dot",
+     "mode": {
+      "outline": "frame",
+      "filled": "solid"
+     },
+     "weight": 0.074968,
+     "params": {
+      "outline": {
+       "cx": 0.251811,
+       "cy": 0.74803,
+       "r": 0.104099
+      },
+      "filled": {
+       "cx": 0.252083,
+       "cy": 0.747917,
+       "r": 0.104167
+      }
+     }
+    },
+    {
+     "primitive": "circle-dot",
+     "mode": {
+      "outline": "frame",
+      "filled": "solid"
+     },
+     "weight": 0.074968,
+     "params": {
+      "outline": {
+       "cx": 0.751811,
+       "cy": 0.74803,
+       "r": 0.104099
+      },
+      "filled": {
+       "cx": 0.752083,
+       "cy": 0.747917,
+       "r": 0.104167
+      }
+     }
+    },
+    {
+     "primitive": "circle-dot",
+     "mode": {
+      "outline": "frame",
+      "filled": "solid"
+     },
+     "weight": 0.0745,
+     "params": {
+      "outline": {
+       "cx": 0.251401,
+       "cy": 0.252016,
+       "r": 0.103631
+      },
+      "filled": {
+       "cx": 0.252083,
+       "cy": 0.252083,
+       "r": 0.104167
+      }
+     }
+    },
+    {
+     "primitive": "circle-dot",
+     "mode": {
+      "outline": "frame",
+      "filled": "solid"
+     },
+     "weight": 0.074371,
+     "params": {
+      "outline": {
+       "cx": 0.501094,
+       "cy": 0.252108,
+       "r": 0.103502
+      },
+      "filled": {
+       "cx": 0.502083,
+       "cy": 0.252083,
+       "r": 0.104167
+      }
+     }
+    },
+    {
+     "primitive": "circle-dot",
+     "mode": {
+      "outline": "frame",
+      "filled": "solid"
+     },
+     "weight": 0.074371,
+     "params": {
+      "outline": {
+       "cx": 0.751094,
+       "cy": 0.252108,
+       "r": 0.103502
+      },
+      "filled": {
+       "cx": 0.752083,
+       "cy": 0.252083,
+       "r": 0.104167
+      }
+     }
+    }
+   ]
   }
  }
 }
