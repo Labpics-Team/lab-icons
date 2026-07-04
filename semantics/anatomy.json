@@ -26,7 +26,11 @@
     "spokeHW": 0.039167,
     "rCO": 0.033333,
     "rCI": 0.029167
-   }
+   },
+   "fidelityToHand": {
+    "outline": 0.9789
+   },
+   "correctionReason": "выравнивание асимметрии руки + 91 волосяная дырка→0, идеальная симметрия 18 зубьев, G1-fillet by construction"
   },
   "reload": {
    "archetype": "arc-terminal",
@@ -48,7 +52,11 @@
    "weights": {
     "outline": "base",
     "filled": "bold"
-   }
+   },
+   "fidelityToHand": {
+    "filled": 0.8614
+   },
+   "ownerReview": "крупная коррекция: концентричная дуга-терминал вместо неконцентричной руки — на глаз владельцу"
   },
   "chevron-down": {
    "archetype": "stroke-v",
@@ -1067,7 +1075,12 @@
       }
      }
     }
-   ]
+   ],
+   "fidelityToHand": {
+    "outline": 0.9415,
+    "filled": 0.9915
+   },
+   "ownerReview": "4-фолд симметрия квадрифолия: габарит/центр те же, лепестки нормализованы — на глаз владельцу"
   },
   "radio": {
    "archetype": "composite",
@@ -1225,7 +1238,12 @@
       }
      }
     }
-   ]
+   ],
+   "fidelityToHand": {
+    "outline": 0.9617,
+    "filled": 0.954
+   },
+   "ownerReview": "нормализация: концентричное кольцо + центрированная точка — на глаз владельцу"
   },
   "apps": {
    "archetype": "composite",
@@ -1454,7 +1472,12 @@
      0.00083,
      -0.00333
     ]
-   }
+   },
+   "fidelityToHand": {
+    "outline": 0.9969,
+    "filled": 0.9815
+   },
+   "correctionReason": "компенсация дрейфа bold-варианта руки (регенерат чист: снос 0, изломов 0)"
   },
   "chevron-back": {
    "archetype": "stroke-v",
@@ -1494,6 +1517,10 @@
      -0.0025,
      0.00083
     ]
+   },
+   "fidelityToHand": {
+    "outline": 0.996,
+    "filled": 0.9915
    }
   },
   "chevron-forward": {
@@ -1534,6 +1561,10 @@
      0.00333,
      -0.00083
     ]
+   },
+   "fidelityToHand": {
+    "outline": 0.996,
+    "filled": 0.9917
    }
   }
  }
