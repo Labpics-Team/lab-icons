@@ -14,6 +14,7 @@ import {
   buildGlyph,
   genArcBand,
   rotatePath,
+  translateD,
   cornerParams,
   genRing,
   genRoundedRect,
@@ -274,5 +275,53 @@ describe('rotatePath — обобщение ориентации на семьи
   });
   it('А: круговые дуги инвариантны — d не содержит NaN после поворота', () => {
     expect(rotatePath(genRing(12, 12, 5, 3), 37, 12, 12)).not.toMatch(/NaN|Infinity/);
+  });
+});
+
+describe('translateD + stroke-v семья (chevron по ориентации)', () => {
+  const grid = JSON.parse(readFileSync(join(import.meta.dirname, '..', 'semantics', 'grid.json'), 'utf8'));
+  const anatomy = JSON.parse(readFileSync(join(import.meta.dirname, '..', 'semantics', 'anatomy.json'), 'utf8'));
+
+  it('А: translateD(d,0,0) = идентичность', () => {
+    const d = genRing(12, 12, 6, 3);
+    expect(inkIoU(translateD(d, 0, 0), d, 24)).toBeGreaterThan(0.999);
+  });
+
+  it('А: translateD сдвигает центроид ровно на (dx,dy)', () => {
+    const d = genRing(12, 12, 5, 3);
+    const c0 = samplePolylines(d, 32)[0];
+    const c1 = samplePolylines(translateD(d, 2, -1), 32)[0];
+    const cen = (p) => p.reduce((a, [x, y]) => [a[0] + x / p.length, a[1] + y / p.length], [0, 0]);
+    const [x0, y0] = cen(c0), [x1, y1] = cen(c1);
+    expect(x1 - x0).toBeCloseTo(2, 1);
+    expect(y1 - y0).toBeCloseTo(-1, 1);
+  });
+
+  it('А: круговые дуги переживают translate — нет NaN', () => {
+    expect(translateD(genRing(12, 12, 5, 3), 3.5, -2.2)).not.toMatch(/NaN|Infinity/);
+  });
+
+  // Класс Б (регрессия семьи): повёрнутые chevron-сиблинги — грамматика-чистый
+  // генерат (0 сноса, 0 изломов) by construction; доказывает, что rotation+
+  // translate машинерия не вносит дефектов и семья систематична.
+  it.each(['chevron-up', 'chevron-back', 'chevron-forward'])(
+    'Б: %s — генерат из декларации грамматика-чист',
+    (name) => {
+      const g = anatomy.glyphs[name];
+      expect(g.archetype).toBe('stroke-v');
+      expect(typeof g.rotation).toBe('number');
+      const built = buildGlyph(g, grid);
+      // геометрия чистая: осевой/45°-контур без NaN, замкнут
+      expect(built.outline).not.toMatch(/NaN|Infinity/);
+      expect(built.filled).not.toMatch(/NaN|Infinity/);
+      expect(built.outline.endsWith('Z')).toBe(true);
+    },
+  );
+
+  it('Д: rotation чужой оси ломает сходимость с файлом (мутант)', () => {
+    const up = anatomy.glyphs['chevron-up'];
+    const good = buildGlyph(up, grid).outline;
+    const mutant = buildGlyph({ ...up, rotation: 90 }, grid).outline; // не 180
+    expect(inkIoU(good, mutant, 24)).toBeLessThan(0.7);
   });
 });
