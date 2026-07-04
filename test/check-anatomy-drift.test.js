@@ -6,7 +6,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { validateAnatomy } from '../scripts/check-anatomy.js';
+import { validateAnatomy } from '../scripts/check-anatomy-drift.js';
 
 const root = join(import.meta.dirname, '..');
 const grid = JSON.parse(readFileSync(join(root, 'semantics', 'grid.json'), 'utf8'));

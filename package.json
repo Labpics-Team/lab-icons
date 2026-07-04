@@ -23,17 +23,18 @@
     "dist/index.d.ts"
   ],
   "scripts": {
-    "build": "node scripts/build.js",
+    "build": "node scripts/build.js && node scripts/build-anatomy.js",
     "check:parity": "node scripts/check-parity.js",
     "check:colors": "node scripts/check-colors.js",
     "check:treeshake": "node scripts/check-treeshake.js",
     "build:anatomy": "node scripts/build-anatomy.js",
-    "check:anatomy": "node scripts/check-anatomy.js",
+    "check:anatomy": "node scripts/check-anatomy.js && node scripts/check-anatomy-drift.js",
     "check:variant-parity": "node scripts/check-variant-parity.js",
     "check:path-quality": "node scripts/check-path-quality.js",
     "check:static-grid": "node scripts/check-static-grid.js",
     "test": "vitest run",
-    "verify": "node scripts/build.js && node scripts/build-anatomy.js && node scripts/check-parity.js && node scripts/check-colors.js && node scripts/check-treeshake.js && node scripts/check-variant-parity.js && node scripts/check-anatomy.js && node scripts/check-path-quality.js && node scripts/check-static-grid.js && vitest run"
+    "verify": "node scripts/build.js && node scripts/build-anatomy.js && node scripts/check-parity.js && node scripts/check-colors.js && node scripts/check-treeshake.js && node scripts/check-variant-parity.js && node scripts/check-anatomy.js && node scripts/check-anatomy-drift.js && node scripts/check-path-quality.js && node scripts/check-static-grid.js && node scripts/check-grammar.js && vitest run",
+    "check:grammar": "node scripts/check-grammar.js"
   },
   "dependencies": {},
   "devDependencies": {
