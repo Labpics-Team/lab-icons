@@ -13,6 +13,7 @@ import { describe, expect, it } from 'vitest';
 import {
   buildGlyph,
   genArcBand,
+  rotatePath,
   cornerParams,
   genRing,
   genRoundedRect,
@@ -246,5 +247,32 @@ describe('genSuperellipse / genSuperellipseStroke — сквиркл-прими�
       expect(min, `точка ${i}`).toBeGreaterThan(2 * pen - 0.12);
       expect(min, `точка ${i}`).toBeLessThan(2 * pen + 0.12);
     }
+  });
+});
+
+describe('rotatePath — обобщение ориентации на семьи', () => {
+  const d = genRoundedRect(12, 8, 6, 3, 1, 0.6); // асимметричный (w≠h) — поворот заметен
+  it('А: rot0 = идентичность (та же геометрия)', () => {
+    expect(inkIoU(rotatePath(d, 0, 12, 12), d, 24)).toBeGreaterThan(0.999);
+  });
+  it('А: rot360 = идентичность', () => {
+    expect(inkIoU(rotatePath(d, 360, 12, 12), d, 24)).toBeGreaterThan(0.999);
+  });
+  it('А: rot90 ×4 вокруг центра = исходник (замкнутая группа)', () => {
+    let r = d;
+    for (let i = 0; i < 4; i++) r = rotatePath(r, 90, 12, 12);
+    expect(inkIoU(r, d, 24)).toBeGreaterThan(0.999);
+  });
+  it('А: rot180 переносит центр фигуры точечным отражением', () => {
+    const poly = samplePolylines(rotatePath(d, 180, 12, 12), 32)[0];
+    let cx = 0, cy = 0;
+    for (const [x, y] of poly) { cx += x; cy += y; }
+    cx /= poly.length; cy /= poly.length;
+    // исходный центр (12,8) отражается через (12,12) → (12,16)
+    expect(cx).toBeCloseTo(12, 1);
+    expect(cy).toBeCloseTo(16, 1);
+  });
+  it('А: круговые дуги инвариантны — d не содержит NaN после поворота', () => {
+    expect(rotatePath(genRing(12, 12, 5, 3), 37, 12, 12)).not.toMatch(/NaN|Infinity/);
   });
 });

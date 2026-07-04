@@ -196,6 +196,25 @@ export function genArcTerminal(p, w) {
   return bow + headD;
 }
 
+/**
+ * Поворот d-пути вокруг (cx,cy) на deg. Дуги генераторов КРУГОВЫЕ
+ * (rx==ry) → x-rotation/флаги инвариантны, вращаются координаты.
+ * Обобщает ориентацию-фиксированные примитивы на семьи (chevron ×4).
+ */
+export function rotatePath(d, deg, cx, cy) {
+  const t = rad(deg), c = Math.cos(t), s = Math.sin(t);
+  const rot = (x, y) => [cx + (x - cx) * c - (y - cy) * s, cy + (x - cx) * s + (y - cy) * c];
+  let out = '';
+  for (const g of parsePathData(d)) {
+    if (g.cmd === 'M' || g.cmd === 'L') out += `${g.cmd}${P(rot(g.x, g.y))}`;
+    else if (g.cmd === 'C') out += `C${P(rot(g.x1, g.y1))} ${P(rot(g.x2, g.y2))} ${P(rot(g.x, g.y))}`;
+    else if (g.cmd === 'Q') out += `Q${P(rot(g.x1, g.y1))} ${P(rot(g.x, g.y))}`;
+    else if (g.cmd === 'A') out += `A${f3(g.rx)} ${f3(g.ry)} ${f3(g.rotation)} ${g.largeArc} ${g.sweep} ${P(rot(g.x, g.y))}`;
+    else if (g.cmd === 'Z') out += 'Z';
+  }
+  return out;
+}
+
 // ── stroke-v (chevron) ──
 /**
  * Законы, снятые с руки на двух весах (chevron-пилот):
