@@ -641,13 +641,17 @@ export function genRing(cx, cy, rOut, rIn) {
  *
  * @returns {{outline?: string, filled?: string}} d-строки вариантов
  */
-export function buildGlyph(entry, grid) {
+export function buildGlyph(entry, grid, axes = {}) {
   const cw = grid.canvas.width;
+  // ОСЬ ВЕСА (вариативность, север владельца): глобальный множитель на все
+  // штриховые токены — одна правка restyle-ит ВЕСЬ задекларированный корпус
+  // (как весовая ось шрифта). Дефолт 1 = идентичность (гейты держат default).
+  const wScale = axes.weight ?? 1;
   const L = (ratio) => ratio * cw;                       // длина: доля → юниты
   const Pt = (q) => [q[0] * cw, q[1] * cw];              // точка
   const Pts = (arr) => arr.map(Pt);                      // полилиния
   const tok = (nameOrRatio) =>
-    typeof nameOrRatio === 'number' ? L(nameOrRatio) : grid.ratios.strokeWidth[nameOrRatio] * cw;
+    (typeof nameOrRatio === 'number' ? L(nameOrRatio) : grid.ratios.strokeWidth[nameOrRatio] * cw) * wScale;
   const out = {};
   if (entry.archetype === 'radial-gear') {
     const p = entry.params;
@@ -720,7 +724,7 @@ export function buildGlyph(entry, grid) {
           const zeta = grid.ratios.cornerSmoothing ?? 0;
           const outer = genRoundedRect(cx2, cy2, W, H, R, zeta, rot);
           if (mode === 'frame') {
-            const w = typeof part.weight === 'number' ? part.weight * cw : tok(part.weight ?? 'base');
+            const w = tok(part.weight ?? 'base');
             if (W - 2 * w <= 0 || H - 2 * w <= 0) {
               throw new Error(`composite rounded-rect frame: перо ${w} съедает габарит ${W}×${H}`);
             }
@@ -732,7 +736,7 @@ export function buildGlyph(entry, grid) {
           // точка/диск; mode frame = кольцо пером (редко), solid = диск
           const [cx2, cy2, r] = [L(pp.cx), L(pp.cy), L(pp.r)];
           if (mode === 'frame') {
-            const w = typeof part.weight === 'number' ? part.weight * cw : tok(part.weight ?? 'base');
+            const w = tok(part.weight ?? 'base');
             chunks.push(genRing(cx2, cy2, r, Math.max(r - w, 0.05)));
           } else {
             chunks.push(genRing(cx2, cy2, r, 0));
@@ -741,7 +745,7 @@ export function buildGlyph(entry, grid) {
           // сквиркл-рамка: контуры = офсеты ОСИ по нормали (перо константно,
           // негатив-дырка следует форме); solid = внешний офсет оси
           const rot = pp.rotation ?? 0;
-          const w = typeof part.weight === 'number' ? part.weight * cw : tok(part.weight ?? 'base');
+          const w = tok(part.weight ?? 'base');
           const ax = L(pp.axis);
           if (mode === 'stroke') {
             chunks.push(genSuperellipseStroke(L(pp.cx), L(pp.cy), ax, ax, pp.n, rot, w / 2, 'both'));
