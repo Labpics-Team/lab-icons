@@ -1415,6 +1415,126 @@
      }
     }
    ]
+  },
+  "chevron-up": {
+   "archetype": "stroke-v",
+   "status": {
+    "outline": "generated",
+    "filled": "generated"
+   },
+   "inkAnchors": {
+    "endL": [
+     0.218333,
+     0.38
+    ],
+    "endR": [
+     0.781219,
+     0.379197
+    ],
+    "innerL": [
+     0.218333,
+     0.432969
+    ],
+    "innerR": [
+     0.781219,
+     0.432166
+    ]
+   },
+   "weights": {
+    "outline": "base",
+    "filled": "bold"
+   },
+   "rotation": 180,
+   "translate": {
+    "outline": [
+     -0.00083,
+     0.00583
+    ],
+    "filled": [
+     0.00083,
+     -0.00333
+    ]
+   }
+  },
+  "chevron-back": {
+   "archetype": "stroke-v",
+   "status": {
+    "outline": "generated",
+    "filled": "generated"
+   },
+   "inkAnchors": {
+    "endL": [
+     0.218333,
+     0.38
+    ],
+    "endR": [
+     0.781219,
+     0.379197
+    ],
+    "innerL": [
+     0.218333,
+     0.432969
+    ],
+    "innerR": [
+     0.781219,
+     0.432166
+    ]
+   },
+   "weights": {
+    "outline": "base",
+    "filled": "bold"
+   },
+   "rotation": 90,
+   "translate": {
+    "outline": [
+     0.00583,
+     0.00083
+    ],
+    "filled": [
+     -0.0025,
+     0.00083
+    ]
+   }
+  },
+  "chevron-forward": {
+   "archetype": "stroke-v",
+   "status": {
+    "outline": "generated",
+    "filled": "generated"
+   },
+   "inkAnchors": {
+    "endL": [
+     0.218333,
+     0.38
+    ],
+    "endR": [
+     0.781219,
+     0.379197
+    ],
+    "innerL": [
+     0.218333,
+     0.432969
+    ],
+    "innerR": [
+     0.781219,
+     0.432166
+    ]
+   },
+   "weights": {
+    "outline": "base",
+    "filled": "bold"
+   },
+   "rotation": 270,
+   "translate": {
+    "outline": [
+     -0.00083,
+     0
+    ],
+    "filled": [
+     0.00333,
+     -0.00083
+    ]
+   }
   }
  }
 }

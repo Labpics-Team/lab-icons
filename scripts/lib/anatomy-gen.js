@@ -215,6 +215,20 @@ export function rotatePath(d, deg, cx, cy) {
   return out;
 }
 
+/** Сдвиг d-пути на (dx,dy) юнитов. Только координаты (флаги дуг неизменны). */
+export function translateD(d, dx, dy) {
+  let out = '';
+  for (const g of parsePathData(d)) {
+    const X = (x) => f3(x + dx), Y = (y) => f3(y + dy);
+    if (g.cmd === 'M' || g.cmd === 'L') out += `${g.cmd}${X(g.x)} ${Y(g.y)}`;
+    else if (g.cmd === 'C') out += `C${X(g.x1)} ${Y(g.y1)} ${X(g.x2)} ${Y(g.y2)} ${X(g.x)} ${Y(g.y)}`;
+    else if (g.cmd === 'Q') out += `Q${X(g.x1)} ${Y(g.y1)} ${X(g.x)} ${Y(g.y)}`;
+    else if (g.cmd === 'A') out += `A${f3(g.rx)} ${f3(g.ry)} ${f3(g.rotation)} ${g.largeArc} ${g.sweep} ${X(g.x)} ${Y(g.y)}`;
+    else if (g.cmd === 'Z') out += 'Z';
+  }
+  return out;
+}
+
 // ── stroke-v (chevron) ──
 /**
  * Законы, снятые с руки на двух весах (chevron-пилот):
@@ -656,8 +670,26 @@ export function buildGlyph(entry, grid) {
   } else if (entry.archetype === 'stroke-v') {
     const a = entry.inkAnchors;
     const anchors = { endL: Pt(a.endL), endR: Pt(a.endR), innerL: Pt(a.innerL), innerR: Pt(a.innerR) };
-    if (entry.weights.outline) out.outline = genStrokeV(anchors, tok(entry.weights.outline));
-    if (entry.weights.filled) out.filled = genStrokeV(anchors, tok(entry.weights.filled));
+    // семья по ориентации: rotation (град) поворачивает знак вокруг центра
+    // канвы — chevron up/down/back/forward = одна форма × поворот (DRY,
+    // грамматика-консистентность). translate ([dx,dy] в долях) — малая
+    // позиционная коррекция под faithful-позицию сиблинга (сохраняет вид,
+    // геометрия остаётся чистой by construction). Per-variant translate:
+    // bold-вариант рука клала иначе.
+    const rotDeg = entry.rotation ?? 0;
+    const trV = (v) => {
+      const t = entry.translate;
+      if (!t) return [0, 0];
+      if (Array.isArray(t)) return t; // плоский [dx,dy] — оба варианта
+      return Array.isArray(t[v]) ? t[v] : [0, 0]; // per-variant объект
+    };
+    const spin = (dS, v) => {
+      let d = rotDeg ? rotatePath(dS, rotDeg, cw / 2, cw / 2) : dS;
+      const [dx, dy] = trV(v);
+      return dx || dy ? translateD(d, L(dx), L(dy)) : d;
+    };
+    if (entry.weights.outline) out.outline = spin(genStrokeV(anchors, tok(entry.weights.outline)), 'outline');
+    if (entry.weights.filled) out.filled = spin(genStrokeV(anchors, tok(entry.weights.filled)), 'filled');
   } else if (entry.archetype === 'rounded-rect-container') {
     // контейнер-рамка: внешний rounded-rect (ζ из сетки) + внутренний офсет
     // пером; filled = сплошной внешний. Внутренний радиус = R − перо.
