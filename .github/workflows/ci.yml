@@ -12,21 +12,26 @@ jobs:
     runs-on: [self-hosted, Linux, X64]
 
     steps:
+      # Actions запинены по SHA (supply-chain) — те же пины, что в labui.
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           persist-credentials: false
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
         with:
           version: 9
+          # per-job dest: дефолтный ~/setup-pnpm ОБЩИЙ для 8 self-hosted раннеров
+          # (один /home/daniel) и гоняется между конкурентными job'ами любых репо.
+          dest: ${{ runner.temp }}/setup-pnpm
 
+      # Без cache:pnpm — на этих раннерах шаг кэша висел на сетевом эгрессе
+      # (класс закрыт в labui); pnpm-store и так персистит на самом раннере.
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: '20'
-          cache: 'pnpm'
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -36,6 +41,9 @@ jobs:
 
       - name: Build animate subpath (tsup)
         run: pnpm build:animate
+
+      - name: Build anatomy (скелеты 444 иконок → dist/anatomy.json)
+        run: pnpm build:anatomy
 
       - name: Typecheck (tsc strict)
         run: pnpm typecheck
@@ -67,8 +75,11 @@ jobs:
       - name: Variant parity check (контракт пары O↔F — каноны колец, регистрация; report до закрытия time, затем strict)
         run: pnpm check:variant-parity
 
-      - name: Anatomy check (декларация анатомии сходится с файлами)
+      - name: Anatomy check (гард статической модели — скелеты, домен, детерминизм, биндинги)
         run: pnpm check:anatomy
+
+      - name: Anatomy drift check (декларация анатомии сходится с файлами, BL-015)
+        run: pnpm check:anatomy:drift
 
       - name: Tests (парсер геометрии — дифференциал по 444 SVG)
         run: pnpm test

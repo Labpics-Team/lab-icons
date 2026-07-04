@@ -21,7 +21,7 @@ import {
   smoothCorner90,
   smoothCornerAny,
 } from '../scripts/lib/anatomy-gen.js';
-import { inkIoU } from '../scripts/check-anatomy.js';
+import { inkIoU } from '../scripts/check-anatomy-drift.js';
 import { samplePolylines } from '../scripts/lib/motion-geometry.js';
 
 const golden = JSON.parse(

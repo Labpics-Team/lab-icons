@@ -24,6 +24,17 @@ const DIST_SVG_DIR = join(ROOT, 'dist', 'svg');
 // Does NOT match "currentColor" or "none" or "inherit".
 const HEX_COLOR_RE = /#([0-9a-fA-F]{6}|[0-9a-fA-F]{3})\b/g;
 
+// M3 (аудит 2026-07-03): hex-регексп был слеп к остальным формам краски —
+// rgb()/hsl()/именованные цвета (fill="red") проходили гард насквозь.
+// Ловим любое значение краско-несущего атрибута, кроме белого списка
+// бескрасочных форм. url(#…) — референс (краску несут stop-color внутри,
+// их поймает этот же гард).
+const PAINT_ATTR_RE = /(fill|stroke|stop-color|color|flood-color|lighting-color)="([^"]*)"/gi;
+const PAINT_ALLOWED_RE = /^(currentColor|none|inherit|transparent|url\(#[^)]*\))$/i;
+// style="" провозит краску мимо атрибутов — в оптимизированном выводе его
+// быть не должно вовсе.
+const STYLE_ATTR_RE = /style="/i;
+
 let errors = 0;
 let scanned = 0;
 
@@ -38,10 +49,17 @@ function scanDir(variant) {
   const files = readdirSync(dir).filter(f => f.endsWith('.svg')).sort();
   for (const file of files) {
     const content = readFileSync(join(dir, file), 'utf8');
-    const matches = [...content.matchAll(HEX_COLOR_RE)];
-    if (matches.length > 0) {
-      const found = [...new Set(matches.map(m => m[0]))].join(', ');
-      console.error(`✗  Hardcoded colour in ${variant}/${file}: ${found}`);
+    const found = new Set();
+
+    for (const m of content.matchAll(HEX_COLOR_RE)) found.add(m[0]);
+    for (const m of content.matchAll(PAINT_ATTR_RE)) {
+      const [, attr, value] = m;
+      if (!PAINT_ALLOWED_RE.test(value.trim())) found.add(`${attr}="${value}"`);
+    }
+    if (STYLE_ATTR_RE.test(content)) found.add('style="…"');
+
+    if (found.size > 0) {
+      console.error(`✗  Hardcoded colour in ${variant}/${file}: ${[...found].join(', ')}`);
       errors++;
     }
     scanned++;

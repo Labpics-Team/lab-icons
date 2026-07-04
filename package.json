@@ -3,6 +3,10 @@
   "version": "0.0.1",
   "private": true,
   "description": "Labpics icon library — 444 SVG (Filled + Outline), tree-shakeable ESM",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Labpics-Team/lab-icons.git"
+  },
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
@@ -19,6 +23,11 @@
     }
   },
   "sideEffects": false,
+  "files": [
+    "dist/index.js",
+    "dist/index.d.ts",
+    "dist/animate"
+  ],
   "scripts": {
     "build": "node scripts/build.js",
     "build:animate": "tsup",
@@ -32,9 +41,11 @@
     "check:motion-bounds": "node scripts/check-motion-bounds.js",
     "check:motion-collision": "node scripts/check-motion-collision.js",
     "check:variant-parity": "node scripts/check-variant-parity.js",
+    "build:anatomy": "node scripts/build-anatomy.js",
     "check:anatomy": "node scripts/check-anatomy.js",
+    "check:anatomy:drift": "node scripts/check-anatomy-drift.js",
     "test": "vitest run",
-    "verify": "node scripts/build.js && tsup && tsc --noEmit && node scripts/check-parity.js && node scripts/check-colors.js && node scripts/check-treeshake.js && node scripts/check-semantics.js && node scripts/check-choreographies.js && node scripts/check-layers.js && node scripts/check-motion-bounds.js && node scripts/check-motion-collision.js && node scripts/check-variant-parity.js && node scripts/check-anatomy.js && vitest run"
+    "verify": "node scripts/build.js && node scripts/build-anatomy.js && tsup && tsc --noEmit && node scripts/check-parity.js && node scripts/check-colors.js && node scripts/check-treeshake.js && node scripts/check-semantics.js && node scripts/check-choreographies.js && node scripts/check-layers.js && node scripts/check-motion-bounds.js && node scripts/check-motion-collision.js && node scripts/check-variant-parity.js && node scripts/check-anatomy.js && node scripts/check-anatomy-drift.js && vitest run"
   },
   "devDependencies": {
     "rollup": "^4.24.0",

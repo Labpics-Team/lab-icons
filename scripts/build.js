@@ -55,6 +55,35 @@ function escapeSvg(svg) {
     .replace(/\$/g, '\\$');
 }
 
+// ── source paint contract (M1, аудит 2026-07-03) ─────────────────────────────
+//
+// Контракт исходников: моно-чернила #101012 (или бесцветные path). Пайплайн
+// делает convertColors(#101012→currentColor) + removeAttrs(fill) — на
+// КОНТРАКТНОМ входе это без потерь. Но на неконтрактном он МОЛЧА меняет
+// рендер: fill="none" (stroke-иконка) стёрся бы и залился currentColor от
+// корня; fill="white" (вырез) перекрасился бы в чернила. Честный результат
+// (политика ДС): такой вход — ошибка сборки с именем файла, не тихая порча.
+const CONTRACT_INK = '#101012';
+const PAINT_ATTR_RE = /(fill|stroke|stop-color|color)\s*=\s*"([^"]*)"/gi;
+
+function assertSourceContract(file, src) {
+  const violations = [];
+  for (const m of src.matchAll(PAINT_ATTR_RE)) {
+    const [, attr, value] = m;
+    if (value.toLowerCase() !== CONTRACT_INK) {
+      violations.push(`${attr}="${value}"`);
+    }
+  }
+  // style="" провозит краску мимо атрибутного контракта — запрещён целиком.
+  if (/style\s*=\s*"/i.test(src)) violations.push('style="…"');
+  if (violations.length > 0) {
+    throw new Error(
+      `source contract: ${file} несёт краску вне контракта (${violations.join(', ')}). ` +
+      `Разрешены только чернила ${CONTRACT_INK} — пайплайн не имеет права молча перекрашивать.`,
+    );
+  }
+}
+
 // ── optimise all SVGs ─────────────────────────────────────────────────────────
 
 function optimiseDir(variant) {
@@ -67,6 +96,7 @@ function optimiseDir(variant) {
 
   for (const file of files) {
     const src = readFileSync(join(srcDir, file), 'utf8');
+    assertSourceContract(`${variant}/${file}`, src);
     const result = optimize(src, { ...svgoConfig, path: join(srcDir, file) });
     if (result.error) {
       throw new Error(`svgo error on ${file}: ${result.error}`);
@@ -107,17 +137,32 @@ jsLines.push('');
 dtsLines.push('// @labpics/icons — auto-generated type declarations');
 dtsLines.push('');
 
+const exportNames = [];
+
 function processResults(results, variant) {
   for (const { file, data } of results) {
     const exportName = makeExportName(file, variant);
     const escaped = escapeSvg(data);
     jsLines.push(`export const ${exportName} = \`${escaped}\`;`);
     dtsLines.push(`export declare const ${exportName}: string;`);
+    exportNames.push(exportName);
   }
 }
 
 processResults(filledResults, 'Filled');
 processResults(outlineResults, 'Outline');
+
+// ── IconName union (аудит 2026-07-03) ────────────────────────────────────────
+// Типобезопасное имя иконки для потребителей (labui <lab-icon name="…">,
+// словари, конфиги): union всех экспортов. Type-only — ноль рантайм-веса,
+// tree-shaking не затронут.
+dtsLines.push('');
+dtsLines.push('/** Имя иконки — union всех 444 экспортов (авто-генерация). */');
+dtsLines.push('export type IconName =');
+for (const name of exportNames) {
+  dtsLines.push(`  | '${name}'`);
+}
+dtsLines.push(';');
 
 mkdirSync(DIST_DIR, { recursive: true });
 
