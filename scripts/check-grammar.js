@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 /**
  * scripts/check-grammar.js — грамматика начертания (v1: направления рёбер).
  *

@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 /**
  * scripts/check-fidelity.js — пол УЗНАВАЕМОСТИ генерата (рефрейм).
  *

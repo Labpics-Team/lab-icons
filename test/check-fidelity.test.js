@@ -72,7 +72,7 @@ describe('check-fidelity — ярус ниже пола (эскалация вл
   it('Д: <0.97 БЕЗ ownerReview — HARD (неэскалированная развилка)', () => {
     const r = run({ a: belowFloor() });
     expect(r.hard.length).toBe(1);
-    expect(r.hard[0]).toMatch(/нужен ownerReview/);
+    expect(r.hard[0]).toMatch(/подтвердить\/поправить закон/);
   });
 
   it('А: <0.97 С ownerReview — report (закон подтверждён), НЕ hard', () => {
