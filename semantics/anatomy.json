@@ -1566,6 +1566,121 @@
     "outline": 0.996,
     "filled": 0.9917
    }
+  },
+  "chevron-up-circle": {
+   "archetype": "container-glyph",
+   "status": {
+    "outline": "generated",
+    "filled": "generated"
+   },
+   "glyph": {
+    "generator": "stroke-v",
+    "weight": "containerGlyph",
+    "inkAnchors": {
+     "endL": [
+      0.308333,
+      0.41875
+     ],
+     "endR": [
+      0.690296,
+      0.419704
+     ],
+     "innerL": [
+      0.441074,
+      0.610114
+     ],
+     "innerR": [
+      0.558926,
+      0.610114
+     ]
+    },
+    "rotation": 180,
+    "translate": [
+     0.00354,
+     -0.02083
+    ]
+   },
+   "fidelityToHand": {
+    "outline": 0.9841,
+    "filled": 0.9945
+   },
+   "correctionReason": "поворот canonical chevron-down-circle (семья × ориентация)"
+  },
+  "chevron-back-circle": {
+   "archetype": "container-glyph",
+   "status": {
+    "outline": "generated",
+    "filled": "generated"
+   },
+   "glyph": {
+    "generator": "stroke-v",
+    "weight": "containerGlyph",
+    "inkAnchors": {
+     "endL": [
+      0.308333,
+      0.41875
+     ],
+     "endR": [
+      0.690296,
+      0.419704
+     ],
+     "innerL": [
+      0.441074,
+      0.610114
+     ],
+     "innerR": [
+      0.558926,
+      0.610114
+     ]
+    },
+    "rotation": 90,
+    "translate": [
+     -0.0125,
+     0
+    ]
+   },
+   "fidelityToHand": {
+    "outline": 1,
+    "filled": 1
+   }
+  },
+  "chevron-forward-circle": {
+   "archetype": "container-glyph",
+   "status": {
+    "outline": "generated",
+    "filled": "generated"
+   },
+   "glyph": {
+    "generator": "stroke-v",
+    "weight": "containerGlyph",
+    "inkAnchors": {
+     "endL": [
+      0.308333,
+      0.41875
+     ],
+     "endR": [
+      0.690296,
+      0.419704
+     ],
+     "innerL": [
+      0.441074,
+      0.610114
+     ],
+     "innerR": [
+      0.558926,
+      0.610114
+     ]
+    },
+    "rotation": 270,
+    "translate": [
+     0.01146,
+     0
+    ]
+   },
+   "fidelityToHand": {
+    "outline": 0.9996,
+    "filled": 0.9999
+   }
   }
  }
 }
