@@ -33,8 +33,9 @@
     "check:path-quality": "node scripts/check-path-quality.js",
     "check:static-grid": "node scripts/check-static-grid.js",
     "test": "vitest run",
-    "verify": "node scripts/build.js && node scripts/build-anatomy.js && node scripts/check-parity.js && node scripts/check-colors.js && node scripts/check-treeshake.js && node scripts/check-variant-parity.js && node scripts/check-anatomy.js && node scripts/check-anatomy-drift.js && node scripts/check-path-quality.js && node scripts/check-static-grid.js && node scripts/check-grammar.js && vitest run",
-    "check:grammar": "node scripts/check-grammar.js"
+    "verify": "node scripts/build.js && node scripts/build-anatomy.js && node scripts/check-parity.js && node scripts/check-colors.js && node scripts/check-treeshake.js && node scripts/check-variant-parity.js && node scripts/check-anatomy.js && node scripts/check-anatomy-drift.js && node scripts/check-path-quality.js && node scripts/check-static-grid.js && node scripts/check-grammar.js && node scripts/check-fidelity.js && vitest run",
+    "check:grammar": "node scripts/check-grammar.js",
+    "check:fidelity": "node scripts/check-fidelity.js"
   },
   "dependencies": {},
   "devDependencies": {
