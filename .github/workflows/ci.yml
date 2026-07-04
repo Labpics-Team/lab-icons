@@ -51,7 +51,7 @@ jobs:
       - name: Variant parity check (контракт пары O↔F — каноны колец, регистрация)
         run: pnpm check:variant-parity
 
-      - name: Anatomy check (декларации анатомии сходятся с файлами, generated ≥99.5%)
+      - name: Anatomy checks (скелет 444 + дрейф деклараций generated ≥99.5%)
         run: pnpm check:anatomy
 
       - name: Path quality check (шум кривых, волосяные фрагменты, встык-швы)
