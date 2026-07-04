@@ -784,10 +784,17 @@ export function buildGlyph(entry, grid) {
     const rOut = (grid.ratios.keylines.circle * cw) / 2;
     const ringWeight = grid.ratios.strokeWidth.enclosureRing * cw;
     const a = entry.glyph.inkAnchors;
-    const glyphD = genStrokeV(
+    let glyphD = genStrokeV(
       { endL: Pt(a.endL), endR: Pt(a.endR), innerL: Pt(a.innerL), innerR: Pt(a.innerR) },
       tok(entry.glyph.weight),
     );
+    // семья по ориентации: тот же rotation+translate, что у stroke-v —
+    // внутренний глиф контейнера вращается, кольцо инвариантно (chevron
+    // {down,up,back,forward}-circle = одна форма × поворот, DRY).
+    const gr = entry.glyph.rotation ?? 0;
+    if (gr) glyphD = rotatePath(glyphD, gr, center[0], center[1]);
+    const gt = Array.isArray(entry.glyph.translate) ? entry.glyph.translate : null;
+    if (gt && (gt[0] || gt[1])) glyphD = translateD(glyphD, L(gt[0]), L(gt[1]));
     out.outline = genRing(center[0], center[1], rOut, rOut - ringWeight) + glyphD;
     out.filled = genRing(center[0], center[1], rOut, 0) + glyphD;
   } else {
