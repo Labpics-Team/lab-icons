@@ -75,9 +75,9 @@ describe('check-fidelity — ярус ниже пола (эскалация вл
     expect(r.hard[0]).toMatch(/нужен ownerReview/);
   });
 
-  it('А: <0.97 С ownerReview — report (вынесено на приёмку), НЕ hard', () => {
-    const r = run({ a: belowFloor({ ownerReview: 'крупная коррекция — на глаз' }) });
+  it('А: <0.97 С ownerReview — report (закон подтверждён), НЕ hard', () => {
+    const r = run({ a: belowFloor({ ownerReview: 'крупная чистка — закон подтверждён' }) });
     expect(r.hard).toEqual([]);
-    expect(r.report.some((e) => e.includes('на приёмку владельцу'))).toBe(true);
+    expect(r.report.some((e) => e.includes('закон подтверждён владельцем'))).toBe(true);
   });
 });
