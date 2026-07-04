@@ -578,6 +578,94 @@ export function genSuperellipseStroke(cx, cy, a, b, n, rotationDeg, pen, side = 
 }
 
 /**
+ * Обводка ломаной оси ПОСТОЯННЫМ пером (класс штриховых глифов: галка,
+ * «!», стержень «i», позже стрелки). Контур = офсеты оси по нормали
+ * ±pen/2 — та же дисциплина, что genSuperellipseStroke (перо константно
+ * по нормали, негатив следует форме). Капы — полукруги R=pen/2 на концах;
+ * стыки круглые: на выпуклой стороне излома — дуга R=pen/2 вокруг
+ * вершины, на вогнутой — честное пересечение офсет-прямых (miter, для
+ * константного пера он и есть точный внутренний контур). Обход
+ * согласованный (лево вперёд → кап → право назад → кап) — все дуги
+ * sweep=0, один замкнутый суб-путь; mode:"solid" (залитый контур).
+ *
+ * @param {Array<[number,number]>} pts — вершины оси (юниты канвы)
+ * @param {number} pen — полная ширина пера (юниты)
+ * @param {boolean} closed — замкнутая ось (пока не реализовано)
+ */
+export function genStrokePath(pts, pen, closed = false) {
+  if (closed) {
+    throw new Error('genStrokePath: замкнутые оси (closed) пока не реализованы — нет потребителя');
+  }
+  const N = pts.length;
+  if (N < 2) throw new Error(`genStrokePath: нужно ≥2 точек оси, получено ${N}`);
+  const h = pen / 2;
+  const u = []; // единичные направления сегментов
+  const n = []; // нормали (rot90)
+  const len = [];
+  for (let i = 0; i + 1 < N; i++) {
+    const dx = pts[i + 1][0] - pts[i][0];
+    const dy = pts[i + 1][1] - pts[i][1];
+    const l = Math.hypot(dx, dy);
+    if (l < 1e-9) throw new Error(`genStrokePath: нулевой сегмент оси ${i}→${i + 1}`);
+    u.push([dx / l, dy / l]);
+    n.push([-dy / l, dx / l]);
+    len.push(l);
+  }
+  // guard офсет-вырождения (как в genSuperellipseStroke): стык длиной
+  // h·tan(φ/2) не должен съедать соседние сегменты; разворот 180° запрещён
+  for (let i = 0; i + 1 < u.length; i++) {
+    const dot = u[i][0] * u[i + 1][0] + u[i][1] * u[i + 1][1];
+    const cross = u[i][0] * u[i + 1][1] - u[i][1] * u[i + 1][0];
+    const trim = h * Math.tan(Math.atan2(Math.abs(cross), dot) / 2);
+    if (1 + dot < 1e-9 || trim >= Math.min(len[i], len[i + 1])) {
+      throw new Error(
+        `genStrokePath: перо ${pen} съедает сегмент на изломе ${i + 1} (стык ${trim.toFixed(3)} ≥ плечо)`,
+      );
+    }
+  }
+  const arc = (to) => `A${f3(h)} ${f3(h)} 0 0 0 ${P(to)}`;
+  const last = u.length - 1;
+  // сторона +n вперёд
+  let d = `M${P(add(pts[0], n[0], h))}`;
+  for (let i = 0; i < u.length; i++) {
+    if (i === last) {
+      d += `L${P(add(pts[i + 1], n[i], h))}`;
+    } else {
+      const dot = u[i][0] * u[i + 1][0] + u[i][1] * u[i + 1][1];
+      const cross = u[i][0] * u[i + 1][1] - u[i][1] * u[i + 1][0];
+      if (cross < 0) {
+        // выпуклый стык на стороне +n: круглый join вокруг вершины
+        d += `L${P(add(pts[i + 1], n[i], h))}` + arc(add(pts[i + 1], n[i + 1], h));
+      } else {
+        // вогнутый: пересечение офсет-прямых
+        const s = [n[i][0] + n[i + 1][0], n[i][1] + n[i + 1][1]];
+        d += `L${P(add(pts[i + 1], s, h / (1 + dot)))}`;
+      }
+    }
+  }
+  // кап конца: полукруг +n → −n
+  d += arc(add(pts[N - 1], n[last], -h));
+  // сторона −n назад
+  for (let i = last; i >= 0; i--) {
+    if (i === 0) {
+      d += `L${P(add(pts[0], n[0], -h))}`;
+    } else {
+      const dot = u[i - 1][0] * u[i][0] + u[i - 1][1] * u[i][1];
+      const cross = u[i - 1][0] * u[i][1] - u[i - 1][1] * u[i][0];
+      if (cross > 0) {
+        // выпуклый стык на стороне −n
+        d += `L${P(add(pts[i], n[i], -h))}` + arc(add(pts[i], n[i - 1], -h));
+      } else {
+        const s = [n[i - 1][0] + n[i][0], n[i - 1][1] + n[i][1]];
+        d += `L${P(add(pts[i], s, -h / (1 + dot)))}`;
+      }
+    }
+  }
+  // кап начала замыкает контур
+  return d + arc(add(pts[0], n[0], h)) + 'Z';
+}
+
+/**
  * Стрелки часов (Г-глиф: вертикаль вверх + горизонталь вправо от общей
  * оси) — семантическая деталь класса time/alarm/timer/history.
  * Капсульные концы R=t/2; вогнутый угол ОСТРЫЙ (канон руки time);
@@ -835,6 +923,15 @@ export function buildGlyph(entry, grid, axes = {}) {
           // (белые стрелки в диске filled-часов и подобные)
           const [cx2, cy2, W, H, R] = [L(pp.cx), L(pp.cy), L(pp.w), L(pp.h), L(pp.rOuter)];
           chunks.push(genRoundedRect(cx2, cy2, W, H, R, grid.ratios.cornerSmoothing ?? 0, pp.rotation ?? 0));
+        } else if (part.primitive === 'stroke-path') {
+          // обводка ломаной оси постоянным пером, капы/стыки круглые
+          // (класс штриховых глифов: галка, «!», стержень «i», стрелки);
+          // points — доли канвы, вес — токен сетки или число-доля
+          if (mode !== 'solid') {
+            throw new Error(`stroke-path: режим «${mode}» не поддержан — обводка сама по себе solid-контур`);
+          }
+          const w = tok(part.weight ?? 'base');
+          chunks.push(genStrokePath(Pts(pp.points ?? []), w, pp.closed ?? false));
         } else {
           throw new Error(`composite: неизвестный примитив «${part.primitive}»`);
         }
