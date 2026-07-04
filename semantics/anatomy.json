@@ -1681,6 +1681,72 @@
     "outline": 0.9996,
     "filled": 0.9999
    }
+  },
+  "aloof": {
+   "archetype": "composite",
+   "status": {
+    "outline": "generated",
+    "filled": "generated"
+   },
+   "parts": [
+    {
+     "primitive": "circle-dot",
+     "mode": {
+      "outline": "frame",
+      "filled": "solid"
+     },
+     "weight": 0.075,
+     "params": {
+      "outline": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.458333
+      },
+      "filled": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.458333
+      }
+     }
+    },
+    {
+     "primitive": "rounded-rect",
+     "mode": "solid",
+     "params": {
+      "cx": 0.382083,
+      "cy": 0.4,
+      "w": 0.098333,
+      "h": 0.116667,
+      "rOuter": 0.049167
+     }
+    },
+    {
+     "primitive": "rounded-rect",
+     "mode": "solid",
+     "params": {
+      "cx": 0.617917,
+      "cy": 0.4,
+      "w": 0.098333,
+      "h": 0.116667,
+      "rOuter": 0.049167
+     }
+    },
+    {
+     "primitive": "rounded-rect",
+     "mode": "solid",
+     "params": {
+      "cx": 0.5,
+      "cy": 0.60375,
+      "w": 0.334583,
+      "h": 0.075,
+      "rOuter": 0.0375
+     }
+    }
+   ],
+   "fidelityToHand": {
+    "outline": 0.9968,
+    "filled": 0.9985
+   }
   }
  }
 }

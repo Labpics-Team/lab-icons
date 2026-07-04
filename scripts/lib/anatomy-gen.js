@@ -631,6 +631,64 @@ export function genRing(cx, cy, rOut, rIn) {
   return c(rOut) + (rIn ? c(rIn) : '');
 }
 
+// ── rounded-polygon (скруглённый многоугольник: play-треугольник, ромб) ──
+/**
+ * verts — ВИРТУАЛЬНЫЕ острые вершины (пересечения продолжений граней, не
+ * скруглённые крайние точки); r — радиус скругления, ζ — суперэллипс входа.
+ * Каждая вершина сглаживается smoothCornerAny (тот же ζ, что углы rect).
+ */
+const unitV = (a) => { const l = Math.hypot(a[0], a[1]) || 1; return [a[0] / l, a[1] / l]; };
+export function genRoundedPolygon(verts, r, zeta) {
+  const n = verts.length;
+  const cs = verts.map((V, i) =>
+    smoothCornerAny(V, unitV(sub(V, verts[(i - 1 + n) % n])), unitV(sub(verts[(i + 1) % n], V)), r, zeta),
+  );
+  let d = `M${P(cs[0].start)}${cs[0].d}`;
+  for (let i = 1; i < n; i++) d += `L${P(cs[i].start)}${cs[i].d}`;
+  return d + 'Z';
+}
+
+/** Внутренний офсет многоугольника внутрь на pen (грань-сдвиг + пересечение). */
+function offsetPolyInward(verts, pen) {
+  const n = verts.length;
+  const c = [verts.reduce((s, v) => s + v[0], 0) / n, verts.reduce((s, v) => s + v[1], 0) / n];
+  const lines = verts.map((V, i) => {
+    const nx = verts[(i + 1) % n];
+    const dir = unitV(sub(nx, V));
+    let nrm = [-dir[1], dir[0]];
+    const mid = [(V[0] + nx[0]) / 2, (V[1] + nx[1]) / 2];
+    if ((c[0] - mid[0]) * nrm[0] + (c[1] - mid[1]) * nrm[1] < 0) nrm = [-nrm[0], -nrm[1]];
+    return { p: [V[0] + nrm[0] * pen, V[1] + nrm[1] * pen], d: dir };
+  });
+  const inter = (l1, l2) => {
+    const [x1, y1] = l1.p, [dx1, dy1] = l1.d, [x2, y2] = l2.p, [dx2, dy2] = l2.d;
+    const den = dx1 * dy2 - dy1 * dx2;
+    if (Math.abs(den) < 1e-9) return l2.p;
+    const t = ((x2 - x1) * dy2 - (y2 - y1) * dx2) / den;
+    return [x1 + dx1 * t, y1 + dy1 * t];
+  };
+  // miter-кламп: на ОСТРЫХ вершинах inner-точка уезжает на pen/sin(θ/2) →
+  // переполнение. Ограничиваем смещение внутрь до maxMiter·pen (как stroke-
+  // miterlimit), иначе кольцо у острого носа врёт.
+  const maxMiter = 2.2 * pen;
+  return verts.map((V, i) => {
+    const p = inter(lines[(i - 1 + n) % n], lines[i]);
+    const disp = Math.hypot(p[0] - V[0], p[1] - V[1]);
+    if (disp <= maxMiter || disp < 1e-9) return p;
+    return [V[0] + (p[0] - V[0]) * (maxMiter / disp), V[1] + (p[1] - V[1]) * (maxMiter / disp)];
+  });
+}
+
+/**
+ * Outline-кольцо: внешний контур + внутренний офсет. Внутренний РЕВЕРСИРОВАН
+ * (обратная намотка) — вычитается и под nonzero (браузер), и под even-odd
+ * (гейт), кольцо честное везде.
+ */
+export function genRoundedPolygonRing(verts, r, zeta, pen, rIn) {
+  const inner = offsetPolyInward(verts, pen).slice().reverse();
+  return genRoundedPolygon(verts, r, zeta) + genRoundedPolygon(inner, rIn ?? Math.max(r - pen, 0.15), zeta);
+}
+
 /**
  * Сборка глифа из записи semantics/anatomy.json.
  *
@@ -801,6 +859,16 @@ export function buildGlyph(entry, grid, axes = {}) {
     if (gt && (gt[0] || gt[1])) glyphD = translateD(glyphD, L(gt[0]), L(gt[1]));
     out.outline = genRing(center[0], center[1], rOut, rOut - ringWeight) + glyphD;
     out.filled = genRing(center[0], center[1], rOut, 0) + glyphD;
+  } else if (entry.archetype === 'rounded-polygon') {
+    // скруглённый многоугольник-масса (play-треугольник, ромб): Filled —
+    // сплошной, Outline — кольцо (внешний + внутр. офсет на перо).
+    const verts = entry.vertices.map(Pt);
+    const r = L(entry.r);
+    const zeta = entry.zeta ?? grid.ratios.cornerSmoothing;
+    const pen = tok(entry.weight ?? 'base');
+    const rIn = entry.rInner != null ? L(entry.rInner) : undefined;
+    out.filled = genRoundedPolygon(verts, r, zeta);
+    out.outline = genRoundedPolygonRing(verts, r, zeta, pen, rIn);
   } else {
     throw new Error(`anatomy-gen: неизвестный архетип «${entry.archetype}»`);
   }
