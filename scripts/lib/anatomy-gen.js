@@ -748,10 +748,17 @@ export function genArcBand(cx, cy, r, aCenterDeg, halfSpanDeg, t) {
 }
 
 // ── контейнеры ──
+/**
+ * Кольцо/диск. Внутренний круг РЕВЕРСИРОВАН (sweep противоположен внешнему)
+ * — дырка честно вычитается и под evenodd (гейт), и под nonzero (браузер),
+ * как у genRoundedPolygonRing. Раньше оба круга шли sweep=0: под nonzero
+ * дырка заливалась (EO≢NZ, адверсарная верификация Волны-2, обязательство №1).
+ * Руки nonzero-безопасны (противоположные sweep) — генерат теперь тоже.
+ */
 export function genRing(cx, cy, rOut, rIn) {
-  const c = (r) =>
-    `M${f3(cx - r)} ${f3(cy)}a${f3(r)} ${f3(r)} 0 1 0 ${f3(2 * r)} 0a${f3(r)} ${f3(r)} 0 1 0 ${f3(-2 * r)} 0Z`;
-  return c(rOut) + (rIn ? c(rIn) : '');
+  const c = (r, sw) =>
+    `M${f3(cx - r)} ${f3(cy)}a${f3(r)} ${f3(r)} 0 1 ${sw} ${f3(2 * r)} 0a${f3(r)} ${f3(r)} 0 1 ${sw} ${f3(-2 * r)} 0Z`;
+  return c(rOut, 0) + (rIn ? c(rIn, 1) : '');
 }
 
 // ── rounded-polygon (скруглённый многоугольник: play-треугольник, ромб) ──
@@ -967,6 +974,23 @@ export function buildGlyph(entry, grid, axes = {}) {
           }
           const w = tok(part.weight ?? 'base');
           chunks.push(genStrokePath(Pts(pp.points ?? []), w, pp.closed ?? false));
+        } else if (part.primitive === 'rounded-polygon') {
+          // скруглённый многоугольник как часть композиции (play-семья,
+          // обязательство №3 Волны-2): vertices — ВИРТУАЛЬНЫЕ вершины
+          // (пересечения продолжений граней, доли канвы), r — радиус (доля),
+          // ζ — безразмерный (дефолт из сетки) — резолв 1:1 как у
+          // standalone-архетипа rounded-polygon. solid = масса, frame =
+          // кольцо (внешний контур + внутренний офсет пером, реверс внутри).
+          const verts = Pts(pp.vertices);
+          const r = L(pp.r);
+          const zeta = pp.zeta ?? grid.ratios.cornerSmoothing;
+          if (mode === 'frame') {
+            const w = tok(part.weight ?? 'base');
+            const rIn = pp.rInner != null ? L(pp.rInner) : undefined;
+            chunks.push(genRoundedPolygonRing(verts, r, zeta, w, rIn));
+          } else {
+            chunks.push(genRoundedPolygon(verts, r, zeta));
+          }
         } else {
           throw new Error(`composite: неизвестный примитив «${part.primitive}»`);
         }
