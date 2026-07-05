@@ -52,8 +52,13 @@ export function segTangent(s, atEnd) {
   return [-Math.sin(a) * s.dir, Math.cos(a) * s.dir];
 }
 
-/** d-эмиттер цепи: дуги >180° режутся пополам (largeArc не нужен). */
+/**
+ * d-эмиттер цепи: дуги режутся на куски ≤120° (largeArc не нужен). Дуги,
+ * близкие к 180°, вырождены для восстановления центра из концов+радиуса
+ * (f3-шум 5e-4 даёт ложные ~0.3° в G1-замере); куски ≤120° обусловлены хорошо.
+ */
 export function emitChain(chain, closed = true) {
+  const MAX_SPAN = (2 * Math.PI) / 3; // 120°
   let d = `M${P(segStart(chain[0]))}`;
   for (const s of chain) {
     if (s.kind === 'line') {
@@ -62,12 +67,10 @@ export function emitChain(chain, closed = true) {
       const span = spanOf(s.a0, s.a1, s.dir);
       const sweep = s.dir > 0 ? 1 : 0;
       const R = f3(s.r);
-      if (span > Math.PI + 1e-9) {
-        const mid = s.a0 + s.dir * (span / 2);
-        d += `A${R} ${R} 0 0 ${sweep} ${P(ept(s.c, s.r, mid))}`;
-        d += `A${R} ${R} 0 0 ${sweep} ${P(segEnd(s))}`;
-      } else {
-        d += `A${R} ${R} 0 0 ${sweep} ${P(segEnd(s))}`;
+      const n = Math.max(1, Math.ceil(span / MAX_SPAN - 1e-9));
+      for (let k = 1; k <= n; k++) {
+        const a = s.a0 + s.dir * ((span * k) / n);
+        d += `A${R} ${R} 0 0 ${sweep} ${P(k === n ? segEnd(s) : ept(s.c, s.r, a))}`;
       }
     }
   }
