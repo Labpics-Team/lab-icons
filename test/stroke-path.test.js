@@ -109,6 +109,28 @@ describe('stroke-path — обводка ломаной постоянным п�
     expect(span(bold)).toBeGreaterThan(span(base) + 0.3);
   });
 
+  it('Б: per-variant weight {outline, filled} резолвится по варианту (Волна-5, двухвариантные стрелки)', () => {
+    // объект-вес: outline=base, filled=bold — идентичен паре скалярных сборок
+    const scalarBase = buildGlyph(checkmark, grid).outline;
+    const scalarBold = buildGlyph(
+      mutate((m) => {
+        m.parts[0].weight = 'bold';
+      }),
+      grid,
+    ).outline;
+    const both = buildGlyph(
+      mutate((m) => {
+        m.status = { outline: 'hand', filled: 'hand' };
+        m.parts[0].mode = { outline: 'solid', filled: 'solid' };
+        m.parts[0].weight = { outline: 'base', filled: 'bold' };
+        m.parts[0].params.filled = m.parts[0].params.outline;
+      }),
+      grid,
+    );
+    expect(both.outline).toBe(scalarBase); // скалярное поведение не изменилось
+    expect(both.filled).toBe(scalarBold); // bold взят из объекта по варианту
+  });
+
   it('Д: <2 точек оси → понятная ошибка', () => {
     const broken = mutate((m) => {
       m.parts[0].params.outline.points = [A];
