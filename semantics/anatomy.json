@@ -2266,6 +2266,80 @@
      }
     }
    ]
+  },
+  "close": {
+   "archetype": "composite",
+   "status": {
+    "outline": "hand"
+   },
+   "parts": [
+    {
+     "primitive": "stroke-path",
+     "mode": {
+      "outline": "solid"
+     },
+     "weight": "base",
+     "params": {
+      "outline": {
+       "points": [
+        [
+         0.323125,
+         0.323125
+        ],
+        [
+         0.68,
+         0.680208
+        ]
+       ],
+       "closed": false
+      }
+     }
+    },
+    {
+     "primitive": "stroke-path",
+     "mode": {
+      "outline": "solid"
+     },
+     "weight": "base",
+     "params": {
+      "outline": {
+       "points": [
+        [
+         0.553226,
+         0.447264
+        ],
+        [
+         0.677083,
+         0.323333
+        ]
+       ],
+       "closed": false
+      }
+     }
+    },
+    {
+     "primitive": "stroke-path",
+     "mode": {
+      "outline": "solid"
+     },
+     "weight": "base",
+     "params": {
+      "outline": {
+       "points": [
+        [
+         0.447192,
+         0.553362
+        ],
+        [
+         0.320208,
+         0.680417
+        ]
+       ],
+       "closed": false
+      }
+     }
+    }
+   ]
   }
  }
 }
