@@ -1778,6 +1778,40 @@
     "outline": 0.991,
     "filled": 1
    }
+  },
+  "checkmark": {
+   "archetype": "composite",
+   "status": {
+    "outline": "hand"
+   },
+   "parts": [
+    {
+     "primitive": "stroke-path",
+     "mode": {
+      "outline": "solid"
+     },
+     "weight": "base",
+     "params": {
+      "outline": {
+       "points": [
+        [
+         0.31833,
+         0.52708
+        ],
+        [
+         0.44757,
+         0.69529
+        ],
+        [
+         0.68333,
+         0.31542
+        ]
+       ],
+       "closed": false
+      }
+     }
+    }
+   ]
   }
  }
 }
