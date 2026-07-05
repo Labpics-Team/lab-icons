@@ -613,13 +613,31 @@ export function genStrokePath(pts, pen, closed = false) {
   }
   // guard офсет-вырождения (как в genSuperellipseStroke): стык длиной
   // h·tan(φ/2) не должен съедать соседние сегменты; разворот 180° запрещён
+  const trims = []; // trims[i] — стык на изломе i+1 (между сегментами i и i+1)
   for (let i = 0; i + 1 < u.length; i++) {
     const dot = u[i][0] * u[i + 1][0] + u[i][1] * u[i + 1][1];
     const cross = u[i][0] * u[i + 1][1] - u[i][1] * u[i + 1][0];
+    if (1 + dot < 1e-9) {
+      // разворот 180°: φ→π, tan(φ/2)→∞ — офсет-стык не существует; отдельная
+      // ветка, чтобы не печатать tan(π/2)-мусор в общем сообщении
+      throw new Error(
+        `genStrokePath: разворот оси на 180° на изломе ${i + 1} — офсет-стык не существует, разбейте ось на отдельные штрихи`,
+      );
+    }
     const trim = h * Math.tan(Math.atan2(Math.abs(cross), dot) / 2);
-    if (1 + dot < 1e-9 || trim >= Math.min(len[i], len[i + 1])) {
+    if (trim >= Math.min(len[i], len[i + 1])) {
       throw new Error(
         `genStrokePath: перо ${pen} съедает сегмент на изломе ${i + 1} (стык ${trim.toFixed(3)} ≥ плечо)`,
+      );
+    }
+    trims.push(trim);
+  }
+  // СОВМЕСТНОЕ съедание: каждый стык по отдельности короче плеч, но два
+  // соседних вместе съедают внутренний сегмент → самопересечение контура
+  for (let i = 1; i + 1 < u.length; i++) {
+    if (trims[i - 1] + trims[i] >= len[i]) {
+      throw new Error(
+        `genStrokePath: перо ${pen} совместно съедает внутренний сегмент ${i}→${i + 1} (стыки ${trims[i - 1].toFixed(3)} + ${trims[i].toFixed(3)} ≥ длина ${len[i].toFixed(3)})`,
       );
     }
   }
