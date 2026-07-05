@@ -90,8 +90,8 @@
   "chevron-down-circle": {
    "archetype": "container-glyph",
    "status": {
-    "outline": "hand",
-    "filled": "hand"
+    "outline": "generated",
+    "filled": "generated"
    },
    "glyph": {
     "generator": "stroke-v",
@@ -114,6 +114,10 @@
       0.610114
      ]
     }
+   },
+   "fidelityToHand": {
+    "outline": 0.9996,
+    "filled": 0.9992
    }
   },
   "tablet-landscape": {
@@ -626,8 +630,8 @@
   "minus-circle": {
    "archetype": "composite",
    "status": {
-    "outline": "hand",
-    "filled": "hand"
+    "outline": "generated",
+    "filled": "generated"
    },
    "parts": [
     {
@@ -648,7 +652,9 @@
        "h": 0.083333,
        "rOuter": 0.041667
       }
-     }
+     },
+     "name": "dash",
+     "role": "ink"
     },
     {
      "primitive": "circle-dot",
@@ -668,9 +674,15 @@
        "cy": 0.5,
        "r": 0.458333
       }
-     }
+     },
+     "name": "ring",
+     "role": "counter"
     }
-   ]
+   ],
+   "fidelityToHand": {
+    "outline": 0.9997,
+    "filled": 1
+   }
   },
   "pause-circle": {
    "archetype": "composite",
