@@ -1980,6 +1980,62 @@
      }
     }
    ]
+  },
+  "checkmarks": {
+   "archetype": "composite",
+   "status": {
+    "outline": "hand"
+   },
+   "parts": [
+    {
+     "primitive": "stroke-path",
+     "mode": {
+      "outline": "solid"
+     },
+     "weight": "base",
+     "params": {
+      "outline": {
+       "points": [
+        [
+         0.222292,
+         0.525833
+        ],
+        [
+         0.356224,
+         0.696543
+        ],
+        [
+         0.591875,
+         0.31875
+        ]
+       ],
+       "closed": false
+      }
+     }
+    },
+    {
+     "primitive": "stroke-path",
+     "mode": {
+      "outline": "solid"
+     },
+     "weight": "base",
+     "params": {
+      "outline": {
+       "points": [
+        [
+         0.548333,
+         0.683542
+        ],
+        [
+         0.778542,
+         0.315625
+        ]
+       ],
+       "closed": false
+      }
+     }
+    }
+   ]
   }
  }
 }
