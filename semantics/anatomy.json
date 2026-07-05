@@ -1926,6 +1926,60 @@
      }
     }
    ]
+  },
+  "checkmark-circle": {
+   "archetype": "composite",
+   "status": {
+    "outline": "hand"
+   },
+   "parts": [
+    {
+     "primitive": "stroke-path",
+     "mode": {
+      "outline": "solid"
+     },
+     "weight": "containerGlyph",
+     "params": {
+      "outline": {
+       "points": [
+        [
+         0.348125,
+         0.532083
+        ],
+        [
+         0.432745,
+         0.653936
+        ],
+        [
+         0.615208,
+         0.360208
+        ]
+       ],
+       "closed": false
+      }
+     }
+    },
+    {
+     "primitive": "circle-dot",
+     "mode": {
+      "outline": "frame",
+      "filled": "solid"
+     },
+     "weight": "enclosureRing",
+     "params": {
+      "outline": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.458333
+      },
+      "filled": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.458333
+      }
+     }
+    }
+   ]
   }
  }
 }
