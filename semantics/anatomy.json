@@ -2434,6 +2434,421 @@
      }
     }
    ]
+  },
+  "ban": {
+   "archetype": "composite",
+   "status": {
+    "outline": "hand"
+   },
+   "parts": [
+    {
+     "primitive": "stroke-path",
+     "mode": {
+      "outline": "solid"
+     },
+     "weight": "base",
+     "params": {
+      "outline": {
+       "points": [
+        [
+         0.255458,
+         0.744542
+        ],
+        [
+         0.744542,
+         0.255458
+        ]
+       ],
+       "closed": false
+      }
+     }
+    },
+    {
+     "primitive": "circle-dot",
+     "mode": {
+      "outline": "frame",
+      "filled": "solid"
+     },
+     "weight": "base",
+     "params": {
+      "outline": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.458333
+      },
+      "filled": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.458333
+      }
+     }
+    }
+   ]
+  },
+  "arrow-up-circle": {
+   "archetype": "composite",
+   "status": {
+    "outline": "hand"
+   },
+   "parts": [
+    {
+     "primitive": "stroke-path",
+     "mode": {
+      "outline": "solid"
+     },
+     "weight": "containerGlyph",
+     "params": {
+      "outline": {
+       "points": [
+        [
+         0.325417,
+         0.487292
+        ],
+        [
+         0.500521,
+         0.312188
+        ],
+        [
+         0.6725,
+         0.484167
+        ]
+       ],
+       "closed": false
+      }
+     }
+    },
+    {
+     "primitive": "stroke-path",
+     "mode": {
+      "outline": "solid"
+     },
+     "weight": "containerGlyph",
+     "params": {
+      "outline": {
+       "points": [
+        [
+         0.499792,
+         0.429967
+        ],
+        [
+         0.499792,
+         0.666667
+        ]
+       ],
+       "closed": false
+      }
+     }
+    },
+    {
+     "primitive": "circle-dot",
+     "mode": {
+      "outline": "frame",
+      "filled": "solid"
+     },
+     "weight": "enclosureRing",
+     "params": {
+      "outline": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.458333
+      },
+      "filled": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.458333
+      }
+     }
+    }
+   ]
+  },
+  "arrow-down-circle": {
+   "archetype": "composite",
+   "status": {
+    "outline": "hand"
+   },
+   "parts": [
+    {
+     "primitive": "stroke-path",
+     "mode": {
+      "outline": "solid"
+     },
+     "weight": "containerGlyph",
+     "params": {
+      "outline": {
+       "points": [
+        [
+         0.328333,
+         0.515833
+        ],
+        [
+         0.500208,
+         0.687708
+        ],
+        [
+         0.675208,
+         0.512708
+        ]
+       ],
+       "closed": false
+      }
+     }
+    },
+    {
+     "primitive": "stroke-path",
+     "mode": {
+      "outline": "solid"
+     },
+     "weight": "containerGlyph",
+     "params": {
+      "outline": {
+       "points": [
+        [
+         0.500833,
+         0.333333
+        ],
+        [
+         0.500833,
+         0.569825
+        ]
+       ],
+       "closed": false
+      }
+     }
+    },
+    {
+     "primitive": "circle-dot",
+     "mode": {
+      "outline": "frame",
+      "filled": "solid"
+     },
+     "weight": "enclosureRing",
+     "params": {
+      "outline": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.458333
+      },
+      "filled": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.458333
+      }
+     }
+    }
+   ]
+  },
+  "arrow-back-circle": {
+   "archetype": "composite",
+   "status": {
+    "outline": "hand"
+   },
+   "parts": [
+    {
+     "primitive": "stroke-path",
+     "mode": {
+      "outline": "solid"
+     },
+     "weight": "containerGlyph",
+     "params": {
+      "outline": {
+       "points": [
+        [
+         0.484583,
+         0.328333
+        ],
+        [
+         0.312708,
+         0.500208
+        ],
+        [
+         0.487708,
+         0.675208
+        ]
+       ],
+       "closed": false
+      }
+     }
+    },
+    {
+     "primitive": "stroke-path",
+     "mode": {
+      "outline": "solid"
+     },
+     "weight": "containerGlyph",
+     "params": {
+      "outline": {
+       "points": [
+        [
+         0.666667,
+         0.500833
+        ],
+        [
+         0.43028,
+         0.500833
+        ]
+       ],
+       "closed": false
+      }
+     }
+    },
+    {
+     "primitive": "circle-dot",
+     "mode": {
+      "outline": "frame",
+      "filled": "solid"
+     },
+     "weight": "enclosureRing",
+     "params": {
+      "outline": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.458333
+      },
+      "filled": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.458333
+      }
+     }
+    }
+   ]
+  },
+  "arrow-forward-circle": {
+   "archetype": "composite",
+   "status": {
+    "outline": "hand"
+   },
+   "parts": [
+    {
+     "primitive": "stroke-path",
+     "mode": {
+      "outline": "solid"
+     },
+     "weight": "containerGlyph",
+     "params": {
+      "outline": {
+       "points": [
+        [
+         0.5125,
+         0.325208
+        ],
+        [
+         0.687708,
+         0.500417
+        ],
+        [
+         0.515625,
+         0.6725
+        ]
+       ],
+       "closed": false
+      }
+     }
+    },
+    {
+     "primitive": "stroke-path",
+     "mode": {
+      "outline": "solid"
+     },
+     "weight": "containerGlyph",
+     "params": {
+      "outline": {
+       "points": [
+        [
+         0.333333,
+         0.499792
+        ],
+        [
+         0.56974,
+         0.499792
+        ]
+       ],
+       "closed": false
+      }
+     }
+    },
+    {
+     "primitive": "circle-dot",
+     "mode": {
+      "outline": "frame",
+      "filled": "solid"
+     },
+     "weight": "enclosureRing",
+     "params": {
+      "outline": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.458333
+      },
+      "filled": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.458333
+      }
+     }
+    }
+   ]
+  },
+  "alert-circle": {
+   "archetype": "composite",
+   "status": {
+    "outline": "hand"
+   },
+   "parts": [
+    {
+     "primitive": "stroke-path",
+     "mode": {
+      "outline": "solid"
+     },
+     "weight": "containerGlyph",
+     "params": {
+      "outline": {
+       "points": [
+        [
+         0.5,
+         0.333333
+        ],
+        [
+         0.5,
+         0.5375
+        ]
+       ],
+       "closed": false
+      }
+     }
+    },
+    {
+     "primitive": "circle-dot",
+     "mode": "solid",
+     "params": {
+      "outline": {
+       "cx": 0.5,
+       "cy": 0.670833,
+       "r": 0.041667
+      }
+     }
+    },
+    {
+     "primitive": "circle-dot",
+     "mode": {
+      "outline": "frame",
+      "filled": "solid"
+     },
+     "weight": "enclosureRing",
+     "params": {
+      "outline": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.458333
+      },
+      "filled": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.458333
+      }
+     }
+    }
+   ]
   }
  }
 }
