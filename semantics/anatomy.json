@@ -2036,6 +2036,82 @@
      }
     }
    ]
+  },
+  "checkmarks-circle": {
+   "archetype": "composite",
+   "status": {
+    "outline": "hand"
+   },
+   "parts": [
+    {
+     "primitive": "stroke-path",
+     "mode": {
+      "outline": "solid"
+     },
+     "weight": "containerGlyph",
+     "params": {
+      "outline": {
+       "points": [
+        [
+         0.262292,
+         0.532083
+        ],
+        [
+         0.347102,
+         0.653871
+        ],
+        [
+         0.529375,
+         0.360208
+        ]
+       ],
+       "closed": false
+      }
+     }
+    },
+    {
+     "primitive": "stroke-path",
+     "mode": {
+      "outline": "solid"
+     },
+     "weight": "containerGlyph",
+     "params": {
+      "outline": {
+       "points": [
+        [
+         0.53625,
+         0.64125
+        ],
+        [
+         0.70875,
+         0.363542
+        ]
+       ],
+       "closed": false
+      }
+     }
+    },
+    {
+     "primitive": "circle-dot",
+     "mode": {
+      "outline": "frame",
+      "filled": "solid"
+     },
+     "weight": "enclosureRing",
+     "params": {
+      "outline": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.458333
+      },
+      "filled": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.458333
+      }
+     }
+    }
+   ]
   }
  }
 }
