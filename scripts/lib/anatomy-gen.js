@@ -968,11 +968,15 @@ export function buildGlyph(entry, grid, axes = {}) {
         } else if (part.primitive === 'stroke-path') {
           // обводка ломаной оси постоянным пером, капы/стыки круглые
           // (класс штриховых глифов: галка, «!», стержень «i», стрелки);
-          // points — доли канвы, вес — токен сетки или число-доля
+          // points — доли канвы, вес — токен сетки или число-доля;
+          // двухвариантные глифы (стрелки, Волна-5): weight может быть
+          // объектом {outline, filled} — резолв по текущему варианту
+          // (прецедент per-variant весов: entry.weights у stroke-v)
           if (mode !== 'solid') {
             throw new Error(`stroke-path: режим «${mode}» не поддержан — обводка сама по себе solid-контур`);
           }
-          const w = tok(part.weight ?? 'base');
+          const wRaw = part.weight != null && typeof part.weight === 'object' ? part.weight[variant] : part.weight;
+          const w = tok(wRaw ?? 'base');
           chunks.push(genStrokePath(Pts(pp.points ?? []), w, pp.closed ?? false));
         } else if (part.primitive === 'rounded-polygon') {
           // скруглённый многоугольник как часть композиции (play-семья,
