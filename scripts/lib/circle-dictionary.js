@@ -181,9 +181,12 @@ export function resolveTangentChain(elements, connectors, closed) {
       if (Math.abs(dist - C.r) > TOL) {
         throw new Error(`circle-dictionary: touch без касания (dist=${dist.toFixed(4)} ≠ r=${C.r})`);
       }
-      // точная точка касания — проекция центра на прямую
-      junctions.push({ p1: foot, p2: foot });
-      joints.push({ at: foot, corner: false });
+      // точная точка касания: проекция центра на прямую, снап на окружность
+      // (q6-квант деклараций даёт |dist−r| до ~1e-5 — стык обязан лежать
+      // ровно на дуге, иначе оффсеты наследуют микрозазор)
+      const tp = add(C.c, unit(sub(foot, C.c)), C.r);
+      junctions.push({ p1: tp, p2: tp });
+      joints.push({ at: tp, corner: false });
     } else if (con.type === 'corner') {
       const hint = con.hint;
       let cands;
@@ -350,13 +353,11 @@ export function offsetChain(chain, off, closed) {
     const j = (i + 1) % segs.length;
     const sa = segs[i], sb = segs[j];
     const gap = norm(sub(segEnd(sa), segStart(sb)));
-    if (gap < 1e-6) continue; // G1 — оффсеты сомкнулись сами
-    if (i === segs.length - 1 && closed) {
-      // стык замыкания обрабатываем к out[0] (segs[0] уже в out)
-      if (!tryTrim(sa, sb)) out.push(roundJoin(chain, i, j, sa, sb, off));
-      continue;
-    }
-    if (!tryTrim(sa, sb)) out.push(roundJoin(chain, i, j, sa, sb, off));
+    // G1 — оффсеты сомкнулись сами; порог 1e-4 покрывает микрозазор
+    // q6-квантования (~1e-5), реальные углы дают зазор ≥ ~1e-2
+    if (gap < 1e-4) continue;
+    const jn = tryTrim(sa, sb) ? null : roundJoin(chain, i, j, sa, sb, off);
+    if (jn) out.push(jn);
   }
   return out;
 }
@@ -365,8 +366,11 @@ function roundJoin(chain, i, j, sa, sb, off) {
   const V = segEnd(chain[i]);
   const pA = segEnd(sa), pB = segStart(sb);
   const a0 = ang(V, pA), a1 = ang(V, pB);
+  const span = spanOf(a0, a1, 1);
+  // вырожденный стык (a0≈a1): spanOf трактует 0 как TAU → петля 360°; пропуск
+  if (span < 1e-3 || span > TAU - 1e-3) return null;
   // направление: короткой дугой (зазор всегда < 180°)
-  const dir = spanOf(a0, a1, 1) <= Math.PI ? 1 : -1;
+  const dir = span <= Math.PI ? 1 : -1;
   return { kind: 'arc', c: V, r: Math.abs(off), a0, a1, dir };
 }
 
