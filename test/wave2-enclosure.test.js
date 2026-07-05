@@ -26,7 +26,7 @@ const cw = grid.canvas.width;
 const THRESHOLD = 0.95;
 
 // Задекларированные иконки Волны-2 (семьями: ban → arrow-*-circle → …)
-const WAVE2 = ['ban'];
+const WAVE2 = ['ban', 'arrow-up-circle'];
 
 describe('wave2-enclosure — генерат декларации сходится с рукой (IoU ≥ 0.95)', () => {
   for (const name of WAVE2) {
