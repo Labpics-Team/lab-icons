@@ -248,6 +248,21 @@ export function resolveTangentChain(elements, connectors, closed) {
             };
             const t1 = A.circle ? tOnCircle(A.circle) : projOnLine(A.line, cf);
             const t2 = B.circle ? tOnCircle(B.circle) : projOnLine(B.line, cf);
+            // фильтр G1: направление касательной непрерывно на обоих стыках.
+            // Ложная ветвь (внешнее касание вместо внутреннего и наоборот)
+            // может проходить дугой точно через hint (апексный бленд eye при
+            // малом s: внешний кандидат ложится на апекс со скором лучше
+            // верного), но даёт разворот касательной на 180° — отсекаем по
+            // знаку dot(тангент носителя, тангент fillet-дуги). Прямые не
+            // декларируют направление обхода — фильтруем только круги.
+            const dirF = arcDirBetween(cf, rf, t1, t2);
+            const tanArc = (c, dir, t) => { const u = unit(sub(t, c)); return [-u[1] * dir, u[0] * dir]; };
+            const g1ok = (E, t) => {
+              if (!E.circle) return true;
+              if (norm(sub(t, cf)) <= EPS) return true;
+              return dot(tanArc(E.circle.c, E.circle.dir ?? 1, t), tanArc(cf, dirF, t)) > 0;
+            };
+            if (!g1ok(A, t1) || !g1ok(B, t2)) continue;
             // скоринг по ТОЧКЕ ДУГИ fillet (не по центру!): hint стоит там, где
             // проходит сама дуга; для апексного бленда (rf > R) центр лежит в rf
             // от апекса, и ближайший-к-hint ЦЕНТР — ложная ветвь (симметричный

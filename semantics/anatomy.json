@@ -1373,7 +1373,10 @@
       ]
      }
     }
-   ]
+   ],
+   "fidelityToHand": {
+    "outline": 0.9795
+   }
   },
   "checkmark": {
    "archetype": "composite",
@@ -2356,6 +2359,72 @@
      }
     }
    ]
+  },
+  "eye": {
+   "archetype": "composite",
+   "status": {
+    "outline": "generated"
+   },
+   "parts": [
+    {
+     "primitive": "arc-splice",
+     "mode": {
+      "outline": "stroke"
+     },
+     "weight": "base",
+     "params": {
+      "arcs": [
+       {
+        "c": [
+         0.5,
+         0.665721
+        ],
+        "r": 0.46093,
+        "dir": 1
+       },
+       {
+        "c": [
+         0.5,
+         0.335945
+        ],
+        "r": 0.46093,
+        "dir": 1
+       }
+      ],
+      "fillets": [
+       {
+        "r": 0.108333,
+        "hint": [
+         0.811667,
+         0.500833
+        ]
+       },
+       {
+        "r": 0.108333,
+        "hint": [
+         0.188333,
+         0.500833
+        ]
+       }
+      ]
+     }
+    },
+    {
+     "primitive": "circle-dot",
+     "mode": {
+      "outline": "frame"
+     },
+     "weight": "base",
+     "params": {
+      "cx": 0.5,
+      "cy": 0.500833,
+      "r": 0.2125
+     }
+    }
+   ],
+   "fidelityToHand": {
+    "outline": 0.8984
+   }
   },
   "filter": {
    "archetype": "composite",
