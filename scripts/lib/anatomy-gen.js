@@ -974,6 +974,23 @@ export function buildGlyph(entry, grid, axes = {}) {
           }
           const w = tok(part.weight ?? 'base');
           chunks.push(genStrokePath(Pts(pp.points ?? []), w, pp.closed ?? false));
+        } else if (part.primitive === 'rounded-polygon') {
+          // скруглённый многоугольник как часть композиции (play-семья,
+          // обязательство №3 Волны-2): vertices — ВИРТУАЛЬНЫЕ вершины
+          // (пересечения продолжений граней, доли канвы), r — радиус (доля),
+          // ζ — безразмерный (дефолт из сетки) — резолв 1:1 как у
+          // standalone-архетипа rounded-polygon. solid = масса, frame =
+          // кольцо (внешний контур + внутренний офсет пером, реверс внутри).
+          const verts = Pts(pp.vertices);
+          const r = L(pp.r);
+          const zeta = pp.zeta ?? grid.ratios.cornerSmoothing;
+          if (mode === 'frame') {
+            const w = tok(part.weight ?? 'base');
+            const rIn = pp.rInner != null ? L(pp.rInner) : undefined;
+            chunks.push(genRoundedPolygonRing(verts, r, zeta, w, rIn));
+          } else {
+            chunks.push(genRoundedPolygon(verts, r, zeta));
+          }
         } else {
           throw new Error(`composite: неизвестный примитив «${part.primitive}»`);
         }

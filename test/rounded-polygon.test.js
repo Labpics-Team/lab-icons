@@ -5,8 +5,10 @@
  * Классы: А (валидность/замкнутость/кольцо-дырка), Д (ζ меняет форму).
  */
 
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { genRoundedPolygon, genRoundedPolygonRing } from '../scripts/lib/anatomy-gen.js';
+import { buildGlyph, genRoundedPolygon, genRoundedPolygonRing } from '../scripts/lib/anatomy-gen.js';
 import { samplePolylines } from '../scripts/lib/curve-sampling.js';
 
 const square = [[6, 6], [18, 6], [18, 18], [6, 18]];
@@ -63,5 +65,44 @@ describe('genRoundedPolygonRing — Outline-кольцо', () => {
     const d = genRoundedPolygonRing(tri, 3, 0.6, 1.9);
     expect(d).not.toMatch(/NaN|Infinity/);
     expect(samplePolylines(d, 32).length).toBe(2);
+  });
+});
+
+describe('rounded-polygon как composite-часть (Волна-3, обязательство №3 Волны-2)', () => {
+  const grid = JSON.parse(readFileSync(join(import.meta.dirname, '..', 'semantics', 'grid.json'), 'utf8'));
+  const cw = grid.canvas.width;
+  const frac = (pts) => pts.map(([x, y]) => [x / cw, y / cw]);
+  const SQ = [[6, 6], [18, 6], [18, 18], [6, 18]];
+  const TRI = [[20, 12], [5, 21], [5, 3]]; // виртуальные вершины, НЕ bbox
+  const entry = (mode, params, weight) => ({
+    archetype: 'composite',
+    status: { outline: 'hand' },
+    parts: [{
+      primitive: 'rounded-polygon',
+      mode: { outline: mode },
+      ...(weight ? { weight } : {}),
+      params: { outline: params },
+    }],
+  });
+
+  it('solid байт-в-байт равен standalone genRoundedPolygon (резолв долей и токен-ζ из сетки)', () => {
+    const { outline } = buildGlyph(entry('solid', { vertices: frac(SQ), r: 3 / cw }), grid);
+    expect(outline).toBe(genRoundedPolygon(SQ, 3, grid.ratios.cornerSmoothing));
+  });
+
+  it('frame — кольцо из 2 контуров, без NaN, равно genRoundedPolygonRing с пером-токеном', () => {
+    const { outline } = buildGlyph(entry('frame', { vertices: frac(SQ), r: 3 / cw }, 'base'), grid);
+    expect(outline).not.toMatch(/NaN|Infinity/);
+    expect(samplePolylines(outline, 32).length).toBe(2);
+    expect(outline).toBe(
+      genRoundedPolygonRing(SQ, 3, grid.ratios.cornerSmoothing, grid.ratios.strokeWidth.base * cw),
+    );
+  });
+
+  it('ζ-override в params действует, включая граничный ζ=0 (nullish, не falsy)', () => {
+    const token = buildGlyph(entry('solid', { vertices: frac(TRI), r: 3 / cw }), grid).outline;
+    const sharp = buildGlyph(entry('solid', { vertices: frac(TRI), r: 3 / cw, zeta: 0 }), grid).outline;
+    expect(sharp).not.toBe(token);
+    expect(sharp).toBe(genRoundedPolygon(TRI, 3, 0));
   });
 });
