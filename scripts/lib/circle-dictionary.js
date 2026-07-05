@@ -248,7 +248,17 @@ export function resolveTangentChain(elements, connectors, closed) {
             };
             const t1 = A.circle ? tOnCircle(A.circle) : projOnLine(A.line, cf);
             const t2 = B.circle ? tOnCircle(B.circle) : projOnLine(B.line, cf);
-            const score = con.hint ? norm(sub(cf, con.hint)) : 0;
+            // скоринг по ТОЧКЕ ДУГИ fillet (не по центру!): hint стоит там, где
+            // проходит сама дуга; для апексного бленда (rf > R) центр лежит в rf
+            // от апекса, и ближайший-к-hint ЦЕНТР — ложная ветвь (симметричный
+            // кандидат внутри фигуры). Берём середину касаний, снап на окружность.
+            let score = 0;
+            if (con.hint) {
+              const m = [(t1[0] + t2[0]) / 2, (t1[1] + t2[1]) / 2];
+              const mc = norm(sub(m, cf));
+              const q = mc > EPS ? add(cf, unit(sub(m, cf)), rf) : m;
+              score = norm(sub(q, con.hint));
+            }
             if (!best || score < best.score) best = { cf, t1, t2, score };
           }
         }
