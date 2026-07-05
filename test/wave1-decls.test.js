@@ -25,7 +25,7 @@ const cw = grid.canvas.width;
 const THRESHOLD = 0.95;
 
 // Задекларированные иконки Волны-1 (порядок — WAVE1-DECL-PREP)
-const WAVE1 = ['checkmark', 'plus', 'plus-circle'];
+const WAVE1 = ['checkmark', 'plus', 'plus-circle', 'checkmark-circle', 'checkmarks', 'checkmarks-circle', 'info-circle', 'info', 'close', 'close-circle'];
 
 describe('wave1-decls — генерат декларации сходится с рукой (IoU ≥ 0.95)', () => {
   for (const name of WAVE1) {
