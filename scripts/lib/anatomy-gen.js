@@ -748,10 +748,17 @@ export function genArcBand(cx, cy, r, aCenterDeg, halfSpanDeg, t) {
 }
 
 // ── контейнеры ──
+/**
+ * Кольцо/диск. Внутренний круг РЕВЕРСИРОВАН (sweep противоположен внешнему)
+ * — дырка честно вычитается и под evenodd (гейт), и под nonzero (браузер),
+ * как у genRoundedPolygonRing. Раньше оба круга шли sweep=0: под nonzero
+ * дырка заливалась (EO≢NZ, адверсарная верификация Волны-2, обязательство №1).
+ * Руки nonzero-безопасны (противоположные sweep) — генерат теперь тоже.
+ */
 export function genRing(cx, cy, rOut, rIn) {
-  const c = (r) =>
-    `M${f3(cx - r)} ${f3(cy)}a${f3(r)} ${f3(r)} 0 1 0 ${f3(2 * r)} 0a${f3(r)} ${f3(r)} 0 1 0 ${f3(-2 * r)} 0Z`;
-  return c(rOut) + (rIn ? c(rIn) : '');
+  const c = (r, sw) =>
+    `M${f3(cx - r)} ${f3(cy)}a${f3(r)} ${f3(r)} 0 1 ${sw} ${f3(2 * r)} 0a${f3(r)} ${f3(r)} 0 1 ${sw} ${f3(-2 * r)} 0Z`;
+  return c(rOut, 0) + (rIn ? c(rIn, 1) : '');
 }
 
 // ── rounded-polygon (скруглённый многоугольник: play-треугольник, ромб) ──
