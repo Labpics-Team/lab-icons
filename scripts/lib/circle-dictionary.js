@@ -220,9 +220,12 @@ export function resolveTangentChain(elements, connectors, closed) {
       const rf = con.r;
       if (!(rf > 0)) throw new Error('circle-dictionary: fillet требует r > 0');
       // локус центров fillet: оффсет каждого носителя на ±rf; перебор знаков,
-      // берём кандидата с точками касания ближе всего к hint
+      // берём кандидата с точками касания ближе всего к hint.
+      // Для круга две ветви: внешнее касание (d = R + rf) и внутреннее
+      // (d = |R − rf|; rf < R — fillet в носителе, rf > R — носитель в fillet:
+      // апексный бленд плоской дугой, eye Волны-6)
       const loci = (E) => {
-        if (E.circle) return [{ kind: 'c', c: E.circle.c, r: E.circle.r + rf }, ...(E.circle.r - rf > EPS ? [{ kind: 'c', c: E.circle.c, r: E.circle.r - rf }] : [])];
+        if (E.circle) return [{ kind: 'c', c: E.circle.c, r: E.circle.r + rf }, ...(Math.abs(E.circle.r - rf) > EPS ? [{ kind: 'c', c: E.circle.c, r: Math.abs(E.circle.r - rf) }] : [])];
         const dl = unit(E.line.d);
         const nl = [dl[1], -dl[0]];
         return [{ kind: 'l', p: add(E.line.p, nl, rf), d: dl, base: E.line }, { kind: 'l', p: add(E.line.p, nl, -rf), d: dl, base: E.line }];
@@ -235,8 +238,16 @@ export function resolveTangentChain(elements, connectors, closed) {
           else if (la.kind === 'l' && lb.kind === 'l') { const q = lineLine(la.p, la.d, lb.p, lb.d); cs = q ? [q] : []; }
           else { const L = la.kind === 'l' ? la : lb, C = la.kind === 'c' ? la : lb; cs = lineCircle(L.p, L.d, C.c, C.r); }
           for (const cf of cs) {
-            const t1 = A.circle ? add(A.circle.c, unit(sub(cf, A.circle.c)), A.circle.r) : projOnLine(A.line, cf);
-            const t2 = B.circle ? add(B.circle.c, unit(sub(cf, B.circle.c)), B.circle.r) : projOnLine(B.line, cf);
+            // точка касания на круге-носителе: c ± unit(cf−c)·R — знак тот,
+            // при котором точка лежит на fillet-окружности (|t−cf| = rf);
+            // «+» для внешнего и fillet-в-носителе, «−» для носителя-в-fillet
+            const tOnCircle = (C) => {
+              const u = unit(sub(cf, C.c));
+              const tp = add(C.c, u, C.r), tm = add(C.c, u, -C.r);
+              return Math.abs(norm(sub(tp, cf)) - rf) <= Math.abs(norm(sub(tm, cf)) - rf) ? tp : tm;
+            };
+            const t1 = A.circle ? tOnCircle(A.circle) : projOnLine(A.line, cf);
+            const t2 = B.circle ? tOnCircle(B.circle) : projOnLine(B.line, cf);
             const score = con.hint ? norm(sub(cf, con.hint)) : 0;
             if (!best || score < best.score) best = { cf, t1, t2, score };
           }
