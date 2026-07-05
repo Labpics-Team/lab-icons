@@ -17,6 +17,7 @@
  */
 
 import { parsePathData } from './path-data.js';
+import { buildDictPart, cutoutCircle, mirrorPathX } from './circle-dictionary.js';
 
 const rad = (deg) => (deg * Math.PI) / 180;
 const deg2 = (r) => ((r * 180) / Math.PI + 360) % 360;
@@ -829,7 +830,7 @@ export function genRoundedPolygonRing(verts, r, zeta, pen, rIn) {
  *
  * @returns {{outline?: string, filled?: string}} d-строки вариантов
  */
-export function buildGlyph(entry, grid, axes = {}) {
+export function buildGlyph(entry, grid, axes = {}, lib = null) {
   const cw = grid.canvas.width;
   // ОСЬ ВЕСА (вариативность, север владельца): глобальный множитель на все
   // штриховые токены — одна правка restyle-ит ВЕСЬ задекларированный корпус
@@ -921,14 +922,33 @@ export function buildGlyph(entry, grid, axes = {}) {
             chunks.push(outer);
           }
         } else if (part.primitive === 'circle-dot') {
-          // точка/диск; mode frame = кольцо пером (редко), solid = диск
+          // точка/диск; mode frame = кольцо пером (редко), solid = диск,
+          // cutout = противо-намотанный диск (дырка в сплошной массе —
+          // честно и под evenodd, и под nonzero; Волна-6: зрачок eye/filled)
           const [cx2, cy2, r] = [L(pp.cx), L(pp.cy), L(pp.r)];
           if (mode === 'frame') {
             const w = tok(part.weight ?? 'base');
             chunks.push(genRing(cx2, cy2, r, Math.max(r - w, 0.05)));
+          } else if (mode === 'cutout') {
+            chunks.push(cutoutCircle(cx2, cy2, r));
           } else {
             chunks.push(genRing(cx2, cy2, r, 0));
           }
+        } else if (
+          part.primitive === 'tangent-chain' ||
+          part.primitive === 'circle-hull' ||
+          part.primitive === 'arc-splice' ||
+          part.primitive === 'four-arc-oval' ||
+          part.primitive === 'arc-chain'
+        ) {
+          // словарь конструктивных окружностей (Волна-6, преп §2):
+          // центральная линия = цепь дуг/прямых с аналитическими стыками;
+          // stroke = оффсеты ±перо/2, silhouette = внешний оффсет (закон №1),
+          // contour/solid = сама цепь. Вес — токен сетки или число-доля;
+          // per-variant вес объектом {outline,filled} (прецедент stroke-path).
+          const wRaw = part.weight != null && typeof part.weight === 'object' ? part.weight[variant] : part.weight;
+          const w = tok(wRaw ?? 'base');
+          chunks.push(buildDictPart(part.primitive, pp, mode, w, cw));
         } else if (part.primitive === 'superellipse-stroke') {
           // сквиркл-рамка: контуры = офсеты ОСИ по нормали (перо константно,
           // негатив-дырка следует форме); solid = внешний офсет оси
@@ -1029,6 +1049,19 @@ export function buildGlyph(entry, grid, axes = {}) {
     const rIn = entry.rInner != null ? L(entry.rInner) : undefined;
     out.filled = genRoundedPolygon(verts, r, zeta);
     out.outline = genRoundedPolygonRing(verts, r, zeta, pen, rIn);
+  } else if (entry.archetype === 'mirror') {
+    // зеркальный глиф: ОДИН источник чисел + отражение (Волна-6:
+    // arrow-undo = mirror(arrow-redo); рука подтверждает зеркало точно —
+    // центры 12.95↔11.05, 3.13↔20.87, суммы x = 24.00). Требует карту
+    // глифов (4-й аргумент) — передаётся из validateAnatomy/тестов.
+    const src = lib?.[entry.of];
+    if (!src) throw new Error(`anatomy-gen: mirror «${entry.of}» — источник не найден (нужен 4-й аргумент lib)`);
+    if (src.archetype === 'mirror') throw new Error('anatomy-gen: mirror от mirror запрещён (один уровень)');
+    const built = buildGlyph(src, grid, axes, lib);
+    for (const variant of ['outline', 'filled']) {
+      if (!entry.status?.[variant] || !built[variant]) continue;
+      out[variant] = mirrorPathX(built[variant], cw / 2);
+    }
   } else {
     throw new Error(`anatomy-gen: неизвестный архетип «${entry.archetype}»`);
   }
