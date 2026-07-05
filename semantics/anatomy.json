@@ -2636,6 +2636,82 @@
      }
     }
    ]
+  },
+  "arrow-back-circle": {
+   "archetype": "composite",
+   "status": {
+    "outline": "hand"
+   },
+   "parts": [
+    {
+     "primitive": "stroke-path",
+     "mode": {
+      "outline": "solid"
+     },
+     "weight": "containerGlyph",
+     "params": {
+      "outline": {
+       "points": [
+        [
+         0.484583,
+         0.328333
+        ],
+        [
+         0.312708,
+         0.500208
+        ],
+        [
+         0.487708,
+         0.675208
+        ]
+       ],
+       "closed": false
+      }
+     }
+    },
+    {
+     "primitive": "stroke-path",
+     "mode": {
+      "outline": "solid"
+     },
+     "weight": "containerGlyph",
+     "params": {
+      "outline": {
+       "points": [
+        [
+         0.666667,
+         0.500833
+        ],
+        [
+         0.43028,
+         0.500833
+        ]
+       ],
+       "closed": false
+      }
+     }
+    },
+    {
+     "primitive": "circle-dot",
+     "mode": {
+      "outline": "frame",
+      "filled": "solid"
+     },
+     "weight": "enclosureRing",
+     "params": {
+      "outline": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.458333
+      },
+      "filled": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.458333
+      }
+     }
+    }
+   ]
   }
  }
 }
