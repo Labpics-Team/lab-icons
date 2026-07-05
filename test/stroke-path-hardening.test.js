@@ -156,4 +156,51 @@ describe('stroke-path hardening — guards офсет-вырождений', () 
     const ys = pts.map((p) => p[1]);
     expect(Math.max(...ys) - Math.min(...ys)).toBeCloseTo(2.0, 1); // габарит = перо
   });
+
+  // maxDev постоянства пера: max |dist(сэмпл, ось) − h| по всем сэмплам
+  // контура (капы включены — распрямлённые guard'ом стороны их не маскируют)
+  const maxDevFor = (points, weight, h) => {
+    const { outline } = buildGlyph(glyphFor(points, weight), grid);
+    const axis = points.map((q) => [q[0] * cw, q[1] * cw]);
+    let maxDev = 0;
+    for (const poly of samplePolylines(outline, 64)) {
+      for (const p of poly) {
+        let d = Infinity;
+        for (let i = 0; i + 1 < axis.length; i++) {
+          d = Math.min(d, distToSeg(p, axis[i], axis[i + 1]));
+        }
+        maxDev = Math.max(maxDev, Math.abs(d - h));
+      }
+    }
+    return maxDev;
+  };
+
+  it('з: регресс верификатора — f3-квантование капа не уводит перо за ±0.02', () => {
+    // SW-плечо close-circle (перо containerGlyph 2.0): хорда капа 2h после
+    // f3 округлялась до 1.99899 < 2R, центр полукруга уезжал с оси на
+    // √(R²−(c/2)²) — sqrt-усиление 5e-4 → maxDev ~0.0318. Фикс: радиус капа =
+    // половина фактической квантованной хорды → точный полукруг (~1e-3)
+    const swArm = [[0.441462, 0.559317], [0.371667, 0.629167]];
+    const h = (grid.ratios.strokeWidth.containerGlyph * cw) / 2; // 1.0
+    expect(maxDevFor(swArm, 'containerGlyph', h)).toBeLessThanOrEqual(0.02);
+  });
+
+  it('и: свип перьев × ориентаций короткого плеча — maxDev капов ≤ 0.02', () => {
+    const pens = [1.5 / 24, 1.8 / 24, 2.0 / 24, 2.4 / 24];
+    // якорь с «неудобной» дробной частью (реальный старт SW-плеча, юниты) —
+    // провоцируем округление f3; длина плеча как у SW-плеча (~2.37 юнита)
+    const A = [10.595088, 13.423608];
+    const L = 2.37;
+    const angles = [0, 45, 67.3]; // горизонталь, диагональ, произвольный угол
+    for (const pen of pens) {
+      for (const aDeg of angles) {
+        const t = (aDeg * Math.PI) / 180;
+        const B = [A[0] + L * Math.cos(t), A[1] + L * Math.sin(t)];
+        const points = q24([A, B]);
+        const h = (pen * cw) / 2;
+        const dev = maxDevFor(points, pen, h);
+        expect(dev, `перо ${pen * 24}/24, угол ${aDeg}°: maxDev ${dev.toFixed(4)}`).toBeLessThanOrEqual(0.02);
+      }
+    }
+  });
 });
