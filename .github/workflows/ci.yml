@@ -57,6 +57,9 @@ jobs:
       - name: Path quality check (шум кривых, волосяные фрагменты, встык-швы)
         run: pnpm check:path-quality
 
+      - name: Topology check (разрыв незакрытого контура — срез хордой)
+        run: pnpm check:topology
+
       - name: Fidelity check (пол узнаваемости генерата ≥97%, эскалация ниже)
         run: pnpm check:fidelity
 
