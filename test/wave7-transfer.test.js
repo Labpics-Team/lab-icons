@@ -28,6 +28,7 @@ const cw = grid.canvas.width;
 // Пер-иконные полы: замер (outline/filled) −0.2 п.п.
 const FLOORS = {
   resize: { outline: 0.977, filled: 0.9657 }, // замер .9790/.9677 (оба варианта — тангенс-кламп капов диагонали, запас 0.02px под мелкосеточный корпусный скан)
+  move: { outline: 0.9546, filled: 0.9664 }, // замер .9566/.9684 (крест: полная вертикаль + 2 полуоси, 6 тангенс-стыков — прецедент close из WAVE7-PREP)
 };
 
 function handFile(name, variant) {
