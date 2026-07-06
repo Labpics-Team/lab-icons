@@ -1,6 +1,7 @@
 node_modules/
 dist/
 .treeshake-tmp/
+preview/
 *.log
 .DS_Store
 Thumbs.db
