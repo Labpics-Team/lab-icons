@@ -904,6 +904,11 @@ export function buildGlyph(entry, grid, axes = {}) {
       if (!entry.status?.[variant]) continue;
       const chunks = [];
       for (const part of entry.parts) {
+        // per-variant активация: явный null в params[variant] исключает часть
+        // из этого варианта. Структурная разница outline↔filled: напр. полость
+        // лотка (rounded-rect-cutout) рисуется только в outline (открытая ⊔-рамка),
+        // а в filled контейнер сплошной и стрелка вычитается негативом.
+        if (part.params && Object.hasOwn(part.params, variant) && part.params[variant] === null) continue;
         const mode = part.mode?.[variant] ?? part.mode ?? 'solid';
         const pp = part.params?.[variant] ?? part.params;
         if (part.primitive === 'rounded-rect') {
