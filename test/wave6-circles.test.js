@@ -28,6 +28,11 @@ const FLOORS = {
   // cloud задекларирован generated: полы = fidelityToHand до промоушена − ε
   // (файлы перегенерены из декларации, гейт дублирует drift как регресс-страж)
   cloud: { outline: 0.9722, filled: 0.9933 }, // замер .9742/.9953
+  // paw + arrow-redo/undo: тот же прецедент cloud — generated, файлы
+  // перегенерены, полы = fidelityToHand до промоушена − ε
+  paw: { outline: 0.9445, filled: 0.9593 }, // замер .9465/.9613
+  'arrow-redo': { outline: 0.9475, filled: 0.9847 }, // замер .9495/.9867
+  'arrow-undo': { outline: 0.9362, filled: 0.9805 }, // замер .9382/.9825
 };
 
 function handFile(name, variant) {
