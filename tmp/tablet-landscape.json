@@ -1,0 +1,22 @@
+{
+ "archetype": "composite",
+ "status": {
+  "outline": "hand"
+ },
+ "parts": [
+  {
+   "primitive": "rounded-rect",
+   "mode": "frame",
+   "weight": "base",
+   "params": {
+    "outline": {
+     "cx": 0.5,
+     "cy": 0.5,
+     "w": 0.916667,
+     "h": 0.691667,
+     "rOuter": 0.121667
+    }
+   }
+  }
+ ]
+}

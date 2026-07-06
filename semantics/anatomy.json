@@ -4459,6 +4459,265 @@
     "filled": 0.9953
    },
    "correctionReason": "аналитические touch-касания лепестков к baseline (cy = baseY − r точно) и G1-стыки circle-hull — рука размазывала лепесток на 2–3 несовпадающих центра"
+  },
+  "paw": {
+   "archetype": "composite",
+   "status": {
+    "outline": "generated",
+    "filled": "generated"
+   },
+   "parts": [
+    {
+     "primitive": "tangent-chain",
+     "mode": {
+      "outline": "stroke",
+      "filled": "silhouette"
+     },
+     "weight": "base",
+     "params": {
+      "outline": {
+       "closed": true,
+       "elements": [
+        {
+         "circle": {
+          "c": [
+           0.5,
+           0.5755
+          ],
+          "r": 0.1017
+         }
+        },
+        {
+         "circle": {
+          "c": [
+           0.7052,
+           0.7633
+          ],
+          "r": 0.0875
+         }
+        },
+        {
+         "circle": {
+          "c": [
+           0.5,
+           1.1982
+          ],
+          "r": 0.3934,
+          "dir": -1
+         }
+        },
+        {
+         "circle": {
+          "c": [
+           0.2948,
+           0.7633
+          ],
+          "r": 0.0875
+         }
+        }
+       ],
+       "connectors": [
+        {
+         "type": "tangent",
+         "hint": [
+          0.6675,
+          0.5988
+         ]
+        },
+        {
+         "type": "kiss"
+        },
+        {
+         "type": "kiss"
+        },
+        {
+         "type": "tangent",
+         "hint": [
+          0.3325,
+          0.5988
+         ]
+        }
+       ]
+      },
+      "filled": {
+       "closed": true,
+       "elements": [
+        {
+         "circle": {
+          "c": [
+           0.5,
+           0.5855
+          ],
+          "r": 0.0917
+         }
+        },
+        {
+         "circle": {
+          "c": [
+           0.7019,
+           0.7618
+          ],
+          "r": 0.0875
+         }
+        },
+        {
+         "circle": {
+          "c": [
+           0.5,
+           1.1982
+          ],
+          "r": 0.3934,
+          "dir": -1
+         }
+        },
+        {
+         "circle": {
+          "c": [
+           0.2981,
+           0.7618
+          ],
+          "r": 0.0875
+         }
+        }
+       ],
+       "connectors": [
+        {
+         "type": "tangent",
+         "hint": [
+          0.6675,
+          0.5988
+         ]
+        },
+        {
+         "type": "kiss"
+        },
+        {
+         "type": "kiss"
+        },
+        {
+         "type": "tangent",
+         "hint": [
+          0.3325,
+          0.5988
+         ]
+        }
+       ]
+      }
+     }
+    },
+    {
+     "primitive": "superellipse",
+     "mode": {
+      "outline": "frame",
+      "filled": "solid"
+     },
+     "params": {
+      "outline": {
+       "cx": 0.178,
+       "cy": 0.45615,
+       "aOut": 0.16045,
+       "bOut": 0.11755,
+       "aIn": 0.08395,
+       "bIn": 0.04185,
+       "nOut": 2,
+       "rotation": 67
+      },
+      "filled": {
+       "cx": 0.16135,
+       "cy": 0.4539,
+       "aOut": 0.14585,
+       "bOut": 0.10065,
+       "nOut": 2,
+       "rotation": 67
+      }
+     }
+    },
+    {
+     "primitive": "superellipse",
+     "mode": {
+      "outline": "frame",
+      "filled": "solid"
+     },
+     "params": {
+      "outline": {
+       "cx": 0.822,
+       "cy": 0.45615,
+       "aOut": 0.16045,
+       "bOut": 0.11755,
+       "aIn": 0.08395,
+       "bIn": 0.04185,
+       "nOut": 2,
+       "rotation": -67
+      },
+      "filled": {
+       "cx": 0.83865,
+       "cy": 0.4539,
+       "aOut": 0.14585,
+       "bOut": 0.10065,
+       "nOut": 2,
+       "rotation": -67
+      }
+     }
+    },
+    {
+     "primitive": "superellipse",
+     "mode": {
+      "outline": "frame",
+      "filled": "solid"
+     },
+     "params": {
+      "outline": {
+       "cx": 0.3738,
+       "cy": 0.2694,
+       "aOut": 0.15945,
+       "bOut": 0.1153,
+       "aIn": 0.08245,
+       "bIn": 0.0397,
+       "nOut": 2,
+       "rotation": 81.8
+      },
+      "filled": {
+       "cx": 0.3673,
+       "cy": 0.2575,
+       "aOut": 0.1447,
+       "bOut": 0.0984,
+       "nOut": 2,
+       "rotation": 81.8
+      }
+     }
+    },
+    {
+     "primitive": "superellipse",
+     "mode": {
+      "outline": "frame",
+      "filled": "solid"
+     },
+     "params": {
+      "outline": {
+       "cx": 0.6262,
+       "cy": 0.2694,
+       "aOut": 0.15945,
+       "bOut": 0.1153,
+       "aIn": 0.08245,
+       "bIn": 0.0397,
+       "nOut": 2,
+       "rotation": -81.8
+      },
+      "filled": {
+       "cx": 0.6327,
+       "cy": 0.2575,
+       "aOut": 0.1447,
+       "bOut": 0.0984,
+       "nOut": 2,
+       "rotation": -81.8
+      }
+     }
+    }
+   ],
+   "fidelityToHand": {
+    "outline": 0.9465,
+    "filled": 0.9613
+   }
   }
  },
  "version": 1

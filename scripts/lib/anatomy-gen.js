@@ -429,7 +429,7 @@ export function genRoundedRect(cx, cy, w, h, R, zeta, rotationDeg = 0) {
  * 16 кубик-сегментов из аналитических производных (Эрмит→Безье),
  * никакой полигонализации (закон BL-014: ступеньки запрещены).
  */
-export function genSuperellipse(cx, cy, a, b, n, rotationDeg = 0) {
+export function genSuperellipse(cx, cy, a, b, n, rotationDeg = 0, reverse = false) {
   const t0 = rad(rotationDeg);
   const ux = [Math.cos(t0), Math.sin(t0)];
   const uy = [-Math.sin(t0), Math.cos(t0)];
@@ -442,7 +442,12 @@ export function genSuperellipse(cx, cy, a, b, n, rotationDeg = 0) {
   // ручки Эрмита по ЦЕНТРАЛЬНЫМ РАЗНОСТЯМ точек: аналитическая производная
   // содержит |cos|^(e−1) с e<1 при n>2 — взрывается у вершин (ловилось
   // тестом гладкости как петли на сотни юнитов)
-  return emitClosedHermite(resampleByArc(pt, 32), world);
+  const pts = resampleByArc(pt, 32);
+  // reverse: обратная намотка для негатив-контуров (frame-дырка) —
+  // вычитается и под evenodd (гейт), и под nonzero (браузер); тот же
+  // закон, что offsetPolyInward(...).reverse() у полигон-рамок
+  if (reverse) pts.reverse();
+  return emitClosedHermite(pts, world);
 }
 
 /**
@@ -572,10 +577,16 @@ export function genSuperellipseStroke(cx, cy, a, b, n, rotationDeg, pen, side = 
       );
     }
   }
-  const emit = (sign) => emitClosedHermite(resampleByArc((t) => offsetPt(t, sign), 32), world);
+  const emit = (sign, reverse = false) => {
+    const pts = resampleByArc((t) => offsetPt(t, sign), 32);
+    // reverse: негатив обратной намоткой — дырка честна и под nonzero
+    // (та же дисциплина, что frame-ветка superellipse и genRoundedPolygonRing)
+    if (reverse) pts.reverse();
+    return emitClosedHermite(pts, world);
+  };
   if (side === 'outer') return emit(1);
   if (side === 'inner') return emit(-1);
-  return emit(1) + emit(-1);
+  return emit(1) + emit(-1, true);
 }
 
 /**
@@ -951,15 +962,21 @@ export function buildGlyph(entry, grid, axes = {}, lib = null) {
           chunks.push(buildDictPart(part.primitive, pp, mode, w, cw));
         } else if (part.primitive === 'superellipse-stroke') {
           // сквиркл-рамка: контуры = офсеты ОСИ по нормали (перо константно,
-          // негатив-дырка следует форме); solid = внешний офсет оси
+          // негатив-дырка следует форме); solid = внешний офсет оси;
+          // вес per-variant объектом — тот же прецедент, что словарная ветка
           const rot = pp.rotation ?? 0;
-          const w = tok(part.weight ?? 'base');
+          const wRaw2 = part.weight != null && typeof part.weight === 'object' ? part.weight[variant] : part.weight;
+          const w = tok(wRaw2 ?? 'base');
           const ax = L(pp.axis);
+          // axisB: эллиптическая ось (paw: палец = кольцо-обводка эллипса
+          // константным пером — два концентрических эллипса эту пару НЕ
+          // описывают, оффсет эллипса ≠ эллипс); без axisB — как раньше
+          const bx = pp.axisB != null ? L(pp.axisB) : ax;
           if (mode === 'stroke') {
-            chunks.push(genSuperellipseStroke(L(pp.cx), L(pp.cy), ax, ax, pp.n, rot, w / 2, 'both'));
+            chunks.push(genSuperellipseStroke(L(pp.cx), L(pp.cy), ax, bx, pp.n, rot, w / 2, 'both'));
           } else {
             // solid: сплошной сквиркл, axis = полная полуось силуэта
-            chunks.push(genSuperellipse(L(pp.cx), L(pp.cy), ax, ax, pp.n, rot));
+            chunks.push(genSuperellipse(L(pp.cx), L(pp.cy), ax, bx, pp.n, rot));
           }
         } else if (part.primitive === 'superellipse') {
           // сквиркл-блоб |x/a|^n+|y/b|^n=1; mode frame = пара контуров
@@ -968,7 +985,8 @@ export function buildGlyph(entry, grid, axes = {}, lib = null) {
           if (mode === 'frame') {
             chunks.push(
               genSuperellipse(L(pp.cx), L(pp.cy), L(pp.aOut), L(pp.bOut ?? pp.aOut), pp.nOut, rot) +
-                genSuperellipse(L(pp.cx), L(pp.cy), L(pp.aIn), L(pp.bIn ?? pp.aIn), pp.nIn ?? pp.nOut, rot),
+                // внутренний = обратная намотка: дырка честна под nonzero
+                genSuperellipse(L(pp.cx), L(pp.cy), L(pp.aIn), L(pp.bIn ?? pp.aIn), pp.nIn ?? pp.nOut, rot, true),
             );
           } else {
             chunks.push(genSuperellipse(L(pp.cx), L(pp.cy), L(pp.aOut), L(pp.bOut ?? pp.aOut), pp.nOut, rot));
