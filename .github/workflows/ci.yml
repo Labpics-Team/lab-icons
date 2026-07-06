@@ -60,6 +60,9 @@ jobs:
       - name: Topology check (разрыв незакрытого контура — срез хордой)
         run: pnpm check:topology
 
+      - name: Corners check (пер-вершинное скругление генерат-vs-рука; корпус в WARN до EC3)
+        run: pnpm check:corners
+
       - name: Fidelity check (пол узнаваемости генерата ≥97%, эскалация ниже)
         run: pnpm check:fidelity
 
