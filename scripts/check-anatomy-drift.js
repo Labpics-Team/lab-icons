@@ -58,7 +58,7 @@ export function validateAnatomy({ grid, anatomy, readSvg }) {
   for (const [name, entry] of Object.entries(anatomy.glyphs)) {
     let built;
     try {
-      built = buildGlyph(entry, grid);
+      built = buildGlyph(entry, grid, {}, anatomy.glyphs);
     } catch (cause) {
       hard.push(`${name}: генератор упал (${cause.message})`);
       continue;
