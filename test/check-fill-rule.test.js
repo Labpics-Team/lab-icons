@@ -41,6 +41,21 @@ describe('fillRuleBlobBug — дискриминатор блоба', () => {
     const r = fillRuleBlobBug(svg('M0 0h24v24H0z') .replace('/>', `/><path d="${ringOpp}"/>`));
     expect(r.isBlobBug).toBe(false);
   });
+
+  it('Д: mixed-файл — evenodd-path + одинаково-намотанное кольцо БЕЗ evenodd → блоб (общефайловый чек это прятал)', () => {
+    // fill-rule применяется ПО-ПУТЁВО: наличие evenodd на ПЕРВОМ path не спасает второй.
+    const mixed = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24">' +
+      '<path fill-rule="evenodd" d="M2 2h4v4h-4z"/>' + // безобидный квадрат с evenodd
+      `<path d="${ringSame}"/></svg>`; // кольцо БЕЗ evenodd → блоб
+    expect(fillRuleBlobBug(mixed).isBlobBug).toBe(true);
+  });
+
+  it('А: раздельные нахлёстывающиеся filled-path без evenodd (случай headphone) → НЕ блоб', () => {
+    // Нахлёст МЕЖДУ path — чернила под обоими правилами (fill-rule по-путёво, не склейка).
+    const overlap = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24">' +
+      '<path d="M4 4h10v10h-10z"/><path d="M9 9h10v10h-10z"/></svg>';
+    expect(fillRuleBlobBug(overlap).isBlobBug).toBe(false);
+  });
 });
 
 describe('findBlobBugs — расслоение Outline(hard)/Filled(warn)', () => {

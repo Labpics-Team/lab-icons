@@ -1,9 +1,9 @@
 // Видящие гейты — ловят то, что видит глаз дизайнера, но слепа площадная IoU:
-//   1. eoNzDisagree  — доля площади, где evenodd ≠ nonzero (класс «прорезь»:
-//      перекрытие суб-путей даёт дыру под evenodd — reload/arrow наконечники).
-//   2. handDisplacement — робастное p90 смещение контура генерат↔рука в юнитах
-//      (уход формы: бабочка play-skip, тонкий plus, чужое скругление pause).
-// Обе меры детерминированы и считаются по ВСЕМУ корпусу, не по выборке-глазу.
+//   1. fillRuleBlobBug — «чёрный блоб»: контур со сквозной дырой без evenodd
+//      заливается в сплошной силуэт под nonzero (браузер по умолчанию). Модель —
+//      симуляция рендера ПО-ПУТЁВО (own fill-rule каждого path), не конкатенация.
+//   2. eoNzDisagree — примитив: доля площади, где evenodd ≠ nonzero для одного d.
+// Меры детерминированы и считаются по ВСЕМУ корпусу, не по выборке-глазу.
 import { samplePolylines } from './curve-sampling.js';
 
 // ── точка внутри чернил: even-odd (чётность) и nonzero (винтинг) ──
@@ -40,28 +40,53 @@ function bbox(polys) {
   return a;
 }
 
+// Разбор <path> с СОБСТВЕННЫМ fill-rule (SVG применяет правило заливки ПО-ПУТЁВО;
+// в корпусе нет контейнерного fill-rule на <svg>/<g> — проверено, так что own = эффективное).
+function pathsOf(rawSvg) {
+  const out = [];
+  for (const tag of rawSvg.match(/<path\b[^>]*>/gi) || []) {
+    const dm = tag.match(/\sd=["']([^"']+)["']/i);
+    if (!dm) continue;
+    const d = dm[1];
+    if (/M0\s*0[hH]24[vV]24[hH]0[zZ]/.test(d)) continue; // клип-рамка Figma — не геометрия
+    out.push({ d, eo: /fill-rule\s*=\s*["']?\s*evenodd/i.test(tag), polys: polysOf(d) });
+  }
+  return out;
+}
+const inkedShipped = (paths, x, y) => paths.some((p) => (p.eo ? insideEO(x, y, p.polys) : windingNZ(x, y, p.polys) !== 0));
+const inkedAllEO = (paths, x, y) => paths.some((p) => insideEO(x, y, p.polys));
+
 /**
- * ПРОДАКШН-ГЕЙТ «чёрный блоб». Иконка со сквозными дырами (кольцо, лицо-в-круге)
- * рендерится дырявой ТОЛЬКО под evenodd. Если файл не объявил fill-rule=evenodd —
- * браузер применяет nonzero по умолчанию → одинаково-намотанные контуры сливаются
- * в СПЛОШНОЙ силуэт. Глаз видит «залитый диск», площадная IoU — нет.
- * Дискриминатор = высокое EO≠NZ И отсутствие объявленного evenodd в файле.
+ * ПРОДАКШН-ГЕЙТ «чёрный блоб». Контур со сквозной дырой (кольцо, лицо-в-круге),
+ * чьи под-контуры намотаны ОДИНАКОВО и path НЕ объявил fill-rule=evenodd →
+ * браузер по умолчанию (nonzero) заливает дыру → сплошной силуэт. Глаз видит
+ * «залитый диск», площадная IoU — нет.
+ *
+ * Модель = симуляция рендера ПО-ПУТЁВО (не конкатенация — она склеивала бы
+ * раздельные path в ложные дыры на нахлёстах). Чернила as-shipped = OR по path
+ * под ЭФФЕКТИВНЫМ правилом (own evenodd → evenodd, иначе nonzero). Блоб-дыра =
+ * точка залита as-shipped, но ПУСТА, будь все path evenodd. Это ловит и mixed-файл
+ * (один path evenodd, другой — кольцо без него: старый общефайловый чек его прятал).
  * @param {string} rawSvg  сырой текст .svg-файла
- * @param {number} tau     порог «есть геометрия дыр», % (по данным корпуса ~5)
+ * @param {number} tau     порог доли залитых дыр, % (чистые=0, блобы 63–68%)
  */
-export function fillRuleBlobBug(rawSvg, tau = 5) {
-  const declaresEvenOdd = /fill-rule\s*=\s*["']?\s*evenodd/i.test(rawSvg);
-  const d = (rawSvg.match(/[<]path[^>]*\sd=["']([^"']+)["']/gi) || [])
-    .map((p) => (p.match(/\sd=["']([^"']+)["']/i) || [, ''])[1])
-    .filter((s) => !/M0\s*0[hH]24[vV]24[hH]0[zZ]/.test(s)) // клип-рамка Figma
-    .join(' ');
-  if (!d.trim()) return { disagreePct: 0, declaresEvenOdd, isBlobBug: false };
-  // Короткие замыкания (перед дорогим растровым сканом):
-  //  1. объявлен evenodd → блоб невозможен, автор задал намерение;
-  //  2. <2 подпутей (M) → нет замкнутой контрформы → залить нечего.
-  if (declaresEvenOdd) return { disagreePct: 0, declaresEvenOdd, isBlobBug: false };
-  if ((d.match(/[Mm]/g) || []).length < 2) return { disagreePct: 0, declaresEvenOdd, isBlobBug: false };
-  const { disagreePct } = eoNzDisagree(d, 0.2);
+export function fillRuleBlobBug(rawSvg, tau = 5, step = 0.2) {
+  const paths = pathsOf(rawSvg);
+  const declaresEvenOdd = paths.some((p) => p.eo);
+  if (!paths.length) return { disagreePct: 0, declaresEvenOdd, isBlobBug: false };
+  // Блоб возможен только у path БЕЗ own-evenodd и с ≥2 под-путями (есть контрформа).
+  const candidate = paths.some((p) => !p.eo && (p.d.match(/[Mm]/g) || []).length >= 2);
+  if (!candidate) return { disagreePct: 0, declaresEvenOdd, isBlobBug: false };
+  const [minX, minY, maxX, maxY] = bbox(paths.flatMap((p) => p.polys));
+  let ship = 0, blob = 0;
+  for (let y = minY; y <= maxY; y += step) {
+    for (let x = minX; x <= maxX; x += step) {
+      if (!inkedShipped(paths, x, y)) continue;
+      ship++;
+      if (!inkedAllEO(paths, x, y)) blob++; // залито сейчас, но дыра под evenodd
+    }
+  }
+  const disagreePct = ship ? (blob / ship) * 100 : 0;
   return { disagreePct, declaresEvenOdd, isBlobBug: disagreePct > tau };
 }
 
@@ -81,20 +106,4 @@ export function eoNzDisagree(d, step = 0.1) {
     }
   }
   return { eo, nz, disagreePct: nz ? (diff / nz) * 100 : (diff ? 100 : 0) };
-}
-
-// ── робастное смещение контура (p90 + пик), в юнитах ──
-function pts(d) { return samplePolylines(d, 14).flat(); }
-function nn(A, B) {
-  const out = [];
-  for (const a of A) { let m = Infinity; for (const b of B) { const dx = a[0] - b[0], dy = a[1] - b[1], s = dx * dx + dy * dy; if (s < m) m = s; } out.push(Math.sqrt(m)); }
-  return out;
-}
-/** p90 (типичное) и max (пик) смещение контура dGen↔dHand в юнитах. */
-export function handDisplacement(dGen, dHand) {
-  const A = pts(dGen), B = pts(dHand);
-  if (!A.length || !B.length) return null;
-  const dd = nn(A, B).concat(nn(B, A)).sort((x, y) => x - y);
-  const q = (p) => dd[Math.min(dd.length - 1, Math.floor(p * dd.length))];
-  return { p90: q(0.9), max: dd[dd.length - 1] };
 }

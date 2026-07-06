@@ -39,7 +39,7 @@ if (isMain) {
   const root = join(dirname(fileURLToPath(import.meta.url)), '..');
   const files = [];
   for (const variant of ['Outline', 'Filled']) {
-    for (const f of readdirSync(join(root, 'svg', variant))) {
+    for (const f of readdirSync(join(root, 'svg', variant)).filter((f) => f.endsWith('.svg'))) {
       files.push({ name: `${variant}/${f}`, content: readFileSync(join(root, 'svg', variant, f), 'utf8') });
     }
   }
