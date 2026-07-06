@@ -1376,7 +1376,8 @@
    ],
    "fidelityToHand": {
     "outline": 0.9795
-   }
+   },
+   "correctionReason": "аналитические G1-стыки купол↔фланки и честный evenodd-вырез мениска (словарь кругов) — рука держала стыки со сносом касательных и открытым зазором нити"
   },
   "checkmark": {
    "archetype": "composite",
@@ -4456,7 +4457,8 @@
    "fidelityToHand": {
     "outline": 0.9742,
     "filled": 0.9953
-   }
+   },
+   "correctionReason": "аналитические touch-касания лепестков к baseline (cy = baseY − r точно) и G1-стыки circle-hull — рука размазывала лепесток на 2–3 несовпадающих центра"
   }
  },
  "version": 1
