@@ -85,7 +85,23 @@
    "weights": {
     "outline": "base",
     "filled": "bold"
-   }
+   },
+   "rotation": 0,
+   "translate": {
+    "outline": [
+     0,
+     -0.001
+    ],
+    "filled": [
+     0.001,
+     0.002
+    ]
+   },
+   "fidelityToHand": {
+    "outline": 0.9982,
+    "filled": 0.9857
+   },
+   "correctionReason": "компенсация дрейфа bold-варианта руки (translate-подбор, зеркало chevron-up)"
   },
   "chevron-down-circle": {
    "archetype": "container-glyph",
@@ -121,37 +137,57 @@
    }
   },
   "tablet-landscape": {
-   "archetype": "rounded-rect-container",
+   "archetype": "composite",
    "status": {
     "outline": "hand",
     "filled": "hand"
    },
-   "params": {
-    "cx": 0.5,
-    "cy": 0.5,
-    "w": 0.916667,
-    "h": 0.691667,
-    "rOuter": 0.121667
-   },
-   "weights": {
-    "outline": "base"
+   "parts": [
+    {
+     "primitive": "rounded-rect",
+     "mode": {
+      "outline": "frame",
+      "filled": "solid"
+     },
+     "weight": "base",
+     "params": {
+      "cx": 0.5,
+      "cy": 0.5,
+      "w": 0.916667,
+      "h": 0.691667,
+      "rOuter": 0.121667
+     }
+    }
+   ],
+   "fidelityToHand": {
+    "outline": 0.997
    }
   },
   "tablet-portrait": {
-   "archetype": "rounded-rect-container",
+   "archetype": "composite",
    "status": {
     "outline": "hand",
     "filled": "hand"
    },
-   "params": {
-    "cx": 0.5,
-    "cy": 0.5,
-    "w": 0.691667,
-    "h": 0.916667,
-    "rOuter": 0.103773
-   },
-   "weights": {
-    "outline": "base"
+   "parts": [
+    {
+     "primitive": "rounded-rect",
+     "mode": {
+      "outline": "frame",
+      "filled": "solid"
+     },
+     "weight": "base",
+     "params": {
+      "cx": 0.5,
+      "cy": 0.5,
+      "w": 0.691667,
+      "h": 0.916667,
+      "rOuter": 0.121667
+     }
+    }
+   ],
+   "fidelityToHand": {
+    "outline": 0.997
    }
   },
   "pause": {
@@ -209,7 +245,11 @@
       }
      }
     }
-   ]
+   ],
+   "fidelityToHand": {
+    "outline": 0.9891,
+    "filled": 0.997
+   }
   },
   "ellipsis-horizontal": {
    "archetype": "composite",
@@ -266,7 +306,11 @@
       }
      }
     }
-   ]
+   ],
+   "fidelityToHand": {
+    "outline": 1,
+    "filled": 0.992
+   }
   },
   "ellipsis-vertical": {
    "archetype": "composite",
@@ -323,7 +367,11 @@
       }
      }
     }
-   ]
+   ],
+   "fidelityToHand": {
+    "outline": 1,
+    "filled": 0.9983
+   }
   },
   "menu": {
    "archetype": "composite",
@@ -372,7 +420,11 @@
       }
      }
     }
-   ]
+   ],
+   "fidelityToHand": {
+    "outline": 0.9995,
+    "filled": 0.9996
+   }
   },
   "minus": {
    "archetype": "composite",
@@ -401,7 +453,11 @@
       }
      }
     }
-   ]
+   ],
+   "fidelityToHand": {
+    "outline": 1,
+    "filled": 0.9996
+   }
   },
   "ellipse": {
    "archetype": "composite",
@@ -430,7 +486,11 @@
       }
      }
     }
-   ]
+   ],
+   "fidelityToHand": {
+    "outline": 1,
+    "filled": 1
+   }
   },
   "filter": {
    "archetype": "composite",
@@ -484,7 +544,7 @@
      "mode": "solid",
      "params": {
       "outline": {
-       "cx": 0.502083,
+       "cx": 0.500833,
        "cy": 0.708333,
        "w": 0.370833,
        "h": 0.075,
@@ -494,12 +554,16 @@
        "cx": 0.5025,
        "cy": 0.708333,
        "w": 0.396667,
-       "h": 0.1,
+       "h": 0.09875,
        "rOuter": 0.05
       }
      }
     }
-   ]
+   ],
+   "fidelityToHand": {
+    "outline": 0.9986,
+    "filled": 0.9994
+   }
   },
   "list": {
    "archetype": "composite",
@@ -576,7 +640,7 @@
      },
      "params": {
       "outline": {
-       "cx": 0.158081,
+       "cx": 0.156831,
        "cy": 0.730069,
        "r": 0.050114
       },
@@ -596,7 +660,7 @@
      "params": {
       "outline": {
        "cx": 0.158307,
-       "cy": 0.500033,
+       "cy": 0.498783,
        "r": 0.050004
       },
       "filled": {
@@ -615,7 +679,7 @@
      "params": {
       "outline": {
        "cx": 0.158281,
-       "cy": 0.270053,
+       "cy": 0.268803,
        "r": 0.04996
       },
       "filled": {
@@ -625,7 +689,11 @@
       }
      }
     }
-   ]
+   ],
+   "fidelityToHand": {
+    "outline": 0.9943,
+    "filled": 0.9979
+   }
   },
   "minus-circle": {
    "archetype": "composite",
@@ -751,7 +819,11 @@
       }
      }
     }
-   ]
+   ],
+   "fidelityToHand": {
+    "outline": 0.9722,
+    "filled": 0.988
+   }
   },
   "sun-low": {
    "archetype": "composite",
@@ -770,7 +842,7 @@
      "params": {
       "outline": {
        "cx": 0.500103,
-       "cy": 0.500024,
+       "cy": 0.498774,
        "r": 0.208444
       },
       "filled": {
@@ -808,7 +880,7 @@
      "params": {
       "outline": {
        "cx": 0.202292,
-       "cy": 0.7975,
+       "cy": 0.79625,
        "r": 0.037565
       },
       "filled": {
@@ -904,7 +976,7 @@
       "outline": {
        "cx": 0.203571,
        "cy": 0.201627,
-       "r": 0.03682
+       "r": 0.03557
       },
       "filled": {
        "cx": 0.203571,
@@ -932,7 +1004,11 @@
       }
      }
     }
-   ]
+   ],
+   "fidelityToHand": {
+    "outline": 0.9712,
+    "filled": 0.9985
+   }
   },
   "time": {
    "archetype": "composite",
@@ -966,7 +1042,7 @@
      "mode": "solid",
      "params": {
       "outline": {
-       "cx": 0.5,
+       "cx": 0.49875,
        "cy": 0.5,
        "up": 0.260833,
        "right": 0.18625,
@@ -981,7 +1057,11 @@
       }
      }
     }
-   ]
+   ],
+   "fidelityToHand": {
+    "outline": 0.9942,
+    "filled": 1
+   }
   },
   "component": {
    "archetype": "composite",
@@ -1393,7 +1473,7 @@
      "weight": 0.0745,
      "params": {
       "outline": {
-       "cx": 0.251401,
+       "cx": 0.250151,
        "cy": 0.252016,
        "r": 0.103631
       },
@@ -1413,7 +1493,7 @@
      "weight": 0.074371,
      "params": {
       "outline": {
-       "cx": 0.501094,
+       "cx": 0.499844,
        "cy": 0.252108,
        "r": 0.103502
       },
@@ -1433,7 +1513,7 @@
      "weight": 0.074371,
      "params": {
       "outline": {
-       "cx": 0.751094,
+       "cx": 0.749844,
        "cy": 0.252108,
        "r": 0.103502
       },
@@ -1444,7 +1524,11 @@
       }
      }
     }
-   ]
+   ],
+   "fidelityToHand": {
+    "outline": 0.9898,
+    "filled": 1
+   }
   },
   "chevron-up": {
    "archetype": "stroke-v",
@@ -1823,7 +1907,10 @@
       }
      }
     }
-   ]
+   ],
+   "fidelityToHand": {
+    "outline": 0.9709
+   }
   },
   "plus": {
    "archetype": "composite",
@@ -1862,7 +1949,7 @@
      "mode": "solid",
      "params": {
       "outline": {
-       "cx": 0.664792,
+       "cx": 0.662292,
        "cy": 0.5,
        "w": 0.254583,
        "h": 0.075,
@@ -1870,7 +1957,10 @@
       }
      }
     }
-   ]
+   ],
+   "fidelityToHand": {
+    "outline": 0.9794
+   }
   },
   "plus-circle": {
    "archetype": "composite",
@@ -1937,7 +2027,10 @@
       }
      }
     }
-   ]
+   ],
+   "fidelityToHand": {
+    "outline": 0.9923
+   }
   },
   "checkmark-circle": {
    "archetype": "composite",
@@ -1991,7 +2084,10 @@
       }
      }
     }
-   ]
+   ],
+   "fidelityToHand": {
+    "outline": 0.9925
+   }
   },
   "checkmarks": {
    "archetype": "composite",
@@ -2047,7 +2143,10 @@
       }
      }
     }
-   ]
+   ],
+   "fidelityToHand": {
+    "outline": 0.9815
+   }
   },
   "checkmarks-circle": {
    "archetype": "composite",
@@ -2123,7 +2222,10 @@
       }
      }
     }
-   ]
+   ],
+   "fidelityToHand": {
+    "outline": 0.992
+   }
   },
   "info-circle": {
    "archetype": "composite",
@@ -2277,7 +2379,10 @@
       }
      }
     }
-   ]
+   ],
+   "fidelityToHand": {
+    "outline": 0.9826
+   }
   },
   "close": {
    "archetype": "composite",
@@ -2351,7 +2456,10 @@
       }
      }
     }
-   ]
+   ],
+   "fidelityToHand": {
+    "outline": 0.9796
+   }
   },
   "close-circle": {
    "archetype": "composite",
@@ -2445,7 +2553,10 @@
       }
      }
     }
-   ]
+   ],
+   "fidelityToHand": {
+    "outline": 0.9885
+   }
   },
   "ban": {
    "archetype": "composite",
@@ -2485,7 +2596,7 @@
      "params": {
       "outline": {
        "cx": 0.5,
-       "cy": 0.5,
+       "cy": 0.4995,
        "r": 0.458333
       },
       "filled": {
@@ -2495,7 +2606,10 @@
       }
      }
     }
-   ]
+   ],
+   "fidelityToHand": {
+    "outline": 0.9869
+   }
   },
   "arrow-up-circle": {
    "archetype": "composite",
@@ -2571,7 +2685,10 @@
       }
      }
     }
-   ]
+   ],
+   "fidelityToHand": {
+    "outline": 0.989
+   }
   },
   "arrow-down-circle": {
    "archetype": "composite",
@@ -2647,7 +2764,10 @@
       }
      }
     }
-   ]
+   ],
+   "fidelityToHand": {
+    "outline": 0.991
+   }
   },
   "arrow-back-circle": {
    "archetype": "composite",
@@ -2723,7 +2843,10 @@
       }
      }
     }
-   ]
+   ],
+   "fidelityToHand": {
+    "outline": 0.9917
+   }
   },
   "arrow-forward-circle": {
    "archetype": "composite",
@@ -2799,7 +2922,10 @@
       }
      }
     }
-   ]
+   ],
+   "fidelityToHand": {
+    "outline": 0.9902
+   }
   },
   "alert-circle": {
    "archetype": "composite",
@@ -2860,7 +2986,10 @@
       }
      }
     }
-   ]
+   ],
+   "fidelityToHand": {
+    "outline": 0.9821
+   }
   },
   "play-circle": {
    "archetype": "composite",
@@ -2918,7 +3047,10 @@
      "name": "ring",
      "role": "counter"
     }
-   ]
+   ],
+   "fidelityToHand": {
+    "outline": 0.9997
+   }
   },
   "play-forward-circle": {
    "archetype": "composite",
@@ -2992,7 +3124,10 @@
      "name": "ring",
      "role": "counter"
     }
-   ]
+   ],
+   "fidelityToHand": {
+    "outline": 0.9762
+   }
   },
   "play-back-circle": {
    "archetype": "composite",
@@ -3037,7 +3172,7 @@
          0.420192
         ]
        ],
-       "r": 0.054167,
+       "r": 0.049167,
        "zeta": 0.06
       }
      },
@@ -3066,7 +3201,10 @@
      "name": "ring",
      "role": "counter"
     }
-   ]
+   ],
+   "fidelityToHand": {
+    "outline": 0.9758
+   }
   },
   "play-skip-back-circle": {
    "archetype": "composite",
@@ -3115,7 +3253,7 @@
          0.69125
         ]
        ],
-       "r": 0.040083,
+       "r": 0.030083,
        "zeta": 0.43
       }
      },
@@ -3144,7 +3282,10 @@
      "name": "ring",
      "role": "counter"
     }
-   ]
+   ],
+   "fidelityToHand": {
+    "outline": 0.9792
+   }
   },
   "play-skip-forward-circle": {
    "archetype": "composite",
@@ -3193,7 +3334,7 @@
          0.696667
         ]
        ],
-       "r": 0.046667,
+       "r": 0.042917,
        "zeta": 0.34
       }
      },
@@ -3222,7 +3363,10 @@
      "name": "ring",
      "role": "counter"
     }
-   ]
+   ],
+   "fidelityToHand": {
+    "outline": 0.9823
+   }
   },
   "arrow-up": {
    "archetype": "composite",
@@ -3315,7 +3459,11 @@
      "name": "shaft",
      "role": "ink"
     }
-   ]
+   ],
+   "fidelityToHand": {
+    "outline": 0.9854,
+    "filled": 0.9848
+   }
   },
   "arrow-down": {
    "archetype": "composite",
@@ -3408,7 +3556,11 @@
      "name": "shaft",
      "role": "ink"
     }
-   ]
+   ],
+   "fidelityToHand": {
+    "outline": 0.9851,
+    "filled": 0.9842
+   }
   },
   "arrow-back": {
    "archetype": "composite",
@@ -3501,7 +3653,11 @@
      "name": "shaft",
      "role": "ink"
     }
-   ]
+   ],
+   "fidelityToHand": {
+    "outline": 0.9821,
+    "filled": 0.9845
+   }
   },
   "arrow-forward": {
    "archetype": "composite",
@@ -3594,7 +3750,11 @@
      "name": "shaft",
      "role": "ink"
     }
-   ]
+   ],
+   "fidelityToHand": {
+    "outline": 0.9831,
+    "filled": 0.9843
+   }
   },
   "swap-horizontal": {
    "archetype": "composite",
@@ -3771,7 +3931,11 @@
      "name": "shaft-b",
      "role": "ink"
     }
-   ]
+   ],
+   "fidelityToHand": {
+    "outline": 0.9825,
+    "filled": 0.9819
+   }
   },
   "swap-vertical": {
    "archetype": "composite",
@@ -3948,7 +4112,11 @@
      "name": "shaft-b",
      "role": "ink"
     }
-   ]
+   ],
+   "fidelityToHand": {
+    "outline": 0.9828,
+    "filled": 0.9826
+   }
   }
  }
 }
