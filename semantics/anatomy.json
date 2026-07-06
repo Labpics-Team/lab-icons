@@ -4392,6 +4392,71 @@
      }
     }
    ]
+  },
+  "cloud": {
+   "archetype": "composite",
+   "status": {
+    "outline": "generated",
+    "filled": "generated"
+   },
+   "parts": [
+    {
+     "primitive": "circle-hull",
+     "mode": {
+      "outline": "stroke",
+      "filled": "silhouette"
+     },
+     "weight": "base",
+     "params": {
+      "circles": [
+       {
+        "c": [
+         0.275,
+         0.538334
+        ],
+        "r": 0.193333
+       },
+       {
+        "c": [
+         0.498,
+         0.414583
+        ],
+        "r": 0.234167
+       },
+       {
+        "c": [
+         0.758333,
+         0.580834
+        ],
+        "r": 0.150833
+       }
+      ],
+      "joints": [
+       {
+        "type": "corner",
+        "hint": [
+         0.27441,
+         0.345002
+        ]
+       },
+       {
+        "type": "corner",
+        "hint": [
+         0.731487,
+         0.432409
+        ]
+       }
+      ],
+      "baseline": {
+       "y": 0.731667
+      }
+     }
+    }
+   ],
+   "fidelityToHand": {
+    "outline": 0.9742,
+    "filled": 0.9953
+   }
   }
  },
  "version": 1

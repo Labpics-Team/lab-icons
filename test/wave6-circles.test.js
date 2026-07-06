@@ -24,6 +24,9 @@ const cw = grid.canvas.width;
 // Пер-иконные полы: замер −0.2 п.п.
 const FLOORS = {
   eye: { outline: 0.9533 }, // замер .9553
+  // cloud задекларирован generated: полы = fidelityToHand до промоушена − ε
+  // (файлы перегенерены из декларации, гейт дублирует drift как регресс-страж)
+  cloud: { outline: 0.9722, filled: 0.9933 }, // замер .9742/.9953
 };
 
 function handFile(name, variant) {
