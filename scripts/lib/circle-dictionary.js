@@ -166,9 +166,19 @@ export function resolveTangentChain(elements, connectors, closed) {
     if (con.type === 'kiss') {
       if (!A.circle || !B.circle) throw new Error('circle-dictionary: kiss требует две окружности');
       const d = norm(sub(B.circle.c, A.circle.c));
-      const ok = Math.abs(d - (A.circle.r + B.circle.r)) <= TOL || Math.abs(d - Math.abs(A.circle.r - B.circle.r)) <= TOL;
-      if (!ok) throw new Error(`circle-dictionary: kiss без касания (d=${d.toFixed(4)}, r=${A.circle.r},${B.circle.r})`);
-      const p = add(A.circle.c, unit(sub(B.circle.c, A.circle.c)), A.circle.r);
+      const dSum = Math.abs(d - (A.circle.r + B.circle.r));
+      const dDiff = Math.abs(d - Math.abs(A.circle.r - B.circle.r));
+      if (dSum > TOL && dDiff > TOL) {
+        throw new Error(`circle-dictionary: kiss без касания (d=${d.toFixed(4)}, r=${A.circle.r},${B.circle.r})`);
+      }
+      // Точка касания на линии центров: внешнее касание и внутреннее с
+      // БОЛЬШЕЙ окружностью первой — в направлении +û от cA; внутреннее с
+      // МАЛОЙ первой (rA < rB) — на дальней стороне малой, cA − û·rA.
+      // Иначе антипод → дуги наматывают 324–358° и parity-flip заливки
+      // (баг найден fire-разведкой, FIRE-PREP §4 «плечо→ядро»).
+      const inner = dDiff <= TOL && dSum > TOL;
+      const sgn = inner && A.circle.r < B.circle.r ? -1 : 1;
+      const p = add(A.circle.c, unit(sub(B.circle.c, A.circle.c)), sgn * A.circle.r);
       junctions.push({ p1: p, p2: p });
       joints.push({ at: p, corner: false });
     } else if (con.type === 'touch') {

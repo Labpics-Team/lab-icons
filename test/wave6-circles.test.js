@@ -15,6 +15,7 @@ import { describe, expect, it } from 'vitest';
 import { buildGlyph } from '../scripts/lib/anatomy-gen.js';
 import { inkIoU } from '../scripts/check-anatomy-drift.js';
 import { renderedPathData } from '../scripts/lib/icon-geometry.js';
+import { resolveTangentChain } from '../scripts/lib/circle-dictionary.js';
 
 const root = join(import.meta.dirname, '..');
 const grid = JSON.parse(readFileSync(join(root, 'semantics', 'grid.json'), 'utf8'));
@@ -47,4 +48,50 @@ describe('wave6-circles — генерат декларации сходится
       });
     }
   }
+});
+
+describe('circle-dictionary/kiss — точка внутреннего касания (регресс FIRE-PREP §4)', () => {
+  // Баг fire-разведки: при внутреннем kiss с МАЛОЙ окружностью первой в паре
+  // точка бралась как cA + û·rA — антипод истинного касания (дуги наматывали
+  // 324–358°, parity-flip заливки). Истина: точка на линии центров, на
+  // ДАЛЬНЕЙ стороне малой окружности: cA − û·rA.
+  const ptOnArc = (seg, a) => [seg.c[0] + seg.r * Math.cos(a), seg.c[1] + seg.r * Math.sin(a)];
+  const dist = (p, q) => Math.hypot(p[0] - q[0], p[1] - q[1]);
+
+  function junctionOf(elements) {
+    const { chain } = resolveTangentChain(elements, [{ type: 'kiss' }], false);
+    expect(chain).toHaveLength(2);
+    return { j: ptOnArc(chain[0], chain[0].a1), chain };
+  }
+
+  it('внутреннее касание, малый круг ПЕРВЫМ: стык на дальней стороне малого', () => {
+    const { j, chain } = junctionOf([
+      { circle: { c: [10, 12], r: 2, startA: 90 } },
+      { circle: { c: [12, 12], r: 4, endA: 90 } },
+    ]);
+    expect(j[0]).toBeCloseTo(8, 9);
+    expect(j[1]).toBeCloseTo(12, 9);
+    // стык обязан лежать на ОБЕИХ окружностях (антипод не лежит на большой)
+    expect(dist(j, chain[0].c)).toBeCloseTo(chain[0].r, 9);
+    expect(dist(j, chain[1].c)).toBeCloseTo(chain[1].r, 9);
+  });
+
+  it('внутреннее касание, большой круг первым: та же точка (инвариант порядка)', () => {
+    const { j } = junctionOf([
+      { circle: { c: [12, 12], r: 4, startA: 90 } },
+      { circle: { c: [10, 12], r: 2, endA: 90 } },
+    ]);
+    expect(j[0]).toBeCloseTo(8, 9);
+    expect(j[1]).toBeCloseTo(12, 9);
+  });
+
+  it('внешнее касание не задето правкой: стык между центрами', () => {
+    const { j, chain } = junctionOf([
+      { circle: { c: [10, 12], r: 2, startA: 90 } },
+      { circle: { c: [16, 12], r: 4, endA: 90 } },
+    ]);
+    expect(j[0]).toBeCloseTo(12, 9);
+    expect(j[1]).toBeCloseTo(12, 9);
+    expect(dist(j, chain[1].c)).toBeCloseTo(chain[1].r, 9);
+  });
 });
