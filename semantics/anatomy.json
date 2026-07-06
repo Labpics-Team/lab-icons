@@ -2363,46 +2363,89 @@
   "eye": {
    "archetype": "composite",
    "status": {
-    "outline": "generated"
+    "outline": "hand"
    },
    "parts": [
     {
-     "primitive": "arc-splice",
+     "primitive": "tangent-chain",
      "mode": {
       "outline": "stroke"
      },
      "weight": "base",
      "params": {
-      "arcs": [
+      "closed": true,
+      "elements": [
        {
-        "c": [
-         0.5,
-         0.665721
-        ],
-        "r": 0.46093,
-        "dir": 1
+        "circle": {
+         "c": [
+          0.557,
+          0.749661
+         ],
+         "r": 0.5575,
+         "dir": 1
+        }
        },
        {
-        "c": [
-         0.5,
-         0.335945
-        ],
-        "r": 0.46093,
-        "dir": 1
+        "circle": {
+         "c": [
+          0.443,
+          0.749661
+         ],
+         "r": 0.5575,
+         "dir": 1
+        }
+       },
+       {
+        "circle": {
+         "c": [
+          0.443,
+          0.252005
+         ],
+         "r": 0.5575,
+         "dir": 1
+        }
+       },
+       {
+        "circle": {
+         "c": [
+          0.557,
+          0.252005
+         ],
+         "r": 0.5575,
+         "dir": 1
+        }
        }
       ],
-      "fillets": [
+      "connectors": [
        {
+        "type": "fillet",
+        "r": 0.055,
+        "hint": [
+         0.5,
+         0.250405
+        ]
+       },
+       {
+        "type": "fillet",
         "r": 0.108333,
         "hint": [
-         0.811667,
+         0.816946,
          0.500833
         ]
        },
        {
+        "type": "fillet",
+        "r": 0.055,
+        "hint": [
+         0.5,
+         0.751261
+        ]
+       },
+       {
+        "type": "fillet",
         "r": 0.108333,
         "hint": [
-         0.188333,
+         0.183054,
          0.500833
         ]
        }
@@ -2423,7 +2466,7 @@
     }
    ],
    "fidelityToHand": {
-    "outline": 0.8984
+    "outline": 0.9553
    }
   },
   "filter": {
