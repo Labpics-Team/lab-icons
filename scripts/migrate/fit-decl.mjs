@@ -22,6 +22,10 @@
  *   --lock <regex>   замораживаем листья с путём под regex
  *   --fast           поиск на сетке IoU 0.24 (финальный замер всегда 0.12)
  *   --steps a,b,..   свои шаги спуска в юнитах канвы (default 0.24..0.012)
+ *   --arrays         жать и числа внутри массивов (координаты точек: p, c,
+ *                    start/end, points). Направляющие d заморожены всегда —
+ *                    их сдвиг денормализует прямую. По умолчанию ВЫКЛ:
+ *                    прежние прогоны воспроизводимы бит-в-бит.
  *   --merge          записать результат в semantics/anatomy.json (статус и
  *                    fidelityToHand НЕ трогаем — промоушен отдельным шагом)
  */
@@ -90,7 +94,8 @@ for (const v of variants) {
 // Заморожено всегда: топология и дискретные величины. Весовые токены —
 // закон сетки, фитить нельзя (числовой weight допускается только по --only).
 const FROZEN_KEYS = new Set(['dir', 'teeth', 'spokes', 'rotation', 'weight', 'closed']);
-const FROZEN_SUBTREES = new Set(['status', 'fidelityToHand', 'weights', 'mode', 'translate']);
+const FROZEN_SUBTREES = new Set(['status', 'fidelityToHand', 'weights', 'mode', 'translate', 'd']);
+const fitArrays = has('--arrays');
 const only = opt('--only') ? new RegExp(opt('--only')) : null;
 const lock = opt('--lock') ? new RegExp(opt('--lock')) : null;
 const ANGLE = /(phi|theta|deg|angle)/i;
@@ -98,7 +103,16 @@ const ANGLE = /(phi|theta|deg|angle)/i;
 const leaves = [];
 (function walk(node, path) {
   if (Array.isArray(node)) {
-    node.forEach((x, i) => walk(x, path.concat(i)));
+    node.forEach((x, i) => {
+      if (typeof x === 'number') {
+        if (!fitArrays) return; // историческое поведение: массивы не жмём
+        const p = path.concat(i);
+        const ps = p.join('.');
+        if (only && !only.test(ps)) return;
+        if (lock && lock.test(ps)) return;
+        leaves.push({ path: p, angle: false });
+      } else walk(x, path.concat(i));
+    });
     return;
   }
   if (node && typeof node === 'object') {
