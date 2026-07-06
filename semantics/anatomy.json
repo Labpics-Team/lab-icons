@@ -3949,6 +3949,149 @@
      "role": "ink"
     }
    ]
+  },
+  "resize": {
+   "archetype": "composite",
+   "status": {
+    "outline": "hand",
+    "filled": "hand"
+   },
+   "fidelityToHand": {
+    "outline": 0.979,
+    "filled": 0.9677
+   },
+   "parts": [
+    {
+     "primitive": "stroke-path",
+     "mode": "solid",
+     "weight": {
+      "outline": "base",
+      "filled": "bold"
+     },
+     "params": {
+      "outline": {
+       "points": [
+        [
+         0.58,
+         0.079167
+        ],
+        [
+         0.92,
+         0.079167
+        ],
+        [
+         0.92125,
+         0.42
+        ]
+       ],
+       "closed": false
+      },
+      "filled": {
+       "points": [
+        [
+         0.569583,
+         0.092292
+        ],
+        [
+         0.908333,
+         0.092292
+        ],
+        [
+         0.908333,
+         0.432083
+        ]
+       ],
+       "closed": false
+      }
+     },
+     "name": "head-a",
+     "role": "ink"
+    },
+    {
+     "primitive": "stroke-path",
+     "mode": "solid",
+     "weight": {
+      "outline": "base",
+      "filled": "bold"
+     },
+     "params": {
+      "outline": {
+       "points": [
+        [
+         0.079167,
+         0.58125
+        ],
+        [
+         0.079167,
+         0.920625
+        ],
+        [
+         0.417083,
+         0.920625
+        ]
+       ],
+       "closed": false
+      },
+      "filled": {
+       "points": [
+        [
+         0.092292,
+         0.571667
+        ],
+        [
+         0.092292,
+         0.9075
+        ],
+        [
+         0.434167,
+         0.9075
+        ]
+       ],
+       "closed": false
+      }
+     },
+     "name": "head-b",
+     "role": "ink"
+    },
+    {
+     "primitive": "stroke-path",
+     "mode": "solid",
+     "weight": {
+      "outline": "base",
+      "filled": "bold"
+     },
+     "params": {
+      "outline": {
+       "points": [
+        [
+         0.155541,
+         0.844792
+        ],
+        [
+         0.844167,
+         0.156166
+        ]
+       ],
+       "closed": false
+      },
+      "filled": {
+       "points": [
+        [
+         0.192917,
+         0.807292
+        ],
+        [
+         0.807708,
+         0.192501
+        ]
+       ],
+       "closed": false
+      }
+     },
+     "name": "shaft",
+     "role": "ink"
+    }
+   ]
   }
  }
 }
