@@ -4718,6 +4718,300 @@
     "outline": 0.9465,
     "filled": 0.9613
    }
+  },
+  "arrow-redo": {
+   "archetype": "composite",
+   "status": {
+    "outline": "generated",
+    "filled": "generated"
+   },
+   "parts": [
+    {
+     "primitive": "tangent-chain",
+     "mode": {
+      "outline": "stroke",
+      "filled": "silhouette"
+     },
+     "weight": "base",
+     "params": {
+      "closed": true,
+      "elements": [
+       {
+        "line": {
+         "p": [
+          0.84984,
+          0.43506
+         ],
+         "d": [
+          0.74699,
+          0.66484
+         ]
+        }
+       },
+       {
+        "circle": {
+         "c": [
+          0.79167,
+          0.50042
+         ],
+         "r": 0.0875,
+         "dir": 1
+        }
+       },
+       {
+        "line": {
+         "p": [
+          0.84971,
+          0.56589
+         ],
+         "d": [
+          -0.74826,
+          0.6634
+         ]
+        }
+       },
+       {
+        "line": {
+         "p": [
+          0.53438,
+          0.75
+         ],
+         "d": [
+          0,
+          -1
+         ]
+        }
+       },
+       {
+        "circle": {
+         "c": [
+          0.50542,
+          1.09917
+         ],
+         "r": 0.45417,
+         "dir": -1
+        }
+       },
+       {
+        "circle": {
+         "c": [
+          0.52563,
+          0.7475
+         ],
+         "r": 0.40292,
+         "dir": 1
+        }
+       },
+       {
+        "line": {
+         "p": [
+          0.53438,
+          0.25
+         ],
+         "d": [
+          0,
+          -1
+         ]
+        }
+       }
+      ],
+      "connectors": [
+       {
+        "type": "touch"
+       },
+       {
+        "type": "touch"
+       },
+       {
+        "type": "corner",
+        "hint": [
+         0.53438,
+         0.84547
+        ]
+       },
+       {
+        "type": "corner",
+        "hint": [
+         0.53438,
+         0.64592
+        ]
+       },
+       {
+        "type": "corner",
+        "hint": [
+         0.13259,
+         0.83619
+        ]
+       },
+       {
+        "type": "corner",
+        "hint": [
+         0.53438,
+         0.34468
+        ]
+       },
+       {
+        "type": "corner",
+        "hint": [
+         0.53438,
+         0.15428
+        ]
+       }
+      ]
+     }
+    }
+   ],
+   "fidelityToHand": {
+    "outline": 0.9495,
+    "filled": 0.9867
+   }
+  },
+  "arrow-undo": {
+   "archetype": "composite",
+   "status": {
+    "outline": "generated",
+    "filled": "generated"
+   },
+   "parts": [
+    {
+     "primitive": "tangent-chain",
+     "mode": {
+      "outline": "stroke",
+      "filled": "silhouette"
+     },
+     "weight": "base",
+     "params": {
+      "closed": true,
+      "elements": [
+       {
+        "line": {
+         "p": [
+          0.15016,
+          0.43506
+         ],
+         "d": [
+          -0.74699,
+          0.66484
+         ]
+        }
+       },
+       {
+        "circle": {
+         "c": [
+          0.20833,
+          0.50042
+         ],
+         "r": 0.0875,
+         "dir": -1
+        }
+       },
+       {
+        "line": {
+         "p": [
+          0.15035,
+          0.56595
+         ],
+         "d": [
+          0.74896,
+          0.66262
+         ]
+        }
+       },
+       {
+        "line": {
+         "p": [
+          0.46562,
+          0.75
+         ],
+         "d": [
+          0,
+          -1
+         ]
+        }
+       },
+       {
+        "circle": {
+         "c": [
+          0.49458,
+          1.09917
+         ],
+         "r": 0.45417,
+         "dir": 1
+        }
+       },
+       {
+        "circle": {
+         "c": [
+          0.47437,
+          0.7475
+         ],
+         "r": 0.40292,
+         "dir": -1
+        }
+       },
+       {
+        "line": {
+         "p": [
+          0.46562,
+          0.25
+         ],
+         "d": [
+          0,
+          -1
+         ]
+        }
+       }
+      ],
+      "connectors": [
+       {
+        "type": "touch"
+       },
+       {
+        "type": "touch"
+       },
+       {
+        "type": "corner",
+        "hint": [
+         0.46562,
+         0.84488
+        ]
+       },
+       {
+        "type": "corner",
+        "hint": [
+         0.46562,
+         0.64592
+        ]
+       },
+       {
+        "type": "corner",
+        "hint": [
+         0.86741,
+         0.83619
+        ]
+       },
+       {
+        "type": "corner",
+        "hint": [
+         0.46562,
+         0.34468
+        ]
+       },
+       {
+        "type": "corner",
+        "hint": [
+         0.46562,
+         0.15428
+        ]
+       }
+      ]
+     }
+    }
+   ],
+   "fidelityToHand": {
+    "outline": 0.9382,
+    "filled": 0.9825
+   }
   }
  },
  "version": 1
