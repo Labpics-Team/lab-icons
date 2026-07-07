@@ -55,7 +55,12 @@ for (const name of BATCH) {
   if (!gen) throw new Error(`build-preview: ${name} не дал outline-генерат`);
 
   // ОРИГИНАЛ — отгружённый svg (ground-truth корпуса).
-  const handSvgRaw = readFileSync(join(REPO, 'svg', 'Outline', `${name}.svg`), 'utf8');
+  let handSvgRaw;
+  try {
+    handSvgRaw = readFileSync(join(REPO, 'svg', 'Outline', `${name}.svg`), 'utf8');
+  } catch (err) {
+    throw new Error(`build-preview: чтение руки svg/Outline/${name}.svg упало: ${err.message}`);
+  }
   const handD = renderedPathData(handSvgRaw).join(' ');
 
   const iou = inkIoU(handD, gen, cw);
