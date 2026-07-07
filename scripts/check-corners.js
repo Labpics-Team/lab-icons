@@ -117,12 +117,20 @@ if (isMain) {
     // RED-proof HARD-режим: каждая фикстура несёт path[0]=рука, path[1]=генерат.
     const fails = [];
     for (const p of args) {
-      const ds = renderedPathData(readFileSync(p, 'utf8'));
-      if (ds.length < 2) {
-        console.error(`check-corners: фикстуре ${basename(p)} нужно ≥2 path (path[0]=рука, path[1]=генерат)`);
+      let defects;
+      try {
+        const ds = renderedPathData(readFileSync(p, 'utf8'));
+        if (ds.length < 2) {
+          console.error(`check-corners: фикстуре ${basename(p)} нужно ≥2 path (path[0]=рука, path[1]=генерат)`);
+          process.exit(2);
+        }
+        defects = cornerDefectsBetween(ds[0], ds[1]);
+      } catch (err) {
+        // Непарсимая/битая фикстура — это ошибка ТЕСТ-СЕТАПА, не дефект формы:
+        // чистый именованный exit 2 (как ветка ds.length<2), а не сырой стек.
+        console.error(`check-corners: фикстура ${basename(p)} непарсима: ${err.message}`);
         process.exit(2);
       }
-      const defects = cornerDefectsBetween(ds[0], ds[1]);
       for (const d of defects) {
         fails.push(`${basename(p)}: вершина (${d.x.toFixed(1)},${d.y.toFixed(1)}) острая у руки (r≈${d.rHand.toFixed(2)}), скруглена генератом (r=${d.rGen.toFixed(2)})`);
       }
