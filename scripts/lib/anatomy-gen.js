@@ -394,10 +394,27 @@ export function smoothCornerAny(V, uDir, wDir, R, zeta) {
 }
 
 /**
+ * Пер-вершинная корнер-роль (EC3, N3): радиус скругления вершины берётся из
+ * ДАННЫХ декларации corners[], а не из одного глобального скаляра. Элемент
+ * {sharp:true} ⇒ r=0 (острый угол руки НИКОГДА не округляется генератом),
+ * {r:number} ⇒ заданный радиус, отсутствует/undefined ⇒ падаем на глобальный
+ * скаляр `fallback`. Возврат — сырой радиус (клампинг у вызывающего).
+ */
+function cornerRadius(role, fallback) {
+  if (role == null) return fallback;
+  if (role.sharp) return 0;
+  if (typeof role.r === 'number') return role.r;
+  return fallback;
+}
+
+/**
  * Скруглённый прямоугольник с ζ-углами (первый живой носитель токена
  * cornerSmoothing): обход по часовой, углы — smoothCorner90.
+ * corners[] — ОПЦИОНАЛЬНАЯ пер-вершинная роль (EC3), выровнена к углам в
+ * порядке обхода [верх-право, низ-право, низ-лево, верх-лево] (индексы 0..3).
+ * Отсутствует ⇒ вывод БАЙТ-В-БАЙТ идентичен нынешнему (все углы на скаляре R).
  */
-export function genRoundedRect(cx, cy, w, h, R, zeta, rotationDeg = 0) {
+export function genRoundedRect(cx, cy, w, h, R, zeta, rotationDeg = 0, corners) {
   // бюджет Figma (distributeAndNormalize при равных углах): вход в кривую
   // p=(1+ζ)R не может съесть больше полустороны — иначе ζ-хвосты соседних
   // углов перекрываются (капсула R=h/2 ⇒ ζ_eff=0, чистые полукруги)
@@ -410,15 +427,26 @@ export function genRoundedRect(cx, cy, w, h, R, zeta, rotationDeg = 0) {
   const uy = [-Math.sin(t), Math.cos(t)];       // локальная ось Y
   const at = (lx, ly) => [cx + ux[0] * lx + uy[0] * ly, cy + ux[1] * lx + uy[1] * ly];
   const neg = (v) => [-v[0], -v[1]];
-  const corners = [
-    smoothCorner90(at(w / 2, -h / 2), ux, uy, R, zeta),        // верх-право
-    smoothCorner90(at(w / 2, h / 2), uy, neg(ux), R, zeta),    // низ-право
-    smoothCorner90(at(-w / 2, h / 2), neg(ux), neg(uy), R, zeta), // низ-лево
-    smoothCorner90(at(-w / 2, -h / 2), neg(uy), ux, R, zeta),  // верх-лево
+  // Угол i: без corners[] ⇒ ровно скаляр R (baseline). С corners[]: пер-вершинный
+  // радиус (кламп budget); r≤0 ⇒ ОСТРЫЙ угол — сегмент вырождается в вершину V
+  // (start=end=V, d=''), вызывающий доводит грань линией L → чистый острый угол.
+  const mk = (V, u, wDir, i) => {
+    const Ri = Math.min(corners ? cornerRadius(corners[i], R) : R, budget);
+    // Робастный класс-гейт вырожденной пер-вершинной роли ({r:NaN}/{r:±Infinity}/
+    // {r:'3'}): только КОНЕЧНЫЙ положительный радиус скругляет, иначе ⇒ острый
+    // угол (сегмент = вершина V, d=''). Не протекает NaN/Infinity в путь.
+    if (corners && !(Number.isFinite(Ri) && Ri > 0)) return { start: V, end: V, d: '' };
+    return smoothCorner90(V, u, wDir, Ri, zeta);
+  };
+  const segs = [
+    mk(at(w / 2, -h / 2), ux, uy, 0),        // верх-право
+    mk(at(w / 2, h / 2), uy, neg(ux), 1),    // низ-право
+    mk(at(-w / 2, h / 2), neg(ux), neg(uy), 2), // низ-лево
+    mk(at(-w / 2, -h / 2), neg(uy), ux, 3),  // верх-лево
   ];
   return (
-    `M${P(corners[3].end)}` +
-    corners.map((c) => `L${P(c.start)}${c.d}`).join('') +
+    `M${P(segs[3].end)}` +
+    segs.map((c) => `L${P(c.start)}${c.d}`).join('') +
     'Z'
   );
 }
@@ -780,11 +808,21 @@ export function genRing(cx, cy, rOut, rIn) {
  * Каждая вершина сглаживается smoothCornerAny (тот же ζ, что углы rect).
  */
 const unitV = (a) => { const l = Math.hypot(a[0], a[1]) || 1; return [a[0] / l, a[1] / l]; };
-export function genRoundedPolygon(verts, r, zeta) {
+// corners[] (EC3, N3) — ОПЦИОНАЛЬНАЯ пер-вершинная роль, выровнена к verts по
+// индексу. Отсутствует ⇒ вывод БАЙТ-В-БАЙТ идентичен нынешнему (скаляр r для
+// всех вершин). {sharp:true}/r≤0 ⇒ острый угол (сегмент = вершина V, d='').
+export function genRoundedPolygon(verts, r, zeta, corners) {
   const n = verts.length;
-  const cs = verts.map((V, i) =>
-    smoothCornerAny(V, unitV(sub(V, verts[(i - 1 + n) % n])), unitV(sub(verts[(i + 1) % n], V)), r, zeta),
-  );
+  const cs = verts.map((V, i) => {
+    const uIn = unitV(sub(V, verts[(i - 1 + n) % n]));
+    const uOut = unitV(sub(verts[(i + 1) % n], V));
+    const ri = corners ? cornerRadius(corners[i], r) : r;
+    // Робастный класс-гейт вырожденной роли ({r:NaN}/{r:±Infinity}) — здесь НЕТ
+    // budget-клампа, поэтому Infinity протёк бы в smoothCornerAny. Только конечный
+    // положительный радиус скругляет, иначе острый угол. См. genRoundedRect.
+    if (corners && !(Number.isFinite(ri) && ri > 0)) return { start: V, end: V, d: '' };
+    return smoothCornerAny(V, uIn, uOut, ri, zeta);
+  });
   let d = `M${P(cs[0].start)}${cs[0].d}`;
   for (let i = 1; i < n; i++) d += `L${P(cs[i].start)}${cs[i].d}`;
   return d + 'Z';
@@ -826,9 +864,12 @@ function offsetPolyInward(verts, pen) {
  * (обратная намотка) — вычитается и под nonzero (браузер), и под even-odd
  * (гейт), кольцо честное везде.
  */
-export function genRoundedPolygonRing(verts, r, zeta, pen, rIn) {
+export function genRoundedPolygonRing(verts, r, zeta, pen, rIn, corners) {
   const inner = offsetPolyInward(verts, pen).slice().reverse();
-  return genRoundedPolygon(verts, r, zeta) + genRoundedPolygon(inner, rIn ?? Math.max(r - pen, 0.15), zeta);
+  // corners[] (EC3) наследуется ВНЕШНИМ контуром (выровнен к verts); внутренний
+  // офсет идёт скаляром — его вершины смещены/переиндексированы miter-клампом,
+  // пер-вершинная роль руки к ним не выровнена. Отсутствует ⇒ идентично baseline.
+  return genRoundedPolygon(verts, r, zeta, corners) + genRoundedPolygon(inner, rIn ?? Math.max(r - pen, 0.15), zeta);
 }
 
 /**
