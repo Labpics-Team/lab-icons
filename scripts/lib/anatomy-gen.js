@@ -432,7 +432,10 @@ export function genRoundedRect(cx, cy, w, h, R, zeta, rotationDeg = 0, corners) 
   // (start=end=V, d=''), вызывающий доводит грань линией L → чистый острый угол.
   const mk = (V, u, wDir, i) => {
     const Ri = Math.min(corners ? cornerRadius(corners[i], R) : R, budget);
-    if (corners && Ri <= 0) return { start: V, end: V, d: '' };
+    // Робастный класс-гейт вырожденной пер-вершинной роли ({r:NaN}/{r:±Infinity}/
+    // {r:'3'}): только КОНЕЧНЫЙ положительный радиус скругляет, иначе ⇒ острый
+    // угол (сегмент = вершина V, d=''). Не протекает NaN/Infinity в путь.
+    if (corners && !(Number.isFinite(Ri) && Ri > 0)) return { start: V, end: V, d: '' };
     return smoothCorner90(V, u, wDir, Ri, zeta);
   };
   const segs = [
@@ -814,7 +817,10 @@ export function genRoundedPolygon(verts, r, zeta, corners) {
     const uIn = unitV(sub(V, verts[(i - 1 + n) % n]));
     const uOut = unitV(sub(verts[(i + 1) % n], V));
     const ri = corners ? cornerRadius(corners[i], r) : r;
-    if (corners && ri <= 0) return { start: V, end: V, d: '' };
+    // Робастный класс-гейт вырожденной роли ({r:NaN}/{r:±Infinity}) — здесь НЕТ
+    // budget-клампа, поэтому Infinity протёк бы в smoothCornerAny. Только конечный
+    // положительный радиус скругляет, иначе острый угол. См. genRoundedRect.
+    if (corners && !(Number.isFinite(ri) && ri > 0)) return { start: V, end: V, d: '' };
     return smoothCornerAny(V, uIn, uOut, ri, zeta);
   });
   let d = `M${P(cs[0].start)}${cs[0].d}`;

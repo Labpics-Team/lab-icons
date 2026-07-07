@@ -105,3 +105,23 @@ describe('genRoundedRect — пер-вершинная корнер-роль (EC
     expect(empty).toBe(baseline);
   });
 });
+
+// В (fault-injection): битая пер-вершинная роль ({r:NaN}/{r:Infinity}) НЕ протекает
+// NaN в путь — вырожденный радиус трактуется как острый угол (guard !(Ri>0)).
+// RED-proof: со старым `Ri<=0` NaN проходит фильтр (NaN<=0 === false) ⇒ NaN в d ⇒
+// падает. С `!(Ri>0)` — острый угол, чистый путь.
+describe('EC3 fault-injection: битый пер-вершинный радиус не даёт NaN', () => {
+  const square = [[6, 6], [18, 6], [18, 18], [6, 18]];
+  for (const bad of [NaN, Infinity, -Infinity]) {
+    it(`genRoundedPolygon: {r:${bad}} ⇒ путь без NaN/Infinity`, () => {
+      const corners = [{ r: bad }, { r: 3 }, { r: 3 }, { r: 3 }];
+      const d = genRoundedPolygon(square, 3, 0, corners);
+      expect(d).not.toMatch(/NaN|Infinity/);
+    });
+    it(`genRoundedRect: {r:${bad}} ⇒ путь без NaN/Infinity`, () => {
+      const corners = [{ r: bad }, { r: 2.5 }, { r: 2.5 }, { r: 2.5 }];
+      const d = genRoundedRect(12, 12, 14, 10, 2.5, 0, 0, corners);
+      expect(d).not.toMatch(/NaN|Infinity/);
+    });
+  }
+});
