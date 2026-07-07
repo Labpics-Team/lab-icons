@@ -1,0 +1,21 @@
+{
+  "comment": "RED-proof GOOD: флагман 'gizmo' собран из ОБЩИХ примитивов (rounded-rect + circle-dot, каждый использован ≥2 глифами корпуса) → покрытие 100% → check-dry-coverage ПРОХОДИТ (exit 0). Отличается от bad только тем, что ссылается на разделяемые генераторы вместо one-off безье.",
+  "glyphs": {
+    "gizmo": {
+      "tier": "flagship",
+      "archetype": "composite",
+      "parts": [
+        { "primitive": "rounded-rect", "params": { "cx": 0.5, "cy": 0.5, "w": 0.08, "h": 0.5, "rOuter": 0.04 } },
+        { "primitive": "circle-dot", "params": { "cx": 0.5, "cy": 0.5, "r": 0.1 } }
+      ]
+    },
+    "helper1": {
+      "archetype": "composite",
+      "parts": [{ "primitive": "rounded-rect", "params": { "cx": 0.3, "cy": 0.3, "w": 0.2, "h": 0.08, "rOuter": 0.04 } }]
+    },
+    "helper2": {
+      "archetype": "composite",
+      "parts": [{ "primitive": "circle-dot", "params": { "cx": 0.7, "cy": 0.7, "r": 0.1 } }]
+    }
+  }
+}

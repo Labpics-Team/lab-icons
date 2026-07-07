@@ -66,6 +66,9 @@ jobs:
       - name: Fidelity check (пол узнаваемости генерата ≥97%, эскалация ниже)
         run: pnpm check:fidelity
 
+      - name: DRY coverage check (флагманы собраны из общих примитивов, ≥2 потребителя)
+        run: pnpm check:dry-coverage
+
       - name: Grammar check (направления рёбер на шкале)
         run: pnpm check:grammar
 
