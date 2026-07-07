@@ -175,5 +175,25 @@ if (isMain) {
     `  ${roundedCorners} скруглённых углов в ${glyphsWithRound} глифах — кандидаты в blanket-round-жертвы (EC3 рассудит острые-vs-легально-круглые).`,
   );
   for (const o of topOffenders.slice(0, 10)) console.log(`  - ${o.name}: ${o.n}`);
+
+  // KNOWN-DEFECT-REFERENCE (закон-поверх-руки): гейт ЧИТАЕТ per-icon статус
+  // lawOverHand из semantics/anatomy.json. Это глифы, где генерат СОЗНАТЕЛЬНО
+  // расходится с ВНУТРЕННЕ-ПРОТИВОРЕЧИВОЙ рукой — их отклонение ОЖИДАЕМО и
+  // обосновано (correctionReason), это НЕ «зализанный острый угол». Читая флаг,
+  // гейт трактует их как эталон-исключения, а не как дефект руки. Non-breaking
+  // (WARN-режим, exit 0; HARD-фикстура RED-proof не затрагивается).
+  try {
+    const anatomy = JSON.parse(readFileSync(join(root, 'semantics', 'anatomy.json'), 'utf8'));
+    const law = Object.entries(anatomy.glyphs || {})
+      .filter(([, g]) => g && g.lawOverHand === true)
+      .map(([n]) => n);
+    if (law.length) {
+      console.log(
+        `  known-defect-reference (закон-поверх-руки, per anatomy.json): ${law.join(', ')} — расхождение с рукой ОЖИДАЕМО и обосновано (correctionReason), НЕ зализанный острый угол.`,
+      );
+    }
+  } catch {
+    /* anatomy.json недоступен — WARN-каталог от него не зависит */
+  }
   console.log('check-corners: OK — WARN-режим, корпус не валится (кусается через RED-proof на фикстуре).');
 }
