@@ -294,5 +294,22 @@ if (isMain) {
       console.log(`  - ${o.name}: «${o.a}»↔«${o.b}» зазор ${o.gap.toFixed(3)} (ε ${EPS})`);
     }
   }
-  console.log('check-adjacency: OK — WARN-режим (кусается через RED-proof: node scripts/check-adjacency.js swap-horizontal).');
+  // HARD-флип промоушена (реальный триггер, не будущее намерение): глифы из
+  // semantics/adjacency-promoted.json ОБЯЗАНЫ быть без разрывов даже в корпусном
+  // прогоне (verify-цепь/CI зовёт этот путь БЕЗ аргументов). Так WARN-каталог
+  // перестаёт вечно прикрывать РЕГРЕССИЮ уже-исправленной (промоутнутой)
+  // декларации: верни зазор swap-horizontal — CI покраснеет, а не смолчит.
+  const promotedFile = join(repo, 'semantics', 'adjacency-promoted.json');
+  const promoted = existsSync(promotedFile)
+    ? JSON.parse(readFileSync(promotedFile, 'utf8')).promoted || []
+    : [];
+  const hardFails = offenders.filter((o) => promoted.includes(o.name));
+  if (hardFails.length > 0) {
+    console.log(`check-adjacency: FAIL — ${hardFails.length} разрыв(ов) в ПРОМОУТНУТЫХ глифах (регрессия смежности):`);
+    for (const o of hardFails) {
+      console.log(`  - ${o.name}: «${o.a}»↔«${o.b}» зазор ${o.gap.toFixed(3)} > ε ${EPS}`);
+    }
+    process.exit(1);
+  }
+  console.log(`check-adjacency: OK — WARN-каталог; ${promoted.length} промоутнут(ых) глиф(ов) HARD-чисты (кусается и через arg-режим: node scripts/check-adjacency.js swap-horizontal).`);
 }
