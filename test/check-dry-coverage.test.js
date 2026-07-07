@@ -73,6 +73,29 @@ describe('А: математика покрытия примитивами', () 
     expect(TRANSCRIPTION_PRIMITIVES.has('bezier')).toBe(true);
   });
 
+  it('malformed (non-string) primitive → бакет "complex" НЕ shared даже при ≥2', () => {
+    // КЛАСС: часть без валидного имени примитива-генератора = СЫРАЯ/неопознанная
+    // геометрия, не переиспользуемый блок. Две такие части в разных глифах не
+    // должны маскироваться под общий примитив (иначе флагман из мусора пройдёт DRY).
+    const m = { p: { parts: [{ primitive: null }] }, q: { parts: [{ params: {} }] } };
+    const u = buildPrimitiveUsers(m);
+    expect(u.get('complex').size).toBe(2); // формально «разделён» — 2 потребителя
+    expect(isShared('complex', u)).toBe(false); // но по закону — нет (сырьё)
+    expect(TRANSCRIPTION_PRIMITIVES.has('complex')).toBe(true);
+  });
+
+  it('флагман целиком из malformed-частей → evaluateDry НЕ ok (гейт кусается)', () => {
+    const anatomy = {
+      glyphs: {
+        junk: { tier: 'flagship', parts: [{ primitive: null }, { primitive: 7 }] },
+        h1: { parts: [{ primitive: null }] }, // даёт «complex» второго потребителя
+      },
+    };
+    const r = evaluateDry({ anatomy });
+    expect(r.ok).toBe(false); // до фикса «complex» был бы shared → ложный PASS
+    expect(r.zeroShared.map((f) => f.name)).toContain('junk');
+  });
+
   it('coverage = доля общих блоков; порог = 1.0', () => {
     expect(glyphCoverage('a', glyphs, users).coverage).toBe(0.5); // rect общий, dot нет
     expect(glyphCoverage('solo', glyphs, users).coverage).toBe(0); // всё one-off
