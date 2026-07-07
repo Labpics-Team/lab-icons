@@ -1,0 +1,20 @@
+{
+  "comment": "Флагманские иконки — под юрисдикцией check-dry-coverage (обязаны быть на 100% из общих примитивов, ≥2 потребителя). Замер master: все перечисленные = 100% (plus/close/checkmark/arrow-*/… на rounded-rect/stroke-path/circle-dot/rounded-polygon). Остаток корпуса вне юрисдикции до вкусовой приёмки владельца (N7). Добавлять сюда — только после проверки, что глиф уже DRY-чист (иначе verify краснеет).",
+  "flagships": [
+    "plus",
+    "plus-circle",
+    "close",
+    "close-circle",
+    "checkmark",
+    "checkmark-circle",
+    "arrow-up",
+    "arrow-down",
+    "arrow-back",
+    "arrow-forward",
+    "arrow-up-circle",
+    "info-circle",
+    "alert-circle",
+    "ban",
+    "play-circle"
+  ]
+}

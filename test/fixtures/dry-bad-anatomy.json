@@ -1,0 +1,21 @@
+{
+  "comment": "RED-proof BAD: флагман 'gadget' собран ЦЕЛИКОМ из one-off per-icon безье (primitive:'bezier', denylist-транскрипция + единственный потребитель) → ноль общих примитивов → check-dry-coverage ОБЯЗАН упасть (exit 1). 'helper1'/'helper2' наполняют корпус общими примитивами, которые флагман демонстративно НЕ использует.",
+  "glyphs": {
+    "gadget": {
+      "tier": "flagship",
+      "archetype": "composite",
+      "parts": [
+        { "primitive": "bezier", "params": { "d": "M4 4C8 4 12 8 12 12" } },
+        { "primitive": "bezier", "params": { "d": "M12 12C16 16 20 20 20 20" } }
+      ]
+    },
+    "helper1": {
+      "archetype": "composite",
+      "parts": [{ "primitive": "circle-dot", "params": { "cx": 0.5, "cy": 0.5, "r": 0.1 } }]
+    },
+    "helper2": {
+      "archetype": "composite",
+      "parts": [{ "primitive": "circle-dot", "params": { "cx": 0.3, "cy": 0.3, "r": 0.1 } }]
+    }
+  }
+}
