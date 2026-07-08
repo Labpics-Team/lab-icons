@@ -3,8 +3,10 @@
  *
  * Закрывает КЛАСС «две части, связные в руке, разорванные в генерате» и
  * РЕГРЕССИЮ промоутнутого флагмана swap-horizontal: если кто-то вернёт зазор
- * (концы палочки 0.20815/0.791434 → 0.211483/0.788101), findAdjacencyDefects
- * ОБЯЗАН его увидеть, а promoted-allowlist — сделать корпусный CI HARD-красным.
+ * (концы палочки 0.141146/0.856875 → до-фиксовые 0.211483/0.788101),
+ * findAdjacencyDefects ОБЯЗАН его увидеть, а promoted-allowlist — сделать
+ * корпусный CI HARD-красным. Закон стыка: торцевой кап палочки КАСАЕТСЯ
+ * вершины шеврона (конец оси = вершина + полуширина штриха вдоль оси).
  *
  * Класс А (unit): fixed → ноль дефектов; broken → дефект (гейт кусается).
  * Класс Д (диверсия): пертурбация ОДНОГО токена (конец палочки) распространяется
@@ -46,10 +48,12 @@ describe('check-adjacency — видящий гейт смежности на г
   });
 
   it('Д: возврат зазора (пертурбация конца палочки) → гейт видит разрыв', () => {
-    // мутируем ТОЛЬКО концы палочки обратно к до-фиксовым значениям
-    const broken = JSON.parse(
-      JSON.stringify(entry).replace(/0\.20815\b/g, '0.211483').replace(/0\.791434\b/g, '0.788101'),
-    );
+    // мутируем ТОЛЬКО концы палочек (outline) обратно к до-фиксовым значениям
+    const broken = structuredClone(entry);
+    const shaftA = broken.parts.find((p) => p.name === 'shaft-a');
+    const shaftB = broken.parts.find((p) => p.name === 'shaft-b');
+    shaftA.params.outline.points[1][0] = 0.211483;
+    shaftB.params.outline.points[1][0] = 0.788101;
     const defects = adjacencyDefectsBetween(handD, genPartsOf(broken));
     expect(defects.length).toBeGreaterThan(0);
     // разрыв именно палочка↔наконечник, зазор выше ε

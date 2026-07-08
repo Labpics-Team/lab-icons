@@ -24,10 +24,14 @@ const readSvg = (variant, name) => {
 };
 
 describe('validateAnatomy — декларация сходится с файлами', () => {
-  it('А: реальная анатомия — ноль hard; report только документированный дефект руки reload/filled', () => {
+  it('А: реальная анатомия — ноль hard; report только документированные отступления от руки', () => {
     const { hard, report, checked } = validateAnatomy({ grid, anatomy, readSvg });
     expect(hard).toEqual([]);
-    expect(report.filter((e) => !e.startsWith('reload/filled'))).toEqual([]);
+    // допустимые report-строки: КАЖДАЯ несёт документацию в декларации —
+    // reload/filled (дефект руки), swap-horizontal (закон смежности поверх
+    // пустого раскрыва руки: lawOverHand + correctionReason в anatomy.json)
+    const documented = ['reload/filled', 'swap-horizontal/outline', 'swap-horizontal/filled'];
+    expect(report.filter((e) => !documented.some((p) => e.startsWith(p)))).toEqual([]);
     expect(checked).toBeGreaterThanOrEqual(6);
   });
 

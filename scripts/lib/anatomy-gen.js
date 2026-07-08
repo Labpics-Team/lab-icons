@@ -741,27 +741,46 @@ export function genStrokePath(pts, pen, closed = false) {
 }
 
 /**
- * Стрелки часов (Г-глиф: вертикаль вверх + горизонталь вправо от общей
- * оси) — семантическая деталь класса time/alarm/timer/history.
- * Капсульные концы R=t/2; вогнутый угол ОСТРЫЙ (канон руки time);
- * нижне-левый выпуклый угол — четверть-дуга R=t/2 (у руки там
- * экспортная лесенка — генерат чистит класс).
- * (cx,cy) — пересечение ОСЕЙ стрелок; up/right — длины осей до концов.
+ * ОДНА стрелка часов (класс time/alarm/timer/history). Раздельные стрелки
+ * вместо сваренного Г-пути — готовность к анимации: вращение каждой =
+ * transform вокруг anchor-центра циферблата (сами анимации вне корпуса).
+ * (cx,cy) — ось циферблата (пересечение осей стрелок), len — длина оси до
+ * конца, t — перо; кап конца R=t/2, пивотный кап R=t/2 = «подшипник»
+ * (диск вокруг оси). Союз двух стрелок воспроизводит канон руки time:
+ * вогнутый угол стыка ОСТРЫЙ, нижне-левый выпуклый — четверть-дуга R=t/2.
+ * socket=true (горизонтальная при вертикальном сиблинге): торец у оси —
+ * грань сиблинга x=cx+t/2 + вогнутая дуга по его подшипнику — стык ВСТЫК
+ * без перекрытия чернил (EO≡NZ, ноль паразитных линз). Все координаты
+ * квантуются к решётке f3 ДО вывода производных точек: совпадающие грани
+ * двух суб-путей совпадают ТОЧНО (ноль щелей-слайверов на стыке).
+ * Реализованы только комбинации с потребителем (time): up без socket,
+ * right с socket; остальное — по мере появления потребителей.
  */
-export function genClockHands(cx, cy, up, right, t) {
-  const h = t / 2;
-  const yTop = cy - up;
-  const xRight = cx + right;
-  return (
-    `M${f3(cx - h)} ${f3(yTop)}` +
-    `A${f3(h)} ${f3(h)} 0 0 1 ${f3(cx + h)} ${f3(yTop)}` + // верхний кап
-    `L${f3(cx + h)} ${f3(cy - h)}` +                        // правая грань вниз, острый вогнутый
-    `L${f3(xRight)} ${f3(cy - h)}` +                        // верх горизонтали
-    `A${f3(h)} ${f3(h)} 0 0 1 ${f3(xRight)} ${f3(cy + h)}` + // правый кап
-    `L${f3(cx)} ${f3(cy + h)}` +                            // нижняя грань до начала скругления
-    `A${f3(h)} ${f3(h)} 0 0 1 ${f3(cx - h)} ${f3(cy)}` +    // нижне-левое скругление R=t/2
-    'Z'
-  );
+export function genClockHand(cx, cy, len, t, dir, socket = false) {
+  const q = (v) => Number.parseFloat(f3(v));
+  const [qcx, qcy, qlen, qh] = [q(cx), q(cy), q(len), q(t / 2)];
+  if (dir === 'up' && !socket) {
+    const yTop = qcy - qlen;
+    return (
+      `M${f3(qcx - qh)} ${f3(yTop)}` +
+      `A${f3(qh)} ${f3(qh)} 0 0 1 ${f3(qcx + qh)} ${f3(yTop)}` + // кап конца
+      `L${f3(qcx + qh)} ${f3(qcy)}` +                            // правая грань до оси
+      `A${f3(qh)} ${f3(qh)} 0 0 1 ${f3(qcx - qh)} ${f3(qcy)}` +  // пивотный кап-подшипник
+      'Z'
+    );
+  }
+  if (dir === 'right' && socket) {
+    const xTip = qcx + qlen;
+    return (
+      `M${f3(qcx + qh)} ${f3(qcy - qh)}` +                        // острый вогнутый угол стыка (канон)
+      `L${f3(xTip)} ${f3(qcy - qh)}` +                            // верхняя грань
+      `A${f3(qh)} ${f3(qh)} 0 0 1 ${f3(xTip)} ${f3(qcy + qh)}` + // кап конца
+      `L${f3(qcx)} ${f3(qcy + qh)}` +                             // нижняя грань до подшипника
+      `A${f3(qh)} ${f3(qh)} 0 0 0 ${f3(qcx + qh)} ${f3(qcy)}` +  // вогнутый сокет по подшипнику сиблинга
+      'Z'                                                         // замыкание по грани сиблинга x=cx+t/2
+    );
+  }
+  throw new Error(`genClockHand: комбинация dir=«${dir}», socket=${socket} не реализована — нет потребителя`);
 }
 
 /**
@@ -1035,10 +1054,15 @@ export function buildGlyph(entry, grid, axes = {}, lib = null) {
         } else if (part.primitive === 'arc-band') {
           // волна: полоса вдоль дуги с капами (radio/volume/wifi, BL-020)
           chunks.push(genArcBand(L(pp.cx), L(pp.cy), L(pp.r), pp.aCenter, pp.halfSpan, L(pp.t)));
-        } else if (part.primitive === 'clock-hands') {
-          // Г-стрелки часов; в filled обычно вырез в диске (evenodd)
-          const [cx2, cy2, up2, right2, t2] = [L(pp.cx), L(pp.cy), L(pp.up), L(pp.right), L(pp.t)];
-          chunks.push(genClockHands(cx2, cy2, up2, right2, t2));
+        } else if (part.primitive === 'clock-hand') {
+          // раздельная стрелка часов (Г-глиф распался на 2 суб-пути);
+          // в filled — вырез в диске (evenodd + встречная намотка).
+          // anchor — центр циферблата в ДОЛЯХ КАНВЫ: контракт готовности
+          // к анимации (вращение = transform вокруг anchor), обязателен
+          if (!Array.isArray(part.anchor) || part.anchor.length !== 2) {
+            throw new Error('clock-hand: обязателен anchor:[x,y] (центр циферблата, доли канвы)');
+          }
+          chunks.push(genClockHand(L(pp.cx), L(pp.cy), L(pp.len), L(pp.t), part.dir, part.socket ?? false));
         } else if (part.primitive === 'rounded-rect-cutout') {
           // негатив: контур внутри сплошной части, evenodd вычитает
           // (белые стрелки в диске filled-часов и подобные)
