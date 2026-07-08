@@ -906,7 +906,12 @@ export function buildGlyph(entry, grid, axes = {}, lib = null) {
   // ОСЬ ВЕСА (вариативность, север владельца): глобальный множитель на все
   // штриховые токены — одна правка restyle-ит ВЕСЬ задекларированный корпус
   // (как весовая ось шрифта). Дефолт 1 = идентичность (гейты держат default).
-  const wScale = axes.weight ?? 1;
+  // КЛАМП в grid.axes.weight (BL-021): ниже min тончайший канон тоньше капа
+  // (нечитаем), выше max схлопываются охранные клиренсы — вывод min/max
+  // задокументирован в grid.json, формулу держит check-ink-weight.
+  const wRange = grid.axes?.weight;
+  const wRaw = axes.weight ?? 1;
+  const wScale = wRange ? Math.min(wRange.max, Math.max(wRange.min, wRaw)) : wRaw;
   // ОСЬ УГЛА (вторая ось вариативности, парадигма Roboto Flex): множитель ζ
   // (cornerSmoothing) на все задекларированные скругления. Дефолт 1 =
   // идентичность БИТ-В-БИТ: короткое замыкание возвращает ζ нетронутым
@@ -1059,8 +1064,10 @@ export function buildGlyph(entry, grid, axes = {}, lib = null) {
             chunks.push(genSuperellipse(L(pp.cx), L(pp.cy), L(pp.aOut), L(pp.bOut ?? pp.aOut), pp.nOut, rot));
           }
         } else if (part.primitive === 'arc-band') {
-          // волна: полоса вдоль дуги с капами (radio/volume/wifi, BL-020)
-          chunks.push(genArcBand(L(pp.cx), L(pp.cy), L(pp.r), pp.aCenter, pp.halfSpan, L(pp.t)));
+          // волна: полоса вдоль дуги с капами (radio/volume/wifi, BL-020);
+          // t — перо штриха: ось веса масштабирует (tok), замер BL-021 ловил
+          // волны 1.6 без изменений на всей сетке весов («вес прыгает»)
+          chunks.push(genArcBand(L(pp.cx), L(pp.cy), L(pp.r), pp.aCenter, pp.halfSpan, tok(pp.t)));
         } else if (part.primitive === 'clock-hand') {
           // раздельная стрелка часов (Г-глиф распался на 2 суб-пути);
           // в filled — вырез в диске (evenodd + встречная намотка).
@@ -1069,7 +1076,9 @@ export function buildGlyph(entry, grid, axes = {}, lib = null) {
           if (!Array.isArray(part.anchor) || part.anchor.length !== 2) {
             throw new Error('clock-hand: обязателен anchor:[x,y] (центр циферблата, доли канвы)');
           }
-          chunks.push(genClockHand(L(pp.cx), L(pp.cy), L(pp.len), L(pp.t), part.dir, part.socket ?? false));
+          // t — перо стрелки: ось веса масштабирует (tok); обе стрелки берут
+          // один множитель — сокет-стык остаётся встык by construction
+          chunks.push(genClockHand(L(pp.cx), L(pp.cy), L(pp.len), tok(pp.t), part.dir, part.socket ?? false));
         } else if (part.primitive === 'rounded-rect-cutout') {
           // негатив: контур внутри сплошной части, evenodd вычитает
           // (белые стрелки в диске filled-часов и подобные)
@@ -1114,7 +1123,10 @@ export function buildGlyph(entry, grid, axes = {}, lib = null) {
   } else if (entry.archetype === 'container-glyph') {
     const center = [cw / 2, cw / 2];
     const rOut = (grid.ratios.keylines.circle * cw) / 2;
-    const ringWeight = grid.ratios.strokeWidth.enclosureRing * cw;
+    // кольцо — ШТРИХ, ось веса масштабирует его как все штриховые токены
+    // (замер BL-021: при weight 1.2 кольцо оставалось 1.5 при глифе 2.4 —
+    // «вес прыгает» ровно класса с зума владельца); default бит-в-бит прежний
+    const ringWeight = tok('enclosureRing');
     const a = entry.glyph.inkAnchors;
     let glyphD = genStrokeV(
       { endL: Pt(a.endL), endR: Pt(a.endR), innerL: Pt(a.innerL), innerR: Pt(a.innerR) },
