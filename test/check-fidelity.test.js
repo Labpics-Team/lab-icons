@@ -1,7 +1,8 @@
 /**
- * test/check-fidelity.test.js — пол узнаваемости генерата (рефрейм).
- * Классы: А (валидные проходят), Д (мутанты: ниже пола / необъяснённое
- * падение / не-число — валятся; grandfather не hard).
+ * test/check-fidelity.test.js — fidelity-сигнал генерата (Гип-1: пол = глаз
+ * владельца). Классы: А (валидные проходят; <пола → owner-review батч, не
+ * hard), Д (мутанты дисциплины: необъяснённое падение / не-число — валятся;
+ * grandfather не hard).
  */
 
 import { describe, expect, it } from 'vitest';
@@ -30,10 +31,15 @@ describe('check-fidelity — пол узнаваемости', () => {
     expect(r.report).toEqual([]);
   });
 
-  it('Д: fidelity < пол 0.97 — HARD (под угрозой узнаваемость)', () => {
+  it('Гип-1: fidelity < пол 0.97 — owner-review батч (сигнал), НЕ hard', () => {
     const r = run({ a: glyph({ fidelityToHand: { outline: 0.995, filled: 0.96 }, correctionReason: 'x' }) });
-    expect(r.hard.length).toBe(1);
-    expect(r.hard[0]).toMatch(/filled.*< пол/);
+    expect(r.hard).toEqual([]);
+    expect(r.ownerBatch.length).toBe(1);
+    expect(r.ownerBatch[0]).toMatch(/filled.*< пол.*ждёт глаза владельца/);
+  });
+
+  it('А: чистый генерат — owner-review батч пуст', () => {
+    expect(run({ a: glyph() }).ownerBatch).toEqual([]);
   });
 
   it('Д: падение <0.99 БЕЗ correctionReason — HARD (необъяснённая отсебятина)', () => {
@@ -69,15 +75,18 @@ describe('check-fidelity — ярус ниже пола (эскалация вл
   });
   const run = (glyphs) => validateFidelity({ anatomy: { glyphs } });
 
-  it('Д: <0.97 БЕЗ ownerReview — HARD (неэскалированная развилка)', () => {
+  it('Гип-1: <0.97 БЕЗ ownerReview — owner-review батч (очередь на глаз), НЕ hard', () => {
     const r = run({ a: belowFloor() });
-    expect(r.hard.length).toBe(1);
-    expect(r.hard[0]).toMatch(/подтвердить\/поправить закон/);
+    expect(r.hard).toEqual([]);
+    expect(r.ownerBatch.length).toBe(1);
+    expect(r.ownerBatch[0]).toMatch(/подтвердить\/поправить закон/);
+    expect(r.ownerBatch[0]).toMatch(/НЕ вернуть черновик/);
   });
 
-  it('А: <0.97 С ownerReview — report (закон подтверждён), НЕ hard', () => {
+  it('А: <0.97 С ownerReview — report (закон подтверждён), НЕ hard и НЕ батч', () => {
     const r = run({ a: belowFloor({ ownerReview: 'крупная чистка — закон подтверждён' }) });
     expect(r.hard).toEqual([]);
+    expect(r.ownerBatch).toEqual([]);
     expect(r.report.some((e) => e.includes('закон подтверждён владельцем'))).toBe(true);
   });
 });
