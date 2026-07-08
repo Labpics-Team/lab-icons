@@ -92,7 +92,9 @@ export function genRadialGear(p) {
       `A${f3(rCO)} ${f3(rCO)} 0 0 1 ${fmt(f1.T1)}L${fmt(h1)}Q${fmt(hub)} ${fmt(h2)}Z`
     );
   };
-  return d + spokes.map(cutout).join('');
+  // вырезы ПРОТИВО-намотаны венцу (реверс): дырки честны и под evenodd,
+  // и под nonzero (класс genRing; был fill-rule-зависим — только с evenodd)
+  return d + spokes.map((s) => reversePathD(cutout(s))).join('');
 }
 
 /**
@@ -212,6 +214,55 @@ export function rotatePath(d, deg, cx, cy) {
     else if (g.cmd === 'Q') out += `Q${P(rot(g.x1, g.y1))} ${P(rot(g.x, g.y))}`;
     else if (g.cmd === 'A') out += `A${f3(g.rx)} ${f3(g.ry)} ${f3(g.rotation)} ${g.largeArc} ${g.sweep} ${P(rot(g.x, g.y))}`;
     else if (g.cmd === 'Z') out += 'Z';
+  }
+  return out;
+}
+
+/**
+ * Реверс намотки d-пути (по каждому суб-пути): негатив-контур (вырез/дырка)
+ * обязан быть ПРОТИВО-намотан носителю — тогда вычитается и под evenodd
+ * (гейт), и под nonzero (браузер). Класс genRing/genRoundedPolygonRing,
+ * обобщённый на произвольный d: сегменты в обратном порядке, C меняет
+ * порядок контролей, A инвертирует sweep. Форма чернил под evenodd
+ * НЕ меняется (реверс — чисто намоточная операция).
+ */
+export function reversePathD(d) {
+  let out = '';
+  // суб-пути независимы: реверс каждого
+  for (const sub of d.match(/[Mm][^Mm]*/g) ?? []) {
+    const segs = [];
+    let start = null;
+    let prev = null;
+    let closed = false;
+    for (const s of parsePathData(sub)) {
+      if (s.cmd === 'M') {
+        start = [s.x, s.y];
+        prev = start;
+      } else if (s.cmd === 'Z') {
+        closed = true;
+      } else {
+        segs.push({ ...s, from: prev });
+        prev = [s.x, s.y];
+      }
+    }
+    if (!start || segs.length === 0) continue;
+    // Z с несовпадающим концом = неявное замыкающее ребро — материализуем
+    // его явной L, иначе реверс потерял бы грань (кромка SVG-грамматики)
+    if (closed && Math.hypot(prev[0] - start[0], prev[1] - start[1]) > 1e-9) {
+      segs.push({ cmd: 'L', x: start[0], y: start[1], from: prev });
+    }
+    const last = segs[segs.length - 1];
+    out += `M${P([last.x, last.y])}`;
+    for (let i = segs.length - 1; i >= 0; i--) {
+      const s = segs[i];
+      const to = s.from; // идём назад: конец реверс-сегмента = начало прямого
+      if (s.cmd === 'L') out += `L${P(to)}`;
+      else if (s.cmd === 'C') out += `C${P([s.x2, s.y2])} ${P([s.x1, s.y1])} ${P(to)}`;
+      else if (s.cmd === 'Q') out += `Q${P([s.x1, s.y1])} ${P(to)}`;
+      else if (s.cmd === 'A') out += `A${f3(s.rx)} ${f3(s.ry)} ${f3(s.rotation)} ${s.largeArc} ${s.sweep ? 0 : 1} ${P(to)}`;
+      else throw new Error(`reversePathD: сегмент «${s.cmd}» не поддержан`);
+    }
+    if (closed) out += 'Z';
   }
   return out;
 }
@@ -631,8 +682,10 @@ export function genSuperellipseStroke(cx, cy, a, b, n, rotationDeg, pen, side = 
  * @param {Array<[number,number]>} pts — вершины оси (юниты канвы)
  * @param {number} pen — полная ширина пера (юниты)
  * @param {boolean} closed — замкнутая ось (пока не реализовано)
+ * @param {{socket?: {start?: {pts,pen}, end?: {pts,pen}}}} opts — сокет-торцы
+ *   «встык» вместо капов (см. socketJoint): сиблинг-шеврон {ось, перо}
  */
-export function genStrokePath(pts, pen, closed = false) {
+export function genStrokePath(pts, pen, closed = false, opts = {}) {
   if (closed) {
     throw new Error('genStrokePath: замкнутые оси (closed) пока не реализованы — нет потребителя');
   }
@@ -700,11 +753,14 @@ export function genStrokePath(pts, pen, closed = false) {
     return `A${r} ${r} 0 0 0 ${P(to)}`;
   };
   const last = u.length - 1;
+  // сокет-торцы «встык» (класс стрелок): конструкция от сиблинга-шеврона
+  const sockEnd = opts.socket?.end ? socketJoint(pts, u, n, len, trims, h, 'end', opts.socket.end) : null;
+  const sockStart = opts.socket?.start ? socketJoint(pts, u, n, len, trims, h, 'start', opts.socket.start) : null;
   // сторона +n вперёд
-  let d = `M${P(add(pts[0], n[0], h))}`;
+  let d = `M${P(sockStart ? sockStart.plus : add(pts[0], n[0], h))}`;
   for (let i = 0; i < u.length; i++) {
     if (i === last) {
-      d += `L${P(add(pts[i + 1], n[i], h))}`;
+      d += `L${P(sockEnd ? sockEnd.plus : add(pts[i + 1], n[i], h))}`;
     } else {
       const dot = u[i][0] * u[i + 1][0] + u[i][1] * u[i + 1][1];
       const cross = u[i][0] * u[i + 1][1] - u[i][1] * u[i + 1][0];
@@ -718,12 +774,14 @@ export function genStrokePath(pts, pen, closed = false) {
       }
     }
   }
-  // кап конца: полукруг +n → −n (текущая точка — конец стороны +n)
-  d += capArc(add(pts[N - 1], n[last], h), add(pts[N - 1], n[last], -h));
+  // конец: сокет-встык (клин апексом внутрь) или полукруг-кап +n → −n
+  d += sockEnd
+    ? `L${P(sockEnd.apex)}L${P(sockEnd.minus)}`
+    : capArc(add(pts[N - 1], n[last], h), add(pts[N - 1], n[last], -h));
   // сторона −n назад
   for (let i = last; i >= 0; i--) {
     if (i === 0) {
-      d += `L${P(add(pts[0], n[0], -h))}`;
+      d += `L${P(sockStart ? sockStart.minus : add(pts[0], n[0], -h))}`;
     } else {
       const dot = u[i - 1][0] * u[i][0] + u[i - 1][1] * u[i][1];
       const cross = u[i - 1][0] * u[i][1] - u[i - 1][1] * u[i][0];
@@ -736,8 +794,199 @@ export function genStrokePath(pts, pen, closed = false) {
       }
     }
   }
-  // кап начала замыкает контур (текущая точка — конец стороны −n)
-  return d + capArc(add(pts[0], n[0], -h), add(pts[0], n[0], h)) + 'Z';
+  // начало замыкает контур (текущая точка — конец стороны −n): сокет-встык
+  // (апекс; Z доводит до стартового угла plus) или полукруг-кап
+  return d + (sockStart ? `L${P(sockStart.apex)}` : capArc(add(pts[0], n[0], -h), add(pts[0], n[0], h))) + 'Z';
+}
+
+/**
+ * КРЕСТ из двух пересекающихся осей ОДНИМ контуром (класс ПЕРЕСЕКАЮЩИХСЯ
+ * штрихов: close «×», plus «+», будущие add/x-семьи). Две отдельные капсулы
+ * дают в пересечении либо evenodd-линзу (перекрытие суб-путей), либо белый
+ * пинч-ромбик (тангенциальное касание капов — пойман владельцем на close):
+ * стык суб-путей в пересечении НЕ сваривается. Класс-фикс конструкцией:
+ * union креста печатается СРАЗУ единым суб-путём — 4 плеча из точки
+ * пересечения осей, полукруглые капы на концах (та же кап-дисциплина
+ * квантования, что genStrokePath), между соседними по азимуту плечами —
+ * вогнутая miter-точка = аналитическое пересечение их офсет-граней.
+ * Один суб-путь ⇒ EO≡NZ тривиально, шов не нужен вовсе.
+ *
+ * @param {Array<Array<[number,number]>>} axes — две оси [[A1,A2],[B1,B2]] (юниты)
+ * @param {number} pen — полная ширина пера (одно перо на крест)
+ * @returns {string} d единого контура
+ */
+export function genStrokeCross(axes, pen) {
+  if (!Array.isArray(axes) || axes.length !== 2 || axes.some((a) => !Array.isArray(a) || a.length !== 2)) {
+    throw new Error('genStrokeCross: нужны ровно две оси по две точки [[A1,A2],[B1,B2]]');
+  }
+  const h = pen / 2;
+  const [[A1, A2], [B1, B2]] = axes;
+  const dA = sub(A2, A1);
+  const dB = sub(B2, B1);
+  const den = dA[0] * dB[1] - dA[1] * dB[0];
+  if (Math.abs(den) < 1e-9) {
+    throw new Error('genStrokeCross: оси параллельны — пересечения нет, это не крест');
+  }
+  // точка пересечения осей: A1 + tA·dA = B1 + tB·dB
+  const tA = ((B1[0] - A1[0]) * dB[1] - (B1[1] - A1[1]) * dB[0]) / den;
+  const tB = ((B1[0] - A1[0]) * dA[1] - (B1[1] - A1[1]) * dA[0]) / den;
+  const EPS_T = 1e-9;
+  if (tA <= EPS_T || tA >= 1 - EPS_T || tB <= EPS_T || tB >= 1 - EPS_T) {
+    throw new Error('genStrokeCross: оси не пересекаются ВНУТРИ обоих отрезков — T-стык/веер не реализован (нет потребителя)');
+  }
+  const X = add(A1, dA, tA);
+  // 4 плеча из X, сортировка по азимуту — соседние пары образуют клинья союза
+  const arms = [A1, A2, B1, B2].map((E) => {
+    const v = sub(E, X);
+    const len = Math.hypot(v[0], v[1]);
+    if (len < 1e-9) throw new Error('genStrokeCross: конец оси совпал с пересечением — вырожденное плечо');
+    const u = [v[0] / len, v[1] / len];
+    return { E, len, u, n: [-v[1] / len, v[0] / len], ang: Math.atan2(v[1], v[0]) };
+  });
+  arms.sort((a, b) => a.ang - b.ang);
+  // вогнутый угол между плечами k и k+1: пересечение офсет-грани +n плеча k
+  // с офсет-гранью −n плеча k+1 (та же miter-формула, что печатает вогнутые
+  // стыки genStrokePath)
+  const corner = (a, b) => {
+    const p1 = add(X, a.n, h);
+    const p2 = add(X, b.n, -h);
+    const d2 = b.u;
+    const dnm = a.u[0] * d2[1] - a.u[1] * d2[0];
+    if (Math.abs(dnm) < 1e-9) throw new Error('genStrokeCross: соседние плечи коллинеарны — клина нет');
+    const t = ((p2[0] - p1[0]) * d2[1] - (p2[1] - p1[1]) * d2[0]) / dnm;
+    const C = add(p1, a.u, t);
+    const s = (C[0] - p2[0]) * d2[0] + (C[1] - p2[1]) * d2[1];
+    if (t <= 0 || s <= 0) throw new Error('genStrokeCross: miter-точка ушла внутрь пересечения — оси почти коллинеарны');
+    if (t >= a.len || s >= b.len) {
+      throw new Error(`genStrokeCross: перо ${pen} съедает плечо (стык ${Math.max(t, s).toFixed(3)} ≥ плечо)`);
+    }
+    return C;
+  };
+  // кап-дисциплина genStrokePath: радиус = половина фактической квантованной
+  // хорды, округлённая вниз (рендерер растягивает по спецификации до полукруга)
+  const q3 = (v) => Number.parseFloat(f3(v));
+  const f3floor = (v) => f3(Math.floor(v * 1000) / 1000);
+  const capArc = (from, to) => {
+    const c = Math.hypot(q3(to[0]) - q3(from[0]), q3(to[1]) - q3(from[1]));
+    const r = f3floor(c / 2);
+    return `A${r} ${r} 0 0 1 ${P(to)}`;
+  };
+  // обход: плечо k — грань −n наружу, кап (−n → +n, выпуклостью наружу,
+  // sweep=1 при n=rot90(u)), грань +n внутрь к углу с плечом k+1
+  let d = '';
+  for (let k = 0; k < 4; k++) {
+    const a = arms[k];
+    const b = arms[(k + 1) % 4];
+    const capIn = add(a.E, a.n, -h);
+    const capOut = add(a.E, a.n, h);
+    d += (k === 0 ? `M${P(capIn)}` : `L${P(capIn)}`) + capArc(capIn, capOut) + `L${P(corner(a, b))}`;
+  }
+  return d + 'Z';
+}
+
+/**
+ * Сокет-торец «встык» (класс стрелок: палочка ↔ шеврон-наконечник; прецедент —
+ * вогнутый сокет genClockHand у time и PR #36 swap-horizontal). Перекрытие двух
+ * суб-путей под evenodd вырезается белой линзой, касание капом даёт белый
+ * полумесяц-пинч — вместо этого торец палочки ложится ТОЧНО на грани вогнутого
+ * miter-клина сиблинга: апекс торца = miter-точка сиблинга (та же формула, что
+ * печатает его контур), грани торца = отрезки ЕГО офсет-граней до створа
+ * палочки. Апекс и концы граней квантуются к решётке f3 ДО вывода углов
+ * (дисциплина genClockHand: совпадающие грани двух суб-путей совпадают ТОЧНО) →
+ * касание без перекрытия и без щели, EO≡NZ, шов на всю ширину торца.
+ *
+ * @param {Array<[number,number]>} pts ось палочки (юниты)
+ * @param {Array} u,n единичные направления/нормали сегментов палочки
+ * @param {Array<number>} len длины сегментов палочки
+ * @param {Array<number>} trims стыковые съедания палочки (guard)
+ * @param {number} h полуширина пера палочки
+ * @param {'start'|'end'} at какой торец замыкается сокетом
+ * @param {{pts:Array<[number,number]>, pen:number}} sib ось и перо сиблинга
+ * @returns {{plus:[number,number], apex:[number,number], minus:[number,number]}}
+ *   углы торца на офсет-сторонах +n/−n и апекс клина
+ */
+function socketJoint(pts, u, n, len, trims, h, at, sib) {
+  const q = (v) => Number.parseFloat(f3(v));
+  const qP = (p) => [q(p[0]), q(p[1])];
+  const N = pts.length;
+  const seg = at === 'end' ? u.length - 1 : 0;
+  const endPt = at === 'end' ? pts[N - 1] : pts[0];
+  const uOut = at === 'end' ? u[seg] : [-u[0][0], -u[0][1]]; // наружу из торца
+  const nEnd = n[seg];
+  const S = sib.pts;
+  const sh = sib.pen / 2;
+  if (!Array.isArray(S) || S.length < 3) {
+    throw new Error('genStrokePath: socket требует у сиблинга ≥3 точек оси (внутренний излом-клин)');
+  }
+  const su = [];
+  const sn = [];
+  for (let i = 0; i + 1 < S.length; i++) {
+    const dx = S[i + 1][0] - S[i][0];
+    const dy = S[i + 1][1] - S[i][1];
+    const l = Math.hypot(dx, dy);
+    if (l < 1e-9) throw new Error(`genStrokePath: socket — нулевой сегмент оси сиблинга ${i}→${i + 1}`);
+    su.push([dx / l, dy / l]);
+    sn.push([-dy / l, dx / l]);
+  }
+  // клин = вогнутый miter ближайшего к торцу внутреннего излома сиблинга
+  let k = -1;
+  let best = Infinity;
+  for (let j = 1; j + 1 < S.length; j++) {
+    const dd = Math.hypot(S[j][0] - endPt[0], S[j][1] - endPt[1]);
+    if (dd < best) { best = dd; k = j; }
+  }
+  const dot = su[k - 1][0] * su[k][0] + su[k - 1][1] * su[k][1];
+  const cross = su[k - 1][0] * su[k][1] - su[k - 1][1] * su[k][0];
+  if (Math.abs(cross) < 1e-9) {
+    throw new Error('genStrokePath: socket — излом сиблинга прямой, вогнутого клина нет');
+  }
+  const sign = cross > 0 ? 1 : -1; // вогнутая сторона излома (где живёт miter)
+  const s = [sn[k - 1][0] + sn[k][0], sn[k - 1][1] + sn[k][1]];
+  // апекс/концы граней — ровно те точки, что печатает контур сиблинга;
+  // квантуем ДО вывода углов торца (решётка f3, класс genClockHand)
+  const apex = qP(add(S[k], s, (sign * sh) / (1 + dot)));
+  const faces = [
+    { E: qP(add(S[k - 1], sn[k - 1], sign * sh)) },
+    { E: qP(add(S[k + 1], sn[k], sign * sh)) },
+  ];
+  for (const f of faces) {
+    const v = sub(f.E, apex);
+    f.len = Math.hypot(v[0], v[1]);
+    if (f.len < 1e-9) throw new Error('genStrokePath: socket — грань клина сиблинга вырождена');
+    f.dir = [v[0] / f.len, v[1] / f.len];
+    // какую офсет-сторону палочки пересекает грань: знак поперечной координаты её конца
+    f.side = (f.E[0] - endPt[0]) * nEnd[0] + (f.E[1] - endPt[1]) * nEnd[1] >= 0 ? 1 : -1;
+  }
+  if (faces[0].side === faces[1].side) {
+    throw new Error('genStrokePath: socket — обе грани клина сиблинга по одну сторону оси, торец не сомкнуть');
+  }
+  const tApex = (apex[0] - endPt[0]) * nEnd[0] + (apex[1] - endPt[1]) * nEnd[1];
+  if (Math.abs(tApex) >= h) {
+    throw new Error('genStrokePath: socket — апекс клина сиблинга вне створа торца (|поперечное смещение| ≥ перо/2)');
+  }
+  const lineHit = (p, dp, p2, dp2) => {
+    const den = dp[0] * dp2[1] - dp[1] * dp2[0];
+    if (Math.abs(den) < 1e-12) {
+      throw new Error('genStrokePath: socket — грань клина сиблинга параллельна оси палочки');
+    }
+    const t = ((p2[0] - p[0]) * dp2[1] - (p2[1] - p[1]) * dp2[0]) / den;
+    return add(p, dp, t);
+  };
+  const avail = len[seg] - (u.length > 1 ? (at === 'end' ? trims[trims.length - 1] : trims[0]) : 0);
+  const cornerOn = (sideSign) => {
+    const f = faces.find((x) => x.side === sideSign);
+    const c = lineHit(apex, f.dir, add(endPt, nEnd, sideSign * h), uOut);
+    const t = (c[0] - apex[0]) * f.dir[0] + (c[1] - apex[1]) * f.dir[1];
+    if (t <= 0 || t >= f.len) {
+      throw new Error('genStrokePath: socket — торец шире грани клина сиблинга (угол сходит с грани)');
+    }
+    const back = -((c[0] - endPt[0]) * uOut[0] + (c[1] - endPt[1]) * uOut[1]); // вглубь палочки
+    if (back >= avail) {
+      throw new Error('genStrokePath: socket — клин сиблинга съедает сегмент палочки (торец глубже плеча)');
+    }
+    return c;
+  };
+  return { plus: cornerOn(1), apex, minus: cornerOn(-1) };
 }
 
 /**
@@ -973,7 +1222,10 @@ export function buildGlyph(entry, grid, axes = {}, lib = null) {
     }
     const outer = genRoundedRect(cx2, cy2, W, H, R, zeta);
     const inner = genRoundedRect(cx2, cy2, W - 2 * w, H - 2 * w, Math.max(R - w, 0.1), zeta);
-    out.outline = outer + inner; // evenodd-вложение (честная дырка)
+    // внутренний РЕВЕРСИРОВАН: дырка вычитается и под evenodd (гейт), и под
+    // nonzero (браузер) — как genRing/genRoundedPolygonRing; был fill-rule-
+    // зависим (отгружался только с evenodd-атрибутом)
+    out.outline = outer + reversePathD(inner);
     out.filled = outer;
   } else if (entry.archetype === 'composite') {
     // композиция частей: каждая часть — примитив с режимом на вариант
@@ -995,7 +1247,9 @@ export function buildGlyph(entry, grid, axes = {}, lib = null) {
             if (W - 2 * w <= 0 || H - 2 * w <= 0) {
               throw new Error(`composite rounded-rect frame: перо ${w} съедает габарит ${W}×${H}`);
             }
-            chunks.push(outer + genRoundedRect(cx2, cy2, W - 2 * w, H - 2 * w, Math.max(R - w, 0.1), zeta, rot));
+            // внутренний РЕВЕРСИРОВАН (класс genRing): дырка честна и под
+            // nonzero — рамка была fill-rule-зависимой (tablet-семья)
+            chunks.push(outer + reversePathD(genRoundedRect(cx2, cy2, W - 2 * w, H - 2 * w, Math.max(R - w, 0.1), zeta, rot)));
           } else {
             chunks.push(outer);
           }
@@ -1087,7 +1341,38 @@ export function buildGlyph(entry, grid, axes = {}, lib = null) {
           }
           const wRaw = part.weight != null && typeof part.weight === 'object' ? part.weight[variant] : part.weight;
           const w = tok(wRaw ?? 'base');
-          chunks.push(genStrokePath(Pts(pp.points ?? []), w, pp.closed ?? false));
+          // socket {start|end: '<имя сиблинга>'} — торец «встык» по клину
+          // сиблинга-шеврона (стык палочка↔наконечник БЕЗ перекрытия и БЕЗ
+          // пинча, класс time; см. socketJoint). Сиблинг ищется в частях этой
+          // же декларации; partsScope — полный список частей при изоляции
+          // части гейтом (materializeParts в check-adjacency / adjacency.test).
+          let socket;
+          if (part.socket) {
+            socket = {};
+            const scope = entry.partsScope ?? entry.parts;
+            for (const endKey of ['start', 'end']) {
+              const sibName = part.socket[endKey];
+              if (sibName == null) continue;
+              const sib = scope.find((p2) => p2.name === sibName && p2 !== part);
+              if (!sib || sib.primitive !== 'stroke-path') {
+                throw new Error(`stroke-path: socket-сиблинг «${sibName}» не найден среди stroke-path частей декларации`);
+              }
+              const sibPP = sib.params?.[variant] ?? sib.params;
+              const sibWRaw = sib.weight != null && typeof sib.weight === 'object' ? sib.weight[variant] : sib.weight;
+              socket[endKey] = { pts: Pts(sibPP.points ?? []), pen: tok(sibWRaw ?? 'base') };
+            }
+          }
+          chunks.push(genStrokePath(Pts(pp.points ?? []), w, pp.closed ?? false, { socket }));
+        } else if (part.primitive === 'stroke-cross') {
+          // крест из двух пересекающихся осей ЕДИНЫМ контуром (класс
+          // пересекающихся штрихов: close «×», plus «+», add/x-семьи) —
+          // две капсулы в пересечении не свариваются (линза/пинч), союз
+          // печатается сразу одним суб-путём (genStrokeCross)
+          if (mode !== 'solid') {
+            throw new Error(`stroke-cross: режим «${mode}» не поддержан — крест сам по себе solid-контур`);
+          }
+          const wxRaw = part.weight != null && typeof part.weight === 'object' ? part.weight[variant] : part.weight;
+          chunks.push(genStrokeCross((pp.axes ?? []).map((seg) => seg.map(Pt)), tok(wxRaw ?? 'base')));
         } else if (part.primitive === 'rounded-polygon') {
           // скруглённый многоугольник как часть композиции (play-семья,
           // обязательство №3 Волны-2): vertices — ВИРТУАЛЬНЫЕ вершины

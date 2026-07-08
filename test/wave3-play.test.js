@@ -38,16 +38,17 @@ const WAVE3 = [
 ];
 
 // Легаси-нарушители EO≠NZ (были в корпусе до Волны-3; вырезы с одинаковой
-// намоткой контуров). Замер 2026-07-05, шаг 0.12: tablet-portrait/outline
-// 41.51%, tablet-landscape/outline 41.38%, cog/outline 23.44%, pause/outline
-// 19.42%, component/outline 10.29%, info-circle/outline 0.62%, reload/filled
-// 0.23%, reload/outline 0.20%. Список может только УМЕНЬШАТЬСЯ.
+// намоткой контуров). Замер 2026-07-05, шаг 0.12: info-circle/outline 0.62%,
+// reload/filled 0.23%, reload/outline 0.20%.
+// Список может только УМЕНЬШАТЬСЯ. 2026-07-09 (fix/eonz-strict): УБРАНЫ
+// tablet-portrait/outline 41.51%, tablet-landscape/outline 41.38%,
+// cog/outline 23.44%, pause/outline 19.42%, component/outline 10.29% —
+// негативы противо-намотаны (reversePathD: genRadialGear,
+// rounded-rect-container, composite-frame), отгрузка generated-вариантов
+// перематериализована, EO≠NZ = 0 (гейт check-eonz-strict).
+// reload/filled демоутнут из отгрузки (перекрытие головы, demotionReason),
+// но генерат по декларации всё ещё EO≠NZ — уберёт только сварка arc-terminal.
 const LEGACY_EO_NZ = new Set([
-  'tablet-portrait/outline',
-  'tablet-landscape/outline',
-  'cog/outline',
-  'pause/outline',
-  'component/outline',
   'info-circle/outline',
   'reload/filled',
   'reload/outline',

@@ -36,7 +36,7 @@
    "archetype": "arc-terminal",
    "status": {
     "outline": "hand",
-    "filled": "generated"
+    "filled": "hand"
    },
    "skeleton": {
     "center": [
@@ -56,7 +56,8 @@
    "fidelityToHand": {
     "filled": 0.8614
    },
-   "ownerReview": "крупная коррекция: концентричная дуга-терминал вместо неконцентричной руки — на глаз владельцу"
+   "ownerReview": "крупная коррекция: концентричная дуга-терминал вместо неконцентричной руки — на глаз владельцу",
+   "demotionReason": "демоут 2026-07-09 (check-eonz-strict): намеренное перекрытие головы с дугой (OVERLAP 0.3 в genArcTerminal) — evenodd-линза, EO≠NZ 92 точек (шаг 0.12); фикс класса = сварка дуга↔голова единым контуром (как stroke-cross) — отдельная волна; рука возвращена в отгрузку"
   },
   "chevron-down": {
    "archetype": "stroke-v",
@@ -1955,49 +1956,43 @@
    },
    "parts": [
     {
-     "primitive": "rounded-rect",
-     "mode": "solid",
+     "primitive": "stroke-cross",
+     "mode": {
+      "outline": "solid"
+     },
+     "weight": "base",
      "params": {
       "outline": {
-       "cx": 0.5,
-       "cy": 0.5025,
-       "w": 0.075,
-       "h": 0.58,
-       "rOuter": 0.0375
-      }
-     }
-    },
-    {
-     "primitive": "rounded-rect",
-     "mode": "solid",
-     "params": {
-      "outline": {
-       "cx": 0.3375,
-       "cy": 0.5,
-       "w": 0.25,
-       "h": 0.075,
-       "rOuter": 0.0375
-      }
-     }
-    },
-    {
-     "primitive": "rounded-rect",
-     "mode": "solid",
-     "params": {
-      "outline": {
-       "cx": 0.662292,
-       "cy": 0.5,
-       "w": 0.254583,
-       "h": 0.075,
-       "rOuter": 0.0375
+       "axes": [
+        [
+         [
+          0.5,
+          0.25
+         ],
+         [
+          0.5,
+          0.755
+         ]
+        ],
+        [
+         [
+          0.25,
+          0.5
+         ],
+         [
+          0.752083,
+          0.5
+         ]
+        ]
+       ]
       }
      }
     }
    ],
    "fidelityToHand": {
-    "outline": 0.9794
+    "outline": 0.9815
    },
-   "correctionReason": "генерат по закону расходится с рукой: outline 97.94%: расхождение рассеяно субпиксельно вдоль всего контура (кластеров нет и на сетке 96) — дребезг руки, снятый конструкцией закона"
+   "correctionReason": "генерат по закону расходится с рукой: outline 98.15%: крест сварен единым контуром stroke-cross (рука рисовала 3 капсулы: перекрытие правого плеча = evenodd-линза, касание левого = пинч); дребезг руки снят конструкцией закона"
   },
   "plus-circle": {
    "archetype": "composite",
@@ -2429,76 +2424,43 @@
    },
    "parts": [
     {
-     "primitive": "stroke-path",
+     "primitive": "stroke-cross",
      "mode": {
       "outline": "solid"
      },
      "weight": "base",
      "params": {
       "outline": {
-       "points": [
+       "axes": [
         [
-         0.323125,
-         0.323125
+         [
+          0.323125,
+          0.323125
+         ],
+         [
+          0.68,
+          0.680208
+         ]
         ],
         [
-         0.68,
-         0.680208
+         [
+          0.677083,
+          0.323333
+         ],
+         [
+          0.320208,
+          0.680417
+         ]
         ]
-       ],
-       "closed": false
-      }
-     }
-    },
-    {
-     "primitive": "stroke-path",
-     "mode": {
-      "outline": "solid"
-     },
-     "weight": "base",
-     "params": {
-      "outline": {
-       "points": [
-        [
-         0.553226,
-         0.447264
-        ],
-        [
-         0.677083,
-         0.323333
-        ]
-       ],
-       "closed": false
-      }
-     }
-    },
-    {
-     "primitive": "stroke-path",
-     "mode": {
-      "outline": "solid"
-     },
-     "weight": "base",
-     "params": {
-      "outline": {
-       "points": [
-        [
-         0.447192,
-         0.553362
-        ],
-        [
-         0.320208,
-         0.680417
-        ]
-       ],
-       "closed": false
+       ]
       }
      }
     }
    ],
    "fidelityToHand": {
-    "outline": 0.9796
+    "outline": 0.986
    },
-   "correctionReason": "генерат по закону расходится с рукой: outline 97.96%: расхождение рассеяно субпиксельно вдоль всего контура (кластеров нет и на сетке 96) — дребезг руки, снятый конструкцией закона"
+   "correctionReason": "генерат по закону расходится с рукой: outline 98.60%: крест сварен единым контуром stroke-cross (рука рисовала длинную капсулу + 2 стаба с тангенциальными капами — белый пинч-ромбик в центре, пойман владельцем); дребезг руки (не-коллинеарность стабов) снят конструкцией закона"
   },
   "close-circle": {
    "archetype": "composite",
@@ -2600,7 +2562,7 @@
   "ban": {
    "archetype": "composite",
    "status": {
-    "outline": "generated"
+    "outline": "hand"
    },
    "parts": [
     {
@@ -2649,7 +2611,8 @@
    "fidelityToHand": {
     "outline": 0.9869
    },
-   "correctionReason": "генерат по закону расходится с рукой: outline 98.69%: расхождение рассеяно субпиксельно вдоль всего контура (кластеров нет и на сетке 96) — дребезг руки, снятый конструкцией закона"
+   "correctionReason": "генерат по закону расходится с рукой: outline 98.69%: расхождение рассеяно субпиксельно вдоль всего контура (кластеров нет и на сетке 96) — дребезг руки, снятый конструкцией закона",
+   "demotionReason": "демоут 2026-07-09 (check-eonz-strict): торец перекладины тангенциально касается внутренней дуги кольца — белый пинч (контакт 1.40 < шва 1.5, линза 8 точек в полосе стыка); фикс класса = сокет-к-дуге (вогнутый торец по дуге кольца, прецедент подшипника genClockHand) — отдельная волна; рука возвращена в отгрузку"
   },
   "arrow-up-circle": {
    "archetype": "composite",
@@ -2760,7 +2723,8 @@
        ],
        "closed": false
       }
-     }
+     },
+     "name": "head"
     },
     {
      "primitive": "stroke-path",
@@ -2782,6 +2746,10 @@
        ],
        "closed": false
       }
+     },
+     "name": "stick",
+     "socket": {
+      "end": "head"
      }
     },
     {
@@ -2802,11 +2770,12 @@
        "cy": 0.5,
        "r": 0.458333
       }
-     }
+     },
+     "name": "ring"
     }
    ],
    "fidelityToHand": {
-    "outline": 0.991
+    "outline": 0.9982
    }
   },
   "arrow-back-circle": {
@@ -2839,7 +2808,8 @@
        ],
        "closed": false
       }
-     }
+     },
+     "name": "head"
     },
     {
      "primitive": "stroke-path",
@@ -2861,6 +2831,10 @@
        ],
        "closed": false
       }
+     },
+     "name": "stick",
+     "socket": {
+      "end": "head"
      }
     },
     {
@@ -2881,11 +2855,12 @@
        "cy": 0.5,
        "r": 0.458333
       }
-     }
+     },
+     "name": "ring"
     }
    ],
    "fidelityToHand": {
-    "outline": 0.9917
+    "outline": 0.9982
    }
   },
   "arrow-forward-circle": {
@@ -2918,7 +2893,8 @@
        ],
        "closed": false
       }
-     }
+     },
+     "name": "head"
     },
     {
      "primitive": "stroke-path",
@@ -2940,6 +2916,10 @@
        ],
        "closed": false
       }
+     },
+     "name": "stick",
+     "socket": {
+      "end": "head"
      }
     },
     {
@@ -2960,11 +2940,12 @@
        "cy": 0.5,
        "r": 0.458333
       }
-     }
+     },
+     "name": "ring"
     }
    ],
    "fidelityToHand": {
-    "outline": 0.9902
+    "outline": 0.9985
    }
   },
   "alert-circle": {

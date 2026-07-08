@@ -213,7 +213,9 @@ function materializeParts(entry, grid, allGlyphs, variant) {
   for (const part of entry.parts) {
     let built;
     try {
-      built = buildGlyph({ ...entry, parts: [part] }, grid, {}, allGlyphs);
+      // partsScope: изолированная часть видит ПОЛНЫЙ список частей —
+      // резолв socket-сиблинга (палочка со socket не выпадает из гейта)
+      built = buildGlyph({ ...entry, parts: [part], partsScope: entry.parts }, grid, {}, allGlyphs);
     } catch {
       continue;
     }

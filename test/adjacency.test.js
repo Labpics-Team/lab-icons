@@ -29,7 +29,9 @@ const anatomy = JSON.parse(readFileSync(join(root, 'semantics', 'anatomy.json'),
 function genPartsOf(entry) {
   const out = [];
   for (const part of entry.parts) {
-    const built = buildGlyph({ ...entry, parts: [part] }, grid, {}, anatomy.glyphs);
+    // partsScope — как materializeParts гейта: изолированная часть видит
+    // полный список частей (резолв socket-сиблинга)
+    const built = buildGlyph({ ...entry, parts: [part], partsScope: entry.parts }, grid, {}, anatomy.glyphs);
     if (built.outline) out.push({ name: part.name || `part${out.length}`, d: built.outline });
   }
   return out;
