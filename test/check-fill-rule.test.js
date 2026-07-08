@@ -42,6 +42,16 @@ describe('fillRuleBlobBug — дискриминатор блоба', () => {
     expect(r.isBlobBug).toBe(false);
   });
 
+  it('Д: compound-path (frame-subpath + same-winding ring в одном d) → блоб (un-anchored regex прятал)', () => {
+    // Экспорт склеил клип-рамку и геометрию в ОДИН <path>: `d` НАЧИНАЕТСЯ с рамки.
+    // Не-заякоренный /M0 0h24v24H0z/ матчил весь `d` → path выпадал целиком вместе с
+    // кольцом → кандидата нет → isBlobBug:false прятал реальный блоб. Фикс вырезает
+    // рамку как отдельный СУБ-путь, оставляя кольцо на анализ → блоб виден.
+    const r = fillRuleBlobBug(svg(`M0 0h24v24H0z ${ringSame}`));
+    expect(r.isBlobBug).toBe(true);
+    expect(r.disagreePct).toBeGreaterThan(50);
+  });
+
   it('Д: mixed-файл — evenodd-path + одинаково-намотанное кольцо БЕЗ evenodd → блоб (общефайловый чек это прятал)', () => {
     // fill-rule применяется ПО-ПУТЁВО: наличие evenodd на ПЕРВОМ path не спасает второй.
     const mixed = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24">' +

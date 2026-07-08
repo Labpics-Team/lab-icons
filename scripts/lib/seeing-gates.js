@@ -47,8 +47,13 @@ function pathsOf(rawSvg) {
   for (const tag of rawSvg.match(/<path\b[^>]*>/gi) || []) {
     const dm = tag.match(/\sd=["']([^"']+)["']/i);
     if (!dm) continue;
-    const d = dm[1];
-    if (/M0\s*0[hH]24[vV]24[hH]0[zZ]/.test(d)) continue; // клип-рамка Figma — не геометрия
+    // Клип-рамка Figma (M0 0h24v24H0z) — не геометрия. Вырезаем её как отдельный
+    // СУБ-путь: одинокая рамка → пустой d (path выпадает), а compound «рамка+кольцо»
+    // в одном d → остаётся только кольцо (иначе полноканвасная рамка залила бы дыру
+    // под nonzero и спрятала блоб). Якорь субпути (^ | после Z) не трогает реальную
+    // геометрию — в корпусе рамка всегда обособлена.
+    const d = dm[1].replace(/(?:^|(?<=[zZ]))\s*M0\s*0[hH]24[vV]24[hH]0[zZ]\s*/g, ' ').trim();
+    if (!d) continue;
     out.push({ d, eo: /fill-rule\s*=\s*["']?\s*evenodd/i.test(tag), polys: polysOf(d) });
   }
   return out;
