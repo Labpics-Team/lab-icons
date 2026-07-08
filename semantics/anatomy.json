@@ -61,8 +61,8 @@
   "chevron-down": {
    "archetype": "stroke-v",
    "status": {
-    "outline": "hand",
-    "filled": "hand"
+    "outline": "generated",
+    "filled": "generated"
    },
    "inkAnchors": {
     "endL": [
@@ -139,8 +139,8 @@
   "tablet-landscape": {
    "archetype": "composite",
    "status": {
-    "outline": "hand",
-    "filled": "hand"
+    "outline": "generated",
+    "filled": "generated"
    },
    "parts": [
     {
@@ -160,14 +160,15 @@
     }
    ],
    "fidelityToHand": {
-    "outline": 0.997
+    "outline": 0.997,
+    "filled": 0.999
    }
   },
   "tablet-portrait": {
    "archetype": "composite",
    "status": {
-    "outline": "hand",
-    "filled": "hand"
+    "outline": "generated",
+    "filled": "generated"
    },
    "parts": [
     {
@@ -187,14 +188,15 @@
     }
    ],
    "fidelityToHand": {
-    "outline": 0.997
+    "outline": 0.997,
+    "filled": 0.9991
    }
   },
   "pause": {
    "archetype": "composite",
    "status": {
     "outline": "hand",
-    "filled": "hand"
+    "filled": "generated"
    },
    "parts": [
     {
@@ -254,8 +256,8 @@
   "ellipsis-horizontal": {
    "archetype": "composite",
    "status": {
-    "outline": "hand",
-    "filled": "hand"
+    "outline": "generated",
+    "filled": "generated"
    },
    "parts": [
     {
@@ -315,8 +317,8 @@
   "ellipsis-vertical": {
    "archetype": "composite",
    "status": {
-    "outline": "hand",
-    "filled": "hand"
+    "outline": "generated",
+    "filled": "generated"
    },
    "parts": [
     {
@@ -376,8 +378,8 @@
   "menu": {
    "archetype": "composite",
    "status": {
-    "outline": "hand",
-    "filled": "hand"
+    "outline": "generated",
+    "filled": "generated"
    },
    "parts": [
     {
@@ -429,8 +431,8 @@
   "minus": {
    "archetype": "composite",
    "status": {
-    "outline": "hand",
-    "filled": "hand"
+    "outline": "generated",
+    "filled": "generated"
    },
    "parts": [
     {
@@ -462,8 +464,8 @@
   "ellipse": {
    "archetype": "composite",
    "status": {
-    "outline": "hand",
-    "filled": "hand"
+    "outline": "generated",
+    "filled": "generated"
    },
    "parts": [
     {
@@ -495,8 +497,8 @@
   "filter": {
    "archetype": "composite",
    "status": {
-    "outline": "hand",
-    "filled": "hand"
+    "outline": "generated",
+    "filled": "generated"
    },
    "parts": [
     {
@@ -568,8 +570,8 @@
   "list": {
    "archetype": "composite",
    "status": {
-    "outline": "hand",
-    "filled": "hand"
+    "outline": "generated",
+    "filled": "generated"
    },
    "parts": [
     {
@@ -755,8 +757,8 @@
   "pause-circle": {
    "archetype": "composite",
    "status": {
-    "outline": "hand",
-    "filled": "hand"
+    "outline": "generated",
+    "filled": "generated"
    },
    "parts": [
     {
@@ -823,13 +825,14 @@
    "fidelityToHand": {
     "outline": 0.9722,
     "filled": 0.988
-   }
+   },
+   "correctionReason": "генерат по закону расходится с рукой: outline 97.22%: посередине по центру [8.4,14.9→9.4,15.6]: закон снимает дребезг руки (чернила руки без конструкции); посередине по центру [10.4,14.9→11.4,15.6]: закон снимает дребезг руки (чернила руки без конструкции); filled 98.80%: посередине по центру [8.4,14.9→9.4,15.6]: конструкция закона ведёт контур полнее/ровнее руки; посередине по центру [10.4,14.9→11.4,15.6]: конструкция закона ведёт контур полнее/ровнее руки"
   },
   "sun-low": {
    "archetype": "composite",
    "status": {
-    "outline": "hand",
-    "filled": "hand"
+    "outline": "generated",
+    "filled": "generated"
    },
    "parts": [
     {
@@ -1008,13 +1011,14 @@
    "fidelityToHand": {
     "outline": 0.9712,
     "filled": 0.9985
-   }
+   },
+   "correctionReason": "генерат по закону расходится с рукой: outline 97.12%: расхождение рассеяно субпиксельно вдоль всего контура (кластеров нет и на сетке 96) — дребезг руки, снятый конструкцией закона"
   },
   "time": {
    "archetype": "composite",
    "status": {
-    "outline": "hand",
-    "filled": "hand"
+    "outline": "generated",
+    "filled": "generated"
    },
    "parts": [
     {
@@ -1909,7 +1913,7 @@
   "checkmark": {
    "archetype": "composite",
    "status": {
-    "outline": "hand"
+    "outline": "generated"
    },
    "parts": [
     {
@@ -1941,12 +1945,13 @@
    ],
    "fidelityToHand": {
     "outline": 0.9709
-   }
+   },
+   "correctionReason": "генерат по закону расходится с рукой: outline 97.09%: внизу по центру [10.3,16.8→11.8,17.3]: конструкция закона ведёт контур полнее/ровнее руки"
   },
   "plus": {
    "archetype": "composite",
    "status": {
-    "outline": "hand"
+    "outline": "generated"
    },
    "parts": [
     {
@@ -1991,7 +1996,8 @@
    ],
    "fidelityToHand": {
     "outline": 0.9794
-   }
+   },
+   "correctionReason": "генерат по закону расходится с рукой: outline 97.94%: расхождение рассеяно субпиксельно вдоль всего контура (кластеров нет и на сетке 96) — дребезг руки, снятый конструкцией закона"
   },
   "plus-circle": {
    "archetype": "composite",
@@ -2066,7 +2072,7 @@
   "checkmark-circle": {
    "archetype": "composite",
    "status": {
-    "outline": "hand"
+    "outline": "generated"
    },
    "parts": [
     {
@@ -2123,7 +2129,7 @@
   "checkmarks": {
    "archetype": "composite",
    "status": {
-    "outline": "hand"
+    "outline": "generated"
    },
    "parts": [
     {
@@ -2177,12 +2183,13 @@
    ],
    "fidelityToHand": {
     "outline": 0.9815
-   }
+   },
+   "correctionReason": "генерат по закону расходится с рукой: outline 98.15%: расхождение рассеяно субпиксельно вдоль всего контура (кластеров нет и на сетке 96) — дребезг руки, снятый конструкцией закона"
   },
   "checkmarks-circle": {
    "archetype": "composite",
    "status": {
-    "outline": "hand"
+    "outline": "generated"
    },
    "parts": [
     {
@@ -2418,7 +2425,7 @@
   "close": {
    "archetype": "composite",
    "status": {
-    "outline": "hand"
+    "outline": "generated"
    },
    "parts": [
     {
@@ -2490,7 +2497,8 @@
    ],
    "fidelityToHand": {
     "outline": 0.9796
-   }
+   },
+   "correctionReason": "генерат по закону расходится с рукой: outline 97.96%: расхождение рассеяно субпиксельно вдоль всего контура (кластеров нет и на сетке 96) — дребезг руки, снятый конструкцией закона"
   },
   "close-circle": {
    "archetype": "composite",
@@ -2592,7 +2600,7 @@
   "ban": {
    "archetype": "composite",
    "status": {
-    "outline": "hand"
+    "outline": "generated"
    },
    "parts": [
     {
@@ -2640,7 +2648,8 @@
    ],
    "fidelityToHand": {
     "outline": 0.9869
-   }
+   },
+   "correctionReason": "генерат по закону расходится с рукой: outline 98.69%: расхождение рассеяно субпиксельно вдоль всего контура (кластеров нет и на сетке 96) — дребезг руки, снятый конструкцией закона"
   },
   "arrow-up-circle": {
    "archetype": "composite",
@@ -2724,7 +2733,7 @@
   "arrow-down-circle": {
    "archetype": "composite",
    "status": {
-    "outline": "hand"
+    "outline": "generated"
    },
    "parts": [
     {
@@ -2803,7 +2812,7 @@
   "arrow-back-circle": {
    "archetype": "composite",
    "status": {
-    "outline": "hand"
+    "outline": "generated"
    },
    "parts": [
     {
@@ -2882,7 +2891,7 @@
   "arrow-forward-circle": {
    "archetype": "composite",
    "status": {
-    "outline": "hand"
+    "outline": "generated"
    },
    "parts": [
     {
@@ -2961,7 +2970,7 @@
   "alert-circle": {
    "archetype": "composite",
    "status": {
-    "outline": "hand"
+    "outline": "generated"
    },
    "parts": [
     {
@@ -3020,12 +3029,13 @@
    ],
    "fidelityToHand": {
     "outline": 0.9821
-   }
+   },
+   "correctionReason": "генерат по закону расходится с рукой: outline 98.21%: посередине по центру [10.9,7.1→11.4,10.1]: закон снимает дребезг руки (чернила руки без конструкции); посередине по центру [12.6,7.1→13.1,10.1]: закон снимает дребезг руки (чернила руки без конструкции)"
   },
   "play-circle": {
    "archetype": "composite",
    "status": {
-    "outline": "hand"
+    "outline": "generated"
    },
    "parts": [
     {
@@ -3086,7 +3096,7 @@
   "play-forward-circle": {
    "archetype": "composite",
    "status": {
-    "outline": "hand"
+    "outline": "generated"
    },
    "parts": [
     {
@@ -3158,12 +3168,13 @@
    ],
    "fidelityToHand": {
     "outline": 0.9762
-   }
+   },
+   "correctionReason": "генерат по закону расходится с рукой: outline 97.62%: посередине по центру [10.8,9.3→11.8,10.3]: конструкция закона ведёт контур полнее/ровнее руки; посередине по центру [10.8,13.8→11.8,14.8]: конструкция закона ведёт контур полнее/ровнее руки"
   },
   "play-back-circle": {
    "archetype": "composite",
    "status": {
-    "outline": "hand"
+    "outline": "generated"
    },
    "parts": [
     {
@@ -3235,7 +3246,8 @@
    ],
    "fidelityToHand": {
     "outline": 0.9758
-   }
+   },
+   "correctionReason": "генерат по закону расходится с рукой: outline 97.58%: посередине по центру [12.3,9.3→13.8,10.3]: конструкция закона ведёт контур полнее/ровнее руки; посередине по центру [12.3,13.8→13.8,14.8]: конструкция закона ведёт контур полнее/ровнее руки"
   },
   "play-skip-back-circle": {
    "archetype": "composite",
