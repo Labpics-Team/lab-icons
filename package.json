@@ -36,8 +36,10 @@
     "check:topology": "node scripts/check-topology.js",
     "check:corners": "node scripts/check-corners.js",
     "check:adjacency": "node scripts/check-adjacency.js",
+    "check:ink-weight": "node scripts/check-ink-weight.js",
+    "check:ink-weight:axes": "node scripts/check-ink-weight.js --axes",
     "test": "vitest run",
-    "verify": "node scripts/build.js && node scripts/build-anatomy.js && node scripts/check-parity.js && node scripts/check-colors.js && node scripts/check-treeshake.js && node scripts/check-variant-parity.js && node scripts/check-anatomy.js && node scripts/check-anatomy-drift.js && node scripts/check-path-quality.js && node scripts/check-static-grid.js && node scripts/check-fill-rule.js && node scripts/check-topology.js && node scripts/check-corners.js && node scripts/check-adjacency.js && node scripts/check-grammar.js && node scripts/check-fidelity.js && node scripts/check-dry-coverage.js && vitest run",
+    "verify": "node scripts/build.js && node scripts/build-anatomy.js && node scripts/check-parity.js && node scripts/check-colors.js && node scripts/check-treeshake.js && node scripts/check-variant-parity.js && node scripts/check-anatomy.js && node scripts/check-anatomy-drift.js && node scripts/check-path-quality.js && node scripts/check-static-grid.js && node scripts/check-fill-rule.js && node scripts/check-topology.js && node scripts/check-corners.js && node scripts/check-adjacency.js && node scripts/check-ink-weight.js && node scripts/check-ink-weight.js --axes && node scripts/check-grammar.js && node scripts/check-fidelity.js && node scripts/check-dry-coverage.js && vitest run",
     "check:grammar": "node scripts/check-grammar.js",
     "check:fidelity": "node scripts/check-fidelity.js",
     "check:dry-coverage": "node scripts/check-dry-coverage.js"
