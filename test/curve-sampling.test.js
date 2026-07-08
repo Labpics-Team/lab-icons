@@ -133,4 +133,18 @@ describe('inkOverlap — пересечение чернил (even-odd)', () => 
     const ring = [square(0, 0, 10), square(2, 2, 6)]; // внешний контур + дырка
     expect(inkOverlap([square(4, 4, 2)], ring)).toBe(false);
   });
+
+  it('А: пустой набор/пустой первый полилайн → false, не throw (гард дерефа polys[0][0])', () => {
+    // Acceptance issue #28: пустые входы возвращают false вместо TypeError.
+    expect(inkOverlap([], [[[0, 0], [1, 1]]])).toBe(false);
+    expect(inkOverlap([[]], [[[0, 0]]])).toBe(false);
+  });
+
+  it('А: пустой ПЕРВЫЙ полилайн при пересекающихся bounds → false, не throw', () => {
+    // Реальный путь к дерефу line 278: bounds перекрываются (ранний AABB-reject
+    // не срабатывает), но polysA[0] пуст → polysA[0][0] === undefined.
+    // До гарда: TypeError "point is not iterable"; после — false.
+    expect(inkOverlap([[], square(0, 0, 2)], [square(0, 0, 2)])).toBe(false);
+    expect(inkOverlap([square(0, 0, 2)], [[], square(0, 0, 2)])).toBe(false);
+  });
 });

@@ -275,5 +275,6 @@ export function inkOverlap(polysA, polysB) {
       }
     }
   }
+  if (!polysA.length || !polysB.length || !polysA[0].length || !polysB[0].length) return false;
   return pointInInk(polysA[0][0], polysB) || pointInInk(polysB[0][0], polysA);
 }
