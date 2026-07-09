@@ -2425,7 +2425,7 @@
   "close": {
    "archetype": "composite",
    "status": {
-    "outline": "generated"
+    "outline": "hand"
    },
    "parts": [
     {
@@ -2813,7 +2813,7 @@
   "arrow-back-circle": {
    "archetype": "composite",
    "status": {
-    "outline": "generated"
+    "outline": "hand"
    },
    "parts": [
     {
@@ -3098,7 +3098,7 @@
   "play-forward-circle": {
    "archetype": "composite",
    "status": {
-    "outline": "generated"
+    "outline": "hand"
    },
    "parts": [
     {
