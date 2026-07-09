@@ -1,6 +1,6 @@
 {
   "name": "@labpics/icons",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": false,
   "description": "Labpics icon library — 444 SVG (Filled + Outline), tree-shakeable ESM",
   "repository": {
