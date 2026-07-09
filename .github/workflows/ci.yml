@@ -105,7 +105,7 @@ jobs:
       - name: DRY coverage check (флагманы собраны из общих примитивов, ≥2 потребителя)
         run: pnpm check:dry-coverage
 
-      - name: Anim-ready check (подвижные части: anchor + раздельные суб-пути)
+      - name: "Anim-ready check (подвижные части: anchor + раздельные суб-пути)"
         run: pnpm check:anim-ready
 
       - name: Grammar check (направления рёбер на шкале)
