@@ -1,7 +1,7 @@
 {
   "name": "@labpics/icons",
-  "version": "0.0.1",
-  "private": true,
+  "version": "0.1.0",
+  "private": false,
   "description": "Labpics icon library — 444 SVG (Filled + Outline), tree-shakeable ESM",
   "repository": {
     "type": "git",
@@ -50,5 +50,18 @@
     "rollup": "^4.24.0",
     "svgo": "^3.3.2",
     "vitest": "2.1.8"
+  },
+  "license": "MIT",
+  "keywords": [
+    "icons",
+    "svg",
+    "design-system",
+    "labpics",
+    "outline",
+    "filled",
+    "animated-icons"
+  ],
+  "engines": {
+    "node": ">=18"
   }
 }
