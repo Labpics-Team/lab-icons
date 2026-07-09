@@ -7,3 +7,7 @@ Thumbs.db
 demo/
 tmp/
 preview/
+
+# scratch-инструменты локальной верификации
+/_*
+/gallery.html

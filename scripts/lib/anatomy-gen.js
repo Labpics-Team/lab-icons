@@ -1246,12 +1246,18 @@ export function buildGlyph(entry, grid, axes = {}, lib = null) {
           const verts = Pts(pp.vertices);
           const r = L(pp.r);
           const zeta = zTok(pp.zeta ?? grid.ratios.cornerSmoothing);
+          // corners[] (EC3) — пер-вершинная роль руки ({r:доля}/{sharp:true}),
+          // выровнена к vertices; {r} — доля канвы, резолвится L() как r.
+          // Отсутствует ⇒ путь БАЙТ-В-БАЙТ прежний (скаляр r).
+          const cRoles = Array.isArray(pp.corners)
+            ? pp.corners.map((c) => (c && typeof c.r === 'number' ? { ...c, r: L(c.r) } : c))
+            : undefined;
           if (mode === 'frame') {
             const w = tok(part.weight ?? 'base');
             const rIn = pp.rInner != null ? L(pp.rInner) : undefined;
-            chunks.push(genRoundedPolygonRing(verts, r, zeta, w, rIn));
+            chunks.push(genRoundedPolygonRing(verts, r, zeta, w, rIn, cRoles));
           } else {
-            chunks.push(genRoundedPolygon(verts, r, zeta));
+            chunks.push(genRoundedPolygon(verts, r, zeta, cRoles));
           }
         } else {
           throw new Error(`composite: неизвестный примитив «${part.primitive}»`);
