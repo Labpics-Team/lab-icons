@@ -93,6 +93,13 @@ describe('wave5-arrows — EO≡NZ на генератах (стык head+shaft 
       const built = buildGlyph(entry, grid);
       for (const [variant, d] of Object.entries(built)) {
         if (!entry.status?.[variant]) continue;
+        // swap-horizontal/outline: стык head+shaft теперь ПЕРЕКРЫВАЕТСЯ по закону
+        // смежности (scripts/check-adjacency.js) — палочка входит в наконечник
+        // (зазор→0), иначе рендер даёт видимо отрезанную часть при 98% IoU. EO≠NZ
+        // в линзе перекрытия ОЖИДАЕМ (одноцветные чернила, nonzero-рендер браузера
+        // идентичен). Связность стыка гарантирует check-adjacency, а не этот
+        // EO≡NZ-ассерт (тот кодировал старое «стык без перекрытия» — корень дыры).
+        if (name === 'swap-horizontal' && variant === 'outline') continue;
         expect(eoNzMismatch(d, 0.12), `${name}/${variant}: точек EO≠NZ`).toBe(0);
       }
     });
