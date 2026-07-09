@@ -81,17 +81,32 @@ jobs:
       - name: Path quality check (шум кривых, волосяные фрагменты, встык-швы)
         run: pnpm check:path-quality
 
+      - name: Fill-rule check (контуры fill-rule-независимы, EO≡NZ)
+        run: pnpm check:fill-rule
+
       - name: Topology check (разрыв незакрытого контура — срез хордой)
         run: pnpm check:topology
 
       - name: Corners check (пер-вершинное скругление генерат-vs-рука; корпус в WARN до EC3)
         run: pnpm check:corners
 
+      - name: Adjacency check (зазоры/касания соседних слоёв; промоутнутые HARD-чисты)
+        run: pnpm check:adjacency
+
+      - name: Ink-weight check (вес штриха по корпусу; промоутнутые HARD-чисты)
+        run: pnpm check:ink-weight
+
+      - name: Ink-weight axes check (сетка весов 0.8/1/1.2 × corner 0/1)
+        run: pnpm check:ink-weight:axes
+
       - name: Fidelity check (пол узнаваемости генерата ≥97%, эскалация ниже)
         run: pnpm check:fidelity
 
       - name: DRY coverage check (флагманы собраны из общих примитивов, ≥2 потребителя)
         run: pnpm check:dry-coverage
+
+      - name: Anim-ready check (подвижные части: anchor + раздельные суб-пути)
+        run: pnpm check:anim-ready
 
       - name: Grammar check (направления рёбер на шкале)
         run: pnpm check:grammar
