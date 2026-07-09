@@ -56,7 +56,7 @@ flowchart LR
   style dst fill:transparent,stroke:#787880,color:#787880
 ```
 
-Рукой рисуются только SVG в `svg/` (моно-чернила `#101012`). `pnpm build`
+Рукой рисуются только SVG в `svg/` (чернила без hex (наследуются от контекста)). `pnpm build`
 прогоняет их через SVGO (чернила → `currentColor`), генерирует
 `dist/index.js` + `dist/index.d.ts` и строит `dist/anatomy.json` — скелет
 глифов из path-данных. Всё, что в `dist/`, — производное и воспроизводимое.
@@ -73,7 +73,7 @@ flowchart LR
 ```json
 {
   "dependencies": {
-    "@labpics/icons": "github:Labpics-Team/lab-icons#v0.0.1-dist"
+    "@labpics/icons": "github:Labpics-Team/lab-icons#v0.2.0-dist"
   }
 }
 ```
@@ -142,7 +142,7 @@ flowchart LR
   classDef dark fill:#101012,stroke:#787880,color:#F2F2FC
 ```
 
-1. Владелец ставит релизный тег на master: `git tag v0.0.2 && git push origin v0.0.2`.
+1. Владелец ставит релизный тег на master: `git tag vX.Y.Z && git push origin vX.Y.Z` (конкретные версии в доке сверяет check:docs-drift).
 2. Workflow [`release-dist.yml`](.github/workflows/release-dist.yml) ловит push
    тега `v*` (собственные `-dist` теги исключены из триггера), гоняет полный
    `pnpm verify` и коммитит `dist/index.js` + `dist/index.d.ts`
@@ -155,7 +155,7 @@ flowchart LR
 
 ```
 svg/
-  Filled/          — 222 иконки (*_filled.svg), моно-чернила #101012
+  Filled/          — 222 иконки (*_filled.svg), цветовых атрибутов нет — чернила наследуются от контекста (hex в dist запрещает check:colors)
   Outline/         — 222 иконки (*.svg)
 semantics/
   grid.json        — токены системы: веса штрихов, keylines, допуски
