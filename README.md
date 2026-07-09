@@ -103,3 +103,18 @@ import { accessibilityFilled, accessibilityOutline } from '@labpics/icons'
 ```bash
 pnpm verify   # build + parity + colors + tree-shake + 4 гейта статики + тесты
 ```
+
+## Nightly quality gates
+
+For an overnight, review-friendly cycle:
+
+```bash
+pnpm check:quality-nightly          # non-strict run, writes quality/quality-report-*.json
+pnpm check:quality-nightly:strict   # strict run; exit 1 on quality defects from strict checks
+```
+
+The command also (re)builds `preview/icon-preview-full.html` with:
+
+- original icon + generated icon,
+- per-row deviation,
+- and a reason cell for deviations above 3%.
