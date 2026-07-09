@@ -283,8 +283,9 @@ if (isMain) {
       }
     }
     if (fails.length > 0) {
-      console.log(`check-adjacency: FAIL — ${fails.length} разрывов смежности:`);
-      for (const e of fails) console.log(`  - ${e}`);
+      // Ошибки — в stderr: CI/пайплайны различают каналы, stdout остаётся для каталога.
+      console.error(`check-adjacency: FAIL — ${fails.length} разрывов смежности:`);
+      for (const e of fails) console.error(`  - ${e}`);
       process.exit(1);
     }
     console.log(`check-adjacency: OK — ${args.length} цель(ей) без разрывов смежности (ε=${EPS})`);
@@ -325,9 +326,10 @@ if (isMain) {
     : [];
   const hardFails = offenders.filter((o) => promoted.includes(o.name));
   if (hardFails.length > 0) {
-    console.log(`check-adjacency: FAIL — ${hardFails.length} разрыв(ов) в ПРОМОУТНУТЫХ глифах (регрессия смежности):`);
+    // Ошибки — в stderr (симметрично arg-режиму): красный CI показывает причину в error-канале.
+    console.error(`check-adjacency: FAIL — ${hardFails.length} разрыв(ов) в ПРОМОУТНУТЫХ глифах (регрессия смежности):`);
     for (const o of hardFails) {
-      console.log(`  - ${o.name}: «${o.a}»↔«${o.b}» зазор ${o.gap.toFixed(3)} > ε ${EPS}`);
+      console.error(`  - ${o.name}: «${o.a}»↔«${o.b}» зазор ${o.gap.toFixed(3)} > ε ${EPS}`);
     }
     process.exit(1);
   }
