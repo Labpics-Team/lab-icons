@@ -1,0 +1,59 @@
+{
+ "version": 1,
+ "comment": "RED-proof фикстура: декларация time ИЗ MASTER до фикса — стрелки сварены в один примитив clock-hands без anchor. Гейт check-anim-ready обязан уронить её (exit 1). Источник: git show master:semantics/anatomy.json.",
+ "glyphs": {
+  "time": {
+   "archetype": "composite",
+   "status": {
+    "outline": "hand",
+    "filled": "hand"
+   },
+   "parts": [
+    {
+     "primitive": "circle-dot",
+     "mode": {
+      "outline": "frame",
+      "filled": "solid"
+     },
+     "weight": 0.075,
+     "params": {
+      "outline": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.458333
+      },
+      "filled": {
+       "cx": 0.5,
+       "cy": 0.5,
+       "r": 0.458333
+      }
+     }
+    },
+    {
+     "primitive": "clock-hands",
+     "mode": "solid",
+     "params": {
+      "outline": {
+       "cx": 0.49875,
+       "cy": 0.5,
+       "up": 0.260833,
+       "right": 0.18625,
+       "t": 0.075
+      },
+      "filled": {
+       "cx": 0.507083,
+       "cy": 0.494583,
+       "up": 0.25,
+       "right": 0.171667,
+       "t": 0.083333
+      }
+     }
+    }
+   ],
+   "fidelityToHand": {
+    "outline": 0.9942,
+    "filled": 1
+   }
+  }
+ }
+}
