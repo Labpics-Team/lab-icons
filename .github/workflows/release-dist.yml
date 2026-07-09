@@ -98,9 +98,10 @@ jobs:
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          # dist/ в .gitignore → добавляем принудительно только два потребляемых
-          # файла (поле "files" в package.json оставит в git-dep ровно их).
-          git add -f dist/index.js dist/index.d.ts
+          # dist/ в .gitignore → добавляем принудительно ровно то, что перечислено
+          # в поле "files" package.json: корневой вход + сабпас ./animate (ESM/CJS/
+          # типы/сорсмапы). Иначе git-dep резолвит "@labpics/icons/animate" в пустоту.
+          git add -f dist/index.js dist/index.d.ts dist/animate
           git commit -m "build: dist для ${DIST_TAG} (git-dep артефакт; main не трогаем)"
           git tag "${DIST_TAG}"
           git push origin "refs/tags/${DIST_TAG}"
