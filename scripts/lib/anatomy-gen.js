@@ -1019,7 +1019,19 @@ export function buildGlyph(entry, grid, axes = {}, lib = null) {
   // ОСЬ ВЕСА (вариативность, север владельца): глобальный множитель на все
   // штриховые токены — одна правка restyle-ит ВЕСЬ задекларированный корпус
   // (как весовая ось шрифта). Дефолт 1 = идентичность (гейты держат default).
-  const wScale = axes.weight ?? 1;
+  // КЛАМП в grid.axes.weight (BL-021): ниже min тончайший канон тоньше капа
+  // (нечитаем), выше max схлопываются охранные клиренсы — вывод min/max
+  // задокументирован в grid.json, формулу держит check-ink-weight.
+  const wRange = grid.axes?.weight;
+  const wRaw = axes.weight ?? 1;
+  const wScale = wRange ? Math.min(wRange.max, Math.max(wRange.min, wRaw)) : wRaw;
+  // ОСЬ УГЛА (вторая ось вариативности, парадигма Roboto Flex): множитель ζ
+  // (cornerSmoothing) на все задекларированные скругления. Дефолт 1 =
+  // идентичность БИТ-В-БИТ: короткое замыкание возвращает ζ нетронутым
+  // (закреплено голден-фикстурой axes-baseline-d.json). При ≠1 результат
+  // клампится в валидный диапазон ζ Figma [0,1] (ζ>1 невалиден, <0 бессмыслен).
+  const zScale = axes.corner ?? 1;
+  const zTok = (z) => (zScale === 1 ? z : Math.max(0, Math.min(1, z * zScale)));
   const L = (ratio) => ratio * cw;                       // длина: доля → юниты
   const Pt = (q) => [q[0] * cw, q[1] * cw];              // точка
   const Pts = (arr) => arr.map(Pt);                      // полилиния
@@ -1071,7 +1083,7 @@ export function buildGlyph(entry, grid, axes = {}, lib = null) {
     // контейнер-рамка: внешний rounded-rect (ζ из сетки) + внутренний офсет
     // пером; filled = сплошной внешний. Внутренний радиус = R − перо.
     const p2 = entry.params;
-    const zeta = grid.ratios.cornerSmoothing ?? 0;
+    const zeta = zTok(grid.ratios.cornerSmoothing ?? 0);
     const w = tok(entry.weights?.outline ?? 'base');
     const [cx2, cy2, W, H, R] = [L(p2.cx), L(p2.cy), L(p2.w), L(p2.h), L(p2.rOuter)];
     if (W - 2 * w <= 0 || H - 2 * w <= 0) {
@@ -1094,7 +1106,7 @@ export function buildGlyph(entry, grid, axes = {}, lib = null) {
         if (part.primitive === 'rounded-rect') {
           const [cx2, cy2, W, H, R] = [L(pp.cx), L(pp.cy), L(pp.w), L(pp.h), L(pp.rOuter)];
           const rot = pp.rotation ?? 0; // градусы (конвенция единиц)
-          const zeta = grid.ratios.cornerSmoothing ?? 0;
+          const zeta = zTok(grid.ratios.cornerSmoothing ?? 0);
           const outer = genRoundedRect(cx2, cy2, W, H, R, zeta, rot);
           if (mode === 'frame') {
             const w = tok(part.weight ?? 'base');
@@ -1165,8 +1177,10 @@ export function buildGlyph(entry, grid, axes = {}, lib = null) {
             chunks.push(genSuperellipse(L(pp.cx), L(pp.cy), L(pp.aOut), L(pp.bOut ?? pp.aOut), pp.nOut, rot));
           }
         } else if (part.primitive === 'arc-band') {
-          // волна: полоса вдоль дуги с капами (radio/volume/wifi, BL-020)
-          chunks.push(genArcBand(L(pp.cx), L(pp.cy), L(pp.r), pp.aCenter, pp.halfSpan, L(pp.t)));
+          // волна: полоса вдоль дуги с капами (radio/volume/wifi, BL-020);
+          // t — перо штриха: ось веса масштабирует (tok), замер BL-021 ловил
+          // волны 1.6 без изменений на всей сетке весов («вес прыгает»)
+          chunks.push(genArcBand(L(pp.cx), L(pp.cy), L(pp.r), pp.aCenter, pp.halfSpan, tok(pp.t)));
         } else if (part.primitive === 'clock-hand') {
           // раздельная стрелка часов (Г-глиф распался на 2 суб-пути);
           // в filled — вырез в диске (evenodd + встречная намотка).
@@ -1175,12 +1189,14 @@ export function buildGlyph(entry, grid, axes = {}, lib = null) {
           if (!Array.isArray(part.anchor) || part.anchor.length !== 2) {
             throw new Error('clock-hand: обязателен anchor:[x,y] (центр циферблата, доли канвы)');
           }
-          chunks.push(genClockHand(L(pp.cx), L(pp.cy), L(pp.len), L(pp.t), part.dir, part.socket ?? false));
+          // t — перо стрелки: ось веса масштабирует (tok); обе стрелки берут
+          // один множитель — сокет-стык остаётся встык by construction
+          chunks.push(genClockHand(L(pp.cx), L(pp.cy), L(pp.len), tok(pp.t), part.dir, part.socket ?? false));
         } else if (part.primitive === 'rounded-rect-cutout') {
           // негатив: контур внутри сплошной части, evenodd вычитает
           // (белые стрелки в диске filled-часов и подобные)
           const [cx2, cy2, W, H, R] = [L(pp.cx), L(pp.cy), L(pp.w), L(pp.h), L(pp.rOuter)];
-          chunks.push(genRoundedRect(cx2, cy2, W, H, R, grid.ratios.cornerSmoothing ?? 0, pp.rotation ?? 0));
+          chunks.push(genRoundedRect(cx2, cy2, W, H, R, zTok(grid.ratios.cornerSmoothing ?? 0), pp.rotation ?? 0));
         } else if (part.primitive === 'stroke-path') {
           // обводка ломаной оси постоянным пером, капы/стыки круглые
           // (класс штриховых глифов: галка, «!», стержень «i», стрелки);
@@ -1224,7 +1240,7 @@ export function buildGlyph(entry, grid, axes = {}, lib = null) {
           // кольцо (внешний контур + внутренний офсет пером, реверс внутри).
           const verts = Pts(pp.vertices);
           const r = L(pp.r);
-          const zeta = pp.zeta ?? grid.ratios.cornerSmoothing;
+          const zeta = zTok(pp.zeta ?? grid.ratios.cornerSmoothing);
           if (mode === 'frame') {
             const w = tok(part.weight ?? 'base');
             const rIn = pp.rInner != null ? L(pp.rInner) : undefined;
@@ -1241,7 +1257,10 @@ export function buildGlyph(entry, grid, axes = {}, lib = null) {
   } else if (entry.archetype === 'container-glyph') {
     const center = [cw / 2, cw / 2];
     const rOut = (grid.ratios.keylines.circle * cw) / 2;
-    const ringWeight = grid.ratios.strokeWidth.enclosureRing * cw;
+    // кольцо — ШТРИХ, ось веса масштабирует его как все штриховые токены
+    // (замер BL-021: при weight 1.2 кольцо оставалось 1.5 при глифе 2.4 —
+    // «вес прыгает» ровно класса с зума владельца); default бит-в-бит прежний
+    const ringWeight = tok('enclosureRing');
     const a = entry.glyph.inkAnchors;
     let glyphD = genStrokeV(
       { endL: Pt(a.endL), endR: Pt(a.endR), innerL: Pt(a.innerL), innerR: Pt(a.innerR) },
@@ -1261,7 +1280,7 @@ export function buildGlyph(entry, grid, axes = {}, lib = null) {
     // сплошной, Outline — кольцо (внешний + внутр. офсет на перо).
     const verts = entry.vertices.map(Pt);
     const r = L(entry.r);
-    const zeta = entry.zeta ?? grid.ratios.cornerSmoothing;
+    const zeta = zTok(entry.zeta ?? grid.ratios.cornerSmoothing);
     const pen = tok(entry.weight ?? 'base');
     const rIn = entry.rInner != null ? L(entry.rInner) : undefined;
     out.filled = genRoundedPolygon(verts, r, zeta);
