@@ -5,8 +5,9 @@
   "cog": {
    "archetype": "radial-gear",
    "status": {
-    "outline": "generated"
+    "outline": "hand"
    },
+   "demotedReason": "eonz-strict: EO≠NZ 9374 точек (сетка 0.12)",
    "params": {
     "cx": 0.5,
     "cy": 0.5,
@@ -36,8 +37,9 @@
    "archetype": "arc-terminal",
    "status": {
     "outline": "hand",
-    "filled": "generated"
+    "filled": "hand"
    },
+   "demotedReason": "eonz-strict: EO≠NZ 92 точек (сетка 0.12); EO≠NZ 933 точек (полоса стыка, сетка 0.015); пинч суб-путей 0~1: контакт 0.10 < шва 1.5 при зазоре 0.0030",
    "skeleton": {
     "center": [
      0.487625,
@@ -139,9 +141,10 @@
   "tablet-landscape": {
    "archetype": "composite",
    "status": {
-    "outline": "generated",
+    "outline": "hand",
     "filled": "generated"
    },
+   "demotedReason": "eonz-strict: EO≠NZ 16552 точек (сетка 0.12) для outline",
    "parts": [
     {
      "primitive": "rounded-rect",
@@ -167,9 +170,10 @@
   "tablet-portrait": {
    "archetype": "composite",
    "status": {
-    "outline": "generated",
+    "outline": "hand",
     "filled": "generated"
    },
+   "demotedReason": "eonz-strict: EO≠NZ 16552 точек (сетка 0.12) для outline",
    "parts": [
     {
      "primitive": "rounded-rect",
@@ -1101,9 +1105,10 @@
   "component": {
    "archetype": "composite",
    "status": {
-    "outline": "generated",
+    "outline": "hand",
     "filled": "generated"
    },
+   "demotedReason": "eonz-strict: EO≠NZ 4114 точек (сетка 0.12) для outline",
    "comment": "Ромбы-сквирклы (утверждено владельцем 2026-07-03): n=2.8, перо base по нормали (рука офсетила вдоль диагонали — ошибка направления, намерение 1.8 восстановлено; ink-ratio 24.8% ≈ рука 23.9%). Внешние чернила = инвариант руки (bbox 8.27/8.87), внутренний контур = офсет по нормали.",
    "parts": [
     {
@@ -1951,8 +1956,9 @@
   "plus": {
    "archetype": "composite",
    "status": {
-    "outline": "generated"
+    "outline": "hand"
    },
+   "demotedReason": "eonz-strict: EO≠NZ 6 точек (сетка 0.12); EO≠NZ 90 точек (полоса стыка, сетка 0.015); пинч суб-путей 0~1: контакт 0.40 < шва 1.5 при зазоре 0.0001; пинч суб-путей 0~2: контакт 0.25 < шва 1.5 при зазоре 0.0032",
    "parts": [
     {
      "primitive": "rounded-rect",
@@ -2425,8 +2431,9 @@
   "close": {
    "archetype": "composite",
    "status": {
-    "outline": "generated"
+    "outline": "hand"
    },
+   "demotedReason": "eonz-strict: пинч суб-путей 0~1: контакт 0.40 < шва 1.5 при зазоре 0.0000; пинч суб-путей 0~2: контакт 0.40 < шва 1.5 при зазоре 0.0000",
    "parts": [
     {
      "primitive": "stroke-path",
@@ -2600,8 +2607,9 @@
   "ban": {
    "archetype": "composite",
    "status": {
-    "outline": "generated"
+    "outline": "hand"
    },
+   "demotedReason": "eonz-strict: EO≠NZ 8 точек (полоса стыка, сетка 0.015); пинч суб-путей 0~2: контакт 1.40 < шва 1.5 при зазоре 0.0015",
    "parts": [
     {
      "primitive": "stroke-path",
@@ -2733,8 +2741,9 @@
   "arrow-down-circle": {
    "archetype": "composite",
    "status": {
-    "outline": "generated"
+    "outline": "hand"
    },
+   "demotedReason": "eonz-strict: EO≠NZ 8 точек (полоса стыка, сетка 0.015); пинч суб-путей 0~1: контакт 0.75 < шва 1.5 при зазоре 0.0006",
    "parts": [
     {
      "primitive": "stroke-path",
@@ -2812,8 +2821,9 @@
   "arrow-back-circle": {
    "archetype": "composite",
    "status": {
-    "outline": "generated"
+    "outline": "hand"
    },
+   "demotedReason": "eonz-strict: EO≠NZ 20 точек (полоса стыка, сетка 0.015); пинч суб-путей 0~1: контакт 0.90 < шва 1.5 при зазоре 0.0024",
    "parts": [
     {
      "primitive": "stroke-path",
@@ -2891,8 +2901,9 @@
   "arrow-forward-circle": {
    "archetype": "composite",
    "status": {
-    "outline": "generated"
+    "outline": "hand"
    },
+   "demotedReason": "eonz-strict: EO≠NZ 6 точек (полоса стыка, сетка 0.015); пинч суб-путей 0~1: контакт 0.75 < шва 1.5 при зазоре 0.0008",
    "parts": [
     {
      "primitive": "stroke-path",
