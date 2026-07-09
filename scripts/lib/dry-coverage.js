@@ -52,15 +52,49 @@ export const TRANSCRIPTION_PRIMITIVES = new Set([
 /** Порог покрытия флагмана — геометрический экстремум «ноль one-off блоков». */
 export const FLAGSHIP_COVERAGE_THRESHOLD = 1.0;
 
+// Semantic primitives where role/name can identify reusable unit families
+// without overfitting to one-off geometry.
+const SEMANTIC_REUSE_PRIMITIVES = new Set(['circle-dot', 'stroke-path']);
+
+function buildReusableSignatures(glyphs) {
+  const counts = new Map();
+  for (const glyph of Object.values(glyphs)) {
+    const parts = Array.isArray(glyph?.parts) ? glyph.parts : [];
+    for (const part of parts) {
+      if (typeof part?.primitive !== 'string') continue;
+      if (!SEMANTIC_REUSE_PRIMITIVES.has(part.primitive)) continue;
+      if (typeof part.role !== 'string' || typeof part.name !== 'string') continue;
+      const sig = `${part.primitive}::${part.role}::${part.name}`;
+      counts.set(sig, (counts.get(sig) || 0) + 1);
+    }
+  }
+  const reusable = new Set();
+  for (const [sig, count] of counts) {
+    if (count >= 2) reusable.add(sig);
+  }
+  return reusable;
+}
+
+function partUnit(part, reusableSignatures) {
+  if (typeof part?.primitive !== 'string') return 'complex';
+  const primitive = part.primitive;
+  if (TRANSCRIPTION_PRIMITIVES.has(primitive)) return primitive;
+  if (typeof part.role === 'string' && typeof part.name === 'string') {
+    const sig = `${primitive}::${part.role}::${part.name}`;
+    if (reusableSignatures.has(sig)) return sig;
+  }
+  return primitive;
+}
+
 /**
  * Строительные блоки глифа как имена примитивов-генераторов.
  * @param {object} glyph
  * @returns {string[]} по одному имени на part; для part-less — [archetype].
  */
-export function glyphUnits(glyph) {
+export function glyphUnits(glyph, reusableSignatures = new Set()) {
   const parts = Array.isArray(glyph?.parts) ? glyph.parts : [];
   if (parts.length > 0) {
-    return parts.map((p) => (typeof p?.primitive === 'string' ? p.primitive : 'complex'));
+    return parts.map((p) => partUnit(p, reusableSignatures));
   }
   return glyph?.archetype ? [glyph.archetype] : [];
 }
@@ -70,10 +104,11 @@ export function glyphUnits(glyph) {
  * @param {Record<string, object>} glyphs
  * @returns {Map<string, Set<string>>}
  */
-export function buildPrimitiveUsers(glyphs) {
+export function buildPrimitiveUsers(glyphs, reusableSignatures = null) {
   const users = new Map();
+  const signatures = reusableSignatures ?? buildReusableSignatures(glyphs);
   for (const [name, glyph] of Object.entries(glyphs)) {
-    for (const prim of new Set(glyphUnits(glyph))) {
+    for (const prim of new Set(glyphUnits(glyph, signatures))) {
       if (!users.has(prim)) users.set(prim, new Set());
       users.get(prim).add(name);
     }
@@ -100,8 +135,8 @@ export function isShared(prim, users) {
  * @returns {{name:string, unitCount:number, sharedCount:number, coverage:number,
  *   shared:string[], oneOff:string[]}}
  */
-export function glyphCoverage(name, glyphs, users) {
-  const units = glyphUnits(glyphs[name]);
+export function glyphCoverage(name, glyphs, users, reusableSignatures) {
+  const units = glyphUnits(glyphs[name], reusableSignatures);
   const shared = [];
   const oneOff = [];
   for (const u of units) (isShared(u, users) ? shared : oneOff).push(u);
@@ -146,11 +181,12 @@ export function flagshipNames(anatomy, manifest) {
  */
 export function evaluateDry({ anatomy, manifest = null, threshold = FLAGSHIP_COVERAGE_THRESHOLD }) {
   const glyphs = anatomy?.glyphs ?? {};
-  const users = buildPrimitiveUsers(glyphs);
+  const reusableSignatures = buildReusableSignatures(glyphs);
+  const users = buildPrimitiveUsers(glyphs, reusableSignatures);
   const names = flagshipNames(anatomy, manifest);
   const missing = names.filter((n) => !glyphs[n]);
   const present = names.filter((n) => glyphs[n]);
-  const flagships = present.map((n) => glyphCoverage(n, glyphs, users));
+  const flagships = present.map((n) => glyphCoverage(n, glyphs, users, reusableSignatures));
   const belowThreshold = flagships.filter((f) => f.coverage < threshold);
   const zeroShared = flagships.filter((f) => f.sharedCount === 0);
   const ok = missing.length === 0 && belowThreshold.length === 0 && zeroShared.length === 0;

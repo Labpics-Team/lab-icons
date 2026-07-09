@@ -65,6 +65,59 @@ describe('А: математика покрытия примитивами', () 
     expect(isShared('unique-blob', users)).toBe(false); // только solo
   });
 
+
+  it('shared works with semantic signature primitive+role+name (circle-dot/stroke-path)', () => {
+    const semGlyphs = {
+      flagship: {
+        tier: 'flagship',
+        archetype: 'composite',
+        parts: [
+          { primitive: 'circle-dot', role: 'badge', name: 'dot-center' },
+          { primitive: 'stroke-path', role: 'stem', name: 'left' },
+        ],
+      },
+      helperBadge: {
+        archetype: 'composite',
+        parts: [{ primitive: 'circle-dot', role: 'badge', name: 'dot-center' }],
+      },
+      helperStem: {
+        archetype: 'composite',
+        parts: [{ primitive: 'stroke-path', role: 'stem', name: 'left' }],
+      },
+    };
+    const usersBySig = buildPrimitiveUsers(semGlyphs);
+    expect(isShared('circle-dot::badge::dot-center', usersBySig)).toBe(true);
+    expect(isShared('stroke-path::stem::left', usersBySig)).toBe(true);
+
+    const result = evaluateDry({ anatomy: { glyphs: semGlyphs } });
+    const flagship = result.flagships.find((f) => f.name === 'flagship');
+    expect(flagship).toBeDefined();
+    expect(flagship.coverage).toBe(1);
+    expect(flagship.shared).toEqual(
+      expect.arrayContaining(['circle-dot::badge::dot-center', 'stroke-path::stem::left']),
+    );
+  });
+
+  it('different semantic signatures are not shared; flagship falls to zeroShared', () => {
+    const semGlyphs = {
+      flagship: {
+        tier: 'flagship',
+        archetype: 'composite',
+        parts: [{ primitive: 'circle-dot', role: 'badge', name: 'unique-dot' }],
+      },
+      helper: {
+        archetype: 'composite',
+        parts: [{ primitive: 'rounded-rect', role: 'body', name: 'helper' }],
+      },
+    };
+    const usersBySig = buildPrimitiveUsers(semGlyphs);
+    expect(isShared('circle-dot::badge::unique-dot', usersBySig)).toBe(false);
+
+    const result = evaluateDry({ anatomy: { glyphs: semGlyphs } });
+    expect(result.ok).toBe(false);
+    expect(result.zeroShared.map((f) => f.name)).toContain('flagship');
+  });
+
   it('FROZEN MUST: транскрипция НЕ shared даже при ≥2 потребителях', () => {
     const t = { x: { parts: [{ primitive: 'bezier' }] }, y: { parts: [{ primitive: 'bezier' }] } };
     const u = buildPrimitiveUsers(t);
