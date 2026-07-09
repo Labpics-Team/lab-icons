@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "comment": "SSOT семантики анимаций: класс каждой иконки + параметры. Хореография классов живёт в рантайме @labpics/icons/animate; здесь — ЧТО иконка означает, там — КАК это движется. Валидируется scripts/check-semantics.js (100% покрытие, закрытые перечни).",
+  "classes": [
+    "direction",
+    "spin",
+    "bell",
+    "wave",
+    "sparkle",
+    "pulse",
+    "draw",
+    "pop",
+    "blink",
+    "drift",
+    "shake",
+    "toggle",
+    "generic"
+  ],
+  "directions": ["up", "down", "left", "right", "up-down", "left-right"]
+}

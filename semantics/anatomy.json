@@ -61,8 +61,8 @@
   "chevron-down": {
    "archetype": "stroke-v",
    "status": {
-    "outline": "hand",
-    "filled": "hand"
+    "outline": "generated",
+    "filled": "generated"
    },
    "inkAnchors": {
     "endL": [
@@ -139,8 +139,8 @@
   "tablet-landscape": {
    "archetype": "composite",
    "status": {
-    "outline": "hand",
-    "filled": "hand"
+    "outline": "generated",
+    "filled": "generated"
    },
    "parts": [
     {
@@ -160,14 +160,15 @@
     }
    ],
    "fidelityToHand": {
-    "outline": 0.997
+    "outline": 0.997,
+    "filled": 0.999
    }
   },
   "tablet-portrait": {
    "archetype": "composite",
    "status": {
-    "outline": "hand",
-    "filled": "hand"
+    "outline": "generated",
+    "filled": "generated"
    },
    "parts": [
     {
@@ -187,14 +188,15 @@
     }
    ],
    "fidelityToHand": {
-    "outline": 0.997
+    "outline": 0.997,
+    "filled": 0.9991
    }
   },
   "pause": {
    "archetype": "composite",
    "status": {
     "outline": "hand",
-    "filled": "hand"
+    "filled": "generated"
    },
    "parts": [
     {
@@ -254,8 +256,8 @@
   "ellipsis-horizontal": {
    "archetype": "composite",
    "status": {
-    "outline": "hand",
-    "filled": "hand"
+    "outline": "generated",
+    "filled": "generated"
    },
    "parts": [
     {
@@ -315,8 +317,8 @@
   "ellipsis-vertical": {
    "archetype": "composite",
    "status": {
-    "outline": "hand",
-    "filled": "hand"
+    "outline": "generated",
+    "filled": "generated"
    },
    "parts": [
     {
@@ -376,8 +378,8 @@
   "menu": {
    "archetype": "composite",
    "status": {
-    "outline": "hand",
-    "filled": "hand"
+    "outline": "generated",
+    "filled": "generated"
    },
    "parts": [
     {
@@ -429,8 +431,8 @@
   "minus": {
    "archetype": "composite",
    "status": {
-    "outline": "hand",
-    "filled": "hand"
+    "outline": "generated",
+    "filled": "generated"
    },
    "parts": [
     {
@@ -462,8 +464,8 @@
   "ellipse": {
    "archetype": "composite",
    "status": {
-    "outline": "hand",
-    "filled": "hand"
+    "outline": "generated",
+    "filled": "generated"
    },
    "parts": [
     {
@@ -495,8 +497,8 @@
   "filter": {
    "archetype": "composite",
    "status": {
-    "outline": "hand",
-    "filled": "hand"
+    "outline": "generated",
+    "filled": "generated"
    },
    "parts": [
     {
@@ -568,8 +570,8 @@
   "list": {
    "archetype": "composite",
    "status": {
-    "outline": "hand",
-    "filled": "hand"
+    "outline": "generated",
+    "filled": "generated"
    },
    "parts": [
     {
@@ -755,8 +757,8 @@
   "pause-circle": {
    "archetype": "composite",
    "status": {
-    "outline": "hand",
-    "filled": "hand"
+    "outline": "generated",
+    "filled": "generated"
    },
    "parts": [
     {
@@ -823,13 +825,14 @@
    "fidelityToHand": {
     "outline": 0.9722,
     "filled": 0.988
-   }
+   },
+   "correctionReason": "генерат по закону расходится с рукой: outline 97.22%: посередине по центру [8.4,14.9→9.4,15.6]: закон снимает дребезг руки (чернила руки без конструкции); посередине по центру [10.4,14.9→11.4,15.6]: закон снимает дребезг руки (чернила руки без конструкции); filled 98.80%: посередине по центру [8.4,14.9→9.4,15.6]: конструкция закона ведёт контур полнее/ровнее руки; посередине по центру [10.4,14.9→11.4,15.6]: конструкция закона ведёт контур полнее/ровнее руки"
   },
   "sun-low": {
    "archetype": "composite",
    "status": {
-    "outline": "hand",
-    "filled": "hand"
+    "outline": "generated",
+    "filled": "generated"
    },
    "parts": [
     {
@@ -1008,13 +1011,14 @@
    "fidelityToHand": {
     "outline": 0.9712,
     "filled": 0.9985
-   }
+   },
+   "correctionReason": "генерат по закону расходится с рукой: outline 97.12%: расхождение рассеяно субпиксельно вдоль всего контура (кластеров нет и на сетке 96) — дребезг руки, снятый конструкцией закона"
   },
   "time": {
    "archetype": "composite",
    "status": {
-    "outline": "hand",
-    "filled": "hand"
+    "outline": "generated",
+    "filled": "generated"
    },
    "parts": [
     {
@@ -1038,21 +1042,52 @@
      }
     },
     {
-     "primitive": "clock-hands",
+     "primitive": "clock-hand",
+     "name": "hand-minute",
+     "role": "ink",
+     "dir": "up",
+     "anchor": [
+      0.5,
+      0.5
+     ],
      "mode": "solid",
      "params": {
       "outline": {
        "cx": 0.49875,
        "cy": 0.5,
-       "up": 0.260833,
-       "right": 0.18625,
+       "len": 0.260833,
        "t": 0.075
       },
       "filled": {
        "cx": 0.507083,
        "cy": 0.494583,
-       "up": 0.25,
-       "right": 0.171667,
+       "len": 0.25,
+       "t": 0.083333
+      }
+     }
+    },
+    {
+     "primitive": "clock-hand",
+     "name": "hand-hour",
+     "role": "ink",
+     "dir": "right",
+     "socket": true,
+     "anchor": [
+      0.5,
+      0.5
+     ],
+     "mode": "solid",
+     "params": {
+      "outline": {
+       "cx": 0.49875,
+       "cy": 0.5,
+       "len": 0.18625,
+       "t": 0.075
+      },
+      "filled": {
+       "cx": 0.507083,
+       "cy": 0.494583,
+       "len": 0.171667,
        "t": 0.083333
       }
      }
@@ -1060,7 +1095,7 @@
    ],
    "fidelityToHand": {
     "outline": 0.9942,
-    "filled": 1
+    "filled": 0.9999
    }
   },
   "component": {
@@ -1878,7 +1913,7 @@
   "checkmark": {
    "archetype": "composite",
    "status": {
-    "outline": "hand"
+    "outline": "generated"
    },
    "parts": [
     {
@@ -1910,12 +1945,13 @@
    ],
    "fidelityToHand": {
     "outline": 0.9709
-   }
+   },
+   "correctionReason": "генерат по закону расходится с рукой: outline 97.09%: внизу по центру [10.3,16.8→11.8,17.3]: конструкция закона ведёт контур полнее/ровнее руки"
   },
   "plus": {
    "archetype": "composite",
    "status": {
-    "outline": "hand"
+    "outline": "generated"
    },
    "parts": [
     {
@@ -1960,7 +1996,8 @@
    ],
    "fidelityToHand": {
     "outline": 0.9794
-   }
+   },
+   "correctionReason": "генерат по закону расходится с рукой: outline 97.94%: расхождение рассеяно субпиксельно вдоль всего контура (кластеров нет и на сетке 96) — дребезг руки, снятый конструкцией закона"
   },
   "plus-circle": {
    "archetype": "composite",
@@ -2035,7 +2072,7 @@
   "checkmark-circle": {
    "archetype": "composite",
    "status": {
-    "outline": "hand"
+    "outline": "generated"
    },
    "parts": [
     {
@@ -2092,7 +2129,7 @@
   "checkmarks": {
    "archetype": "composite",
    "status": {
-    "outline": "hand"
+    "outline": "generated"
    },
    "parts": [
     {
@@ -2146,12 +2183,13 @@
    ],
    "fidelityToHand": {
     "outline": 0.9815
-   }
+   },
+   "correctionReason": "генерат по закону расходится с рукой: outline 98.15%: расхождение рассеяно субпиксельно вдоль всего контура (кластеров нет и на сетке 96) — дребезг руки, снятый конструкцией закона"
   },
   "checkmarks-circle": {
    "archetype": "composite",
    "status": {
-    "outline": "hand"
+    "outline": "generated"
    },
    "parts": [
     {
@@ -2459,7 +2497,9 @@
    ],
    "fidelityToHand": {
     "outline": 0.9796
-   }
+   },
+   "correctionReason": "генерат по закону расходится с рукой: outline 97.96%: расхождение рассеяно субпиксельно вдоль всего контура (кластеров нет и на сетке 96) — дребезг руки, снятый конструкцией закона",
+   "demotionReason": "демоут 2026-07-09 (зум владельца 2026-07-08, STOP PR #34): вторая палочка креста разрезана на 2 куска с щелями, ромбик-evenodd в центре — блоб-порог check-fill-rule слеп к малым артефактам; вернуть только через eonz-strict/ink-topology"
   },
   "close-circle": {
    "archetype": "composite",
@@ -2561,7 +2601,7 @@
   "ban": {
    "archetype": "composite",
    "status": {
-    "outline": "hand"
+    "outline": "generated"
    },
    "parts": [
     {
@@ -2609,7 +2649,8 @@
    ],
    "fidelityToHand": {
     "outline": 0.9869
-   }
+   },
+   "correctionReason": "генерат по закону расходится с рукой: outline 98.69%: расхождение рассеяно субпиксельно вдоль всего контура (кластеров нет и на сетке 96) — дребезг руки, снятый конструкцией закона"
   },
   "arrow-up-circle": {
    "archetype": "composite",
@@ -2693,7 +2734,7 @@
   "arrow-down-circle": {
    "archetype": "composite",
    "status": {
-    "outline": "hand"
+    "outline": "generated"
    },
    "parts": [
     {
@@ -2846,12 +2887,13 @@
    ],
    "fidelityToHand": {
     "outline": 0.9917
-   }
+   },
+   "demotionReason": "демоут 2026-07-09 (зум владельца 2026-07-08, STOP PR #34): грязь/залип под наконечником + полумесяц в стыке — вернуть только через eonz-strict (сварка X-пересечений) + ink-topology"
   },
   "arrow-forward-circle": {
    "archetype": "composite",
    "status": {
-    "outline": "hand"
+    "outline": "generated"
    },
    "parts": [
     {
@@ -2930,7 +2972,7 @@
   "alert-circle": {
    "archetype": "composite",
    "status": {
-    "outline": "hand"
+    "outline": "generated"
    },
    "parts": [
     {
@@ -2989,12 +3031,13 @@
    ],
    "fidelityToHand": {
     "outline": 0.9821
-   }
+   },
+   "correctionReason": "генерат по закону расходится с рукой: outline 98.21%: посередине по центру [10.9,7.1→11.4,10.1]: закон снимает дребезг руки (чернила руки без конструкции); посередине по центру [12.6,7.1→13.1,10.1]: закон снимает дребезг руки (чернила руки без конструкции)"
   },
   "play-circle": {
    "archetype": "composite",
    "status": {
-    "outline": "hand"
+    "outline": "generated"
    },
    "parts": [
     {
@@ -3127,12 +3170,14 @@
    ],
    "fidelityToHand": {
     "outline": 0.9762
-   }
+   },
+   "correctionReason": "генерат по закону расходится с рукой: outline 97.62%: посередине по центру [10.8,9.3→11.8,10.3]: конструкция закона ведёт контур полнее/ровнее руки; посередине по центру [10.8,13.8→11.8,14.8]: конструкция закона ведёт контур полнее/ровнее руки",
+   "demotionReason": "демоут 2026-07-09 (зум владельца 2026-07-08, STOP PR #34): клинья слиты в одну массу с вертикальными щелями — метафора перемотки убита; компонент-каунт чернил (North) не гейтился; вернуть только через ink-topology"
   },
   "play-back-circle": {
    "archetype": "composite",
    "status": {
-    "outline": "hand"
+    "outline": "generated"
    },
    "parts": [
     {
@@ -3204,7 +3249,8 @@
    ],
    "fidelityToHand": {
     "outline": 0.9758
-   }
+   },
+   "correctionReason": "генерат по закону расходится с рукой: outline 97.58%: посередине по центру [12.3,9.3→13.8,10.3]: конструкция закона ведёт контур полнее/ровнее руки; посередине по центру [12.3,13.8→13.8,14.8]: конструкция закона ведёт контур полнее/ровнее руки"
   },
   "play-skip-back-circle": {
    "archetype": "composite",
@@ -3816,6 +3862,9 @@
       "outline": "base",
       "filled": "bold"
      },
+     "socket": {
+      "end": "head-a"
+     },
      "params": {
       "outline": {
        "points": [
@@ -3824,7 +3873,7 @@
          0.324167
         ],
         [
-         0.211483,
+         0.103646,
          0.324167
         ]
        ],
@@ -3837,7 +3886,7 @@
          0.33125
         ],
         [
-         0.256421,
+         0.114896,
          0.33125
         ]
        ],
@@ -3900,6 +3949,9 @@
       "outline": "base",
       "filled": "bold"
      },
+     "socket": {
+      "end": "head-b"
+     },
      "params": {
       "outline": {
        "points": [
@@ -3908,7 +3960,7 @@
          0.675833
         ],
         [
-         0.788101,
+         0.894375,
          0.675833
         ]
        ],
@@ -3921,7 +3973,7 @@
          0.669167
         ],
         [
-         0.741287,
+         0.883125,
          0.669167
         ]
        ],
@@ -3932,9 +3984,11 @@
      "role": "ink"
     }
    ],
+   "lawOverHand": true,
+   "correctionReason": "закон смежности поверх руки, стык СОКЕТОМ-ВСТЫК (2026-07-09): конец оси палочки = вершина шеврона, торец — вогнутый сокет по граням miter-клина наконечника (genStrokePath socket, класс time) — касание без щели (рука оставляла видимый разрез раскрыва) и БЕЗ перекрытия (прежний торцевой кап с перекрытием дисков резал белый полумесяц под evenodd — скриншот владельца); связность стыка держит check-adjacency (HARD, промоушен), EO≡NZ точное; IoU к руке вырос 93.78→98.70 / 91.98→98.72 (перемер 2026-07-09, шаг 0.12) — сокет снял лишние чернила перекрытия из раскрыва",
    "fidelityToHand": {
-    "outline": 0.9825,
-    "filled": 0.9819
+    "outline": 0.987,
+    "filled": 0.9872
    }
   },
   "swap-vertical": {
@@ -4119,6 +4173,7 @@
    }
   },
   "bulb": {
+   "lawOverHand": true,
    "archetype": "composite",
    "status": {
     "outline": "generated"
@@ -4455,6 +4510,8 @@
    "correctionReason": "аналитические G1-стыки купол↔фланки и честный evenodd-вырез мениска (словарь кругов) — рука держала стыки со сносом касательных и открытым зазором нити"
   },
   "eye": {
+   "lawOverHand": true,
+   "correctionReason": "закон-поверх-руки: симметричный миндаль G1-конструкцией — фланги 4 дуги руки r=0.5575, вершины лежат ВНУТРИ крон-дуг радиуса зрачка r=0.2125 (kiss-касание с флангами: |центр-фланга − центр-кроны| = 0.5575 − 0.2125 точно), углы глаза — галтели r=0.108333; прежний микро-мост r=0.055 у вершин (субпиксельная дуга = видимый излом при формальном G1) устранён КАК КЛАСС: минимальный радиус дуги контура теперь 0.108333 (штатный угол глаза); худший стык 0.031°, кривизна вершины = кривизне зрачка (конструкционная привязка, не подгон); 4.59% = цена симметрии и гладкости закона над несогласованной рукой (замер inkIoU шаг 0.12)",
    "archetype": "composite",
    "status": {
     "outline": "hand"
@@ -4472,8 +4529,8 @@
        {
         "circle": {
          "c": [
-          0.557,
-          0.749661
+          0.558115,
+          0.747978
          ],
          "r": 0.5575,
          "dir": 1
@@ -4482,8 +4539,18 @@
        {
         "circle": {
          "c": [
-          0.443,
-          0.749661
+          0.5,
+          0.407905
+         ],
+         "r": 0.2125,
+         "dir": 1
+        }
+       },
+       {
+        "circle": {
+         "c": [
+          0.441885,
+          0.747978
          ],
          "r": 0.5575,
          "dir": 1
@@ -4492,8 +4559,8 @@
        {
         "circle": {
          "c": [
-          0.443,
-          0.252005
+          0.441885,
+          0.253688
          ],
          "r": 0.5575,
          "dir": 1
@@ -4502,8 +4569,18 @@
        {
         "circle": {
          "c": [
-          0.557,
-          0.252005
+          0.5,
+          0.593761
+         ],
+         "r": 0.2125,
+         "dir": 1
+        }
+       },
+       {
+        "circle": {
+         "c": [
+          0.558115,
+          0.253688
          ],
          "r": 0.5575,
          "dir": 1
@@ -4512,12 +4589,10 @@
       ],
       "connectors": [
        {
-        "type": "fillet",
-        "r": 0.055,
-        "hint": [
-         0.5,
-         0.250405
-        ]
+        "type": "kiss"
+       },
+       {
+        "type": "kiss"
        },
        {
         "type": "fillet",
@@ -4528,12 +4603,10 @@
         ]
        },
        {
-        "type": "fillet",
-        "r": 0.055,
-        "hint": [
-         0.5,
-         0.751261
-        ]
+        "type": "kiss"
+       },
+       {
+        "type": "kiss"
        },
        {
         "type": "fillet",
@@ -4560,10 +4633,11 @@
     }
    ],
    "fidelityToHand": {
-    "outline": 0.9553
+    "outline": 0.9541
    }
   },
   "cloud": {
+   "lawOverHand": true,
    "archetype": "composite",
    "status": {
     "outline": "generated",
@@ -4628,559 +4702,6 @@
     "filled": 0.9953
    },
    "correctionReason": "аналитические touch-касания лепестков к baseline (cy = baseY − r точно) и G1-стыки circle-hull — рука размазывала лепесток на 2–3 несовпадающих центра"
-  },
-  "paw": {
-   "archetype": "composite",
-   "status": {
-    "outline": "generated",
-    "filled": "generated"
-   },
-   "parts": [
-    {
-     "primitive": "tangent-chain",
-     "mode": {
-      "outline": "stroke",
-      "filled": "silhouette"
-     },
-     "weight": "base",
-     "params": {
-      "outline": {
-       "closed": true,
-       "elements": [
-        {
-         "circle": {
-          "c": [
-           0.5,
-           0.5755
-          ],
-          "r": 0.1017
-         }
-        },
-        {
-         "circle": {
-          "c": [
-           0.7052,
-           0.7633
-          ],
-          "r": 0.0875
-         }
-        },
-        {
-         "circle": {
-          "c": [
-           0.5,
-           1.1982
-          ],
-          "r": 0.3934,
-          "dir": -1
-         }
-        },
-        {
-         "circle": {
-          "c": [
-           0.2948,
-           0.7633
-          ],
-          "r": 0.0875
-         }
-        }
-       ],
-       "connectors": [
-        {
-         "type": "tangent",
-         "hint": [
-          0.6675,
-          0.5988
-         ]
-        },
-        {
-         "type": "kiss"
-        },
-        {
-         "type": "kiss"
-        },
-        {
-         "type": "tangent",
-         "hint": [
-          0.3325,
-          0.5988
-         ]
-        }
-       ]
-      },
-      "filled": {
-       "closed": true,
-       "elements": [
-        {
-         "circle": {
-          "c": [
-           0.5,
-           0.5855
-          ],
-          "r": 0.0917
-         }
-        },
-        {
-         "circle": {
-          "c": [
-           0.7019,
-           0.7618
-          ],
-          "r": 0.0875
-         }
-        },
-        {
-         "circle": {
-          "c": [
-           0.5,
-           1.1982
-          ],
-          "r": 0.3934,
-          "dir": -1
-         }
-        },
-        {
-         "circle": {
-          "c": [
-           0.2981,
-           0.7618
-          ],
-          "r": 0.0875
-         }
-        }
-       ],
-       "connectors": [
-        {
-         "type": "tangent",
-         "hint": [
-          0.6675,
-          0.5988
-         ]
-        },
-        {
-         "type": "kiss"
-        },
-        {
-         "type": "kiss"
-        },
-        {
-         "type": "tangent",
-         "hint": [
-          0.3325,
-          0.5988
-         ]
-        }
-       ]
-      }
-     }
-    },
-    {
-     "primitive": "superellipse",
-     "mode": {
-      "outline": "frame",
-      "filled": "solid"
-     },
-     "params": {
-      "outline": {
-       "cx": 0.178,
-       "cy": 0.45615,
-       "aOut": 0.16045,
-       "bOut": 0.11755,
-       "aIn": 0.08395,
-       "bIn": 0.04185,
-       "nOut": 2,
-       "rotation": 67
-      },
-      "filled": {
-       "cx": 0.16135,
-       "cy": 0.4539,
-       "aOut": 0.14585,
-       "bOut": 0.10065,
-       "nOut": 2,
-       "rotation": 67
-      }
-     }
-    },
-    {
-     "primitive": "superellipse",
-     "mode": {
-      "outline": "frame",
-      "filled": "solid"
-     },
-     "params": {
-      "outline": {
-       "cx": 0.822,
-       "cy": 0.45615,
-       "aOut": 0.16045,
-       "bOut": 0.11755,
-       "aIn": 0.08395,
-       "bIn": 0.04185,
-       "nOut": 2,
-       "rotation": -67
-      },
-      "filled": {
-       "cx": 0.83865,
-       "cy": 0.4539,
-       "aOut": 0.14585,
-       "bOut": 0.10065,
-       "nOut": 2,
-       "rotation": -67
-      }
-     }
-    },
-    {
-     "primitive": "superellipse",
-     "mode": {
-      "outline": "frame",
-      "filled": "solid"
-     },
-     "params": {
-      "outline": {
-       "cx": 0.3738,
-       "cy": 0.2694,
-       "aOut": 0.15945,
-       "bOut": 0.1153,
-       "aIn": 0.08245,
-       "bIn": 0.0397,
-       "nOut": 2,
-       "rotation": 81.8
-      },
-      "filled": {
-       "cx": 0.3673,
-       "cy": 0.2575,
-       "aOut": 0.1447,
-       "bOut": 0.0984,
-       "nOut": 2,
-       "rotation": 81.8
-      }
-     }
-    },
-    {
-     "primitive": "superellipse",
-     "mode": {
-      "outline": "frame",
-      "filled": "solid"
-     },
-     "params": {
-      "outline": {
-       "cx": 0.6262,
-       "cy": 0.2694,
-       "aOut": 0.15945,
-       "bOut": 0.1153,
-       "aIn": 0.08245,
-       "bIn": 0.0397,
-       "nOut": 2,
-       "rotation": -81.8
-      },
-      "filled": {
-       "cx": 0.6327,
-       "cy": 0.2575,
-       "aOut": 0.1447,
-       "bOut": 0.0984,
-       "nOut": 2,
-       "rotation": -81.8
-      }
-     }
-    }
-   ],
-   "fidelityToHand": {
-    "outline": 0.9465,
-    "filled": 0.9613
-   }
-  },
-  "arrow-redo": {
-   "archetype": "composite",
-   "status": {
-    "outline": "generated",
-    "filled": "generated"
-   },
-   "parts": [
-    {
-     "primitive": "tangent-chain",
-     "mode": {
-      "outline": "stroke",
-      "filled": "silhouette"
-     },
-     "weight": "base",
-     "params": {
-      "closed": true,
-      "elements": [
-       {
-        "line": {
-         "p": [
-          0.84984,
-          0.43506
-         ],
-         "d": [
-          0.74699,
-          0.66484
-         ]
-        }
-       },
-       {
-        "circle": {
-         "c": [
-          0.79167,
-          0.50042
-         ],
-         "r": 0.0875,
-         "dir": 1
-        }
-       },
-       {
-        "line": {
-         "p": [
-          0.84971,
-          0.56589
-         ],
-         "d": [
-          -0.74826,
-          0.6634
-         ]
-        }
-       },
-       {
-        "line": {
-         "p": [
-          0.53438,
-          0.75
-         ],
-         "d": [
-          0,
-          -1
-         ]
-        }
-       },
-       {
-        "circle": {
-         "c": [
-          0.50542,
-          1.09917
-         ],
-         "r": 0.45417,
-         "dir": -1
-        }
-       },
-       {
-        "circle": {
-         "c": [
-          0.52563,
-          0.7475
-         ],
-         "r": 0.40292,
-         "dir": 1
-        }
-       },
-       {
-        "line": {
-         "p": [
-          0.53438,
-          0.25
-         ],
-         "d": [
-          0,
-          -1
-         ]
-        }
-       }
-      ],
-      "connectors": [
-       {
-        "type": "touch"
-       },
-       {
-        "type": "touch"
-       },
-       {
-        "type": "corner",
-        "hint": [
-         0.53438,
-         0.84547
-        ]
-       },
-       {
-        "type": "corner",
-        "hint": [
-         0.53438,
-         0.64592
-        ]
-       },
-       {
-        "type": "corner",
-        "hint": [
-         0.13259,
-         0.83619
-        ]
-       },
-       {
-        "type": "corner",
-        "hint": [
-         0.53438,
-         0.34468
-        ]
-       },
-       {
-        "type": "corner",
-        "hint": [
-         0.53438,
-         0.15428
-        ]
-       }
-      ]
-     }
-    }
-   ],
-   "fidelityToHand": {
-    "outline": 0.9495,
-    "filled": 0.9867
-   }
-  },
-  "arrow-undo": {
-   "archetype": "composite",
-   "status": {
-    "outline": "generated",
-    "filled": "generated"
-   },
-   "parts": [
-    {
-     "primitive": "tangent-chain",
-     "mode": {
-      "outline": "stroke",
-      "filled": "silhouette"
-     },
-     "weight": "base",
-     "params": {
-      "closed": true,
-      "elements": [
-       {
-        "line": {
-         "p": [
-          0.15016,
-          0.43506
-         ],
-         "d": [
-          -0.74699,
-          0.66484
-         ]
-        }
-       },
-       {
-        "circle": {
-         "c": [
-          0.20833,
-          0.50042
-         ],
-         "r": 0.0875,
-         "dir": -1
-        }
-       },
-       {
-        "line": {
-         "p": [
-          0.15035,
-          0.56595
-         ],
-         "d": [
-          0.74896,
-          0.66262
-         ]
-        }
-       },
-       {
-        "line": {
-         "p": [
-          0.46562,
-          0.75
-         ],
-         "d": [
-          0,
-          -1
-         ]
-        }
-       },
-       {
-        "circle": {
-         "c": [
-          0.49458,
-          1.09917
-         ],
-         "r": 0.45417,
-         "dir": 1
-        }
-       },
-       {
-        "circle": {
-         "c": [
-          0.47437,
-          0.7475
-         ],
-         "r": 0.40292,
-         "dir": -1
-        }
-       },
-       {
-        "line": {
-         "p": [
-          0.46562,
-          0.25
-         ],
-         "d": [
-          0,
-          -1
-         ]
-        }
-       }
-      ],
-      "connectors": [
-       {
-        "type": "touch"
-       },
-       {
-        "type": "touch"
-       },
-       {
-        "type": "corner",
-        "hint": [
-         0.46562,
-         0.84488
-        ]
-       },
-       {
-        "type": "corner",
-        "hint": [
-         0.46562,
-         0.64592
-        ]
-       },
-       {
-        "type": "corner",
-        "hint": [
-         0.86741,
-         0.83619
-        ]
-       },
-       {
-        "type": "corner",
-        "hint": [
-         0.46562,
-         0.34468
-        ]
-       },
-       {
-        "type": "corner",
-        "hint": [
-         0.46562,
-         0.15428
-        ]
-       }
-      ]
-     }
-    }
-   ],
-   "fidelityToHand": {
-    "outline": 0.9382,
-    "filled": 0.9825
-   }
   },
   "resize": {
    "archetype": "composite",

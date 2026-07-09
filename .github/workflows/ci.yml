@@ -39,6 +39,15 @@ jobs:
       - name: Build (svgo optimise + generate ESM index)
         run: pnpm build
 
+      - name: Build animate subpath (tsup)
+        run: pnpm build:animate
+
+      - name: Build anatomy (скелеты 444 иконок → dist/anatomy.json)
+        run: pnpm build:anatomy
+
+      - name: Typecheck (tsc strict)
+        run: pnpm typecheck
+
       - name: Parity check (222 × 2 = 444 exports)
         run: pnpm check:parity
 
@@ -47,6 +56,21 @@ jobs:
 
       - name: Tree-shaking proof
         run: pnpm check:treeshake
+
+      - name: Semantics check (100% покрытие анимационной семантикой)
+        run: pnpm check:semantics
+
+      - name: Choreographies check (дрифт генерата, провенанс, полнота классов)
+        run: pnpm check:choreographies
+
+      - name: Layers check (per-icon разметка — индексы слоёв, якоря, дрифт генерата)
+        run: pnpm check:layers
+
+      - name: Motion bounds check (ни один кадр не выводит контур за канву)
+        run: pnpm check:motion-bounds
+
+      - name: Motion collision check (движение не создаёт наслоений слоёв)
+        run: pnpm check:motion-collision
 
       - name: Variant parity check (контракт пары O↔F — каноны колец, регистрация)
         run: pnpm check:variant-parity
@@ -57,8 +81,17 @@ jobs:
       - name: Path quality check (шум кривых, волосяные фрагменты, встык-швы)
         run: pnpm check:path-quality
 
+      - name: Topology check (разрыв незакрытого контура — срез хордой)
+        run: pnpm check:topology
+
+      - name: Corners check (пер-вершинное скругление генерат-vs-рука; корпус в WARN до EC3)
+        run: pnpm check:corners
+
       - name: Fidelity check (пол узнаваемости генерата ≥97%, эскалация ниже)
         run: pnpm check:fidelity
+
+      - name: DRY coverage check (флагманы собраны из общих примитивов, ≥2 потребителя)
+        run: pnpm check:dry-coverage
 
       - name: Grammar check (направления рёбер на шкале)
         run: pnpm check:grammar
@@ -68,6 +101,14 @@ jobs:
 
       - name: Tests (анатомия, примитивы, гейты, геометрия — дифференциал по 444 SVG)
         run: pnpm test
+
+      # Bite test: битый класс в семантике должен уронить гейт
+      - name: Semantics guard bites on invalid class
+        run: |
+          cp semantics/assignments.json /tmp/_assignments_backup.json
+          sed -i 's/"accessibility": {"class": "generic"}/"accessibility": {"class": "levitate"}/' semantics/assignments.json
+          pnpm check:semantics && echo "ERROR: semantics should have failed" && exit 1 || echo "OK: semantics correctly failed on invalid class"
+          cp /tmp/_assignments_backup.json semantics/assignments.json
 
       # Bite test: inject a missing SVG and assert parity fails
       - name: Parity guard bites on missing icon
@@ -83,3 +124,27 @@ jobs:
             > dist/svg/Filled/_colour_test.svg
           pnpm check:colors && echo "ERROR: colours should have failed" && exit 1 || echo "OK: colour check correctly failed on injected hex"
           rm dist/svg/Filled/_colour_test.svg
+
+      # Bite test: битый path-индекс в per-icon разметке должен уронить гейт
+      - name: Layers guard bites on invalid path index
+        run: |
+          cp semantics/layers.json /tmp/_layers_backup.json
+          node -e "const fs=require('fs');const j=JSON.parse(fs.readFileSync('semantics/layers.json','utf8'));j.icons['history'].outline.parts[0].paths=[99];fs.writeFileSync('semantics/layers.json',JSON.stringify(j,null,1));"
+          pnpm check:layers && echo "ERROR: layers should have failed" && exit 1 || echo "OK: layers correctly failed on invalid path index"
+          cp /tmp/_layers_backup.json semantics/layers.json
+
+      # Bite test: раздутый масштаб должен уронить bounds-гейт (вылет за канву)
+      - name: Motion bounds guard bites on oversized scale
+        run: |
+          cp src/animate/icon-choreographies.generated.json /tmp/_choreo_backup.json
+          node -e "const fs=require('fs');const p='src/animate/icon-choreographies.generated.json';const j=JSON.parse(fs.readFileSync(p,'utf8'));j.icons['heart'].outline.parts[0].keyframes=[{offset:0,transform:'scale(1, 1)'},{offset:0.5,transform:'scale(1.4, 1.4)'},{offset:1,transform:'scale(1, 1)'}];fs.writeFileSync(p,JSON.stringify(j,null,1));"
+          pnpm check:motion-bounds && echo "ERROR: bounds should have failed" && exit 1 || echo "OK: bounds correctly failed on oversized scale"
+          cp /tmp/_choreo_backup.json src/animate/icon-choreographies.generated.json
+
+      # Bite test: размашистый язычок должен уронить collision-гейт (наслоение)
+      - name: Motion collision guard bites on wild clapper swing
+        run: |
+          cp src/animate/icon-choreographies.generated.json /tmp/_choreo_backup2.json
+          node -e "const fs=require('fs');const p='src/animate/icon-choreographies.generated.json';const j=JSON.parse(fs.readFileSync(p,'utf8'));j.icons['notifications'].outline.parts[1].keyframes=[{offset:0,transform:'rotate(0deg)'},{offset:0.5,transform:'rotate(-50deg)'},{offset:1,transform:'rotate(0deg)'}];fs.writeFileSync(p,JSON.stringify(j,null,1));"
+          pnpm check:motion-collision && echo "ERROR: collision should have failed" && exit 1 || echo "OK: collision correctly failed on wild clapper"
+          cp /tmp/_choreo_backup2.json src/animate/icon-choreographies.generated.json
