@@ -18,7 +18,8 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { iconGeometry } from './lib/icon-geometry.js';
+import { iconGeometry, renderedPathData } from './lib/icon-geometry.js';
+import { samplePolylines, segmentsCross } from './lib/curve-sampling.js';
 
 /**
  * @param {{grid:any, files:Array<{name:string, content:string}>}} input
@@ -88,6 +89,65 @@ export function validateStaticGrid({ grid, files }) {
             `${name}: круглое обрамление смещено с центра сетки на ${off.toFixed(2)} ` +
               `(центр ${cx.toFixed(2)},${cy.toFixed(2)})`,
           );
+        }
+      }
+    }
+
+    // 4. Сетка v3 (report): охранный клиренс — min-зазор между
+    //    невложенными и непересекающимися элементами ≥ канона 0.8
+    //    (ниже — только аномалии руки: класс схлопнутой прожилки earth).
+    //    Радиусная шкала опровергнута данными (см. grid.json) — радиусы
+    //    производны от конструкции, их держит анатомия.
+    if (grid.ratios.clearanceMin) {
+      const cMin = u(grid.ratios.clearanceMin);
+      const polys = samplePolylines(renderedPathData(content).join(''), 10).filter((p) => p.length > 2);
+      if (polys.length >= 2 && polys.length <= 12) {
+        const bbs = polys.map((p) => {
+          let a = 1e9, b = 1e9, x = -1e9, y = -1e9;
+          for (const [px, py] of p) {
+            a = Math.min(a, px); b = Math.min(b, py);
+            x = Math.max(x, px); y = Math.max(y, py);
+          }
+          return { a, b, x, y };
+        });
+        for (let i = 0; i < polys.length; i++) {
+          for (let j = i + 1; j < polys.length; j++) {
+            const A = bbs[i], B = bbs[j];
+            const nested =
+              (A.a <= B.a && A.b <= B.b && A.x >= B.x && A.y >= B.y) ||
+              (B.a <= A.a && B.b <= A.b && B.x >= A.x && B.y >= A.y);
+            if (nested) continue;
+            // пересекающиеся пары — одно вещество с нахлёстом: их
+            // min-дистанция меряется сбоку от стыка (ложный «клиренс»)
+            let crossing = false;
+            outerCross: for (let a2 = 0; a2 < polys[i].length; a2++) {
+              for (let b2 = 0; b2 < polys[j].length; b2++) {
+                if (
+                  segmentsCross(
+                    polys[i][a2], polys[i][(a2 + 1) % polys[i].length],
+                    polys[j][b2], polys[j][(b2 + 1) % polys[j].length],
+                  )
+                ) {
+                  crossing = true;
+                  break outerCross;
+                }
+              }
+            }
+            if (crossing) continue;
+            let min = 1e9;
+            for (const q of polys[i])
+              for (const w of polys[j]) {
+                const dd = Math.hypot(q[0] - w[0], q[1] - w[1]);
+                if (dd < min) min = dd;
+              }
+            // 0-зазоры/пересечения — зона гейта швов (path-quality), тут
+            // только «опасно узкий, но не нулевой» охранный коридор
+            if (min > 0.05 && min < cMin) {
+              report.push(
+                `${name}: клиренс ${min.toFixed(2)} между элементами ${i}↔${j} уже канона ${cMin.toFixed(2)} — охранный зазор`,
+              );
+            }
+          }
         }
       }
     }

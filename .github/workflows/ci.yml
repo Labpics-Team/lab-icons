@@ -72,16 +72,34 @@ jobs:
       - name: Motion collision check (движение не создаёт наслоений слоёв)
         run: pnpm check:motion-collision
 
-      - name: Variant parity check (контракт пары O↔F — каноны колец, регистрация; report до закрытия time, затем strict)
+      - name: Variant parity check (контракт пары O↔F — каноны колец, регистрация)
         run: pnpm check:variant-parity
 
-      - name: Anatomy check (гард статической модели — скелеты, домен, детерминизм, биндинги)
+      - name: Anatomy checks (скелет 444 + дрейф деклараций generated ≥99.5%)
         run: pnpm check:anatomy
 
-      - name: Anatomy drift check (декларация анатомии сходится с файлами, BL-015)
-        run: pnpm check:anatomy:drift
+      - name: Path quality check (шум кривых, волосяные фрагменты, встык-швы)
+        run: pnpm check:path-quality
 
-      - name: Tests (парсер геометрии — дифференциал по 444 SVG)
+      - name: Topology check (разрыв незакрытого контура — срез хордой)
+        run: pnpm check:topology
+
+      - name: Corners check (пер-вершинное скругление генерат-vs-рука; корпус в WARN до EC3)
+        run: pnpm check:corners
+
+      - name: Fidelity check (пол узнаваемости генерата ≥97%, эскалация ниже)
+        run: pnpm check:fidelity
+
+      - name: DRY coverage check (флагманы собраны из общих примитивов, ≥2 потребителя)
+        run: pnpm check:dry-coverage
+
+      - name: Grammar check (направления рёбер на шкале)
+        run: pnpm check:grammar
+
+      - name: Static grid check (поля, keylines)
+        run: pnpm check:static-grid
+
+      - name: Tests (анатомия, примитивы, гейты, геометрия — дифференциал по 444 SVG)
         run: pnpm test
 
       # Bite test: битый класс в семантике должен уронить гейт

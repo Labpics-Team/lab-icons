@@ -8,7 +8,7 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { iconGeometry, renderedPathData } from '../scripts/lib/icon-geometry.js';
-import { samplePolylines } from '../scripts/lib/motion-geometry.js';
+import { samplePolylines } from '../scripts/lib/curve-sampling.js';
 
 const root = join(import.meta.dirname, '..', 'svg');
 

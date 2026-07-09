@@ -20,7 +20,7 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { renderedPathData } from './lib/icon-geometry.js';
-import { samplePolylines } from './lib/motion-geometry.js';
+import { samplePolylines } from './lib/curve-sampling.js';
 
 /** Площадь и центроид замкнутой полилинии (Гаусс). */
 function areaCentroid(poly) {

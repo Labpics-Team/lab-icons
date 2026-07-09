@@ -22,7 +22,7 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { renderedPathData } from './lib/icon-geometry.js';
-import { inkOverlap, samplePolylines, segmentsCross } from './lib/motion-geometry.js';
+import { inkOverlap, samplePolylines, segmentsCross } from './lib/curve-sampling.js';
 import { parsePathData } from './lib/path-data.js';
 
 const DEFAULT_RATIOS = {

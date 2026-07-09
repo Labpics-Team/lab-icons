@@ -1,5 +1,5 @@
 /**
- * scripts/check-anatomy-drift.js — гейт дрейфа «анатомия ↔ файл» (BL-015).
+ * scripts/check-anatomy.js — гейт дрейфа «анатомия ↔ файл» (BL-015).
  *
  * Для каждого глифа semantics/anatomy.json генерат из декларации
  * сверяется с файлом svg/ по IoU чернил:
@@ -16,7 +16,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { buildGlyph } from './lib/anatomy-gen.js';
 import { renderedPathData } from './lib/icon-geometry.js';
-import { samplePolylines } from './lib/motion-geometry.js';
+import { samplePolylines } from './lib/curve-sampling.js';
 
 function inkAt(polys, x, y) {
   let hits = 0;
@@ -58,7 +58,7 @@ export function validateAnatomy({ grid, anatomy, readSvg }) {
   for (const [name, entry] of Object.entries(anatomy.glyphs)) {
     let built;
     try {
-      built = buildGlyph(entry, grid);
+      built = buildGlyph(entry, grid, {}, anatomy.glyphs);
     } catch (cause) {
       hard.push(`${name}: генератор упал (${cause.message})`);
       continue;
@@ -107,15 +107,15 @@ if (isMain) {
   const strict = process.argv.includes('--strict');
   const { hard, report, checked } = validateAnatomy({ grid, anatomy, readSvg });
   if (hard.length > 0) {
-    console.error(`check-anatomy-drift: HARD — ${hard.length} дрейфов:`);
+    console.error(`check-anatomy: HARD — ${hard.length} дрейфов:`);
     for (const e of hard) console.error('  - ' + e);
   }
   if (report.length > 0) {
-    console.log(`check-anatomy-drift: REPORT — ${report.length} расхождений с рукой:`);
+    console.log(`check-anatomy: REPORT — ${report.length} расхождений с рукой:`);
     for (const e of report) console.log('  - ' + e);
   }
   if (hard.length === 0 && report.length === 0) {
-    console.log(`check-anatomy-drift: OK — анатомия сходится с файлами (проверено ${checked} вариантов)`);
+    console.log(`check-anatomy: OK — анатомия сходится с файлами (проверено ${checked} вариантов)`);
   }
   if (hard.length > 0 || (strict && report.length > 0)) process.exit(1);
 }

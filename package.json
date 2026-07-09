@@ -1,7 +1,7 @@
 {
   "name": "@labpics/icons",
-  "version": "0.0.1",
-  "private": true,
+  "version": "0.1.0",
+  "private": false,
   "description": "Labpics icon library — 444 SVG (Filled + Outline), tree-shakeable ESM",
   "repository": {
     "type": "git",
@@ -29,8 +29,9 @@
     "dist/animate"
   ],
   "scripts": {
-    "build": "node scripts/build.js",
+    "build": "node scripts/build.js && node scripts/build-anatomy.js",
     "build:animate": "tsup",
+    "build:anatomy": "node scripts/build-anatomy.js",
     "typecheck": "tsc --noEmit",
     "check:parity": "node scripts/check-parity.js",
     "check:colors": "node scripts/check-colors.js",
@@ -41,11 +42,22 @@
     "check:motion-bounds": "node scripts/check-motion-bounds.js",
     "check:motion-collision": "node scripts/check-motion-collision.js",
     "check:variant-parity": "node scripts/check-variant-parity.js",
-    "build:anatomy": "node scripts/build-anatomy.js",
-    "check:anatomy": "node scripts/check-anatomy.js",
+    "check:anatomy": "node scripts/check-anatomy.js && node scripts/check-anatomy-drift.js",
     "check:anatomy:drift": "node scripts/check-anatomy-drift.js",
+    "check:path-quality": "node scripts/check-path-quality.js",
+    "check:static-grid": "node scripts/check-static-grid.js",
+    "check:fill-rule": "node scripts/check-fill-rule.js",
+    "check:topology": "node scripts/check-topology.js",
+    "check:corners": "node scripts/check-corners.js",
+    "check:adjacency": "node scripts/check-adjacency.js",
+    "check:ink-weight": "node scripts/check-ink-weight.js",
+    "check:ink-weight:axes": "node scripts/check-ink-weight.js --axes",
+    "check:grammar": "node scripts/check-grammar.js",
+    "check:anim-ready": "node scripts/check-anim-ready.js",
+    "check:fidelity": "node scripts/check-fidelity.js",
+    "check:dry-coverage": "node scripts/check-dry-coverage.js",
     "test": "vitest run",
-    "verify": "node scripts/build.js && node scripts/build-anatomy.js && tsup && tsc --noEmit && node scripts/check-parity.js && node scripts/check-colors.js && node scripts/check-treeshake.js && node scripts/check-semantics.js && node scripts/check-choreographies.js && node scripts/check-layers.js && node scripts/check-motion-bounds.js && node scripts/check-motion-collision.js && node scripts/check-variant-parity.js && node scripts/check-anatomy.js && node scripts/check-anatomy-drift.js && vitest run"
+    "verify": "node scripts/build.js && node scripts/build-anatomy.js && tsup && tsc --noEmit && node scripts/check-parity.js && node scripts/check-colors.js && node scripts/check-treeshake.js && node scripts/check-semantics.js && node scripts/check-choreographies.js && node scripts/check-layers.js && node scripts/check-motion-bounds.js && node scripts/check-motion-collision.js && node scripts/check-variant-parity.js && node scripts/check-anatomy.js && node scripts/check-anatomy-drift.js && node scripts/check-path-quality.js && node scripts/check-static-grid.js && node scripts/check-fill-rule.js && node scripts/check-topology.js && node scripts/check-corners.js && node scripts/check-adjacency.js && node scripts/check-ink-weight.js && node scripts/check-ink-weight.js --axes && node scripts/check-grammar.js && node scripts/check-fidelity.js && node scripts/check-dry-coverage.js && node scripts/check-anim-ready.js && vitest run"
   },
   "devDependencies": {
     "rollup": "^4.24.0",
@@ -53,5 +65,18 @@
     "tsup": "8.3.6",
     "typescript": "5.7.3",
     "vitest": "2.1.8"
+  },
+  "license": "MIT",
+  "keywords": [
+    "icons",
+    "svg",
+    "design-system",
+    "labpics",
+    "outline",
+    "filled",
+    "animated-icons"
+  ],
+  "engines": {
+    "node": ">=18"
   }
 }
