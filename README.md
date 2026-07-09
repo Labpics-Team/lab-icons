@@ -85,11 +85,14 @@ flowchart LR
 
 Затем `pnpm install`.
 
-> **Что внутри `-dist` тега:** релизный workflow коммитит в него ровно
-> `dist/index.js` + `dist/index.d.ts` (статические иконки). Подпуть
-> `./animate` в `-dist` артефакт пока **не** входит —
-> [`release-dist.yml`](.github/workflows/release-dist.yml) не добавляет
-> `dist/animate`; рантайм анимаций доступен при сборке из клона репозитория.
+> **Что внутри `-dist` тега:** релизный workflow
+> ([`release-dist.yml`](.github/workflows/release-dist.yml)) коммитит в него
+> ровно то, что перечислено в поле `files` `package.json`:
+> `dist/index.js` + `dist/index.d.ts` + `dist/animate` (рантайм `./animate`:
+> ESM + CJS + типы). Исключение — уже опубликованный `v0.2.0-dist`: он собран
+> до этого фикса и `dist/animate` **не** содержит (артефакт иммутабелен,
+> задним числом не патчится). Подпуть `./animate` придёт в git-dep со
+> следующим релизным тегом.
 
 > **Почему не npm/GitHub Packages:** реестр требует, чтобы scope пакета совпадал
 > с аккаунтом-владельцем, а бренд-scope `@labpics` занят неактивным
@@ -170,7 +173,7 @@ flowchart LR
   TAG["git tag vX.Y.Z на master<br/>+ push origin"]:::node
   WF["GitHub Actions<br/>release-dist.yml"]:::accent
   VG["pnpm verify<br/>полный гейт на теге"]:::node
-  DT["брат-тег vX.Y.Z-dist:<br/>коммит с dist/index.js + index.d.ts<br/>поверх релизного тега"]:::dark
+  DT["брат-тег vX.Y.Z-dist:<br/>коммит с dist/index.js + index.d.ts + animate/<br/>поверх релизного тега"]:::dark
   CON["потребитель:<br/>github:Labpics-Team/lab-icons#vX.Y.Z-dist"]:::node
   TAG --> WF
   WF --> VG
@@ -184,8 +187,9 @@ flowchart LR
 1. Владелец ставит релизный тег на master: `git tag v0.2.0 && git push origin v0.2.0`.
 2. Workflow [`release-dist.yml`](.github/workflows/release-dist.yml) ловит push
    тега `v*` (собственные `-dist` теги исключены из триггера), гоняет полный
-   `pnpm verify` и коммитит `dist/index.js` + `dist/index.d.ts`
-   (принудительный `git add -f` — `dist/` в `.gitignore`) поверх релизного тега.
+   `pnpm verify` и коммитит содержимое поля `files`: `dist/index.js`,
+   `dist/index.d.ts`, `dist/animate` (принудительный `git add -f` — `dist/`
+   в `.gitignore`) поверх релизного тега.
 3. Этот коммит пушится **только как тег `vX.Y.Z-dist`** — master не меняется.
 4. Артефакт иммутабелен: существующий `-dist` тег workflow не перезаписывает.
    Новый релиз = новый тег.
@@ -214,6 +218,7 @@ scripts/
   build-anatomy.js    — dist/anatomy.json из path-данных dist/svg
   gen-choreographies.mjs — генерация хореографий из пресетов lab-motion
   lib/                — генераторы глифов, геометрия кривых, motion-scan (ядро гейтов)
+  geometry/, migrate/ — инструментарий фитов и миграций корпуса (не гейты)
   check-*.js          — 22 гейта (см. таблицу ниже)
 test/              — 38 файлов vitest (анатомия, примитивы, гейты, геометрия)
 docs/
@@ -232,11 +237,10 @@ pnpm build:animate  # tsup → dist/animate (ESM + CJS + d.ts)
 pnpm verify         # сборка + tsc --noEmit + 22 гейта + vitest — полный локальный гейт
 ```
 
-CI ([`ci.yml`](.github/workflows/ci.yml), pnpm 9 / Node 20) гоняет сборку,
-typecheck, гейты и тесты отдельными шагами и добавляет шесть **bite-тестов**:
-в исходники подсовывается поломка, и гейт обязан упасть. Четыре гейта
-(`check:fill-rule`, `check:adjacency`, `check:ink-weight`, `check:anim-ready`)
-входят в `pnpm verify`, но отдельными шагами CI пока не гоняются.
+CI ([`ci.yml`](.github/workflows/ci.yml), pnpm 9 / Node 20) гоняет ровно те же
+гейты, что и `pnpm verify`, отдельными шагами (паритет CI ↔ verify закреплён
+в #56) и добавляет шесть **bite-тестов**: в исходники подсовывается поломка,
+и гейт обязан упасть.
 
 Каждый гейт запускается и отдельно: `pnpm check:<имя>`.
 
