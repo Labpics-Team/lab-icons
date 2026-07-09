@@ -220,7 +220,7 @@ scripts/
   lib/                — генераторы глифов, геометрия кривых, motion-scan (ядро гейтов)
   geometry/, migrate/ — инструментарий фитов и миграций корпуса (не гейты)
   check-*.js          — 22 гейта (см. таблицу ниже)
-test/              — 38 файлов vitest (анатомия, примитивы, гейты, геометрия)
+test/              — vitest-сьюты: анатомия, примитивы, гейты, геометрия
 docs/
   anatomy.md · anatomy-model.md · grammar.md
 svgo.config.cjs    — конфиг оптимизации (currentColor, 24×24 viewBox)
