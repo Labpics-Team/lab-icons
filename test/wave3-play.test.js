@@ -42,6 +42,9 @@ const WAVE3 = [
 // 41.51%, tablet-landscape/outline 41.38%, cog/outline 23.44%, pause/outline
 // 19.42%, component/outline 10.29%, info-circle/outline 0.62%, reload/filled
 // 0.23%, reload/outline 0.20%. Список может только УМЕНЬШАТЬСЯ.
+// swap-horizontal УБРАН (2026-07-09): «безвредное перекрытие» стыка опровергнуто
+// владельцем (белый полумесяц в линзе под evenodd на скриншоте) — стык переведён
+// на сокет-встык (genStrokePath socket, класс time), EO≡NZ снова точное.
 const LEGACY_EO_NZ = new Set([
   'tablet-portrait/outline',
   'tablet-landscape/outline',

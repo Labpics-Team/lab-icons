@@ -207,13 +207,16 @@ export function adjacencyDefectsBetween(handD, genParts, eps = EPS) {
 
 // ── материализация генерата из anatomy ─────────────────────────────────────
 
-/** Per-part генерат-path-data глифа для варианта (outline/filled). */
+/** Per-part генерат-path-data глифа для варианта (outline/filled).
+ * partsScope отдаёт изолированной части полный список частей декларации:
+ * сокет-торец (genStrokePath socket) конструируется от сиблинга-шеврона —
+ * без него палочка молча выпадала бы из проверки смежности. */
 function materializeParts(entry, grid, allGlyphs, variant) {
   const out = [];
   for (const part of entry.parts) {
     let built;
     try {
-      built = buildGlyph({ ...entry, parts: [part] }, grid, {}, allGlyphs);
+      built = buildGlyph({ ...entry, parts: [part], partsScope: entry.parts }, grid, {}, allGlyphs);
     } catch {
       continue;
     }
