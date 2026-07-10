@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  hasCanonicalVerify,
   validateRepoContract,
   workflowJobBlocks,
 } from '../scripts/check-repo-contract.js';
@@ -7,12 +8,27 @@ import {
 const PACKAGE_MANAGER = 'pnpm@10.30.3';
 const ACTION_SHA = 'a7487c7e89a18df4991f7f222e4898a00d66ddda';
 
+function verifyStep(mode) {
+  if (mode === 'logged') {
+    return `      - name: Verify
+        shell: pwsh
+        run: |
+          pnpm verify 2>&1 | Tee-Object -FilePath verify-windows.log
+          $verifyExit = $LASTEXITCODE
+          if ($verifyExit -ne 0) { exit $verifyExit }
+`;
+  }
+  return `      - name: Verify
+        run: ${mode === 'direct' ? 'pnpm verify' : 'pnpm build'}
+`;
+}
+
 function job({
   id = 'verify',
   version = '10.30.3',
   actionRef = ACTION_SHA,
   install = true,
-  verify = true,
+  verify = 'direct',
   runner = 'ubuntu-latest',
   tail = '',
 } = {}) {
@@ -25,9 +41,7 @@ function job({
           version: ${version}
       - name: Install
         run: ${install ? 'pnpm install --frozen-lockfile' : 'pnpm install'}
-      - name: Verify
-        run: ${verify ? 'pnpm verify' : 'pnpm build'}
-${tail}`;
+${verifyStep(verify)}${tail}`;
 }
 
 function workflow({ jobs = [job()] } = {}) {
@@ -80,7 +94,7 @@ describe('check-repo-contract', () => {
     const ci = workflow({
       jobs: [
         job({ id: 'linux', runner: 'ubuntu-latest' }),
-        job({ id: 'windows', runner: 'windows-latest' }),
+        job({ id: 'windows', runner: 'windows-latest', verify: 'logged' }),
       ],
     });
     expect(fixture({ filesPatch: { '.github/workflows/ci.yml': ci } })).toEqual([]);
@@ -105,11 +119,22 @@ jobs:
     expect(workflowJobBlocks(text).map((entry) => entry.id)).toEqual(['matrix']);
   });
 
+  it('принимает только logged-wrapper с обязательным пробросом exit code', () => {
+    const valid = verifyStep('logged');
+    const masked = valid.replace(
+      'if ($verifyExit -ne 0) { exit $verifyExit }',
+      'if ($verifyExit -ne 0) { Write-Host masked }',
+    );
+    expect(hasCanonicalVerify(valid)).toBe(true);
+    expect(hasCanonicalVerify(masked)).toBe(false);
+    expect(hasCanonicalVerify('run: pnpm verify || true')).toBe(false);
+  });
+
   it('кусается, если второй runner не выполняет собственный verify', () => {
     const ci = workflow({
       jobs: [
         job({ id: 'linux' }),
-        job({ id: 'windows', runner: 'windows-latest', verify: false }),
+        job({ id: 'windows', runner: 'windows-latest', verify: 'bypass' }),
       ],
     });
     const errors = fixture({ filesPatch: { '.github/workflows/ci.yml': ci } });
@@ -189,10 +214,10 @@ jobs:
   it('кусается, если workflow обходит pnpm verify', () => {
     const errors = fixture({
       filesPatch: {
-        '.github/workflows/ci.yml': workflow({ jobs: [job({ verify: false })] }),
+        '.github/workflows/ci.yml': workflow({ jobs: [job({ verify: 'bypass' })] }),
       },
     });
-    expect(errors.some((error) => error.includes('одной командой «pnpm verify»'))).toBe(true);
+    expect(errors.some((error) => error.includes('канонической командой «pnpm verify»'))).toBe(true);
     expect(errors.some((error) => error.includes('второй список истины'))).toBe(true);
   });
 
