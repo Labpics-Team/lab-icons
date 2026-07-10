@@ -8,6 +8,7 @@ import {
   handoffViolations,
   findInkHexClaims,
   hasDocRole,
+  releaseWorkflowFiles,
   distributionViolations,
   auditRepo,
 } from '../scripts/check-docs-drift.js';
@@ -35,7 +36,6 @@ describe('счётчики корпуса', () => {
   });
 
   it('игнорирует числа без единиц и субвыборки', () => {
-    // «28 из 222 иконок»: 28 — субвыборка без единицы, ловится только 222
     const claims = extractCountClaims('28 из 222 иконок — чистые композиции');
     expect(claims.map((c) => c.n)).toEqual([222]);
   });
@@ -132,23 +132,32 @@ describe('каналы поставки', () => {
     exports: contract.exports,
   };
   const workflow =
-    'pnpm verify\ngit add -f dist/index.js dist/index.d.ts dist/animate';
+    'steps:\n  - run: pnpm verify\n  - run: |\n      git add -f dist/index.js dist/index.d.ts dist/animate';
+  const readme =
+    'Основной канал — npm: `pnpm add @labpics/icons`.\n' +
+    'Дополнительный fallback: `github:Labpics-Team/lab-icons#vX.Y.Z-dist`.';
 
   it('принимает npm primary и immutable git fallback', () => {
-    const readme =
-      'Основной канал — npm: `pnpm add @labpics/icons`.\n' +
-      'Дополнительный fallback: `github:Labpics-Team/lab-icons#vX.Y.Z-dist`.';
     expect(
       distributionViolations({ readme, pkg, contract, releaseWorkflow: workflow }),
     ).toEqual([]);
   });
 
-  it('кусается на старой private/git-only/PAT прозе', () => {
-    const readme =
-      'Пакет НЕ публикуется в npm (`private: true`), репозиторий приватный; ' +
+  it('извлекает файлы только из исполняемой git add, не из комментария', () => {
+    expect(
+      releaseWorkflowFiles(
+        '# git add -f dist/fake\nrun: |\n  git add -f dist/index.js dist/index.d.ts dist/animate',
+      ),
+    ).toEqual(['dist/index.js', 'dist/index.d.ts', 'dist/animate']);
+    expect(releaseWorkflowFiles('# git add -f dist/index.js')).toEqual([]);
+  });
+
+  it('кусается на старой private/git-only/PAT прозе даже под markdown', () => {
+    const falseReadme =
+      'Пакет НЕ публикуется в npm (`private: **true**`), репозиторий приватный; ' +
       'нужен fine-grained PAT и GH_PAT.';
     const errors = distributionViolations({
-      readme,
+      readme: falseReadme,
       pkg,
       contract,
       releaseWorkflow: workflow,
@@ -160,19 +169,33 @@ describe('каналы поставки', () => {
     expect(errors.join('\n')).toMatch(/не требует GitHub PAT/);
   });
 
-  it('кусается на дрейфе package files/exports и workflow', () => {
-    const readme =
-      'Основной канал — npm: `pnpm add @labpics/icons`.\n' +
-      'Дополнительный fallback: `github:Labpics-Team/lab-icons#vX.Y.Z-dist`.';
+  it('кусается на пустом install/specifier вместо includes-пустоты', () => {
+    const broken = {
+      ...contract,
+      primary: { ...contract.primary, install: '' },
+      fallback: { ...contract.fallback, specifier: '' },
+    };
+    const errors = distributionViolations({
+      readme,
+      pkg: { ...pkg, files: broken.files, exports: broken.exports },
+      contract: broken,
+      releaseWorkflow: workflow,
+    });
+    expect(errors).toContain('release contract: primary.install обязан быть непустой строкой');
+    expect(errors).toContain('release contract: fallback.specifier обязан быть непустой строкой');
+  });
+
+  it('кусается на дрейфе package files/exports и фактической команды workflow', () => {
     const errors = distributionViolations({
       readme,
       pkg: { ...pkg, files: ['dist/index.js'], exports: {} },
       contract,
-      releaseWorkflow: 'pnpm verify',
+      releaseWorkflow:
+        '# dist/animate упомянут только в комментарии\nrun: pnpm verify\nrun: |\n  git add -f dist/index.js',
     });
     expect(errors).toContain('release contract files != package.json#files');
     expect(errors).toContain('release contract exports != package.json#exports');
-    expect(errors.some((error) => error.includes('dist/animate'))).toBe(true);
+    expect(errors.some((error) => error.includes('git add files'))).toBe(true);
   });
 });
 
