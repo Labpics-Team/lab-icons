@@ -16,6 +16,7 @@ import { execFileSync } from 'node:child_process';
 const VARIANTS = new Set(['outline', 'filled']);
 const SHA40 = /^[0-9a-f]{40}$/;
 const LS_TREE_LINE = /^(\d+)\s+blob\s+([0-9a-f]{40})\t(.+)$/;
+const NAME_STATUS_LINE = /^([A-Z])(\d{1,3})?\t([^\t]+)(?:\t([^\t]+))?$/;
 
 function defaultGit(repo, args) {
   return execFileSync('git', args, {
@@ -106,7 +107,12 @@ export function createHandHistory(repo, { runGit = (args) => defaultGit(repo, ar
         anatomyAtCache.set(commitSha, null);
       } else {
         try {
-          anatomyAtCache.set(commitSha, JSON.parse(snapshot.content));
+          const parsed = JSON.parse(snapshot.content);
+          if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed) ||
+              !parsed.glyphs || typeof parsed.glyphs !== 'object' || Array.isArray(parsed.glyphs)) {
+            throw new Error('ожидался объект с glyphs');
+          }
+          anatomyAtCache.set(commitSha, parsed);
         } catch (error) {
           throw new Error(
             `hand-history: semantics/anatomy.json@${commitSha.slice(0, 7)} невалиден (${error.message})`,
@@ -125,7 +131,7 @@ export function createHandHistory(repo, { runGit = (args) => defaultGit(repo, ar
         'log',
         '--follow',
         '--format=@%H%x09%cs',
-        '--name-only',
+        '--name-status',
         '--',
         relativePath,
       ]);
@@ -135,12 +141,26 @@ export function createHandHistory(repo, { runGit = (args) => defaultGit(repo, ar
         if (line.startsWith('@')) {
           const match = line.match(/^@([0-9a-f]{40})\t(\d{4}-\d{2}-\d{2})$/);
           if (!match) throw new Error(`hand-history: неожиданный заголовок git log: ${line}`);
-          current = { commitSha: match[1], date: match[2], path: null };
+          current = { commitSha: match[1], date: match[2], path: null, change: null };
           revisions.push(current);
-        } else if (line.trim() && current && !current.path) {
-          assertRelativePath(line.trim());
-          current.path = line.trim();
+          continue;
         }
+        if (!line.trim()) continue;
+        if (!current) throw new Error(`hand-history: name-status вне commit-блока: ${line}`);
+
+        const change = line.match(NAME_STATUS_LINE);
+        if (!change) throw new Error(`hand-history: неожиданный name-status: ${line}`);
+        const kind = change[1];
+        const path = kind === 'R' || kind === 'C' ? change[4] : change[3];
+        if (!path) throw new Error(`hand-history: ${kind}-запись не несёт конечный путь: ${line}`);
+        assertRelativePath(path);
+        if (current.path && current.path !== path) {
+          throw new Error(
+            `hand-history: одна ревизия дала несколько путей (${current.path}, ${path})`,
+          );
+        }
+        current.path = path;
+        current.change = kind;
       }
       historyCache.set(
         relativePath,
@@ -165,8 +185,17 @@ export function createHandHistory(repo, { runGit = (args) => defaultGit(repo, ar
     }
 
     for (const revision of fileHistory(relativePath)) {
-      const status = anatomyAt(revision.commitSha)?.glyphs?.[name]?.status?.[variant];
+      const anatomy = anatomyAt(revision.commitSha);
+      const statuses = anatomy?.glyphs?.[name]?.status;
+      const hasStatus = statuses && Object.prototype.hasOwnProperty.call(statuses, variant);
+      const status = hasStatus ? statuses[variant] : undefined;
       if (status === 'generated') continue;
+      if (hasStatus && status !== 'hand') {
+        throw new Error(
+          `hand-history: ${name}/${variant}@${revision.commitSha.slice(0, 7)} ` +
+            `имеет неизвестный status ${JSON.stringify(status)}`,
+        );
+      }
 
       const file = fileAt(revision.commitSha, revision.path);
       if (!file) {
