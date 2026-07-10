@@ -34,7 +34,7 @@ function normalizeEntries(part) {
   });
 }
 
-function assertParts(parts) {
+function assertParts(parts, stepsPerSeg) {
   if (!Array.isArray(parts) || parts.length === 0) {
     throw new Error('part-adjacency: parts обязан быть непустым массивом');
   }
@@ -49,7 +49,7 @@ function assertParts(parts) {
     return {
       id: part.id,
       entries,
-      segments: boundarySegments(entries),
+      segments: boundarySegments(entries, stepsPerSeg),
     };
   });
 }
@@ -58,7 +58,7 @@ function samePoint(a, b) {
   return Math.abs(a[0] - b[0]) <= GEOM_EPS && Math.abs(a[1] - b[1]) <= GEOM_EPS;
 }
 
-function boundarySegments(entries, stepsPerSeg = 24) {
+function boundarySegments(entries, stepsPerSeg) {
   const segments = [];
   for (const entry of entries) {
     for (const poly of samplePolylines(entry.d, stepsPerSeg)) {
@@ -132,7 +132,7 @@ function masksOverlap(a, b) {
 }
 
 /** Минимальный геометрический зазор двух частей; overlap/touch = 0. */
-export function partGap(partA, partB, rasterA = null, rasterB = null) {
+function partGap(partA, partB, rasterA = null, rasterB = null) {
   if (rasterA && rasterB && masksOverlap(rasterA, rasterB)) return 0;
   let best = Infinity;
   for (const [a, b] of partA.segments) {
@@ -151,10 +151,30 @@ function occupiedCells(mask) {
   return cells;
 }
 
-function componentCountsNear(partRaster, baselineLabels, radiusCells) {
-  const counts = new Map();
+function sortedCounts(counts) {
+  return [...counts.entries()]
+    .map(([component, count]) => ({ component, count }))
+    .sort((a, b) => b.count - a.count || a.component - b.component);
+}
+
+/**
+ * Прямой overlap и proximity — разные доказательства.
+ *
+ * Если ink части реально занимает клетки двух независимых baseline-компонент,
+ * часть уже создала незаконный мост и никакое «большинство площади» не может
+ * назначить её одной стороне. Proximity используется только при нулевом
+ * прямом overlap — для малых fit-расхождений около исторической руки.
+ */
+function componentEvidence(partRaster, baselineLabels, radiusCells) {
+  const directCounts = new Map();
+  const nearCounts = new Map();
   const { cols, rows } = partRaster;
+
   for (const index of occupiedCells(partRaster.mask)) {
+    const direct = baselineLabels[index];
+    if (direct >= 0) directCounts.set(direct, (directCounts.get(direct) ?? 0) + 1);
+    if (radiusCells === 0) continue;
+
     const row = Math.floor(index / cols);
     const col = index % cols;
     const labelsForCell = new Set();
@@ -168,11 +188,9 @@ function componentCountsNear(partRaster, baselineLabels, radiusCells) {
         if (label >= 0) labelsForCell.add(label);
       }
     }
-    for (const label of labelsForCell) counts.set(label, (counts.get(label) ?? 0) + 1);
+    for (const label of labelsForCell) nearCounts.set(label, (nearCounts.get(label) ?? 0) + 1);
   }
-  return [...counts.entries()]
-    .map(([component, count]) => ({ component, count }))
-    .sort((a, b) => b.count - a.count || a.component - b.component);
+  return { direct: sortedCounts(directCounts), near: sortedCounts(nearCounts) };
 }
 
 function assignParts(parts, partRasters, baselineLabels, assignmentRadius, step) {
@@ -181,21 +199,50 @@ function assignParts(parts, partRasters, baselineLabels, assignmentRadius, step)
   const radiusCells = Math.max(0, Math.ceil(assignmentRadius / step));
 
   for (let index = 0; index < parts.length; index++) {
-    const candidates = componentCountsNear(partRasters[index], baselineLabels, radiusCells);
+    const evidence = componentEvidence(partRasters[index], baselineLabels, radiusCells);
+    if (evidence.direct.length > 1) {
+      errors.push(
+        `${parts[index].id}: перекрывает несколько baseline-компонент ` +
+          `(${evidence.direct.map((item) => `${item.component}=${item.count}`).join(', ')})`,
+      );
+      assignments.push({
+        id: parts[index].id,
+        component: null,
+        evidence: 'overlap-conflict',
+        candidates: evidence.direct,
+      });
+      continue;
+    }
+    if (evidence.direct.length === 1) {
+      assignments.push({
+        id: parts[index].id,
+        component: evidence.direct[0].component,
+        evidence: 'overlap',
+        candidates: evidence.direct,
+      });
+      continue;
+    }
+
+    const candidates = evidence.near;
     if (candidates.length === 0) {
       errors.push(`${parts[index].id}: не примыкает ни к одной компоненте baseline`);
-      assignments.push({ id: parts[index].id, component: null, candidates });
+      assignments.push({ id: parts[index].id, component: null, evidence: 'none', candidates });
       continue;
     }
     if (candidates.length > 1 && candidates[0].count === candidates[1].count) {
       errors.push(
-        `${parts[index].id}: неоднозначное назначение baseline ` +
+        `${parts[index].id}: неоднозначное proximity-назначение baseline ` +
           `(${candidates[0].component}=${candidates[0].count}, ${candidates[1].component}=${candidates[1].count})`,
       );
-      assignments.push({ id: parts[index].id, component: null, candidates });
+      assignments.push({ id: parts[index].id, component: null, evidence: 'proximity-tie', candidates });
       continue;
     }
-    assignments.push({ id: parts[index].id, component: candidates[0].component, candidates });
+    assignments.push({
+      id: parts[index].id,
+      component: candidates[0].component,
+      evidence: 'proximity',
+      candidates,
+    });
   }
   return { assignments, errors };
 }
@@ -262,7 +309,7 @@ export function analyzePartAdjacency({
   phaseX = 0.5,
   phaseY = 0.5,
   eps = 0.15,
-  assignmentRadius = 0.9,
+  assignmentRadius = 0,
   stepsPerSeg = 24,
 }) {
   if (!Array.isArray(baselineEntries) || baselineEntries.length === 0) {
@@ -272,8 +319,11 @@ export function analyzePartAdjacency({
   if (!(Number.isFinite(assignmentRadius) && assignmentRadius >= 0)) {
     throw new Error(`part-adjacency: assignmentRadius обязан быть >= 0; найдено ${assignmentRadius}`);
   }
+  if (!Number.isInteger(stepsPerSeg) || stepsPerSeg < 1) {
+    throw new Error(`part-adjacency: stepsPerSeg обязан быть положительным целым; найдено ${stepsPerSeg}`);
+  }
 
-  const parts = assertParts(rawParts);
+  const parts = assertParts(rawParts, stepsPerSeg);
   const rasterOptions = { width, height, step, phaseX, phaseY, stepsPerSeg };
   const baselineRaster = rasterizePathEntries(baselineEntries, rasterOptions);
   const labeled = labelMaskFeatures(
