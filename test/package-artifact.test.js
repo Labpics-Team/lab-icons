@@ -2,7 +2,10 @@ import { mkdirSync, mkdtempSync, rmSync, unlinkSync, writeFileSync } from 'node:
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
-import { validateInstalledPackage } from '../scripts/check-package-artifact.js';
+import {
+  pnpmInvocation,
+  validateInstalledPackage,
+} from '../scripts/check-package-artifact.js';
 
 const roots = [];
 
@@ -87,5 +90,30 @@ describe('check-package-artifact', () => {
     expect(validateInstalledPackage(root).errors).toContain(
       'root ESM export не указывает на ./dist/index.js',
     );
+  });
+
+  it('на POSIX запускает pnpm напрямую без shell', () => {
+    expect(
+      pnpmInvocation(['pack', '--pack-destination', '/tmp/out'], {
+        platform: 'linux',
+        command: '/opt/pnpm',
+      }),
+    ).toEqual({
+      file: '/opt/pnpm',
+      args: ['pack', '--pack-destination', '/tmp/out'],
+    });
+  });
+
+  it('на Windows запускает pnpm.cmd через ComSpec, не через shell:true', () => {
+    expect(
+      pnpmInvocation(['install', '--offline'], {
+        platform: 'win32',
+        command: 'pnpm.cmd',
+        comspec: 'C:\\Windows\\System32\\cmd.exe',
+      }),
+    ).toEqual({
+      file: 'C:\\Windows\\System32\\cmd.exe',
+      args: ['/d', '/s', '/c', 'pnpm.cmd', 'install', '--offline'],
+    });
   });
 });
