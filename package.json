@@ -35,6 +35,7 @@
     "build:anatomy": "node scripts/build-anatomy.js",
     "typecheck": "tsc --noEmit",
     "check:repo-contract": "node scripts/check-repo-contract.js",
+    "check:package-artifact": "node scripts/check-package-artifact.js",
     "check:parity": "node scripts/check-parity.js",
     "check:colors": "node scripts/check-colors.js",
     "check:treeshake": "node scripts/check-treeshake.js",
@@ -60,7 +61,7 @@
     "check:dry-coverage": "node scripts/check-dry-coverage.js",
     "check:docs-drift": "node scripts/check-docs-drift.js",
     "test": "vitest run",
-    "verify": "node scripts/check-repo-contract.js && node scripts/build.js && node scripts/build-anatomy.js && tsup && tsc --noEmit && node scripts/check-parity.js && node scripts/check-colors.js && node scripts/check-treeshake.js && node scripts/check-semantics.js && node scripts/check-choreographies.js && node scripts/check-layers.js && node scripts/check-motion-bounds.js && node scripts/check-motion-collision.js && node scripts/check-variant-parity.js && node scripts/check-anatomy.js && node scripts/check-anatomy-drift.js && node scripts/check-path-quality.js && node scripts/check-static-grid.js && node scripts/check-fill-rule.js && node scripts/check-topology.js && node scripts/check-corners.js && node scripts/check-adjacency.js && node scripts/check-ink-weight.js && node scripts/check-ink-weight.js --axes && node scripts/check-grammar.js && node scripts/check-fidelity.js && node scripts/check-dry-coverage.js && node scripts/check-anim-ready.js && node scripts/check-docs-drift.js && vitest run"
+    "verify": "node scripts/check-repo-contract.js && node scripts/build.js && node scripts/build-anatomy.js && tsup && tsc --noEmit && node scripts/check-package-artifact.js && node scripts/check-parity.js && node scripts/check-colors.js && node scripts/check-treeshake.js && node scripts/check-semantics.js && node scripts/check-choreographies.js && node scripts/check-layers.js && node scripts/check-motion-bounds.js && node scripts/check-motion-collision.js && node scripts/check-variant-parity.js && node scripts/check-anatomy.js && node scripts/check-anatomy-drift.js && node scripts/check-path-quality.js && node scripts/check-static-grid.js && node scripts/check-fill-rule.js && node scripts/check-topology.js && node scripts/check-corners.js && node scripts/check-adjacency.js && node scripts/check-ink-weight.js && node scripts/check-ink-weight.js --axes && node scripts/check-grammar.js && node scripts/check-fidelity.js && node scripts/check-dry-coverage.js && node scripts/check-anim-ready.js && node scripts/check-docs-drift.js && vitest run"
   },
   "devDependencies": {
     "rollup": "^4.24.0",
