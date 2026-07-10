@@ -19,6 +19,7 @@ describe('path-aware ink raster', () => {
     const result = topology(content);
 
     expect(result.components).toHaveLength(1);
+    expect(result.components[0]).toBeCloseTo(160, 8);
     expect(result.holes).toHaveLength(0);
   });
 
@@ -29,7 +30,9 @@ describe('path-aware ink raster', () => {
     const result = topology(content);
 
     expect(result.components).toHaveLength(1);
+    expect(result.components[0]).toBeCloseTo(192, 8);
     expect(result.holes).toHaveLength(1);
+    expect(result.holes[0]).toBeCloseTo(64, 8);
   });
 
   it('не выдумывает counter под nonzero у одинаково намотанных контуров', () => {
@@ -39,7 +42,20 @@ describe('path-aware ink raster', () => {
     const result = topology(content);
 
     expect(result.components).toHaveLength(1);
+    expect(result.components[0]).toBeCloseTo(256, 8);
     expect(result.holes).toHaveLength(0);
+  });
+
+  it('сохраняет counter под nonzero при противоположной намотке', () => {
+    const content = svg(
+      '<path d="M2 2H18V18H2Z M6 6V14H14V6Z"/>',
+    );
+    const result = topology(content);
+
+    expect(result.components).toHaveLength(1);
+    expect(result.components[0]).toBeCloseTo(192, 8);
+    expect(result.holes).toHaveLength(1);
+    expect(result.holes[0]).toBeCloseTo(64, 8);
   });
 
   it('композитит отдельный path поверх counter другого path', () => {
@@ -50,6 +66,7 @@ describe('path-aware ink raster', () => {
     const result = topology(content);
 
     expect(result.components).toHaveLength(1);
+    expect(result.components[0]).toBeCloseTo(256, 8);
     expect(result.holes).toHaveLength(0);
   });
 
