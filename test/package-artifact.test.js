@@ -3,6 +3,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 import {
+  localTarballSpecifier,
   pnpmInvocation,
   validateInstalledPackage,
 } from '../scripts/check-package-artifact.js';
@@ -90,6 +91,17 @@ describe('check-package-artifact', () => {
     expect(validateInstalledPackage(root).errors).toContain(
       'root ESM export не указывает на ./dist/index.js',
     );
+  });
+
+  it('строит относительный file specifier без URL-кодирования DOS 8.3 пути', () => {
+    const specifier = localTarballSpecifier(
+      'C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\consumer',
+      'C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\pack\\labpics-icons-0.2.0.tgz',
+      () => '..\\pack\\labpics-icons-0.2.0.tgz',
+    );
+
+    expect(specifier).toBe('file:../pack/labpics-icons-0.2.0.tgz');
+    expect(specifier).not.toContain('%7E');
   });
 
   it('на POSIX запускает pnpm напрямую без shell', () => {
