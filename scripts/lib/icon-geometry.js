@@ -26,14 +26,39 @@ function attributeValue(tag, name) {
  * Нормализация: m→M + явная l перед неявным относительным хвостом.
  */
 function normalizeHead(d) {
-  // СТРОГОЕ SVG-число: максимум одна точка, опц. экспонента — жадный
-  // [\d.]+ склеивал «7.57.62.5» в одно «число» и ломал radio.
-  const num = String.raw`-?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?`;
+  // СТРОГОЕ SVG-число: один знак, максимум одна точка, опц. экспонента —
+  // жадный [\d.]+ склеивал «7.57.62.5» в одно «число» и ломал radio.
+  const num = String.raw`[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?`;
   return d.replace(
-    new RegExp(String.raw`^\s*m[\s,]*(${num})[\s,]*(${num})([\s,]*)(-?[\d.]|)`),
+    new RegExp(String.raw`^\s*m[\s,]*(${num})[\s,]*(${num})([\s,]*)([+-]?[\d.]|)`),
     (whole, x, y, sep, tailStart) =>
       `M${x} ${y}` + (tailStart ? `l${tailStart}` : sep + tailStart),
   );
+}
+
+/**
+ * Значение fill-rule из inline style с реальной локальной cascade:
+ * - style перекрывает presentation attribute;
+ * - среди деклараций одного приоритета побеждает последняя;
+ * - !important перекрывает обычную декларацию.
+ */
+function styleFillRule(style) {
+  if (typeof style !== 'string') return null;
+  let selected = null;
+  for (const declaration of style.split(';')) {
+    const colon = declaration.indexOf(':');
+    if (colon < 0) continue;
+    const property = declaration.slice(0, colon).trim().toLowerCase();
+    if (property !== 'fill-rule') continue;
+
+    const raw = declaration.slice(colon + 1).trim();
+    const important = /\s*!important\s*$/i.test(raw);
+    const value = raw.replace(/\s*!important\s*$/i, '').trim().toLowerCase();
+    if (value !== 'evenodd' && value !== 'nonzero') continue;
+
+    if (!selected || important || !selected.important) selected = { value, important };
+  }
+  return selected?.value ?? null;
 }
 
 /**
@@ -41,13 +66,11 @@ function normalizeHead(d) {
  * контейнерах запрещён: без полноценного XML cascade его нельзя угадывать.
  */
 function ownFillRule(tag) {
-  const direct = attributeValue(tag, 'fill-rule')?.trim().toLowerCase();
-  if (direct === 'evenodd') return 'evenodd';
-  if (direct === 'nonzero') return 'nonzero';
+  const styled = styleFillRule(attributeValue(tag, 'style'));
+  if (styled) return styled;
 
-  const style = attributeValue(tag, 'style');
-  const styled = style?.match(/(?:^|;)\s*fill-rule\s*:\s*(evenodd|nonzero)\b/i)?.[1];
-  return styled?.toLowerCase() === 'evenodd' ? 'evenodd' : 'nonzero';
+  const direct = attributeValue(tag, 'fill-rule')?.trim().toLowerCase();
+  return direct === 'evenodd' ? 'evenodd' : 'nonzero';
 }
 
 /**
