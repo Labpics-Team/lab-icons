@@ -100,18 +100,25 @@ export function pnpmSetupBlocks(text) {
 }
 
 /**
- * Допустим либо прямой `run: pnpm verify`, либо единственный проверенный
- * PowerShell-wrapper Windows: он пишет полный лог и обязательно возвращает
- * исходный `$LASTEXITCODE`. Произвольные `|| true`/`continue-on-error` этим
- * контрактом не маскируются.
+ * Допустим прямой `run: pnpm verify` либо два закрытых логирующих wrapper-а:
+ *
+ * - Bash: `set -o pipefail` + точная pipe-команда в `verify-linux.log`;
+ * - PowerShell: точная pipe-команда + захват и проброс `$LASTEXITCODE`.
+ *
+ * Произвольные `|| true`, `continue-on-error` и логирование без сохранения кода
+ * завершения этим контрактом не маскируются.
  */
 export function hasCanonicalVerify(text) {
   if (/^\s*run:\s*pnpm verify\s*$/m.test(text)) return true;
 
-  const loggedCommand = /^\s*pnpm verify 2>&1 \| Tee-Object -FilePath verify-windows\.log\s*$/m.test(text);
+  const linuxPipefail = /^\s*set -o pipefail\s*$/m.test(text);
+  const linuxLoggedCommand = /^\s*pnpm verify 2>&1 \| tee verify-linux\.log\s*$/m.test(text);
+  if (linuxPipefail && linuxLoggedCommand) return true;
+
+  const windowsLoggedCommand = /^\s*pnpm verify 2>&1 \| Tee-Object -FilePath verify-windows\.log\s*$/m.test(text);
   const capturesExit = /^\s*\$verifyExit = \$LASTEXITCODE\s*$/m.test(text);
   const propagatesExit = /^\s*if \(\$verifyExit -ne 0\) \{ exit \$verifyExit \}\s*$/m.test(text);
-  return loggedCommand && capturesExit && propagatesExit;
+  return windowsLoggedCommand && capturesExit && propagatesExit;
 }
 
 function pnpmJobErrors({ relativePath, job, expectedPnpmVersion }) {
@@ -258,11 +265,9 @@ const isMain = process.argv[1] && import.meta.url === pathToFileURL(process.argv
 if (isMain) {
   const errors = validateRepoContract();
   if (errors.length > 0) {
-    console.error(`check-repo-contract: HARD — ${errors.length} нарушений воспроизводимости:`);
+    console.error(`check-repo-contract: HARD — ${errors.length} нарушений:`);
     for (const error of errors) console.error(`  - ${error}`);
     process.exit(1);
   }
-  console.log(
-    'check-repo-contract: OK — packageManager SSOT, один lockfile, каждый pnpm-job запускает канонический pnpm verify',
-  );
+  console.log('check-repo-contract: OK — один pnpm/lockfile, CI и release выполняют канонический pnpm verify');
 }
