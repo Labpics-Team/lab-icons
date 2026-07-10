@@ -1,0 +1,78 @@
+name: R0 release probe
+
+on:
+  push:
+    branches: [chore/r0-release-probe]
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    name: Probe published npm artifact
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Inspect @labpics/icons@0.2.0
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT="$RUNNER_TEMP/lab-icons-release-probe"
+          mkdir -p "$ROOT/pack" "$ROOT/consumer" "$ROOT/report"
+
+          npm view '@labpics/icons@0.2.0' \
+            name version dist.tarball dist.integrity dist.shasum time --json \
+            | tee "$ROOT/report/npm-view.json"
+
+          cd "$ROOT/pack"
+          npm pack '@labpics/icons@0.2.0' --ignore-scripts --json \
+            | tee "$ROOT/report/npm-pack.json"
+          TARBALL="$(node -e "const fs=require('fs');const j=JSON.parse(fs.readFileSync('$ROOT/report/npm-pack.json','utf8'));process.stdout.write(j[0].filename)")"
+          tar -tzf "$TARBALL" | LC_ALL=C sort | tee "$ROOT/report/tar-files.txt"
+          mkdir unpacked
+          tar -xzf "$TARBALL" -C unpacked
+          cp unpacked/package/package.json "$ROOT/report/published-package.json"
+
+          cd "$ROOT/consumer"
+          printf '%s\n' '{"name":"release-probe-consumer","private":true,"type":"module"}' > package.json
+          npm install --ignore-scripts --no-package-lock "$ROOT/pack/$TARBALL"
+
+          set +e
+          node --input-type=module -e "import('@labpics/icons').then(m=>{if(typeof m.accessibilityOutline!=='string')throw new Error('root export absent')})" \
+            >"$ROOT/report/root-esm.log" 2>&1
+          ROOT_ESM=$?
+          node --input-type=module -e "import('@labpics/icons/animate').then(m=>{if(typeof m.animateIcon!=='function')throw new Error('animateIcon absent')})" \
+            >"$ROOT/report/animate-esm.log" 2>&1
+          ANIMATE_ESM=$?
+          node -e "const m=require('@labpics/icons/animate');if(typeof m.animateIcon!=='function')throw new Error('animateIcon absent')" \
+            >"$ROOT/report/animate-cjs.log" 2>&1
+          ANIMATE_CJS=$?
+          set -e
+
+          cat > "$ROOT/report/probe-status.json" <<JSON
+          {
+            "rootEsm": $ROOT_ESM,
+            "animateEsm": $ANIMATE_ESM,
+            "animateCjs": $ANIMATE_CJS
+          }
+          JSON
+          cat "$ROOT/report/probe-status.json"
+          echo "root ESM log:"; cat "$ROOT/report/root-esm.log"
+          echo "animate ESM log:"; cat "$ROOT/report/animate-esm.log"
+          echo "animate CJS log:"; cat "$ROOT/report/animate-cjs.log"
+
+      - name: Upload probe evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: r0-release-probe
+          path: ${{ runner.temp }}/lab-icons-release-probe/report
+          if-no-files-found: error
+          retention-days: 7
