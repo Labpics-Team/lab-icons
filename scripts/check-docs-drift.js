@@ -124,42 +124,60 @@ const FALSE_DISTRIBUTION_CLAIMS = [
   { re: /fine-grained\s+PAT|\bGH_PAT\b|Contents:\s*read/i, why: 'npm install не требует GitHub PAT' },
 ];
 
+function nonEmptyString(value) {
+  return typeof value === 'string' && value.trim().length > 0;
+}
+
+/** Фактические аргументы исполняемой команды git add -f, не совпадения в комментариях. */
+export function releaseWorkflowFiles(releaseWorkflow) {
+  const match = releaseWorkflow.match(/^\s*git\s+add\s+-f\s+([^\n#]+?)\s*$/m);
+  return match ? match[1].trim().split(/\s+/) : [];
+}
+
 /**
  * Release contract владеет устойчивой формой каналов; внешняя публикация
  * проверяется release-probe, но README не имеет права противоречить контракту.
  */
 export function distributionViolations({ readme, pkg, contract, releaseWorkflow }) {
   const errors = [];
+  const plainReadme = readme.replace(/[`*_~]/g, '');
+
   if (contract.version !== 1) errors.push(`release contract: неизвестная schema version ${contract.version}`);
   if (contract.packageName !== pkg.name)
     errors.push(`release contract packageName ${contract.packageName} != package.json ${pkg.name}`);
   if (pkg.private !== false) errors.push('package.json обязан нести private:false для public npm channel');
   if (contract.primary?.kind !== 'npm') errors.push('release contract: primary channel обязан быть npm');
+  if (!nonEmptyString(contract.primary?.install))
+    errors.push('release contract: primary.install обязан быть непустой строкой');
   if (contract.fallback?.kind !== 'github-dist-tag' || contract.fallback?.immutable !== true)
     errors.push('release contract: fallback обязан быть immutable github-dist-tag');
+  if (!nonEmptyString(contract.fallback?.specifier))
+    errors.push('release contract: fallback.specifier обязан быть непустой строкой');
   if (!isDeepStrictEqual(contract.files, pkg.files))
     errors.push('release contract files != package.json#files');
   if (!isDeepStrictEqual(contract.exports, pkg.exports))
     errors.push('release contract exports != package.json#exports');
 
-  if (!readme.includes(contract.primary?.install ?? ''))
-    errors.push(`README не содержит primary install «${contract.primary?.install}»`);
-  if (!readme.includes(contract.fallback?.specifier ?? ''))
-    errors.push(`README не содержит fallback specifier «${contract.fallback?.specifier}»`);
-  if (!/основн[^\n]{0,80}npm/i.test(readme))
+  if (nonEmptyString(contract.primary?.install) && !readme.includes(contract.primary.install))
+    errors.push(`README не содержит primary install «${contract.primary.install}»`);
+  if (nonEmptyString(contract.fallback?.specifier) && !readme.includes(contract.fallback.specifier))
+    errors.push(`README не содержит fallback specifier «${contract.fallback.specifier}»`);
+  if (!/основн[^\n]{0,80}npm/i.test(plainReadme))
     errors.push('README не объявляет npm основным каналом');
-  if (!/(fallback|резервн|дополнительн)[^\n]{0,120}-dist/i.test(readme))
+  if (!/(fallback|резервн|дополнительн)[^\n]{0,120}-dist/i.test(plainReadme))
     errors.push('README не объясняет -dist как дополнительный fallback');
 
   for (const { re, why } of FALSE_DISTRIBUTION_CLAIMS) {
-    const match = readme.match(re);
+    const match = plainReadme.match(re);
     if (match) errors.push(`README ложное distribution-утверждение «${match[0]}» (${why})`);
   }
 
-  for (const file of contract.files ?? [])
-    if (!releaseWorkflow.includes(file))
-      errors.push(`release-dist workflow не добавляет contract file ${file}`);
-  if (!releaseWorkflow.includes('pnpm verify'))
+  const actualFiles = releaseWorkflowFiles(releaseWorkflow);
+  if (!isDeepStrictEqual(actualFiles, contract.files))
+    errors.push(
+      `release-dist git add files ${JSON.stringify(actualFiles)} != contract ${JSON.stringify(contract.files)}`,
+    );
+  if (!/^\s*run:\s*pnpm\s+verify\s*$/m.test(releaseWorkflow))
     errors.push('release-dist workflow не запускает canonical pnpm verify');
   return errors;
 }
