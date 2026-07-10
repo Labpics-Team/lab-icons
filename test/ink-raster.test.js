@@ -83,6 +83,18 @@ describe('path-aware ink raster', () => {
     expect(topology(content).holes).toHaveLength(1);
   });
 
+  it('соблюдает локальную cascade: style важнее атрибута, последний !important побеждает', () => {
+    const content = svg(
+      `<path fill-rule='evenodd' ` +
+        `style='fill-rule: evenodd !important; fill-rule: nonzero; fill-rule: nonzero !important' ` +
+        `d='M2 2H18V18H2Z M6 6H14V14H6Z'/>`,
+    );
+    const entries = renderedPathEntries(content);
+
+    expect(entries[0].fillRule).toBe('nonzero');
+    expect(topology(content).holes).toHaveLength(0);
+  });
+
   it('отказывает на inherited fill-rule вместо приблизительной XML-cascade', () => {
     const content =
       `<svg viewBox='0 0 24 24'>` +
@@ -94,12 +106,17 @@ describe('path-aware ink raster', () => {
 
   it('нормализует первый относительный moveto без связи с предыдущим path', () => {
     const entries = renderedPathEntries(
-      svg("<path d='m2 2 4 0 0 4z'/><path d='m10 2 4 0 0 4z'/>") ,
+      svg(
+        "<path d='m2 2 4 0 0 4z'/>" +
+          "<path d='m10 2 4 0 0 4z'/>" +
+          "<path d='m+18 +2 +4 0 0 +4z'/>",
+      ),
     );
 
     expect(entries.map((entry) => entry.d)).toEqual([
       'M2 2l4 0 0 4z',
       'M10 2l4 0 0 4z',
+      'M+18 +2l+4 0 0 +4z',
     ]);
   });
 
