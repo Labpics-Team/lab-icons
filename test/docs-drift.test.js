@@ -8,6 +8,7 @@ import {
   handoffViolations,
   findInkHexClaims,
   hasDocRole,
+  distributionViolations,
   auditRepo,
 } from '../scripts/check-docs-drift.js';
 
@@ -43,13 +44,12 @@ describe('счётчики корпуса', () => {
     const f = computeCorpusFacts(ROOT);
     expect(f.total).toBe(f.outline + f.filled);
     expect(f.exports).toBe(f.names * 2);
-    // паритет весов — инвариант check-parity, здесь только согласованность
     expect(f.outline).toBe(f.names);
   });
 
   it('кусается: устаревший счётчик не входит в допустимое множество', () => {
     const allowed = allowedCounts(computeCorpusFacts(ROOT));
-    expect(allowed.has(447)).toBe(false); // фикстуры тестов — не корпус
+    expect(allowed.has(447)).toBe(false);
     expect(allowed.has(200)).toBe(false);
   });
 });
@@ -102,6 +102,77 @@ describe('роли доков', () => {
 
   it('кусается: док без роли', () => {
     expect(hasDocRole('# Просто заметки\n\nтекст без роли где-то дальше')).toBe(false);
+  });
+});
+
+describe('каналы поставки', () => {
+  const contract = {
+    version: 1,
+    packageName: '@labpics/icons',
+    primary: { kind: 'npm', install: 'pnpm add @labpics/icons' },
+    fallback: {
+      kind: 'github-dist-tag',
+      specifier: 'github:Labpics-Team/lab-icons#vX.Y.Z-dist',
+      immutable: true,
+    },
+    files: ['dist/index.js', 'dist/index.d.ts', 'dist/animate'],
+    exports: {
+      '.': { import: './dist/index.js', types: './dist/index.d.ts' },
+      './animate': {
+        types: './dist/animate/index.d.ts',
+        import: './dist/animate/index.js',
+        require: './dist/animate/index.cjs',
+      },
+    },
+  };
+  const pkg = {
+    name: '@labpics/icons',
+    private: false,
+    files: contract.files,
+    exports: contract.exports,
+  };
+  const workflow =
+    'pnpm verify\ngit add -f dist/index.js dist/index.d.ts dist/animate';
+
+  it('принимает npm primary и immutable git fallback', () => {
+    const readme =
+      'Основной канал — npm: `pnpm add @labpics/icons`.\n' +
+      'Дополнительный fallback: `github:Labpics-Team/lab-icons#vX.Y.Z-dist`.';
+    expect(
+      distributionViolations({ readme, pkg, contract, releaseWorkflow: workflow }),
+    ).toEqual([]);
+  });
+
+  it('кусается на старой private/git-only/PAT прозе', () => {
+    const readme =
+      'Пакет НЕ публикуется в npm (`private: true`), репозиторий приватный; ' +
+      'нужен fine-grained PAT и GH_PAT.';
+    const errors = distributionViolations({
+      readme,
+      pkg,
+      contract,
+      releaseWorkflow: workflow,
+    });
+    expect(errors.join('\n')).toMatch(/не содержит primary install/);
+    expect(errors.join('\n')).toMatch(/private:false/);
+    expect(errors.join('\n')).toMatch(/npm — основной/);
+    expect(errors.join('\n')).toMatch(/репозиторий public/);
+    expect(errors.join('\n')).toMatch(/не требует GitHub PAT/);
+  });
+
+  it('кусается на дрейфе package files/exports и workflow', () => {
+    const readme =
+      'Основной канал — npm: `pnpm add @labpics/icons`.\n' +
+      'Дополнительный fallback: `github:Labpics-Team/lab-icons#vX.Y.Z-dist`.';
+    const errors = distributionViolations({
+      readme,
+      pkg: { ...pkg, files: ['dist/index.js'], exports: {} },
+      contract,
+      releaseWorkflow: 'pnpm verify',
+    });
+    expect(errors).toContain('release contract files != package.json#files');
+    expect(errors).toContain('release contract exports != package.json#exports');
+    expect(errors.some((error) => error.includes('dist/animate'))).toBe(true);
   });
 });
 
