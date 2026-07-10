@@ -99,6 +99,21 @@ export function pnpmSetupBlocks(text) {
   return blocks;
 }
 
+/**
+ * Допустим либо прямой `run: pnpm verify`, либо единственный проверенный
+ * PowerShell-wrapper Windows: он пишет полный лог и обязательно возвращает
+ * исходный `$LASTEXITCODE`. Произвольные `|| true`/`continue-on-error` этим
+ * контрактом не маскируются.
+ */
+export function hasCanonicalVerify(text) {
+  if (/^\s*run:\s*pnpm verify\s*$/m.test(text)) return true;
+
+  const loggedCommand = /^\s*pnpm verify 2>&1 \| Tee-Object -FilePath verify-windows\.log\s*$/m.test(text);
+  const capturesExit = /^\s*\$verifyExit = \$LASTEXITCODE\s*$/m.test(text);
+  const propagatesExit = /^\s*if \(\$verifyExit -ne 0\) \{ exit \$verifyExit \}\s*$/m.test(text);
+  return loggedCommand && capturesExit && propagatesExit;
+}
+
 function pnpmJobErrors({ relativePath, job, expectedPnpmVersion }) {
   const errors = [];
   const prefix = `${relativePath} job ${job.id}`;
@@ -125,8 +140,8 @@ function pnpmJobErrors({ relativePath, job, expectedPnpmVersion }) {
     errors.push(`${prefix}: зависимости обязаны ставиться через «pnpm install --frozen-lockfile»`);
   }
 
-  if (!/^\s*run:\s*pnpm verify\s*$/m.test(job.text)) {
-    errors.push(`${prefix}: полный гейт должен запускаться одной командой «pnpm verify»`);
+  if (!hasCanonicalVerify(job.text)) {
+    errors.push(`${prefix}: полный гейт должен запускаться канонической командой «pnpm verify»`);
   }
 
   const duplicatedEntrypoints = [
@@ -159,10 +174,9 @@ function workflowErrors({ relativePath, text, expectedPnpmVersion }) {
     errors.push(...pnpmJobErrors({ relativePath, job, expectedPnpmVersion }));
   }
 
-  // `pnpm verify` без setup в том же job — типичный ложнозелёный matrix copy.
+  // Verify без setup в том же job — типичный ложнозелёный matrix copy.
   for (const job of jobs) {
-    const runsVerify = /^\s*run:\s*pnpm verify\s*$/m.test(job.text);
-    if (runsVerify && pnpmSetupBlocks(job.text).length === 0) {
+    if (hasCanonicalVerify(job.text) && pnpmSetupBlocks(job.text).length === 0) {
       errors.push(`${relativePath} job ${job.id}: pnpm verify есть, но pnpm/action-setup находится не в этом job`);
     }
   }
