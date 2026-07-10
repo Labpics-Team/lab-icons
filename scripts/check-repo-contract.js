@@ -6,6 +6,10 @@
  * расходились. Такой дрейф опаснее красного CI — часть обязательных проверок
  * могла вообще не запускаться. Гейт держит один package manager, один lockfile
  * и один вход в полный набор проверок: `pnpm verify`.
+ *
+ * Workflow проверяется ПО JOB, а не как плоский текст: второй runner не должен
+ * получать зелёный статус за счёт install/verify, которые находятся в соседнем
+ * job и на его платформе никогда не выполнялись.
  */
 
 import { existsSync, readFileSync } from 'node:fs';
@@ -29,6 +33,40 @@ function defaultReadText(root, relativePath) {
 }
 
 /**
+ * Простая структурная выборка job-блоков GitHub Actions.
+ *
+ * Job ID по синтаксису Actions находится ровно на два пробела глубже `jobs:`.
+ * Мы не пытаемся реализовать YAML-парсер: гейт проверяет репозиторный workflow,
+ * а тесты фиксируют поддерживаемую структуру и не дают молча спутать nested key
+ * с отдельным job.
+ */
+export function workflowJobBlocks(text) {
+  const lines = text.split(/\r?\n/);
+  const jobsLine = lines.findIndex((line) => /^jobs:\s*(?:#.*)?$/.test(line));
+  if (jobsLine < 0) return [];
+
+  const jobs = [];
+  let current = null;
+  for (let index = jobsLine + 1; index < lines.length; index++) {
+    const line = lines[index];
+    const trimmed = line.trim();
+    const indent = line.match(/^\s*/)?.[0].length ?? 0;
+
+    if (trimmed && !trimmed.startsWith('#') && indent === 0) break;
+
+    const header = line.match(/^  ([A-Za-z_][A-Za-z0-9_-]*):\s*(?:#.*)?$/);
+    if (header) {
+      if (current) jobs.push({ id: current.id, text: current.lines.join('\n') });
+      current = { id: header[1], lines: [line] };
+      continue;
+    }
+    if (current) current.lines.push(line);
+  }
+  if (current) jobs.push({ id: current.id, text: current.lines.join('\n') });
+  return jobs;
+}
+
+/**
  * Извлекает только блоки pnpm/action-setup. Чужие inputs с ключом `version`
  * намеренно игнорируются: общий regex по YAML создавал бы ложные срабатывания.
  */
@@ -36,19 +74,19 @@ export function pnpmSetupBlocks(text) {
   const lines = text.split(/\r?\n/);
   const blocks = [];
 
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
+  for (let index = 0; index < lines.length; index++) {
+    const line = lines[index];
     const action = line.match(/^(\s*)(?:-\s+)?uses:\s*pnpm\/action-setup@([^\s#]+)/);
     if (!action) continue;
 
     const baseIndent = action[1].length;
     let version = null;
-    for (let j = i + 1; j < lines.length; j++) {
-      const next = lines[j];
+    for (let nextIndex = index + 1; nextIndex < lines.length; nextIndex++) {
+      const next = lines[nextIndex];
       const trimmed = next.trim();
       if (!trimmed || trimmed.startsWith('#')) continue;
 
-      const indent = next.match(/^\s*/)[0].length;
+      const indent = next.match(/^\s*/)?.[0].length ?? 0;
       if (trimmed.startsWith('- ') && indent <= baseIndent) break;
 
       const versionMatch = trimmed.match(/^version:\s*['"]?([^'"\s#]+)/);
@@ -61,44 +99,97 @@ export function pnpmSetupBlocks(text) {
   return blocks;
 }
 
-function workflowErrors({ relativePath, text, expectedPnpmVersion }) {
+/**
+ * Допустим прямой `run: pnpm verify` либо два закрытых логирующих wrapper-а:
+ *
+ * - Bash: `set -o pipefail` + точная pipe-команда в `verify-linux.log`;
+ * - PowerShell: точная pipe-команда + захват и проброс `$LASTEXITCODE`.
+ *
+ * Произвольные `|| true`, `continue-on-error` и логирование без сохранения кода
+ * завершения этим контрактом не маскируются. Сокращённый YAML step `- run:`
+ * эквивалентен развёрнутому `run:` и обязан распознаваться теми же правилами.
+ */
+export function hasCanonicalVerify(text) {
+  if (/^\s*(?:-\s+)?run:\s*pnpm verify\s*$/m.test(text)) return true;
+
+  const linuxPipefail = /^\s*set -o pipefail\s*$/m.test(text);
+  const linuxLoggedCommand = /^\s*pnpm verify 2>&1 \| tee verify-linux\.log\s*$/m.test(text);
+  if (linuxPipefail && linuxLoggedCommand) return true;
+
+  const windowsLoggedCommand = /^\s*pnpm verify 2>&1 \| Tee-Object -FilePath verify-windows\.log\s*$/m.test(text);
+  const capturesExit = /^\s*\$verifyExit = \$LASTEXITCODE\s*$/m.test(text);
+  const propagatesExit = /^\s*if \(\$verifyExit -ne 0\) \{ exit \$verifyExit \}\s*$/m.test(text);
+  return windowsLoggedCommand && capturesExit && propagatesExit;
+}
+
+function pnpmJobErrors({ relativePath, job, expectedPnpmVersion }) {
   const errors = [];
-  const setups = pnpmSetupBlocks(text);
+  const prefix = `${relativePath} job ${job.id}`;
+  const setups = pnpmSetupBlocks(job.text);
 
   if (setups.length !== 1) {
-    errors.push(`${relativePath}: должен быть ровно один pnpm/action-setup; найдено ${setups.length}`);
+    errors.push(`${prefix}: должен быть ровно один pnpm/action-setup; найдено ${setups.length}`);
   } else {
     const [setup] = setups;
     if (!PINNED_ACTION_REF.test(setup.ref)) {
-      errors.push(`${relativePath}: pnpm/action-setup обязан быть запинен полным 40-символьным SHA; найдено ${setup.ref}`);
+      errors.push(
+        `${prefix}: pnpm/action-setup обязан быть запинен полным 40-символьным SHA; найдено ${setup.ref}`,
+      );
     }
     if (expectedPnpmVersion && setup.version !== expectedPnpmVersion) {
       errors.push(
-        `${relativePath}: pnpm action обязан использовать ${expectedPnpmVersion} из packageManager; ` +
+        `${prefix}: pnpm action обязан использовать ${expectedPnpmVersion} из packageManager; ` +
           `найдено ${setup.version ?? 'ничего'}`,
       );
     }
   }
 
-  if (!/^\s*run:\s*pnpm install --frozen-lockfile\s*$/m.test(text)) {
-    errors.push(`${relativePath}: зависимости обязаны ставиться через «pnpm install --frozen-lockfile»`);
+  if (!/^\s*(?:-\s+)?run:\s*pnpm install --frozen-lockfile\s*$/m.test(job.text)) {
+    errors.push(`${prefix}: зависимости обязаны ставиться через «pnpm install --frozen-lockfile»`);
   }
 
-  if (!/^\s*run:\s*pnpm verify\s*$/m.test(text)) {
-    errors.push(`${relativePath}: полный гейт должен запускаться одной командой «pnpm verify»`);
+  if (!hasCanonicalVerify(job.text)) {
+    errors.push(`${prefix}: полный гейт должен запускаться канонической командой «pnpm verify»`);
   }
 
   const duplicatedEntrypoints = [
-    ...text.matchAll(/^\s*run:\s*pnpm\s+(build(?::\S+)?|typecheck|test|check:\S+)\s*$/gm),
+    ...job.text.matchAll(
+      /^\s*(?:-\s+)?run:\s*pnpm\s+(build(?::\S+)?|typecheck|test|check:\S+)\s*$/gm,
+    ),
   ].map((match) => match[0].trim());
   if (duplicatedEntrypoints.length > 0) {
     errors.push(
-      `${relativePath}: отдельные верхнеуровневые шаги дублируют verify и создают второй список истины: ` +
+      `${prefix}: отдельные верхнеуровневые шаги дублируют verify и создают второй список истины: ` +
         duplicatedEntrypoints.join(', '),
     );
   }
 
-  if (/^\s*run:\s*(npm|yarn)\s+(ci|install)\b/m.test(text)) {
+  return errors;
+}
+
+function workflowErrors({ relativePath, text, expectedPnpmVersion }) {
+  const errors = [];
+  const jobs = workflowJobBlocks(text);
+  if (jobs.length === 0) {
+    return [`${relativePath}: секция jobs отсутствует или не распознана`];
+  }
+
+  const pnpmJobs = jobs.filter((job) => pnpmSetupBlocks(job.text).length > 0);
+  if (pnpmJobs.length === 0) {
+    errors.push(`${relativePath}: нет ни одного job с pnpm/action-setup`);
+  }
+  for (const job of pnpmJobs) {
+    errors.push(...pnpmJobErrors({ relativePath, job, expectedPnpmVersion }));
+  }
+
+  // Verify без setup в том же job — типичный ложнозелёный matrix copy.
+  for (const job of jobs) {
+    if (hasCanonicalVerify(job.text) && pnpmSetupBlocks(job.text).length === 0) {
+      errors.push(`${relativePath} job ${job.id}: pnpm verify есть, но pnpm/action-setup находится не в этом job`);
+    }
+  }
+
+  if (/^\s*(?:-\s+)?run:\s*(npm|yarn)\s+(ci|install)\b/m.test(text)) {
     errors.push(`${relativePath}: установка зависимостей разрешена только через pnpm`);
   }
 
@@ -175,9 +266,9 @@ const isMain = process.argv[1] && import.meta.url === pathToFileURL(process.argv
 if (isMain) {
   const errors = validateRepoContract();
   if (errors.length > 0) {
-    console.error(`check-repo-contract: HARD — ${errors.length} нарушений воспроизводимости:`);
+    console.error(`check-repo-contract: HARD — ${errors.length} нарушений:`);
     for (const error of errors) console.error(`  - ${error}`);
     process.exit(1);
   }
-  console.log('check-repo-contract: OK — packageManager SSOT, один lockfile, CI/release запускают канонический pnpm verify');
+  console.log('check-repo-contract: OK — один pnpm/lockfile, CI и release выполняют канонический pnpm verify');
 }
