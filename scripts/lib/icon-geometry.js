@@ -11,6 +11,7 @@ import { pathBBox } from './path-data.js';
 
 const VIEWBOX_RE = /viewBox\s*=\s*["']([\d.\s-]+)["']/i;
 const PATH_TAG_RE = /<path\b[^>]*>/gi;
+const FILL_RULE_CONTAINER_RE = /<(?:svg|g)\b[^>]*>/gi;
 
 /** Значение quoted-атрибута тега; corpus contract запрещает style-магии извне. */
 function attributeValue(tag, name) {
@@ -37,8 +38,7 @@ function normalizeHead(d) {
 
 /**
  * Эффективный fill-rule самого path. В корпусе наследуемый fill-rule на
- * контейнерах запрещён контрактом; inline style поддержан, чтобы диагностика
- * не давала ложнозелёный результат на старом экспорте.
+ * контейнерах запрещён: без полноценного XML cascade его нельзя угадывать.
  */
 function ownFillRule(tag) {
   const direct = attributeValue(tag, 'fill-rule')?.trim().toLowerCase();
@@ -51,12 +51,28 @@ function ownFillRule(tag) {
 }
 
 /**
+ * Не молчим на наследуемом fill-rule. Поддержать каскад «примерно» хуже, чем
+ * упасть: вложенные группы потребовали бы XML-стек и могли дать ложнозелёный
+ * topology verdict. Канон корпуса — правило локально на path.
+ */
+function assertPathLocalFillRule(svgContent) {
+  for (const tag of svgContent.match(FILL_RULE_CONTAINER_RE) ?? []) {
+    const direct = attributeValue(tag, 'fill-rule');
+    const style = attributeValue(tag, 'style');
+    if (direct != null || /(?:^|;)\s*fill-rule\s*:/i.test(style ?? '')) {
+      throw new Error('icon-geometry: наследуемый fill-rule на <svg>/<g> запрещён; перенести правило на конкретный <path>');
+    }
+  }
+}
+
+/**
  * Рендерящиеся path-элементы без геометрии из <defs>.
  *
  * @returns {Array<{index:number, d:string, fillRule:'evenodd'|'nonzero'}>}
  */
 export function renderedPathEntries(svgContent) {
   const withoutDefs = svgContent.replace(/<defs\b[\s\S]*?<\/defs>/gi, '');
+  assertPathLocalFillRule(withoutDefs);
   const entries = [];
   let index = 0;
   for (const tag of withoutDefs.match(PATH_TAG_RE) ?? []) {
