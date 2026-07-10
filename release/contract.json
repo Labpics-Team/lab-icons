@@ -3,6 +3,7 @@
   "packageName": "@labpics/icons",
   "primary": {
     "kind": "npm",
+    "access": "public",
     "install": "pnpm add @labpics/icons"
   },
   "fallback": {
