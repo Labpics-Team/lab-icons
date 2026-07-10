@@ -9,14 +9,15 @@
 
 import { pathBBox } from './path-data.js';
 
-const VIEWBOX_RE = /viewBox\s*=\s*["']([\d.\s-]+)["']/i;
+const SVG_TAG_RE = /<svg\b[^>]*>/i;
 const PATH_TAG_RE = /<path\b[^>]*>/gi;
 const FILL_RULE_CONTAINER_RE = /<(?:svg|g)\b[^>]*>/gi;
+const CSS_WIDE_FILL_RULES = new Set(['inherit', 'unset', 'revert', 'revert-layer']);
 
-/** Значение quoted-атрибута тега; corpus contract запрещает style-магии извне. */
+/** Значение quoted-атрибута тега; имя обязано начинаться после whitespace. */
 function attributeValue(tag, name) {
   const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const match = tag.match(new RegExp(`\\b${escaped}\\s*=\\s*(?:"([^"]*)"|'([^']*)')`, 'i'));
+  const match = tag.match(new RegExp(`(?:^|\\s)${escaped}\\s*=\\s*(?:"([^"]*)"|'([^']*)')`, 'i'));
   return match ? (match[1] ?? match[2] ?? '') : null;
 }
 
@@ -36,11 +37,24 @@ function normalizeHead(d) {
   );
 }
 
+function normalizeFillRule(value, source) {
+  const normalized = value.trim().toLowerCase();
+  if (normalized === 'evenodd' || normalized === 'nonzero') return normalized;
+  if (normalized === 'initial') return 'nonzero';
+  if (CSS_WIDE_FILL_RULES.has(normalized)) {
+    throw new Error(
+      `icon-geometry: ${source} использует ${normalized}; inherited fill-rule без полного XML/CSS cascade запрещён`,
+    );
+  }
+  return null;
+}
+
 /**
  * Значение fill-rule из inline style с реальной локальной cascade:
  * - style перекрывает presentation attribute;
  * - среди деклараций одного приоритета побеждает последняя;
- * - !important перекрывает обычную декларацию.
+ * - !important перекрывает обычную декларацию;
+ * - синтаксически неверная декларация игнорируется по CSS-правилам.
  */
 function styleFillRule(style) {
   if (typeof style !== 'string') return null;
@@ -53,8 +67,11 @@ function styleFillRule(style) {
 
     const raw = declaration.slice(colon + 1).trim();
     const important = /\s*!important\s*$/i.test(raw);
-    const value = raw.replace(/\s*!important\s*$/i, '').trim().toLowerCase();
-    if (value !== 'evenodd' && value !== 'nonzero') continue;
+    const value = normalizeFillRule(
+      raw.replace(/\s*!important\s*$/i, ''),
+      'inline style fill-rule',
+    );
+    if (!value) continue;
 
     if (!selected || important || !selected.important) selected = { value, important };
   }
@@ -69,8 +86,8 @@ function ownFillRule(tag) {
   const styled = styleFillRule(attributeValue(tag, 'style'));
   if (styled) return styled;
 
-  const direct = attributeValue(tag, 'fill-rule')?.trim().toLowerCase();
-  return direct === 'evenodd' ? 'evenodd' : 'nonzero';
+  const direct = attributeValue(tag, 'fill-rule');
+  return direct == null ? 'nonzero' : (normalizeFillRule(direct, 'presentation attribute fill-rule') ?? 'nonzero');
 }
 
 /**
@@ -125,12 +142,15 @@ export function renderedPathData(svgContent) {
  * }}
  */
 export function iconGeometry(svgContent) {
-  const vb = VIEWBOX_RE.exec(svgContent);
-  if (!vb) throw new Error('icon-geometry: viewBox не найден');
-  const [x, y, width, height] = vb[1].trim().split(/\s+/).map(Number);
-  if ([x, y, width, height].some((v) => !Number.isFinite(v))) {
-    throw new Error(`icon-geometry: невалидный viewBox "${vb[1]}"`);
+  const svgTag = svgContent.match(SVG_TAG_RE)?.[0] ?? null;
+  const rawViewBox = svgTag ? attributeValue(svgTag, 'viewBox') : null;
+  if (rawViewBox == null) throw new Error('icon-geometry: viewBox не найден');
+
+  const values = rawViewBox.trim().split(/[\s,]+/).filter(Boolean).map(Number);
+  if (values.length !== 4 || values.some((value) => !Number.isFinite(value))) {
+    throw new Error(`icon-geometry: невалидный viewBox "${rawViewBox}"`);
   }
+  const [x, y, width, height] = values;
 
   const paths = [];
   for (const { index, d } of renderedPathEntries(svgContent)) {
