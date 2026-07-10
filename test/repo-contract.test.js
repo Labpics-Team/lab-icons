@@ -9,13 +9,21 @@ const PACKAGE_MANAGER = 'pnpm@10.30.3';
 const ACTION_SHA = 'a7487c7e89a18df4991f7f222e4898a00d66ddda';
 
 function verifyStep(mode) {
-  if (mode === 'logged') {
+  if (mode === 'logged-windows') {
     return `      - name: Verify
         shell: pwsh
         run: |
           pnpm verify 2>&1 | Tee-Object -FilePath verify-windows.log
           $verifyExit = $LASTEXITCODE
           if ($verifyExit -ne 0) { exit $verifyExit }
+`;
+  }
+  if (mode === 'logged-linux') {
+    return `      - name: Verify
+        shell: bash
+        run: |
+          set -o pipefail
+          pnpm verify 2>&1 | tee verify-linux.log
 `;
   }
   return `      - name: Verify
@@ -93,8 +101,8 @@ describe('check-repo-contract', () => {
   it('принимает независимые Linux и Windows job с полным контрактом в каждом', () => {
     const ci = workflow({
       jobs: [
-        job({ id: 'linux', runner: 'ubuntu-latest' }),
-        job({ id: 'windows', runner: 'windows-latest', verify: 'logged' }),
+        job({ id: 'linux', runner: 'ubuntu-latest', verify: 'logged-linux' }),
+        job({ id: 'windows', runner: 'windows-latest', verify: 'logged-windows' }),
       ],
     });
     expect(fixture({ filesPatch: { '.github/workflows/ci.yml': ci } })).toEqual([]);
@@ -119,8 +127,8 @@ jobs:
     expect(workflowJobBlocks(text).map((entry) => entry.id)).toEqual(['matrix']);
   });
 
-  it('принимает только logged-wrapper с обязательным пробросом exit code', () => {
-    const valid = verifyStep('logged');
+  it('принимает только Windows wrapper с обязательным пробросом exit code', () => {
+    const valid = verifyStep('logged-windows');
     const masked = valid.replace(
       'if ($verifyExit -ne 0) { exit $verifyExit }',
       'if ($verifyExit -ne 0) { Write-Host masked }',
@@ -128,6 +136,13 @@ jobs:
     expect(hasCanonicalVerify(valid)).toBe(true);
     expect(hasCanonicalVerify(masked)).toBe(false);
     expect(hasCanonicalVerify('run: pnpm verify || true')).toBe(false);
+  });
+
+  it('принимает Linux wrapper только с pipefail', () => {
+    const valid = verifyStep('logged-linux');
+    const masked = valid.replace('set -o pipefail\n', '');
+    expect(hasCanonicalVerify(valid)).toBe(true);
+    expect(hasCanonicalVerify(masked)).toBe(false);
   });
 
   it('кусается, если второй runner не выполняет собственный verify', () => {
