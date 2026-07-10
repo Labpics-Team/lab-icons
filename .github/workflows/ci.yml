@@ -44,9 +44,22 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       # Единственный список обязательных проверок живёт в package.json#scripts.verify.
-      # Иначе CI и локальный прогон неизбежно расходятся.
+      # Иначе CI и локальный прогон неизбежно расходятся. pipefail сохраняет
+      # исходный код pnpm при одновременной записи полного корпуса в артефакт.
       - name: Verify repository, geometry, package and tests
-        run: pnpm verify
+        shell: bash
+        run: |
+          set -o pipefail
+          pnpm verify 2>&1 | tee verify-linux.log
+
+      - name: Upload failed Linux verify log
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: linux-verify-log
+          path: verify-linux.log
+          if-no-files-found: warn
+          retention-days: 3
 
       # Bite tests доказывают, что критические гарды действительно падают,
       # а не только печатают зелёный отчёт на исправном корпусе.
