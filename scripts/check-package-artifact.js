@@ -104,6 +104,33 @@ export function validateInstalledPackage(packageRoot) {
   return { errors, files: existsSync(packageRoot) ? listFiles(packageRoot) : [] };
 }
 
+/**
+ * Node не запускает `.cmd` напрямую через execFileSync на современных Windows
+ * (EINVAL после security hardening). Используем явный системный command
+ * processor без `shell: true`: executable и все аргументы остаются раздельными.
+ */
+export function pnpmInvocation(
+  args,
+  {
+    platform = process.platform,
+    command = platform === 'win32' ? 'pnpm.cmd' : 'pnpm',
+    comspec = process.env.ComSpec || 'cmd.exe',
+  } = {},
+) {
+  if (platform === 'win32') {
+    return { file: comspec, args: ['/d', '/s', '/c', command, ...args] };
+  }
+  return { file: command, args };
+}
+
+function runPnpm(args, options, commandOptions) {
+  const invocation = pnpmInvocation(args, commandOptions);
+  return execFileSync(invocation.file, invocation.args, {
+    ...options,
+    windowsHide: true,
+  });
+}
+
 function commandFailure(error) {
   const stdout = Buffer.isBuffer(error.stdout) ? error.stdout.toString('utf8') : String(error.stdout ?? '');
   const stderr = Buffer.isBuffer(error.stderr) ? error.stderr.toString('utf8') : String(error.stderr ?? '');
@@ -111,19 +138,29 @@ function commandFailure(error) {
 }
 
 /** Полный pack/install/import/typecheck smoke. */
-export function checkPackageArtifact({ root = ROOT, pnpm = process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm' } = {}) {
+export function checkPackageArtifact({
+  root = ROOT,
+  platform = process.platform,
+  pnpmCommand = platform === 'win32' ? 'pnpm.cmd' : 'pnpm',
+  comspec = process.env.ComSpec || 'cmd.exe',
+} = {}) {
   const temp = mkdtempSync(join(tmpdir(), 'lab-icons-package-'));
   const packDir = join(temp, 'pack');
   const consumer = join(temp, 'consumer');
+  const commandOptions = { platform, command: pnpmCommand, comspec };
   mkdirSync(packDir, { recursive: true });
   mkdirSync(consumer, { recursive: true });
 
   try {
-    execFileSync(pnpm, ['pack', '--pack-destination', packDir], {
-      cwd: root,
-      encoding: 'utf8',
-      stdio: ['ignore', 'pipe', 'pipe'],
-    });
+    runPnpm(
+      ['pack', '--pack-destination', packDir],
+      {
+        cwd: root,
+        encoding: 'utf8',
+        stdio: ['ignore', 'pipe', 'pipe'],
+      },
+      commandOptions,
+    );
 
     const tarballs = readdirSync(packDir).filter((name) => name.endsWith('.tgz'));
     if (tarballs.length !== 1) {
@@ -150,10 +187,10 @@ export function checkPackageArtifact({ root = ROOT, pnpm = process.platform === 
 
     // --no-lockfile отключает CI-default frozen-lockfile в пустом consumer.
     // --offline доказывает, что установка не зависит от registry/network.
-    execFileSync(
-      pnpm,
+    runPnpm(
       ['install', '--offline', '--ignore-scripts', '--no-lockfile', '--store-dir', join(temp, 'store')],
       { cwd: consumer, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] },
+      commandOptions,
     );
 
     const installed = join(consumer, 'node_modules', '@labpics', 'icons');
