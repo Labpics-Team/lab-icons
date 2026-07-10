@@ -1,34 +1,13 @@
 name: Release dist tag
 
-# Публикует релиз @labpics/icons НЕ в npm-реестр, а как git-зависимость.
-#
-# ПОЧЕМУ так, а не GitHub Packages:
-#   GitHub Packages для npm требует, чтобы scope пакета совпадал с владельцем-
-#   аккаунтом реестра. Владелец репозитория — организация Labpics-Team, а бренд-
-#   scope @labpics занят «мёртвым» User-сквоттером (labpics, неактивен). Значит
-#   через встроенный GITHUB_TOKEN опубликовать @labpics/* в реестр нельзя (403).
-#   Правило scope==owner действует ТОЛЬКО в реестре; для git-зависимостей имя
-#   пакета свободно — поэтому бренд @labpics/icons сохраняем, а потребители ставят
-#   пакет прямо из git по иммутабельному тегу с уже собранным dist/.
-#   (Если GitHub освободит username labpics — вернёмся к GitHub Packages.)
-#
-# КАК устроен релиз:
-#   1. Владелец ставит релизный тег на master:  git tag v0.0.2 && git push origin v0.0.2
-#   2. Этот воркфлоу ловит push тега v* , гоняет полный verify-гейт и создаёт
-#      БРАТСКИЙ тег <тег>-dist — коммит с добавленным dist/ поверх релизного тега.
-#   3. Потребитель ставит:  "@labpics/icons": "github:Labpics-Team/lab-icons#v0.0.2-dist"
-#      (раздел «Установка» в README.md).
-#
-#   main НЕ трогается: dist/ остаётся gitignored в основной ветке и живёт только
-#   внутри иммутабельного -dist тега. Артефакт нельзя пропатчить на месте — новый
-#   релиз = новый тег (immutable infrastructure).
+# Публикует иммутабельный git-dependency артефакт поверх релизного тега.
+# Канал npm проверяется и документируется отдельно; этот workflow отвечает
+# только за братский <tag>-dist и не должен менять master.
 on:
   push:
     tags:
       - 'v*'
-      # Исключаем собственные -dist теги: иначе push ниже зациклил бы воркфлоу.
-      # (Push через GITHUB_TOKEN и так не триггерит workflow повторно — это второй
-      # рубеж защиты от рекурсии.)
+      # Push собственного -dist тега не должен зациклить workflow.
       - '!v*-dist'
   workflow_dispatch:
     inputs:
@@ -36,7 +15,7 @@ on:
         description: 'Релизный тег vX.Y.Z для ручной пересборки dist'
         required: true
 
-# contents: write — нужно, чтобы запушить брат-тег <тег>-dist. Больше ничего не даём.
+# Единственное необходимое расширенное право — push братского тега.
 permissions:
   contents: write
 
@@ -44,27 +23,23 @@ jobs:
   release-dist:
     name: Verify gate + push <tag>-dist
     runs-on: [self-hosted, Linux, X64]
+    timeout-minutes: 30
 
     steps:
-      # Actions запинены по SHA (supply-chain) — ТЕ ЖЕ пины, что в ci.yml.
-      # persist-credentials НЕ отключаем (в отличие от ci.yml): токен нужен в
-      # рабочем дереве, чтобы запушить -dist тег.
-      - name: Checkout релизного тега
+      # Те же SHA-пины, что в ci.yml. persist-credentials здесь нужен для push.
+      - name: Checkout release tag
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
-          # push тега → github.ref (refs/tags/vX.Y.Z); ручной запуск → inputs.tag.
           ref: ${{ github.event.inputs.tag || github.ref }}
 
       - name: Setup pnpm
         uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
         with:
-          version: 9
-          # per-job dest: дефолтный ~/setup-pnpm ОБЩИЙ для 8 self-hosted раннеров
-          # (один /home/daniel) и гоняется между конкурентными job'ами любых репо.
+          # Должно совпадать с package.json#packageManager; это держит
+          # scripts/check-repo-contract.js внутри pnpm verify.
+          version: 10.30.3
           dest: ${{ runner.temp }}/setup-pnpm
 
-      # Без cache:pnpm — на этих раннерах шаг кэша висел на сетевом эгрессе
-      # (класс закрыт в labui); pnpm-store и так персистит на самом раннере.
       - name: Setup Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
@@ -73,36 +48,34 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # Полный гейт: build + parity(444) + colours + tree-shaking. verify также
-      # собирает dist/index.js + dist/index.d.ts — их и вкладываем в -dist тег.
-      - name: Verify (build + parity + colours + tree-shaking)
+      # Единственный канонический список сборки, геометрических гейтов и тестов.
+      - name: Verify release source
         run: pnpm verify
 
-      # Собираем иммутабельный брат-тег <тег>-dist: коммит с dist/ поверх релизного
-      # тега, затем push ТОЛЬКО этого тега. master не меняется. Идемпотентно:
-      # существующий -dist тег не перезаписываем (артефакт неизменяем).
       - name: Build and push <tag>-dist
         run: |
           set -euo pipefail
           TAG="${{ github.event.inputs.tag || github.ref_name }}"
           case "$TAG" in
-            *-dist) echo "::error::Ожидался релизный тег vX.Y.Z, а не -dist ($TAG)"; exit 1 ;;
+            *-dist)
+              echo "::error::Ожидался релизный тег vX.Y.Z, а не -dist ($TAG)"
+              exit 1
+              ;;
           esac
           DIST_TAG="${TAG}-dist"
 
           if git ls-remote --exit-code --tags origin "refs/tags/${DIST_TAG}" >/dev/null 2>&1; then
-            echo "Тег ${DIST_TAG} уже существует — пропускаю (иммутабельный артефакт)."
+            echo "Тег ${DIST_TAG} уже существует — иммутабельный артефакт не перезаписывается."
             exit 0
           fi
 
-          git config user.name  "github-actions[bot]"
+          git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          # dist/ в .gitignore → добавляем принудительно ровно то, что перечислено
-          # в поле "files" package.json: корневой вход + сабпас ./animate (ESM/CJS/
-          # типы/сорсмапы). Иначе git-dep резолвит "@labpics/icons/animate" в пустоту.
+          # dist/ gitignored. Принудительно добавляем ровно опубликованные входы
+          # из package.json#files, включая ESM/CJS/types подпути ./animate.
           git add -f dist/index.js dist/index.d.ts dist/animate
-          git commit -m "build: dist для ${DIST_TAG} (git-dep артефакт; main не трогаем)"
+          git commit -m "build: dist для ${DIST_TAG} (git-dep артефакт; master не трогаем)"
           git tag "${DIST_TAG}"
           git push origin "refs/tags/${DIST_TAG}"
           echo "Опубликован git-dep тег ${DIST_TAG}."
