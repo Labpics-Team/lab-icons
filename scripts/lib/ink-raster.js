@@ -113,6 +113,9 @@ export function rasterizePathEntries(
   if (!Number.isInteger(stepsPerSeg) || stepsPerSeg < 1) {
     throw new Error(`ink-raster: stepsPerSeg обязан быть положительным целым; найдено ${stepsPerSeg}`);
   }
+  if (!Array.isArray(entries) || entries.length === 0) {
+    throw new Error('ink-raster: entries обязан быть непустым массивом path');
+  }
 
   const cols = Math.ceil(width / step);
   const rows = Math.ceil(height / step);
@@ -144,7 +147,17 @@ export function rasterizeSvgInk(svgContent, options = {}) {
   return rasterizePathEntries(renderedPathEntries(svgContent), options);
 }
 
-function labelFeatures(mask, cols, rows, eightConnected) {
+/**
+ * Маркировка связных областей произвольной бинарной маски.
+ *
+ * Возвращаем не только площади, но и labels каждой клетки: adjacency-гейту
+ * нужно доказуемо назначить именованные части конкретной компоненте baseline,
+ * а не угадывать компоненту по bbox/порядку path.
+ */
+export function labelMaskFeatures(mask, cols, rows, { eightConnected = true } = {}) {
+  if (!(mask instanceof Uint8Array) || mask.length !== cols * rows) {
+    throw new Error('ink-raster: mask не согласован с cols×rows');
+  }
   const labels = new Int32Array(mask.length).fill(-1);
   const stack = new Int32Array(mask.length);
   const features = [];
@@ -154,6 +167,12 @@ function labelFeatures(mask, cols, rows, eightConnected) {
     const id = features.length;
     let cells = 0;
     let touchesFrame = false;
+    let minRow = rows;
+    let minCol = cols;
+    let maxRow = -1;
+    let maxCol = -1;
+    let sumRow = 0;
+    let sumCol = 0;
     let top = 0;
     stack[top++] = start;
     labels[start] = id;
@@ -163,6 +182,12 @@ function labelFeatures(mask, cols, rows, eightConnected) {
       cells++;
       const row = Math.floor(index / cols);
       const col = index % cols;
+      sumRow += row;
+      sumCol += col;
+      if (row < minRow) minRow = row;
+      if (col < minCol) minCol = col;
+      if (row > maxRow) maxRow = row;
+      if (col > maxCol) maxCol = col;
       if (row === 0 || col === 0 || row === rows - 1 || col === cols - 1) touchesFrame = true;
 
       for (let dr = -1; dr <= 1; dr++) {
@@ -180,9 +205,15 @@ function labelFeatures(mask, cols, rows, eightConnected) {
         }
       }
     }
-    features.push({ cells, touchesFrame });
+    features.push({
+      id,
+      cells,
+      touchesFrame,
+      bbox: { minRow, minCol, maxRow, maxCol },
+      centroidCell: [sumCol / cells, sumRow / cells],
+    });
   }
-  return features;
+  return { labels, features };
 }
 
 /**
@@ -194,11 +225,12 @@ export function topologyOfMask({ mask, cols, rows, step }) {
     throw new Error('ink-raster: mask не согласован с cols×rows');
   }
   const cellArea = step * step;
-  const components = labelFeatures(mask, cols, rows, true).map((feature) => feature.cells * cellArea);
+  const components = labelMaskFeatures(mask, cols, rows, { eightConnected: true })
+    .features.map((feature) => feature.cells * cellArea);
   const negative = new Uint8Array(mask.length);
   for (let i = 0; i < mask.length; i++) negative[i] = mask[i] ? 0 : 1;
-  const holes = labelFeatures(negative, cols, rows, false)
-    .filter((feature) => !feature.touchesFrame)
+  const holes = labelMaskFeatures(negative, cols, rows, { eightConnected: false })
+    .features.filter((feature) => !feature.touchesFrame)
     .map((feature) => feature.cells * cellArea);
   return {
     components: components.sort((a, b) => b - a),
