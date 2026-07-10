@@ -8,6 +8,7 @@ import {
   handoffViolations,
   findInkHexClaims,
   hasDocRole,
+  normalizeDistributionText,
   releaseWorkflowFiles,
   distributionViolations,
   auditRepo,
@@ -152,10 +153,18 @@ describe('каналы поставки', () => {
     expect(releaseWorkflowFiles('# git add -f dist/index.js')).toEqual([]);
   });
 
-  it('кусается на старой private/git-only/PAT прозе даже под markdown', () => {
+  it('нормализует markdown, переносы и типографские дефисы', () => {
+    expect(
+      normalizeDistributionText(
+        '`private`: **true**\nрепозиторий — приватный\nfine‑grained\nPAT',
+      ),
+    ).toBe('private: true репозиторий - приватный fine-grained PAT');
+  });
+
+  it('кусается на старой private/git-only/PAT прозе при Unicode и переносах', () => {
     const falseReadme =
-      'Пакет НЕ публикуется в npm (`private: **true**`), репозиторий приватный; ' +
-      'нужен fine-grained PAT и GH_PAT.';
+      'Пакет **не\nпубликуется** никуда в npm (`private`: `true`), ' +
+      'репозиторий — приватный; нужен fine‑grained\nPAT и GH_PAT.';
     const errors = distributionViolations({
       readme: falseReadme,
       pkg,
