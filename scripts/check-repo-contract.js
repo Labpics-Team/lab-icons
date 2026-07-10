@@ -106,10 +106,11 @@ export function pnpmSetupBlocks(text) {
  * - PowerShell: точная pipe-команда + захват и проброс `$LASTEXITCODE`.
  *
  * Произвольные `|| true`, `continue-on-error` и логирование без сохранения кода
- * завершения этим контрактом не маскируются.
+ * завершения этим контрактом не маскируются. Сокращённый YAML step `- run:`
+ * эквивалентен развёрнутому `run:` и обязан распознаваться теми же правилами.
  */
 export function hasCanonicalVerify(text) {
-  if (/^\s*run:\s*pnpm verify\s*$/m.test(text)) return true;
+  if (/^\s*(?:-\s+)?run:\s*pnpm verify\s*$/m.test(text)) return true;
 
   const linuxPipefail = /^\s*set -o pipefail\s*$/m.test(text);
   const linuxLoggedCommand = /^\s*pnpm verify 2>&1 \| tee verify-linux\.log\s*$/m.test(text);
@@ -143,7 +144,7 @@ function pnpmJobErrors({ relativePath, job, expectedPnpmVersion }) {
     }
   }
 
-  if (!/^\s*run:\s*pnpm install --frozen-lockfile\s*$/m.test(job.text)) {
+  if (!/^\s*(?:-\s+)?run:\s*pnpm install --frozen-lockfile\s*$/m.test(job.text)) {
     errors.push(`${prefix}: зависимости обязаны ставиться через «pnpm install --frozen-lockfile»`);
   }
 
@@ -153,7 +154,7 @@ function pnpmJobErrors({ relativePath, job, expectedPnpmVersion }) {
 
   const duplicatedEntrypoints = [
     ...job.text.matchAll(
-      /^\s*run:\s*pnpm\s+(build(?::\S+)?|typecheck|test|check:\S+)\s*$/gm,
+      /^\s*(?:-\s+)?run:\s*pnpm\s+(build(?::\S+)?|typecheck|test|check:\S+)\s*$/gm,
     ),
   ].map((match) => match[0].trim());
   if (duplicatedEntrypoints.length > 0) {
@@ -188,7 +189,7 @@ function workflowErrors({ relativePath, text, expectedPnpmVersion }) {
     }
   }
 
-  if (/^\s*run:\s*(npm|yarn)\s+(ci|install)\b/m.test(text)) {
+  if (/^\s*(?:-\s+)?run:\s*(npm|yarn)\s+(ci|install)\b/m.test(text)) {
     errors.push(`${relativePath}: установка зависимостей разрешена только через pnpm`);
   }
 
