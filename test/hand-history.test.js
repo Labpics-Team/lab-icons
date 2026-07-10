@@ -10,13 +10,13 @@ const EARLY_HAND_BLOB = '4'.repeat(40);
 
 const treeLine = (blobSha, path) => `100644 blob ${blobSha}\t${path}\n`;
 
-function fixtureGit({ shallow = false, malformedOldAnatomy = false } = {}) {
+function fixtureGit({ shallow = false, malformedOldAnatomy = false, oldStatus = 'hand' } = {}) {
   const calls = [];
   const blobs = new Map([
     [NEW_ANATOMY_BLOB, JSON.stringify({ glyphs: { demo: { status: { outline: 'generated' } } } })],
     [OLD_ANATOMY_BLOB, malformedOldAnatomy
       ? '{broken'
-      : JSON.stringify({ glyphs: { demo: { status: { outline: 'hand' } } } })],
+      : JSON.stringify({ glyphs: { demo: { status: { outline: oldStatus } } } })],
     [HAND_BLOB, '<svg><path d="M0 0L1 0L1 1Z"/></svg>'],
   ]);
 
@@ -25,8 +25,8 @@ function fixtureGit({ shallow = false, malformedOldAnatomy = false } = {}) {
     calls.push(command);
 
     if (command === 'rev-parse --is-shallow-repository') return shallow ? 'true\n' : 'false\n';
-    if (command === 'log --follow --format=@%H%x09%cs --name-only -- svg/Outline/demo.svg') {
-      return `@${NEW}\t2026-07-10\nsvg/Outline/demo.svg\n\n@${OLD}\t2026-07-01\nlegacy/demo.svg\n`;
+    if (command === 'log --follow --format=@%H%x09%cs --name-status -- svg/Outline/demo.svg') {
+      return `@${NEW}\t2026-07-10\nM\tsvg/Outline/demo.svg\n\n@${OLD}\t2026-07-01\nM\tlegacy/demo.svg\n`;
     }
     if (command === `ls-tree -r ${NEW} -- semantics/anatomy.json`) {
       return treeLine(NEW_ANATOMY_BLOB, 'semantics/anatomy.json');
@@ -64,11 +64,26 @@ describe('hand-history', () => {
     });
   });
 
+  it('берёт конечный путь rename/copy записи, а не первую строку наугад', () => {
+    const runGit = (args) => {
+      const command = args.join(' ');
+      if (command === 'log --follow --format=@%H%x09%cs --name-status -- svg/Outline/demo.svg') {
+        return `@${OLD}\t2026-07-01\nR100\tlegacy/demo.svg\tsvg/Outline/demo.svg\n`;
+      }
+      throw new Error(`unexpected git call: ${command}`);
+    };
+
+    const revisions = createHandHistory('/virtual', { runGit }).fileHistory('svg/Outline/demo.svg');
+    expect(revisions).toEqual([
+      { commitSha: OLD, date: '2026-07-01', path: 'svg/Outline/demo.svg', change: 'R' },
+    ]);
+  });
+
   it('считает ревизию до появления anatomy ручной, но не проглатывает другие ошибки', () => {
     const runGit = (args) => {
       const command = args.join(' ');
-      if (command === 'log --follow --format=@%H%x09%cs --name-only -- svg/Filled/demo_filled.svg') {
-        return `@${OLD}\t2026-06-01\nsvg/Filled/demo_filled.svg\n`;
+      if (command === 'log --follow --format=@%H%x09%cs --name-status -- svg/Filled/demo_filled.svg') {
+        return `@${OLD}\t2026-06-01\nA\tsvg/Filled/demo_filled.svg\n`;
       }
       if (command === `ls-tree -r ${OLD} -- semantics/anatomy.json`) return '';
       if (command === `ls-tree -r ${OLD} -- svg/Filled/demo_filled.svg`) {
@@ -91,11 +106,19 @@ describe('hand-history', () => {
       .toThrow(/anatomy\.json@bbbbbbb невалиден/);
   });
 
+  it('кусается на неизвестном status вместо неявного признания его рукой', () => {
+    const fake = fixtureGit({ oldStatus: 'parked' });
+    const history = createHandHistory('/virtual', { runGit: fake.runGit });
+
+    expect(() => history.handFromHistory('svg/Outline/demo.svg', 'demo', 'outline'))
+      .toThrow(/неизвестный status "parked"/);
+  });
+
   it('не превращает ошибку git в отсутствие файла', () => {
     const runGit = (args) => {
       const command = args.join(' ');
-      if (command === 'log --follow --format=@%H%x09%cs --name-only -- svg/Outline/demo.svg') {
-        return `@${OLD}\t2026-07-01\nsvg/Outline/demo.svg\n`;
+      if (command === 'log --follow --format=@%H%x09%cs --name-status -- svg/Outline/demo.svg') {
+        return `@${OLD}\t2026-07-01\nM\tsvg/Outline/demo.svg\n`;
       }
       if (command === `ls-tree -r ${OLD} -- semantics/anatomy.json`) {
         throw new Error('repository corrupt');
