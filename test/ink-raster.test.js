@@ -66,8 +66,19 @@ describe('path-aware ink raster', () => {
     expect(topology(content).holes).toHaveLength(1);
   });
 
+  it('отказывает на inherited fill-rule вместо приблизительной XML-cascade', () => {
+    const content =
+      `<svg viewBox='0 0 24 24'>` +
+      `<g fill-rule='evenodd'><path d='M2 2H18V18H2Z M6 6H14V14H6Z'/></g>` +
+      `</svg>`;
+
+    expect(() => renderedPathEntries(content)).toThrow(/наследуемый fill-rule/);
+  });
+
   it('нормализует первый относительный moveto без связи с предыдущим path', () => {
-    const entries = renderedPathEntries(svg("<path d='m2 2 4 0 0 4z'/><path d='m10 2 4 0 0 4z'/>") );
+    const entries = renderedPathEntries(
+      svg("<path d='m2 2 4 0 0 4z'/><path d='m10 2 4 0 0 4z'/>") ,
+    );
 
     expect(entries.map((entry) => entry.d)).toEqual([
       'M2 2l4 0 0 4z',
