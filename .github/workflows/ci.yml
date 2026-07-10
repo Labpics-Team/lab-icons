@@ -137,4 +137,20 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Verify repository, geometry, package and tests
-        run: pnpm verify
+        shell: pwsh
+        run: |
+          $PSNativeCommandUseErrorActionPreference = $false
+          pnpm verify 2>&1 | Tee-Object -FilePath verify-windows.log
+          $verifyExit = $LASTEXITCODE
+          if ($verifyExit -ne 0) { exit $verifyExit }
+
+      # GitHub UI режет длинный лог полного корпуса. Артефакт сохраняется только
+      # при ошибке и позволяет разбирать точную первопричину, не перезапуская job.
+      - name: Upload failed Windows verify log
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: windows-verify-log
+          path: verify-windows.log
+          if-no-files-found: warn
+          retention-days: 3
