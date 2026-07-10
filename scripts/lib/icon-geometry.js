@@ -1,45 +1,80 @@
 /**
  * scripts/lib/icon-geometry.js — геометрия слоёв иконки из исходного SVG (zero-dep).
  *
- * Слой анимации = <path> в порядке следования в файле. Для каждого слоя
- * считаем точный bbox (lib/path-data.js) и якорь (центр bbox) — это
- * transform-origin слоя в системе viewBox (transform-box: fill-box даёт
- * тот же центр в рантайме; билд-тайм значение нужно гейтам и хореографии,
- * где якорь смещён семантически, напр. подвес колокольчика).
+ * Порядок <path> пока является историческим контрактом анимационного слоя, но
+ * статические гейты не имеют права склеивать разные элементы в один compound
+ * path: SVG применяет fill-rule к каждому <path> отдельно, а затем композитит
+ * их чернила объединением. renderedPathEntries сохраняет эту границу.
  */
 
 import { pathBBox } from './path-data.js';
 
-const VIEWBOX_RE = /viewBox="([\d.\s-]+)"/;
-const PATH_D_RE = /<path\b[^>]*?\bd="([^"]+)"/g;
+const VIEWBOX_RE = /viewBox\s*=\s*["']([\d.\s-]+)["']/i;
+const PATH_TAG_RE = /<path\b[^>]*>/gi;
 
-/**
- * d-строки только РЕНДЕРЯЩИХСЯ path: содержимое <defs> (clipPath и т.п.) —
- * служебная геометрия, не чернила. 8 иконок корпуса с clip-path числились
- * «руинами с нулевыми полями» из-за фантомного прямоугольника M0 0h24v24z
- * внутри defs — гейты обязаны его не видеть.
- */
-export function renderedPathData(svgContent) {
-  const withoutDefs = svgContent.replace(/<defs\b[\s\S]*?<\/defs>/g, '');
-  return [...withoutDefs.matchAll(PATH_D_RE)].map((m) => normalizeHead(m[1]));
+/** Значение quoted-атрибута тега; corpus contract запрещает style-магии извне. */
+function attributeValue(tag, name) {
+  const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const match = tag.match(new RegExp(`\\b${escaped}\\s*=\\s*(?:"([^"]*)"|'([^']*)')`, 'i'));
+  return match ? (match[1] ?? match[2] ?? '') : null;
 }
 
 /**
  * Первый moveto path-элемента по SVG-спеке АБСОЛЮТЕН даже при «m» —
- * но при join('') нескольких d он перестаёт быть первым и продолжается
- * от конца предыдущего path: класс фантомной «геометрии за канвой»
- * (headphone/radio/translate, 6 файлов корпуса). Нормализация: m→M +
- * явная l перед неявным относительным хвостом (ловушка absHead).
+ * но при последующей обработке фрагмента он может перестать быть первым.
+ * Нормализация: m→M + явная l перед неявным относительным хвостом.
  */
 function normalizeHead(d) {
   // СТРОГОЕ SVG-число: максимум одна точка, опц. экспонента — жадный
-  // [\d.]+ склеивал «7.57.62.5» в одно «число» и ломал radio (клин в канве)
+  // [\d.]+ склеивал «7.57.62.5» в одно «число» и ломал radio.
   const num = String.raw`-?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?`;
   return d.replace(
     new RegExp(String.raw`^\s*m[\s,]*(${num})[\s,]*(${num})([\s,]*)(-?[\d.]|)`),
     (whole, x, y, sep, tailStart) =>
       `M${x} ${y}` + (tailStart ? `l${tailStart}` : sep + tailStart),
   );
+}
+
+/**
+ * Эффективный fill-rule самого path. В корпусе наследуемый fill-rule на
+ * контейнерах запрещён контрактом; inline style поддержан, чтобы диагностика
+ * не давала ложнозелёный результат на старом экспорте.
+ */
+function ownFillRule(tag) {
+  const direct = attributeValue(tag, 'fill-rule')?.trim().toLowerCase();
+  if (direct === 'evenodd') return 'evenodd';
+  if (direct === 'nonzero') return 'nonzero';
+
+  const style = attributeValue(tag, 'style');
+  const styled = style?.match(/(?:^|;)\s*fill-rule\s*:\s*(evenodd|nonzero)\b/i)?.[1];
+  return styled?.toLowerCase() === 'evenodd' ? 'evenodd' : 'nonzero';
+}
+
+/**
+ * Рендерящиеся path-элементы без геометрии из <defs>.
+ *
+ * @returns {Array<{index:number, d:string, fillRule:'evenodd'|'nonzero'}>}
+ */
+export function renderedPathEntries(svgContent) {
+  const withoutDefs = svgContent.replace(/<defs\b[\s\S]*?<\/defs>/gi, '');
+  const entries = [];
+  let index = 0;
+  for (const tag of withoutDefs.match(PATH_TAG_RE) ?? []) {
+    const d = attributeValue(tag, 'd');
+    if (!d) continue;
+    entries.push({ index, d: normalizeHead(d), fillRule: ownFillRule(tag) });
+    index++;
+  }
+  return entries;
+}
+
+/**
+ * Обратносовместимый список d-строк. Использовать join() допустимо только для
+ * метрик, которым безразлична per-path семантика заливки; рендер-гейты обязаны
+ * потреблять renderedPathEntries().
+ */
+export function renderedPathData(svgContent) {
+  return renderedPathEntries(svgContent).map((entry) => entry.d);
 }
 
 /**
@@ -59,8 +94,7 @@ export function iconGeometry(svgContent) {
   }
 
   const paths = [];
-  let index = 0;
-  for (const d of renderedPathData(svgContent)) {
+  for (const { index, d } of renderedPathEntries(svgContent)) {
     const bbox = pathBBox(d);
     const w = bbox.maxX - bbox.minX;
     const h = bbox.maxY - bbox.minY;
@@ -72,7 +106,6 @@ export function iconGeometry(svgContent) {
       height: h,
       area: w * h,
     });
-    index++;
   }
   if (paths.length === 0) throw new Error('icon-geometry: в SVG нет <path>');
   return { viewBox: { x, y, width, height }, paths };
