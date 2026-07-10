@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "packageName": "@labpics/icons",
+  "primary": {
+    "kind": "npm",
+    "install": "pnpm add @labpics/icons"
+  },
+  "fallback": {
+    "kind": "github-dist-tag",
+    "specifier": "github:Labpics-Team/lab-icons#vX.Y.Z-dist",
+    "immutable": true
+  },
+  "files": [
+    "dist/index.js",
+    "dist/index.d.ts",
+    "dist/animate"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./animate": {
+      "types": "./dist/animate/index.d.ts",
+      "import": "./dist/animate/index.js",
+      "require": "./dist/animate/index.cjs"
+    }
+  }
+}
