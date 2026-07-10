@@ -117,15 +117,37 @@ export function hasDocRole(text) {
  * ------------------------------------------------------------------ */
 
 const FALSE_DISTRIBUTION_CLAIMS = [
-  { re: /["']?private["']?\s*:\s*true/i, why: 'package public, private:false' },
-  { re: /не\s+публикуется[^\n]*npm/i, why: 'npm — основной опубликованный канал' },
-  { re: /почему\s+не\s+npm/i, why: 'npm — основной опубликованный канал' },
-  { re: /репозитор(?:ий|ия)\s+приват/i, why: 'репозиторий public' },
-  { re: /fine-grained\s+PAT|\bGH_PAT\b|Contents:\s*read/i, why: 'npm install не требует GitHub PAT' },
+  {
+    re: /["']?private["']?\s*:\s*["']?true["']?/i,
+    why: 'package public, private:false',
+  },
+  {
+    re: /не\s+публикуется.{0,160}\bnpm\b/i,
+    why: 'npm — основной опубликованный канал',
+  },
+  { re: /почему\s+не\s+npm\b/i, why: 'npm — основной опубликованный канал' },
+  { re: /репозитор(?:ий|ия)[\s-]*приват/i, why: 'репозиторий public' },
+  {
+    re: /fine\s*-\s*grained\s+PAT|\bGH_PAT\b|Contents\s*:\s*read/i,
+    why: 'npm install не требует GitHub PAT',
+  },
 ];
 
 function nonEmptyString(value) {
   return typeof value === 'string' && value.trim().length > 0;
+}
+
+/**
+ * Нормализация нужна именно для guard-а утверждений: markdown, перенос строки
+ * и типографский дефис не должны превращать ложь в невидимую для regex форму.
+ */
+export function normalizeDistributionText(text) {
+  return String(text)
+    .normalize('NFKC')
+    .replace(/[`*_~]/g, '')
+    .replace(/[‐‑‒–—―]/g, '-')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 /** Фактические аргументы исполняемой команды git add -f, не совпадения в комментариях. */
@@ -140,7 +162,7 @@ export function releaseWorkflowFiles(releaseWorkflow) {
  */
 export function distributionViolations({ readme, pkg, contract, releaseWorkflow }) {
   const errors = [];
-  const plainReadme = readme.replace(/[`*_~]/g, '');
+  const plainReadme = normalizeDistributionText(readme);
 
   if (contract.version !== 1) errors.push(`release contract: неизвестная schema version ${contract.version}`);
   if (contract.packageName !== pkg.name)
@@ -162,9 +184,9 @@ export function distributionViolations({ readme, pkg, contract, releaseWorkflow 
     errors.push(`README не содержит primary install «${contract.primary.install}»`);
   if (nonEmptyString(contract.fallback?.specifier) && !readme.includes(contract.fallback.specifier))
     errors.push(`README не содержит fallback specifier «${contract.fallback.specifier}»`);
-  if (!/основн[^\n]{0,80}npm/i.test(plainReadme))
+  if (!/основн.{0,80}\bnpm\b/i.test(plainReadme))
     errors.push('README не объявляет npm основным каналом');
-  if (!/(fallback|резервн|дополнительн)[^\n]{0,120}-dist/i.test(plainReadme))
+  if (!/(fallback|резервн|дополнительн).{0,120}-dist/i.test(plainReadme))
     errors.push('README не объясняет -dist как дополнительный fallback');
 
   for (const { re, why } of FALSE_DISTRIBUTION_CLAIMS) {
