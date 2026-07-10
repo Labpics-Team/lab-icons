@@ -14,7 +14,8 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 export const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
-const REQUIRED_PACKAGE_MANAGER = 'pnpm@10.30.3';
+const EXACT_PNPM = /^pnpm@(\d+\.\d+\.\d+)$/;
+const PINNED_ACTION_REF = /^[0-9a-f]{40}$/;
 const FORBIDDEN_LOCKFILES = [
   'package-lock.json',
   'npm-shrinkwrap.json',
@@ -27,18 +28,60 @@ function defaultReadText(root, relativePath) {
   return readFileSync(join(root, relativePath), 'utf8');
 }
 
-function workflowErrors({ relativePath, text, expectedPnpmVersion }) {
-  const errors = [];
-  const versions = [...text.matchAll(/^\s*version:\s*['"]?([^'"\s#]+)/gm)].map((match) => match[1]);
+/**
+ * Извлекает только блоки pnpm/action-setup. Чужие inputs с ключом `version`
+ * намеренно игнорируются: общий regex по YAML создавал бы ложные срабатывания.
+ */
+export function pnpmSetupBlocks(text) {
+  const lines = text.split(/\r?\n/);
+  const blocks = [];
 
-  if (!text.includes('pnpm/action-setup@')) {
-    errors.push(`${relativePath}: нет pnpm/action-setup`);
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const action = line.match(/^(\s*)(?:-\s+)?uses:\s*pnpm\/action-setup@([^\s#]+)/);
+    if (!action) continue;
+
+    const baseIndent = action[1].length;
+    let version = null;
+    for (let j = i + 1; j < lines.length; j++) {
+      const next = lines[j];
+      const trimmed = next.trim();
+      if (!trimmed || trimmed.startsWith('#')) continue;
+
+      const indent = next.match(/^\s*/)[0].length;
+      if (trimmed.startsWith('- ') && indent <= baseIndent) break;
+
+      const versionMatch = trimmed.match(/^version:\s*['"]?([^'"\s#]+)/);
+      if (versionMatch) version = versionMatch[1];
+    }
+
+    blocks.push({ ref: action[2], version });
   }
 
-  if (versions.length !== 1 || versions[0] !== expectedPnpmVersion) {
-    errors.push(
-      `${relativePath}: pnpm action обязан использовать ${expectedPnpmVersion}; найдено: ${versions.join(', ') || 'ничего'}`,
-    );
+  return blocks;
+}
+
+function workflowErrors({ relativePath, text, expectedPnpmVersion }) {
+  const errors = [];
+  const setups = pnpmSetupBlocks(text);
+
+  if (setups.length !== 1) {
+    errors.push(`${relativePath}: должен быть ровно один pnpm/action-setup; найдено ${setups.length}`);
+  } else {
+    const [setup] = setups;
+    if (!PINNED_ACTION_REF.test(setup.ref)) {
+      errors.push(`${relativePath}: pnpm/action-setup обязан быть запинен полным 40-символьным SHA; найдено ${setup.ref}`);
+    }
+    if (expectedPnpmVersion && setup.version !== expectedPnpmVersion) {
+      errors.push(
+        `${relativePath}: pnpm action обязан использовать ${expectedPnpmVersion} из packageManager; ` +
+          `найдено ${setup.version ?? 'ничего'}`,
+      );
+    }
+  }
+
+  if (!/^\s*run:\s*pnpm install --frozen-lockfile\s*$/m.test(text)) {
+    errors.push(`${relativePath}: зависимости обязаны ставиться через «pnpm install --frozen-lockfile»`);
   }
 
   if (!/^\s*run:\s*pnpm verify\s*$/m.test(text)) {
@@ -80,9 +123,10 @@ export function validateRepoContract({
     return [`package.json: не читается как JSON (${error.message})`];
   }
 
-  if (pkg.packageManager !== REQUIRED_PACKAGE_MANAGER) {
+  const packageManagerMatch = EXACT_PNPM.exec(String(pkg.packageManager ?? ''));
+  if (!packageManagerMatch) {
     errors.push(
-      `package.json: packageManager обязан быть ${REQUIRED_PACKAGE_MANAGER}; найдено ${String(pkg.packageManager)}`,
+      `package.json: packageManager обязан быть точной версией вида pnpm@X.Y.Z; найдено ${String(pkg.packageManager)}`,
     );
   }
 
@@ -112,7 +156,7 @@ export function validateRepoContract({
     errors.push('package.json: verify обязан начинаться с check-repo-contract, чтобы дрейф кусался до сборки');
   }
 
-  const expectedPnpmVersion = REQUIRED_PACKAGE_MANAGER.slice('pnpm@'.length);
+  const expectedPnpmVersion = packageManagerMatch?.[1] ?? null;
   for (const relativePath of ['.github/workflows/ci.yml', '.github/workflows/release-dist.yml']) {
     let text;
     try {
@@ -135,5 +179,5 @@ if (isMain) {
     for (const error of errors) console.error(`  - ${error}`);
     process.exit(1);
   }
-  console.log('check-repo-contract: OK — один pnpm, один lockfile, CI/release запускают канонический pnpm verify');
+  console.log('check-repo-contract: OK — packageManager SSOT, один lockfile, CI/release запускают канонический pnpm verify');
 }
