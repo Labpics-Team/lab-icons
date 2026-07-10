@@ -6,13 +6,21 @@ on:
   pull_request:
     branches: [master]
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-and-verify:
-    name: Build, parity, colours, tree-shaking
+    name: Canonical pnpm verify
     runs-on: [self-hosted, Linux, X64]
+    timeout-minutes: 30
 
     steps:
-      # Actions запинены по SHA (supply-chain) — те же пины, что в labui.
+      # Actions запинены по SHA: supply-chain обновляется отдельным ревью.
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
@@ -21,13 +29,12 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
         with:
-          version: 9
-          # per-job dest: дефолтный ~/setup-pnpm ОБЩИЙ для 8 self-hosted раннеров
-          # (один /home/daniel) и гоняется между конкурентными job'ами любых репо.
+          # Должно дословно совпадать с package.json#packageManager;
+          # scripts/check-repo-contract.js не даст этим источникам разойтись.
+          version: 10.30.3
+          # Общий $HOME у конкурентных self-hosted job раньше создавал гонки.
           dest: ${{ runner.temp }}/setup-pnpm
 
-      # Без cache:pnpm — на этих раннерах шаг кэша висел на сетевом эгрессе
-      # (класс закрыт в labui); pnpm-store и так персистит на самом раннере.
       - name: Setup Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
@@ -36,130 +43,68 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build (svgo optimise + generate ESM index)
-        run: pnpm build
+      # Единственный список обязательных проверок живёт в package.json#scripts.verify.
+      # Иначе CI и локальный прогон неизбежно расходятся.
+      - name: Verify repository, geometry, package and tests
+        run: pnpm verify
 
-      - name: Build animate subpath (tsup)
-        run: pnpm build:animate
-
-      - name: Build anatomy (скелеты 444 иконок → dist/anatomy.json)
-        run: pnpm build:anatomy
-
-      - name: Typecheck (tsc strict)
-        run: pnpm typecheck
-
-      - name: Parity check (222 × 2 = 444 exports)
-        run: pnpm check:parity
-
-      - name: Colour check (no hardcoded hex in optimised SVGs)
-        run: pnpm check:colors
-
-      - name: Tree-shaking proof
-        run: pnpm check:treeshake
-
-      - name: Semantics check (100% покрытие анимационной семантикой)
-        run: pnpm check:semantics
-
-      - name: Choreographies check (дрифт генерата, провенанс, полнота классов)
-        run: pnpm check:choreographies
-
-      - name: Layers check (per-icon разметка — индексы слоёв, якоря, дрифт генерата)
-        run: pnpm check:layers
-
-      - name: Motion bounds check (ни один кадр не выводит контур за канву)
-        run: pnpm check:motion-bounds
-
-      - name: Motion collision check (движение не создаёт наслоений слоёв)
-        run: pnpm check:motion-collision
-
-      - name: Variant parity check (контракт пары O↔F — каноны колец, регистрация)
-        run: pnpm check:variant-parity
-
-      - name: Anatomy checks (скелет 444 + дрейф деклараций generated ≥99.5%)
-        run: pnpm check:anatomy
-
-      - name: Path quality check (шум кривых, волосяные фрагменты, встык-швы)
-        run: pnpm check:path-quality
-
-      - name: Fill-rule check (контуры fill-rule-независимы, EO≡NZ)
-        run: pnpm check:fill-rule
-
-      - name: Topology check (разрыв незакрытого контура — срез хордой)
-        run: pnpm check:topology
-
-      - name: Corners check (пер-вершинное скругление генерат-vs-рука; корпус в WARN до EC3)
-        run: pnpm check:corners
-
-      - name: Adjacency check (зазоры/касания соседних слоёв; промоутнутые HARD-чисты)
-        run: pnpm check:adjacency
-
-      - name: Ink-weight check (вес штриха по корпусу; промоутнутые HARD-чисты)
-        run: pnpm check:ink-weight
-
-      - name: Ink-weight axes check (сетка весов 0.8/1/1.2 × corner 0/1)
-        run: pnpm check:ink-weight:axes
-
-      - name: Fidelity check (пол узнаваемости генерата ≥97%, эскалация ниже)
-        run: pnpm check:fidelity
-
-      - name: DRY coverage check (флагманы собраны из общих примитивов, ≥2 потребителя)
-        run: pnpm check:dry-coverage
-
-      - name: "Anim-ready check (подвижные части: anchor + раздельные суб-пути)"
-        run: pnpm check:anim-ready
-
-      - name: Grammar check (направления рёбер на шкале)
-        run: pnpm check:grammar
-
-      - name: Static grid check (поля, keylines)
-        run: pnpm check:static-grid
-
-      - name: Tests (анатомия, примитивы, гейты, геометрия — дифференциал по 444 SVG)
-        run: pnpm test
-
-      # Bite test: битый класс в семантике должен уронить гейт
+      # Bite tests доказывают, что критические гарды действительно падают,
+      # а не только печатают зелёный отчёт на исправном корпусе.
       - name: Semantics guard bites on invalid class
         run: |
           cp semantics/assignments.json /tmp/_assignments_backup.json
+          trap 'cp /tmp/_assignments_backup.json semantics/assignments.json' EXIT
           sed -i 's/"accessibility": {"class": "generic"}/"accessibility": {"class": "levitate"}/' semantics/assignments.json
-          pnpm check:semantics && echo "ERROR: semantics should have failed" && exit 1 || echo "OK: semantics correctly failed on invalid class"
-          cp /tmp/_assignments_backup.json semantics/assignments.json
+          if pnpm check:semantics; then
+            echo "ERROR: semantics should have failed"
+            exit 1
+          fi
 
-      # Bite test: inject a missing SVG and assert parity fails
-      - name: Parity guard bites on missing icon
+      - name: Parity guard bites on extra icon
         run: |
           cp svg/Filled/accessibility_filled.svg svg/Filled/_EXTRA_TEST_filled.svg
-          pnpm check:parity && echo "ERROR: parity should have failed" && exit 1 || echo "OK: parity correctly failed on extra file"
-          rm svg/Filled/_EXTRA_TEST_filled.svg
+          trap 'rm -f svg/Filled/_EXTRA_TEST_filled.svg' EXIT
+          if pnpm check:parity; then
+            echo "ERROR: parity should have failed"
+            exit 1
+          fi
 
-      # Bite test: inject hardcoded colour and assert colors fails
       - name: Colour guard bites on hardcoded hex
         run: |
           echo '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#101012"><path d="M0 0"/></svg>' \
             > dist/svg/Filled/_colour_test.svg
-          pnpm check:colors && echo "ERROR: colours should have failed" && exit 1 || echo "OK: colour check correctly failed on injected hex"
-          rm dist/svg/Filled/_colour_test.svg
+          trap 'rm -f dist/svg/Filled/_colour_test.svg' EXIT
+          if pnpm check:colors; then
+            echo "ERROR: colours should have failed"
+            exit 1
+          fi
 
-      # Bite test: битый path-индекс в per-icon разметке должен уронить гейт
       - name: Layers guard bites on invalid path index
         run: |
           cp semantics/layers.json /tmp/_layers_backup.json
-          node -e "const fs=require('fs');const j=JSON.parse(fs.readFileSync('semantics/layers.json','utf8'));j.icons['history'].outline.parts[0].paths=[99];fs.writeFileSync('semantics/layers.json',JSON.stringify(j,null,1));"
-          pnpm check:layers && echo "ERROR: layers should have failed" && exit 1 || echo "OK: layers correctly failed on invalid path index"
-          cp /tmp/_layers_backup.json semantics/layers.json
+          trap 'cp /tmp/_layers_backup.json semantics/layers.json' EXIT
+          node -e "const fs=require('fs');const p='semantics/layers.json';const j=JSON.parse(fs.readFileSync(p,'utf8'));j.icons.history.outline.parts[0].paths=[99];fs.writeFileSync(p,JSON.stringify(j,null,1)+'\n');"
+          if pnpm check:layers; then
+            echo "ERROR: layers should have failed"
+            exit 1
+          fi
 
-      # Bite test: раздутый масштаб должен уронить bounds-гейт (вылет за канву)
       - name: Motion bounds guard bites on oversized scale
         run: |
           cp src/animate/icon-choreographies.generated.json /tmp/_choreo_backup.json
-          node -e "const fs=require('fs');const p='src/animate/icon-choreographies.generated.json';const j=JSON.parse(fs.readFileSync(p,'utf8'));j.icons['heart'].outline.parts[0].keyframes=[{offset:0,transform:'scale(1, 1)'},{offset:0.5,transform:'scale(1.4, 1.4)'},{offset:1,transform:'scale(1, 1)'}];fs.writeFileSync(p,JSON.stringify(j,null,1));"
-          pnpm check:motion-bounds && echo "ERROR: bounds should have failed" && exit 1 || echo "OK: bounds correctly failed on oversized scale"
-          cp /tmp/_choreo_backup.json src/animate/icon-choreographies.generated.json
+          trap 'cp /tmp/_choreo_backup.json src/animate/icon-choreographies.generated.json' EXIT
+          node -e "const fs=require('fs');const p='src/animate/icon-choreographies.generated.json';const j=JSON.parse(fs.readFileSync(p,'utf8'));j.icons.heart.outline.parts[0].keyframes=[{offset:0,transform:'scale(1, 1)'},{offset:0.5,transform:'scale(1.4, 1.4)'},{offset:1,transform:'scale(1, 1)'}];fs.writeFileSync(p,JSON.stringify(j,null,1)+'\n');"
+          if pnpm check:motion-bounds; then
+            echo "ERROR: bounds should have failed"
+            exit 1
+          fi
 
-      # Bite test: размашистый язычок должен уронить collision-гейт (наслоение)
       - name: Motion collision guard bites on wild clapper swing
         run: |
           cp src/animate/icon-choreographies.generated.json /tmp/_choreo_backup2.json
-          node -e "const fs=require('fs');const p='src/animate/icon-choreographies.generated.json';const j=JSON.parse(fs.readFileSync(p,'utf8'));j.icons['notifications'].outline.parts[1].keyframes=[{offset:0,transform:'rotate(0deg)'},{offset:0.5,transform:'rotate(-50deg)'},{offset:1,transform:'rotate(0deg)'}];fs.writeFileSync(p,JSON.stringify(j,null,1));"
-          pnpm check:motion-collision && echo "ERROR: collision should have failed" && exit 1 || echo "OK: collision correctly failed on wild clapper"
-          cp /tmp/_choreo_backup2.json src/animate/icon-choreographies.generated.json
+          trap 'cp /tmp/_choreo_backup2.json src/animate/icon-choreographies.generated.json' EXIT
+          node -e "const fs=require('fs');const p='src/animate/icon-choreographies.generated.json';const j=JSON.parse(fs.readFileSync(p,'utf8'));j.icons.notifications.outline.parts[1].keyframes=[{offset:0,transform:'rotate(0deg)'},{offset:0.5,transform:'rotate(-50deg)'},{offset:1,transform:'rotate(0deg)'}];fs.writeFileSync(p,JSON.stringify(j,null,1)+'\n');"
+          if pnpm check:motion-collision; then
+            echo "ERROR: collision should have failed"
+            exit 1
+          fi
