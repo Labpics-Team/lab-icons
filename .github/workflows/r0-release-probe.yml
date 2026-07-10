@@ -3,6 +3,8 @@ name: R0 release probe
 on:
   push:
     branches: [chore/r0-release-probe]
+  pull_request:
+    branches: [master]
 
 permissions:
   contents: read
