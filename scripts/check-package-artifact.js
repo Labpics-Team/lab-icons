@@ -123,6 +123,21 @@ export function pnpmInvocation(
   return { file: command, args };
 }
 
+/**
+ * Локальный tarball задаётся относительным file-specifier, не file:// URL.
+ * WHATWG URL корректно кодирует `~` как `%7E`, но pnpm на Windows интерпретировал
+ * DOS 8.3 segment `RUNNER~1` буквально как `RUNNER%7E1` и искал несуществующий
+ * путь. Относительный specifier не проходит через URL-percent-encoding и
+ * переносим между POSIX и Windows; slash нормализуется для package.json.
+ */
+export function localTarballSpecifier(fromDir, tarball, relativePath = relative) {
+  const path = relativePath(fromDir, tarball).replaceAll('\\', '/');
+  if (!path || path.startsWith('/')) {
+    throw new Error(`package artifact: tarball обязан быть относительным к consumer; найдено ${path || '<empty>'}`);
+  }
+  return `file:${path}`;
+}
+
 function runPnpm(args, options, commandOptions) {
   const invocation = pnpmInvocation(args, commandOptions);
   return execFileSync(invocation.file, invocation.args, {
@@ -168,6 +183,7 @@ export function checkPackageArtifact({
     }
     const tarball = join(packDir, tarballs[0]);
     const rootPackage = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
+    const tarballSpecifier = localTarballSpecifier(consumer, tarball);
 
     writeFileSync(
       join(consumer, 'package.json'),
@@ -177,7 +193,7 @@ export function checkPackageArtifact({
           private: true,
           type: 'module',
           packageManager: rootPackage.packageManager,
-          dependencies: { '@labpics/icons': pathToFileURL(tarball).href },
+          dependencies: { '@labpics/icons': tarballSpecifier },
         },
         null,
         2,
