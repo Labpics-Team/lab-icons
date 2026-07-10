@@ -104,6 +104,20 @@ describe('part adjacency graph', () => {
     expect(result.partitionSignature).toBe('a,b|c,d');
   });
 
+  it('блокирует одну часть, которая сама склеивает две baseline-компоненты', () => {
+    const result = analyze({
+      baselineEntries: [entry(1, 1, 5, 5), entry(7, 1, 11, 5)],
+      parts: [rect('illegal-bridge', 4, 2, 8, 4)],
+    });
+
+    expect(result.assignments[0]).toMatchObject({
+      id: 'illegal-bridge',
+      component: null,
+      evidence: 'overlap-conflict',
+    });
+    expect(result.errors[0]).toMatch(/перекрывает несколько baseline-компонент/);
+  });
+
   it('не назначает чернила внутри counter компоненте кольца', () => {
     const donut = {
       d: 'M1 1H20V10H1Z M6 3V8H15V3Z',
@@ -118,7 +132,7 @@ describe('part adjacency graph', () => {
     expect(result.errors[0]).toMatch(/не примыкает ни к одной компоненте/);
   });
 
-  it('делает равное назначение двум baseline-компонентам явной ошибкой', () => {
+  it('делает равное proximity-назначение двум baseline-компонентам явной ошибкой', () => {
     const result = analyze({
       baselineEntries: [entry(1, 1, 5, 5), entry(7, 1, 11, 5)],
       parts: [rect('bridge', 5.5, 2, 6.5, 4)],
@@ -126,7 +140,8 @@ describe('part adjacency graph', () => {
     });
 
     expect(result.assignments[0].component).toBeNull();
-    expect(result.errors[0]).toMatch(/неоднозначное назначение/);
+    expect(result.assignments[0].evidence).toBe('proximity-tie');
+    expect(result.errors[0]).toMatch(/неоднозначное proximity-назначение/);
   });
 
   it('красит зависимость component partition от raster phase', () => {
