@@ -133,7 +133,9 @@ describe('каналы поставки', () => {
     exports: contract.exports,
   };
   const workflow =
-    'steps:\n  - run: pnpm verify\n  - run: |\n      git add -f dist/index.js dist/index.d.ts dist/animate';
+    'steps:\n  - name: Verify release source\n    run: pnpm verify\n' +
+    '  - name: Build and push <tag>-dist\n    run: |\n' +
+    '      git add -f dist/index.js dist/index.d.ts dist/animate';
   const readme =
     'Основной канал — npm: `pnpm add @labpics/icons`.\n' +
     'Дополнительный fallback: `github:Labpics-Team/lab-icons#vX.Y.Z-dist`.';
