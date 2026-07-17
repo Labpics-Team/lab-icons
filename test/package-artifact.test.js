@@ -1,4 +1,13 @@
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, unlinkSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  lstatSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  unlinkSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -70,14 +79,17 @@ describe('check-package-artifact', () => {
     write(source, 'package.json', '{"name":"fixture"}\n');
     write(source, 'scripts/build.js', 'export {};\n');
     write(source, 'dist/index.js', 'export const stale = true;\n');
-    mkdirSync(join(source, 'node_modules'), { recursive: true });
+    write(source, 'node_modules/.pnpm/tooling-sentinel', 'installed tooling\n');
 
     createCleanPackSource(source, clean);
 
     expect(existsSync(join(clean, 'package.json'))).toBe(true);
     expect(existsSync(join(clean, 'scripts/build.js'))).toBe(true);
     expect(existsSync(join(clean, 'dist'))).toBe(false);
-    expect(existsSync(join(clean, 'node_modules'))).toBe(true);
+    expect(lstatSync(join(clean, 'node_modules')).isSymbolicLink()).toBe(true);
+    expect(readFileSync(join(clean, 'node_modules/.pnpm/tooling-sentinel'), 'utf8')).toBe(
+      'installed tooling\n',
+    );
   });
 
   it('принимает минимальный публичный артефакт', () => {

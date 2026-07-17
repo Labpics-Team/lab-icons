@@ -65,7 +65,13 @@ export function createCleanPackSource(root, destination) {
       return !CLEAN_PACK_EXCLUDES.has(top) && !path.endsWith('.tgz');
     },
   });
-  symlinkSync(join(root, 'node_modules'), join(destination, 'node_modules'), 'junction');
+  const tooling = join(destination, 'node_modules');
+  // Node 20 fs.cp на Windows может оставить destination placeholder для
+  // исключённого непустого pnpm node_modules (его junction-дерево уже не
+  // копируется). Удаление placeholder сохраняет один источник tooling и
+  // делает повторное подключение детерминированным на обеих платформах.
+  rmSync(tooling, { recursive: true, force: true });
+  symlinkSync(join(root, 'node_modules'), tooling, 'junction');
   if (existsSync(join(destination, 'dist'))) {
     throw new Error('package artifact: clean source неожиданно содержит dist');
   }
