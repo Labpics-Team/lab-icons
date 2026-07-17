@@ -22,7 +22,14 @@ import {
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { dirname, join, relative } from 'node:path';
+import {
+  dirname,
+  isAbsolute,
+  join,
+  relative,
+  resolve,
+  toNamespacedPath,
+} from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import {
   installedAllowlist,
@@ -43,6 +50,29 @@ const CLEAN_PACK_EXCLUDES = new Set([
   'tmp',
 ]);
 
+const NATIVE_PATH = { isAbsolute, relative };
+
+/**
+ * Проецирует путь fs.cp filter в source-relative allow/deny решение.
+ *
+ * Корень и source обязаны принадлежать одному path namespace. Иначе Windows
+ * path.relative возвращает абсолютный \\?\-путь, а top-level denylist молча
+ * перестаёт быть denylist. Неожиданную проекцию поэтому отклоняем до копии.
+ */
+export function shouldCopyCleanPackPath(copyRoot, source, pathApi = NATIVE_PATH) {
+  const projected = pathApi.relative(copyRoot, source).replaceAll('\\', '/');
+  if (!projected) return true;
+  if (
+    pathApi.isAbsolute(projected) ||
+    projected === '..' ||
+    projected.startsWith('../')
+  ) {
+    throw new Error(`package artifact: путь filter вне clean source root (${projected})`);
+  }
+  const [top] = projected.split('/');
+  return !CLEAN_PACK_EXCLUDES.has(top) && !projected.endsWith('.tgz');
+}
+
 /**
  * Создаёт source-only checkout для pack-smoke.
  *
@@ -53,29 +83,31 @@ const CLEAN_PACK_EXCLUDES = new Set([
  * канонический pnpm build.
  */
 export function createCleanPackSource(root, destination) {
-  if (!existsSync(join(root, 'node_modules'))) {
+  const resolvedRoot = resolve(root);
+  const resolvedDestination = resolve(destination);
+  if (!existsSync(join(resolvedRoot, 'node_modules'))) {
     throw new Error('package artifact: node_modules отсутствует; сначала pnpm install --frozen-lockfile');
   }
-  cpSync(root, destination, {
+  // fs.cp нормализует source через toNamespacedPath до вызова filter на
+  // Windows. Передаём обе исходные координаты в том же namespace, чтобы
+  // relative(root, source) оставался относительным на каждой платформе.
+  const copyRoot = toNamespacedPath(resolvedRoot);
+  const copyDestination = toNamespacedPath(resolvedDestination);
+  cpSync(copyRoot, copyDestination, {
     recursive: true,
     filter(source) {
-      const path = relative(root, source).replaceAll('\\', '/');
-      if (!path) return true;
-      const [top] = path.split('/');
-      return !CLEAN_PACK_EXCLUDES.has(top) && !path.endsWith('.tgz');
+      return shouldCopyCleanPackPath(copyRoot, source);
     },
   });
-  const tooling = join(destination, 'node_modules');
-  // Node 20 fs.cp на Windows может оставить destination placeholder для
-  // исключённого непустого pnpm node_modules (его junction-дерево уже не
-  // копируется). Удаление placeholder сохраняет один источник tooling и
-  // делает повторное подключение детерминированным на обеих платформах.
-  rmSync(tooling, { recursive: true, force: true });
-  symlinkSync(join(root, 'node_modules'), tooling, 'junction');
-  if (existsSync(join(destination, 'dist'))) {
-    throw new Error('package artifact: clean source неожиданно содержит dist');
+  const copiedTopLevels = new Set(readdirSync(resolvedDestination));
+  for (const excluded of CLEAN_PACK_EXCLUDES) {
+    if (copiedTopLevels.has(excluded)) {
+      throw new Error(`package artifact: clean source неожиданно содержит ${excluded}`);
+    }
   }
-  return destination;
+  const tooling = join(resolvedDestination, 'node_modules');
+  symlinkSync(join(resolvedRoot, 'node_modules'), tooling, 'junction');
+  return resolvedDestination;
 }
 
 function listFiles(root, current = root) {

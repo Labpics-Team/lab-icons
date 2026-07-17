@@ -129,7 +129,7 @@ describe('README как public release projection', () => {
     expect(errors.some((error) => error.includes('primary install'))).toBe(true);
     expect(errors.some((error) => error.includes('@labpics/icons/ir/recipes'))).toBe(true);
     expect(errors.some((error) => error.includes('pnpm observatory'))).toBe(true);
-    expect(errors.some((error) => error.includes('private/git-only'))).toBe(true);
+    expect(errors.some((error) => error.includes('ложное distribution-утверждение'))).toBe(true);
     expect(errors.some((error) => error.includes('count release manifest'))).toBe(true);
     expect(errors.some((error) => error.includes('CommonJS declaration boundary'))).toBe(true);
   });

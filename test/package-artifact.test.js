@@ -9,7 +9,7 @@ import {
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { dirname, join } from 'node:path';
+import { dirname, join, win32 } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 import {
   createCleanPackSource,
@@ -20,6 +20,7 @@ import {
   mutateExportWithoutRootAttribute,
   mutateFirstPathCoordinate,
   pnpmInvocation,
+  shouldCopyCleanPackPath,
   validateInstalledPackage,
 } from '../scripts/check-package-artifact.js';
 
@@ -78,17 +79,46 @@ describe('check-package-artifact', () => {
     const clean = join(fixture, 'clean');
     write(source, 'package.json', '{"name":"fixture"}\n');
     write(source, 'scripts/build.js', 'export {};\n');
+    write(source, '.git/config', '[core]\n');
     write(source, 'dist/index.js', 'export const stale = true;\n');
     write(source, 'node_modules/.pnpm/tooling-sentinel', 'installed tooling\n');
+    write(source, 'preview/debug.html', '<p>debug</p>\n');
+    write(source, 'stale.tgz', 'not a package\n');
 
     createCleanPackSource(source, clean);
 
     expect(existsSync(join(clean, 'package.json'))).toBe(true);
     expect(existsSync(join(clean, 'scripts/build.js'))).toBe(true);
+    expect(existsSync(join(clean, '.git'))).toBe(false);
     expect(existsSync(join(clean, 'dist'))).toBe(false);
+    expect(existsSync(join(clean, 'preview'))).toBe(false);
+    expect(existsSync(join(clean, 'stale.tgz'))).toBe(false);
     expect(lstatSync(join(clean, 'node_modules')).isSymbolicLink()).toBe(true);
     expect(readFileSync(join(clean, 'node_modules/.pnpm/tooling-sentinel'), 'utf8')).toBe(
       'installed tooling\n',
+    );
+  });
+
+  it('отсекает denylist для namespaced Windows paths и fail-closed при смешении namespaces', () => {
+    const root = 'D:\\a\\lab-icons\\lab-icons';
+    const copyRoot = win32.toNamespacedPath(root);
+    const inside = (path) => win32.toNamespacedPath(win32.join(root, path));
+
+    for (const excluded of [
+      '.git/config',
+      '.treeshake-tmp/probe.js',
+      'coverage/index.html',
+      'demo/index.html',
+      'dist/index.js',
+      'node_modules/.pnpm/tool',
+      'preview/debug.html',
+      'tmp/probe.txt',
+    ]) {
+      expect(shouldCopyCleanPackPath(copyRoot, inside(excluded), win32)).toBe(false);
+    }
+    expect(shouldCopyCleanPackPath(copyRoot, inside('scripts/build.js'), win32)).toBe(true);
+    expect(() => shouldCopyCleanPackPath(root, inside('dist/index.js'), win32)).toThrow(
+      'путь filter вне clean source root',
     );
   });
 
