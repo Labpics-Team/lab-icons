@@ -140,21 +140,22 @@ pnpm verify
    анатомический diagnostic output;
 2. `build:catalog` пересобирает catalog и TypeScript‑проекцию из актуальной
    геометрии до компиляции публичного IR;
-3. `build:ir` очищает только owned `dist/ir`, затем собирает `/ir` и
-   `/ir/recipes`;
+3. `build:ir` собирает `/ir`, `/ir/recipes` и их точную declaration closure во
+   временный каталог, проверяет закрытый набор output и транзакционно заменяет
+   owned `dist/ir` с восстановлением после ошибки или прерванного swap;
 4. lifecycle `prepack` вызывает тот же `pnpm build`.
 
-Публичный tarball содержит ровно 6 release‑файлов из `release/contract.json` плюс npm
+Публичный tarball содержит ровно 7 release‑файлов из `release/contract.json` плюс npm
 metadata. `check:package-artifact` копирует исходники без `dist/`, запускает
 реальный `pnpm pack`/`prepack`, ставит tarball в пустого offline‑consumer и
-проверяет все ESM entrypoints, TypeScript declarations, source fingerprints и
-hostile mutations. Поэтому старый локальный `dist/` не способен сделать гейт
-зелёным.
+проверяет все ESM entrypoints, bundler/NodeNext TypeScript declarations,
+ожидаемо закрытый CommonJS surface, source fingerprints и hostile mutations.
+Поэтому старый локальный `dist/` не способен сделать гейт зелёным.
 
 `pnpm verify` также запускает типы, геометрические инварианты, catalog/anatomy
 drift, размерные ratchets, docs drift и unit/property bite‑тесты. Числа в этом
 README либо выводятся из закрытого файлового контракта, либо защищены гейтом.
-Size-ratchet обязан быть точной проекцией всех шести файлов
+Size-ratchet обязан быть точной проекцией всех семи файлов
 `release/contract.json`, поэтому новый public output не может остаться без
 raw/gzip ceiling.
 Исторические отчёты variant parity и path quality не выданы за нулевой долг:

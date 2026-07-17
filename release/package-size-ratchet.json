@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "measurement": "fflate@0.8.2 gzipSync level=9 mtime=0 after pnpm build",
+  "measurement": "fflate@0.8.3 gzipSync level=9 mtime=0 after pnpm build",
   "artifacts": {
     "dist/index.d.ts": {
       "baselineBytes": 30262,
@@ -22,21 +22,31 @@
         "sourceMappingURL"
       ]
     },
+    "dist/ir/catalog.generated.d.ts": {
+      "baselineBytes": 3441,
+      "baselineGzipBytes": 1345,
+      "maxBytes": 3441,
+      "maxGzipBytes": 1345,
+      "allowedModules": [],
+      "forbiddenNeedles": [
+        "sourceMappingURL"
+      ]
+    },
     "dist/ir/index.d.ts": {
-      "baselineBytes": 11102,
-      "baselineGzipBytes": 3671,
-      "maxBytes": 11102,
-      "maxGzipBytes": 3671,
+      "baselineBytes": 6799,
+      "baselineGzipBytes": 2252,
+      "maxBytes": 6799,
+      "maxGzipBytes": 2252,
       "allowedModules": [],
       "forbiddenNeedles": [
         "sourceMappingURL"
       ]
     },
     "dist/ir/index.js": {
-      "baselineBytes": 814978,
-      "baselineGzipBytes": 119307,
-      "maxBytes": 814978,
-      "maxGzipBytes": 119307,
+      "baselineBytes": 790094,
+      "baselineGzipBytes": 120887,
+      "maxBytes": 790094,
+      "maxGzipBytes": 120887,
       "allowedModules": [
         "scripts/lib/anatomy-gen.js",
         "scripts/lib/calendar-geometry.js",
@@ -57,20 +67,20 @@
       ]
     },
     "dist/ir/recipes.d.ts": {
-      "baselineBytes": 10005,
-      "baselineGzipBytes": 2536,
-      "maxBytes": 10005,
-      "maxGzipBytes": 2536,
+      "baselineBytes": 9239,
+      "baselineGzipBytes": 2341,
+      "maxBytes": 9239,
+      "maxGzipBytes": 2341,
       "allowedModules": [],
       "forbiddenNeedles": [
         "sourceMappingURL"
       ]
     },
     "dist/ir/recipes.js": {
-      "baselineBytes": 65677,
-      "baselineGzipBytes": 15460,
-      "maxBytes": 65677,
-      "maxGzipBytes": 15460,
+      "baselineBytes": 65222,
+      "baselineGzipBytes": 15364,
+      "maxBytes": 65222,
+      "maxGzipBytes": 15364,
       "allowedModules": [
         "scripts/lib/calendar-geometry.js",
         "scripts/lib/glyph-operators.js",

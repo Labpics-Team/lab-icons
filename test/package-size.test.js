@@ -77,9 +77,9 @@ describe('package size ratchet', () => {
   });
 
   it('закрепляет pure-JS gzip oracle точной версией, а не host zlib', () => {
-    expect(PACKAGE_SIZE_ORACLE_VERSION).toBe('0.8.2');
+    expect(PACKAGE_SIZE_ORACLE_VERSION).toBe('0.8.3');
     expect(PACKAGE_SIZE_MEASUREMENT).toBe(
-      'fflate@0.8.2 gzipSync level=9 mtime=0 after pnpm build',
+      'fflate@0.8.3 gzipSync level=9 mtime=0 after pnpm build',
     );
     const source = Buffer.concat([
       Buffer.from('Lab Icons · negative space · 24×24\n', 'utf8'),
@@ -94,7 +94,7 @@ describe('package size ratchet', () => {
     );
   });
 
-  it.each([undefined, '^0.8.2', '~0.8.2', 'latest', '0.8'])(
+  it.each([undefined, '^0.8.3', '~0.8.3', 'latest', '0.8'])(
     'fail-closed отклоняет неприкреплённую версию gzip oracle: %s',
     (version) => {
       expect(() => parsePackageSizeOracleVersion(version)).toThrow(/точной версией/);

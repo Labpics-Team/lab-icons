@@ -35,6 +35,7 @@ import {
   installedAllowlist,
   validatePackageProjection,
   validateReleaseContract,
+  validateReleaseTypeDependencyGraph,
 } from './lib/release-contract.js';
 
 export const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -133,6 +134,12 @@ export function validateInstalledPackage(packageRoot, contract) {
   for (const path of files) {
     if (!expectedSet.has(path)) errors.push(`tarball содержит файл вне exact allowlist: ${path}`);
   }
+  errors.push(...validateReleaseTypeDependencyGraph({
+    contract,
+    readText(file) {
+      return readFileSync(join(packageRoot, file), 'utf8');
+    },
+  }));
 
   let pkg = null;
   try {
@@ -477,6 +484,61 @@ export function checkPackageArtifact({
       [join(root, 'node_modules', 'typescript', 'bin', 'tsc'), '-p', join(consumer, 'tsconfig.json')],
       { cwd: consumer, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] },
     );
+
+    writeFileSync(
+      join(consumer, 'smoke-nodenext.mts'),
+      `import { accessibilityOutline } from '@labpics/icons';\n` +
+        `import { glyph, type GlyphIR } from '@labpics/icons/ir';\n` +
+        `import { buildDirectionalArrow } from '@labpics/icons/ir/recipes';\n` +
+        `const ir: GlyphIR = glyph({ icon: 'reload' });\n` +
+        `void [accessibilityOutline, ir, buildDirectionalArrow];\n`,
+      'utf8',
+    );
+    writeFileSync(
+      join(consumer, 'tsconfig.nodenext.json'),
+      `${JSON.stringify(
+        {
+          compilerOptions: {
+            target: 'ES2022',
+            module: 'NodeNext',
+            moduleResolution: 'NodeNext',
+            lib: ['ES2022', 'DOM'],
+            strict: true,
+            noEmit: true,
+            skipLibCheck: false,
+          },
+          include: ['smoke-nodenext.mts'],
+        },
+        null,
+        2,
+      )}\n`,
+      'utf8',
+    );
+    execFileSync(
+      process.execPath,
+      [
+        join(root, 'node_modules', 'typescript', 'bin', 'tsc'),
+        '-p',
+        join(consumer, 'tsconfig.nodenext.json'),
+      ],
+      { cwd: consumer, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] },
+    );
+
+    writeFileSync(
+      join(consumer, 'smoke.cjs'),
+      `try {\n` +
+        `  require('@labpics/icons');\n` +
+        `  throw new Error('ESM-only package unexpectedly exposed require');\n` +
+        `} catch (error) {\n` +
+        `  if (error?.code !== 'ERR_PACKAGE_PATH_NOT_EXPORTED') throw error;\n` +
+        `}\n`,
+      'utf8',
+    );
+    execFileSync(process.execPath, [join(consumer, 'smoke.cjs')], {
+      cwd: consumer,
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
 
     const rootEntry = join(installed, 'dist/index.js');
     const originalRootEntry = readFileSync(rootEntry, 'utf8');

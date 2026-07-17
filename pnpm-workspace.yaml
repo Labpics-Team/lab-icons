@@ -1,0 +1,25 @@
+# Любая новая транзитива сначала выдерживает сутки в registry. Strict-режим
+# применяет окно и к уже записанному lockfile; отсутствие publish time — отказ.
+minimumReleaseAge: 1440
+minimumReleaseAgeStrict: true
+minimumReleaseAgeIgnoreMissingTime: false
+
+# Lockfile — вход для проверки, не доверенная индульгенция. Exotic sources и
+# downgrade trust-сигналов запрещены до выполнения dependency lifecycle.
+trustLockfile: false
+trustPolicy: no-downgrade
+blockExoticSubdeps: true
+
+# Один явный writer: команды не имеют права самовольно чинить node_modules.
+verifyDepsBeforeRun: error
+strictDepBuilds: true
+
+# Resolver обязан строить граф для минимально поддерживаемого runtime, даже
+# когда локальный разработчик запускает более новый Node.
+nodeVersion: 22.14.0
+engineStrict: true
+
+allowBuilds:
+  # Единственный dependency lifecycle в lockfile: esbuild выбирает нативный
+  # бинарник для текущей платформы; сетевых либо репозиторных side effects нет.
+  esbuild: true

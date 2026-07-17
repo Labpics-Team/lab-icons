@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "packageName": "@labpics/icons",
   "primary": {
     "kind": "npm",
@@ -14,10 +14,14 @@
   "files": [
     "dist/index.d.ts",
     "dist/index.js",
+    "dist/ir/catalog.generated.d.ts",
     "dist/ir/index.d.ts",
     "dist/ir/index.js",
     "dist/ir/recipes.d.ts",
     "dist/ir/recipes.js"
+  ],
+  "typeDependencies": [
+    "dist/ir/catalog.generated.d.ts"
   ],
   "exports": {
     ".": {
