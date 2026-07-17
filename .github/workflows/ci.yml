@@ -65,16 +65,6 @@ jobs:
 
       # Bite tests доказывают, что критические гарды действительно падают,
       # а не только печатают зелёный отчёт на исправном корпусе.
-      - name: Semantics guard bites on invalid class
-        run: |
-          cp semantics/assignments.json /tmp/_assignments_backup.json
-          trap 'cp /tmp/_assignments_backup.json semantics/assignments.json' EXIT
-          sed -i 's/"accessibility": {"class": "generic"}/"accessibility": {"class": "levitate"}/' semantics/assignments.json
-          if pnpm check:semantics; then
-            echo "ERROR: semantics should have failed"
-            exit 1
-          fi
-
       - name: Parity guard bites on extra icon
         run: |
           cp svg/Filled/accessibility_filled.svg svg/Filled/_EXTRA_TEST_filled.svg
@@ -91,36 +81,6 @@ jobs:
           trap 'rm -f dist/svg/Filled/_colour_test.svg' EXIT
           if pnpm check:colors; then
             echo "ERROR: colours should have failed"
-            exit 1
-          fi
-
-      - name: Layers guard bites on invalid path index
-        run: |
-          cp semantics/layers.json /tmp/_layers_backup.json
-          trap 'cp /tmp/_layers_backup.json semantics/layers.json' EXIT
-          node -e "const fs=require('fs');const p='semantics/layers.json';const j=JSON.parse(fs.readFileSync(p,'utf8'));j.icons.history.outline.parts[0].paths=[99];fs.writeFileSync(p,JSON.stringify(j,null,1)+'\n');"
-          if pnpm check:layers; then
-            echo "ERROR: layers should have failed"
-            exit 1
-          fi
-
-      - name: Motion bounds guard bites on oversized scale
-        run: |
-          cp src/animate/icon-choreographies.generated.json /tmp/_choreo_backup.json
-          trap 'cp /tmp/_choreo_backup.json src/animate/icon-choreographies.generated.json' EXIT
-          node -e "const fs=require('fs');const p='src/animate/icon-choreographies.generated.json';const j=JSON.parse(fs.readFileSync(p,'utf8'));j.icons.heart.outline.parts[0].keyframes=[{offset:0,transform:'scale(1, 1)'},{offset:0.5,transform:'scale(1.4, 1.4)'},{offset:1,transform:'scale(1, 1)'}];fs.writeFileSync(p,JSON.stringify(j,null,1)+'\n');"
-          if pnpm check:motion-bounds; then
-            echo "ERROR: bounds should have failed"
-            exit 1
-          fi
-
-      - name: Motion collision guard bites on wild clapper swing
-        run: |
-          cp src/animate/icon-choreographies.generated.json /tmp/_choreo_backup2.json
-          trap 'cp /tmp/_choreo_backup2.json src/animate/icon-choreographies.generated.json' EXIT
-          node -e "const fs=require('fs');const p='src/animate/icon-choreographies.generated.json';const j=JSON.parse(fs.readFileSync(p,'utf8'));j.icons.notifications.outline.parts[1].keyframes=[{offset:0,transform:'rotate(0deg)'},{offset:0.5,transform:'rotate(-50deg)'},{offset:1,transform:'rotate(0deg)'}];fs.writeFileSync(p,JSON.stringify(j,null,1)+'\n');"
-          if pnpm check:motion-collision; then
-            echo "ERROR: collision should have failed"
             exit 1
           fi
 

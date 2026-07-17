@@ -149,9 +149,6 @@ export function validateReadmeReleaseProjection(readme, pkg, contract) {
   if (!readme.includes(releaseCountClaim)) {
     errors.push(`README: отсутствует точный count release manifest «${releaseCountClaim}»`);
   }
-  if (!readme.includes('dist/animate/index.d.cts')) {
-    errors.push('README: CommonJS declaration boundary dist/animate/index.d.cts не документирована');
-  }
   const stalePrivateClaims = [
     /private\s*:\s*true/i,
     /НЕ\s+публикуется[^\n]*npm/i,

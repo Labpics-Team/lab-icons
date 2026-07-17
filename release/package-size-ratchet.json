@@ -2,57 +2,6 @@
   "version": 1,
   "measurement": "fflate@0.8.2 gzipSync level=9 mtime=0 after pnpm build",
   "artifacts": {
-    "dist/animate/index.cjs": {
-      "baselineBytes": 270886,
-      "baselineGzipBytes": 23254,
-      "maxBytes": 270886,
-      "maxGzipBytes": 23254,
-      "allowedModules": [
-        "semantics/assignments.json",
-        "src/animate/choreographies.generated.json",
-        "src/animate/icon-choreographies.generated.json",
-        "src/animate/index.ts"
-      ],
-      "forbiddenNeedles": [
-        "sourceMappingURL"
-      ]
-    },
-    "dist/animate/index.d.cts": {
-      "baselineBytes": 4777,
-      "baselineGzipBytes": 2060,
-      "maxBytes": 4777,
-      "maxGzipBytes": 2060,
-      "allowedModules": [],
-      "forbiddenNeedles": [
-        "sourceMappingURL"
-      ],
-      "identicalTo": "dist/animate/index.d.ts"
-    },
-    "dist/animate/index.d.ts": {
-      "baselineBytes": 4777,
-      "baselineGzipBytes": 2060,
-      "maxBytes": 4777,
-      "maxGzipBytes": 2060,
-      "allowedModules": [],
-      "forbiddenNeedles": [
-        "sourceMappingURL"
-      ]
-    },
-    "dist/animate/index.js": {
-      "baselineBytes": 270814,
-      "baselineGzipBytes": 23229,
-      "maxBytes": 270814,
-      "maxGzipBytes": 23229,
-      "allowedModules": [
-        "semantics/assignments.json",
-        "src/animate/choreographies.generated.json",
-        "src/animate/icon-choreographies.generated.json",
-        "src/animate/index.ts"
-      ],
-      "forbiddenNeedles": [
-        "sourceMappingURL"
-      ]
-    },
     "dist/index.d.ts": {
       "baselineBytes": 30262,
       "baselineGzipBytes": 3600,

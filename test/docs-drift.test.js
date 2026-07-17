@@ -123,15 +123,13 @@ describe('README как public release projection', () => {
       .replace('pnpm add @labpics/icons', 'пакет НЕ публикуется в npm; private: true')
       .replaceAll('`@labpics/icons/ir/recipes`', '`@labpics/icons/internal`')
       .replace('pnpm observatory', 'ручная страница')
-      .replace('ровно 10 release‑файлов', 'ровно 9 release‑файлов')
-      .replaceAll('dist/animate/index.d.cts', 'dist/animate/index.d.ts');
+      .replace('ровно 6 release‑файлов', 'ровно 5 release‑файлов');
     const errors = validateReadmeReleaseProjection(hostile, PACKAGE, RELEASE_CONTRACT);
     expect(errors.some((error) => error.includes('primary install'))).toBe(true);
     expect(errors.some((error) => error.includes('@labpics/icons/ir/recipes'))).toBe(true);
     expect(errors.some((error) => error.includes('pnpm observatory'))).toBe(true);
     expect(errors.some((error) => error.includes('private/git-only'))).toBe(true);
     expect(errors.some((error) => error.includes('count release manifest'))).toBe(true);
-    expect(errors.some((error) => error.includes('CommonJS declaration boundary'))).toBe(true);
   });
 });
 

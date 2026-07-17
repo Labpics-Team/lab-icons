@@ -2,28 +2,6 @@ import { defineConfig } from 'tsup';
 
 export default defineConfig([
   {
-    entry: ['src/animate/index.ts'],
-    outDir: 'dist/animate',
-    format: ['esm'],
-    dts: true,
-    splitting: false,
-    sourcemap: false,
-    clean: false,
-    minify: false,
-    treeshake: true,
-  },
-  {
-    entry: ['src/animate/index.ts'],
-    outDir: 'dist/animate',
-    format: ['cjs'],
-    dts: false,
-    splitting: false,
-    sourcemap: false,
-    clean: false,
-    minify: false,
-    treeshake: true,
-  },
-  {
     entry: ['src/ir/index.ts'],
     outDir: 'dist/ir',
     format: ['esm'],
