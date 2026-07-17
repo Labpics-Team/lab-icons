@@ -1,0 +1,139 @@
+{
+  "version": 1,
+  "measurement": "fflate@0.8.2 gzipSync level=9 mtime=0 after pnpm build",
+  "artifacts": {
+    "dist/animate/index.cjs": {
+      "baselineBytes": 270886,
+      "baselineGzipBytes": 23254,
+      "maxBytes": 270886,
+      "maxGzipBytes": 23254,
+      "allowedModules": [
+        "semantics/assignments.json",
+        "src/animate/choreographies.generated.json",
+        "src/animate/icon-choreographies.generated.json",
+        "src/animate/index.ts"
+      ],
+      "forbiddenNeedles": [
+        "sourceMappingURL"
+      ]
+    },
+    "dist/animate/index.d.cts": {
+      "baselineBytes": 4777,
+      "baselineGzipBytes": 2060,
+      "maxBytes": 4777,
+      "maxGzipBytes": 2060,
+      "allowedModules": [],
+      "forbiddenNeedles": [
+        "sourceMappingURL"
+      ],
+      "identicalTo": "dist/animate/index.d.ts"
+    },
+    "dist/animate/index.d.ts": {
+      "baselineBytes": 4777,
+      "baselineGzipBytes": 2060,
+      "maxBytes": 4777,
+      "maxGzipBytes": 2060,
+      "allowedModules": [],
+      "forbiddenNeedles": [
+        "sourceMappingURL"
+      ]
+    },
+    "dist/animate/index.js": {
+      "baselineBytes": 270814,
+      "baselineGzipBytes": 23229,
+      "maxBytes": 270814,
+      "maxGzipBytes": 23229,
+      "allowedModules": [
+        "semantics/assignments.json",
+        "src/animate/choreographies.generated.json",
+        "src/animate/icon-choreographies.generated.json",
+        "src/animate/index.ts"
+      ],
+      "forbiddenNeedles": [
+        "sourceMappingURL"
+      ]
+    },
+    "dist/index.d.ts": {
+      "baselineBytes": 30262,
+      "baselineGzipBytes": 3600,
+      "maxBytes": 30262,
+      "maxGzipBytes": 3600,
+      "allowedModules": [],
+      "forbiddenNeedles": [
+        "sourceMappingURL"
+      ]
+    },
+    "dist/index.js": {
+      "baselineBytes": 343335,
+      "baselineGzipBytes": 95123,
+      "maxBytes": 343335,
+      "maxGzipBytes": 95123,
+      "allowedModules": [],
+      "forbiddenNeedles": [
+        "sourceMappingURL"
+      ]
+    },
+    "dist/ir/index.d.ts": {
+      "baselineBytes": 11102,
+      "baselineGzipBytes": 3671,
+      "maxBytes": 11102,
+      "maxGzipBytes": 3671,
+      "allowedModules": [],
+      "forbiddenNeedles": [
+        "sourceMappingURL"
+      ]
+    },
+    "dist/ir/index.js": {
+      "baselineBytes": 814978,
+      "baselineGzipBytes": 119307,
+      "maxBytes": 814978,
+      "maxGzipBytes": 119307,
+      "allowedModules": [
+        "scripts/lib/anatomy-gen.js",
+        "scripts/lib/calendar-geometry.js",
+        "scripts/lib/circle-dictionary.js",
+        "scripts/lib/glyph-operators.js",
+        "scripts/lib/icon-geometry.js",
+        "scripts/lib/path-data.js",
+        "semantics/anatomy.json",
+        "semantics/catalog.json",
+        "semantics/grid.json",
+        "src/ir/catalog.generated.ts",
+        "src/ir/index.ts",
+        "src/ir/recipes.ts",
+        "src/ir/sha256.ts"
+      ],
+      "forbiddenNeedles": [
+        "sourceMappingURL"
+      ]
+    },
+    "dist/ir/recipes.d.ts": {
+      "baselineBytes": 10005,
+      "baselineGzipBytes": 2536,
+      "maxBytes": 10005,
+      "maxGzipBytes": 2536,
+      "allowedModules": [],
+      "forbiddenNeedles": [
+        "sourceMappingURL"
+      ]
+    },
+    "dist/ir/recipes.js": {
+      "baselineBytes": 65677,
+      "baselineGzipBytes": 15460,
+      "maxBytes": 65677,
+      "maxGzipBytes": 15460,
+      "allowedModules": [
+        "scripts/lib/calendar-geometry.js",
+        "scripts/lib/glyph-operators.js",
+        "src/ir/recipes.ts"
+      ],
+      "forbiddenNeedles": [
+        "@labpics/icons",
+        "<svg",
+        "ICON_IDS",
+        "semantics/catalog",
+        "sourceMappingURL"
+      ]
+    }
+  }
+}

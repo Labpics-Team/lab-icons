@@ -98,6 +98,16 @@ describe('transformAt — значение transform части в момент 
 });
 
 describe('samplePolylines — суб-пути раздельно', () => {
+  it('сохраняет literal endpoint SVG-дуги без тригонометрического дрейфа', () => {
+    const endpoint = [7.14, 15.07];
+    const [polyline] = samplePolylines(
+      `M5.44 13.37A1.2 1.2 0 0 1 ${endpoint[0]} ${endpoint[1]}`,
+      24,
+    );
+
+    expect(polyline.at(-1)).toEqual(endpoint);
+  });
+
   it('А: два квадрата в одном d → две замкнутые полилинии', () => {
     const polys = samplePolylines('M0 0h2v2H0zM10 10h2v2h-2z', 4);
     expect(polys).toHaveLength(2);

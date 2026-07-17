@@ -16,6 +16,8 @@
  *      check-colors, который запрещает hex в dist/svg).
  *   5. Каждый docs/*.md в первых 5 строках объявляет роль
  *      (справка | ADR | канон | гайд | отчёт | «Роль:»).
+ *   6. README проецирует public npm/fallback/exports из release contract и
+ *      не может вернуться к устаревшему private/git-only рассказу.
  *
  * Функции чистые и экспортируются — каждое поведение доказуемо юнитами
  * (test/docs-drift.test.js), включая «гейт кусается».
@@ -115,6 +117,55 @@ export function hasDocRole(text) {
 }
 
 /* ------------------------------------------------------------------ *
+ * 6. Public release surface                                           *
+ * ------------------------------------------------------------------ */
+
+/** README — человекочитаемая проекция release SSOT, не второй канон. */
+export function validateReadmeReleaseProjection(readme, pkg, contract) {
+  const errors = [];
+  if (pkg.private !== false) {
+    errors.push('package.json#private обязан быть false для документированного public npm channel');
+  }
+  const install = contract?.primary?.install;
+  if (typeof install !== 'string' || !readme.includes(install)) {
+    errors.push(`README: отсутствует primary install из release contract: ${String(install)}`);
+  }
+  const fallback = contract?.fallback?.specifier?.replace('vX.Y.Z', `v${pkg.version}`);
+  if (typeof fallback !== 'string' || !readme.includes(fallback)) {
+    errors.push(`README: отсутствует versioned fallback из release contract: ${String(fallback)}`);
+  }
+  for (const subpath of Object.keys(contract?.exports ?? {})) {
+    const specifier = subpath === '.'
+      ? contract.packageName
+      : `${contract.packageName}${subpath.slice(1)}`;
+    if (!readme.includes(`\`${specifier}\``)) {
+      errors.push(`README: публичный export ${specifier} не документирован как code literal`);
+    }
+  }
+  for (const required of ['release/contract.json', 'pnpm observatory', 'prepack']) {
+    if (!readme.includes(required)) errors.push(`README: отсутствует обязательный release/QA marker «${required}»`);
+  }
+  const releaseCountClaim = `ровно ${contract?.files?.length} release‑файлов`;
+  if (!readme.includes(releaseCountClaim)) {
+    errors.push(`README: отсутствует точный count release manifest «${releaseCountClaim}»`);
+  }
+  if (!readme.includes('dist/animate/index.d.cts')) {
+    errors.push('README: CommonJS declaration boundary dist/animate/index.d.cts не документирована');
+  }
+  const stalePrivateClaims = [
+    /private\s*:\s*true/i,
+    /НЕ\s+публикуется[^\n]*npm/i,
+    /ставится\s+только\s+как\s+git[- ]зависимость/i,
+  ];
+  for (const pattern of stalePrivateClaims) {
+    if (pattern.test(readme)) {
+      errors.push(`README: найден устаревший private/git-only claim ${pattern}`);
+    }
+  }
+  return errors;
+}
+
+/* ------------------------------------------------------------------ *
  * Аудит целиком                                                       *
  * ------------------------------------------------------------------ */
 
@@ -122,6 +173,7 @@ export function auditRepo(root = ROOT) {
   const errors = [];
   const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
   const readme = readFileSync(join(root, 'README.md'), 'utf8');
+  const releaseContract = JSON.parse(readFileSync(join(root, 'release/contract.json'), 'utf8'));
 
   // 1. Версии
   for (const ref of extractVersionRefs(readme))
@@ -170,6 +222,9 @@ export function auditRepo(root = ROOT) {
   for (const [file, text] of corpus.slice(1))
     if (!hasDocRole(text))
       errors.push(`${file}: роль не объявлена в первых 5 строках (справка/ADR/канон/гайд/отчёт)`);
+
+  // 6. Public npm + exports + fallback
+  errors.push(...validateReadmeReleaseProjection(readme, pkg, releaseContract));
 
   return { errors, facts };
 }
