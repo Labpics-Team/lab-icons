@@ -3,11 +3,27 @@
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { gzipSync } from 'node:zlib';
 import { isDeepStrictEqual } from 'node:util';
+import { gzipSync } from 'fflate';
 
 export const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-export const PACKAGE_SIZE_MEASUREMENT = 'node:zlib gzipSync level=9 mtime=0 after pnpm build';
+const PACKAGE_JSON = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'));
+const PINNED_VERSION = /^\d+\.\d+\.\d+$/;
+
+export function parsePackageSizeOracleVersion(value) {
+  if (typeof value !== 'string' || !PINNED_VERSION.test(value)) {
+    throw new TypeError(
+      'package.json#devDependencies.fflate обязан быть точной версией без range',
+    );
+  }
+  return value;
+}
+
+export const PACKAGE_SIZE_ORACLE_VERSION = parsePackageSizeOracleVersion(
+  PACKAGE_JSON.devDependencies?.fflate,
+);
+export const PACKAGE_SIZE_MEASUREMENT =
+  `fflate@${PACKAGE_SIZE_ORACLE_VERSION} gzipSync level=9 mtime=0 after pnpm build`;
 
 const SAFE_SEGMENT = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
 const ROOT_FIELDS = ['artifacts', 'measurement', 'version'];
@@ -153,6 +169,10 @@ export function parsePackageSizeRatchet(value) {
   });
 }
 
+export function gzipArtifact(source) {
+  return gzipSync(source, { level: 9, mtime: 0 });
+}
+
 export function measureArtifact(source) {
   // Один source module может появиться в нескольких esbuild sections одного
   // entry. Контракт фиксирует множество включённых модулей, а не внутреннюю
@@ -163,7 +183,10 @@ export function measureArtifact(source) {
   )].sort();
   return Object.freeze({
     bytes: source.byteLength,
-    gzipBytes: gzipSync(source, { level: 9, mtime: 0 }).byteLength,
+    // node:zlib не является воспроизводимым oracle: одинаковые bytes давали
+    // разные DEFLATE streams между zlib 1.2.x и 1.3.x. Exact-version pure JS
+    // compressor делает baseline свойством репозитория, а не host runtime.
+    gzipBytes: gzipArtifact(source).byteLength,
     modules: Object.freeze(modules),
   });
 }

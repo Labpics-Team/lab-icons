@@ -1,12 +1,12 @@
 {
   "version": 1,
-  "measurement": "node:zlib gzipSync level=9 mtime=0 after pnpm build",
+  "measurement": "fflate@0.8.2 gzipSync level=9 mtime=0 after pnpm build",
   "artifacts": {
     "dist/animate/index.cjs": {
       "baselineBytes": 270886,
-      "baselineGzipBytes": 21914,
+      "baselineGzipBytes": 23254,
       "maxBytes": 270886,
-      "maxGzipBytes": 21914,
+      "maxGzipBytes": 23254,
       "allowedModules": [
         "semantics/assignments.json",
         "src/animate/choreographies.generated.json",
@@ -19,9 +19,9 @@
     },
     "dist/animate/index.d.cts": {
       "baselineBytes": 4777,
-      "baselineGzipBytes": 2048,
+      "baselineGzipBytes": 2060,
       "maxBytes": 4777,
-      "maxGzipBytes": 2048,
+      "maxGzipBytes": 2060,
       "allowedModules": [],
       "forbiddenNeedles": [
         "sourceMappingURL"
@@ -30,9 +30,9 @@
     },
     "dist/animate/index.d.ts": {
       "baselineBytes": 4777,
-      "baselineGzipBytes": 2048,
+      "baselineGzipBytes": 2060,
       "maxBytes": 4777,
-      "maxGzipBytes": 2048,
+      "maxGzipBytes": 2060,
       "allowedModules": [],
       "forbiddenNeedles": [
         "sourceMappingURL"
@@ -40,9 +40,9 @@
     },
     "dist/animate/index.js": {
       "baselineBytes": 270814,
-      "baselineGzipBytes": 21891,
+      "baselineGzipBytes": 23229,
       "maxBytes": 270814,
-      "maxGzipBytes": 21891,
+      "maxGzipBytes": 23229,
       "allowedModules": [
         "semantics/assignments.json",
         "src/animate/choreographies.generated.json",
@@ -55,9 +55,9 @@
     },
     "dist/index.d.ts": {
       "baselineBytes": 30262,
-      "baselineGzipBytes": 3526,
+      "baselineGzipBytes": 3600,
       "maxBytes": 30262,
-      "maxGzipBytes": 3526,
+      "maxGzipBytes": 3600,
       "allowedModules": [],
       "forbiddenNeedles": [
         "sourceMappingURL"
@@ -65,9 +65,9 @@
     },
     "dist/index.js": {
       "baselineBytes": 343335,
-      "baselineGzipBytes": 90472,
+      "baselineGzipBytes": 95123,
       "maxBytes": 343335,
-      "maxGzipBytes": 90472,
+      "maxGzipBytes": 95123,
       "allowedModules": [],
       "forbiddenNeedles": [
         "sourceMappingURL"
@@ -75,25 +75,25 @@
     },
     "dist/ir/index.d.ts": {
       "baselineBytes": 11102,
-      "baselineGzipBytes": 3600,
+      "baselineGzipBytes": 3671,
       "maxBytes": 11102,
-      "maxGzipBytes": 3600,
+      "maxGzipBytes": 3671,
       "allowedModules": [],
       "forbiddenNeedles": [
         "sourceMappingURL"
       ]
     },
     "dist/ir/index.js": {
-   "baselineBytes": 814978,
-   "baselineGzipBytes": 112363,
-   "maxBytes": 814978,
-   "maxGzipBytes": 112363,
+      "baselineBytes": 814978,
+      "baselineGzipBytes": 119307,
+      "maxBytes": 814978,
+      "maxGzipBytes": 119307,
       "allowedModules": [
         "scripts/lib/anatomy-gen.js",
-    "scripts/lib/calendar-geometry.js",
-    "scripts/lib/circle-dictionary.js",
-    "scripts/lib/glyph-operators.js",
-    "scripts/lib/icon-geometry.js",
+        "scripts/lib/calendar-geometry.js",
+        "scripts/lib/circle-dictionary.js",
+        "scripts/lib/glyph-operators.js",
+        "scripts/lib/icon-geometry.js",
         "scripts/lib/path-data.js",
         "semantics/anatomy.json",
         "semantics/catalog.json",
@@ -108,20 +108,20 @@
       ]
     },
     "dist/ir/recipes.d.ts": {
-   "baselineBytes": 10005,
-   "baselineGzipBytes": 2494,
-   "maxBytes": 10005,
-   "maxGzipBytes": 2494,
+      "baselineBytes": 10005,
+      "baselineGzipBytes": 2536,
+      "maxBytes": 10005,
+      "maxGzipBytes": 2536,
       "allowedModules": [],
       "forbiddenNeedles": [
         "sourceMappingURL"
       ]
     },
     "dist/ir/recipes.js": {
-   "baselineBytes": 65677,
-   "baselineGzipBytes": 15058,
-   "maxBytes": 65677,
-   "maxGzipBytes": 15058,
+      "baselineBytes": 65677,
+      "baselineGzipBytes": 15460,
+      "maxBytes": 65677,
+      "maxGzipBytes": 15460,
       "allowedModules": [
         "scripts/lib/calendar-geometry.js",
         "scripts/lib/glyph-operators.js",
