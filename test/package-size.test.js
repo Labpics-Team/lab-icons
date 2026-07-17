@@ -1,11 +1,18 @@
+import { createHash } from 'node:crypto';
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
-import { checkPackageSize, measureArtifact } from '../scripts/check-package-size.js';
+import {
+  checkPackageSize,
+  gzipArtifact,
+  measureArtifact,
+  PACKAGE_SIZE_MEASUREMENT,
+  PACKAGE_SIZE_ORACLE_VERSION,
+  parsePackageSizeOracleVersion,
+} from '../scripts/check-package-size.js';
 
 const roots = [];
-const MEASUREMENT = 'node:zlib gzipSync level=9 mtime=0 after pnpm build';
 
 const REQUIRED_LIMIT_FIELDS = [
   'baselineBytes',
@@ -35,7 +42,7 @@ function fixture() {
   writeFileSync(join(root, 'release/contract.json'), JSON.stringify({ files: [file] }));
   writeFileSync(join(root, 'release/package-size-ratchet.json'), JSON.stringify({
     version: 1,
-    measurement: MEASUREMENT,
+    measurement: PACKAGE_SIZE_MEASUREMENT,
     artifacts: {
       [file]: {
         baselineBytes: measurement.bytes,
@@ -68,6 +75,31 @@ describe('package size ratchet', () => {
     expect(measurement.bytes).toBe(source.byteLength);
     expect(measurement.gzipBytes).toBeGreaterThan(0);
   });
+
+  it('закрепляет pure-JS gzip oracle точной версией, а не host zlib', () => {
+    expect(PACKAGE_SIZE_ORACLE_VERSION).toBe('0.8.2');
+    expect(PACKAGE_SIZE_MEASUREMENT).toBe(
+      'fflate@0.8.2 gzipSync level=9 mtime=0 after pnpm build',
+    );
+    const source = Buffer.concat([
+      Buffer.from('Lab Icons · negative space · 24×24\n', 'utf8'),
+      Buffer.from([0, 255, 1, 254, 2, 253, 3, 252]),
+      Buffer.alloc(64, 0x41),
+    ]);
+    const compressed = Buffer.from(gzipArtifact(source));
+    expect(compressed.byteLength).toBe(67);
+    expect(compressed.subarray(0, 10).toString('hex')).toBe('1f8b0800000000000203');
+    expect(createHash('sha256').update(compressed).digest('hex')).toBe(
+      'd366d654c2882616a8f4d6eb636956649fc173944eb79a83e46a7b4de18e9837',
+    );
+  });
+
+  it.each([undefined, '^0.8.2', '~0.8.2', 'latest', '0.8'])(
+    'fail-closed отклоняет неприкреплённую версию gzip oracle: %s',
+    (version) => {
+      expect(() => parsePackageSizeOracleVersion(version)).toThrow(/точной версией/);
+    },
+  );
 
   it.each(['version', 'measurement', 'artifacts'])(
     'fail-closed отклоняет удаление обязательного root-поля %s',
@@ -161,6 +193,15 @@ describe('package size ratchet', () => {
     });
     expect(checkPackageSize({ root: ceilingCase.root }).errors.join('\n')).toMatch(
       /maxBytes.*baselineBytes/,
+    );
+
+    const gzipCeilingCase = fixture();
+    updateRatchet(gzipCeilingCase.root, (ratchet) => {
+      ratchet.artifacts[gzipCeilingCase.file].maxGzipBytes =
+        ratchet.artifacts[gzipCeilingCase.file].baselineGzipBytes - 1;
+    });
+    expect(checkPackageSize({ root: gzipCeilingCase.root }).errors.join('\n')).toMatch(
+      /maxGzipBytes.*baselineGzipBytes/,
     );
   });
 

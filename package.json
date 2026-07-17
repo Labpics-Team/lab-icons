@@ -94,6 +94,7 @@
     "verify": "node scripts/check-repo-contract.js && node scripts/check-catalog.js && tsc --noEmit && pnpm build && node scripts/check-package-size.js && node scripts/check-package-artifact.js && node scripts/check-parity.js && node scripts/check-colors.js && node scripts/check-treeshake.js && node scripts/check-semantics.js && node scripts/check-choreographies.js && node scripts/check-layers.js && node scripts/check-motion-bounds.js && node scripts/check-motion-collision.js && node scripts/check-variant-parity.js && node scripts/check-anatomy.js && node scripts/check-anatomy-drift.js && node scripts/check-path-quality.js && node scripts/check-static-grid.js && node scripts/check-fill-rule.js && node scripts/check-topology.js && node scripts/check-corners.js && node scripts/check-adjacency.js && node scripts/check-ink-weight.js && node scripts/check-ink-weight.js --axes && node scripts/check-grammar.js && node scripts/check-fidelity.js && node scripts/check-dry-coverage.js && node scripts/check-anim-ready.js && node scripts/check-docs-drift.js && vitest run"
   },
   "devDependencies": {
+    "fflate": "0.8.2",
     "rollup": "^4.24.0",
     "svgo": "^3.3.2",
     "tsup": "8.3.6",
