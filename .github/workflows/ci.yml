@@ -3,8 +3,9 @@ name: CI
 on:
   push:
     branches: [master]
+  # Stacked PR тоже обязан получить доказательство exact head SHA.
   pull_request:
-    branches: [master]
+  merge_group:
 
 permissions:
   contents: read
@@ -14,58 +15,61 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-and-verify:
-    name: Canonical pnpm verify (Linux)
-    runs-on: [self-hosted, Linux, X64]
+  verify:
+    name: Verify ${{ matrix.os }} / Node ${{ matrix.node }}
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            node: '22.14.0'
+          - os: ubuntu-latest
+            node: '24'
+          - os: ubuntu-latest
+            node: '26'
+          - os: windows-latest
+            node: '24'
+          - os: macos-latest
+            node: '24'
 
     steps:
-      # Actions запинены по SHA: supply-chain обновляется отдельным ревью.
+      # Все third-party actions закреплены commit SHA; tag используется только
+      # как человекочитаемая биография обновления.
       - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           # Observatory сравнивает generated с доказанным hand blob из history.
           fetch-depth: 0
           persist-credentials: false
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
         with:
-          # Должно дословно совпадать с package.json#packageManager;
-          # scripts/check-repo-contract.js не даст этим источникам разойтись.
-          version: 10.30.3
-          # Общий $HOME у конкурентных self-hosted job раньше создавал гонки.
+          # Дословно совпадает с package.json#packageManager; repo-contract
+          # запрещает второй источник версии.
+          version: 11.13.1
           dest: ${{ runner.temp }}/setup-pnpm
 
       - name: Setup Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: '20'
+          node-version: ${{ matrix.node }}
+          package-manager-cache: false
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # Единственный список обязательных проверок живёт в package.json#scripts.verify.
-      # Иначе CI и локальный прогон неизбежно расходятся. pipefail сохраняет
-      # исходный код pnpm при одновременной записи полного корпуса в артефакт.
+      # Один список обязательных проверок живёт в package.json#scripts.verify.
       - name: Verify repository, geometry, package and tests
-        shell: bash
-        run: |
-          set -o pipefail
-          pnpm verify 2>&1 | tee verify-linux.log
+        run: pnpm verify
 
-      - name: Upload failed Linux verify log
-        if: failure()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        with:
-          name: linux-verify-log
-          path: verify-linux.log
-          if-no-files-found: warn
-          retention-days: 3
-
-      # Bite tests доказывают, что критические гарды действительно падают,
-      # а не только печатают зелёный отчёт на исправном корпусе.
+      # Bite tests выполняются один раз на основной LTS: их задача — доказать
+      # запрещающую ветку guard, а не повторить platform matrix.
       - name: Parity guard bites on extra icon
+        if: matrix.os == 'ubuntu-latest' && matrix.node == '24'
+        shell: bash
         run: |
           cp svg/Filled/accessibility_filled.svg svg/Filled/_EXTRA_TEST_filled.svg
           trap 'rm -f svg/Filled/_EXTRA_TEST_filled.svg' EXIT
@@ -75,6 +79,8 @@ jobs:
           fi
 
       - name: Colour guard bites on hardcoded hex
+        if: matrix.os == 'ubuntu-latest' && matrix.node == '24'
+        shell: bash
         run: |
           echo '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#101012"><path d="M0 0"/></svg>' \
             > dist/svg/Filled/_colour_test.svg
@@ -84,49 +90,21 @@ jobs:
             exit 1
           fi
 
-  windows-verify:
-    name: Canonical pnpm verify (Windows)
-    runs-on: windows-latest
-    timeout-minutes: 30
-
+  # Внешний ruleset не должен знать о составе matrix. Один стабильный check
+  # разрешает менять поддерживаемые Node/OS только вместе с версионируемым CI,
+  # не оставляя защиту master привязанной к устаревающим именам job.
+  required:
+    name: Required CI
+    if: ${{ always() }}
+    needs: verify
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    permissions: {}
     steps:
-      # Это не сокращённый smoke: Windows обязан пройти тот же полный контракт,
-      # включая pack → offline install → ESM/CJS/types consumer.
-      - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
-        with:
-          version: 10.30.3
-          dest: ${{ runner.temp }}/setup-pnpm
-
-      - name: Setup Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
-        with:
-          node-version: '20'
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Verify repository, geometry, package and tests
-        shell: pwsh
+      - name: Require the entire verification matrix
+        env:
+          MATRIX_RESULT: ${{ needs.verify.result }}
+        shell: bash
         run: |
-          $PSNativeCommandUseErrorActionPreference = $false
-          pnpm verify 2>&1 | Tee-Object -FilePath verify-windows.log
-          $verifyExit = $LASTEXITCODE
-          if ($verifyExit -ne 0) { exit $verifyExit }
-
-      # GitHub UI режет длинный лог полного корпуса. Артефакт сохраняется только
-      # при ошибке и позволяет разбирать точную первопричину, не перезапуская job.
-      - name: Upload failed Windows verify log
-        if: failure()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        with:
-          name: windows-verify-log
-          path: verify-windows.log
-          if-no-files-found: warn
-          retention-days: 3
+          set -euo pipefail
+          [[ "$MATRIX_RESULT" == 'success' ]]

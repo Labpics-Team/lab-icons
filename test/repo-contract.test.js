@@ -9,8 +9,23 @@ import {
   workflowJobBlocks,
 } from '../scripts/check-repo-contract.js';
 
-const PACKAGE_MANAGER = 'pnpm@10.30.3';
-const ACTION_SHA = 'a7487c7e89a18df4991f7f222e4898a00d66ddda';
+const PACKAGE_MANAGER = 'pnpm@11.13.1';
+const PNPM_VERSION = '11.13.1';
+const PNPM_ACTION_SHA = '0ebf47130e4866e96fce0953f49152a61190b271';
+const CHECKOUT_ACTION_SHA = '9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0';
+const PNPM_WORKSPACE = `minimumReleaseAge: 1440
+minimumReleaseAgeStrict: true
+minimumReleaseAgeIgnoreMissingTime: false
+trustLockfile: false
+trustPolicy: no-downgrade
+blockExoticSubdeps: true
+verifyDepsBeforeRun: error
+strictDepBuilds: true
+nodeVersion: 22.14.0
+engineStrict: true
+allowBuilds:
+  esbuild: true
+`;
 const RELEASE_CONTRACT = JSON.parse(
   readFileSync(new URL('../release/contract.json', import.meta.url), 'utf8'),
 );
@@ -40,8 +55,8 @@ function verifyStep(mode) {
 
 function job({
   id = 'verify',
-  version = '10.30.3',
-  actionRef = ACTION_SHA,
+  version = PNPM_VERSION,
+  actionRef = PNPM_ACTION_SHA,
   install = true,
   verify = 'direct',
   runner = 'ubuntu-latest',
@@ -51,7 +66,7 @@ function job({
     runs-on: ${runner}
     steps:
       - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        uses: actions/checkout@${CHECKOUT_ACTION_SHA}
         with:
           fetch-depth: 0
       - name: Setup pnpm
@@ -110,12 +125,12 @@ function fixture({ packagePatch = {}, filesPatch = {}, existingPatch = {} } = {}
     files: RELEASE_CONTRACT.files,
     exports: RELEASE_CONTRACT.exports,
     packageManager: PACKAGE_MANAGER,
-    engines: { node: '>=20', pnpm: '>=9' },
+    engines: { node: '>=22.14.0', pnpm: '>=11.13.1' },
     scripts: {
       build: 'pnpm build:static && pnpm build:catalog && pnpm build:ir',
       'build:static': 'node scripts/build.js && node scripts/build-anatomy.js',
       'build:catalog': 'node scripts/build-catalog.mjs',
-      'build:ir': 'node scripts/clean-ir-dist.js && tsup',
+      'build:ir': 'node scripts/build-ir.mjs',
       'check:repo-contract': 'node scripts/check-repo-contract.js',
       prepack: 'pnpm build',
       verify: 'node scripts/check-repo-contract.js && node scripts/check-catalog.js && pnpm build',
@@ -125,6 +140,7 @@ function fixture({ packagePatch = {}, filesPatch = {}, existingPatch = {} } = {}
   const files = {
     'package.json': JSON.stringify(pkg),
     'release/contract.json': JSON.stringify(RELEASE_CONTRACT),
+    'pnpm-workspace.yaml': PNPM_WORKSPACE,
     '.github/workflows/ci.yml': workflow(),
     '.github/workflows/release-dist.yml': releaseWorkflow(),
     ...filesPatch,
@@ -177,9 +193,9 @@ jobs:
         os: [ubuntu-latest, windows-latest]
     runs-on: \${{ matrix.os }}
     steps:
-      - uses: pnpm/action-setup@${ACTION_SHA}
+      - uses: pnpm/action-setup@${PNPM_ACTION_SHA}
         with:
-          version: 10.30.3
+          version: ${PNPM_VERSION}
       - run: pnpm install --frozen-lockfile
       - run: pnpm verify
 `;
@@ -232,8 +248,8 @@ jobs:
   });
 
   it('считает packageManager единственным SSOT версии pnpm', () => {
-    const errors = fixture({ packagePatch: { packageManager: 'pnpm@10.31.0' } });
-    expect(errors.filter((error) => error.includes('pnpm action обязан использовать 10.31.0'))).toHaveLength(2);
+    const errors = fixture({ packagePatch: { packageManager: 'pnpm@11.13.2' } });
+    expect(errors.filter((error) => error.includes('pnpm action обязан использовать 11.13.2'))).toHaveLength(2);
   });
 
   it('запрещает плавающий packageManager', () => {
@@ -254,7 +270,7 @@ jobs:
         '.github/workflows/ci.yml': workflow({ jobs: [job({ version: '9.15.0' })] }),
       },
     });
-    expect(errors.some((error) => error.includes('pnpm action обязан использовать 10.30.3'))).toBe(true);
+    expect(errors.some((error) => error.includes(`pnpm action обязан использовать ${PNPM_VERSION}`))).toBe(true);
   });
 
   it('игнорирует version inputs чужих actions', () => {
@@ -276,6 +292,61 @@ jobs:
     expect(errors.some((error) => error.includes('40-символьным SHA'))).toBe(true);
   });
 
+  it('требует полный commit SHA у любого внешнего action', () => {
+    const tail = `      - name: Floating external action
+        uses: actions/setup-node@v7
+`;
+    const ci = workflow({ jobs: [job({ tail })] });
+    expect(fixture({ filesPatch: { '.github/workflows/ci.yml': ci } })).toContain(
+      '.github/workflows/ci.yml: actions/setup-node@v7 обязан быть запинен полным commit SHA',
+    );
+  });
+
+  it('запрещает persistent self-hosted runner', () => {
+    const ci = workflow({ jobs: [job({ runner: '[self-hosted, linux]' })] });
+    expect(fixture({ filesPatch: { '.github/workflows/ci.yml': ci } })).toContain(
+      '.github/workflows/ci.yml: persistent self-hosted runner запрещён для repository code',
+    );
+  });
+
+  it.each([
+    ['minimumReleaseAge', '1440', '0'],
+    ['minimumReleaseAgeStrict', 'true', 'false'],
+    ['minimumReleaseAgeIgnoreMissingTime', 'false', 'true'],
+    ['trustLockfile', 'false', 'true'],
+    ['trustPolicy', 'no-downgrade', 'off'],
+    ['blockExoticSubdeps', 'true', 'false'],
+    ['verifyDepsBeforeRun', 'error', 'install'],
+    ['strictDepBuilds', 'true', 'false'],
+    ['nodeVersion', '22.14.0', '24.0.0'],
+    ['engineStrict', 'true', 'false'],
+  ])('кусается на drift pnpm policy %s', (key, expected, drifted) => {
+    const policy = PNPM_WORKSPACE.replace(`${key}: ${expected}`, `${key}: ${drifted}`);
+    expect(fixture({ filesPatch: { 'pnpm-workspace.yaml': policy } })).toContain(
+      `pnpm-workspace.yaml: ${key} обязан быть ${expected}; найдено ${drifted}`,
+    );
+  });
+
+  it('кусается на ослаблении allowBuilds.esbuild', () => {
+    const policy = PNPM_WORKSPACE.replace('  esbuild: true', '  esbuild: false');
+    expect(fixture({ filesPatch: { 'pnpm-workspace.yaml': policy } })).toContain(
+      'pnpm-workspace.yaml: allowBuilds.esbuild обязан быть ровно true',
+    );
+  });
+
+  it('запрещает security overrides в workspace policy', () => {
+    const policy = `${PNPM_WORKSPACE}overrides:\n  vulnerable-package: 1.2.3\n`;
+    expect(fixture({ filesPatch: { 'pnpm-workspace.yaml': policy } })).toContain(
+      'pnpm-workspace.yaml: security override запрещён; исправлять нужно dependency graph',
+    );
+  });
+
+  it('запрещает legacy package.json#pnpm', () => {
+    expect(fixture({ packagePatch: { pnpm: { overrides: { hostile: '1.0.0' } } } })).toContain(
+      'package.json#pnpm запрещён: pnpm 11 читает project settings из pnpm-workspace.yaml',
+    );
+  });
+
   it('требует frozen install в каждом pnpm job', () => {
     const errors = fixture({
       filesPatch: {
@@ -287,7 +358,7 @@ jobs:
 
   it('требует полную history в каждом verify job', () => {
     expect(checkoutBlocks(job())).toEqual([{
-      ref: '11bd71901bbe5b1630ceea73d27597364c9af683',
+      ref: CHECKOUT_ACTION_SHA,
       fetchDepth: '0',
     }]);
     const shallow = workflow({ jobs: [job().replace('fetch-depth: 0', 'fetch-depth: 1')] });
@@ -314,7 +385,7 @@ jobs:
     const rogue = `${releaseWorkflow()}  retag-anything:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/checkout@${CHECKOUT_ACTION_SHA}
       - run: git tag hostile && git push origin hostile
 `;
     const errors = fixture({ filesPatch: { '.github/workflows/release-dist.yml': rogue } });
@@ -361,7 +432,7 @@ jobs:
           build: 'pnpm build:static && pnpm build:catalog && pnpm build:ir',
           'build:static': 'node scripts/build.js && node scripts/build-anatomy.js',
           'build:catalog': 'node scripts/build-catalog.mjs',
-          'build:ir': 'node scripts/clean-ir-dist.js && tsup',
+          'build:ir': 'node scripts/build-ir.mjs',
           'check:repo-contract': 'node scripts/check-repo-contract.js',
           prepack: 'pnpm build',
           verify: 'node scripts/build.js',
@@ -380,7 +451,7 @@ jobs:
           build: 'node scripts/build.js',
           'build:static': 'node scripts/build.js && node scripts/build-anatomy.js',
           'build:catalog': 'node scripts/build-catalog.mjs',
-          'build:ir': 'node scripts/clean-ir-dist.js && tsup',
+          'build:ir': 'node scripts/build-ir.mjs',
           'check:repo-contract': 'node scripts/check-repo-contract.js',
           prepack: 'node scripts/build.js',
           verify: 'node scripts/check-repo-contract.js && node scripts/build.js',
@@ -400,7 +471,7 @@ jobs:
           build: 'pnpm build:static && pnpm build:catalog && pnpm build:ir',
           'build:static': 'node scripts/build.js && node scripts/build-anatomy.js',
           'build:catalog': 'node -e "process.exit(0)"',
-          'build:ir': 'node scripts/clean-ir-dist.js && tsup',
+          'build:ir': 'node scripts/build-ir.mjs',
           'check:repo-contract': 'node scripts/check-repo-contract.js',
           prepack: 'pnpm build',
           verify: 'node scripts/check-repo-contract.js && pnpm build && node scripts/check-catalog.js',
