@@ -4,9 +4,11 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 import {
+  declarationModuleSpecifiers,
   installedAllowlist,
   validatePackageProjection,
   validateReleaseContract,
+  validateReleaseTypeDependencyGraph,
 } from '../scripts/lib/release-contract.js';
 import {
   validateDistProvenance,
@@ -20,6 +22,16 @@ const PACKAGE = JSON.parse(readFileSync(new URL('../package.json', import.meta.u
 const roots = [];
 const SOURCE_COMMIT = 'a'.repeat(40);
 const DIST_COMMIT = 'b'.repeat(40);
+
+const DECLARATIONS = Object.freeze({
+  'dist/index.d.ts': 'export declare const accessibilityOutline: string;\n',
+  'dist/ir/catalog.generated.d.ts': "export type CatalogIconId = 'fixture';\n",
+  'dist/ir/index.d.ts':
+    `import type { CatalogIconId } from './catalog.generated.js';\n` +
+    `export type { RecipeResult } from './recipes.js';\n` +
+    'export declare const iconIds: readonly CatalogIconId[];\n',
+  'dist/ir/recipes.d.ts': 'export interface RecipeResult { readonly kind: string }\n',
+});
 
 function write(root, path, content = '') {
   const absolute = join(root, path);
@@ -85,6 +97,94 @@ describe('release contract', () => {
     expect(CONTRACT.files.every((file) => !file.endsWith('/') && !file.includes('*'))).toBe(true);
   });
 
+  it('доказывает точную import closure публичных деклараций', () => {
+    expect(
+      validateReleaseTypeDependencyGraph({
+        contract: CONTRACT,
+        readText(file) {
+          if (!Object.hasOwn(DECLARATIONS, file)) throw new Error('ENOENT');
+          return DECLARATIONS[file];
+        },
+      }),
+    ).toEqual([]);
+  });
+
+  it('lexer видит все module-reference формы, но не текст комментариев', () => {
+    const parsed = declarationModuleSpecifiers(
+      `// import './comment.js'\n` +
+      `/* export type { Ghost } from './ghost.js' */\n` +
+      `import './side-effect.js';\n` +
+      `import type Main = require('./require.js');\n` +
+      `export type Lazy = import('./lazy.js').Lazy;\n` +
+      `export type { Direct } from './direct.js';\n`,
+    );
+    expect(parsed.errors).toEqual([]);
+    expect(parsed.specifiers).toEqual([
+      './side-effect.js',
+      './require.js',
+      './lazy.js',
+      './direct.js',
+    ]);
+  });
+
+  it('fail-closed отклоняет external и escaped type dependency', () => {
+    const external = {
+      ...DECLARATIONS,
+      'dist/ir/index.d.ts':
+        `import type { External } from 'unlisted-package';\n` + DECLARATIONS['dist/ir/index.d.ts'],
+    };
+    const externalErrors = validateReleaseTypeDependencyGraph({
+      contract: CONTRACT,
+      readText(file) {
+        return external[file];
+      },
+    });
+    expect(externalErrors).toContain(
+      'release declaration graph: dist/ir/index.d.ts содержит внешнюю type-зависимость unlisted-package',
+    );
+
+    expect(declarationModuleSpecifiers(`import './catalog\\u002egenerated.js';`).errors).toEqual([
+      'escaped module specifier запрещён на offset 7',
+    ]);
+  });
+
+  it('не позволяет manifest легализовать orphan typeDependency', () => {
+    const orphan = 'dist/ir/orphan.d.ts';
+    const contract = {
+      ...CONTRACT,
+      files: [...CONTRACT.files, orphan].sort(),
+      typeDependencies: [...CONTRACT.typeDependencies, orphan].sort(),
+    };
+    const errors = validateReleaseTypeDependencyGraph({
+      contract,
+      readText(file) {
+        if (!Object.hasOwn(DECLARATIONS, file)) throw new Error('ENOENT');
+        return DECLARATIONS[file];
+      },
+    });
+    expect(errors).toContain(
+      'release typeDependencies не равен import closure: declared [dist/ir/catalog.generated.d.ts, dist/ir/orphan.d.ts], actual [dist/ir/catalog.generated.d.ts]',
+    );
+  });
+
+  it('кусается на отсутствующей транзитивной декларации', () => {
+    const contract = {
+      ...CONTRACT,
+      files: CONTRACT.files.filter((file) => file !== 'dist/ir/catalog.generated.d.ts'),
+      typeDependencies: [],
+    };
+    const errors = validateReleaseTypeDependencyGraph({
+      contract,
+      readText(file) {
+        if (!Object.hasOwn(DECLARATIONS, file)) throw new Error('ENOENT');
+        return DECLARATIONS[file];
+      },
+    });
+    expect(errors).toContain(
+      'release declaration graph: dist/ir/index.d.ts импортирует отсутствующий dist/ir/catalog.generated.d.ts',
+    );
+  });
+
   it('не допускает directory entry, glob и sourcemap', () => {
     for (const file of ['dist/ir', 'dist/**/*.js', 'dist/ir/index.js.map']) {
       const bad = { ...CONTRACT, files: [...CONTRACT.files, file].sort() };
@@ -140,7 +240,7 @@ describe('release contract', () => {
   it('не допускает ни одного файла manifest вне export surface', () => {
     const files = [...CONTRACT.files, 'dist/orphan.js'].sort();
     expect(validateReleaseContract({ ...CONTRACT, files })).toContain(
-      'release file не достижим ни из одного export: dist/orphan.js',
+      'release file не достижим ни из export, ни как typeDependency: dist/orphan.js',
     );
   });
 

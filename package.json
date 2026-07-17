@@ -11,7 +11,7 @@
     "access": "public"
   },
   "type": "module",
-  "packageManager": "pnpm@10.30.3",
+  "packageManager": "pnpm@11.13.1",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -33,6 +33,7 @@
   "files": [
     "dist/index.d.ts",
     "dist/index.js",
+    "dist/ir/catalog.generated.d.ts",
     "dist/ir/index.d.ts",
     "dist/ir/index.js",
     "dist/ir/recipes.d.ts",
@@ -41,11 +42,14 @@
   "scripts": {
     "build": "pnpm build:static && pnpm build:catalog && pnpm build:ir",
     "build:static": "node scripts/build.js && node scripts/build-anatomy.js",
-    "build:ir": "node scripts/clean-ir-dist.js && tsup",
+    "build:ir": "node scripts/build-ir.mjs",
     "build:anatomy": "node scripts/build-anatomy.js",
     "build:catalog": "node scripts/build-catalog.mjs",
     "observatory": "node scripts/build-observatory.mjs",
     "typecheck": "tsc --noEmit",
+    "check:security": "pnpm audit --audit-level=low",
+    "check:publint": "publint --strict",
+    "check:attw": "attw --pack . --profile esm-only --format table --no-emoji --no-color",
     "check:repo-contract": "node scripts/check-repo-contract.js",
     "check:package-artifact": "node scripts/check-package-artifact.js",
     "check:package-size": "node scripts/check-package-size.js",
@@ -71,15 +75,18 @@
     "check:docs-drift": "node scripts/check-docs-drift.js",
     "prepack": "pnpm build",
     "test": "vitest run",
-    "verify": "node scripts/check-repo-contract.js && node scripts/check-catalog.js && tsc --noEmit && pnpm build && node scripts/check-package-size.js && node scripts/check-package-artifact.js && node scripts/check-parity.js && node scripts/check-colors.js && node scripts/check-treeshake.js && node scripts/check-variant-parity.js && node scripts/check-anatomy.js && node scripts/check-anatomy-drift.js && node scripts/check-path-quality.js && node scripts/check-static-grid.js && node scripts/check-fill-rule.js && node scripts/check-topology.js && node scripts/check-corners.js && node scripts/check-adjacency.js && node scripts/check-ink-weight.js && node scripts/check-ink-weight.js --axes && node scripts/check-grammar.js && node scripts/check-fidelity.js && node scripts/check-dry-coverage.js && node scripts/check-anim-ready.js && node scripts/check-docs-drift.js && vitest run"
+    "verify": "node scripts/check-repo-contract.js && node scripts/check-catalog.js && pnpm check:security && tsc --noEmit && pnpm build && node scripts/check-package-size.js && node scripts/check-package-artifact.js && pnpm check:publint && pnpm check:attw && node scripts/check-parity.js && node scripts/check-colors.js && node scripts/check-treeshake.js && node scripts/check-variant-parity.js && node scripts/check-anatomy.js && node scripts/check-anatomy-drift.js && node scripts/check-path-quality.js && node scripts/check-static-grid.js && node scripts/check-fill-rule.js && node scripts/check-topology.js && node scripts/check-corners.js && node scripts/check-adjacency.js && node scripts/check-ink-weight.js && node scripts/check-ink-weight.js --axes && node scripts/check-grammar.js && node scripts/check-fidelity.js && node scripts/check-dry-coverage.js && node scripts/check-anim-ready.js && node scripts/check-docs-drift.js && vitest run"
   },
   "devDependencies": {
-    "fflate": "0.8.2",
-    "rollup": "^4.24.0",
-    "svgo": "^3.3.2",
-    "tsup": "8.3.6",
-    "typescript": "5.7.3",
-    "vitest": "2.1.8"
+    "@arethetypeswrong/cli": "0.18.5",
+    "esbuild": "0.28.1",
+    "fflate": "0.8.3",
+    "publint": "0.3.21",
+    "rollup": "4.62.2",
+    "svgo": "4.0.2",
+    "typescript": "7.0.2",
+    "vite": "8.1.4",
+    "vitest": "4.1.10"
   },
   "license": "MIT",
   "keywords": [
@@ -91,7 +98,7 @@
     "filled"
   ],
   "engines": {
-    "node": ">=20",
-    "pnpm": ">=9"
+    "node": ">=22.14.0",
+    "pnpm": ">=11.13.1"
   }
 }

@@ -123,7 +123,7 @@ describe('README как public release projection', () => {
       .replace('pnpm add @labpics/icons', 'пакет НЕ публикуется в npm; private: true')
       .replaceAll('`@labpics/icons/ir/recipes`', '`@labpics/icons/internal`')
       .replace('pnpm observatory', 'ручная страница')
-      .replace('ровно 6 release‑файлов', 'ровно 5 release‑файлов');
+      .replace('ровно 7 release‑файлов', 'ровно 6 release‑файлов');
     const errors = validateReadmeReleaseProjection(hostile, PACKAGE, RELEASE_CONTRACT);
     expect(errors.some((error) => error.includes('primary install'))).toBe(true);
     expect(errors.some((error) => error.includes('@labpics/icons/ir/recipes'))).toBe(true);

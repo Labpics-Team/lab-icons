@@ -24,6 +24,19 @@ export const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
 const EXACT_PNPM = /^pnpm@(\d+\.\d+\.\d+)$/;
 const PINNED_ACTION_REF = /^[0-9a-f]{40}$/;
+const CANONICAL_ENGINES = Object.freeze({ node: '>=22.14.0', pnpm: '>=11.13.1' });
+const PNPM_POLICY = Object.freeze({
+  blockExoticSubdeps: 'true',
+  engineStrict: 'true',
+  minimumReleaseAge: '1440',
+  minimumReleaseAgeIgnoreMissingTime: 'false',
+  minimumReleaseAgeStrict: 'true',
+  nodeVersion: '22.14.0',
+  strictDepBuilds: 'true',
+  trustLockfile: 'false',
+  trustPolicy: 'no-downgrade',
+  verifyDepsBeforeRun: 'error',
+});
 const FORBIDDEN_LOCKFILES = [
   'package-lock.json',
   'npm-shrinkwrap.json',
@@ -35,7 +48,7 @@ const CANONICAL_BUILD_SCRIPTS = Object.freeze({
   build: 'pnpm build:static && pnpm build:catalog && pnpm build:ir',
   'build:static': 'node scripts/build.js && node scripts/build-anatomy.js',
   'build:catalog': 'node scripts/build-catalog.mjs',
-  'build:ir': 'node scripts/clean-ir-dist.js && tsup',
+  'build:ir': 'node scripts/build-ir.mjs',
   prepack: 'pnpm build',
 });
 
@@ -260,6 +273,16 @@ function workflowErrors({ relativePath, text, expectedPnpmVersion }) {
     return [`${relativePath}: секция jobs отсутствует или не распознана`];
   }
 
+  if (/\bself-hosted\b/.test(text)) {
+    errors.push(`${relativePath}: persistent self-hosted runner запрещён для repository code`);
+  }
+  for (const match of text.matchAll(/^\s*(?:-\s+)?uses:\s*([^\s#]+)@([^\s#]+)/gm)) {
+    const [, action, ref] = match;
+    if (!action.startsWith('./') && !PINNED_ACTION_REF.test(ref)) {
+      errors.push(`${relativePath}: ${action}@${ref} обязан быть запинен полным commit SHA`);
+    }
+  }
+
   const pnpmJobs = jobs.filter((job) => pnpmSetupBlocks(job.text).length > 0);
   if (pnpmJobs.length === 0) {
     errors.push(`${relativePath}: нет ни одного job с pnpm/action-setup`);
@@ -385,11 +408,40 @@ export function validateRepoContract({
     );
   }
 
-  if (pkg.engines?.node !== '>=20') {
-    errors.push(`package.json: engines.node обязан быть >=20; найдено ${String(pkg.engines?.node)}`);
+  if (pkg.engines?.node !== CANONICAL_ENGINES.node) {
+    errors.push(
+      `package.json: engines.node обязан быть ${CANONICAL_ENGINES.node}; ` +
+        `найдено ${String(pkg.engines?.node)}`,
+    );
   }
-  if (pkg.engines?.pnpm !== '>=9') {
-    errors.push(`package.json: engines.pnpm обязан быть >=9; найдено ${String(pkg.engines?.pnpm)}`);
+  if (pkg.engines?.pnpm !== CANONICAL_ENGINES.pnpm) {
+    errors.push(
+      `package.json: engines.pnpm обязан быть ${CANONICAL_ENGINES.pnpm}; ` +
+        `найдено ${String(pkg.engines?.pnpm)}`,
+    );
+  }
+  if (Object.hasOwn(pkg, 'pnpm')) {
+    errors.push('package.json#pnpm запрещён: pnpm 11 читает project settings из pnpm-workspace.yaml');
+  }
+
+  try {
+    const policy = readText('pnpm-workspace.yaml');
+    for (const [key, expected] of Object.entries(PNPM_POLICY)) {
+      const match = policy.match(new RegExp(`^${key}:\\s*([^#\\s]+)\\s*$`, 'm'));
+      if (match?.[1] !== expected) {
+        errors.push(
+          `pnpm-workspace.yaml: ${key} обязан быть ${expected}; найдено ${match?.[1] ?? 'ничего'}`,
+        );
+      }
+    }
+    if (!/^allowBuilds:\s*$[\s\S]*?^\s{2}esbuild:\s*true\s*$/m.test(policy)) {
+      errors.push('pnpm-workspace.yaml: allowBuilds.esbuild обязан быть ровно true');
+    }
+    if (/^overrides:\s*$/m.test(policy)) {
+      errors.push('pnpm-workspace.yaml: security override запрещён; исправлять нужно dependency graph');
+    }
+  } catch (error) {
+    errors.push(`pnpm-workspace.yaml: не читается (${error.message})`);
   }
 
   if (!fileExists('pnpm-lock.yaml')) {

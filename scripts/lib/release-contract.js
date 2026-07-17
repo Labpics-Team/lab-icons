@@ -1,7 +1,16 @@
 import { isDeepStrictEqual } from 'node:util';
+import { posix } from 'node:path';
 
 const SAFE_SEGMENT = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
-const ROOT_KEYS = ['exports', 'fallback', 'files', 'packageName', 'primary', 'version'];
+const ROOT_KEYS = [
+  'exports',
+  'fallback',
+  'files',
+  'packageName',
+  'primary',
+  'typeDependencies',
+  'version',
+];
 const PRIMARY_KEYS = ['access', 'install', 'kind'];
 const FALLBACK_KEYS = ['immutable', 'kind', 'specifier'];
 const EXPORT_KEYS = ['.', './ir', './ir/recipes'];
@@ -68,8 +77,8 @@ export function validateReleaseContract(contract) {
   const errors = [];
   if (!isRecord(contract)) return ['release/contract.json обязан быть объектом'];
   validateExactKeys(contract, ROOT_KEYS, 'release contract', errors);
-  if (contract.version !== 3) {
-    errors.push(`release contract version обязан быть 3; найдено ${String(contract.version)}`);
+  if (contract.version !== 4) {
+    errors.push(`release contract version обязан быть 4; найдено ${String(contract.version)}`);
   }
   if (contract.packageName !== '@labpics/icons') {
     errors.push(`release packageName изменён: ${String(contract.packageName)}`);
@@ -110,6 +119,29 @@ export function validateReleaseContract(contract) {
     }
   }
 
+  const typeDependencies = new Set();
+  if (!Array.isArray(contract.typeDependencies)) {
+    errors.push('release typeDependencies обязан быть массивом точных .d.ts файлов');
+  } else {
+    if (new Set(contract.typeDependencies).size !== contract.typeDependencies.length) {
+      errors.push('release typeDependencies содержит дубликаты');
+    }
+    const sorted = [...contract.typeDependencies].sort();
+    if (!isDeepStrictEqual(contract.typeDependencies, sorted)) {
+      errors.push('release typeDependencies обязан быть лексикографически отсортирован');
+    }
+    const files = new Set(Array.isArray(contract.files) ? contract.files : []);
+    for (const file of contract.typeDependencies) {
+      if (!isExactDistFile(file) || !file.endsWith('.d.ts')) {
+        errors.push(`release typeDependencies содержит не точный .d.ts файл: ${String(file)}`);
+      } else if (!files.has(file)) {
+        errors.push(`release typeDependency отсутствует в release files: ${file}`);
+      } else {
+        typeDependencies.add(file);
+      }
+    }
+  }
+
   if (validateExactKeys(contract.exports, EXPORT_KEYS, 'release exports', errors)) {
     const files = new Set(Array.isArray(contract.files) ? contract.files : []);
     const referenced = new Set();
@@ -134,8 +166,200 @@ export function validateReleaseContract(contract) {
       }
     }
     for (const file of files) {
-      if (!referenced.has(file)) errors.push(`release file не достижим ни из одного export: ${file}`);
+      if (!referenced.has(file) && !typeDependencies.has(file)) {
+        errors.push(`release file не достижим ни из export, ни как typeDependency: ${file}`);
+      }
     }
+    for (const file of typeDependencies) {
+      if (referenced.has(file)) {
+        errors.push(`release typeDependency обязан быть транзитивным, но уже является export target: ${file}`);
+      }
+    }
+  }
+  return errors;
+}
+
+function declarationTarget(fromFile, specifier) {
+  const resolved = posix.normalize(posix.join(posix.dirname(fromFile), specifier));
+  if (!resolved.startsWith('dist/')) return null;
+  if (/\.(?:m|c)?js$/.test(resolved)) return resolved.replace(/\.(?:m|c)?js$/, '.d.ts');
+  if (resolved.endsWith('.d.ts')) return resolved;
+  return `${resolved}.d.ts`;
+}
+
+function declarationTokens(source) {
+  const tokens = [];
+  const errors = [];
+  let index = 0;
+  while (index < source.length) {
+    const char = source[index];
+    if (/\s/.test(char)) {
+      index += 1;
+      continue;
+    }
+    if (char === '/' && source[index + 1] === '/') {
+      const end = source.indexOf('\n', index + 2);
+      index = end < 0 ? source.length : end + 1;
+      continue;
+    }
+    if (char === '/' && source[index + 1] === '*') {
+      const end = source.indexOf('*/', index + 2);
+      if (end < 0) {
+        errors.push('незакрытый block comment');
+        break;
+      }
+      index = end + 2;
+      continue;
+    }
+    if (char === '"' || char === "'") {
+      const quote = char;
+      const start = index;
+      let value = '';
+      let escaped = false;
+      index += 1;
+      while (index < source.length && source[index] !== quote) {
+        if (source[index] === '\\') {
+          escaped = true;
+          index += 2;
+        } else {
+          value += source[index];
+          index += 1;
+        }
+      }
+      if (index >= source.length) {
+        errors.push(`незакрытый string literal на offset ${start}`);
+        break;
+      }
+      index += 1;
+      tokens.push({ kind: 'string', value, escaped, offset: start });
+      continue;
+    }
+    if (/[A-Za-z_$]/.test(char)) {
+      const start = index;
+      index += 1;
+      while (index < source.length && /[A-Za-z0-9_$]/.test(source[index])) index += 1;
+      tokens.push({ kind: 'identifier', value: source.slice(start, index), offset: start });
+      continue;
+    }
+    tokens.push({ kind: 'punctuator', value: char, offset: index });
+    index += 1;
+  }
+  return { tokens, errors };
+}
+
+/**
+ * Минимальный lexer деклараций, а не regex по произвольному тексту.
+ *
+ * Он различает код, строки и комментарии и закрывает все module-reference
+ * формы, которые способен эмитить TypeScript: `from`, side-effect import,
+ * import-type и `require()`. Escape в module specifier запрещён: канонический
+ * build никогда его не создаёт, а молча декодировать неоднозначный путь в
+ * supply-chain gate опаснее явного отказа.
+ */
+export function declarationModuleSpecifiers(source) {
+  if (typeof source !== 'string') {
+    return { specifiers: [], errors: ['declaration source обязан быть строкой'] };
+  }
+  const references = [...source.matchAll(
+    /^\s*\/\/\/\s*<reference\s+(?:path|types)\s*=\s*["']([^"']+)["'][^>]*>/gm,
+  )].map((match) => match[1]);
+  const { tokens, errors } = declarationTokens(source);
+  const found = [...references];
+  const addString = (token) => {
+    if (!token || token.kind !== 'string') return false;
+    if (token.escaped) {
+      errors.push(`escaped module specifier запрещён на offset ${token.offset}`);
+      return true;
+    }
+    found.push(token.value);
+    return true;
+  };
+
+  for (let index = 0; index < tokens.length; index++) {
+    const token = tokens[index];
+    if (token.kind !== 'identifier') continue;
+    if (token.value === 'from') {
+      addString(tokens[index + 1]);
+      continue;
+    }
+    if (token.value === 'import') {
+      if (addString(tokens[index + 1])) continue;
+      if (tokens[index + 1]?.value === '(') addString(tokens[index + 2]);
+      continue;
+    }
+    if (token.value === 'require' && tokens[index + 1]?.value === '(') {
+      addString(tokens[index + 2]);
+    }
+  }
+
+  return {
+    specifiers: [...new Set(found)],
+    errors,
+  };
+}
+
+/**
+ * Доказывает, что auxiliary declarations — точная транзитивная closure
+ * публичных type entrypoints. Само перечисление в manifest не должно уметь
+ * легализовать orphan .d.ts.
+ */
+export function validateReleaseTypeDependencyGraph({ contract, readText }) {
+  const errors = [];
+  const files = new Set(Array.isArray(contract?.files) ? contract.files : []);
+  const declared = new Set(
+    Array.isArray(contract?.typeDependencies) ? contract.typeDependencies : [],
+  );
+  const entrypoints = new Set();
+  for (const value of Object.values(contract?.exports ?? {})) {
+    const target = value?.types;
+    if (typeof target === 'string' && target.startsWith('./')) entrypoints.add(target.slice(2));
+  }
+
+  const reached = new Set();
+  const queue = [...entrypoints];
+  while (queue.length > 0) {
+    const file = queue.shift();
+    if (reached.has(file)) continue;
+    reached.add(file);
+    let source;
+    try {
+      source = readText(file);
+    } catch (error) {
+      errors.push(`release declaration graph: ${file} не читается (${error.message})`);
+      continue;
+    }
+    const parsed = declarationModuleSpecifiers(source);
+    for (const error of parsed.errors) {
+      errors.push(`release declaration graph: ${file}: ${error}`);
+    }
+    const specifiers = parsed.specifiers;
+    for (const specifier of specifiers) {
+      if (!specifier.startsWith('.')) {
+        errors.push(
+          `release declaration graph: ${file} содержит внешнюю type-зависимость ${specifier}`,
+        );
+        continue;
+      }
+      const target = declarationTarget(file, specifier);
+      if (!target) {
+        errors.push(`release declaration graph: ${file} выходит за dist через ${specifier}`);
+        continue;
+      }
+      if (!files.has(target)) {
+        errors.push(`release declaration graph: ${file} импортирует отсутствующий ${target}`);
+        continue;
+      }
+      if (!reached.has(target)) queue.push(target);
+    }
+  }
+
+  const actual = [...reached].filter((file) => !entrypoints.has(file)).sort();
+  const expected = [...declared].sort();
+  if (!isDeepStrictEqual(actual, expected)) {
+    errors.push(
+      `release typeDependencies не равен import closure: ` +
+        `declared [${expected.join(', ')}], actual [${actual.join(', ')}]`,
+    );
   }
   return errors;
 }

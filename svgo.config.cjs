@@ -19,7 +19,9 @@ module.exports = {
       name: 'preset-default',
       params: {
         overrides: {
-          removeViewBox: false,
+          // SVGO 4 больше не включает removeViewBox в preset-default.
+          // Отсутствие отдельного plugin и есть fail-closed сохранение viewBox;
+          // попытка override печатает 444 предупреждения и ничего не защищает.
           cleanupIds: { remove: true, minify: false },
           convertPathData: { floatPrecision: 2, transformPrecision: 2 },
         },

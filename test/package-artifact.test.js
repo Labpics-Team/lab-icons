@@ -56,7 +56,13 @@ function validPackage() {
   write(root, 'dist/index.js', 'export const accessibilityOutline = `<svg/>`;\n');
   write(root, 'dist/index.d.ts', 'export declare const accessibilityOutline: string;\n');
   write(root, 'dist/ir/index.js', 'export const iconIds = []; export const glyph = () => ({});\n');
-  write(root, 'dist/ir/index.d.ts', 'export declare const iconIds: readonly string[]; export declare function glyph(): unknown;\n');
+  write(
+    root,
+    'dist/ir/index.d.ts',
+    `import type { CatalogIconId } from './catalog.generated.js';\n` +
+      'export declare const iconIds: readonly CatalogIconId[]; export declare function glyph(): unknown;\n',
+  );
+  write(root, 'dist/ir/catalog.generated.d.ts', "export type CatalogIconId = 'fixture';\n");
   write(root, 'dist/ir/recipes.js', 'export const buildDirectionalArrow = () => ({});\n');
   write(root, 'dist/ir/recipes.d.ts', 'export declare function buildDirectionalArrow(): unknown;\n');
   return root;
@@ -121,6 +127,18 @@ describe('check-package-artifact', () => {
     const result = validateInstalledPackage(validPackage(), CONTRACT);
     expect(result.errors).toEqual([]);
     expect(result.files).toContain('dist/ir/index.js');
+  });
+
+  it('кусается, если транзитивная декларация отсутствует физически', () => {
+    const root = validPackage();
+    rmSync(join(root, 'dist/ir/catalog.generated.d.ts'));
+    const errors = validateInstalledPackage(root, CONTRACT).errors;
+    expect(errors).toContain('в tarball отсутствует dist/ir/catalog.generated.d.ts');
+    expect(
+      errors.some((error) =>
+        error.includes('dist/ir/catalog.generated.d.ts не читается'),
+      ),
+    ).toBe(true);
   });
 
   it('кусается на утечке исходников и производного корпуса', () => {
