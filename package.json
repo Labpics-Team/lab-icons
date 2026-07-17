@@ -1,11 +1,14 @@
 {
   "name": "@labpics/icons",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": false,
   "description": "Labpics icon library — 444 SVG (Filled + Outline), tree-shakeable ESM",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Labpics-Team/lab-icons.git"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "type": "module",
   "packageManager": "pnpm@10.30.3",
@@ -18,24 +21,49 @@
       "types": "./dist/index.d.ts"
     },
     "./animate": {
-      "types": "./dist/animate/index.d.ts",
-      "import": "./dist/animate/index.js",
-      "require": "./dist/animate/index.cjs"
+      "import": {
+        "types": "./dist/animate/index.d.ts",
+        "default": "./dist/animate/index.js"
+      },
+      "require": {
+        "types": "./dist/animate/index.d.cts",
+        "default": "./dist/animate/index.cjs"
+      }
+    },
+    "./ir": {
+      "types": "./dist/ir/index.d.ts",
+      "import": "./dist/ir/index.js"
+    },
+    "./ir/recipes": {
+      "types": "./dist/ir/recipes.d.ts",
+      "import": "./dist/ir/recipes.js"
     }
   },
   "sideEffects": false,
   "files": [
-    "dist/index.js",
+    "dist/animate/index.cjs",
+    "dist/animate/index.d.cts",
+    "dist/animate/index.d.ts",
+    "dist/animate/index.js",
     "dist/index.d.ts",
-    "dist/animate"
+    "dist/index.js",
+    "dist/ir/index.d.ts",
+    "dist/ir/index.js",
+    "dist/ir/recipes.d.ts",
+    "dist/ir/recipes.js"
   ],
   "scripts": {
-    "build": "node scripts/build.js && node scripts/build-anatomy.js",
-    "build:animate": "tsup",
+    "build": "pnpm build:static && pnpm build:catalog && pnpm build:runtime",
+    "build:static": "node scripts/build.js && node scripts/build-anatomy.js",
+    "build:animate": "pnpm build:runtime",
+    "build:runtime": "node scripts/clean-runtime-dist.js && tsup && node scripts/build-animate-cjs-types.js",
     "build:anatomy": "node scripts/build-anatomy.js",
+    "build:catalog": "node scripts/build-catalog.mjs",
+    "observatory": "node scripts/build-observatory.mjs",
     "typecheck": "tsc --noEmit",
     "check:repo-contract": "node scripts/check-repo-contract.js",
     "check:package-artifact": "node scripts/check-package-artifact.js",
+    "check:package-size": "node scripts/check-package-size.js",
     "check:parity": "node scripts/check-parity.js",
     "check:colors": "node scripts/check-colors.js",
     "check:treeshake": "node scripts/check-treeshake.js",
@@ -46,6 +74,7 @@
     "check:motion-collision": "node scripts/check-motion-collision.js",
     "check:variant-parity": "node scripts/check-variant-parity.js",
     "check:anatomy": "node scripts/check-anatomy.js && node scripts/check-anatomy-drift.js",
+    "check:catalog": "node scripts/check-catalog.js",
     "check:anatomy:drift": "node scripts/check-anatomy-drift.js",
     "check:path-quality": "node scripts/check-path-quality.js",
     "check:static-grid": "node scripts/check-static-grid.js",
@@ -60,8 +89,9 @@
     "check:fidelity": "node scripts/check-fidelity.js",
     "check:dry-coverage": "node scripts/check-dry-coverage.js",
     "check:docs-drift": "node scripts/check-docs-drift.js",
+    "prepack": "pnpm build",
     "test": "vitest run",
-    "verify": "node scripts/check-repo-contract.js && node scripts/build.js && node scripts/build-anatomy.js && tsup && tsc --noEmit && node scripts/check-package-artifact.js && node scripts/check-parity.js && node scripts/check-colors.js && node scripts/check-treeshake.js && node scripts/check-semantics.js && node scripts/check-choreographies.js && node scripts/check-layers.js && node scripts/check-motion-bounds.js && node scripts/check-motion-collision.js && node scripts/check-variant-parity.js && node scripts/check-anatomy.js && node scripts/check-anatomy-drift.js && node scripts/check-path-quality.js && node scripts/check-static-grid.js && node scripts/check-fill-rule.js && node scripts/check-topology.js && node scripts/check-corners.js && node scripts/check-adjacency.js && node scripts/check-ink-weight.js && node scripts/check-ink-weight.js --axes && node scripts/check-grammar.js && node scripts/check-fidelity.js && node scripts/check-dry-coverage.js && node scripts/check-anim-ready.js && node scripts/check-docs-drift.js && vitest run"
+    "verify": "node scripts/check-repo-contract.js && node scripts/check-catalog.js && tsc --noEmit && pnpm build && node scripts/check-package-size.js && node scripts/check-package-artifact.js && node scripts/check-parity.js && node scripts/check-colors.js && node scripts/check-treeshake.js && node scripts/check-semantics.js && node scripts/check-choreographies.js && node scripts/check-layers.js && node scripts/check-motion-bounds.js && node scripts/check-motion-collision.js && node scripts/check-variant-parity.js && node scripts/check-anatomy.js && node scripts/check-anatomy-drift.js && node scripts/check-path-quality.js && node scripts/check-static-grid.js && node scripts/check-fill-rule.js && node scripts/check-topology.js && node scripts/check-corners.js && node scripts/check-adjacency.js && node scripts/check-ink-weight.js && node scripts/check-ink-weight.js --axes && node scripts/check-grammar.js && node scripts/check-fidelity.js && node scripts/check-dry-coverage.js && node scripts/check-anim-ready.js && node scripts/check-docs-drift.js && vitest run"
   },
   "devDependencies": {
     "rollup": "^4.24.0",

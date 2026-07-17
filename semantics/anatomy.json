@@ -5,7 +5,7 @@
   "cog": {
    "archetype": "radial-gear",
    "status": {
-    "outline": "generated"
+    "outline": "hand"
    },
    "params": {
     "cx": 0.5,
@@ -156,7 +156,9 @@
       "w": 0.916667,
       "h": 0.691667,
       "rOuter": 0.121667
-     }
+     },
+     "id": "body",
+     "role": "body"
     }
    ],
    "fidelityToHand": {
@@ -184,7 +186,9 @@
       "w": 0.691667,
       "h": 0.916667,
       "rOuter": 0.121667
-     }
+     },
+     "id": "body",
+     "role": "body"
     }
    ],
    "fidelityToHand": {
@@ -221,7 +225,9 @@
        "h": 0.7075,
        "rOuter": 0.1
       }
-     }
+     },
+     "id": "bar-left",
+     "role": "content"
     },
     {
      "primitive": "rounded-rect",
@@ -245,7 +251,9 @@
        "h": 0.7075,
        "rOuter": 0.1
       }
-     }
+     },
+     "id": "bar-right",
+     "role": "content"
     }
    ],
    "fidelityToHand": {
@@ -274,7 +282,9 @@
        "cy": 0.500021,
        "r": 0.104167
       }
-     }
+     },
+     "id": "dot-center",
+     "role": "content"
     },
     {
      "primitive": "circle-dot",
@@ -290,7 +300,9 @@
        "cy": 0.500021,
        "r": 0.104167
       }
-     }
+     },
+     "id": "dot-right",
+     "role": "content"
     },
     {
      "primitive": "circle-dot",
@@ -306,7 +318,9 @@
        "cy": 0.500021,
        "r": 0.104167
       }
-     }
+     },
+     "id": "dot-left",
+     "role": "content"
     }
    ],
    "fidelityToHand": {
@@ -335,7 +349,9 @@
        "cy": 0.251187,
        "r": 0.104167
       }
-     }
+     },
+     "id": "dot-top",
+     "role": "content"
     },
     {
      "primitive": "circle-dot",
@@ -351,7 +367,9 @@
        "cy": 0.499297,
        "r": 0.104167
       }
-     }
+     },
+     "id": "dot-center",
+     "role": "content"
     },
     {
      "primitive": "circle-dot",
@@ -367,7 +385,9 @@
        "cy": 0.747021,
        "r": 0.104167
       }
-     }
+     },
+     "id": "dot-bottom",
+     "role": "content"
     }
    ],
    "fidelityToHand": {
@@ -400,7 +420,9 @@
        "h": 0.1,
        "rOuter": 0.05
       }
-     }
+     },
+     "id": "bar-top",
+     "role": "content"
     },
     {
      "primitive": "rounded-rect",
@@ -420,7 +442,9 @@
        "h": 0.1,
        "rOuter": 0.05
       }
-     }
+     },
+     "id": "bar-bottom",
+     "role": "content"
     }
    ],
    "fidelityToHand": {
@@ -453,7 +477,9 @@
        "h": 0.1,
        "rOuter": 0.05
       }
-     }
+     },
+     "id": "bar",
+     "role": "content"
     }
    ],
    "fidelityToHand": {
@@ -486,7 +512,9 @@
        "cy": 0.5,
        "r": 0.458333
       }
-     }
+     },
+     "id": "body",
+     "role": "body"
     }
    ],
    "fidelityToHand": {
@@ -519,7 +547,9 @@
        "h": 0.1,
        "rOuter": 0.05
       }
-     }
+     },
+     "id": "bar-top",
+     "role": "content"
     },
     {
      "primitive": "rounded-rect",
@@ -539,7 +569,9 @@
        "h": 0.1,
        "rOuter": 0.05
       }
-     }
+     },
+     "id": "bar-middle",
+     "role": "content"
     },
     {
      "primitive": "rounded-rect",
@@ -559,13 +591,16 @@
        "h": 0.09875,
        "rOuter": 0.05
       }
-     }
+     },
+     "id": "bar-bottom",
+     "role": "content"
     }
    ],
    "fidelityToHand": {
     "outline": 0.9986,
     "filled": 0.9994
-   }
+   },
+   "correctionReason": "три полосы перестроены как точные capsule с общей высотой и единым законом терминала; расхождение с рукой распределено по субпиксельной границе экспортных кривых, а не меняет структуру знака"
   },
   "list": {
    "archetype": "composite",
@@ -592,7 +627,9 @@
        "h": 0.1,
        "rOuter": 0.05
       }
-     }
+     },
+     "id": "line-middle",
+     "role": "content"
     },
     {
      "primitive": "rounded-rect",
@@ -612,7 +649,9 @@
        "h": 0.1,
        "rOuter": 0.05
       }
-     }
+     },
+     "id": "line-bottom",
+     "role": "content"
     },
     {
      "primitive": "rounded-rect",
@@ -632,7 +671,9 @@
        "h": 0.1,
        "rOuter": 0.05
       }
-     }
+     },
+     "id": "line-top",
+     "role": "content"
     },
     {
      "primitive": "circle-dot",
@@ -651,7 +692,9 @@
        "cy": 0.72306,
        "r": 0.058572
       }
-     }
+     },
+     "id": "bullet-bottom",
+     "role": "content"
     },
     {
      "primitive": "circle-dot",
@@ -670,7 +713,9 @@
        "cy": 0.500036,
        "r": 0.058298
       }
-     }
+     },
+     "id": "bullet-middle",
+     "role": "content"
     },
     {
      "primitive": "circle-dot",
@@ -689,13 +734,16 @@
        "cy": 0.277103,
        "r": 0.058284
       }
-     }
+     },
+     "id": "bullet-top",
+     "role": "content"
     }
    ],
    "fidelityToHand": {
     "outline": 0.9943,
     "filled": 0.9979
-   }
+   },
+   "correctionReason": "строки и маркеры приведены к общему вертикальному ритму, capsule-рецепту и круговому словарю; рука хранила независимый позиционный дрейф одинаковых повторов"
   },
   "minus-circle": {
    "archetype": "composite",
@@ -724,7 +772,8 @@
       }
      },
      "name": "dash",
-     "role": "ink"
+     "role": "ink",
+     "id": "dash"
     },
     {
      "primitive": "circle-dot",
@@ -746,7 +795,8 @@
       }
      },
      "name": "ring",
-     "role": "counter"
+     "role": "counter",
+     "id": "ring"
     }
    ],
    "fidelityToHand": {
@@ -779,7 +829,9 @@
        "h": 0.3025,
        "rOuter": 0.06875
       }
-     }
+     },
+     "id": "bar-right",
+     "role": "content"
     },
     {
      "primitive": "rounded-rect",
@@ -799,7 +851,9 @@
        "h": 0.3025,
        "rOuter": 0.069167
       }
-     }
+     },
+     "id": "bar-left",
+     "role": "content"
     },
     {
      "primitive": "circle-dot",
@@ -819,7 +873,9 @@
        "cy": 0.5,
        "r": 0.458333
       }
-     }
+     },
+     "id": "container",
+     "role": "container"
     }
    ],
    "fidelityToHand": {
@@ -853,7 +909,9 @@
        "cy": 0.5,
        "r": 0.208333
       }
-     }
+     },
+     "id": "core",
+     "role": "body"
     },
     {
      "primitive": "circle-dot",
@@ -872,7 +930,9 @@
        "cy": 0.797538,
        "r": 0.037685
       }
-     }
+     },
+     "id": "ray-se",
+     "role": "detail"
     },
     {
      "primitive": "circle-dot",
@@ -891,7 +951,9 @@
        "cy": 0.796696,
        "r": 0.036791
       }
-     }
+     },
+     "id": "ray-sw",
+     "role": "detail"
     },
     {
      "primitive": "circle-dot",
@@ -910,7 +972,9 @@
        "cy": 0.079167,
        "r": 0.0375
       }
-     }
+     },
+     "id": "ray-n",
+     "role": "detail"
     },
     {
      "primitive": "circle-dot",
@@ -929,7 +993,9 @@
        "cy": 0.5,
        "r": 0.0375
       }
-     }
+     },
+     "id": "ray-e",
+     "role": "detail"
     },
     {
      "primitive": "circle-dot",
@@ -948,7 +1014,9 @@
        "cy": 0.5,
        "r": 0.0375
       }
-     }
+     },
+     "id": "ray-w",
+     "role": "detail"
     },
     {
      "primitive": "circle-dot",
@@ -967,7 +1035,9 @@
        "cy": 0.920833,
        "r": 0.0375
       }
-     }
+     },
+     "id": "ray-s",
+     "role": "detail"
     },
     {
      "primitive": "circle-dot",
@@ -986,7 +1056,9 @@
        "cy": 0.201627,
        "r": 0.03682
       }
-     }
+     },
+     "id": "ray-nw",
+     "role": "detail"
     },
     {
      "primitive": "circle-dot",
@@ -1005,7 +1077,9 @@
        "cy": 0.2025,
        "r": 0.037712
       }
-     }
+     },
+     "id": "ray-ne",
+     "role": "detail"
     }
    ],
    "fidelityToHand": {
@@ -1039,7 +1113,9 @@
        "cy": 0.5,
        "r": 0.458333
       }
-     }
+     },
+     "id": "dial",
+     "role": "container"
     },
     {
      "primitive": "clock-hand",
@@ -1064,7 +1140,8 @@
        "len": 0.25,
        "t": 0.083333
       }
-     }
+     },
+     "id": "hand-minute"
     },
     {
      "primitive": "clock-hand",
@@ -1090,7 +1167,8 @@
        "len": 0.171667,
        "t": 0.083333
       }
-     }
+     },
+     "id": "hand-hour"
     }
    ],
    "fidelityToHand": {
@@ -1128,7 +1206,9 @@
        "n": 2.8,
        "rotation": 45
       }
-     }
+     },
+     "id": "lobe-s",
+     "role": "content"
     },
     {
      "primitive": "superellipse-stroke",
@@ -1152,7 +1232,9 @@
        "n": 2.8,
        "rotation": 45
       }
-     }
+     },
+     "id": "lobe-w",
+     "role": "content"
     },
     {
      "primitive": "superellipse-stroke",
@@ -1176,7 +1258,9 @@
        "n": 2.8,
        "rotation": 45
       }
-     }
+     },
+     "id": "lobe-e",
+     "role": "content"
     },
     {
      "primitive": "superellipse-stroke",
@@ -1200,7 +1284,9 @@
        "n": 2.8,
        "rotation": 45
       }
-     }
+     },
+     "id": "lobe-n",
+     "role": "content"
     }
    ],
    "fidelityToHand": {
@@ -1237,7 +1323,9 @@
        "halfSpan": 40,
        "t": 0.079167
       }
-     }
+     },
+     "id": "wave-outer-right",
+     "role": "detail"
     },
     {
      "primitive": "arc-band",
@@ -1259,7 +1347,9 @@
        "halfSpan": 40,
        "t": 0.079167
       }
-     }
+     },
+     "id": "wave-outer-left",
+     "role": "detail"
     },
     {
      "primitive": "arc-band",
@@ -1281,7 +1371,9 @@
        "halfSpan": 40,
        "t": 0.079167
       }
-     }
+     },
+     "id": "wave-middle-right",
+     "role": "detail"
     },
     {
      "primitive": "arc-band",
@@ -1303,7 +1395,9 @@
        "halfSpan": 40,
        "t": 0.079167
       }
-     }
+     },
+     "id": "wave-middle-left",
+     "role": "detail"
     },
     {
      "primitive": "arc-band",
@@ -1325,7 +1419,9 @@
        "halfSpan": 35,
        "t": 0.079167
       }
-     }
+     },
+     "id": "wave-inner-right",
+     "role": "detail"
     },
     {
      "primitive": "arc-band",
@@ -1347,7 +1443,9 @@
        "halfSpan": 35,
        "t": 0.079167
       }
-     }
+     },
+     "id": "wave-inner-left",
+     "role": "detail"
     },
     {
      "primitive": "circle-dot",
@@ -1363,7 +1461,9 @@
        "cy": 0.5,
        "r": 0.056667
       }
-     }
+     },
+     "id": "emitter",
+     "role": "control"
     }
    ],
    "fidelityToHand": {
@@ -1376,7 +1476,7 @@
    "archetype": "composite",
    "status": {
     "outline": "hand",
-    "filled": "hand"
+    "filled": "generated"
    },
    "parts": [
     {
@@ -1397,7 +1497,9 @@
        "cy": 0.5,
        "r": 0.104167
       }
-     }
+     },
+     "id": "cell-middle-left",
+     "role": "content"
     },
     {
      "primitive": "circle-dot",
@@ -1417,7 +1519,9 @@
        "cy": 0.5,
        "r": 0.104167
       }
-     }
+     },
+     "id": "cell-center",
+     "role": "content"
     },
     {
      "primitive": "circle-dot",
@@ -1437,7 +1541,9 @@
        "cy": 0.5,
        "r": 0.104167
       }
-     }
+     },
+     "id": "cell-middle-right",
+     "role": "content"
     },
     {
      "primitive": "circle-dot",
@@ -1457,7 +1563,9 @@
        "cy": 0.747917,
        "r": 0.104167
       }
-     }
+     },
+     "id": "cell-bottom-center",
+     "role": "content"
     },
     {
      "primitive": "circle-dot",
@@ -1477,7 +1585,9 @@
        "cy": 0.747917,
        "r": 0.104167
       }
-     }
+     },
+     "id": "cell-bottom-left",
+     "role": "content"
     },
     {
      "primitive": "circle-dot",
@@ -1497,7 +1607,9 @@
        "cy": 0.747917,
        "r": 0.104167
       }
-     }
+     },
+     "id": "cell-bottom-right",
+     "role": "content"
     },
     {
      "primitive": "circle-dot",
@@ -1517,7 +1629,9 @@
        "cy": 0.252083,
        "r": 0.104167
       }
-     }
+     },
+     "id": "cell-top-left",
+     "role": "content"
     },
     {
      "primitive": "circle-dot",
@@ -1537,7 +1651,9 @@
        "cy": 0.252083,
        "r": 0.104167
       }
-     }
+     },
+     "id": "cell-top-center",
+     "role": "content"
     },
     {
      "primitive": "circle-dot",
@@ -1557,7 +1673,9 @@
        "cy": 0.252083,
        "r": 0.104167
       }
-     }
+     },
+     "id": "cell-top-right",
+     "role": "content"
     }
    ],
    "fidelityToHand": {
@@ -1838,7 +1956,9 @@
        "cy": 0.5,
        "r": 0.458333
       }
-     }
+     },
+     "id": "face",
+     "role": "container"
     },
     {
      "primitive": "rounded-rect",
@@ -1849,7 +1969,9 @@
       "w": 0.098333,
       "h": 0.116667,
       "rOuter": 0.049167
-     }
+     },
+     "id": "eye-left",
+     "role": "content"
     },
     {
      "primitive": "rounded-rect",
@@ -1860,7 +1982,9 @@
       "w": 0.098333,
       "h": 0.116667,
       "rOuter": 0.049167
-     }
+     },
+     "id": "eye-right",
+     "role": "content"
     },
     {
      "primitive": "rounded-rect",
@@ -1871,7 +1995,9 @@
       "w": 0.334583,
       "h": 0.075,
       "rOuter": 0.0375
-     }
+     },
+     "id": "mouth",
+     "role": "content"
     }
    ],
    "fidelityToHand": {
@@ -1940,7 +2066,9 @@
        ],
        "closed": false
       }
-     }
+     },
+     "id": "mark",
+     "role": "content"
     }
    ],
    "fidelityToHand": {
@@ -1965,7 +2093,9 @@
        "h": 0.58,
        "rOuter": 0.0375
       }
-     }
+     },
+     "id": "stem",
+     "role": "content"
     },
     {
      "primitive": "rounded-rect",
@@ -1978,7 +2108,9 @@
        "h": 0.075,
        "rOuter": 0.0375
       }
-     }
+     },
+     "id": "arm-left",
+     "role": "content"
     },
     {
      "primitive": "rounded-rect",
@@ -1991,7 +2123,9 @@
        "h": 0.075,
        "rOuter": 0.0375
       }
-     }
+     },
+     "id": "arm-right",
+     "role": "content"
     }
    ],
    "fidelityToHand": {
@@ -2016,7 +2150,9 @@
        "h": 0.453333,
        "rOuter": 0.041667
       }
-     }
+     },
+     "id": "stem",
+     "role": "content"
     },
     {
      "primitive": "rounded-rect",
@@ -2029,7 +2165,9 @@
        "h": 0.083333,
        "rOuter": 0.041667
       }
-     }
+     },
+     "id": "arm-left",
+     "role": "content"
     },
     {
      "primitive": "rounded-rect",
@@ -2042,7 +2180,9 @@
        "h": 0.083333,
        "rOuter": 0.041667
       }
-     }
+     },
+     "id": "arm-right",
+     "role": "content"
     },
     {
      "primitive": "circle-dot",
@@ -2062,7 +2202,9 @@
        "cy": 0.5,
        "r": 0.458333
       }
-     }
+     },
+     "id": "container",
+     "role": "container"
     }
    ],
    "fidelityToHand": {
@@ -2099,7 +2241,9 @@
        ],
        "closed": false
       }
-     }
+     },
+     "id": "mark",
+     "role": "content"
     },
     {
      "primitive": "circle-dot",
@@ -2119,7 +2263,9 @@
        "cy": 0.5,
        "r": 0.458333
       }
-     }
+     },
+     "id": "container",
+     "role": "container"
     }
    ],
    "fidelityToHand": {
@@ -2156,7 +2302,9 @@
        ],
        "closed": false
       }
-     }
+     },
+     "id": "mark-primary",
+     "role": "content"
     },
     {
      "primitive": "stroke-path",
@@ -2178,7 +2326,9 @@
        ],
        "closed": false
       }
-     }
+     },
+     "id": "mark-secondary",
+     "role": "content"
     }
    ],
    "fidelityToHand": {
@@ -2216,7 +2366,9 @@
        ],
        "closed": false
       }
-     }
+     },
+     "id": "mark-primary",
+     "role": "content"
     },
     {
      "primitive": "stroke-path",
@@ -2238,7 +2390,9 @@
        ],
        "closed": false
       }
-     }
+     },
+     "id": "mark-secondary",
+     "role": "content"
     },
     {
      "primitive": "circle-dot",
@@ -2258,7 +2412,9 @@
        "cy": 0.5,
        "r": 0.458333
       }
-     }
+     },
+     "id": "container",
+     "role": "container"
     }
    ],
    "fidelityToHand": {
@@ -2295,7 +2451,9 @@
        ],
        "closed": false
       }
-     }
+     },
+     "id": "stem",
+     "role": "content"
     },
     {
      "primitive": "stroke-path",
@@ -2317,7 +2475,9 @@
        ],
        "closed": false
       }
-     }
+     },
+     "id": "baseline",
+     "role": "content"
     },
     {
      "primitive": "circle-dot",
@@ -2328,7 +2488,9 @@
        "cy": 0.330417,
        "r": 0.052083
       }
-     }
+     },
+     "id": "dot",
+     "role": "content"
     },
     {
      "primitive": "circle-dot",
@@ -2348,9 +2510,14 @@
        "cy": 0.5,
        "r": 0.458333
       }
-     }
+     },
+     "id": "container",
+     "role": "container"
     }
-   ]
+   ],
+   "ownerReview": {
+    "outline": "кандидат намеренно не принят: раздельные stem, baseline и container дают лишний малый counter на низких raster sizes; нужен opsz-закон стыка до замены руки"
+   }
   },
   "info": {
    "archetype": "composite",
@@ -2382,7 +2549,9 @@
        ],
        "closed": false
       }
-     }
+     },
+     "id": "stem",
+     "role": "content"
     },
     {
      "primitive": "stroke-path",
@@ -2404,7 +2573,9 @@
        ],
        "closed": false
       }
-     }
+     },
+     "id": "baseline",
+     "role": "content"
     },
     {
      "primitive": "circle-dot",
@@ -2415,7 +2586,9 @@
        "cy": 0.247708,
        "r": 0.052083
       }
-     }
+     },
+     "id": "dot",
+     "role": "content"
     }
    ],
    "fidelityToHand": {
@@ -2448,7 +2621,9 @@
        ],
        "closed": false
       }
-     }
+     },
+     "id": "diagonal-nw-se",
+     "role": "content"
     },
     {
      "primitive": "stroke-path",
@@ -2470,7 +2645,9 @@
        ],
        "closed": false
       }
-     }
+     },
+     "id": "diagonal-ne",
+     "role": "content"
     },
     {
      "primitive": "stroke-path",
@@ -2492,7 +2669,9 @@
        ],
        "closed": false
       }
-     }
+     },
+     "id": "diagonal-sw",
+     "role": "content"
     }
    ],
    "fidelityToHand": {
@@ -2527,7 +2706,9 @@
        ],
        "closed": false
       }
-     }
+     },
+     "id": "diagonal-nw-se",
+     "role": "content"
     },
     {
      "primitive": "stroke-path",
@@ -2549,7 +2730,9 @@
        ],
        "closed": false
       }
-     }
+     },
+     "id": "diagonal-ne",
+     "role": "content"
     },
     {
      "primitive": "stroke-path",
@@ -2571,7 +2754,9 @@
        ],
        "closed": false
       }
-     }
+     },
+     "id": "diagonal-sw",
+     "role": "content"
     },
     {
      "primitive": "circle-dot",
@@ -2591,7 +2776,9 @@
        "cy": 0.5,
        "r": 0.458333
       }
-     }
+     },
+     "id": "container",
+     "role": "container"
     }
    ],
    "fidelityToHand": {
@@ -2624,7 +2811,9 @@
        ],
        "closed": false
       }
-     }
+     },
+     "id": "strike",
+     "role": "decorator"
     },
     {
      "primitive": "circle-dot",
@@ -2644,7 +2833,9 @@
        "cy": 0.5,
        "r": 0.458333
       }
-     }
+     },
+     "id": "container",
+     "role": "container"
     }
    ],
    "fidelityToHand": {
@@ -2682,7 +2873,9 @@
        ],
        "closed": false
       }
-     }
+     },
+     "id": "head",
+     "role": "content"
     },
     {
      "primitive": "stroke-path",
@@ -2704,7 +2897,9 @@
        ],
        "closed": false
       }
-     }
+     },
+     "id": "shaft",
+     "role": "content"
     },
     {
      "primitive": "circle-dot",
@@ -2724,7 +2919,9 @@
        "cy": 0.5,
        "r": 0.458333
       }
-     }
+     },
+     "id": "container",
+     "role": "container"
     }
    ],
    "fidelityToHand": {
@@ -2761,7 +2958,9 @@
        ],
        "closed": false
       }
-     }
+     },
+     "id": "head",
+     "role": "content"
     },
     {
      "primitive": "stroke-path",
@@ -2783,7 +2982,9 @@
        ],
        "closed": false
       }
-     }
+     },
+     "id": "shaft",
+     "role": "content"
     },
     {
      "primitive": "circle-dot",
@@ -2803,7 +3004,9 @@
        "cy": 0.5,
        "r": 0.458333
       }
-     }
+     },
+     "id": "container",
+     "role": "container"
     }
    ],
    "fidelityToHand": {
@@ -2840,7 +3043,9 @@
        ],
        "closed": false
       }
-     }
+     },
+     "id": "head",
+     "role": "content"
     },
     {
      "primitive": "stroke-path",
@@ -2862,7 +3067,9 @@
        ],
        "closed": false
       }
-     }
+     },
+     "id": "shaft",
+     "role": "content"
     },
     {
      "primitive": "circle-dot",
@@ -2882,7 +3089,9 @@
        "cy": 0.5,
        "r": 0.458333
       }
-     }
+     },
+     "id": "container",
+     "role": "container"
     }
    ],
    "fidelityToHand": {
@@ -2920,7 +3129,9 @@
        ],
        "closed": false
       }
-     }
+     },
+     "id": "head",
+     "role": "content"
     },
     {
      "primitive": "stroke-path",
@@ -2942,7 +3153,9 @@
        ],
        "closed": false
       }
-     }
+     },
+     "id": "shaft",
+     "role": "content"
     },
     {
      "primitive": "circle-dot",
@@ -2962,7 +3175,9 @@
        "cy": 0.5,
        "r": 0.458333
       }
-     }
+     },
+     "id": "container",
+     "role": "container"
     }
    ],
    "fidelityToHand": {
@@ -2995,7 +3210,9 @@
        ],
        "closed": false
       }
-     }
+     },
+     "id": "stem",
+     "role": "content"
     },
     {
      "primitive": "circle-dot",
@@ -3006,7 +3223,9 @@
        "cy": 0.670833,
        "r": 0.041667
       }
-     }
+     },
+     "id": "dot",
+     "role": "content"
     },
     {
      "primitive": "circle-dot",
@@ -3026,7 +3245,9 @@
        "cy": 0.5,
        "r": 0.458333
       }
-     }
+     },
+     "id": "container",
+     "role": "container"
     }
    ],
    "fidelityToHand": {
@@ -3066,7 +3287,8 @@
       }
      },
      "name": "triangle",
-     "role": "ink"
+     "role": "ink",
+     "id": "triangle"
     },
     {
      "primitive": "circle-dot",
@@ -3088,7 +3310,8 @@
       }
      },
      "name": "ring",
-     "role": "counter"
+     "role": "counter",
+     "id": "ring"
     }
    ],
    "fidelityToHand": {
@@ -3143,7 +3366,8 @@
       }
      },
      "name": "double-triangle",
-     "role": "ink"
+     "role": "ink",
+     "id": "double-triangle"
     },
     {
      "primitive": "circle-dot",
@@ -3165,7 +3389,8 @@
       }
      },
      "name": "ring",
-     "role": "counter"
+     "role": "counter",
+     "id": "ring"
     }
    ],
    "fidelityToHand": {
@@ -3222,7 +3447,8 @@
       }
      },
      "name": "double-triangle",
-     "role": "ink"
+     "role": "ink",
+     "id": "double-triangle"
     },
     {
      "primitive": "circle-dot",
@@ -3244,7 +3470,8 @@
       }
      },
      "name": "ring",
-     "role": "counter"
+     "role": "counter",
+     "id": "ring"
     }
    ],
    "fidelityToHand": {
@@ -3304,7 +3531,8 @@
       }
      },
      "name": "triangle-bar",
-     "role": "ink"
+     "role": "ink",
+     "id": "triangle-bar"
     },
     {
      "primitive": "circle-dot",
@@ -3326,7 +3554,8 @@
       }
      },
      "name": "ring",
-     "role": "counter"
+     "role": "counter",
+     "id": "ring"
     }
    ],
    "fidelityToHand": {
@@ -3385,7 +3614,8 @@
       }
      },
      "name": "triangle-bar",
-     "role": "ink"
+     "role": "ink",
+     "id": "triangle-bar"
     },
     {
      "primitive": "circle-dot",
@@ -3407,7 +3637,8 @@
       }
      },
      "name": "ring",
-     "role": "counter"
+     "role": "counter",
+     "id": "ring"
     }
    ],
    "fidelityToHand": {
@@ -3465,7 +3696,8 @@
       }
      },
      "name": "head",
-     "role": "ink"
+     "role": "ink",
+     "id": "head"
     },
     {
      "primitive": "stroke-path",
@@ -3503,7 +3735,8 @@
       }
      },
      "name": "shaft",
-     "role": "ink"
+     "role": "ink",
+     "id": "shaft"
     }
    ],
    "fidelityToHand": {
@@ -3562,7 +3795,8 @@
       }
      },
      "name": "head",
-     "role": "ink"
+     "role": "ink",
+     "id": "head"
     },
     {
      "primitive": "stroke-path",
@@ -3600,7 +3834,8 @@
       }
      },
      "name": "shaft",
-     "role": "ink"
+     "role": "ink",
+     "id": "shaft"
     }
    ],
    "fidelityToHand": {
@@ -3659,7 +3894,8 @@
       }
      },
      "name": "head",
-     "role": "ink"
+     "role": "ink",
+     "id": "head"
     },
     {
      "primitive": "stroke-path",
@@ -3697,7 +3933,8 @@
       }
      },
      "name": "shaft",
-     "role": "ink"
+     "role": "ink",
+     "id": "shaft"
     }
    ],
    "fidelityToHand": {
@@ -3756,7 +3993,8 @@
       }
      },
      "name": "head",
-     "role": "ink"
+     "role": "ink",
+     "id": "head"
     },
     {
      "primitive": "stroke-path",
@@ -3794,12 +4032,16 @@
       }
      },
      "name": "shaft",
-     "role": "ink"
+     "role": "ink",
+     "id": "shaft"
     }
    ],
    "fidelityToHand": {
     "outline": 0.9831,
     "filled": 0.9843
+   },
+   "ownerReview": {
+    "outline": "кандидат намеренно не принят: отдельные head и shaft пересекаются и создают лишние counter-компоненты под evenodd; требуется socket-встык из directional recipe, а не маскировка отклонения"
    }
   },
   "swap-horizontal": {
@@ -3853,7 +4095,8 @@
       }
      },
      "name": "head-a",
-     "role": "ink"
+     "role": "ink",
+     "id": "head-a"
     },
     {
      "primitive": "stroke-path",
@@ -3894,7 +4137,8 @@
       }
      },
      "name": "shaft-a",
-     "role": "ink"
+     "role": "ink",
+     "id": "shaft-a"
     },
     {
      "primitive": "stroke-path",
@@ -3940,7 +4184,8 @@
       }
      },
      "name": "head-b",
-     "role": "ink"
+     "role": "ink",
+     "id": "head-b"
     },
     {
      "primitive": "stroke-path",
@@ -3981,7 +4226,8 @@
       }
      },
      "name": "shaft-b",
-     "role": "ink"
+     "role": "ink",
+     "id": "shaft-b"
     }
    ],
    "lawOverHand": true,
@@ -4042,7 +4288,8 @@
       }
      },
      "name": "head-a",
-     "role": "ink"
+     "role": "ink",
+     "id": "head-a"
     },
     {
      "primitive": "stroke-path",
@@ -4080,7 +4327,8 @@
       }
      },
      "name": "shaft-a",
-     "role": "ink"
+     "role": "ink",
+     "id": "shaft-a"
     },
     {
      "primitive": "stroke-path",
@@ -4126,7 +4374,8 @@
       }
      },
      "name": "head-b",
-     "role": "ink"
+     "role": "ink",
+     "id": "head-b"
     },
     {
      "primitive": "stroke-path",
@@ -4164,7 +4413,8 @@
       }
      },
      "name": "shaft-b",
-     "role": "ink"
+     "role": "ink",
+     "id": "shaft-b"
     }
    ],
    "fidelityToHand": {
@@ -4279,7 +4529,9 @@
         ]
        }
       ]
-     }
+     },
+     "id": "shell",
+     "role": "body"
     },
     {
      "primitive": "tangent-chain",
@@ -4360,7 +4612,9 @@
         ]
        }
       ]
-     }
+     },
+     "id": "base",
+     "role": "body"
     },
     {
      "primitive": "tangent-chain",
@@ -4409,7 +4663,9 @@
         ]
        }
       ]
-     }
+     },
+     "id": "contact",
+     "role": "detail"
     },
     {
      "primitive": "arc-chain",
@@ -4501,7 +4757,9 @@
         "sweep": 0
        }
       ]
-     }
+     },
+     "id": "filament",
+     "role": "control"
     }
    ],
    "fidelityToHand": {
@@ -4617,7 +4875,9 @@
         ]
        }
       ]
-     }
+     },
+     "id": "eye-shape",
+     "role": "body"
     },
     {
      "primitive": "circle-dot",
@@ -4629,7 +4889,9 @@
       "cx": 0.5,
       "cy": 0.500833,
       "r": 0.2125
-     }
+     },
+     "id": "pupil",
+     "role": "control"
     }
    ],
    "fidelityToHand": {
@@ -4694,7 +4956,9 @@
       "baseline": {
        "y": 0.731667
       }
-     }
+     },
+     "id": "cloud-body",
+     "role": "body"
     }
    ],
    "fidelityToHand": {
@@ -4758,7 +5022,8 @@
       }
      },
      "name": "head-a",
-     "role": "ink"
+     "role": "ink",
+     "id": "head-a"
     },
     {
      "primitive": "stroke-path",
@@ -4804,7 +5069,8 @@
       }
      },
      "name": "head-b",
-     "role": "ink"
+     "role": "ink",
+     "id": "head-b"
     },
     {
      "primitive": "stroke-path",
@@ -4842,7 +5108,8 @@
       }
      },
      "name": "shaft",
-     "role": "ink"
+     "role": "ink",
+     "id": "shaft"
     }
    ]
   },
@@ -4901,7 +5168,8 @@
       }
      },
      "name": "head-up",
-     "role": "ink"
+     "role": "ink",
+     "id": "head-up"
     },
     {
      "primitive": "stroke-path",
@@ -4947,7 +5215,8 @@
       }
      },
      "name": "head-down",
-     "role": "ink"
+     "role": "ink",
+     "id": "head-down"
     },
     {
      "primitive": "stroke-path",
@@ -4993,7 +5262,8 @@
       }
      },
      "name": "head-left",
-     "role": "ink"
+     "role": "ink",
+     "id": "head-left"
     },
     {
      "primitive": "stroke-path",
@@ -5039,7 +5309,8 @@
       }
      },
      "name": "head-right",
-     "role": "ink"
+     "role": "ink",
+     "id": "head-right"
     },
     {
      "primitive": "stroke-path",
@@ -5077,7 +5348,8 @@
       }
      },
      "name": "shaft-v",
-     "role": "ink"
+     "role": "ink",
+     "id": "shaft-v"
     },
     {
      "primitive": "stroke-path",
@@ -5115,7 +5387,8 @@
       }
      },
      "name": "shaft-h-left",
-     "role": "ink"
+     "role": "ink",
+     "id": "shaft-h-left"
     },
     {
      "primitive": "stroke-path",
@@ -5153,9 +5426,14 @@
       }
      },
      "name": "shaft-h-right",
-     "role": "ink"
+     "role": "ink",
+     "id": "shaft-h-right"
     }
-   ]
+   ],
+   "ownerReview": {
+    "outline": "кандидат намеренно не принят: четыре head пересекают осевые shafts и порождают множество микроконтров под evenodd; все четыре стыка должны быть одним socket-рецептом",
+    "filled": "кандидат намеренно не принят: bold head/shaft пересечения меняют topology и малый растр; исправление — общий двунаправленный socket-рецепт, не локальная подгонка точек"
+   }
   },
   "download": {
    "archetype": "composite",
@@ -5273,7 +5551,8 @@
         "type": "touch"
        }
       ]
-     }
+     },
+     "id": "tray"
     },
     {
      "primitive": "stroke-path",
@@ -5300,7 +5579,8 @@
      },
      "socket": {
       "end": "head-down"
-     }
+     },
+     "id": "shaft"
     },
     {
      "primitive": "stroke-path",
@@ -5328,7 +5608,8 @@
        ],
        "closed": false
       }
-     }
+     },
+     "id": "head-down"
     }
    ],
    "correctionReason": "выпрямление асимметрии правой руки шеврона (рука-референс с перекосом, фиттер упёрся в 94.7%); терминалы приведены к сетке, шеврон досимметрирован точно (0.38/0.62, y равные) — биссектриса клина вертикальна, апекс на оси палочки; стык палочка↔наконечник переведён на сокет-встык (genStrokePath socket, класс time) — EO≡NZ точный 0; регенерат заменил руку, зеркальная симметрия by construction"
@@ -5449,7 +5730,8 @@
         "type": "touch"
        }
       ]
-     }
+     },
+     "id": "box"
     },
     {
      "primitive": "stroke-path",
@@ -5476,7 +5758,8 @@
      },
      "socket": {
       "start": "head-up"
-     }
+     },
+     "id": "shaft"
     },
     {
      "primitive": "stroke-path",
@@ -5504,7 +5787,8 @@
        ],
        "closed": false
       }
-     }
+     },
+     "id": "head-up"
     }
    ],
    "fidelityToHand": {

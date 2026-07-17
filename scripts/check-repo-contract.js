@@ -15,6 +15,10 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import {
+  validatePackageProjection,
+  validateReleaseContract,
+} from './lib/release-contract.js';
 
 export const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -27,6 +31,14 @@ const FORBIDDEN_LOCKFILES = [
   'bun.lock',
   'bun.lockb',
 ];
+const CANONICAL_BUILD_SCRIPTS = Object.freeze({
+  build: 'pnpm build:static && pnpm build:catalog && pnpm build:runtime',
+  'build:static': 'node scripts/build.js && node scripts/build-anatomy.js',
+  'build:catalog': 'node scripts/build-catalog.mjs',
+  'build:runtime':
+    'node scripts/clean-runtime-dist.js && tsup && node scripts/build-animate-cjs-types.js',
+  prepack: 'pnpm build',
+});
 
 function defaultReadText(root, relativePath) {
   return readFileSync(join(root, relativePath), 'utf8');
@@ -99,6 +111,29 @@ export function pnpmSetupBlocks(text) {
   return blocks;
 }
 
+/** Observatory опирается на hand blobs из истории, поэтому shallow запрещён. */
+export function checkoutBlocks(text) {
+  const lines = text.split(/\r?\n/);
+  const blocks = [];
+  for (let index = 0; index < lines.length; index++) {
+    const action = lines[index].match(/^(\s*)(?:-\s+)?uses:\s*actions\/checkout@([^\s#]+)/);
+    if (!action) continue;
+    const baseIndent = action[1].length;
+    let fetchDepth = null;
+    for (let nextIndex = index + 1; nextIndex < lines.length; nextIndex++) {
+      const next = lines[nextIndex];
+      const trimmed = next.trim();
+      if (!trimmed || trimmed.startsWith('#')) continue;
+      const indent = next.match(/^\s*/)?.[0].length ?? 0;
+      if (trimmed.startsWith('- ') && indent <= baseIndent) break;
+      const match = trimmed.match(/^fetch-depth:\s*['"]?([^'"\s#]+)/);
+      if (match) fetchDepth = match[1];
+    }
+    blocks.push({ ref: action[2], fetchDepth });
+  }
+  return blocks;
+}
+
 /**
  * Допустим прямой `run: pnpm verify` либо два закрытых логирующих wrapper-а:
  *
@@ -122,10 +157,62 @@ export function hasCanonicalVerify(text) {
   return windowsLoggedCommand && capturesExit && propagatesExit;
 }
 
+/**
+ * Извлекает shell-тело каждого `run` step без попытки исполнить YAML/shell.
+ * Для release policy этого достаточно: remote mutation surface закрыта до
+ * одного дословного command, а любое иное употребление token `push` в run
+ * fail-closed запрещено.
+ */
+export function workflowRunScripts(text) {
+  const lines = text.split(/\r?\n/);
+  const scripts = [];
+  for (let index = 0; index < lines.length; index++) {
+    const match = lines[index].match(/^(\s*)(?:-\s+)?run:\s*(.*?)\s*$/);
+    if (!match) continue;
+    const baseIndent = match[1].length;
+    const scalar = match[2];
+    if (scalar && !/^[>|][+-]?$/.test(scalar)) {
+      scripts.push(scalar);
+      continue;
+    }
+    const body = [];
+    for (let next = index + 1; next < lines.length; next++) {
+      const line = lines[next];
+      const trimmed = line.trim();
+      const indent = line.match(/^\s*/)?.[0].length ?? 0;
+      if (trimmed && indent <= baseIndent) break;
+      if (indent > baseIndent) body.push(line.slice(baseIndent + 1));
+      index = next;
+    }
+    scripts.push(body.join('\n'));
+  }
+  return scripts;
+}
+
+/** Любой standalone `push` внутри executable run-body считается mutation. */
+export function pushTokenLinesFromRunSteps(text) {
+  const token = /(?:^|[^A-Za-z0-9_])push(?:$|[^A-Za-z0-9_])/;
+  return workflowRunScripts(text).flatMap((script) =>
+    script.split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter((line) => line && !line.startsWith('#') && token.test(line)),
+  );
+}
+
 function pnpmJobErrors({ relativePath, job, expectedPnpmVersion }) {
   const errors = [];
   const prefix = `${relativePath} job ${job.id}`;
   const setups = pnpmSetupBlocks(job.text);
+  const checkouts = checkoutBlocks(job.text);
+
+  if (checkouts.length !== 1) {
+    errors.push(`${prefix}: должен быть ровно один actions/checkout; найдено ${checkouts.length}`);
+  } else if (checkouts[0].fetchDepth !== '0') {
+    errors.push(
+      `${prefix}: checkout обязан иметь fetch-depth: 0 для historical-hand provenance; ` +
+        `найдено ${checkouts[0].fetchDepth ?? 'ничего'}`,
+    );
+  }
 
   if (setups.length !== 1) {
     errors.push(`${prefix}: должен быть ровно один pnpm/action-setup; найдено ${setups.length}`);
@@ -196,6 +283,75 @@ function workflowErrors({ relativePath, text, expectedPnpmVersion }) {
   return errors;
 }
 
+/** Release manual dispatch принимает только существующий tag package version. */
+export function releaseWorkflowErrors(text) {
+  const errors = [];
+  const jobs = workflowJobBlocks(text);
+  const owner = jobs.length === 1 && jobs[0].id === 'release-dist' ? jobs[0].text : '';
+  if (jobs.length !== 1 || jobs[0]?.id !== 'release-dist') {
+    errors.push(
+      `.github/workflows/release-dist.yml: contents:write разрешён ровно одному job release-dist; ` +
+        `найдено [${jobs.map((job) => job.id).join(', ')}]`,
+    );
+  }
+  const exactCheckout =
+    "ref: ${{ github.event_name == 'workflow_dispatch' && format('refs/tags/{0}', inputs.tag) || github.ref }}";
+  if (!owner.includes(exactCheckout)) {
+    errors.push('.github/workflows/release-dist.yml: checkout обязан разрешать manual input только как refs/tags/<tag>');
+  }
+  if (!/description:\s*['"][^'"\n]*branch\/SHA запрещены[^'"\n]*['"]/m.test(text)) {
+    errors.push('.github/workflows/release-dist.yml: manual ref policy обязана явно запрещать branch/SHA');
+  }
+  const releaseTagEnv = [...owner.matchAll(/^\s*RELEASE_TAG:\s*\$\{\{ inputs\.tag \|\| github\.ref_name \}\}\s*$/gm)];
+  if (releaseTagEnv.length !== 2) {
+    errors.push(
+      `.github/workflows/release-dist.yml: untrusted ref обязан входить в shell только через RELEASE_TAG env; ` +
+        `найдено ${releaseTagEnv.length} bindings`,
+    );
+  }
+  if (/run:\s*[^\n]*\$\{\{ inputs\.tag|TAG="\$\{\{ inputs\.tag/m.test(owner)) {
+    errors.push('.github/workflows/release-dist.yml: inputs.tag запрещено интерполировать прямо в shell');
+  }
+  const sourceChecks = [...owner.matchAll(/^\s*run:\s*node scripts\/check-release-ref\.js source /gm)];
+  const distChecks = [...owner.matchAll(/^\s*node scripts\/check-release-ref\.js dist /gm)];
+  const stageChecks = [...owner.matchAll(/^\s*node scripts\/stage-release-dist\.js\s*$/gm)];
+  if (sourceChecks.length !== 1) {
+    errors.push(`.github/workflows/release-dist.yml: source ref check обязан быть ровно один; найдено ${sourceChecks.length}`);
+  }
+  if (distChecks.length !== 2) {
+    errors.push(
+      `.github/workflows/release-dist.yml: dist provenance обязан проверяться для existing и new tag; ` +
+        `найдено ${distChecks.length}`,
+    );
+  }
+  if (stageChecks.length !== 1) {
+    errors.push(
+      `.github/workflows/release-dist.yml: release-dist owner обязан ровно один раз stage-ить manifest; ` +
+        `найдено ${stageChecks.length}`,
+    );
+  }
+  if (!hasCanonicalVerify(owner)) {
+    errors.push('.github/workflows/release-dist.yml: pnpm verify обязан выполняться внутри owner job release-dist');
+  }
+  if (!/^\s*git fetch --no-tags origin "refs\/tags\/\$\{DIST_TAG\}:refs\/tags\/\$\{DIST_TAG\}"\s*$/m.test(owner)) {
+    errors.push('.github/workflows/release-dist.yml: existing sibling tag обязан fetch-иться перед provenance check');
+  }
+  const pushLines = pushTokenLinesFromRunSteps(owner);
+  const canonicalPush = 'git push origin "refs/tags/${DIST_TAG}"';
+  if (pushLines.length !== 1 || pushLines[0] !== canonicalPush) {
+    errors.push(
+      `.github/workflows/release-dist.yml: remote mutation surface обязан быть ровно «${canonicalPush}»; ` +
+        `найдено [${pushLines.join(', ')}]`,
+    );
+  }
+  const finalProvenance = owner.lastIndexOf('node scripts/check-release-ref.js dist "$TAG"');
+  const pushIndex = owner.indexOf(canonicalPush);
+  if (finalProvenance < 0 || pushIndex < finalProvenance) {
+    errors.push('.github/workflows/release-dist.yml: tag push обязан идти после final new-dist provenance check');
+  }
+  return errors;
+}
+
 /**
  * Чистая проверка контракта. Инъекции readText/fileExists нужны не для моков
  * ради моков, а чтобы bite-тесты доказывали каждое запрещающее правило.
@@ -212,6 +368,15 @@ export function validateRepoContract({
     pkg = JSON.parse(readText('package.json'));
   } catch (error) {
     return [`package.json: не читается как JSON (${error.message})`];
+  }
+
+  let releaseContract;
+  try {
+    releaseContract = JSON.parse(readText('release/contract.json'));
+    errors.push(...validateReleaseContract(releaseContract));
+    errors.push(...validatePackageProjection(pkg, releaseContract));
+  } catch (error) {
+    errors.push(`release/contract.json: не читается как JSON (${error.message})`);
   }
 
   const packageManagerMatch = EXACT_PNPM.exec(String(pkg.packageManager ?? ''));
@@ -246,6 +411,33 @@ export function validateRepoContract({
   ) {
     errors.push('package.json: verify обязан начинаться с check-repo-contract, чтобы дрейф кусался до сборки');
   }
+  for (const [name, expected] of Object.entries(CANONICAL_BUILD_SCRIPTS)) {
+    if (pkg.scripts?.[name] !== expected) {
+      errors.push(`package.json: ${name} обязан быть «${expected}»; найдено «${String(pkg.scripts?.[name])}»`);
+    }
+  }
+  if (typeof pkg.scripts?.verify === 'string') {
+    const commands = pkg.scripts.verify.split('&&').map((command) => command.trim());
+    if (commands[1] !== 'node scripts/check-catalog.js') {
+      errors.push(
+        'package.json: verify обязан проверять catalog drift до typecheck/build, иначе build скроет stale projection',
+      );
+    }
+    if (commands.filter((command) => command === 'pnpm build').length !== 1) {
+      errors.push('package.json: verify обязан ровно один раз вызывать канонический pnpm build');
+    }
+    for (const bypass of [
+      'node scripts/build.js',
+      'node scripts/build-anatomy.js',
+      'pnpm build:static',
+      'pnpm build:catalog',
+      'pnpm build:runtime',
+    ]) {
+      if (commands.includes(bypass)) {
+        errors.push(`package.json: verify обходит канонический build через «${bypass}»`);
+      }
+    }
+  }
 
   const expectedPnpmVersion = packageManagerMatch?.[1] ?? null;
   for (const relativePath of ['.github/workflows/ci.yml', '.github/workflows/release-dist.yml']) {
@@ -257,6 +449,9 @@ export function validateRepoContract({
       continue;
     }
     errors.push(...workflowErrors({ relativePath, text, expectedPnpmVersion }));
+    if (relativePath === '.github/workflows/release-dist.yml') {
+      errors.push(...releaseWorkflowErrors(text));
+    }
   }
 
   return errors;

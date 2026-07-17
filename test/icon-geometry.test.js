@@ -7,7 +7,12 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { iconGeometry, renderedPathData } from '../scripts/lib/icon-geometry.js';
+import {
+  iconGeometry,
+  renderedPathData,
+  renderedPathEntries,
+  sourcePathEntries,
+} from '../scripts/lib/icon-geometry.js';
 import { samplePolylines } from '../scripts/lib/curve-sampling.js';
 
 const root = join(import.meta.dirname, '..', 'svg');
@@ -60,6 +65,33 @@ describe('icon-geometry — path внутри <defs> не геометрия (к
       expect(p.bbox.maxX).toBeLessThan(23.5);
       expect(p.bbox.maxY).toBeLessThan(23.5);
     }
+  });
+
+  it('bite: half-canvas clip не выдаётся за тот же source fallback', () => {
+    const hostile =
+      '<svg viewBox="0 0 24 24"><g clip-path="url(#half)">' +
+      '<path d="M0 0H24V24H0Z"/></g><defs><clipPath id="half">' +
+      '<path d="M0 0H12V24H0Z"/></clipPath></defs></svg>';
+
+    expect(() => renderedPathEntries(hostile)).toThrow(/неэквивалентный clipPath запрещён/);
+  });
+
+  it('bite: full-canvas clip с дополнительной group-семантикой не lower-ится молча', () => {
+    const hostile =
+      '<svg viewBox="0 0 24 24"><g clip-path="url(#all)" transform="translate(1)">' +
+      '<path d="M0 0H24V24H0Z"/></g><defs><clipPath id="all">' +
+      '<path d="M0 0H24V24H0Z"/></clipPath></defs></svg>';
+
+    expect(() => renderedPathEntries(hostile)).toThrow(/локальным viewport identity/);
+  });
+
+  it('bite: viewport clip не считается identity, если он реально срезает path', () => {
+    const hostile =
+      '<svg viewBox="0 0 24 24"><g clip-path="url(#all)">' +
+      '<path d="M-1 0H24V24H-1Z"/></g><defs><clipPath id="all">' +
+      '<path d="M0 0H24V24H0Z"/></clipPath></defs></svg>';
+
+    expect(() => renderedPathEntries(hostile)).toThrow(/не identity для геометрии за viewBox/);
   });
 });
 
@@ -116,6 +148,36 @@ describe('icon-geometry — join-безопасность d-строк (клас
         expect(y).toBeLessThan(24.5);
       }
     }
+  });
+});
+
+describe('icon-geometry — closed fill-rule grammar', () => {
+  const root = (body) =>
+    `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" ` +
+    `width="24" height="24" fill="currentColor">${body}</svg>`;
+
+  it('bite: CSS escape не переопределяет browser silhouette мимо IR parser', () => {
+    const hostile = root(
+      '<path fill-rule="\\65 venodd" d="M0 0H10V10H0Z M2 2H8V8H2Z"/>',
+    );
+
+    expect(() => sourcePathEntries(hostile)).toThrow(/неканонический fill-rule/);
+  });
+
+  it('принимает только буквальные локальные значения с доказанной семантикой', () => {
+    const evenodd = sourcePathEntries(root('<path fill-rule="evenodd" d="M0 0H10V10H0Z"/>'));
+    const initial = sourcePathEntries(root('<path style="fill-rule: initial" d="M0 0H10V10H0Z"/>'));
+    expect(evenodd[0].fillRule).toBe('evenodd');
+    expect(initial[0].fillRule).toBe('nonzero');
+  });
+
+  it.each([
+    ['fill', ' fill="currentColor"'],
+    ['width', ' width="24"'],
+    ['height', ' height="24"'],
+  ])('installed source требует root %s, входящий в render contract', (_name, attribute) => {
+    const canonical = root('<path d="M0 0H10V10H0Z"/>');
+    expect(() => sourcePathEntries(canonical.replace(attribute, ''))).toThrow(/обязательным literal 24|svg\.fill/);
   });
 });
 

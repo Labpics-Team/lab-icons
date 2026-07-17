@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { describe, it, expect } from 'vitest';
 import {
   ROOT,
@@ -8,8 +9,15 @@ import {
   handoffViolations,
   findInkHexClaims,
   hasDocRole,
+  validateReadmeReleaseProjection,
   auditRepo,
 } from '../scripts/check-docs-drift.js';
+
+const PACKAGE = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
+const RELEASE_CONTRACT = JSON.parse(
+  readFileSync(new URL('../release/contract.json', import.meta.url), 'utf8'),
+);
+const README = readFileSync(new URL('../README.md', import.meta.url), 'utf8');
 
 describe('версии: пины и примеры тегов', () => {
   it('ловит конкретный dist-пин и пример тега', () => {
@@ -102,6 +110,28 @@ describe('роли доков', () => {
 
   it('кусается: док без роли', () => {
     expect(hasDocRole('# Просто заметки\n\nтекст без роли где-то дальше')).toBe(false);
+  });
+});
+
+describe('README как public release projection', () => {
+  it('проецирует npm, versioned fallback, все exports и Observatory', () => {
+    expect(validateReadmeReleaseProjection(README, PACKAGE, RELEASE_CONTRACT)).toEqual([]);
+  });
+
+  it('кусается на возврате к private/git-only и потере IR export', () => {
+    const hostile = README
+      .replace('pnpm add @labpics/icons', 'пакет НЕ публикуется в npm; private: true')
+      .replaceAll('`@labpics/icons/ir/recipes`', '`@labpics/icons/internal`')
+      .replace('pnpm observatory', 'ручная страница')
+      .replace('ровно 10 release‑файлов', 'ровно 9 release‑файлов')
+      .replaceAll('dist/animate/index.d.cts', 'dist/animate/index.d.ts');
+    const errors = validateReadmeReleaseProjection(hostile, PACKAGE, RELEASE_CONTRACT);
+    expect(errors.some((error) => error.includes('primary install'))).toBe(true);
+    expect(errors.some((error) => error.includes('@labpics/icons/ir/recipes'))).toBe(true);
+    expect(errors.some((error) => error.includes('pnpm observatory'))).toBe(true);
+    expect(errors.some((error) => error.includes('private/git-only'))).toBe(true);
+    expect(errors.some((error) => error.includes('count release manifest'))).toBe(true);
+    expect(errors.some((error) => error.includes('CommonJS declaration boundary'))).toBe(true);
   });
 });
 

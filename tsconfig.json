@@ -12,5 +12,5 @@
     "skipLibCheck": true,
     "noEmit": true
   },
-  "include": ["src/animate/**/*.ts", "test/**/*.ts"]
+  "include": ["src/animate/**/*.ts", "src/ir/**/*.ts", "test/**/*.ts"]
 }

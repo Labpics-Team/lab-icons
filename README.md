@@ -1,223 +1,201 @@
 # @labpics/icons
 
-Библиотека иконок Labpics: **222 имени × 2 варианта (Outline + Filled) = 444 SVG**
-и ровно 444 именованных ESM-экспорта (+ тип `IconName`). Без runtime-зависимостей
-(`dependencies: {}`), tree-shakeable (`sideEffects: false`), каждая иконка —
-`currentColor` на канве `viewBox="0 0 24 24"`.
+Публичная библиотека иконок Labpics: **222 имени × 2 варианта = 444 SVG** и
+ровно 444 именованных ESM-экспорта. Исходная канва — `0 0 24 24`, чернила —
+`currentColor`, package surface — без runtime-зависимостей и с
+`sideEffects: false`.
 
-Три вещи, которые нужно знать сразу:
-
-1. **Пакет НЕ публикуется в npm-реестры** (`private: true`). Он ставится как
-   git-зависимость по иммутабельному тегу `vX.Y.Z-dist` — см. [Установка](#установка).
-2. **`dist/` в git не хранится** (gitignored). Он собирается заново на каждом
-   релизе и живёт только внутри `-dist` тега — см. [Релиз](#релиз-как-рождается--dist-тег).
-3. **Статика систематизирована анатомической моделью**: токены сетки и декларации
-   глифов лежат в `semantics/`, а расхождение производных файлов с декларациями
-   ловят гейты — см. [Гейты](#разработка-сборка-и-гейты).
-
-## Как устроен конвейер
-
-```mermaid
-%%{init: {'theme':'base','themeVariables':{
-  'lineColor':'#787880','textColor':'#0A0A10',
-  'edgeLabelBackground':'#F7F7FF',
-  'clusterBkg':'transparent','clusterBorder':'#787880'
-}}}%%
-flowchart LR
-  subgraph src["Исходники (коммитятся в git)"]
-    OUT["svg/Outline<br/>222 SVG"]:::node
-    FIL["svg/Filled<br/>222 SVG"]:::node
-    SEM["semantics/<br/>grid · anatomy · flagships"]:::node
-  end
-  subgraph bld["pnpm build"]
-    B1["scripts/build.js<br/>SVGO: #101012 → currentColor"]:::accent
-    B2["scripts/build-anatomy.js<br/>скелет из path-данных"]:::node
-  end
-  subgraph dst["dist/ (в git НЕ хранится)"]
-    IDX["index.js + index.d.ts<br/>444 экспорта + тип IconName"]:::dark
-    DSVG["svg/<br/>оптимизированные копии"]:::node
-    ANAT["anatomy.json"]:::node
-  end
-  VER["pnpm verify<br/>13 гейтов + vitest"]:::accent
-  OUT --> B1
-  FIL --> B1
-  B1 --> IDX
-  B1 --> DSVG
-  DSVG --> B2
-  B2 --> ANAT
-  SEM -. "декларации и токены" .-> VER
-  IDX --> VER
-  ANAT --> VER
-  classDef node fill:#F7F7FF,stroke:#787880,color:#0A0A10
-  classDef accent fill:#006FF3,stroke:#787880,color:#FCFDFF
-  classDef dark fill:#101012,stroke:#787880,color:#F2F2FC
-  style src fill:transparent,stroke:#787880,color:#787880
-  style bld fill:transparent,stroke:#787880,color:#787880
-  style dst fill:transparent,stroke:#787880,color:#787880
-```
-
-Рукой рисуются только SVG в `svg/` (чернила без hex (наследуются от контекста)). `pnpm build`
-прогоняет их через SVGO (чернила → `currentColor`), генерирует
-`dist/index.js` + `dist/index.d.ts` и строит `dist/anatomy.json` — скелет
-глифов из path-данных. Всё, что в `dist/`, — производное и воспроизводимое.
+Это не обещание, что весь корпус уже параметрический. Авторская геометрия
+доступна целиком; генеративная модель включается только для вариантов, которые
+прошли quality policy. Остальные честно возвращаются как source IR, без
+синтетической «догадки».
 
 ## Установка
 
-Пакет ставится **git-зависимостью** по тегу `<версия>-dist`, внутри которого
-уже лежит собранный `dist/`. Поле `files` в `package.json` оставляет в
-установке ровно `dist/index.js` + `dist/index.d.ts` (+ `package.json`,
-`README`) — без исходных SVG. Сборка на стороне потребителя не нужна.
+Primary channel, зафиксированный в [`release/contract.json`](release/contract.json), —
+публичный npm:
 
-**В `package.json` потребителя:**
+```bash
+pnpm add @labpics/icons
+```
+
+Иммутабельный GitHub fallback для версии этого checkout:
 
 ```json
 {
   "dependencies": {
-    "@labpics/icons": "github:Labpics-Team/lab-icons#v0.2.0-dist"
+    "@labpics/icons": "github:Labpics-Team/lab-icons#v0.3.0-dist"
   }
 }
 ```
 
-Затем `pnpm install`.
+`-dist` — отдельный артефактный commit поверх source tag `v0.3.0`; его parent,
+точный список файлов и blob каждого output проверяются перед созданием либо
+повторным использованием тега. Наличие npm‑контракта не подменяет факт
+публикации конкретной версии: перед релизным объявлением registry проверяется
+отдельно.
 
-> **Почему не npm/GitHub Packages:** реестр требует, чтобы scope пакета совпадал
-> с аккаунтом-владельцем, а бренд-scope `@labpics` занят неактивным
-> User-сквоттером. Для git-зависимостей имя пакета свободно, поэтому бренд
-> `@labpics/icons` сохраняется. Путь через GitHub Packages вернём, если GitHub
-> освободит username `labpics`.
+## Публичные entrypoints
 
-**Аутентификация** (репозиторий приватный; токен только в переменной окружения,
-НИКОГДА в git):
-
-- **Локально:** отдельный токен не нужен — работает существующая авторизация
-  `gh`/`git` (если `git clone` приватного репозитория проходит, поставится и git-dep).
-- **В CI потребителя:** fine-grained PAT со scope `Contents: read` на
-  `Labpics-Team/lab-icons`, прокинутый в переменную окружения (напр. `GH_PAT`)
-  и подставленный в git через `insteadOf` (в Labpics токен хранится в Infisical
-  как SSOT — не хардкодь и не коммить его):
-
-  ```bash
-  git config --global url."https://x-access-token:${GH_PAT}@github.com/".insteadOf "ssh://git@github.com/"
-  git config --global url."https://x-access-token:${GH_PAT}@github.com/".insteadOf "https://github.com/"
-  ```
-
-## Использование
+| Импорт | Назначение |
+|---|---|
+| `@labpics/icons` | Статические SVG-строки и тип `IconName` |
+| `@labpics/icons/animate` | Текущий runtime: ESM + `.d.ts` и CJS + `.d.cts` |
+| `@labpics/icons/ir` | Строгий Glyph IR, каталог, capabilities, оси и calendar recipe |
+| `@labpics/icons/ir/recipes` | Лёгкие чистые kernels: стрелки, декораторы, лучи, ноты, календарные цифры |
 
 ```ts
-import { accessibilityFilled, accessibilityOutline } from '@labpics/icons'
+import { accessibilityOutline } from '@labpics/icons'
+import { glyph, glyphCapabilities } from '@labpics/icons/ir'
+import { buildDirectionalArrow } from '@labpics/icons/ir/recipes'
+
+const exactSource = glyph({
+  icon: 'accessibility',
+  variant: 'outline',
+  modelMode: 'source-only',
+})
+
+const capabilities = glyphCapabilities('reload', 'outline')
+const arrow = buildDirectionalArrow({ orientation: 'forward', shaftLength: 0.52 })
+
+void [accessibilityOutline, exactSource, capabilities, arrow]
 ```
 
-В бандл попадают только импортированные иконки (tree-shaking через
-`sideEffects: false`; гейт `check:treeshake` это доказывает на каждом прогоне).
+`glyph()` по умолчанию использует только accepted‑модель и автоматически
+возвращает точный source fallback там, где модели нет либо она в quarantine.
+`allow-candidate` — явный исследовательский режим, не неявное расширение
+production surface. Поддержанные оси узнаются через `glyphCapabilities()`:
+наличие `weight`, `corner` или `opsz` не предполагается одинаковым у всех
+иконок.
 
-**Конвенция имён** — экспорт выводится из имени файла:
+Каждый geometry recipe публикует проверенные контрформы через
+`negativeSpace.constraints`: normalized minimum и фактическое измерение с
+именованным методом и участниками. Отдельного `pass` нет — нарушение minimum
+останавливает построение исключением.
 
-| Вариант | Файл                       | Экспорт                |
-|---------|----------------------------|------------------------|
-| Filled  | `accessibility_filled.svg` | `accessibilityFilled`  |
-| Outline | `accessibility.svg`        | `accessibilityOutline` |
+Точность fallback ограничена намеренно закрытым source-языком: монохромные
+fill-paths с локальным fill rule. Viewport-identity clip понижается как
+доказанный no-op; частичный clip, mask, transform и прочая невыраженная в IR
+render-семантика fail-closed, а не теряется при извлечении path.
 
-Union-тип всех 444 имён — `IconName` (генерируется в `dist/index.d.ts`).
+## Геометрическая система
 
-## Релиз: как рождается `-dist` тег
+Канон системы описан в [docs/foundations.md](docs/foundations.md): keylines,
+негативное пространство, оптические пределы, stable part identity, topology и
+правила композиции. Основные слои:
 
-```mermaid
-%%{init: {'theme':'base','themeVariables':{
-  'lineColor':'#787880','textColor':'#0A0A10',
-  'edgeLabelBackground':'#F7F7FF',
-  'clusterBkg':'transparent','clusterBorder':'#787880'
-}}}%%
-flowchart LR
-  TAG["git tag vX.Y.Z на master<br/>+ push origin"]:::node
-  WF["GitHub Actions<br/>release-dist.yml"]:::accent
-  VG["pnpm verify<br/>полный гейт на теге"]:::node
-  DT["брат-тег vX.Y.Z-dist:<br/>коммит с dist/index.js + index.d.ts<br/>поверх релизного тега"]:::dark
-  CON["потребитель:<br/>github:Labpics-Team/lab-icons#vX.Y.Z-dist"]:::node
-  TAG --> WF
-  WF --> VG
-  VG -- "зелёный" --> DT
-  DT -- "иммутабельный git-dep" --> CON
-  classDef node fill:#F7F7FF,stroke:#787880,color:#0A0A10
-  classDef accent fill:#006FF3,stroke:#787880,color:#FCFDFF
-  classDef dark fill:#101012,stroke:#787880,color:#F2F2FC
-```
+- `semantics/grid.json` — сетка, веса, поля и допуски;
+- `semantics/anatomy.json` — декларации архетипов и переиспользуемых частей;
+- `semantics/catalog.json` — закрытый каталог source/model capabilities и
+  fingerprints;
+- `semantics/model-quality.json` — accepted/quarantine policy;
+- `src/ir/` — типизированная публичная граница без часов, DOM и файлового IO;
+- `scripts/lib/glyph-operators.js` — чистые геометрические операторы.
 
-1. Владелец ставит релизный тег на master: `git tag vX.Y.Z && git push origin vX.Y.Z` (конкретные версии в доке сверяет check:docs-drift).
-2. Workflow [`release-dist.yml`](.github/workflows/release-dist.yml) ловит push
-   тега `v*` (собственные `-dist` теги исключены из триггера), гоняет полный
-   `pnpm verify` и коммитит `dist/index.js` + `dist/index.d.ts`
-   (принудительный `git add -f` — `dist/` в `.gitignore`) поверх релизного тега.
-3. Этот коммит пушится **только как тег `vX.Y.Z-dist`** — master не меняется.
-4. Артефакт иммутабелен: существующий `-dist` тег workflow не перезаписывает.
-   Новый релиз = новый тег.
+Chevron и shaft образуют стрелку через явный weld; enclosure, strike и badge —
+переиспользуемые декораторы; `sun-low → sun` строится радиальными слотами;
+одиночная и парная ноты используют общую анатомию. Стабильные `part.id`,
+`morphGroup`, anchors и composition готовят формы к последующей поиконной
+семантической анимации. Эта статика не выдаёт generic scale/rotate за готовый
+SF Symbols‑класс motion.
 
-## Структура репозитория
+В частности, текущая анатомия `time` — корректный статический socket, но ещё не
+контракт независимого вращения стрелок. Motion-capability появится только после
+перехода к самостоятельным bearing-overlap capsules и доказанного lowering
+через `union`/`mask-subtract` на всём диапазоне поворотов.
 
-```
-svg/
-  Filled/          — 222 иконки (*_filled.svg), цветовых атрибутов нет — чернила наследуются от контекста (hex в dist запрещает check:colors)
-  Outline/         — 222 иконки (*.svg)
-semantics/
-  grid.json        — токены системы: веса штрихов, keylines, допуски
-  anatomy.json     — декларации глифов (архетипы и части-примитивы, доли канвы)
-  flagships.json   — манифест флагманов для check:dry-coverage
-anatomy/
-  bindings.json    — семантические привязки анимаций к анатомии (pivot/axis)
-scripts/
-  build.js            — SVGO + генерация dist/index.js и dist/index.d.ts
-  build-anatomy.js    — dist/anatomy.json из path-данных dist/svg
-  lib/anatomy-gen.js  — генераторы глифов из деклараций
-  lib/curve-sampling.js — выборка и геометрия кривых (ядро гейтов)
-  check-*.js          — гейты (см. таблицу ниже)
-docs/
-  anatomy.md · anatomy-model.md · grammar.md
-svgo.config.cjs    — конфиг оптимизации (currentColor, 24×24 viewBox)
-.github/workflows/ — ci.yml (гейты на PR/push), release-dist.yml (релиз)
-```
+`calendarNumberGlyph()` принимает явные `Date`, IANA time zone и `opsz`, а
+цифры строит собственным rounded recipe с табличными слотами. Время остаётся
+инъекцией вызывающего кода: библиотека не читает «сегодня» скрыто при импорте.
 
-## Разработка: сборка и гейты
+Числовая непрерывность генератора ещё не делает ось публичной capability.
+Каждая рекламируемая `weight`/`corner` проходит sampled optical proof из
+`semantics/axis-quality.json`; topology drift и фазовая нестабильность остаются
+явным debt, пока геометрический закон не исправлен.
+
+## Observatory
 
 ```bash
-pnpm install
-pnpm build    # svgo-оптимизация + dist/index.js + dist/index.d.ts + dist/anatomy.json
-pnpm verify   # build + 13 гейтов + vitest — то же, что гоняет CI
+pnpm observatory
 ```
 
-Каждый гейт запускается и отдельно: `pnpm check:<имя>`.
+Команда создаёт локальную `preview/observatory.html` и машинный JSON‑отчёт. На
+одной странице показаны original, generated, overlay/diff, отклонение,
+topology, ink и объяснение каждого результата выше порога 3%. Страница —
+инструмент ревью и диагностики; генерация отчёта сама по себе не переводит
+candidate в accepted — SSOT статуса остаётся в quality policy.
+Target-size binary deviation пока диагностический, потому что это не
+alpha coverage; target topology при этом участвует в acceptance.
 
-| Гейт | Что ловит | Политика |
-|---|---|---|
-| `check:parity` | 222 + 222 файла, ровно 444 экспорта в `dist/index.js` | HARD |
-| `check:colors` | хардкод-hex в оптимизированных SVG (всё должно быть `currentColor`) | HARD |
-| `check:treeshake` | пруф tree-shaking: неиспользуемые экспорты выпадают из бандла | HARD |
-| `check:variant-parity` | контракт пары O↔F: каноны весов колец, регистрация глифа ≤ 0.15 px | HARD |
-| `check:anatomy` | скелет + привязки `bindings.json`; дрейф: `generated` IoU ≥ 99.5% | HARD (`hand` ≥ 95% — report) |
-| `check:path-quality` | шум кривых, волосяные фрагменты, встык-швы между path | HARD |
-| `check:static-grid` | поля и keylines по токенам `grid.json` | HARD |
-| `check:fill-rule` | «блоб» — контур залился из-за fill-rule | Outline HARD, Filled WARN |
-| `check:topology` | незамкнутый контур — срез хордой | Outline HARD, Filled WARN |
-| `check:corners` | пер-вершинные скругления генерат-vs-рука | WARN-каталог (HARD после EC3) |
-| `check:grammar` | направления рёбер на шкале начертания | HARD |
-| `check:fidelity` | пол узнаваемости generated-глифов: ≥ 97% на обоих вариантах | HARD ниже пола без `ownerReview` |
-| `check:dry-coverage` | флагманы на 100% из общих примитивов, каждый примитив ≥ 2 потребителя | HARD по флагманам |
+## Сборка и доказательства
 
-Разница политик Outline/Filled сознательная: у контурных иконок блоб или срез —
-видимая поломка (HARD), у заливок сплошная заливка и незамкнутые
-конструкционные слои бывают по замыслу (WARN).
+```bash
+pnpm install --frozen-lockfile
+pnpm build
+pnpm verify
+```
 
-## Анатомическая модель
+`pnpm build` — единственный полный build entrypoint:
 
-Иконки описаны не только пикселями, но и декларациями: `semantics/grid.json`
-задаёт токены (веса штрихов, keylines, допуски), `semantics/anatomy.json` —
-архетипы и части-примитивы каждого глифа. Иконки со статусом `generated`
-обязаны совпадать со своей декларацией на ≥ 99.5% чернил (IoU), падение
-узнаваемости ниже 97% — стоп-сигнал. Подробно:
-[docs/anatomy.md](docs/anatomy.md) (обзор),
-[docs/anatomy-model.md](docs/anatomy-model.md) (модель),
-[docs/grammar.md](docs/grammar.md) (грамматика начертания).
+1. `build:static` оптимизирует исходные SVG, генерирует root ESM/types и
+   анатомический diagnostic output;
+2. `build:catalog` пересобирает catalog и TypeScript‑проекцию из актуальной
+   геометрии до компиляции публичного IR;
+3. `build:runtime` очищает свои owned directories, собирает `/animate`, `/ir`
+   и `/ir/recipes`, затем материализует CommonJS declaration
+   `dist/animate/index.d.cts`;
+4. lifecycle `prepack` вызывает тот же `pnpm build`.
+
+Публичный tarball содержит ровно 10 release‑файлов из `release/contract.json` плюс npm
+metadata. `check:package-artifact` копирует исходники без `dist/`, запускает
+реальный `pnpm pack`/`prepack`, ставит tarball в пустого offline‑consumer и
+проверяет ESM, runtime CJS, Node16 CJS typecheck через `.d.cts`, все source
+fingerprints и hostile mutations. Поэтому старый локальный `dist/` не способен
+сделать гейт зелёным.
+
+`pnpm verify` также запускает типы, геометрические инварианты, catalog/anatomy
+drift, размерные ratchets, docs drift и unit/property bite‑тесты. Числа в этом
+README либо выводятся из закрытого файлового контракта, либо защищены гейтом.
+Size-ratchet обязан быть точной проекцией всех десяти файлов
+`release/contract.json`, поэтому новый public output не может остаться без
+raw/gzip ceiling.
+Исторические отчёты variant parity и path quality не выданы за нулевой долг:
+их ceiling и SHA-256 полного множества findings заморожены в
+`semantics/legacy-quality-snapshot.json`, поэтому новая регрессия не прячется
+за зелёным report-режимом.
+
+## Релиз
+
+Source release запускается только тегом, дословно равным
+`v<package.json#version>`:
+
+```bash
+git tag v0.3.0
+git push origin v0.3.0
+```
+
+[`release-dist.yml`](.github/workflows/release-dist.yml) проверяет строгий
+SemVer, совпадение checkout HEAD с source tag, выполняет `pnpm verify`, затем
+создаёт `v0.3.0-dist`. Ручной запуск принимает только уже существующий source
+tag; branch и SHA не являются допустимыми release ref. Существующий sibling не
+считается успехом вслепую: его parent, manifest и байты сравниваются с текущей
+clean‑сборкой. `master` workflow не изменяет.
+
+## Структура
+
+```text
+svg/{Outline,Filled}/       авторские исходники
+semantics/                  сетка, анатомия, каталог и quality policy
+src/animate/                animation runtime
+src/ir/                     Glyph IR и публичные recipe types
+scripts/lib/                functional geometry core
+release/contract.json       SSOT npm/git-dist package surface
+docs/foundations.md         геометрическая конституция
+preview/                    локальный ignored Observatory output
+```
 
 ## Потребители
 
-- **labui** — реэкспортирует иконки в `packages/icons` (компонент `<lab-icon>`).
-- **lab-motion** — читает `anatomy/bindings.json`: семантические привязки
-  анимаций (жест, pivot, ось) к анатомии глифов.
+- `labui` — UI-компоненты и реэкспорт статических иконок;
+- `lab-motion` — потребитель стабильной анатомии для будущих смысловых
+  choreography/morph‑контрактов.

@@ -1,0 +1,50 @@
+{
+  "version": 2,
+  "packageName": "@labpics/icons",
+  "primary": {
+    "kind": "npm",
+    "access": "public",
+    "install": "pnpm add @labpics/icons"
+  },
+  "fallback": {
+    "kind": "github-dist-tag",
+    "specifier": "github:Labpics-Team/lab-icons#vX.Y.Z-dist",
+    "immutable": true
+  },
+  "files": [
+    "dist/animate/index.cjs",
+    "dist/animate/index.d.cts",
+    "dist/animate/index.d.ts",
+    "dist/animate/index.js",
+    "dist/index.d.ts",
+    "dist/index.js",
+    "dist/ir/index.d.ts",
+    "dist/ir/index.js",
+    "dist/ir/recipes.d.ts",
+    "dist/ir/recipes.js"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./animate": {
+      "import": {
+        "types": "./dist/animate/index.d.ts",
+        "default": "./dist/animate/index.js"
+      },
+      "require": {
+        "types": "./dist/animate/index.d.cts",
+        "default": "./dist/animate/index.cjs"
+      }
+    },
+    "./ir": {
+      "types": "./dist/ir/index.d.ts",
+      "import": "./dist/ir/index.js"
+    },
+    "./ir/recipes": {
+      "types": "./dist/ir/recipes.d.ts",
+      "import": "./dist/ir/recipes.js"
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+ "version": 1,
+ "comment": "R0 fact baseline corrected by the deterministic Observatory on 2026-07-16. The generated floor preserves all 67 constructed laws; accepted counts only PASS masters, while quarantine is explicit debt that may only decrease.",
+ "minimumModeledNames": 63,
+ "minimumModeledVariants": 100,
+ "minimumGeneratedVariants": 67,
+ "minimumAcceptedVariants": 54,
+ "maximumQuarantinedGeneratedVariants": 13,
+ "maximumSourceOnlyVariants": 344,
+ "maximumUnclassifiedModelParts": 0
+}
