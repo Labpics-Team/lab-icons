@@ -112,10 +112,10 @@ function fixture({ packagePatch = {}, filesPatch = {}, existingPatch = {} } = {}
     packageManager: PACKAGE_MANAGER,
     engines: { node: '>=20', pnpm: '>=9' },
     scripts: {
-      build: 'pnpm build:static && pnpm build:catalog && pnpm build:runtime',
+      build: 'pnpm build:static && pnpm build:catalog && pnpm build:ir',
       'build:static': 'node scripts/build.js && node scripts/build-anatomy.js',
       'build:catalog': 'node scripts/build-catalog.mjs',
-      'build:runtime': 'node scripts/clean-runtime-dist.js && tsup && node scripts/build-animate-cjs-types.js',
+      'build:ir': 'node scripts/clean-ir-dist.js && tsup',
       'check:repo-contract': 'node scripts/check-repo-contract.js',
       prepack: 'pnpm build',
       verify: 'node scripts/check-repo-contract.js && node scripts/check-catalog.js && pnpm build',
@@ -358,10 +358,10 @@ jobs:
     const errors = fixture({
       packagePatch: {
         scripts: {
-          build: 'pnpm build:static && pnpm build:catalog && pnpm build:runtime',
+          build: 'pnpm build:static && pnpm build:catalog && pnpm build:ir',
           'build:static': 'node scripts/build.js && node scripts/build-anatomy.js',
           'build:catalog': 'node scripts/build-catalog.mjs',
-          'build:runtime': 'node scripts/clean-runtime-dist.js && tsup && node scripts/build-animate-cjs-types.js',
+          'build:ir': 'node scripts/clean-ir-dist.js && tsup',
           'check:repo-contract': 'node scripts/check-repo-contract.js',
           prepack: 'pnpm build',
           verify: 'node scripts/build.js',
@@ -380,7 +380,7 @@ jobs:
           build: 'node scripts/build.js',
           'build:static': 'node scripts/build.js && node scripts/build-anatomy.js',
           'build:catalog': 'node scripts/build-catalog.mjs',
-          'build:runtime': 'node scripts/clean-runtime-dist.js && tsup && node scripts/build-animate-cjs-types.js',
+          'build:ir': 'node scripts/clean-ir-dist.js && tsup',
           'check:repo-contract': 'node scripts/check-repo-contract.js',
           prepack: 'node scripts/build.js',
           verify: 'node scripts/check-repo-contract.js && node scripts/build.js',
@@ -397,10 +397,10 @@ jobs:
     const errors = fixture({
       packagePatch: {
         scripts: {
-          build: 'pnpm build:static && pnpm build:catalog && pnpm build:runtime',
+          build: 'pnpm build:static && pnpm build:catalog && pnpm build:ir',
           'build:static': 'node scripts/build.js && node scripts/build-anatomy.js',
           'build:catalog': 'node -e "process.exit(0)"',
-          'build:runtime': 'node scripts/clean-runtime-dist.js && tsup && node scripts/build-animate-cjs-types.js',
+          'build:ir': 'node scripts/clean-ir-dist.js && tsup',
           'check:repo-contract': 'node scripts/check-repo-contract.js',
           prepack: 'pnpm build',
           verify: 'node scripts/check-repo-contract.js && pnpm build && node scripts/check-catalog.js',

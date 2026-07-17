@@ -17,18 +17,8 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
-    },
-    "./animate": {
-      "import": {
-        "types": "./dist/animate/index.d.ts",
-        "default": "./dist/animate/index.js"
-      },
-      "require": {
-        "types": "./dist/animate/index.d.cts",
-        "default": "./dist/animate/index.cjs"
-      }
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
     },
     "./ir": {
       "types": "./dist/ir/index.d.ts",
@@ -41,10 +31,6 @@
   },
   "sideEffects": false,
   "files": [
-    "dist/animate/index.cjs",
-    "dist/animate/index.d.cts",
-    "dist/animate/index.d.ts",
-    "dist/animate/index.js",
     "dist/index.d.ts",
     "dist/index.js",
     "dist/ir/index.d.ts",
@@ -53,10 +39,9 @@
     "dist/ir/recipes.js"
   ],
   "scripts": {
-    "build": "pnpm build:static && pnpm build:catalog && pnpm build:runtime",
+    "build": "pnpm build:static && pnpm build:catalog && pnpm build:ir",
     "build:static": "node scripts/build.js && node scripts/build-anatomy.js",
-    "build:animate": "pnpm build:runtime",
-    "build:runtime": "node scripts/clean-runtime-dist.js && tsup && node scripts/build-animate-cjs-types.js",
+    "build:ir": "node scripts/clean-ir-dist.js && tsup",
     "build:anatomy": "node scripts/build-anatomy.js",
     "build:catalog": "node scripts/build-catalog.mjs",
     "observatory": "node scripts/build-observatory.mjs",
@@ -67,11 +52,6 @@
     "check:parity": "node scripts/check-parity.js",
     "check:colors": "node scripts/check-colors.js",
     "check:treeshake": "node scripts/check-treeshake.js",
-    "check:semantics": "node scripts/check-semantics.js",
-    "check:choreographies": "node scripts/check-choreographies.js",
-    "check:layers": "node scripts/check-layers.js",
-    "check:motion-bounds": "node scripts/check-motion-bounds.js",
-    "check:motion-collision": "node scripts/check-motion-collision.js",
     "check:variant-parity": "node scripts/check-variant-parity.js",
     "check:anatomy": "node scripts/check-anatomy.js && node scripts/check-anatomy-drift.js",
     "check:catalog": "node scripts/check-catalog.js",
@@ -91,7 +71,7 @@
     "check:docs-drift": "node scripts/check-docs-drift.js",
     "prepack": "pnpm build",
     "test": "vitest run",
-    "verify": "node scripts/check-repo-contract.js && node scripts/check-catalog.js && tsc --noEmit && pnpm build && node scripts/check-package-size.js && node scripts/check-package-artifact.js && node scripts/check-parity.js && node scripts/check-colors.js && node scripts/check-treeshake.js && node scripts/check-semantics.js && node scripts/check-choreographies.js && node scripts/check-layers.js && node scripts/check-motion-bounds.js && node scripts/check-motion-collision.js && node scripts/check-variant-parity.js && node scripts/check-anatomy.js && node scripts/check-anatomy-drift.js && node scripts/check-path-quality.js && node scripts/check-static-grid.js && node scripts/check-fill-rule.js && node scripts/check-topology.js && node scripts/check-corners.js && node scripts/check-adjacency.js && node scripts/check-ink-weight.js && node scripts/check-ink-weight.js --axes && node scripts/check-grammar.js && node scripts/check-fidelity.js && node scripts/check-dry-coverage.js && node scripts/check-anim-ready.js && node scripts/check-docs-drift.js && vitest run"
+    "verify": "node scripts/check-repo-contract.js && node scripts/check-catalog.js && tsc --noEmit && pnpm build && node scripts/check-package-size.js && node scripts/check-package-artifact.js && node scripts/check-parity.js && node scripts/check-colors.js && node scripts/check-treeshake.js && node scripts/check-variant-parity.js && node scripts/check-anatomy.js && node scripts/check-anatomy-drift.js && node scripts/check-path-quality.js && node scripts/check-static-grid.js && node scripts/check-fill-rule.js && node scripts/check-topology.js && node scripts/check-corners.js && node scripts/check-adjacency.js && node scripts/check-ink-weight.js && node scripts/check-ink-weight.js --axes && node scripts/check-grammar.js && node scripts/check-fidelity.js && node scripts/check-dry-coverage.js && node scripts/check-anim-ready.js && node scripts/check-docs-drift.js && vitest run"
   },
   "devDependencies": {
     "fflate": "0.8.2",
@@ -108,8 +88,7 @@
     "design-system",
     "labpics",
     "outline",
-    "filled",
-    "animated-icons"
+    "filled"
   ],
   "engines": {
     "node": ">=20",

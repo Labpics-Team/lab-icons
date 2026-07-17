@@ -34,9 +34,11 @@ const DIST_SVG_DIR = join(DIST_DIR, 'svg');
 
 // ── clean stale artifacts ─────────────────────────────────────────────────────
 
-if (existsSync(DIST_SVG_DIR)) {
-  rmSync(DIST_SVG_DIR, { recursive: true, force: true });
-  console.log('⚙  Cleaned dist/svg (stale artifacts removed)');
+if (existsSync(DIST_DIR)) {
+  // Канонический build всегда начинается с пустого output tree: удалённый
+  // public subpath не может остаться локальным фантомом после новой сборки.
+  rmSync(DIST_DIR, { recursive: true, force: true });
+  console.log('⚙  Cleaned dist (stale artifacts removed)');
 }
 
 // ── helpers ──────────────────────────────────────────────────────────────────

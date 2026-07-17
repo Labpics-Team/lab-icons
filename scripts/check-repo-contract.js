@@ -32,11 +32,10 @@ const FORBIDDEN_LOCKFILES = [
   'bun.lockb',
 ];
 const CANONICAL_BUILD_SCRIPTS = Object.freeze({
-  build: 'pnpm build:static && pnpm build:catalog && pnpm build:runtime',
+  build: 'pnpm build:static && pnpm build:catalog && pnpm build:ir',
   'build:static': 'node scripts/build.js && node scripts/build-anatomy.js',
   'build:catalog': 'node scripts/build-catalog.mjs',
-  'build:runtime':
-    'node scripts/clean-runtime-dist.js && tsup && node scripts/build-animate-cjs-types.js',
+  'build:ir': 'node scripts/clean-ir-dist.js && tsup',
   prepack: 'pnpm build',
 });
 
@@ -431,7 +430,7 @@ export function validateRepoContract({
       'node scripts/build-anatomy.js',
       'pnpm build:static',
       'pnpm build:catalog',
-      'pnpm build:runtime',
+      'pnpm build:ir',
     ]) {
       if (commands.includes(bypass)) {
         errors.push(`package.json: verify обходит канонический build через «${bypass}»`);

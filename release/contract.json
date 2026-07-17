@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "packageName": "@labpics/icons",
   "primary": {
     "kind": "npm",
@@ -12,10 +12,6 @@
     "immutable": true
   },
   "files": [
-    "dist/animate/index.cjs",
-    "dist/animate/index.d.cts",
-    "dist/animate/index.d.ts",
-    "dist/animate/index.js",
     "dist/index.d.ts",
     "dist/index.js",
     "dist/ir/index.d.ts",
@@ -25,18 +21,8 @@
   ],
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
-    },
-    "./animate": {
-      "import": {
-        "types": "./dist/animate/index.d.ts",
-        "default": "./dist/animate/index.js"
-      },
-      "require": {
-        "types": "./dist/animate/index.d.cts",
-        "default": "./dist/animate/index.cjs"
-      }
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
     },
     "./ir": {
       "types": "./dist/ir/index.d.ts",
