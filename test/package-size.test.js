@@ -258,7 +258,7 @@ describe('package size ratchet', () => {
     expect(measureArtifact(source).modules).toEqual(['src/ir/index.ts']);
   });
 
-  it('кусается, если CommonJS declaration перестала совпадать с ESM API', () => {
+  it('кусается, если объявленная byte-identical пара артефактов разошлась', () => {
     const { root, file, source } = fixture();
     const twin = 'dist/ir/recipes.d.ts';
     mkdirSync(join(root, 'dist/ir'), { recursive: true });

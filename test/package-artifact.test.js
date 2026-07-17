@@ -5,7 +5,6 @@ import {
   mkdtempSync,
   readFileSync,
   rmSync,
-  unlinkSync,
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -56,10 +55,6 @@ function validPackage() {
   write(root, 'LICENSE', 'MIT\n');
   write(root, 'dist/index.js', 'export const accessibilityOutline = `<svg/>`;\n');
   write(root, 'dist/index.d.ts', 'export declare const accessibilityOutline: string;\n');
-  write(root, 'dist/animate/index.js', 'export const iconClass = () => `spin`;\n');
-  write(root, 'dist/animate/index.cjs', 'exports.iconClass = () => `spin`;\n');
-  write(root, 'dist/animate/index.d.cts', 'export declare function iconClass(name: string): string;\n');
-  write(root, 'dist/animate/index.d.ts', 'export declare function iconClass(name: string): string;\n');
   write(root, 'dist/ir/index.js', 'export const iconIds = []; export const glyph = () => ({});\n');
   write(root, 'dist/ir/index.d.ts', 'export declare const iconIds: readonly string[]; export declare function glyph(): unknown;\n');
   write(root, 'dist/ir/recipes.js', 'export const buildDirectionalArrow = () => ({});\n');
@@ -125,23 +120,7 @@ describe('check-package-artifact', () => {
   it('принимает минимальный публичный артефакт', () => {
     const result = validateInstalledPackage(validPackage(), CONTRACT);
     expect(result.errors).toEqual([]);
-    expect(result.files).toContain('dist/animate/index.cjs');
-  });
-
-  it('кусается, если CJS-подпуть обещан, но отсутствует', () => {
-    const root = validPackage();
-    unlinkSync(join(root, 'dist/animate/index.cjs'));
-    expect(validateInstalledPackage(root, CONTRACT).errors).toContain(
-      'в tarball отсутствует dist/animate/index.cjs',
-    );
-  });
-
-  it('кусается, если у CJS runtime нет отдельной .d.cts boundary', () => {
-    const root = validPackage();
-    unlinkSync(join(root, 'dist/animate/index.d.cts'));
-    expect(validateInstalledPackage(root, CONTRACT).errors).toContain(
-      'в tarball отсутствует dist/animate/index.d.cts',
-    );
+    expect(result.files).toContain('dist/ir/index.js');
   });
 
   it('кусается на утечке исходников и производного корпуса', () => {

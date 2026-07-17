@@ -4,14 +4,12 @@ const SAFE_SEGMENT = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
 const ROOT_KEYS = ['exports', 'fallback', 'files', 'packageName', 'primary', 'version'];
 const PRIMARY_KEYS = ['access', 'install', 'kind'];
 const FALLBACK_KEYS = ['immutable', 'kind', 'specifier'];
-const EXPORT_KEYS = ['.', './animate', './ir', './ir/recipes'];
+const EXPORT_KEYS = ['.', './ir', './ir/recipes'];
 const EXPORT_CONDITIONS = Object.freeze({
-  '.': ['import', 'types'],
-  './ir': ['import', 'types'],
-  './ir/recipes': ['import', 'types'],
+  '.': ['types', 'import'],
+  './ir': ['types', 'import'],
+  './ir/recipes': ['types', 'import'],
 });
-const ANIMATE_CONDITIONS = ['import', 'require'];
-const ANIMATE_BRANCH_CONDITIONS = ['types', 'default'];
 export const STRICT_SEMVER = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*)(?:\.(?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*))*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$/;
 
 function isRecord(value) {
@@ -70,8 +68,8 @@ export function validateReleaseContract(contract) {
   const errors = [];
   if (!isRecord(contract)) return ['release/contract.json обязан быть объектом'];
   validateExactKeys(contract, ROOT_KEYS, 'release contract', errors);
-  if (contract.version !== 2) {
-    errors.push(`release contract version обязан быть 2; найдено ${String(contract.version)}`);
+  if (contract.version !== 3) {
+    errors.push(`release contract version обязан быть 3; найдено ${String(contract.version)}`);
   }
   if (contract.packageName !== '@labpics/icons') {
     errors.push(`release packageName изменён: ${String(contract.packageName)}`);
@@ -116,42 +114,7 @@ export function validateReleaseContract(contract) {
     const files = new Set(Array.isArray(contract.files) ? contract.files : []);
     const referenced = new Set();
     for (const [subpath, conditions] of Object.entries(contract.exports)) {
-      if (subpath === './animate') {
-        if (!validateOrderedKeys(
-          conditions,
-          ANIMATE_CONDITIONS,
-          'release export ./animate',
-          errors,
-        )) {
-          continue;
-        }
-        for (const [moduleKind, suffixes] of [
-          ['import', { types: '.d.ts', default: '.js' }],
-          ['require', { types: '.d.cts', default: '.cjs' }],
-        ]) {
-          const branch = conditions[moduleKind];
-          if (!validateOrderedKeys(
-            branch,
-            ANIMATE_BRANCH_CONDITIONS,
-            `release export ./animate.${moduleKind}`,
-            errors,
-          )) {
-            continue;
-          }
-          for (const condition of ANIMATE_BRANCH_CONDITIONS) {
-            validateExportTarget({
-              target: branch[condition],
-              label: `release export ./animate.${moduleKind}.${condition}`,
-              suffix: suffixes[condition],
-              files,
-              referenced,
-              errors,
-            });
-          }
-        }
-        continue;
-      }
-      if (!validateExactKeys(
+      if (!validateOrderedKeys(
         conditions,
         EXPORT_CONDITIONS[subpath] ?? [],
         `release export ${subpath}`,
