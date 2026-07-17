@@ -155,12 +155,16 @@ function arcSamples(cx, cy, seg, steps, out) {
   let dTheta = angle((x1p - cxp) / rx, (y1p - cyp) / ry, (-x1p - cxp) / rx, (-y1p - cyp) / ry);
   if (!sweep && dTheta > 0) dTheta -= 2 * Math.PI;
   if (sweep && dTheta < 0) dTheta += 2 * Math.PI;
-  for (let i = 1; i <= steps; i++) {
+  // Endpoint команды A — нормативная координата, а не результат обратной
+  // тригонометрии. На i=steps формула центра давала дрейф ~1e-8 и могла
+  // разорвать точный L/Z seam следующего сегмента в topology/adjacency gates.
+  for (let i = 1; i < steps; i++) {
     const theta = theta1 + (dTheta * i) / steps;
     const px = rx * Math.cos(theta);
     const py = ry * Math.sin(theta);
     out.push([ccx + cosPhi * px - sinPhi * py, ccy + sinPhi * px + cosPhi * py]);
   }
+  out.push([x, y]);
 }
 
 /**

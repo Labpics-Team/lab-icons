@@ -1,14 +1,21 @@
-import { mkdirSync, mkdtempSync, rmSync, unlinkSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, unlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 import {
+  createCleanPackSource,
   localTarballSpecifier,
+  mutateExportWithEscapedFillRule,
+  mutateExportWithHalfCanvasClip,
+  mutateExportWithNestedSvgViewport,
+  mutateExportWithoutRootAttribute,
+  mutateFirstPathCoordinate,
   pnpmInvocation,
   validateInstalledPackage,
 } from '../scripts/check-package-artifact.js';
 
 const roots = [];
+const CONTRACT = JSON.parse(readFileSync(new URL('../release/contract.json', import.meta.url), 'utf8'));
 
 function write(root, path, content = '') {
   const absolute = join(root, path);
@@ -24,15 +31,15 @@ function validPackage() {
     'package.json',
     `${JSON.stringify({
       name: '@labpics/icons',
+      version: '0.2.0',
+      private: false,
+      main: './dist/index.js',
+      module: './dist/index.js',
+      types: './dist/index.d.ts',
+      publishConfig: { access: 'public' },
       sideEffects: false,
-      exports: {
-        '.': { import: './dist/index.js', types: './dist/index.d.ts' },
-        './animate': {
-          import: './dist/animate/index.js',
-          require: './dist/animate/index.cjs',
-          types: './dist/animate/index.d.ts',
-        },
-      },
+      files: CONTRACT.files,
+      exports: CONTRACT.exports,
     })}\n`,
   );
   write(root, 'README.md', '# fixture\n');
@@ -41,7 +48,12 @@ function validPackage() {
   write(root, 'dist/index.d.ts', 'export declare const accessibilityOutline: string;\n');
   write(root, 'dist/animate/index.js', 'export const iconClass = () => `spin`;\n');
   write(root, 'dist/animate/index.cjs', 'exports.iconClass = () => `spin`;\n');
+  write(root, 'dist/animate/index.d.cts', 'export declare function iconClass(name: string): string;\n');
   write(root, 'dist/animate/index.d.ts', 'export declare function iconClass(name: string): string;\n');
+  write(root, 'dist/ir/index.js', 'export const iconIds = []; export const glyph = () => ({});\n');
+  write(root, 'dist/ir/index.d.ts', 'export declare const iconIds: readonly string[]; export declare function glyph(): unknown;\n');
+  write(root, 'dist/ir/recipes.js', 'export const buildDirectionalArrow = () => ({});\n');
+  write(root, 'dist/ir/recipes.d.ts', 'export declare function buildDirectionalArrow(): unknown;\n');
   return root;
 }
 
@@ -50,8 +62,26 @@ afterEach(() => {
 });
 
 describe('check-package-artifact', () => {
+  it('строит pack из source-only копии и не переносит грязный dist', () => {
+    const fixture = mkdtempSync(join(tmpdir(), 'lab-icons-clean-pack-fixture-'));
+    roots.push(fixture);
+    const source = join(fixture, 'repo');
+    const clean = join(fixture, 'clean');
+    write(source, 'package.json', '{"name":"fixture"}\n');
+    write(source, 'scripts/build.js', 'export {};\n');
+    write(source, 'dist/index.js', 'export const stale = true;\n');
+    mkdirSync(join(source, 'node_modules'), { recursive: true });
+
+    createCleanPackSource(source, clean);
+
+    expect(existsSync(join(clean, 'package.json'))).toBe(true);
+    expect(existsSync(join(clean, 'scripts/build.js'))).toBe(true);
+    expect(existsSync(join(clean, 'dist'))).toBe(false);
+    expect(existsSync(join(clean, 'node_modules'))).toBe(true);
+  });
+
   it('принимает минимальный публичный артефакт', () => {
-    const result = validateInstalledPackage(validPackage());
+    const result = validateInstalledPackage(validPackage(), CONTRACT);
     expect(result.errors).toEqual([]);
     expect(result.files).toContain('dist/animate/index.cjs');
   });
@@ -59,8 +89,16 @@ describe('check-package-artifact', () => {
   it('кусается, если CJS-подпуть обещан, но отсутствует', () => {
     const root = validPackage();
     unlinkSync(join(root, 'dist/animate/index.cjs'));
-    expect(validateInstalledPackage(root).errors).toContain(
+    expect(validateInstalledPackage(root, CONTRACT).errors).toContain(
       'в tarball отсутствует dist/animate/index.cjs',
+    );
+  });
+
+  it('кусается, если у CJS runtime нет отдельной .d.cts boundary', () => {
+    const root = validPackage();
+    unlinkSync(join(root, 'dist/animate/index.d.cts'));
+    expect(validateInstalledPackage(root, CONTRACT).errors).toContain(
+      'в tarball отсутствует dist/animate/index.d.cts',
     );
   });
 
@@ -68,28 +106,90 @@ describe('check-package-artifact', () => {
     const root = validPackage();
     write(root, 'src/private.ts', 'export {};\n');
     write(root, 'dist/svg/Outline/private.svg', '<svg/>\n');
-    const errors = validateInstalledPackage(root).errors;
-    expect(errors).toContain('tarball содержит внутренний путь src');
-    expect(errors).toContain('tarball содержит внутренний путь dist/svg');
+    const errors = validateInstalledPackage(root, CONTRACT).errors;
+    expect(errors).toContain('tarball содержит файл вне exact allowlist: src/private.ts');
+    expect(errors).toContain('tarball содержит файл вне exact allowlist: dist/svg/Outline/private.svg');
   });
 
   it('кусается на рассинхроне exports с физическими файлами', () => {
     const root = validPackage();
-    const pkg = {
-      name: '@labpics/icons',
-      sideEffects: false,
-      exports: {
-        '.': { import: './dist/missing.js', types: './dist/index.d.ts' },
-        './animate': {
-          import: './dist/animate/index.js',
-          require: './dist/animate/index.cjs',
-          types: './dist/animate/index.d.ts',
-        },
-      },
-    };
+    const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
+    pkg.exports['.'].import = './dist/missing.js';
     write(root, 'package.json', `${JSON.stringify(pkg)}\n`);
-    expect(validateInstalledPackage(root).errors).toContain(
-      'root ESM export не указывает на ./dist/index.js',
+    expect(validateInstalledPackage(root, CONTRACT).errors).toContain(
+      'package.json#exports дрейфует от release contract',
+    );
+  });
+
+  it('кусается на любом stale-файле, даже внутри разрешённого dist-каталога', () => {
+    const root = validPackage();
+    write(root, 'dist/ir/index.js.map', '{}\n');
+    expect(validateInstalledPackage(root, CONTRACT).errors).toContain(
+      'tarball содержит файл вне exact allowlist: dist/ir/index.js.map',
+    );
+  });
+
+  it('кусается на встроенной sourcemap metadata без отдельного .map-файла', () => {
+    const root = validPackage();
+    write(root, 'dist/ir/recipes.js', '//# sourceMappingURL=data:application/json;base64,e30=\n');
+    expect(validateInstalledPackage(root, CONTRACT).errors).toContain(
+      'dist/ir/recipes.js содержит sourcemap/sourcesContent metadata',
+    );
+  });
+
+  it('hostile mutation меняет координату, но не command topology', () => {
+    const source = 'export const accessibilityOutline = `<svg><path d="M19.85 6.22L2 3Z"/></svg>`;\n';
+    const mutated = mutateFirstPathCoordinate(source);
+    expect(mutated).toContain('d="M19.851 6.22L2 3Z"');
+    expect(mutated.match(/[MLZ]/g)).toEqual(source.match(/[MLZ]/g));
+  });
+
+  it('hostile clip меняет отображение, не меняя ни одной d-строки корпуса', () => {
+    const source = 'export const accessibilityOutline = `<svg viewBox="0 0 24 24"><path d="M0 0H24V24H0Z"/></svg>`;\n';
+    const mutated = mutateExportWithHalfCanvasClip(source);
+    expect(mutated).toContain('clip-path="url(#hostile-half)"');
+    expect(mutated).toContain('<path d="M0 0H12V24H0Z"/>');
+    expect(mutated.match(/M0 0H24V24H0Z/g)).toHaveLength(1);
+  });
+
+  it('hostile nested viewport масштабирует те же d-строки', () => {
+    const source = 'export const accessibilityOutline = `<svg viewBox="0 0 24 24"><path d="M0 0H24V24H0Z"/></svg>`;\n';
+    const mutated = mutateExportWithNestedSvgViewport(source);
+    expect(mutated).toContain('<svg viewBox="0 0 48 48" width="24" height="24">');
+    expect(mutated.match(/M0 0H24V24H0Z/g)).toHaveLength(1);
+    expect(mutated.match(/<svg\b/g)).toHaveLength(2);
+  });
+
+  it('hostile CSS escape меняет fill-rule, сохраняя d байт-в-байт', () => {
+    const source = 'export const accessibilityOutline = `<svg><path d="M0 0H24V24H0Z"/></svg>`;\n';
+    const mutated = mutateExportWithEscapedFillRule(source);
+    expect(mutated).toContain('fill-rule="\\\\65 venodd"');
+    expect(mutated.match(/M0 0H24V24H0Z/g)).toHaveLength(1);
+  });
+
+  it.each([
+    ['fill', 'fill="currentColor"'],
+    ['width', 'width="24"'],
+    ['height', 'height="24"'],
+    ['viewBox', 'viewBox="0 0 24 24"'],
+  ])('hostile root mutation удаляет только канонический %s', (attribute, literal) => {
+    const source =
+      'export const accessibilityOutline = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"><path fill="currentColor" d="M0 0H24V24H0Z"/></svg>`;\n';
+    const mutated = mutateExportWithoutRootAttribute(source, attribute);
+    const rootOpening = mutated.match(/<svg[^>]*>/)?.[0];
+
+    expect(rootOpening).toBeDefined();
+    expect(rootOpening).not.toContain(literal);
+    expect(mutated).toContain('<path fill="currentColor" d="M0 0H24V24H0Z"/>');
+    expect(mutated.match(/M0 0H24V24H0Z/g)).toEqual(source.match(/M0 0H24V24H0Z/g));
+  });
+
+  it('не изображает hostile bite, если root literal уже неканоничен', () => {
+    const source =
+      'export const accessibilityOutline = `<svg viewBox="0 0 24 24" width="23" height="24" fill="currentColor"><path d="M0 0H24V24H0Z"/></svg>`;\n';
+
+    expect(() => mutateExportWithoutRootAttribute(source, 'width')).toThrow(
+      'root не содержит literal width="24"',
     );
   });
 

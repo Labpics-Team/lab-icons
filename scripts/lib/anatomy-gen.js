@@ -16,7 +16,7 @@
  * enclosureRing 1.5. Части-массы (терминалы) инвариантны весу.
  */
 
-import { parsePathData } from './path-data.js';
+import { parsePathData, pathBBox } from './path-data.js';
 import { buildDictPart, cutoutCircle, mirrorPathX } from './circle-dictionary.js';
 
 const rad = (deg) => (deg * Math.PI) / 180;
@@ -350,12 +350,21 @@ export function smoothCornerAny(V, uDir, wDir, R, zeta) {
   const nOut = [wDir[1] * sgn, -wDir[0] * sgn];
   // центр вписанной дуги: на биссектрисе, dist R от обеих граней
   const C = [V[0] - uDir[0] * tNom + nIn[0] * R, V[1] - uDir[1] * tNom + nIn[1] * R];
-  // ζ→0: хвосты вырождаются, а pересечение касательной с гранью — в 0/0
-  // (NaN-контроли, ревью верификатора) → честная чистая дуга
+  // ζ→0: хвосты вырождаются, а пересечение касательной с гранью — в 0/0.
+  // Геометрически это чистая дуга, но сериализуем нулевые C-хвосты: тогда
+  // command topology остаётся C+A+C на ВСЕЙ непрерывной оси corner и контур
+  // можно интерполировать до endpoint без особого morph-переходника.
   if (zeta < 1e-6) {
     const S0 = [V[0] - uDir[0] * tNom, V[1] - uDir[1] * tNom];
     const E0 = [V[0] + wDir[0] * tNom, V[1] + wDir[1] * tNom];
-    return { start: S0, end: E0, d: `A${f3(R)} ${f3(R)} 0 0 ${sweep} ${P(E0)}` };
+    return {
+      start: S0,
+      end: E0,
+      d:
+        `C${P(S0)} ${P(S0)} ${P(S0)}` +
+        `A${f3(R)} ${f3(R)} 0 0 ${sweep} ${P(E0)}` +
+        `C${P(E0)} ${P(E0)} ${P(E0)}`,
+    };
   }
   const delta = Math.PI - theta;          // полный поворот дуги при ζ=0
   const arcMeasure = delta * (1 - zeta);  // остающийся сектор
@@ -1311,6 +1320,151 @@ export function buildGlyph(entry, grid, axes = {}, lib = null) {
     }
   } else {
     throw new Error(`anatomy-gen: неизвестный архетип «${entry.archetype}»`);
+  }
+  return out;
+}
+
+/**
+ * Топологическая сигнатура — минимальный контракт совместимости morph.
+ * Совпадение сигнатур не обещает красивую интерполяцию, но несовпадение
+ * доказывает, что point-to-point morph без явного remap невозможен.
+ */
+export function topologySignature(d) {
+  const subpaths = [];
+  let current = [];
+  for (const segment of parsePathData(d)) {
+    if (segment.cmd === 'M' && current.length > 0) {
+      subpaths.push(current.join(''));
+      current = [];
+    }
+    current.push(segment.cmd);
+  }
+  if (current.length > 0) subpaths.push(current.join(''));
+  return subpaths.join('|');
+}
+
+const fixedPart = (id, role, d) => ({ id, role, d });
+
+/**
+ * Строит те же чернила, что buildGlyph, но не уничтожает анатомические
+ * границы. Индекс path в SVG намеренно не используется как identity:
+ * стабильность будущей анимации держат явные part.id декларации.
+ *
+ * @returns {{outline?: Array<object>, filled?: Array<object>}}
+ */
+export function buildGlyphParts(entry, grid, axes = {}, lib = null) {
+  const cw = grid.canvas.width;
+  const built = buildGlyph(entry, grid, axes, lib);
+  const raw = { outline: [], filled: [] };
+
+  if (entry.archetype === 'composite') {
+    const ids = new Set();
+    for (const part of entry.parts) {
+      if (typeof part.id !== 'string' || part.id.trim() === '') {
+        throw new Error('anatomy-gen parts: composite part обязан иметь явный непустой id');
+      }
+      if (ids.has(part.id)) throw new Error(`anatomy-gen parts: повторный part.id «${part.id}»`);
+      ids.add(part.id);
+      if (typeof part.role !== 'string' || part.role.trim() === '') {
+        throw new Error(`anatomy-gen parts: ${part.id} обязан иметь явный role`);
+      }
+
+      const isolated = { ...entry, parts: [part], partsScope: entry.parts };
+      const one = buildGlyph(isolated, grid, axes, lib);
+      for (const variant of ['outline', 'filled']) {
+        if (!one[variant]) continue;
+        raw[variant].push({
+          id: part.id,
+          role: part.role,
+          d: one[variant],
+          anchor: part.anchor,
+          morphGroup: part.morphGroup ?? null,
+        });
+      }
+    }
+  } else if (entry.archetype === 'arc-terminal') {
+    for (const variant of ['outline', 'filled']) {
+      const d = built[variant];
+      if (!d) continue;
+      const terminal = scaleD(entry.skeleton.headD, cw);
+      if (!d.endsWith(terminal)) {
+        throw new Error(`anatomy-gen parts: arc-terminal/${variant} потерял границу terminal`);
+      }
+      raw[variant].push(
+        fixedPart('orbit', 'ink', d.slice(0, -terminal.length)),
+        fixedPart('terminal', 'control', terminal),
+      );
+    }
+  } else if (entry.archetype === 'container-glyph') {
+    const weightRange = grid.axes?.weight;
+    const rawWeight = axes.weight ?? 1;
+    const weight = weightRange
+      ? Math.min(weightRange.max, Math.max(weightRange.min, rawWeight))
+      : rawWeight;
+    const radius = (grid.ratios.keylines.circle * cw) / 2;
+    const ringWeight = grid.ratios.strokeWidth.enclosureRing * cw * weight;
+    for (const variant of ['outline', 'filled']) {
+      const d = built[variant];
+      if (!d) continue;
+      const container = genRing(cw / 2, cw / 2, radius, variant === 'outline' ? radius - ringWeight : 0);
+      if (!d.startsWith(container)) {
+        throw new Error(`anatomy-gen parts: container-glyph/${variant} потерял границу container`);
+      }
+      raw[variant].push(
+        fixedPart('container', 'container', container),
+        fixedPart('mark', 'ink', d.slice(container.length)),
+      );
+    }
+  } else if (entry.archetype === 'mirror') {
+    const source = lib?.[entry.of];
+    if (!source) throw new Error(`anatomy-gen parts: mirror «${entry.of}» не найден`);
+    const sourceParts = buildGlyphParts(source, grid, axes, lib);
+    for (const variant of ['outline', 'filled']) {
+      if (!entry.status?.[variant]) continue;
+      raw[variant] = (sourceParts[variant] ?? []).map((part) => ({
+        ...part,
+        d: mirrorPathX(part.d, cw / 2),
+        anchor: part.anchor ? [1 - part.anchor[0], part.anchor[1]] : undefined,
+      }));
+    }
+  } else {
+    const intrinsic = {
+      'radial-gear': ['body', 'ink'],
+      'stroke-v': ['mark', 'ink'],
+      'rounded-rect-container': ['container', 'container'],
+      'rounded-polygon': ['body', 'ink'],
+    }[entry.archetype];
+    if (!intrinsic) throw new Error(`anatomy-gen parts: архетип «${entry.archetype}» не классифицирован`);
+    for (const variant of ['outline', 'filled']) {
+      if (built[variant]) raw[variant].push(fixedPart(intrinsic[0], intrinsic[1], built[variant]));
+    }
+  }
+
+  const out = {};
+  for (const variant of ['outline', 'filled']) {
+    if (!built[variant]) continue;
+    const parts = raw[variant];
+    const rejoined = parts.map((part) => part.d).join('');
+    if (rejoined !== built[variant]) {
+      throw new Error(`anatomy-gen parts: ${entry.archetype}/${variant} не собирается обратно byte-identical`);
+    }
+    out[variant] = parts.map((part, zIndex) => {
+      const bbox = pathBBox(part.d);
+      const derivedAnchor = [
+        ((bbox.minX + bbox.maxX) / 2) / cw,
+        ((bbox.minY + bbox.maxY) / 2) / cw,
+      ];
+      return {
+        id: part.id,
+        role: part.role,
+        d: part.d,
+        zIndex,
+        anchor: part.anchor ?? derivedAnchor,
+        anchorSource: part.anchor ? 'declared' : 'geometry-bbox-center',
+        morphGroup: part.morphGroup ?? null,
+        topologySignature: topologySignature(part.d),
+      };
+    });
   }
   return out;
 }

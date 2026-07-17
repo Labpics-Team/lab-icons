@@ -1,0 +1,13 @@
+{
+  "comment": "Measured full-corpus migration debt frozen on 2026-07-16. CI rejects count growth and every unreviewed finding-set substitution; lowering debt requires refreshing this proof in the same reviewed change.",
+  "pathQuality": {
+    "findingSetSha256": "sha256:9c31deb6918c614ad0f99575d488c6478b6ab15237ded5b26840a39266f567f8",
+    "maximumFindings": 3326,
+    "maximumMajorFindings": 1553
+  },
+  "variantParity": {
+    "findingSetSha256": "sha256:c6b3a3e15ae11257e6239ed235ac25625b735e09a9ff4e10be1ced1d17d9301b",
+    "maximumFindings": 14
+  },
+  "version": 1
+}

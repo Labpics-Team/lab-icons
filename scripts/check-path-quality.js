@@ -24,6 +24,10 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { renderedPathData } from './lib/icon-geometry.js';
 import { inkOverlap, samplePolylines, segmentsCross } from './lib/curve-sampling.js';
 import { parsePathData } from './lib/path-data.js';
+import {
+  compareDebtSnapshot,
+  validateLegacyQualitySnapshot,
+} from './lib/legacy-quality-snapshot.js';
 
 const DEFAULT_RATIOS = {
   microSegment: 0.05 / 24,
@@ -382,11 +386,16 @@ if (isMain) {
     }
   }
   const findings = validatePathQuality({ grid, files });
+  const debt = validateLegacyQualitySnapshot(
+    JSON.parse(readFileSync(join(root, 'semantics', 'legacy-quality-snapshot.json'), 'utf8')),
+  );
+  const isMajor = (finding) => !/излом [23]\./.test(finding);
+  const debtErrors = compareDebtSnapshot(findings, debt.pathQuality, { major: isMajor });
   if (findings.length > 0) {
     // Расслоение: изломы 2–4° = систематический шум экспортного округления
     // (чинится пере-фитом кривых пакетно), остальное = ревизия руками.
-    const minor = findings.filter((e) => /излом [23]\./.test(e));
-    const major = findings.filter((e) => !/излом [23]\./.test(e));
+    const minor = findings.filter((e) => !isMajor(e));
+    const major = findings.filter(isMajor);
     console.log(
       `check-path-quality: REPORT — ${findings.length} находок: ` +
         `${minor.length} minor (экспортный шум 2–4°), ${major.length} major (ревизия)`,
@@ -395,5 +404,12 @@ if (isMain) {
   } else {
     console.log(`check-path-quality: OK — кривые ${files.length} файлов чисты`);
   }
+  if (debtErrors.length > 0) {
+    console.error(
+      'check-path-quality: HARD — frozen migration debt изменился; ' +
+      `сначала опровергнуть регрессию:\n  - ${debtErrors.join('\n  - ')}`,
+    );
+  }
   if (process.argv.includes('--strict') && findings.length > 0) process.exit(1);
+  if (debtErrors.length > 0) process.exit(1);
 }

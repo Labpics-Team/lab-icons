@@ -1,0 +1,58 @@
+{
+ "version": 1,
+ "comment": "R0 quarantine measured by the deterministic Observatory on 2026-07-16. A generated law remains modeled, but accepted-only must use source fallback until its named geometric finding is closed.",
+ "quarantined": {
+  "arrow-down-circle/outline": {
+   "reason": "at least one declared target raster reports component or counter divergence, while the adaptive topology oracle remains uncertain",
+   "exitCriteria": "make every target raster topology match and obtain a resolved adaptive-oracle match"
+  },
+  "arrow-forward-circle/outline": {
+   "reason": "at least one declared target raster reports component or counter divergence, while the adaptive topology oracle remains uncertain",
+   "exitCriteria": "make every target raster topology match and obtain a resolved adaptive-oracle match"
+  },
+  "ban/outline": {
+   "reason": "the adaptive topology oracle cannot resolve the normalized law against the historical hand; no topology difference is claimed",
+   "exitCriteria": "obtain a resolved topology match before owner review of the remaining subpixel normalization"
+  },
+  "bulb/outline": {
+   "reason": "the adaptive topology oracle cannot resolve the analytic dome and meniscus against the historical negative space; no difference is claimed",
+   "exitCriteria": "encode the intended counter law and obtain a resolved topology match at all declared masters"
+  },
+  "chevron-up-circle/filled": {
+   "reason": "the rotated canonical construction diverges in at least one target-raster topology sample",
+   "exitCriteria": "remove the raster topology divergence without breaking rotational family identity"
+  },
+  "component/filled": {
+   "reason": "the fourfold-symmetric reconstruction diverges in at least one target-raster sample and remains uncertain in the adaptive oracle",
+   "exitCriteria": "preserve fourfold symmetry while obtaining target-raster parity and a resolved adaptive-oracle match"
+  },
+  "component/outline": {
+   "reason": "the fourfold-symmetric reconstruction diverges in at least one target-raster sample and remains uncertain in the adaptive oracle",
+   "exitCriteria": "preserve fourfold symmetry while obtaining target-raster parity and a resolved adaptive-oracle match"
+  },
+  "filter/outline": {
+   "reason": "capsule normalization exceeds the automatic silhouette acceptance threshold",
+   "exitCriteria": "obtain explicit owner acceptance or reduce the geometric deviation below the policy threshold"
+  },
+  "list/outline": {
+   "reason": "shared row rhythm and capsule terminals exceed the automatic silhouette acceptance threshold",
+   "exitCriteria": "obtain explicit owner acceptance or reduce the geometric deviation below the policy threshold"
+  },
+  "plus/outline": {
+   "reason": "the adaptive topology oracle cannot resolve the normalized construction against the historical hand; no topology difference is claimed",
+   "exitCriteria": "obtain a resolved topology match before evaluating the remaining contour normalization"
+  },
+  "radio/filled": {
+   "reason": "concentric normalization exceeds the automatic silhouette acceptance threshold",
+   "exitCriteria": "obtain explicit owner acceptance or reduce the geometric deviation below the policy threshold"
+  },
+  "radio/outline": {
+   "reason": "the adaptive topology oracle cannot resolve the concentric ring reconstruction against historical negative space; no difference is claimed",
+   "exitCriteria": "obtain a resolved ring and center topology match at analysis and target raster sizes"
+  },
+  "reload/filled": {
+   "reason": "concentric orbit and terminal correction exceeds the automatic silhouette acceptance threshold",
+   "exitCriteria": "obtain explicit owner acceptance or reduce the geometric deviation below the policy threshold"
+  }
+ }
+}
