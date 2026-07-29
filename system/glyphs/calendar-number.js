@@ -37,7 +37,14 @@ export const DIGIT_CAP = 7.3;
  * нижнее скругление 4.75. Тело чуть уже рамки: залитая масса оптически тяжелее
  * штриха и обязана отступить.
  */
-export const BODY = Object.freeze({ top: 8.4, bottom: 21.05, halfW: 9.32, r: 4.75 });
+export const BODY = Object.freeze({ top: 8.42, bottom: 21.0, halfW: 9.29, r: 4.75 });
+/**
+ * Шапка Filled — ОТДЕЛЬНЫЙ кусок чернил. Дуктус оригинала показывает ровно два
+ * связных куска: шапка (y 1…6.83) и тело (y 8.42…21). Между ними негативный
+ * канал 1.59 ≈ перо: в Filled шапка не рамка вокруг тела, а самостоятельная
+ * плашка над ним. Скругление верха 3.74, низ шапки прямой.
+ */
+export const HEAD = Object.freeze({ top: 2.52, bottom: 6.83, halfW: 9.29, r: 3.74 });
 
 function plate(t, penOverride) {
   const w = PLATE.w;
@@ -112,6 +119,7 @@ defineGlyph('calendar-number', {
    */
   filled: (t, ax) => {
     const { top, bottom, halfW } = BODY;
+    const H = HEAD;
     const body = S.roundedPolygon(
       [
         [t.cx - halfW, top],
@@ -126,10 +134,18 @@ defineGlyph('calendar-number', {
       capHeight: DIGIT_CAP,
       center: [t.cx, (top + bottom) / 2],
     });
-    // Рамка в Filled идёт весом КОНТЕЙНЕРА (1.5), а не Bold: тело уже залито,
-    // и обрамление обязано оптически уступить содержимому. Замер руки: кап
-    // ушка в calendar-number_filled — 0.75, то есть перо ровно 1.5.
-    const p = plate(t, t.stroke.ring);
+    // Шапка: плашка со скруглённым верхом плюс ушки. Перо ушек — вес
+    // контейнера (замер: кап ушка в оригинале 0.75, то есть перо ровно 1.5).
+    const p = S.roundedPolygon(
+      [
+        [t.cx - H.halfW, H.top],
+        [t.cx + H.halfW, H.top],
+        [t.cx + H.halfW, H.bottom],
+        [t.cx - H.halfW, H.bottom],
+      ],
+      [H.r, H.r, 0, 0],
+      t.corner.smoothing,
+    );
     p.add(ears(t, t.stroke.ring));
     p.add(body);
     p.add(digits.reverse());
