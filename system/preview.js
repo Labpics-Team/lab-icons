@@ -45,13 +45,14 @@ function card(r) {
     <div class="row">
       <figure><div class="box">${r.reference ? r.reference.replace('<svg ', '<svg class="ic" ') : '<div class="no">нет</div>'}</div><figcaption>оригинал</figcaption></figure>
       <figure><div class="box"><svg viewBox="0 0 24 24" class="ic"><path d="${r.d}"/></svg></div><figcaption>генерат</figcaption></figure>
-      <figure><div class="box">${r.reference ? overlay(r.reference, r.d) : ''}</div><figcaption>наложение</figcaption></figure>
+      <figure><div class="box">${r.reference ? overlay(r.reference, r.dRef ?? r.d) : ''}</div><figcaption>наложение${r.refAxes ? ' · ' + esc(Object.entries(r.refAxes).map(([k, v]) => k + ' = ' + v).join(', ')) : ''}</figcaption></figure>
     </div>
     <dl class="meta">
       <dt>смещение контура</dt><dd>${offTxt}</dd>
       <dt>подпутей / сегментов</dt><dd>${r.subpaths} / ${r.segments}</dd>
       <dt>вердикт</dt><dd>${esc(r.verdict?.kind ?? '—')}</dd>
     </dl>
+    ${r.refAxes ? `<p class="axes"><b>сравнение.</b> глиф зависит от внешнего состояния: показан при текущем значении оси, а сверяется с оригиналом при ${esc(Object.entries(r.refAxes).map(([k, v]) => k + ' = ' + v).join(', '))} — том, что зафиксировала рука.</p>` : ''}
     <p class="law"><b>закон.</b> ${esc(r.law)}</p>
     ${needArg ? `<p class="arg"><b>почему отклонение ${pct(dev)}.</b> ${esc(argText)}${r.verdict?.note && r.argument ? ' <i>' + esc(r.verdict.note) + '</i>' : ''}</p>` : ''}
     ${r.axes ? `<p class="axes"><b>оси.</b> ${Object.entries(r.axes).map(([k, a]) => `${esc(k)} ∈ [${a.min}…${a.max}], по умолчанию ${a.def}${a.note ? ' — ' + esc(a.note) : ''}`).join('; ')}</p>` : ''}
