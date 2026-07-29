@@ -69,7 +69,7 @@ export const STACK = Object.freeze({
   rTop: 2.66,
   rTail: 1.85,
   shift: 3.0,
-  clearance: 1.02,
+  clearance: 0.0,
 });
 
 defineGlyph('bookmark', {
@@ -97,12 +97,10 @@ defineGlyph('bookmarks', {
   law:
     'та же лента в двух экземплярах со сдвигом 3 по обеим осям (диагональ 45° на шкале ' +
     'направлений); класс «стопка» — задний экземпляр вырезает из себя тень переднего ' +
-    'с зазором 1.0, передний ложится сверху. Лента ужата так, чтобы пара уложилась в живую область',
+    'по её силуэту без дополнительного зазора — разделителем служит её собственное перо; передний ложится сверху. Лента ужата так, чтобы пара уложилась в живую область',
   argument:
-    'остаточные 4.8% — та же кривизна хвостов, что и у одиночной ленты, только удвоенная: ' +
-    'хвостов теперь четыре. Плюс рука сделала задний экземпляр чуть короче переднего ' +
-    '(её хвост обрывается на 17.0 против 18.4 у системы) — но это не закон, а следствие ' +
-    'того, что она рисовала его отдельно, а не тем же силуэтом.',
+    'Outline сходится на 0.98%, порога не превышает. Filled остаётся выше: там расходится ' +
+    'кривизна хвостов, и хвостов теперь четыре против двух у одиночной ленты.',
   outline: (t) => {
     const pen = t.stroke.glyph;
     const s = STACK.shift / 2;
@@ -126,7 +124,7 @@ defineGlyph('bookmarks', {
     const back = ribbonSolid(t.cx + s, STACK.halfW, STACK.top - s, STACK.tail - s, STACK.apex - s, STACK.rTop, STACK.rTail, 0);
     const front = ribbonSolid(t.cx - s, STACK.halfW, STACK.top + s, STACK.tail + s, STACK.apex + s, STACK.rTop, STACK.rTail, 0);
     const shadow = ribbonSolid(
-      t.cx - s, STACK.halfW, STACK.top + s, STACK.tail + s, STACK.apex + s, STACK.rTop, STACK.rTail, STACK.clearance,
+      t.cx - s, STACK.halfW, STACK.top + s, STACK.tail + s, STACK.apex + s, STACK.rTop, STACK.rTail, t.stroke.base,
     );
     return cut(back, shadow).add(front);
   },
