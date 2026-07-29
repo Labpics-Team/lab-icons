@@ -46,6 +46,33 @@ const points = (name) => {
   ];
 };
 
+/**
+ * ТРЕЩИНА ИЛИ ШОВ РАСТЕРИЗАТОРА — различаются масштабированием.
+ *
+ * Настоящий зазор имеет постоянную ширину в единицах канвы: удвоил разрешение —
+ * ширина та же. Шов заливки на месте, где две почти совпавшие кромки сходятся
+ * под острым углом, всегда ровно два пикселя: 0.250 при ss = 8, 0.126 при 16,
+ * 0.100 при 20 — то есть 2/ss, и с разрешением он тает.
+ *
+ * Порог по абсолютной ширине для этого не годится и был бы опасен: настоящие
+ * трещины наушников мерились 0.2 ед при ss = 10, то есть ровно на том же
+ * пределе, и любой порог спрятал бы доказанный дефект. Различает только
+ * поведение при смене разрешения.
+ */
+const crackWidths = (path, ss) =>
+  topology(maskFromPath(path, CANVAS, ss, 0.02), { canvas: CANVAS, ss })
+    .holes.filter((h) => 2 * h.maxR < 0.5)
+    .map((h) => 2 * h.maxR)
+    .sort((a, b) => b - a);
+
+const realCracks = (path) => {
+  const a = crackWidths(path, SS);
+  if (!a.length) return 0;
+  const b = crackWidths(path, SS * 2);
+  // трещина настоящая, если на вдвое мелком пикселе она НЕ ужалась вдвое
+  return b.filter((w, i) => w >= (a[i] ?? 0) * 0.6).length;
+};
+
 const shot = (path) => {
   const nums = [...path.toD().matchAll(/-?\d*\.?\d+/g)].map((m) => Number(m[0]));
   let bad = false;
@@ -55,7 +82,7 @@ const shot = (path) => {
     else if (Math.abs(v) > max) max = Math.abs(v);
   }
   const t = topology(maskFromPath(path, CANVAS, SS, 0.02), { canvas: CANVAS, ss: SS });
-  return { bad, max, ink: t.ink, counters: t.counters, cracks: t.cracks };
+  return { bad, max, ink: t.ink, counters: t.counters, cracks: realCracks(path) };
 };
 
 const problems = [];
