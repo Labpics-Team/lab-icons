@@ -198,18 +198,12 @@ const innerArrow = (dir) => (t) => {
   });
 };
 
-const ARROW_ARG =
-  'та же арифметика штриха, что у шевронов: пятно расхождения — наружный сустав вершины ' +
-  '(система даёт круглый сустав радиусом кап, рука срезает его дугой R2). Габарит чернил ' +
-  'по трём замерам совпал: кончик 5.50 = keyR/2, хвост 5.00, полувысота 5.17.';
-
 for (const dir of ['down', 'up', 'back', 'forward']) {
   declare(
     `arrow-${dir}-circle`,
     'шеврон 45° + хвост по оси; кончик чернил на половинном keyline (keyR/2), ' +
       'терминал хвоста 5.00, полувысота головы 5.17 — скелет = чернила минус кап',
     innerArrow(dir),
-    { argument: ARROW_ARG },
   );
 }
 
@@ -261,10 +255,9 @@ const innerChecks = (t) => {
   return p.add(strokeSegment(B, [B[0] + (V[0] - B[0]) * k, B[1] + (V[1] - B[1]) * k], w));
 };
 
-const CHECK_ARG =
-  'наружный локоть: система ставит круглый сустав радиусом кап (вылет 1.0 за ось), ' +
-  'рука срезает его дугой R1.5 со сглаживанием и выносит 0.61 — пятно 1.5×1.5 ед. ' +
-  'внизу знака. Остальной контур совпадает: обе кромки пера сошлись на 2.005 при пере 2.0.';
+// Единственное известное расхождение чека — наружный локоть: система ставит
+// круглый сустав радиусом кап (вылет 1.0 за ось), рука срезает его дугой R1.5
+// со сглаживанием и выносит 0.61. Пятно 1.5×1.5 ед. внизу знака, 0.3% площади.
 
 declare(
   'checkmark-circle',
@@ -468,17 +461,15 @@ export const REDO_IN = {
   outer: { c: [0.24, 2.69], r: 5.417 },
   inner: { c: [-0.222, 6.552], r: 4.777 },
   seam: { outer: [-5.09, 3.62], inner: [-4.21, 3.92] },
-  /**
-   * Хвост замыкается не по кромке головы, а на кап ГЛУБЖЕ неё. Стык встык дал
-   * бы две совпадающие прямые: объединение под nonzero их переживает, а вырез
-   * негативом — нет (пересечение коллинеарных рёбер вырождено). Перекрытие
-   * переводит стык в честное поперечное пересечение и стоит ровно ноль чернил:
-   * перекрытая полоса целиком лежит внутри головы.
-   */
-  overlap: 1.0,
 };
 
 const ang = (c, p) => Math.atan2(p[1] - c[1], p[0] - c[0]);
+const unit = (a, b) => {
+  const dx = b[0] - a[0];
+  const dy = b[1] - a[1];
+  const l = Math.hypot(dx, dy);
+  return [dx / l, dy / l];
+};
 
 /** Точка пересечения окружности с вертикалью x, верхняя ветвь. */
 function topOnCircle(c, r, x) {
@@ -486,12 +477,45 @@ function topOnCircle(c, r, x) {
   return [x, c[1] - Math.sqrt(Math.max(0, r * r - dx * dx))];
 }
 
-function redoTail(t) {
+/**
+ * Скругление вершины V радиусом r между входным d1 и выходным d2 направлением:
+ * точки касания и дуга между ними. То же построение, что внутри roundedPolygon,
+ * но выданное наружу — силуэт повтора собирается ОДНИМ подпутём, и вставлять
+ * скругления приходится вручную.
+ */
+function cornerArc(V, d1, d2, r) {
+  const phi = Math.acos(Math.max(-1, Math.min(1, -(d1[0] * d2[0] + d1[1] * d2[1]))));
+  const td = r / Math.tan(phi / 2);
+  const T1 = [V[0] - d1[0] * td, V[1] - d1[1] * td];
+  const T2 = [V[0] + d2[0] * td, V[1] + d2[1] * td];
+  const bl = Math.hypot(d2[0] - d1[0], d2[1] - d1[1]);
+  const k = r / Math.sin(phi / 2) / bl;
+  const cen = [V[0] + (d2[0] - d1[0]) * k, V[1] + (d2[1] - d1[1]) * k];
+  const a0 = ang(cen, T1);
+  let a1 = ang(cen, T2);
+  const turn = d1[0] * d2[1] - d1[1] * d2[0];
+  if (turn > 0) while (a1 < a0) a1 += 2 * Math.PI;
+  else while (a1 > a0) a1 -= 2 * Math.PI;
+  return { T1, T2, cen, a0, a1, r };
+}
+
+/**
+ * Силуэт повтора ОДНИМ замкнутым подпутём: голова и хвост стыкуются по
+ * кромке основания, и разрезать их порознь нельзя — две коллинеарные прямые
+ * вырождают пересечение и вырез негативом рассыпается. Поэтому стык здесь не
+ * булев, а конструктивный: обход идёт голова → основание → хвост → основание.
+ */
+function redoSilhouette(t) {
+  const h = REDO_IN.head;
+  const yc = t.cy + h.axis;
+  const xb = t.cx + h.base;
+  const V0 = [xb, yc - h.half];
+  const V1 = [t.cx + h.apex, yc];
+  const V2 = [xb, yc + h.half];
   const co = [t.cx + REDO_IN.outer.c[0], t.cy + REDO_IN.outer.c[1]];
   const ci = [t.cx + REDO_IN.inner.c[0], t.cy + REDO_IN.inner.c[1]];
   const ro = REDO_IN.outer.r;
   const ri = REDO_IN.inner.r;
-  const xb = t.cx + REDO_IN.head.base + REDO_IN.overlap;
   const P1 = topOnCircle(co, ro, xb);
   const P2 = [t.cx + REDO_IN.seam.outer[0], t.cy + REDO_IN.seam.outer[1]];
   const P3 = [t.cx + REDO_IN.seam.inner[0], t.cy + REDO_IN.seam.inner[1]];
@@ -499,42 +523,42 @@ function redoTail(t) {
   const tip = [(P2[0] + P3[0]) / 2, (P2[1] + P3[1]) / 2];
   const rTip = Math.hypot(P3[0] - P2[0], P3[1] - P2[1]) / 2;
 
-  let a0 = ang(co, P1);
-  let a1 = ang(co, P2);
-  while (a1 > a0) a1 -= 2 * Math.PI;
-  let b0 = ang(tip, P2);
-  let b1 = ang(tip, P3);
-  while (b1 > b0) b1 -= 2 * Math.PI;
-  let c0 = ang(ci, P3);
-  let c1 = ang(ci, P4);
+  const up = [0, -1];
+  const d01 = unit(V0, V1);
+  const d12 = unit(V1, V2);
+  const k0 = cornerArc(V0, up, d01, h.rBase);
+  const k1 = cornerArc(V1, d01, d12, h.rApex);
+  const k2 = cornerArc(V2, d12, up, h.rBase);
+
+  // хвост: внутренняя кромка вниз-влево, круглый конец, внешняя кромка обратно
+  let i0 = ang(ci, P4);
+  let i1 = ang(ci, P3);
+  while (i1 > i0) i1 -= 2 * Math.PI;
+  let c0 = ang(tip, P3);
+  let c1 = ang(tip, P2);
   while (c1 < c0) c1 += 2 * Math.PI;
+  let o0 = ang(co, P2);
+  let o1 = ang(co, P1);
+  while (o1 < o0) o1 += 2 * Math.PI;
 
   const p = new Path()
-    .move(P1)
-    .arc(co, ro, a0, a1)
-    .arc(tip, rTip, b0, b1)
-    .arc(ci, ri, c0, c1)
-    .line(P1)
+    .move(k0.T2)
+    .line(k1.T1)
+    .arc(k1.cen, h.rApex, k1.a0, k1.a1)
+    .line(k2.T1)
+    .arc(k2.cen, h.rBase, k2.a0, k2.a1)
+    .line(P4)
+    .arc(ci, ri, i0, i1)
+    .arc(tip, rTip, c0, c1)
+    .arc(co, ro, o0, o1)
+    .line(k0.T1)
+    .arc(k0.cen, h.rBase, k0.a0, k0.a1)
     .close();
   return orientCW(p);
 }
 
-function redoHead(t) {
-  const h = REDO_IN.head;
-  const y = t.cy + h.axis;
-  return S.roundedPolygon(
-    [
-      [t.cx + h.base, y - h.half],
-      [t.cx + h.apex, y],
-      [t.cx + h.base, y + h.half],
-    ],
-    [h.rBase, h.rApex, h.rBase],
-    t.corner.smoothing,
-  );
-}
-
-const innerRedo = (t) => redoHead(t).add(redoTail(t));
-const innerUndo = (t) => innerRedo(t).mirrorX(t.cx);
+const innerRedo = (t) => redoSilhouette(t);
+const innerUndo = (t) => redoSilhouette(t).mirrorX(t.cx);
 
 const REDO_LAW =
   'сплошной знак: треугольная голова (вершина +5.87, полувысота 5.19, ось на 0.48 выше центра) ' +
