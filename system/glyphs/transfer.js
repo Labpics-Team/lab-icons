@@ -814,7 +814,7 @@ defineGlyph('navigate', {
       [Math.max(0, t.corner.detail - w), 0, NAVIGATE.notchR + w, 0],
       t.corner.smoothing,
     );
-    return outer.add(inner.reverse());
+    return process.env.LAB_NAV_CUT ? cut(outer, inner) : outer.add(inner.reverse());
   },
   filled: (t) =>
     S.roundedPolygon(
