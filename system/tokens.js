@@ -81,8 +81,23 @@ export const TOKENS = Object.freeze({
     snug: r(1.2),
     /** Канальный зазор ≈ перо: негатив читается как штрих. Номинал 1.8. */
     channel: r(1.8),
-    /** Зазор вокруг накладного класса (перечёркивание, бейдж). Номинал 1.2. */
-    overlay: r(1.2),
+    /**
+     * Зазор вокруг ПЕРЕЧЁРКИВАНИЯ. Номинал 1.35 — снят с корпуса замером
+     * расстояния от кромки оси до ближайших чернил носителя:
+     *   eye-off 1.354 · heart-off 1.354 · notifications-off 1.354 · cloud-off 1.354
+     *   mic-off 1.796 · video-camera-off 1.796
+     * Четыре независимых носителя дают одно число до третьего знака; два
+     * стоят шире. Взято большинство. Итоговая полуширина выреза = кап + 1.35.
+     */
+    slash: r(1.35),
+    /**
+     * Зазор вокруг БЕЙДЖА. Номинал 1.5: mail-unread даёт 1.498, то есть радиус
+     * выреза ровно 4.5 = 1.5 × радиуса бейджа. (notifications-unread 1.607 —
+     * там носитель в этом месте и так отступает.)
+     */
+    badge: r(1.5),
+    /** Общий псевдоним для накладок без собственного замера. */
+    overlay: r(1.35),
   }),
 
   /** СКРУГЛЕНИЯ. Радиус — абсолютный токен (как терминал шрифта), не доля. */
@@ -243,6 +258,8 @@ export function resolve(opt = {}) {
       min: u(TOKENS.clearance.min),
       snug: u(TOKENS.clearance.snug),
       channel: u(TOKENS.clearance.channel),
+      slash: u(TOKENS.clearance.slash),
+      badge: u(TOKENS.clearance.badge),
       overlay: u(TOKENS.clearance.overlay),
     },
     corner: {

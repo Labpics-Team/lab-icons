@@ -189,7 +189,7 @@ export function slash(t, o = {}) {
 /** Тень перечёркивания — то, что вырезается из носителя. */
 export function slashShadow(t, o = {}) {
   const ax = slashAxis(t, o);
-  const clr = o.clearance ?? t.clearance.overlay;
+  const clr = o.clearance ?? t.clearance.slash;
   return strokeSegment(ax.a, ax.b, ax.weight + 2 * clr);
 }
 
@@ -216,7 +216,7 @@ export function badge(t, o = {}) {
 
 export function badgeShadow(t, o = {}) {
   const b = badgeDisc(t, o);
-  return S.circle(b.c, b.r + (o.clearance ?? t.clearance.overlay));
+  return S.circle(b.c, b.r + (o.clearance ?? t.clearance.badge));
 }
 
 /** Класс «с уведомлением». */
