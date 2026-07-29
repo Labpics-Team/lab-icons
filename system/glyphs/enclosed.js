@@ -46,22 +46,22 @@ import { chevron, arrow, strokePath, strokePolyline, strokeSegment, cut } from '
 // ── ОПОРНЫЕ ВЕЛИЧИНЫ КЛАССА (все — выводы из токенов) ─────────────────────
 
 /** Центр канвы. */
-const C = (t) => [t.cx, t.cy];
+export const C = (t) => [t.cx, t.cy];
 /** Перо начинки: служебный вес глифа-в-контейнере, к оси fill не чувствителен. */
-const PEN = (t) => t.stroke.containerGlyph;
+export const PEN = (t) => t.stroke.containerGlyph;
 /** Терминал начинки = перо/2. */
-const CAP = (t) => t.cap.containerGlyph;
+export const CAP = (t) => t.cap.containerGlyph;
 /** ВНУТРЕННИЙ KEYLINE ПО ЧЕРНИЛАМ: половина внешнего. */
-const INK = (t) => t.keyR / 2;
+export const INK = (t) => t.keyR / 2;
 /** Тот же keyline по СКЕЛЕТУ: чернила минус кап. */
-const KEY = (t) => INK(t) - CAP(t);
+export const KEY = (t) => INK(t) - CAP(t);
 
 /**
  * Вырезать начинку из диска. `cut` принимает регион одним куском, а начинка
  * бывает из нескольких подпутей (точка + штрих у alert, две пластины у pause),
  * поэтому режем подпуть за подпутём: иначе в дырку уйдёт только первый.
  */
-function holes(disc, glyph) {
+export function holes(disc, glyph) {
   let p = disc;
   for (const sub of glyph.clone().subs) {
     if (!sub.segs.length) continue;
@@ -79,7 +79,7 @@ const CLASS_LAW =
  * Объявить члена класса. `inner` строит начинку в полной канве.
  * @param {(t:object)=>Path} inner
  */
-function declare(name, law, inner, o = {}) {
+export function declare(name, law, inner, o = {}) {
   const ringWeight = o.ring ?? ((t) => t.stroke.ring);
   defineGlyph(name, {
     family: 'enclosed',
