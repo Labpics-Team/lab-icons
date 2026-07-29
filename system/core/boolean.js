@@ -15,7 +15,7 @@
  */
 
 import { v2 } from './num.js';
-import { Path, edgeAt, edgeEnd, edgeStart, splitEdge, pathFromEdges } from './path.js';
+import { Path, edgeAt, edgeEnd, edgeStart, edgeLen, splitEdge, pathFromEdges } from './path.js';
 import { intersectEdges } from './intersect.js';
 
 const JOIN_TOL = 1e-5;
@@ -84,7 +84,37 @@ function reverseEdge(e) {
  * Предпочтение отдаётся смене источника (subject↔region): на честном
  * пересечении куски всегда чередуются, и это снимает неоднозначность узла.
  */
-function chain(edges) {
+const dirOut = (e) => v2.norm(v2.sub(edgeAt(e, Math.min(0.02, 0.5)), edgeStart(e)));
+const dirIn = (e) => v2.norm(v2.sub(edgeEnd(e), edgeAt(e, Math.max(0.98, 0.5))));
+
+/**
+ * Правило выбора продолжения В УЗЛЕ ОБЪЕДИНЕНИЯ — не то же, что при вычитании.
+ *
+ * При честном пересечении куски subject и region строго чередуются, и смена
+ * источника снимает неоднозначность. В объединении узел бывает КАСАТЕЛЬНЫМ:
+ * стартовый колпачок хвоста стрелки упирается в дугу сустава головы, в точке
+ * сходятся четыре конца, и переключаться на соседнюю фигуру там НЕЛЬЗЯ —
+ * обход обязан идти по внешней стороне. Правило внешней стороны одно: из всех
+ * продолжений брать самое «правое» относительно входного направления, то есть
+ * максимальный поворот по обходу. Иначе цепь не замыкается, а незамкнутую
+ * сшивка дотягивает хордой — это и есть косой разруб поперёк глифа.
+ */
+function pickOutermost(edges, cand, cur) {
+  const tIn = dirIn(edges[cur]);
+  let best = cand[0];
+  let bestA = Infinity;
+  for (const j of cand) {
+    const tOut = dirOut(edges[j]);
+    const a = Math.atan2(v2.cross(tIn, tOut), v2.dot(tIn, tOut));
+    if (a < bestA) {
+      bestA = a;
+      best = j;
+    }
+  }
+  return best;
+}
+
+function chain(edges, o = {}) {
   const buckets = new Map();
   edges.forEach((e, i) => {
     const k = key(edgeStart(e));
@@ -107,8 +137,12 @@ function chain(edges) {
         cur = null;
         break;
       }
-      const src = edges[cur].src;
-      cur = cand.find((j) => edges[j].src !== src) ?? cand[0];
+      if (o.outermost) {
+        cur = cand.length > 1 ? pickOutermost(edges, cand, cur) : cand[0];
+      } else {
+        const src = edges[cur].src;
+        cur = cand.find((j) => edges[j].src !== src) ?? cand[0];
+      }
     }
     if (loop.length) {
       const closed = v2.dist(edgeEnd(loop[loop.length - 1]), edgeStart(loop[0])) < JOIN_TOL * 20;
@@ -138,7 +172,31 @@ function chain(edges) {
  * Правильный ответ один: сперва граница ОБЪЕДИНЕНИЯ. Она состоит из тех кусков
  * контуров, что не лежат строго внутри другого подпути региона.
  */
-function unionBoundary(reg) {
+/**
+ * ПЕРЕСЕЧЕНИЕ ИЛИ КАСАНИЕ.
+ *
+ * Хвост стрелки выходит ровно из вершины шеврона, поэтому его кромка КАСАЕТСЯ
+ * дуги сустава — в одной точке, не пересекая её. Резать контур в такой точке
+ * нельзя: кусок не входит внутрь соседа и не выходит из него, а разрез рождает
+ * узел, в котором сходятся четыре конца, и сшивка замыкает по ним лишнюю петлю.
+ *
+ * Проверка прямая и ровно та, ради которой разрез и делается: меняется ли
+ * «внутри соседа» при переходе через точку. Не меняется — это касание.
+ */
+function crosses(edge, t, other) {
+  // Отступ задаётся в ЕДИНИЦАХ КАНВЫ, а не в параметре: у короткого куска
+  // параметрические 0.001 — это тысячные доли единицы, то есть меньше допуска
+  // самого теста принадлежности, и обе пробы читаются одинаково. Тогда честное
+  // пересечение объявляется касанием, разрез не делается, и сшивка режет глиф
+  // пополам — что и было видно на краю оси rond.
+  const L = Math.max(edgeLen(edge), 1e-6);
+  const d = Math.min(0.35, 0.03 / L);
+  const before = edgeAt(edge, Math.max(0, t - d));
+  const after = edgeAt(edge, Math.min(1, t + d));
+  return containsPoint(other, before) !== containsPoint(other, after);
+}
+
+export function unionBoundary(reg) {
   const subs = reg.subs.filter((s) => s.segs.length);
   if (subs.length < 2) return reg;
   const paths = subs.map((s) => new Path([s]));
@@ -149,7 +207,9 @@ function unionBoundary(reg) {
       if (i === j) continue;
       for (let a = 0; a < per[i].length; a++) {
         for (let b = 0; b < per[j].length; b++) {
-          for (const x of intersectEdges(per[i][a], per[j][b])) ts[i][a].push(x.t1);
+          for (const x of intersectEdges(per[i][a], per[j][b])) {
+            if (crosses(per[i][a], x.t1, paths[j])) ts[i][a].push(x.t1);
+          }
         }
       }
     }
@@ -160,11 +220,41 @@ function unionBoundary(reg) {
       const m = midOf(e);
       let inside = false;
       for (let j = 0; j < paths.length && !inside; j++) if (j !== i && containsPoint(paths[j], m)) inside = true;
-      if (!inside) kept.push(e);
+      // `src` — не украшение: в узле объединения сходятся куски РАЗНЫХ фигур,
+      // и обход обязан переключаться между ними. Без пометки chain выбирает
+      // продолжение произвольно и на касательных контактах замыкает лишнюю
+      // петлю площадью 0.1 ед² — ту самую лучину, что читается трещиной.
+      if (!inside) kept.push({ ...e, src: i });
     }
   }
+
+  /**
+   * СОВПАВШИЕ КУСКИ ГРАНИЦЫ. Хвост стрелки выходит из вершины шеврона, и его
+   * стартовый колпачок ложится РОВНО на дугу сустава головы: две фигуры дают
+   * здесь один и тот же кусок границы. Ни один из них не «внутри» другого,
+   * поэтому фильтр выше пропускает оба, граница задваивается, и сшивка
+   * замыкает по дублю лишнюю петлю.
+   *
+   * Сонаправленные дубли — это одна и та же внешняя граница, оставляем одну.
+   * Встречные означали бы, что кусок внутренний для объединения, — убираем оба.
+   */
+  const dedup = [];
+  const dropped = new Set();
+  for (let a = 0; a < kept.length; a++) {
+    if (dropped.has(a)) continue;
+    let same = true;
+    let dup = false;
+    for (let b = a + 1; b < kept.length; b++) {
+      if (dropped.has(b) || kept[b].src === kept[a].src) continue;
+      if (v2.dist(midOf(kept[a]), midOf(kept[b])) > 1e-4) continue;
+      dup = true;
+      dropped.add(b);
+      same = v2.dist(edgeStart(kept[a]), edgeStart(kept[b])) < 1e-4;
+    }
+    if (!dup || same) dedup.push(kept[a]);
+  }
   const out = new Path();
-  for (const l of chain(kept)) if (l.edges.length >= 2) out.add(pathFromEdges(l.edges, true));
+  for (const l of chain(dedup)) if (l.edges.length >= 2) out.add(pathFromEdges(l.edges, true));
   return out.isEmpty() ? reg : out;
 }
 
