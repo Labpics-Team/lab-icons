@@ -182,6 +182,9 @@ function numeric(e1, e2, t1a = 0, t1b = 1, t2a = 0, t2b = 1, depth = 0, out = []
  */
 export function intersectEdges(e1, e2) {
   let pts = null;
+  if (e1.type === 'arc' && e2.type === 'arc' && v2.dist(e1.c, e2.c) < 1e-7 && Math.abs(e1.r - e2.r) < 1e-7) {
+    return coArc(e1, e2);
+  }
   if (e1.type === 'line' && e2.type === 'line') return lineLine(e1, e2);
   if (e1.type === 'line' && e2.type === 'arc') pts = lineCircle(e1.a, e1.b, e2.c, e2.r);
   else if (e1.type === 'arc' && e2.type === 'line') pts = lineCircle(e2.a, e2.b, e1.c, e1.r);
@@ -198,6 +201,52 @@ export function intersectEdges(e1, e2) {
   }
   const co = coincident(e1, e2);
   return co ?? collapse(numeric(e1, e2));
+}
+
+/**
+ * ДУГИ НА ОДНОЙ ОКРУЖНОСТИ.
+ *
+ * circleCircle для совпадающих окружностей честно возвращает пусто: общих
+ * ТОЧЕК у них нет, есть общая дуга. Для булевой это худший из ответов — куски
+ * границы совпадают, но не разрезаны по общим концам, и схлопывание дублей
+ * рвёт кольцо. Возвращаем границы углового перекрытия: после разреза по ним
+ * совпавшие куски получают одинаковые концы и схлопываются начисто.
+ *
+ * Случай не экзотический: стартовый колпачок хвоста стрелки — это дуга того же
+ * радиуса вокруг той же вершины, что и круглый сустав головы.
+ */
+function coArc(e1, e2) {
+  const span = (e) => {
+    const lo = Math.min(e.a0, e.a1);
+    const hi = Math.max(e.a0, e.a1);
+    return [lo, hi];
+  };
+  const [l1, h1] = span(e1);
+  const out = [];
+  const at = (ang) => {
+    // угол может быть записан со сдвигом на целый оборот
+    for (let k = -2; k <= 2; k++) {
+      const a = ang + k * TAU;
+      if (a >= l1 - 1e-9 && a <= h1 + 1e-9) {
+        const t1 = (a - e1.a0) / (e1.a1 - e1.a0);
+        const t2 = paramAt(e2, v2.polar(e1.c, e1.r, a));
+        if (t1 >= -PAD && t1 <= 1 + PAD && t2 != null) {
+          // co: разрез по границе СОВПАДЕНИЯ. Тест «пересекает или касается»
+          // такие точки обязан пропускать: на совпавшем участке «внутри соседа»
+          // не меняется по определению, а резать там всё равно нужно — иначе
+          // дубли границы получат разные концы и схлопнутся с дырой.
+          out.push({ t1: Math.min(1, Math.max(0, t1)), t2, p: v2.polar(e1.c, e1.r, a), co: true });
+        }
+        return;
+      }
+    }
+  };
+  const [l2, h2] = span(e2);
+  for (const ang of [l1, h1, l2, h2]) at(ang);
+  // оставить только крайние по t1: середины перекрытия резать незачем
+  if (out.length <= 2) return out;
+  out.sort((a, b) => a.t1 - b.t1);
+  return [out[0], out[out.length - 1]];
 }
 
 /**

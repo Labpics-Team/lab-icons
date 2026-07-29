@@ -84,37 +84,7 @@ function reverseEdge(e) {
  * Предпочтение отдаётся смене источника (subject↔region): на честном
  * пересечении куски всегда чередуются, и это снимает неоднозначность узла.
  */
-const dirOut = (e) => v2.norm(v2.sub(edgeAt(e, Math.min(0.02, 0.5)), edgeStart(e)));
-const dirIn = (e) => v2.norm(v2.sub(edgeEnd(e), edgeAt(e, Math.max(0.98, 0.5))));
-
-/**
- * Правило выбора продолжения В УЗЛЕ ОБЪЕДИНЕНИЯ — не то же, что при вычитании.
- *
- * При честном пересечении куски subject и region строго чередуются, и смена
- * источника снимает неоднозначность. В объединении узел бывает КАСАТЕЛЬНЫМ:
- * стартовый колпачок хвоста стрелки упирается в дугу сустава головы, в точке
- * сходятся четыре конца, и переключаться на соседнюю фигуру там НЕЛЬЗЯ —
- * обход обязан идти по внешней стороне. Правило внешней стороны одно: из всех
- * продолжений брать самое «правое» относительно входного направления, то есть
- * максимальный поворот по обходу. Иначе цепь не замыкается, а незамкнутую
- * сшивка дотягивает хордой — это и есть косой разруб поперёк глифа.
- */
-function pickOutermost(edges, cand, cur) {
-  const tIn = dirIn(edges[cur]);
-  let best = cand[0];
-  let bestA = Infinity;
-  for (const j of cand) {
-    const tOut = dirOut(edges[j]);
-    const a = Math.atan2(v2.cross(tIn, tOut), v2.dot(tIn, tOut));
-    if (a < bestA) {
-      bestA = a;
-      best = j;
-    }
-  }
-  return best;
-}
-
-function chain(edges, o = {}) {
+function chain(edges) {
   const buckets = new Map();
   edges.forEach((e, i) => {
     const k = key(edgeStart(e));
@@ -161,12 +131,8 @@ function chain(edges, o = {}) {
         }
         cand = [best];
       }
-      if (o.outermost) {
-        cur = cand.length > 1 ? pickOutermost(edges, cand, cur) : cand[0];
-      } else {
-        const src = edges[cur].src;
-        cur = cand.find((j) => edges[j].src !== src) ?? cand[0];
-      }
+      const src = edges[cur].src;
+      cur = cand.find((j) => edges[j].src !== src) ?? cand[0];
     }
     if (loop.length) {
       const closed = v2.dist(edgeEnd(loop[loop.length - 1]), edgeStart(loop[0])) < JOIN_TOL * 20;
@@ -238,7 +204,7 @@ export function unionBoundary(reg) {
       for (let a = 0; a < per[i].length; a++) {
         for (let b = 0; b < per[j].length; b++) {
           for (const x of intersectEdges(per[i][a], per[j][b])) {
-            if (!crosses(per[i][a], x.t1, paths[j])) continue;
+            if (!x.co && !crosses(per[i][a], x.t1, paths[j])) continue;
             ts[i][a].push(x.t1);
             ts[j][b].push(x.t2);
           }
