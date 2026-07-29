@@ -301,6 +301,31 @@ describe('корпус деклараций', () => {
   });
 });
 
+describe('якоря движения', () => {
+  it('ось вращения кольца — его собственный центр, а не кончик штриха', async () => {
+    const { motionAnchors } = await import('../system/motion.js');
+    const a = motionAnchors(S.ring([12, 12], 11, 1.8));
+    expect(a.primaryPivot[0]).toBeCloseTo(12, 3);
+    expect(a.primaryPivot[1]).toBeCloseTo(12, 3);
+    expect(a.pivots[0].sweepDeg).toBeCloseTo(720, 0);
+  });
+
+  it('терминал пера не побеждает кольцо: ранг учитывает радиус', async () => {
+    const { motionAnchors } = await import('../system/motion.js');
+    const p = S.ring([12, 12], 11, 1.8);
+    p.add(strokeSegment([4, 4], [8, 4], 1.8));
+    const a = motionAnchors(p);
+    expect(a.primaryPivot[0]).toBeCloseTo(12, 3);
+  });
+
+  it('центроид чернил симметричной фигуры совпадает с центром', async () => {
+    const { motionAnchors } = await import('../system/motion.js');
+    const a = motionAnchors(S.circle([12, 12], 8));
+    expect(a.ink.centroid[0]).toBeCloseTo(12, 2);
+    expect(a.ink.centroid[1]).toBeCloseTo(12, 2);
+  });
+});
+
 describe('растеризатор метрики', () => {
   it('площадь маски сходится к аналитической', () => {
     const m = rasterize([{ polys: S.circle([12, 12], 6).flatten(0.005), fillRule: 'nonzero' }], 24, 16);
