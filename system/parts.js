@@ -49,7 +49,7 @@ export function chevron(t, o = {}) {
     [apex[0] + half, apex[1] - depth],
   ];
   const spine = polySpine(pts);
-  const p = strokePath(spine, w);
+  const p = strokePath(spine, w, { joint: t.corner });
   const deg = DIR[o.dir ?? 'down'] ?? 0;
   rotAbout(p, deg, [t.cx, t.cy]);
   rotAbout(spine, deg, [t.cx, t.cy]);
@@ -80,7 +80,7 @@ export function arrow(t, o = {}) {
     [apex[0] + half, apex[1] - depth],
   ];
   const head = polySpine(pts);
-  const p = strokePath(head, w);
+  const p = strokePath(head, w, { joint: t.corner });
   if (tail > 0) p.add(strokeSegment(apex, [apex[0], apex[1] - tail], w));
   const deg = DIR[o.dir ?? 'down'] ?? 0;
   return rotAbout(p, deg, [t.cx, t.cy]);
@@ -110,7 +110,7 @@ export function wedge(t, c, h, o = {}) {
   const W = t.wedge;
   const back = h * W.anchor;
   const fwd = h - back;
-  const half = (h * W.aspect) / 2;
+  const half = (h * (o.aspect ?? W.aspect)) / 2;
   const r = o.r ?? h * W.corner;
   const p = S.roundedPolygon(
     [

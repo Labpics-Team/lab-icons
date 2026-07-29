@@ -146,8 +146,21 @@ export function numeralMetrics(capHeight, penOverride) {
 export function numeral(d, { capHeight, origin = [0, 0], pen } = {}) {
   const m = numeralMetrics(capHeight, pen);
   const out = new Path();
+  /**
+   * Локоть цифры — КРУГЛЫЙ СУСТАВ, а не корпусная галтель.
+   *
+   * Корпусный локоть (радиус в перо) снят с шевронов и стрелок — указателей,
+   * у которых излом внутри силуэта и срезать его нечем. У цифры излом стоит на
+   * ВЕРХНЕЙ ЛИНИИ: флаг единицы упирается в неё же. Галтель в перо срезала бы
+   * там 0.7 роста, и цифра перестала бы держать кегль — контракт, который у
+   * знака сильнее любой мягкости.
+   *
+   * Это не исключение из закона, а другая его область: у шрифтового знака своя
+   * дисциплина роста, и подчиняется он ей, а не иконочной.
+   */
+  const joint = { smoothing: 0, joint: 0, elbow: 0.5 };
   for (const s of skeleton(d, m.Ws, m.Hs)) {
-    out.add(strokePath(s.translate(origin[0] + m.pen / 2, origin[1] + m.pen / 2), m.pen));
+    out.add(strokePath(s.translate(origin[0] + m.pen / 2, origin[1] + m.pen / 2), m.pen, { joint }));
   }
   return out;
 }

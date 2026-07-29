@@ -50,8 +50,14 @@ for (const r of rows) {
 // Чернила не имеют права вылезать за канву.
 for (const r of rows) {
   if (r.error) continue;
-  const nums = [...r.d.matchAll(/-?\d*\.?\d+/g)].map((m) => Math.abs(Number(m[0])));
-  const max = Math.max(...nums);
+  // Через reduce, а не Math.max(...nums): у составного глифа координат тысячи,
+  // и spread такой длины кладёт стек — гейт падал бы на самых сложных глифах,
+  // то есть ровно там, где он нужнее всего.
+  let max = 0;
+  for (const m of r.d.matchAll(/-?\d*\.?\d+/g)) {
+    const v = Math.abs(Number(m[0]));
+    if (v > max) max = v;
+  }
   if (max > 200) problems.push(`${r.name}/${r.variant}: координата ${max} — геометрия уехала за пределы канвы`);
 }
 

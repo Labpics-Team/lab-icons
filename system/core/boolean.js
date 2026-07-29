@@ -126,8 +126,50 @@ function chain(edges) {
  * @param {Path} region
  * @returns {Path}
  */
+/**
+ * ГРАНИЦА ОБЪЕДИНЕНИЯ многосоставного региона.
+ *
+ * Вычитать перекрывающиеся куски ПООЧЕРЁДНО нельзя. Стрелка — это голова и
+ * хвост, налегающие друг на друга у острия; если резать диск сначала головой,
+ * а потом хвостом, второй рез идёт по краю уже вырезанной дырки и оставляет
+ * лучину. Сложить же оба подпути развёрнутыми тоже нельзя: под nonzero в их
+ * перекрытии намотка даёт −1, то есть дырка в дырке снова становится чернилами.
+ *
+ * Правильный ответ один: сперва граница ОБЪЕДИНЕНИЯ. Она состоит из тех кусков
+ * контуров, что не лежат строго внутри другого подпути региона.
+ */
+function unionBoundary(reg) {
+  const subs = reg.subs.filter((s) => s.segs.length);
+  if (subs.length < 2) return reg;
+  const paths = subs.map((s) => new Path([s]));
+  const per = paths.map((p) => p.edges());
+  const ts = per.map((es) => es.map(() => []));
+  for (let i = 0; i < per.length; i++) {
+    for (let j = 0; j < per.length; j++) {
+      if (i === j) continue;
+      for (let a = 0; a < per[i].length; a++) {
+        for (let b = 0; b < per[j].length; b++) {
+          for (const x of intersectEdges(per[i][a], per[j][b])) ts[i][a].push(x.t1);
+        }
+      }
+    }
+  }
+  const kept = [];
+  for (let i = 0; i < per.length; i++) {
+    for (const e of splitAll(per[i], ts[i])) {
+      const m = midOf(e);
+      let inside = false;
+      for (let j = 0; j < paths.length && !inside; j++) if (j !== i && containsPoint(paths[j], m)) inside = true;
+      if (!inside) kept.push(e);
+    }
+  }
+  const out = new Path();
+  for (const l of chain(kept)) if (l.edges.length >= 2) out.add(pathFromEdges(l.edges, true));
+  return out.isEmpty() ? reg : out;
+}
+
 export function cut(subject, region) {
-  const reg = orientCW(region);
+  const reg = unionBoundary(orientCW(region));
   const sEdges = subject.edges().map((e) => ({ ...e, src: 's' }));
   const rEdges = reg.edges().map((e) => ({ ...e, src: 'r' }));
   const [ts, tr] = collectSplits(sEdges, rEdges);

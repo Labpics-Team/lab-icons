@@ -15,6 +15,7 @@
 import { Path, edgeAt, edgeStart, edgeEnd, pathFromEdges } from '../core/path.js';
 import { intersectEdges } from '../core/intersect.js';
 import { v2, TEPS } from '../core/num.js';
+import { TOKENS } from '../tokens.js';
 
 const TAU = Math.PI * 2;
 
@@ -101,20 +102,186 @@ function sliceFrom(e, t) {
   return { ...e, a0, a: v2.polar(e.c, e.r, a0) };
 }
 
+/**
+ * ПЛАВНЫЙ ВХОД В СУСТАВ и ФАСКА ВНУТРЕННЕГО ЛОКТЯ.
+ *
+ * Замер корпуса: у наружного локтя шеврона и стрелки рука держит мягкость
+ * ε = 1.29…1.68, а система ставила голую дугу радиуса пера (ε = 1 ровно) —
+ * 52 таких узла. У внутреннего локтя рука кладёт фаску R = 0.23…0.39, система
+ * оставляла честное пересечение эквидистант, то есть голое остриё — ещё 48.
+ *
+ * Оба дефекта — один узел, поэтому и правка одна. Наружная сторона получает
+ * тот же ζ-вход, что и вершина многоугольника; внутренняя — маленькую галтель.
+ * Это не украшение: остриё внутреннего локтя режет негативное пространство
+ * между плечами, и на мелком кегле оно первым забивается.
+ *
+ * Ease применяется, только когда соседнее ребро — ПРЯМАЯ (кривизна нуль):
+ * кубика с заданными касательными на обоих концах имеет ровно один свободный
+ * параметр, и его уже забирает условие k = 1/h на стыке с дугой. Для дуги-
+ * соседа условие было бы несовместным, и там честнее оставить голый сустав.
+ */
+
+/** Опора кубики, дающая на стыке с дугой радиуса r ровно кривизну 1/r. */
+function easeHandle(E, X, A, r) {
+  const dx = v2.sub(X, E);
+  const lex = v2.len(dx);
+  if (lex < TEPS) return null;
+  const u = v2.mul(dx, 1 / lex);
+  const ax = v2.sub(A, X);
+  const m = v2.len(ax);
+  if (m < TEPS) return null;
+  const sinT = Math.abs(v2.cross(v2.mul(ax, 1 / m), u));
+  if (sinT < 1e-6) return null;
+  const p = lex - (1.5 * m * m) / (r * sinT);
+  return p <= TEPS ? null : v2.mad(E, u, p);
+}
+
+const lineCross = (p1, d1, p2, d2) => {
+  const den = v2.cross(d1, d2);
+  if (Math.abs(den) < 1e-9) return null;
+  return v2.mad(p1, d1, v2.cross(v2.sub(p2, p1), d2) / den);
+};
+
+/** Точка на прямом ребре, отступив `d` от его конца (или начала при from=true). */
+function backOff(e, d, from) {
+  const u = v2.norm(v2.sub(e.b, e.a));
+  return from ? v2.mad(e.a, u, d) : v2.mad(e.b, u, -d);
+}
+
+/**
+ * Смягчить сустав: вернуть [prevУкороченное, кубика, дугаУкороченная, кубика,
+ * nextУкороченное] либо null, если места не хватило.
+ */
+function easedJoint(prev, arc, next, zeta) {
+  if (zeta <= 1e-6 || prev.type !== 'line' || next.type !== 'line') return null;
+  const h = arc.r;
+  const theta = arc.a1 - arc.a0;
+  const dir = Math.sign(theta) || 1;
+  const shrink = (Math.abs(theta) * zeta) / 2;
+  if (Math.abs(theta) - 2 * shrink < 1e-6) return null;
+  const b0 = arc.a0 + dir * shrink;
+  const b1 = arc.a1 - dir * shrink;
+  const P0 = v2.polar(arc.c, h, b0);
+  const P1 = v2.polar(arc.c, h, b1);
+  const tan0 = [-Math.sin(b0) * dir, Math.cos(b0) * dir];
+  const tan1 = [-Math.sin(b1) * dir, Math.cos(b1) * dir];
+
+  // Отступ по прямым — та же доля ζ от касательного расстояния, что и у
+  // вершины многоугольника: миterная точка минус точка касания дуги.
+  const miter = lineCross(prev.a, v2.norm(v2.sub(prev.b, prev.a)), next.b, v2.norm(v2.sub(next.b, next.a)));
+  if (!miter) return null;
+  const td = v2.dist(miter, edgeEnd(prev));
+  const run = td * zeta;
+  if (run < 1e-6) return null;
+  if (v2.dist(prev.a, prev.b) <= run + TEPS || v2.dist(next.a, next.b) <= run + TEPS) return null;
+
+  const E0 = backOff(prev, run, false);
+  const E1 = backOff(next, run, true);
+  const u0 = v2.norm(v2.sub(prev.b, prev.a));
+  const u1 = v2.norm(v2.sub(next.a, next.b));
+  const X0 = lineCross(E0, u0, P0, tan0);
+  const X1 = lineCross(E1, u1, P1, tan1);
+  if (!X0 || !X1) return null;
+  const H0 = easeHandle(E0, X0, P0, h);
+  const H1 = easeHandle(E1, X1, P1, h);
+  if (!H0 || !H1) return null;
+
+  return [
+    { ...prev, b: E0 },
+    { type: 'cubic', p: [E0, H0, X0, P0] },
+    { ...arc, a0: b0, a1: b1, a: P0, b: P1 },
+    { type: 'cubic', p: [P1, X1, H1, E1] },
+    { ...next, a: E1 },
+  ];
+}
+
+/**
+ * ГАЛТЕЛЬ НАРУЖНОГО ЛОКТЯ радиуса r между двумя эквидистантами.
+ *
+ * Круглый сустав (дуга радиуса пера/2 вокруг вершины скелета) — не то, что
+ * делает рука. Замер: chevron-forward несёт на локте буквальное `A1.8 1.8`,
+ * то есть радиус, равный ПЕРУ, вдвое больше круглого сустава; по 32 локтям
+ * корпуса R/перо = 0.85…1.00 при медиане 0.93. Круглый сустав дал бы 0.50.
+ *
+ * Разница не косметическая: галтель радиуса больше пера СРЕЗАЕТ угол, чуть
+ * сужая штрих на локте, — отчего локоть и читается мягким. Круглый сустав
+ * такого сужения не даёт и выглядит острее при том же пере.
+ *
+ * Прямые здесь НЕ сходятся в общей точке: эквидистанты встречаются за вершиной,
+ * в миterной точке. Поэтому галтель строится от неё, а не от конца ребра.
+ */
+function outerFillet(prev, next, r, h) {
+  if (r <= h + 1e-9 || prev.type !== 'line' || next.type !== 'line') return null;
+  const u0 = v2.norm(v2.sub(prev.b, prev.a));
+  const u1 = v2.norm(v2.sub(next.b, next.a));
+  const M = lineCross(prev.a, u0, next.a, u1);
+  if (!M) return null;
+  const cosP = Math.max(-1, Math.min(1, v2.dot(v2.mul(u0, -1), u1)));
+  const phi = Math.acos(cosP);
+  if (phi < 1e-6 || Math.PI - phi < 1e-6) return null;
+  const td = r / Math.tan(phi / 2);
+  const T0 = v2.mad(M, u0, -td);
+  const T1 = v2.mad(M, u1, td);
+  // хватает ли длины рёбер, чтобы галтель на них села
+  if (v2.dot(v2.sub(T0, prev.a), u0) < 0 || v2.dot(v2.sub(next.b, T1), u1) < 0) return null;
+  const bis = v2.norm(v2.add(v2.mul(u0, -1), u1));
+  const cen = v2.mad(M, bis, r / Math.sin(phi / 2));
+  let a0 = Math.atan2(T0[1] - cen[1], T0[0] - cen[0]);
+  let a1 = Math.atan2(T1[1] - cen[1], T1[0] - cen[0]);
+  const d = Math.sign(v2.cross(u0, u1)) || 1;
+  if (d > 0) while (a1 < a0) a1 += TAU;
+  else while (a1 > a0) a1 -= TAU;
+  if (Math.abs(a1 - a0) > Math.PI) a1 -= Math.sign(a1 - a0) * TAU;
+  return [
+    { ...prev, b: T0 },
+    { type: 'arc', c: cen, r, a0, a1, a: T0, b: T1 },
+    { ...next, a: T1 },
+  ];
+}
+
+/** Фаска радиуса r во внутреннем локте: две прямые, сходящиеся в точке Q. */
+function innerFillet(prev, next, r) {
+  if (r <= 1e-6 || prev.type !== 'line' || next.type !== 'line') return null;
+  const Q = edgeEnd(prev);
+  const u0 = v2.norm(v2.sub(prev.a, prev.b)); // от Q назад по prev
+  const u1 = v2.norm(v2.sub(next.b, next.a)); // от Q вперёд по next
+  const cosP = Math.max(-1, Math.min(1, v2.dot(u0, u1)));
+  const phi = Math.acos(cosP);
+  if (phi < 1e-6 || Math.PI - phi < 1e-6) return null;
+  const td = r / Math.tan(phi / 2);
+  if (v2.dist(prev.a, prev.b) <= td + TEPS || v2.dist(next.a, next.b) <= td + TEPS) return null;
+  const T0 = v2.mad(Q, u0, td);
+  const T1 = v2.mad(Q, u1, td);
+  const bis = v2.norm(v2.add(u0, u1));
+  const cen = v2.mad(Q, bis, r / Math.sin(phi / 2));
+  let a0 = Math.atan2(T0[1] - cen[1], T0[0] - cen[0]);
+  let a1 = Math.atan2(T1[1] - cen[1], T1[0] - cen[0]);
+  const turn = v2.cross(v2.sub(Q, prev.a), v2.sub(next.b, Q));
+  const d = Math.sign(turn) || 1;
+  if (d > 0) while (a1 < a0) a1 += TAU;
+  else while (a1 > a0) a1 -= TAU;
+  if (Math.abs(a1 - a0) > Math.PI) a1 -= Math.sign(a1 - a0) * TAU;
+  return [
+    { ...prev, b: T0 },
+    { type: 'arc', c: cen, r, a0, a1, a: T0, b: T1 },
+    { ...next, a: T1 },
+  ];
+}
+
 /** Одна сторона обводки: цепочка эквидистант с суставами. */
-function sideChain(edges, h, closed) {
+function sideChain(edges, h, closed, jt) {
   const off = edges.map((e) => offsetEdge(e, h));
   const out = [off[0]];
   for (let i = 1; i < off.length; i++) {
-    joinInto(out, edges[i - 1], edges[i], off[i], h);
+    joinInto(out, edges[i - 1], edges[i], off[i], h, false, jt);
   }
   if (closed) {
-    joinInto(out, edges[edges.length - 1], edges[0], out[0], h, true);
+    joinInto(out, edges[edges.length - 1], edges[0], out[0], h, true, jt);
   }
   return out;
 }
 
-function joinInto(out, ePrev, eNext, offNext, h, wrap = false) {
+function joinInto(out, ePrev, eNext, offNext, h, wrap = false, jt = {}) {
   const prev = out[out.length - 1];
   const vertex = edgeEnd(ePrev);
   const tIn = tangent(ePrev, 1);
@@ -130,14 +297,35 @@ function joinInto(out, ePrev, eNext, offNext, h, wrap = false) {
   const outerSide = turn > 0 ? 1 : -1; // +1 = левая сторона внешняя
   const thisSideIsOuter = Math.sign(h) === outerSide;
   if (thisSideIsOuter) {
-    const arc = jointArc(vertex, Math.abs(h), edgeEnd(prev), edgeStart(offNext), Math.sign(turn));
+    // Галтель радиуса `jt.outer`; если места нет — честный круглый сустав.
+    const fil = outerFillet(prev, offNext, jt.outer, Math.abs(h));
+    const arc = fil ? fil[1] : jointArc(vertex, Math.abs(h), edgeEnd(prev), edgeStart(offNext), Math.sign(turn));
+    const pv = fil ? fil[0] : prev;
+    const nx = fil ? fil[2] : offNext;
+    if (fil) out[out.length - 1] = pv;
+    const eased = easedJoint(pv, arc, nx, jt.ease ?? 0);
+    if (eased) {
+      out[out.length - 1] = eased[0];
+      out.push(eased[1], eased[2], eased[3]);
+      if (wrap) out[0] = eased[4];
+      else out.push(eased[4]);
+      return;
+    }
     out.push(arc);
-    if (wrap) out[0] = offNext;
-    else out.push(offNext);
+    if (wrap) out[0] = nx;
+    else out.push(nx);
     return;
   }
   const trimmed = trimPair(prev, offNext, vertex);
   if (trimmed) {
+    const filleted = innerFillet(trimmed[0], trimmed[1], jt.inner ?? 0);
+    if (filleted) {
+      out[out.length - 1] = filleted[0];
+      out.push(filleted[1]);
+      if (wrap) out[0] = filleted[2];
+      else out.push(filleted[2]);
+      return;
+    }
     out[out.length - 1] = trimmed[0];
     if (wrap) out[0] = trimmed[1];
     else out.push(trimmed[1]);
@@ -151,7 +339,11 @@ function joinInto(out, ePrev, eNext, offNext, h, wrap = false) {
 }
 
 const reverseEdge = (e) =>
-  e.type === 'line' ? { ...e, a: e.b, b: e.a } : { ...e, a0: e.a1, a1: e.a0, a: e.b, b: e.a };
+  e.type === 'line'
+    ? { ...e, a: e.b, b: e.a }
+    : e.type === 'cubic'
+      ? { type: 'cubic', p: [e.p[3], e.p[2], e.p[1], e.p[0]] }
+      : { ...e, a0: e.a1, a1: e.a0, a: e.b, b: e.a };
 
 /**
  * Обводка скелета.
@@ -163,6 +355,15 @@ const reverseEdge = (e) =>
  */
 export function strokePath(spine, weight, opt = {}) {
   const cap = opt.cap ?? 'round';
+  // Смягчение сустава — свойство ПЕРА, а не иконки: одинаково у каждого
+  // шеврона, стрелки и галочки корпуса. Фаска задана долей пера и потому едет
+  // за весом сама. `opt.joint` — это разрешённый t.corner: через него до
+  // сустава доходят оси crnr и rond.
+  const jt = {
+    ease: opt.joint?.smoothing ?? opt.jointEase ?? TOKENS.corner.smoothing,
+    inner: weight * (opt.joint?.joint ?? opt.jointInner ?? TOKENS.corner.joint),
+    outer: weight * (opt.joint?.elbow ?? opt.jointOuter ?? TOKENS.corner.elbow),
+  };
   const h = weight / 2;
   const out = new Path();
   for (let si = 0; si < spine.subs.length; si++) {
@@ -178,8 +379,8 @@ export function strokePath(spine, weight, opt = {}) {
       continue;
     }
 
-    const left = sideChain(edges, h, closed);
-    const right = sideChain(edges, -h, closed).map(reverseEdge).reverse();
+    const left = sideChain(edges, h, closed, jt);
+    const right = sideChain(edges, -h, closed, jt).map(reverseEdge).reverse();
 
     if (closed) {
       // `right` уже развёрнута в sideChain-обработке (map(reverseEdge).reverse()),
