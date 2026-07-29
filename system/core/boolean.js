@@ -253,11 +253,64 @@ export function unionBoundary(reg) {
   }
   const out = new Path();
   for (const l of chain(dedup)) if (l.edges.length >= 2) out.add(pathFromEdges(l.edges, true));
-  return out.isEmpty() ? reg : out;
+  if (out.isEmpty()) return null;
+
+  /**
+   * ПРОВЕРКА СЕБЯ. Разбор границы объединения — процедура с вырожденными
+   * случаями (касание, совпадение дугой, узел на границе округления), и она
+   * умеет собрать правдоподобный, но НЕВЕРНЫЙ контур. Так у info-circle/filled
+   * вместо буквы «i» вырезалась диагональная клякса, а площадь показывала
+   * всего 4% — то есть молчала.
+   *
+   * Инвариант объединения проверяем прямо: КАЖДАЯ точка, лежавшая внутри хоть
+   * одного исходного куска, обязана остаться внутри результата. Не сошлось —
+   * возвращаем null, и вызывающий честно режет по кускам, вместо того чтобы
+   * выдавать выдумку за геометрию.
+   */
+  // Необходимое условие, которое ловит развал сразу: объединение СОДЕРЖИТ
+  // каждый кусок, значит его площадь не меньше площади любого из них. У «i»
+  // разбор давал 15.35 при куске в 16.81 — и это при отклонении всего 4%.
+  const maxPart = Math.max(...paths.map((q) => Math.abs(signedArea(q))));
+  if (Math.abs(signedArea(out)) < maxPart - 1e-6) return null;
+  for (const q of paths) {
+    const probe = interiorProbe(q);
+    if (probe && !containsPoint(out, probe)) return null;
+  }
+  return out;
+}
+
+/** Точка заведомо внутри подпути (для проверки инвариантов). */
+function interiorProbe(sub) {
+  const es = sub.edges();
+  const cw = signedArea(sub) > 0;
+  for (const e of es) {
+    const m = midOf(e);
+    const t = v2.norm(v2.sub(edgeEnd(e), edgeStart(e)));
+    const nIn = cw ? [t[1], -t[0]] : [-t[1], t[0]];
+    for (const d of [0.03, 0.08, 0.15]) {
+      const q = v2.mad(m, nIn, d);
+      if (containsPoint(sub, q)) return q;
+    }
+  }
+  return null;
 }
 
 export function cut(subject, region) {
-  const reg = unionBoundary(orientCW(region));
+  const oriented = orientCW(region);
+  const united = unionBoundary(oriented);
+  // Объединение не сошлось — режем кусками. Для НЕналегающих кусков это верно
+  // всегда, для налегающих хуже, но честнее выдумки.
+  if (united === null) {
+    let p = subject;
+    for (const sub of oriented.subs) {
+      if (sub.segs.length) p = cutOne(p, new Path([structuredClone(sub)]));
+    }
+    return p;
+  }
+  return cutOne(subject, united);
+}
+
+function cutOne(subject, reg) {
   const sEdges = subject.edges().map((e) => ({ ...e, src: 's' }));
   const rEdges = reg.edges().map((e) => ({ ...e, src: 'r' }));
   const [ts, tr] = collectSplits(sEdges, rEdges);

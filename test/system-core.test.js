@@ -415,6 +415,26 @@ describe('качество контура', () => {
     expect(n).toBeGreaterThan(0);
   });
 
+  it('вырез многосоставной начинки не теряет чернил — иначе буква станет кляксой', () => {
+    // Разбор границы объединения умеет собрать правдоподобный, но НЕВЕРНЫЙ
+    // контур. У info-circle/filled вместо «i» вырезалась диагональная клякса,
+    // а площадь показывала всего 4% — то есть молчала. Инвариант прямой:
+    // площадь дырки равна площади самой начинки.
+    const t = resolve();
+    const glyph = strokePolyline([[10, 11], [12, 11], [12, 16]], 2)
+      .add(strokeSegment([9.9, 16], [14.2, 16], 2))
+      .add(S.circle([12, 8], 1.25));
+    const disc = S.circle([12, 12], 11);
+    const holed = cut(disc, glyph);
+    const ss = 12;
+    const px = (m) => m.reduce((a, v) => a + v, 0) / (ss * ss);
+    const inkGlyph = px(maskFromPath(glyph, 24, ss, 0.01));
+    const inkDisc = px(maskFromPath(disc, 24, ss, 0.01));
+    const inkHoled = px(maskFromPath(holed, 24, ss, 0.01));
+    expect(inkDisc - inkHoled, 'площадь выреза').toBeCloseTo(inkGlyph, 0);
+    expect(t.cx).toBe(12);
+  });
+
   it('касание двух рёбер — это две точки контакта, а не тысяча', () => {
     // Деление сходится к точкам, но контакт бывает участком. Отсев по
     // параметру пропускал континуум, и путь распухал до 700 КБ.
