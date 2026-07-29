@@ -49,26 +49,12 @@ function polyRing(points, radii, weight, smoothing = 0) {
   return outer.add(S.roundedPolygon(inPts, rIn, smoothing).reverse());
 }
 
-/** Зеркало пути относительно вертикальной оси канвы. */
-const mirror = (p, t) => p.scale(-1, [t.cx, t.cy]).scale(-1, [t.cx, t.cy]) && flipX(p, t.cx);
-
-function flipX(path, cx) {
-  for (const sub of path.subs) {
-    for (const s of sub.segs) {
-      if (s.to) s.to = [2 * cx - s.to[0], s.to[1]];
-      if (s.c1) s.c1 = [2 * cx - s.c1[0], s.c1[1]];
-      if (s.c2) s.c2 = [2 * cx - s.c2[0], s.c2[1]];
-      if (s.c) s.c = [2 * cx - s.c[0], s.c[1]];
-      if (s.type === 'A') {
-        const a0 = s.a0;
-        s.a0 = Math.PI - s.a1;
-        s.a1 = Math.PI - a0;
-      }
-      if (s.from) s.from = [2 * cx - s.from[0], s.from[1]];
-    }
-  }
-  return path;
-}
+/**
+ * Зеркало относительно вертикали канвы. Заливка nonzero к ориентации
+ * безразлична, поэтому отражение целого пути (внешний контур + дырки) остаётся
+ * корректным: обход просто меняет знак у всех подпутей сразу.
+ */
+const flipX = (path, cx) => path.mirrorX(cx);
 
 // ══ 1. УКАЗАТЕЛЬ ══════════════════════════════════════════════════════════
 
@@ -136,13 +122,14 @@ defineGlyph('play', {
 /**
  * СТЕНКА play-skip — вертикальный штрих во всю живую область: терминалы на
  * margin + кап и canvas − margin − кап, то есть чернила ровно 22 = живая
- * область (замер: 1.000 … 23.096). Ось стоит вплотную к острию треугольника:
- * x = canvas − margin − кап, при котором правая кромка стенки совпадает с
- * правой кромкой указателя (обе на 22.0).
+ * область (замер: 1.000 … 23.096). По горизонтали стенка НЕ самостоятельна:
+ * её внешняя кромка совпадает с остриём указателя (замеры 22.00 и 22.00),
+ * поэтому ось = остриё − кап.
  */
 function skipWall(t) {
   const cap = t.cap.base;
-  const x = t.canvas - t.margin - cap;
+  const tip = t.cx - (t.keyR - PLAY_CORNER) / 8 + t.keyR;
+  const x = tip - cap;
   return strokeSegment([x, t.margin + cap], [x, t.canvas - t.margin - cap], t.stroke.base);
 }
 
@@ -538,9 +525,8 @@ function headphone(t, weight) {
   const r = t.keyR - t.cap.base;
   const band = S.arcBand(c, r, rad(BAND_END_DEG), rad(360 - BAND_END_DEG + 360), t.stroke.base, 'round');
   const p = new Path().add(band);
-  const right = cupShape(t, weight);
-  p.add(right);
-  p.add(flipX(cupShape(t, weight), t.cx));
+  p.add(cupShape(t, weight));
+  p.add(cupShape(t, weight).mirrorX(t.cx));
   return p;
 }
 

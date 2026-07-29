@@ -15,6 +15,7 @@ import { maskFromSvg, maskFromPath, compare, diffClusters, classify, contourOffs
 import { pathsFromSvg, polylinesFromD } from './core/parse.js';
 import { T } from './tokens.js';
 import { toSvg } from './render.js';
+import { ductusDiff } from './ductus.js';
 
 const file = process.argv[2];
 if (!file) {
@@ -57,7 +58,10 @@ for (const [name, def] of glyphs) {
     const v = classify(cmp, cl, off, pen);
     n++;
     if (cmp.deviation <= 0.03 || v.kind === 'registration') ok++;
-    rows.push({ name, variant, dev: cmp.deviation, off: off.median, p95: off.p95, kind: v.kind, note: v.note, segs: path.subs.reduce((s, x) => s + x.segs.length, 0) });
+    const dd = process.argv.includes('--ductus')
+      ? ductusDiff(maskFromSvg(svg, 24, 10), maskFromPath(path, 24, 10, 0.01), { canvas: 24, ss: 10 }).issues
+      : [];
+    rows.push({ name, variant, dev: cmp.deviation, off: off.median, p95: off.p95, kind: v.kind, note: v.note, ductus: dd, segs: path.subs.reduce((s, x) => s + x.segs.length, 0) });
     if (showD === name && variant === 'outline') console.log(`d(${name}) = ${path.toD()}\n`);
   }
 }
@@ -72,5 +76,6 @@ for (const r of rows) {
     `${(r.name + '/' + r.variant).padEnd(32)} ${((r.dev * 100).toFixed(2) + '%').padStart(8)}  ` +
       `смещ ${r.off.toFixed(3)} (p95 ${r.p95.toFixed(2)})  ${r.kind}${r.dev > 0.03 && r.note ? ' — ' + r.note.slice(0, 110) : ''}`,
   );
+  if (r.ductus && r.ductus.length) for (const q of r.ductus) console.log(`      ДУКТУС: ${q}`);
 }
 console.log(`\nсошлось ${ok}/${n} (≤3% площади ИЛИ вердикт registration)`);
