@@ -13,6 +13,47 @@ import { buildAll, summarize, ROOT, ARGUE_AT } from './build.js';
 import { glyphs, buildGlyph } from './registry.js';
 import { TOKENS, AXES, T, NOMINAL_CANVAS } from './tokens.js';
 import { numeral, numeralString, numeralMetrics } from './numerals.js';
+import { topologyDiff } from './topology.js';
+import { spectrumOfD, spectrumOfPath, cornerDiff } from './corners.js';
+import { maskFromSvg, maskFromPath } from './metrics.js';
+import { pathsFromSvg } from './core/parse.js';
+
+/**
+ * КАЧЕСТВО КОНТУРА на карточке.
+ *
+ * Процент отвечает на «сколько чернил не совпало» и молчит про всё остальное.
+ * Шов площадью не виден вовсе, подменённое скругление — тем более. Поэтому
+ * рядом с процентом стоят два независимых вердикта: топология (острова,
+ * трещины, пережимы) и спектр углов (поворот, радиус, мягкость каждого узла).
+ * Три зелёных числа — три разных утверждения, а не одно, сказанное трижды.
+ */
+function quality(r) {
+  if (r.error || !r.reference) return null;
+  try {
+    const def = glyphs.get(r.name);
+    const opt = def?.refAxes ? { axes: def.refAxes } : {};
+    const path = buildGlyph(r.name, r.variant, opt);
+    const topo = topologyDiff(maskFromSvg(r.reference, 24, 10), maskFromPath(path, 24, 10, 0.01), { canvas: 24, ss: 10 });
+    const refD = pathsFromSvg(r.reference).map((p) => p.d).join(' ');
+    const corn = cornerDiff(spectrumOfD(refD), spectrumOfPath(path));
+    return { topo: topo.issues, corners: corn.issues, unreliable: corn.unreliable };
+  } catch {
+    return null;
+  }
+}
+
+const badge = (q) => {
+  if (!q) return '';
+  const t = q.topo.length
+    ? `<i class="b bad" title="${esc(q.topo.join(' · '))}">топология: ${q.topo.map((x) => x.split(':')[0]).join(', ')}</i>`
+    : '<i class="b ok">топология ✓</i>';
+  const c = q.unreliable
+    ? '<i class="b none" title="разбиение контура не даёт 360° — прибор не берётся судить">углы: не измерены</i>'
+    : q.corners.length
+      ? `<i class="b warn" title="${esc(q.corners.join(' · '))}">углы: ${q.corners.length}</i>`
+      : '<i class="b ok">углы ✓</i>';
+  return `<p class="badges">${t}${c}</p>`;
+};
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const pct = (v) => (v * 100).toFixed(2) + '%';
@@ -47,6 +88,7 @@ function card(r) {
       <figure><div class="box"><svg viewBox="0 0 24 24" class="ic"><path d="${r.d}"/></svg></div><figcaption>генерат</figcaption></figure>
       <figure><div class="box">${r.reference ? overlay(r.reference, r.dRef ?? r.d) : ''}</div><figcaption>наложение${r.refAxes ? ' · ' + esc(Object.entries(r.refAxes).map(([k, v]) => k + ' = ' + v).join(', ')) : ''}</figcaption></figure>
     </div>
+    ${badge(quality(r))}
     <dl class="meta">
       <dt>смещение контура</dt><dd>${offTxt}</dd>
       <dt>подпутей / сегментов</dt><dd>${r.subpaths} / ${r.segments}</dd>
@@ -251,6 +293,12 @@ dl.meta{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;margin:0 0 8px;
 dl.meta dt{color:var(--dim)} dl.meta dd{margin:0;font-variant-numeric:tabular-nums}
 .law,.arg,.axes{margin:8px 0 0;font-size:12.5px;line-height:1.5}
 .law{color:var(--dim)} .law b,.arg b,.axes b{color:var(--fg)}
+.badges{display:flex;gap:6px;flex-wrap:wrap;margin:0}
+.badges .b{font-style:normal;font-size:11px;line-height:1;padding:5px 8px;border-radius:999px;border:1px solid transparent;cursor:help}
+.badges .ok{color:var(--good);border-color:color-mix(in srgb,var(--good) 35%,transparent)}
+.badges .warn{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 35%,transparent)}
+.badges .bad{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 45%,transparent);background:color-mix(in srgb,var(--bad) 10%,transparent)}
+.badges .none{color:var(--dim);border-color:color-mix(in srgb,var(--dim) 30%,transparent)}
 .arg{background:color-mix(in srgb,var(--warn) 10%,transparent);border-radius:9px;padding:9px 11px}
 .axes{color:var(--dim)}
 table.tok{width:100%;border-collapse:collapse;font-size:13px;background:var(--card);
