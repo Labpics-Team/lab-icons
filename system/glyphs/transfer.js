@@ -364,14 +364,13 @@ export const SWAP_A = 4.13;
 export const SWAP_TIP = 22.0;
 export const SWAP_TAIL_INK = 1.83;
 
+/** Одна стрелка swap: вправо, ось на cy + A. */
 const swapArm = (t) => {
   const w = t.stroke.glyph;
   const cap = t.cap.glyph;
-  const apexX = apexFromTip(SWAP_TIP, -w, HEAD_RHO) + w; // вершина левее кончика
   const y = t.cy + SWAP_A;
   const apex = [SWAP_TIP - cap + HEAD_RHO * (Math.SQRT2 - 1), y];
-  const p = arrow(apex, 0, SWAP_A, w, HEAD_RHO, -90, apex);
-  return p.add(strokeSegment([SWAP_TAIL_INK + cap, y], apex, w)) && p.add(void 0) ? p : p;
+  return arrowAt(apex, [SWAP_TAIL_INK + cap, y], SWAP_A, w, HEAD_RHO, 90);
 };
 
 defineGlyph('swap-horizontal', {
@@ -382,13 +381,8 @@ defineGlyph('swap-horizontal', {
     'на 22.0, терминал хвоста чернилами на 1.83 — оба закреплены по чернилам, ' +
     'поэтому Filled получается сменой пера. Вторая стрелка — первая, повёрнутая на 180°',
   outline: (t) => {
-    const w = t.stroke.glyph;
-    const cap = t.cap.glyph;
-    const y = t.cy + SWAP_A;
-    const apex = [SWAP_TIP - cap + HEAD_RHO * (Math.SQRT2 - 1), y];
-    const a = head(apex, SWAP_A, w, HEAD_RHO, -90, apex);
-    a.add(strokeSegment([SWAP_TAIL_INK + cap, y], apex, w));
-    return a.add(a.clone().rotate(Math.PI, [t.cx, t.cy]));
+    const a = swapArm(t);
+    return a.add(swapArm(t).rotate(Math.PI, [t.cx, t.cy]));
   },
 });
 
@@ -396,13 +390,8 @@ defineGlyph('swap-vertical', {
   family: 'transfer',
   law: 'тот же swap, повёрнутый на 90°: одна конструкция в двух положениях, а не две иконки',
   outline: (t) => {
-    const w = t.stroke.glyph;
-    const cap = t.cap.glyph;
-    const y = t.cy + SWAP_A;
-    const apex = [SWAP_TIP - cap + HEAD_RHO * (Math.SQRT2 - 1), y];
-    const a = head(apex, SWAP_A, w, HEAD_RHO, -90, apex);
-    a.add(strokeSegment([SWAP_TAIL_INK + cap, y], apex, w));
-    a.add(a.clone().rotate(Math.PI, [t.cx, t.cy]));
+    const a = swapArm(t);
+    a.add(swapArm(t).rotate(Math.PI, [t.cx, t.cy]));
     return a.rotate(-Math.PI / 2, [t.cx, t.cy]);
   },
 });
@@ -431,13 +420,13 @@ defineGlyph('move', {
   outline: (t) => {
     const w = t.stroke.glyph;
     const half = MOVE_HALF_INK - 2 * t.cap.glyph;
-    const a = apexFromTip(t.margin, w, HEAD_RHO);
+    const a = apexFromTip(t.margin, t.stroke.base, HEAD_RHO);
     const b = t.canvas - a;
     const p = strokeSegment([t.cx, a], [t.cx, b], w).add(strokeSegment([a, t.cy], [b, t.cy], w));
     for (const [apex, deg] of [
       [[t.cx, a], 0],
       [[t.cx, b], 180],
-      [[a, t.cy], -90],
+      [[a, t.cy], 270],
       [[b, t.cy], 90],
     ]) {
       p.add(head(apex, half, w, HEAD_RHO, deg, apex));
@@ -460,27 +449,26 @@ defineGlyph('move', {
  */
 export const RESIZE_ARM = 8.16;
 
-const bracket = (t, corner, sx, sy) => {
+/**
+ * Уголок: L-образная пластина. Терминалы — ПАРЫ вершин с радиусом в полперо:
+ * две смежные дуги смыкаются касательно и дают полукруг, то есть кап здесь
+ * не приклеен, а выведен (тот же приём, что у `cross` в prim/shape.js).
+ * dx/dy — направления плеч от вершины уголка.
+ */
+const bracket = (t, corner, dx, dy) => {
   const w = t.stroke.glyph;
   const h = w / 2;
   const [x, y] = corner;
-  const rIn = Math.max(0, t.corner.detail - w);
-  // L-образная пластина: терминалы — пары вершин с радиусом в полперо,
-  // две смежные дуги смыкаются касательно и дают полукруг (приём `cross`)
+  const A = RESIZE_ARM;
   const pts = [
-    [x - sx * RESIZE_ARM, y - sy * h],
-    [x + sx * h, y - sy * h],
-    [x + sx * h, y + sy * RESIZE_ARM],
-    [x - sx * h, y + sy * RESIZE_ARM],
-    [x - sx * h, y + sy * h],
-    [x - sx * RESIZE_ARM, y + sy * h],
+    [x + dx * A, y - dy * h],
+    [x - dx * h, y - dy * h],
+    [x - dx * h, y + dy * A],
+    [x + dx * h, y + dy * A],
+    [x + dx * h, y + dy * h],
+    [x + dx * A, y + dy * h],
   ];
-  const r = [h, t.corner.detail, h, h, rIn, h];
-  if (sx * sy < 0) {
-    pts.reverse();
-    r.reverse();
-  }
-  return S.roundedPolygon(pts, r);
+  return S.roundedPolygon(pts, [h, t.corner.detail, h, h, Math.max(0, t.corner.detail - w), h]);
 };
 
 defineGlyph('resize', {
@@ -498,6 +486,7 @@ defineGlyph('resize', {
     const p = bracket(t, [hi, lo], -1, 1);
     p.add(bracket(t, [lo, hi], 1, -1));
     return p.add(strokeSegment([hi, lo], [lo, hi], w));
+    // диагональ идёт из вершины в вершину: обе лежат на антидиагонали x + y = 24
   },
 });
 
@@ -531,28 +520,28 @@ const TRAY_LAW =
   'остаётся волосяной снаружи: это симметрическая разность, знак при этом сохраняет ' +
   'РЕГУЛЯРНОЕ перо (замер: r=.9 во всех Filled этой тройки)';
 
-const trayGlyph = (cyTray, side, apexY, tailY, dir) =>
-  defineGlyph(side.name, {
+const trayGlyph = (name, cyTray, topOpen, apexY, tailY, dir) => {
+  const sign = (t, w) => arrowAt([t.cx, apexY], [t.cx, tailY], HEAD_HALF, w, 0, dir);
+  defineGlyph(name, {
     family: 'transfer',
     law: TRAY_LAW,
     outline: (t) => {
       const w = t.stroke.glyph;
       const ring = box([t.cx, cyTray], BOX_HALF, BOX_HALF, w, t.corner.smoothing, false);
-      const edge = side.top ? cyTray - BOX_HALF + w / 2 : cyTray + BOX_HALF - w / 2;
-      const tray = openSide(ring, 'h', t.cx, TRAY_GAP, edge, w);
-      return tray.add(arrow([t.cx, apexY], tailY, HEAD_HALF, w, 0, dir, [t.cx, apexY]));
+      const edge = topOpen ? cyTray - BOX_HALF + w / 2 : cyTray + BOX_HALF - w / 2;
+      return openSide(ring, 'h', t.cx, TRAY_GAP, edge, w).add(sign(t, w));
     },
-    filled: (t) => {
-      const w = t.stroke.base;
-      const body = box([t.cx, cyTray], BOX_HALF, BOX_HALF, w, t.corner.smoothing, true);
-      const sign = arrow([t.cx, apexY], tailY, HEAD_HALF, w, 0, dir, [t.cx, apexY]);
-      return xorSign(body, sign);
-    },
+    filled: (t) =>
+      xorSign(
+        box([t.cx, cyTray], BOX_HALF, BOX_HALF, t.stroke.base, t.corner.smoothing, true),
+        sign(t, t.stroke.base),
+      ),
   });
+};
 
-trayGlyph(TRAY_CY_DOWN, { name: 'download', top: true }, DOWNLOAD_APEX, DOWNLOAD_TAIL, 180);
-trayGlyph(TRAY_CY_UP, { name: 'upload', top: false }, UPLOAD_APEX, UPLOAD_TAIL, 0);
-trayGlyph(TRAY_CY_DOWN, { name: 'push', top: true }, PUSH_APEX, PUSH_TAIL, 0);
+trayGlyph('download', TRAY_CY_DOWN, true, DOWNLOAD_APEX, DOWNLOAD_TAIL, 180);
+trayGlyph('upload', TRAY_CY_UP, false, UPLOAD_APEX, UPLOAD_TAIL, 0);
+trayGlyph('push', TRAY_CY_DOWN, true, PUSH_APEX, PUSH_TAIL, 0);
 
 // ── ДВЕРЬ И СТРЕЛКА: exit / enter ─────────────────────────────────────────
 
@@ -570,7 +559,8 @@ export const DOOR_HALF_H = 8.63;
 export const DOOR_GAP = 3.35;
 export const DOOR_HEAD_HALF = 3.3;
 
-const doorGlyph = (name, cxDoor, openRight, apexX, tailX) =>
+const doorGlyph = (name, cxDoor, openRight, apexX, tailX) => {
+  const sign = (t, w) => arrowAt([apexX, t.cy], [tailX, t.cy], DOOR_HEAD_HALF, w, 0, 90);
   defineGlyph(name, {
     family: 'transfer',
     law:
@@ -582,24 +572,15 @@ const doorGlyph = (name, cxDoor, openRight, apexX, tailX) =>
       const w = t.stroke.glyph;
       const ring = box([cxDoor, t.cy], DOOR_HALF_W, DOOR_HALF_H, w, t.corner.smoothing, false);
       const edge = openRight ? cxDoor + DOOR_HALF_W - w / 2 : cxDoor - DOOR_HALF_W + w / 2;
-      const door = openSide(ring, 'v', t.cy, DOOR_GAP, edge, w);
-      const apex = [apexX, t.cy];
-      return door.add(arrow(apex, tailX, DOOR_HEAD_HALF, w, 0, 90, apex).rotate(0, apex));
+      return openSide(ring, 'v', t.cy, DOOR_GAP, edge, w).add(sign(t, w));
     },
-    filled: (t) => {
-      const w = t.stroke.base;
-      const body = box([cxDoor, t.cy], DOOR_HALF_W, DOOR_HALF_H, w, t.corner.smoothing, true);
-      const apex = [apexX, t.cy];
-      const sign = arrowH(apex, tailX, DOOR_HEAD_HALF, w);
-      return xorSign(body, sign);
-    },
+    filled: (t) =>
+      xorSign(
+        box([cxDoor, t.cy], DOOR_HALF_W, DOOR_HALF_H, t.stroke.base, t.corner.smoothing, true),
+        sign(t, t.stroke.base),
+      ),
   });
-
-/** Горизонтальная стрелка: голова повёрнута на 90°, хвост по оси. */
-function arrowH(apex, tailX, half, w) {
-  const p = head(apex, half, w, 0, 90, apex);
-  return p.add(strokeSegment(apex, [tailX, apex[1]], w));
-}
+};
 
 doorGlyph('exit', 15.24, false, 17.01, 4.23);
 doorGlyph('enter', 8.8, true, 22.11, 9.34);

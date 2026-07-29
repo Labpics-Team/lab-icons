@@ -36,6 +36,7 @@
     "system": "node system/build.js",
     "system:preview": "node system/preview.js",
     "system:family": "node system/check-family.mjs",
+    "system:sheet": "node system/contact-sheet.mjs",
     "typecheck": "tsc --noEmit",
     "check:repo-contract": "node scripts/check-repo-contract.js",
     "check:package-artifact": "node scripts/check-package-artifact.js",

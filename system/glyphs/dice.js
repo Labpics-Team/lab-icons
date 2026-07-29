@@ -69,11 +69,21 @@ function corpus(t) {
   return p;
 }
 
-function pips(t) {
-  const side = (dx, dy) => S.ellipse([t.cx + dx, t.cy + dy], PIP.a, PIP.b, 0);
-  const p = S.ellipse([t.cx + PIPS.top[0], t.cy + PIPS.top[1]], PIP.b, PIP.a, 0);
-  for (const [dx, dy] of PIPS.left) p.add(side(dx, dy));
-  for (const [dx, dy] of PIPS.right) p.add(side(dx, dy));
+/**
+ * СДВИГ ФИШЕК В FILLED. Дуктус даёт центры просветов у обоих начертаний, и они
+ * НЕ совпадают: каждая грань сдвинута своим вектором. Замер (Filled минус
+ * Outline): левая (−1.05, +0.96), правая (+0.93, +0.96), верхняя (0, −1.04).
+ * Причина конструктивная: в Filled фишки выбиты из сплошной массы рядом с
+ * выбитым же швом, и рука отвела их от шва, чтобы просветы не сливались.
+ */
+export const PIP_SHIFT = Object.freeze({ left: [-1.05, 0.96], right: [0.93, 0.96], top: [0, -1.04] });
+
+function pips(t, shift) {
+  const S0 = shift ?? { left: [0, 0], right: [0, 0], top: [0, 0] };
+  const side = (dx, dy, s) => S.ellipse([t.cx + dx + s[0], t.cy + dy + s[1]], PIP.a, PIP.b, 0);
+  const p = S.ellipse([t.cx + PIPS.top[0] + S0.top[0], t.cy + PIPS.top[1] + S0.top[1]], PIP.b, PIP.a, 0);
+  for (const [dx, dy] of PIPS.left) p.add(side(dx, dy, S0.left));
+  for (const [dx, dy] of PIPS.right) p.add(side(dx, dy, S0.right));
   return p;
 }
 
@@ -128,7 +138,7 @@ defineGlyph('dice', {
     ];
     let p = S.roundedPolygon(V, corner, t.corner.smoothing);
     p = subtractEach(p, seam(t, t.stroke.base));
-    p = subtractEach(p, pips(t));
+    p = subtractEach(p, pips(t, PIP_SHIFT));
     return p;
   },
 });
