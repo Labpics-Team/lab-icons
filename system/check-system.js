@@ -14,6 +14,7 @@
 import { buildAll, summarize, ARGUE_AT } from './build.js';
 import { glyphs, buildGlyph } from './registry.js';
 import { ductusDiff } from './ductus.js';
+import { topologyDiff } from './topology.js';
 import { maskFromSvg, maskFromPath } from './metrics.js';
 import { readFileSync, existsSync } from 'node:fs';
 
@@ -61,6 +62,38 @@ for (const r of rows) {
   if (max > 200) problems.push(`${r.name}/${r.variant}: координата ${max} — геометрия уехала за пределы канвы`);
 }
 
+/**
+ * СВЕРКА ТОПОЛОГИИ — часть контракта, а не факультатив.
+ *
+ * Шов не виден площадью: щель весом 0.01 ед² не сдвигает процент вовсе, а на
+ * экране это волосяная линия поперёк штриха. Поэтому острова, трещины и
+ * пережимы проверяются гейтом наравне с отклонением — иначе первый же
+ * рефакторинг заварит одно и расклеит другое, и никто не заметит.
+ *
+ * Порог мягкий по построению: сравнение идёт С РУКОЙ. Если у оригинала штрих
+ * тоже разорван (signature — четыре несвязных куска), система вправе сделать
+ * так же. Претензия возникает, только когда СТАЛО ХУЖЕ, чем было.
+ */
+const topoNotes = [];
+if (!process.argv.includes('--fast')) {
+  for (const r of rows) {
+    if (r.error || !r.hasReference) continue;
+    const file = `reference/${r.variant === 'filled' ? 'Filled' : 'Outline'}/${r.name}${r.variant === 'filled' ? '_filled' : ''}.svg`;
+    if (!existsSync(file)) continue;
+    const def = glyphs.get(r.name);
+    const ref = maskFromSvg(readFileSync(file, 'utf8'), 24, 10);
+    const gen = maskFromPath(buildGlyph(r.name, r.variant, def.refAxes ? { axes: def.refAxes } : {}), 24, 10, 0.01);
+    for (const q of topologyDiff(ref, gen, { canvas: 24, ss: 10 }).issues) {
+      // ОСТРОВА и ТРЕЩИНЫ — всегда дефект: это разрыв там, где рука вела цельно.
+      // ПЕРЕЖИМ и СЧЁТЧИКИ пока предъявляются как замечание: у части глифов это
+      // законная разница построения, и пока она не разобрана поимённо, ронять
+      // сборку на ней нечестно.
+      const hard = /^(ОСТРОВА|ТРЕЩИНЫ)/.test(q);
+      (hard ? problems : topoNotes).push(`${r.name}/${r.variant}: ${q}`);
+    }
+  }
+}
+
 // СВЕРКА ДУКТУСОВ (по флагу --ductus): совпала ли КОНСТРУКЦИЯ, а не площадь.
 // Считается дорого (карта расстояний на каждый глиф), поэтому по требованию.
 if (process.argv.includes('--ductus')) {
@@ -84,6 +117,10 @@ console.log(
   `check-system: ${sum.declared} имён · ${sum.rendered} вариантов · сошлось ${converged}/${sum.measured} ` +
     `· медиана ${(sum.median * 100).toFixed(2)}% · p90 ${(sum.p90 * 100).toFixed(2)}%`,
 );
+if (topoNotes.length) {
+  console.log(`\ncheck-system: ${topoNotes.length} замечаний по топологии (не роняют сборку)`);
+  for (const n of topoNotes) console.log('  ~ ' + n);
+}
 
 if (problems.length) {
   console.error(`\ncheck-system: ${problems.length} нарушений контракта\n`);
