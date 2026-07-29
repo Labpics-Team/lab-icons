@@ -32,7 +32,7 @@
 
 import { defineGlyph } from '../registry.js';
 import { Path } from '../core/path.js';
-import { v2 } from '../core/num.js';
+import { v2, TEPS } from '../core/num.js';
 import * as S from '../prim/shape.js';
 import { strokePath, strokeSegment } from '../prim/stroke.js';
 
@@ -212,8 +212,24 @@ function beamGeom(t) {
  */
 function beamSpine(g) {
   const { P, n, r, C1, C2, aBeam } = g;
-  return new Path()
-    .move([P.leftStemX, P.leftHeadY])
+  /**
+   * Ось rond доводит объявленные радиусы до нуля — это её смысл, «острый
+   * угол». Но локоть здесь живёт в СКЕЛЕТЕ, и дуга нулевого радиуса не
+   * острый угол, а вырожденное ребро: обводка честно падает на ней с «перо
+   * шире дуги». Гейт осей это и поймал — musical-notes не строился при
+   * rond = 0 вовсе.
+   *
+   * Правильное прочтение нуля для скелетного локтя — ЛОМАНАЯ: вершина в
+   * пересечении ножки и балки. Скругление снаружи всё равно даст сустав пера,
+   * так что знак не станет колючим — он станет ровно тем, что обещает ось.
+   */
+  const p = new Path().move([P.leftStemX, P.leftHeadY]);
+  if (r < TEPS) {
+    const v1 = [P.leftStemX, g.axisY(P.leftStemX) + r * g.drop];
+    const v2r = [P.rightStemX, g.axisY(P.rightStemX) + r * g.drop];
+    return p.line(v1).line(v2r).line([P.rightStemX, P.rightHeadY]);
+  }
+  return p
     .line([P.leftStemX, C1[1]])
     .arc(C1, r, Math.PI, aBeam)
     .line(v2.mad(C2, n, -r))
