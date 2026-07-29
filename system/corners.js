@@ -100,7 +100,7 @@ function meet(p1, d1, p2, d2) {
  * Так излом (голый угол) и скругление живут в одном представлении: у излома
  * поворот сосредоточен в нуле длины, у скругления размазан по дуге.
  */
-function sampleSub(sub) {
+export function sampleSub(sub) {
   const es = sub.edges.filter((e) => edgeLen(e) > 1e-7);
   const pts = [];
   for (const e of es) {

@@ -32,7 +32,7 @@ import { maskFromSvg, maskFromPath } from './metrics.js';
  * Точное евклидово расстояние до фона (алгоритм Фельзенсвальба, две проходки
  * по осям). Возвращает КВАДРАТ расстояния в пикселях растра.
  */
-function edt(mask, n) {
+export function edt(mask, n) {
   const INF = 1e12;
   const f = new Float64Array(n);
   const d = new Float64Array(n * n);
