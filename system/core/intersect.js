@@ -139,6 +139,11 @@ const overlap = (A, B) => A[0] <= B[2] + 1e-7 && B[0] <= A[2] + 1e-7 && A[1] <= 
 
 /** Общий случай с кубикой: рекурсивное деление до сходимости. */
 function numeric(e1, e2, t1a = 0, t1b = 1, t2a = 0, t2b = 1, depth = 0, out = []) {
+  // Ветвление обязано иметь потолок. У СОВПАДАЮЩИХ рёбер габариты перекрыты на
+  // каждом шаге, отбраковки не происходит, и дерево деления растёт до 2^42
+  // листьев — процесс просто виснет. Ограничение по числу набранных точек
+  // делает совпадение дешёвым: участок всё равно схлопнется в две границы.
+  if (out.length > COINCIDENT_MAX * 4) return out;
   const s1 = subEdge(e1, t1a, t1b);
   const s2 = subEdge(e2, t2a, t2b);
   if (!overlap(ebox(s1), ebox(s2))) return out;
@@ -191,7 +196,28 @@ export function intersectEdges(e1, e2) {
     }
     return out;
   }
-  return collapse(numeric(e1, e2));
+  const co = coincident(e1, e2);
+  return co ?? collapse(numeric(e1, e2));
+}
+
+/**
+ * СОВПАДЕНИЕ рёбер целиком — распознаётся до деления, а не после.
+ *
+ * Прямая, записанная кубикой с коллинеарными опорами, совпадает с этой же
+ * прямой во всех точках. Делением такое не решается: пересечение здесь не
+ * множество точек, а весь отрезок. Возвращаем его концы — единственный
+ * осмысленный ответ, который к тому же не даёт булевой резать в пустоту.
+ */
+function coincident(e1, e2) {
+  const N = 10;
+  const ts = [];
+  for (let i = 0; i <= N; i++) {
+    const t1 = i / N;
+    const t2 = paramAt(e2, edgeAt(e1, t1));
+    if (t2 == null || v2.dist(edgeAt(e2, t2), edgeAt(e1, t1)) > 1e-6) return null;
+    ts.push({ t1, t2, p: edgeAt(e1, t1) });
+  }
+  return [ts[0], ts[ts.length - 1]];
 }
 
 /**

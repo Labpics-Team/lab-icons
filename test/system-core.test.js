@@ -17,6 +17,11 @@ import { numeral, numeralMetrics, numeralString } from '../system/numerals.js';
 import { glyphs, buildGlyph } from '../system/registry.js';
 import { toSvg } from '../system/render.js';
 import '../system/glyphs/index.js';
+import { edgesOfPath, curvature } from '../system/contour.js';
+import { sampleSub, spectrumOfPath } from '../system/corners.js';
+import { intersectEdges } from '../system/core/intersect.js';
+import * as topo from '../system/topology.js';
+import * as P from '../system/parts.js';
 
 const area = (p) => Math.abs(p.subs.reduce((s, _, i) => s + p.subArea(i, 0.002), 0));
 
@@ -331,5 +336,92 @@ describe('растеризатор метрики', () => {
     const m = rasterize([{ polys: S.circle([12, 12], 6).flatten(0.005), fillRule: 'nonzero' }], 24, 16);
     const px = m.reduce((s, v) => s + v, 0) / (16 * 16);
     expect(px).toBeCloseTo(Math.PI * 36, 0);
+  });
+});
+
+/**
+ * КАЧЕСТВО КОНТУРА — инварианты, которые площадь не ловит.
+ *
+ * Каждый из этих тестов закрывает дефект, реально найденный в корпусе. Их
+ * задача — не дать закрыться обратно: площадная метрика на все эти поломки
+ * реагирует сотыми долями процента, то есть не реагирует.
+ */
+describe('качество контура', () => {
+  it('полный поворот замкнутого контура ровно ±360° — инвариант Гаусса', () => {
+    const cases = {
+      'квадрат ζ=0': S.roundedRect(12, 12, 16, 16, 4, 0),
+      'квадрат ζ=0.6': S.roundedRect(12, 12, 16, 16, 4, 0.6),
+      'квадрат ζ=1': S.roundedRect(12, 12, 16, 16, 4, 1),
+      круг: S.circle([12, 12], 8),
+      'штрих-ломаная': strokePolyline([[6, 9], [12, 15], [18, 9]], 1.8),
+    };
+    for (const [name, path] of Object.entries(cases)) {
+      for (const sub of edgesOfPath(path)) {
+        const pts = sampleSub(sub);
+        let total = 0;
+        for (const q of pts) total += q.simp + q.dturn;
+        expect(Math.abs(Math.abs(total) - 360), `${name}: поворот ${total.toFixed(2)}°`).toBeLessThan(1.5);
+      }
+    }
+  });
+
+  it('плавный вход входит в дугу с ЕЁ кривизной, а не круче', () => {
+    // Опора кубики бралась «на глазок» как 2/3 хорды, и на стыке выходило
+    // 0.368 против 0.250 у дуги — защип перед каждым скруглением корпуса.
+    for (const r of [2, 4, 6]) {
+      const es = edgesOfPath(S.roundedRect(12, 12, 16, 16, r, 0.6))[0].edges;
+      const arc = es.find((e) => e.kind === 'arc');
+      const before = es[es.indexOf(arc) - 1];
+      expect(before.kind).toBe('cubic');
+      const kEnd = Math.abs(curvature(before, 1));
+      expect(kEnd, `r=${r}: кривизна на стыке ${kEnd.toFixed(4)} против ${(1 / arc.r).toFixed(4)}`).toBeCloseTo(1 / arc.r, 3);
+    }
+  });
+
+  it('локоть штриха: наружная галтель — перо, внутренняя фаска — шестая доля', () => {
+    const pen = 1.8;
+    const sp = spectrumOfPath(strokePolyline([[6, 9], [12, 15], [18, 9]], pen)).filter((c) => c.kind !== 'колпачок');
+    expect(sp).toHaveLength(2);
+    const inner = sp.find((c) => c.r < 1);
+    const outer = sp.find((c) => c.r >= 1);
+    expect(inner.r, 'фаска внутреннего локтя').toBeCloseTo(pen * TOKENS.corner.joint, 2);
+    // наружная галтель ζ-сглажена, поэтому измеренный радиус чуть больше номинала
+    expect(outer.r).toBeGreaterThan(pen * 0.9);
+    expect(outer.r).toBeLessThan(pen * 1.35);
+    expect(outer.ease, 'мягкость наружного локтя').toBeGreaterThan(1.2);
+  });
+
+  it('вычитание налегающего региона не оставляет трещин', () => {
+    // Голова и хвост стрелки перекрываются. Поочерёдный рез оставлял лучину,
+    // а сложение развёрнутых подпутей давало под nonzero намотку −1, то есть
+    // дырку в дырке. Правильный ответ — граница объединения.
+    const region = strokePolyline([[8, 8], [12, 12], [16, 8]], 2).add(strokeSegment([12, 12], [12, 4], 2));
+    const holed = cut(S.circle([12, 12], 11), region);
+    const n = 24 * 12;
+    const mask = maskFromPath(holed, 24, 12, 0.005);
+    // просвет обязан быть ОДИН связный: если рез оставил лучину, их станет больше
+    const { topology } = topo;
+    const t = topology(mask, { canvas: 24, ss: 12 });
+    expect(t.ink, 'кусков чернил').toBe(1);
+    expect(t.cracks, 'трещин').toBe(0);
+    expect(n).toBeGreaterThan(0);
+  });
+
+  it('касание двух рёбер — это две точки контакта, а не тысяча', () => {
+    // Деление сходится к точкам, но контакт бывает участком. Отсев по
+    // параметру пропускал континуум, и путь распухал до 700 КБ.
+    const a = { type: 'cubic', p: [[0, 0], [4, 0], [8, 0], [12, 0]] };
+    const b = { type: 'line', a: [0, 0], b: [12, 0] };
+    expect(intersectEdges(a, b).length).toBeLessThanOrEqual(8);
+  });
+
+  it('клин семейства play — одна фигура на все размеры', () => {
+    const t = resolve();
+    for (const h of [6, 9.28, 13, 21.45]) {
+      const sp = spectrumOfPath(P.wedge(t, [12, 12], h)).filter((c) => c.kind === 'скруглённый');
+      expect(sp, `высота ${h}: вершин`).toHaveLength(3);
+      // радиус идёт за высотой, а не задан по месту
+      for (const c of sp) expect(c.r / h, `высота ${h}`).toBeCloseTo(TOKENS.wedge.corner, 1);
+    }
   });
 });
