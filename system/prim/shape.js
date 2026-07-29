@@ -174,14 +174,16 @@ export function roundedPolygon(points, radius, smoothing = 0) {
       const E1 = v2.mad(V[i], g.d2, pRun);
       const X0 = lineCross(E0, g.d1, P0, tan0);
       const X1 = lineCross(E1, v2.mul(g.d2, -1), P1, v2.mul(tan1, -1));
-      if (X0 && X1) {
+      const h0 = X0 && easeHandle(E0, X0, P0, r);
+      const h1 = X1 && easeHandle(E1, X1, P1, r);
+      if (h0 && h1) {
         if (!started) {
           p.move(E0);
           started = true;
         } else p.line(E0);
-        p.curve(v2.mad(E0, v2.sub(X0, E0), 2 / 3), X0, P0);
+        p.curve(h0, X0, P0);
         p.arc(cen, r, b0, b1);
-        p.curve(X1, v2.mad(E1, v2.sub(X1, E1), 2 / 3), E1);
+        p.curve(X1, h1, E1);
         continue;
       }
     }
@@ -193,6 +195,41 @@ export function roundedPolygon(points, radius, smoothing = 0) {
     p.arc(cen, r, a0, a1);
   }
   return p.close();
+}
+
+/**
+ * РУЧКА ПЛАВНОГО ВХОДА в дугу — та, при которой кривизна на стыке РАВНА 1/r.
+ *
+ * Кубика E→A с опорными точками (E + p·u, X) имеет нулевую кривизну в E при
+ * любом p: три первые точки лежат на одной прямой. А вот кривизна в A зависит
+ * от p, и «на глазок» взятое p = 2/3 давало на стыке 0.368 против 0.250 у
+ * дуги — вход оказывался КРУЧЕ того, во что входит. Глаз читает это как
+ * защип: скругление поджимается перед дугой и отпускает после.
+ *
+ * Кривизна кубики в конце: k = (2/3)·|(P₃−P₂)×(P₂−P₁)| / |P₃−P₂|³. Здесь
+ * P₃−P₂ = A−X, P₂−P₁ = (|X−E| − p)·u, значит
+ *
+ *      k = (2/3)·|A−X|·sinθ·(|X−E| − p) / |A−X|³,
+ *
+ * и требование k = 1/r решается относительно p однозначно:
+ *
+ *      p = |X−E| − (3/2)·|A−X|² / (r·sinθ),   θ = ∠(A−X, u).
+ *
+ * Возвращает null, если бюджет сглаживания не оставляет места (p ≤ 0): тогда
+ * честнее нарисовать голую галтель, чем подсунуть кривую с защипом.
+ */
+function easeHandle(E, X, A, r) {
+  const dx = v2.sub(X, E);
+  const lex = v2.len(dx);
+  if (lex < TEPS) return null;
+  const u = v2.mul(dx, 1 / lex);
+  const ax = v2.sub(A, X);
+  const m = v2.len(ax);
+  const sinT = Math.abs(v2.cross(v2.mul(ax, 1 / Math.max(m, TEPS)), u));
+  if (m < TEPS || sinT < 1e-6) return null;
+  const p = lex - (1.5 * m * m) / (r * sinT);
+  if (p <= TEPS) return null;
+  return v2.mad(E, u, p);
 }
 
 /** Пересечение двух прямых, заданных точкой и направлением. */
