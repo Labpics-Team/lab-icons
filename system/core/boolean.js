@@ -132,10 +132,34 @@ function chain(edges, o = {}) {
       used[cur] = true;
       loop.push(edges[cur]);
       const end = edgeEnd(edges[cur]);
-      const cand = (buckets.get(key(end)) || []).filter((j) => !used[j]);
+      let cand = (buckets.get(key(end)) || []).filter((j) => !used[j]);
       if (!cand.length) {
-        cur = null;
-        break;
+        /**
+         * Ключ узла — округление координаты, и координата умеет садиться РОВНО
+         * на границу округления: 14.845775 → 1484577.5, где половинки уходят в
+         * разные стороны от малейшей разницы в последнем бите. Тогда две
+         * половины одной петли получают разные ключи, обход обрывается, и
+         * незамкнутая цепь достраивается хордой — разруб поперёк глифа.
+         *
+         * Промах по ключу поэтому не приговор: добираем ближайшее начало в
+         * пределах допуска. Путь дорогой, но случается только на этих самых
+         * граничных узлах.
+         */
+        let best = null;
+        let bd = JOIN_TOL * 20;
+        for (let j = 0; j < edges.length; j++) {
+          if (used[j]) continue;
+          const d = v2.dist(edgeStart(edges[j]), end);
+          if (d < bd) {
+            bd = d;
+            best = j;
+          }
+        }
+        if (best == null) {
+          cur = null;
+          break;
+        }
+        cand = [best];
       }
       if (o.outermost) {
         cur = cand.length > 1 ? pickOutermost(edges, cand, cur) : cand[0];
@@ -202,13 +226,21 @@ export function unionBoundary(reg) {
   const paths = subs.map((s) => new Path([s]));
   const per = paths.map((p) => p.edges());
   const ts = per.map((es) => es.map(() => []));
+  /**
+   * Пара считается ОДИН раз, и обе стороны режутся по одному и тому же
+   * пересечению. Если звать intersectEdges для (i,j) и (j,i) порознь, точки
+   * выходят чуть разные — численный решатель кубики к порядку не безразличен, —
+   * концы кусков перестают совпадать, сшивка не находит стык и возвращает
+   * ОТКРЫТУЮ цепь. Достроенная хордой, она и даёт разруб поперёк глифа.
+   */
   for (let i = 0; i < per.length; i++) {
-    for (let j = 0; j < per.length; j++) {
-      if (i === j) continue;
+    for (let j = i + 1; j < per.length; j++) {
       for (let a = 0; a < per[i].length; a++) {
         for (let b = 0; b < per[j].length; b++) {
           for (const x of intersectEdges(per[i][a], per[j][b])) {
-            if (crosses(per[i][a], x.t1, paths[j])) ts[i][a].push(x.t1);
+            if (!crosses(per[i][a], x.t1, paths[j])) continue;
+            ts[i][a].push(x.t1);
+            ts[j][b].push(x.t2);
           }
         }
       }
