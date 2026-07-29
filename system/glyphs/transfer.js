@@ -118,12 +118,21 @@ function head(apex, half, w, rho, deg = 0, about = null) {
 const apexFromTip = (tip, w, rho) => tip + w / 2 - rho * (Math.SQRT2 - 1);
 
 /**
+ * ЛОКОТЬ ГОЛОВЫ — точка, где сходятся внутренние кромки плеч: на биссектрисе,
+ * позади вершины на кап·√2. Хвост начинается ИМЕННО ЗДЕСЬ, а не в вершине:
+ * иначе его полукруглый терминал вылезал бы за остриё наружу (у притупленной
+ * головы остриё отстоит от вершины всего на ρ + кап − ρ√2).
+ */
+const crotch = (apex, dir, w) => v2.mad(apex, dir, Math.SQRT2 * (w / 2));
+
+/**
  * Стрелка = голова + хвост. `deg` поворачивает ТОЛЬКО голову вокруг вершины
  * (0 = вверх, 90 = вправо, 180 = вниз), хвост задаётся терминалом в канве:
  * так вершина и терминал остаются теми величинами, которые сняты с корпуса.
  */
 function arrowAt(apex, tailPoint, half, w, rho, deg = 0) {
-  return head(apex, half, w, rho, deg, apex).add(strokeSegment(apex, tailPoint, w));
+  const p = head(apex, half, w, rho, deg, apex);
+  return p.add(strokeSegment(crotch(apex, v2.norm(v2.sub(tailPoint, apex)), w), tailPoint, w));
 }
 
 /**
@@ -250,21 +259,28 @@ defineGlyph('reload', {
  */
 export const REFRESH_CY = 13.46;
 export const REFRESH_R = 8.56;
+/** Полуразмах головы refresh: 3.00 в обоих начертаниях (замер совпал точно). */
+export const REFRESH_HALF = 3.0;
+/** Вынос вершины головы от оси канвы: 3.80 (замер 3.81 Outline, 3.76 Filled). */
+export const REFRESH_APEX_DX = 3.8;
 
 defineGlyph('refresh', {
   family: 'transfer',
   law:
     'кольцевая полоса с разрывом в верхнем правом квадранте (90°): круглый терминал ' +
-    'на 0°, радиальный срез на −90°. Ось головы совпадает с концом полосы, голова ' +
+    'на 0°, радиальный срез на −90°. В срез входит прямое звено по оси головы, голова ' +
     'смотрит вправо. Посадка кольца выведена из живой области: снизу чернила кольца ' +
-    'на 23, сверху плечо головы на 1, откуда центр (24+half)/2 и радиус (22−half)/2 − кап',
+    'на 23, сверху плечо головы на 1, откуда центр (24+half)/2 = 13.5 и радиус ' +
+    '(22−half)/2 − кап = 8.60 (замер Outline 13.47 и 8.615); в Filled рука дала кольцу ' +
+    'выйти за живую область, поэтому радиус взят минимаксом по двум начертаниям',
   outline: (t) => {
     const w = t.stroke.glyph;
     const c = [t.cx, REFRESH_CY];
     const p = bandRoundStart(c, REFRESH_R, 0, rad(270), w);
     const axis = REFRESH_CY - REFRESH_R;
-    const apex = [t.cx + 0.8 + HEAD_HALF, axis];
-    return p.add(head(apex, HEAD_HALF, w, HEAD_RHO, 90, apex));
+    const apex = [t.cx + REFRESH_APEX_DX, axis];
+    p.add(strokeSegment([t.cx, axis], crotch(apex, [-1, 0], w), w));
+    return p.add(head(apex, REFRESH_HALF, w, HEAD_RHO, 90, apex));
   },
 });
 
@@ -285,10 +301,9 @@ const syncArm = (t) => {
   const w = t.stroke.glyph;
   const R = ARC_INK - t.cap.glyph;
   const c = [t.cx - SYNC_DX, t.cy];
-  const spine = new Path().arcFrom(c, R, rad(SYNC_A0), rad(180)).line([c[0] - R, SYNC_STEM]);
-  const p = strokePath(spine, w);
   const apex = [c[0] - R, SYNC_STEM - HEAD_HALF];
-  return p.add(head(apex, HEAD_HALF, w, HEAD_RHO));
+  const spine = new Path().arcFrom(c, R, rad(SYNC_A0), rad(180)).line(crotch(apex, [0, 1], w));
+  return strokePath(spine, w).add(head(apex, HEAD_HALF, w, HEAD_RHO));
 };
 
 defineGlyph('sync', {
@@ -327,12 +342,11 @@ const repeatArm = (t) => {
   const R = ARC_INK - cap;
   const barY = t.cy + REPEAT_GAP + cap;
   const c = [t.canvas - t.margin - ARC_INK, barY - R];
-  const apexX = apexFromTip(REPEAT_TIP, w, HEAD_RHO);
-  const spine = new Path().arcFrom(c, R, rad(REPEAT_A0), rad(90)).line([apexX, barY]);
+  const apex = [apexFromTip(REPEAT_TIP, w, HEAD_RHO), barY];
+  const spine = new Path().arcFrom(c, R, rad(REPEAT_A0), rad(90)).line(crotch(apex, [1, 0], w));
   const p = strokePath(spine, w);
   p.add(S.circle(v2.polar(c, R, rad(REPEAT_A0)), w / 2));
-  const apex = [apexX, barY];
-  return p.add(head(apex, HEAD_HALF, w, HEAD_RHO, -90, apex));
+  return p.add(head(apex, HEAD_HALF, w, HEAD_RHO, 270, apex));
 };
 
 defineGlyph('repeat', {
@@ -356,30 +370,37 @@ defineGlyph('repeat', {
  * Ключ: ВНУТРЕННЕЕ плечо головы приходит ровно на ось канвы (замер 11.999 и
  * 12.005 при Regular, 11.997 и 12.000 при Bold — четыре независимых попадания),
  * то есть полуразмах головы РАВЕН разносу осей: half = A.
- * A = 4.13 — минимакс (4.18 Regular, 4.08 Bold).
+ *
+ * Сам разнос закреплён ПО ЧЕРНИЛАМ: внешнее плечо головы упирается в
+ * cy + 9.34 при обоих перьях (замер 16.18 + 4.18 + 0.9 = 21.26 при Regular и
+ * 16.08 + 4.08 + 1.2 = 21.36 при Bold), а поскольку ось = cy + A и half = A,
+ * это даёт cy + 2A + кап = cy + SWAP_SPAN, откуда A = (SWAP_SPAN − кап)/2
+ * (4.22 при Regular против замера 4.18, 4.07 при Bold против замера 4.08).
  * Кончик чернил головы — на 22.0 (замер 21.99 Outline, 22.00 Filled), хвост
- * терминалом на 2.76/3.00 по скелету, то есть чернилами на 1.86/1.80.
+ * терминалом чернил на 1.83 (замер 1.86 Outline, 1.80 Filled).
  */
-export const SWAP_A = 4.13;
+export const SWAP_SPAN = 9.34;
 export const SWAP_TIP = 22.0;
 export const SWAP_TAIL_INK = 1.83;
 
-/** Одна стрелка swap: вправо, ось на cy + A. */
+/** Одна стрелка swap: вправо, ось на cy + A, где A = (SWAP_SPAN − кап)/2. */
 const swapArm = (t) => {
   const w = t.stroke.glyph;
   const cap = t.cap.glyph;
-  const y = t.cy + SWAP_A;
+  const A = (SWAP_SPAN - cap) / 2;
+  const y = t.cy + A;
   const apex = [SWAP_TIP - cap + HEAD_RHO * (Math.SQRT2 - 1), y];
-  return arrowAt(apex, [SWAP_TAIL_INK + cap, y], SWAP_A, w, HEAD_RHO, 90);
+  return arrowAt(apex, [SWAP_TAIL_INK + cap, y], A, w, HEAD_RHO, 90);
 };
 
 defineGlyph('swap-horizontal', {
   family: 'transfer',
   law:
-    'две стрелки навстречу, оси на cy ± 4.13; полуразмах головы равен разносу осей, ' +
-    'поэтому внутреннее плечо каждой головы приходит ровно на ось канвы. Кончик чернил ' +
-    'на 22.0, терминал хвоста чернилами на 1.83 — оба закреплены по чернилам, ' +
-    'поэтому Filled получается сменой пера. Вторая стрелка — первая, повёрнутая на 180°',
+    'две стрелки навстречу, оси на cy ± A; полуразмах головы равен разносу осей, ' +
+    'поэтому внутреннее плечо каждой головы приходит ровно на ось канвы, а внешнее — ' +
+    'на чернильную границу cy + 9.34, откуда A = (9.34 − кап)/2. Кончик чернил на 22.0, ' +
+    'терминал хвоста чернилами на 1.83; всё закреплено по чернилам, поэтому Filled ' +
+    'получается сменой пера. Вторая стрелка — первая, повёрнутая на 180°',
   outline: (t) => {
     const a = swapArm(t);
     return a.add(swapArm(t).rotate(Math.PI, [t.cx, t.cy]));
@@ -422,7 +443,10 @@ defineGlyph('move', {
     const half = MOVE_HALF_INK - 2 * t.cap.glyph;
     const a = apexFromTip(t.margin, t.stroke.base, HEAD_RHO);
     const b = t.canvas - a;
-    const p = strokeSegment([t.cx, a], [t.cx, b], w).add(strokeSegment([a, t.cy], [b, t.cy], w));
+    const k = Math.SQRT2 * t.cap.glyph; // стволы начинаются в локтях голов
+    const p = strokeSegment([t.cx, a + k], [t.cx, b - k], w).add(
+      strokeSegment([a + k, t.cy], [b - k, t.cy], w),
+    );
     for (const [apex, deg] of [
       [[t.cx, a], 0],
       [[t.cx, b], 180],
@@ -459,7 +483,9 @@ const bracket = (t, corner, dx, dy) => {
   const w = t.stroke.glyph;
   const h = w / 2;
   const [x, y] = corner;
-  const A = RESIZE_ARM;
+  // плечо задано по СКЕЛЕТУ, а полигон описывает чернила: терминал-полукруг
+  // выступает за центр терминала на кап, поэтому вершина отнесена на A + кап
+  const A = RESIZE_ARM + h;
   const pts = [
     [x + dx * A, y - dy * h],
     [x - dx * h, y - dy * h],
@@ -485,8 +511,11 @@ defineGlyph('resize', {
     const lo = t.margin + cap;
     const p = bracket(t, [hi, lo], -1, 1);
     p.add(bracket(t, [lo, hi], 1, -1));
-    return p.add(strokeSegment([hi, lo], [lo, hi], w));
-    // диагональ идёт из вершины в вершину: обе лежат на антидиагонали x + y = 24
+    // диагональ идёт из вершины в вершину по антидиагонали x + y = 24, но
+    // отступает от каждой на кап·√2 — во внутренний угол уголка: иначе её
+    // полукруглый терминал вылезал бы за скруглённый внешний угол
+    const d = Math.SQRT2 * cap * U;
+    return p.add(strokeSegment([hi - d, lo + d], [lo + d, hi - d], w));
   },
 });
 
@@ -654,7 +683,7 @@ defineGlyph('share', {
  * начертаниях; во внутреннем контуре Outline та же дуга даёт 9.00 = 7 + перо,
  * то есть вогнутый радиус растёт на перо, а не убывает).
  */
-export const NAVIGATE = Object.freeze({ apexU: 17.34, wingU: -6.33, wingV: 7.83, notchU: -3.2, notchR: 7 });
+export const NAVIGATE = Object.freeze({ apexU: 17.31, wingU: -8.53, wingV: 9.64, notchU: -2.44, notchR: 7 });
 
 const axial = (u, v) => [12 + (u + v) * U, 12 + (v - u) * U];
 

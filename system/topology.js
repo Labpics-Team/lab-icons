@@ -203,16 +203,54 @@ export function necks(mask, o = {}) {
  * (талия ровно между двумя рядами пикселей) выпадает из обоих определений.
  *
  * Кромка в гребень не входит: у кромки расстояние равно нулю у любой формы.
+ *
+ * И последнее сито — ПРОХОД. Голый минимум по гребню меряет не то: у любого
+ * острого угла медиальная ось уходит в самое остриё, там радиус равен пикселю,
+ * и минимум садится туда у КАЖДОГО глифа с непритуплённым углом. Острие — не
+ * пережим: чернила там кончаются, а не сдавлены. Пережим — место, где чернила
+ * ПРОХОДЯТ насквозь и в этом месте узкие. Проверяется кольцом чуть шире
+ * вписанной окружности: у прохода чернила пересекают его двумя дугами (штрих
+ * идёт дальше в обе стороны), у острия — одной, у одинокой точки — ни одной.
+ * Если прохода в глифе нет вовсе (три точки многоточия, сплошной диск), меры
+ * «пережим» не существует, и тогда честнее вернуть толщину самой тонкой
+ * детали, пометив, что это не пережим.
  */
+function through(mask, n, x, y, r) {
+  // Кольцо вдвое шире вписанной окружности: у сужения «на конус» на таком
+  // отдалении чернила остаются только с одной стороны, у сквозного пережима —
+  // с обеих. Плюс два пикселя, чтобы кольцо не легло на саму окружность.
+  const R = 2 * r + 2;
+  const steps = Math.max(12, Math.round(2 * Math.PI * R));
+  let ink = 0;
+  let arcs = 0;
+  let prev = 0;
+  let first = 0;
+  for (let k = 0; k < steps; k++) {
+    const a = (2 * Math.PI * k) / steps;
+    const qx = Math.round(x + R * Math.cos(a));
+    const qy = Math.round(y + R * Math.sin(a));
+    const v = qx < 0 || qy < 0 || qx >= n || qy >= n ? 0 : mask[qy * n + qx];
+    if (k === 0) first = v;
+    else if (v && !prev) arcs++;
+    ink += v;
+    prev = v;
+  }
+  if (first && !prev) arcs++; // замыкание кольца
+  return (arcs || (ink ? 1 : 0)) >= 2;
+}
+
 function narrowest(mask, o = {}) {
   const { ss, n } = grid(mask, o);
   const d2 = edt(mask, n);
-  let best = Infinity;
-  let at = null;
+  let bestAny = Infinity;
+  let atAny = null;
+  let bestThrough = Infinity;
+  let atThrough = null;
   for (let y = 1; y < n - 1; y++) {
     for (let x = 1; x < n - 1; x++) {
       const i = y * n + x;
-      if (!mask[i] || d2[i] >= best) continue;
+      // ниже обоих минимумов уже не опустимся: bestAny ≤ bestThrough всегда
+      if (!mask[i] || d2[i] >= bestThrough) continue;
       const v = d2[i];
       let ridge = true;
       for (const [dx, dy] of NB8) {
@@ -235,12 +273,21 @@ function narrowest(mask, o = {}) {
         }
       }
       if (!ridge) continue;
-      best = v;
-      at = [r2((x + 0.5) / ss), r2((y + 0.5) / ss)];
+      const site = [r2((x + 0.5) / ss), r2((y + 0.5) / ss)];
+      if (v < bestAny) {
+        bestAny = v;
+        atAny = site;
+      }
+      if (through(mask, n, x, y, Math.sqrt(v))) {
+        bestThrough = v;
+        atThrough = site;
+      }
     }
   }
-  if (!Number.isFinite(best)) return { width: 0, at: null };
-  return { width: r3((2 * Math.sqrt(best)) / ss), at };
+  const pass = Number.isFinite(bestThrough);
+  const best = pass ? bestThrough : bestAny;
+  if (!Number.isFinite(best)) return { width: 0, at: null, through: false };
+  return { width: r3((2 * Math.sqrt(best)) / ss), at: pass ? atThrough : atAny, through: pass };
 }
 
 /**
@@ -258,7 +305,14 @@ export function analyzeTopology(mask, o = {}) {
   const { canvas, ss } = grid(mask, o);
   const t = topology(mask, { canvas, ss, counterWidth: o.counterWidth });
   const thin = narrowest(mask, { canvas, ss });
-  return { ...t, necks: necks(mask, { canvas, ss, radii: o.radii, minPart: o.minPart }), minWidth: thin.width, pinch: thin.at };
+  return {
+    ...t,
+    necks: necks(mask, { canvas, ss, radii: o.radii, minPart: o.minPart }),
+    minWidth: thin.width,
+    pinch: thin.at,
+    /** true — узкое место сквозное (пережим), false — просто самая тонкая деталь. */
+    pinchThrough: thin.through,
+  };
 }
 
 /**
@@ -321,7 +375,10 @@ export function topologyDiff(refMask, genMask, o = {}) {
   if (a.minWidth > 0 && b.minWidth < a.minWidth * 0.85 && a.minWidth - b.minWidth > 0.1) {
     issues.push(
       `ПЕРЕЖИМ: самое узкое место ${b.minWidth} против ${a.minWidth} ед у руки (×${r2(b.minWidth / a.minWidth)})` +
-        `${b.pinch ? ` в точке ${b.pinch.join(', ')}` : ''} — штрих сдавлен там, где рука вела ровно`,
+        `${b.pinch ? ` в точке ${b.pinch.join(', ')}` : ''} — ` +
+        (b.pinchThrough
+          ? 'штрих сдавлен там, где рука вела ровно: на мелком кегле здесь и порвётся'
+          : 'самая тонкая деталь тоньше, чем у руки: на мелком кегле пропадёт первой'),
     );
   }
 
