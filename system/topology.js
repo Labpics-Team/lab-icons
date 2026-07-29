@@ -350,10 +350,10 @@ export function topologyDiff(refMask, genMask, o = {}) {
   const wide = (h) => 2 * h.maxR >= (o.counterWidth ?? 0.5);
   const genCracks = b.holes.filter((h) => !wide(h)).sort((p, q) => q.area - p.area);
   if (genCracks.length > a.cracks) {
-    const shown = genCracks.slice(0, 3).map((h) => `${r2(2 * h.maxR)}×${h.area} ед в точке ${h.at.join(', ')}`);
+    const shown = genCracks.slice(0, 3).map((h) => `шириной ${r2(2 * h.maxR)} ед в точке ${h.at.join(', ')}`);
     issues.push(
-      `ТРЕЩИНЫ: ${genCracks.length} тонких дырок против ${a.cracks} у руки (${shown.join('; ')}) — ` +
-        'слои сведены встык и не заварены: шов виден на любом рендере, где пиксель попадёт в щель',
+      `ТРЕЩИНЫ: тонких дырок ${genCracks.length} против ${a.cracks} у руки (${shown.join('; ')}) — ` +
+        'слои сведены встык и не заварены: это шов, и он вылезет на любом кегле, где пиксель попадёт в щель',
     );
   }
 
@@ -365,14 +365,17 @@ export function topologyDiff(refMask, genMask, o = {}) {
     const gb = b.necks[k].ink - b.ink;
     if (gb > ga) {
       issues.push(
-        `ПЕРЕШЕЕК: при сжатии на r=${a.necks[k].r} форма даёт ${b.necks[k].ink} кусков против ${a.necks[k].ink} у руки — ` +
+        `ПЕРЕШЕЕК: кусков после сжатия на r=${a.necks[k].r}: ${b.necks[k].ink} против ${a.necks[k].ink} у руки — ` +
           `в конструкции есть место тоньше ${r2(2 * a.necks[k].r)} ед, у руки такого нет`,
       );
       break;
     }
   }
 
-  if (a.minWidth > 0 && b.minWidth < a.minWidth * 0.85 && a.minWidth - b.minWidth > 0.1) {
+  // Порог не вкусовой: на растре ss=10 одна ступенька карты расстояний — это
+  // уже 0.1 ед, поэтому меньше 20% и 0.15 ед разницы предъявлять нечестно,
+  // такое даёт сам растр.
+  if (a.minWidth > 0 && b.minWidth < a.minWidth * 0.8 && a.minWidth - b.minWidth > 0.15) {
     issues.push(
       `ПЕРЕЖИМ: самое узкое место ${b.minWidth} против ${a.minWidth} ед у руки (×${r2(b.minWidth / a.minWidth)})` +
         `${b.pinch ? ` в точке ${b.pinch.join(', ')}` : ''} — ` +
