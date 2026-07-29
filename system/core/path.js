@@ -89,14 +89,14 @@ export class Path {
     return this.subs.length === 0 || this.subs.every((s) => s.segs.length === 0);
   }
 
-  /** Строка d-атрибута. */
+  /** Строка d-атрибута. Узлы сливаются на выводе — модель не трогается. */
   toD() {
     let d = '';
     for (const sub of this.subs) {
       if (!sub.segs.length) continue;
       d += `M${fmtP(sub.from)}`;
       let cur = sub.from;
-      for (const s of sub.segs) {
+      for (const s of mergeSegs(sub.from, sub.segs)) {
         if (s.k === 'L') {
           if (Math.abs(s.to[0] - cur[0]) < 5e-4) d += `V${fmt(s.to[1])}`;
           else if (Math.abs(s.to[1] - cur[1]) < 5e-4) d += `H${fmt(s.to[0])}`;
@@ -286,6 +286,56 @@ function reverseSub(sub) {
     else segs.push({ k: 'A', c: s.c.slice(), r: s.r, a0: s.a1, a1: s.a0, to: to.slice() });
   }
   return { from: pts[pts.length - 1].slice(), segs, closed: sub.closed };
+}
+
+/**
+ * СЛИЯНИЕ УЗЛОВ НА ВЫВОДЕ — точная операция, не упрощение.
+ *
+ * Конструктор естественно порождает соседние дуги одной окружности (у креста
+ * два смежных скругления плеча — это один полукруглый терминал, разрезанный
+ * пополам вершиной многоугольника). Оставить их порознь значит поставить в
+ * контур лишний узел там, где рука ставит один: у неё plus — 14 команд, а у
+ * наивного вывода 21. Лишний узел — это лишняя точка, которая на этапе
+ * анимации поедет отдельно от соседей.
+ *
+ * Сливаются только СТРОГО совпадающие вещи: дуги с общим центром, радиусом и
+ * стыкующимся углом; сонаправленные коллинеарные прямые; вырожденные сегменты
+ * выбрасываются. Модель при этом не меняется — центры дуг остаются на месте.
+ */
+function mergeSegs(from, segs) {
+  const out = [];
+  let cur = from;
+  for (const s of segs) {
+    const prev = out[out.length - 1];
+    const start = out.length ? out[out.length - 1].to : from;
+
+    if (s.k === 'L' && v2.dist(start, s.to) < 1e-9) continue;
+    if (s.k === 'A' && Math.abs(s.a1 - s.a0) < 1e-9) continue;
+
+    if (prev && prev.k === 'A' && s.k === 'A' && prev.r === s.r && v2.eq(prev.c, s.c, 1e-9)) {
+      const d1 = prev.a1 - prev.a0;
+      const d2 = s.a1 - s.a0;
+      // Углы могут отличаться на целый оборот (ветвь atan2 у соседних вершин
+      // разная) — стык проверяется по модулю 2π, а не вычитанием «в лоб».
+      const dd = s.a0 - prev.a1;
+      const joined = Math.abs(dd - Math.round(dd / TAU) * TAU) < 1e-9;
+      if (joined && Math.sign(d1) === Math.sign(d2) && Math.abs(d1 + d2) < TAU - 1e-9) {
+        out[out.length - 1] = { k: 'A', c: prev.c, r: prev.r, a0: prev.a0, a1: prev.a0 + d1 + d2, to: s.to };
+        continue;
+      }
+    }
+    if (prev && prev.k === 'L' && s.k === 'L') {
+      const a = v2.norm(v2.sub(prev.to, out.length > 1 ? out[out.length - 2].to : from));
+      const b = v2.norm(v2.sub(s.to, prev.to));
+      if (Math.abs(v2.cross(a, b)) < 1e-9 && v2.dot(a, b) > 0) {
+        out[out.length - 1] = { k: 'L', to: s.to };
+        continue;
+      }
+    }
+    out.push(s);
+    cur = s.to;
+  }
+  return out;
 }
 
 function arcD(s) {
