@@ -208,12 +208,24 @@ export function polylinesFromD(d, tol = 0.01) {
   }).filter((p) => p.length > 2);
 }
 
-/** Извлечь из SVG-файла список {d, fillRule}. */
+/**
+ * Извлечь из SVG-файла список {d, fillRule} — ТОЛЬКО рисующие пути.
+ *
+ * Содержимое `<defs>`, `<clipPath>`, `<mask>`, `<symbol>` и `<pattern>` НЕ
+ * рисует: это определения. Шесть иконок корпуса несут
+ * `<defs><clipPath id="a"><path d="M0 0h24v24H0z"/></clipPath></defs>`, и
+ * наивная регулярка по `<path>` считала этот прямоугольник чернилами — то есть
+ * мерила у них залитую канву целиком. Один вырезанный кусок разметки, а метрика
+ * врала на 100%.
+ */
+const NON_RENDERING = /<(defs|clipPath|mask|symbol|pattern)\b[\s\S]*?<\/\1>/gi;
+
 export function pathsFromSvg(svg) {
   const out = [];
+  const drawable = svg.replace(NON_RENDERING, '');
   const re = /<path\b([^>]*)>/g;
   let m;
-  while ((m = re.exec(svg))) {
+  while ((m = re.exec(drawable))) {
     const attrs = m[1];
     const dm = /\sd="([^"]*)"/.exec(attrs);
     if (!dm) continue;

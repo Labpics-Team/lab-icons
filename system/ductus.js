@@ -285,6 +285,7 @@ export function counters(mask, o = {}) {
   return list
     .filter((c) => c.area / (ss * ss) > 0.05)
     .map((c) => {
+      if (o.light) return { area: Number((c.area / (ss * ss)).toFixed(2)), box: c.box.map((v) => Number((v / ss).toFixed(2))), maxCircle: null };
       const only = new Uint8Array(mask.length);
       for (let i = 0; i < labels.length; i++) if (labels[i] === c.id) only[i] = 1;
       const circ = inscribedCircles(only, { canvas, ss, count: 1, minR: 0.05 })[0] ?? null;
@@ -309,11 +310,14 @@ export function analyze(mask, o = {}) {
   return {
     parts: parts.sort((a, b) => b.area - a.area),
     pen: penProfile(mask, { canvas, ss }),
-    circles: inscribedCircles(mask, { canvas, ss, count: o.count ?? 16 }).map((c) => ({
+    // Упаковка окружностей — самая дорогая часть (по карте расстояний на круг),
+    // и для СВЕРКИ она не нужна: структуру задают куски, просветы, перо и
+    // калибр. Поэтому в лёгком режиме её не считаем.
+    circles: o.light ? [] : inscribedCircles(mask, { canvas, ss, count: o.count ?? 16 }).map((c) => ({
       c: c.c.map((v) => Number(v.toFixed(2))),
       r: Number(c.r.toFixed(3)),
     })),
-    counters: counters(mask, { canvas, ss }),
+    counters: counters(mask, { canvas, ss, light: o.light }),
     enclosing: enclosingCircle(mask, { canvas, ss }),
   };
 }
@@ -343,8 +347,8 @@ export function analyzePath(path, ss = 12) {
  *   enclosing — разный keyline. Значит глиф не того калибра.
  */
 export function ductusDiff(refMask, genMask, o = {}) {
-  const a = analyze(refMask, o);
-  const b = analyze(genMask, o);
+  const a = analyze(refMask, { ...o, light: true });
+  const b = analyze(genMask, { ...o, light: true });
   const issues = [];
   if (a.parts.length !== b.parts.length)
     issues.push(`кусков чернил: оригинал ${a.parts.length}, генерат ${b.parts.length}`);
