@@ -82,11 +82,19 @@ describe('модель пути', () => {
     expect(seg.r).toBeCloseTo(10, 9);
   });
 
-  it('зеркало меняет направление обхода дуги', () => {
-    const p = new Path().arcFrom([12, 12], 5, 0, Math.PI / 2);
-    const before = Math.sign(p.subs[0].segs[0].a1 - p.subs[0].segs[0].a0);
-    p.mirrorX(12);
-    expect(Math.sign(p.subs[0].segs[0].a1 - p.subs[0].segs[0].a0)).toBe(-before);
+  it('зеркало СОХРАНЯЕТ обход — иначе зеркальная часть гасит чернила', () => {
+    // Отражение переворачивает намотку; пока зеркалится путь целиком, это
+    // незаметно, но зеркальная ЧАСТЬ в одном пути с незеркальной складывается
+    // под nonzero в +1 − 1 = 0. Так у наушников гасла левая чашка.
+    const a = S.circle([9, 12], 4);
+    const before = Math.sign(a.subArea(0));
+    expect(Math.sign(a.mirrorX(12).subArea(0))).toBe(before);
+
+    // и проверка по существу: объединение фигуры с её зеркалом даёт чернила
+    // ВЕЗДЕ, где есть хоть одна из них, а не дырку в перекрытии
+    const band = S.circle([12, 12], 6);
+    const both = band.clone().add(S.circle([9, 12], 4).mirrorX(12));
+    expect(containsPoint(both, [12, 12]), 'перекрытие обязано остаться чернилами').toBe(true);
   });
 
   it('разворот подпути сохраняет геометрию и меняет знак площади', () => {

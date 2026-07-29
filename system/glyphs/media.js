@@ -655,7 +655,7 @@ function headphone(t, weight) {
   // чашка приходит в общий путь с обратной намоткой, и в месте, где она
   // накрывает обод, nonzero даёт +1 − 1 = 0 — чернила гаснут. Разворот
   // возвращает обход, и слои складываются, а не вычитаются.
-  p.add(cupShape(t, weight).mirrorX(t.cx).reverse());
+  p.add(cupShape(t, weight).mirrorX(t.cx));
   return p;
 }
 

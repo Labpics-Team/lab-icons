@@ -18,10 +18,21 @@
  * У musical-notes флаг разворачивается в БАЛКУ: тот же наклон, но вместо
  * разворота — скруглённый угол во вторую ножку, и второй прогон идёт
  * параллельно на канальном зазоре. Головы, ножки и наклон — те же числа.
+ *
+ * ЛЕВАЯ НОЖКА, БАЛКА И ПРАВАЯ НОЖКА — ОДИН ШТРИХ, А НЕ ТРИ. Разбор контура
+ * оригинала показывает два локтя ОДНОГО скелетного радиуса 2.0 (= corner.detail),
+ * и это не подгон: рука выписала радиусы буквально. Наружная дуга правого локтя
+ * в `d` — `a2.9 2.9`, то есть 2.0 + перо/2; внутренняя дуга левого локтя в
+ * счётчике балки — `a1.1 1.1`, то есть 2.0 − перо/2. Разность 2.9 − 1.1 = 1.8 =
+ * перо. Точки касания, посчитанные из этой модели, ложатся на записанные рукой
+ * концы наружного филета (8.26, 6.91) и (10.386, 4.118) против (8.25, 6.92) и
+ * (10.38, 4.12) — расхождение 0.01. При радиусе 1.8 или 2.15 те же точки уезжают
+ * на 0.11…0.16, так что радиус пинается замером, а не вкусом.
  */
 
 import { defineGlyph } from '../registry.js';
 import { Path } from '../core/path.js';
+import { v2 } from '../core/num.js';
 import * as S from '../prim/shape.js';
 import { strokePath, strokeSegment } from '../prim/stroke.js';
 
@@ -37,15 +48,19 @@ const D = (deg) => (deg * Math.PI) / 180;
  *   stemOffset 2.07 — расстояние от центра головы до осевой ножки. Замер:
  *     11.29 − 9.23 = 2.06 (одна нота) и 9.18 − 7.11 = 2.07 (две ноты).
  *     Одно число на два независимых глифа — это закон, а не совпадение.
- *   beamTilt ≈ −14.5° — наклон флага и балки. Замер: −14.6° у флага,
- *     −14.9° у балки.
+ *   beamTilt −15.48° — наклон балки, снятый с ОСИ верхнего штриха: наружная
+ *     верхняя кромка проходит через (10.38, 4.12) и (16.30, 2.48), это −15.49°,
+ *     кромка счётчика под ней — −15.53°. Нижний штрих у руки идёт на 0.6°
+ *     положе (−14.85° и −14.91° по двум своим кромкам), то есть плечи балки у
+ *     руки НЕ параллельны. Система обязана выбрать один закон: взят наклон
+ *     верхнего штриха, потому что именно он несёт оба локтя и обе ножки.
  */
 export const NOTE = Object.freeze({
   headRx: 2.21,
   headTilt: -17.3,
   stemOffset: 2.07,
   flagTilt: -14.44,
-  beamTilt: -14.9,
+  beamTilt: -15.48,
 });
 
 /** Голова: обводка наклонного эллипса. Полуось ry — само перо. */
@@ -59,164 +74,217 @@ function head(t, c, rot = NOTE.headTilt) {
 }
 
 /**
- * ШПИЛЬКА — прогон, разворот на 180° наружу, прогон обратно на ту же ось.
+ * ШПИЛЬКА — прогон, разворот на 180° наружу, прогон обратно НА ТУ ЖЕ ОСЬ.
  * Радиус разворота выводится из негативного канала между прогонами:
  *     rTurn = (канал + перо) / 2
- * Канал у руки 1.50 — это вес кольца-обрамления, ближайший канонический
- * зазор снизу от «негатив ≈ штрих».
+ * Канал у руки 1.49 (перпендикуляр между кромками счётчика флага) — это вес
+ * кольца-обрамления, ближайший канонический зазор снизу от «негатив ≈ штрих».
+ * Проверка радиуса: у руки наружная дуга разворота `a2.54`, внутренняя `a0.74`,
+ * разность ровно перо, полусумма 1.64 против выведенных (1.5 + 1.8)/2 = 1.65.
+ *
+ * «На ту же ось» — не украшение формулировки, а условие целости штриха.
+ * Обратный прогон длиной в прямой обрывается ПРАВЕЕ оси ножки (у одиночной
+ * ноты на 0.82), и тогда его наклонный торец углом вылезает из ножки: щель
+ * шириной в десятую единицы, которую площадь не видит вовсе.
  */
-function hairpin(start, tiltDeg, len, channel, pen) {
+function hairpinGeom(start, tiltDeg, len, channel, pen) {
   const d = [Math.cos(D(tiltDeg)), Math.sin(D(tiltDeg))];
   const n = [-d[1], d[0]];
   const rTurn = (channel + pen) / 2;
-  const P1 = [start[0] + d[0] * len, start[1] + d[1] * len];
-  const C = [P1[0] + n[0] * rTurn, P1[1] + n[1] * rTurn];
-  const a0 = Math.atan2(P1[1] - C[1], P1[0] - C[0]);
-  const P2 = [2 * C[0] - P1[0], 2 * C[1] - P1[1]];
-  return new Path()
-    .move(start)
-    .line(P1)
-    .arc(C, rTurn, a0, a0 + Math.PI)
-    .line([P2[0] - d[0] * len, P2[1] - d[1] * len]);
+  const P1 = v2.mad(start, d, len);
+  const C = v2.mad(P1, n, rTurn);
+  const P2 = v2.mad(C, n, rTurn);
+  const back = [start[0], P2[1] - (P2[0] - start[0]) * (d[1] / d[0])];
+  return { d, n, rTurn, P1, C, P2, back, mid: [start[0], (start[1] + back[1]) / 2] };
+}
+
+/** Дописать шпильку к уже начатому скелету (текущая точка = начало шпильки). */
+function hairpinTo(path, g) {
+  const a0 = Math.atan2(g.P1[1] - g.C[1], g.P1[0] - g.C[0]);
+  return path.line(g.P1).arc(g.C, g.rTurn, a0, a0 + Math.PI).line(g.back);
 }
 
 /**
- * Сплошной флаг = ТА ЖЕ шпилька, залитая внутри. Доказательство выводимости:
- * внешняя дуга разворота у руки r = 2.54, а (канал + 2·перо)/2 = (1.5 + 3.6)/2
- * = 2.55. То есть заливка получается штрихом по ОСИ шпильки пером во всю её
- * ширину — вторую фигуру рисовать не нужно.
+ * Одиночная нота: голова + ножка + флаг. Замеры `musical-note.svg`:
+ *   stemX 11.29 — кромки ножки 10.39 и 12.19, ширина ровно перо;
+ *   flagStart 4.45 — ордината, на которой ОСЬ верхнего прогона флага пересекает
+ *     ось ножки: наружная верхняя кромка флага проходит через (11.60, 3.44) и
+ *     (14.67, 2.64), на x = 11.29 это y = 3.521, плюс перо/2 по нормали → 4.450;
+ *   flagLen 3.74 — проверка: центр разворота выходит в (15.324, 5.115) против
+ *     записанного рукой (15.32, 5.10).
  */
-function hairpinSolid(start, tiltDeg, len, channel, pen) {
-  const d = [Math.cos(D(tiltDeg)), Math.sin(D(tiltDeg))];
-  const n = [-d[1], d[0]];
-  const rTurn = (channel + pen) / 2;
-  const R = channel / 2 + pen; // половина полной ширины шпильки
-  const P1 = [start[0] + d[0] * len, start[1] + d[1] * len];
-  const C = [P1[0] + n[0] * rTurn, P1[1] + n[1] * rTurn];
-  const A = [start[0] + n[0] * rTurn, start[1] + n[1] * rTurn];
-  const aTop = Math.atan2(-n[1], -n[0]);
-  return new Path()
-    .move([A[0] - n[0] * R, A[1] - n[1] * R])
-    .line([C[0] - n[0] * R, C[1] - n[1] * R])
-    .arc(C, R, aTop, aTop + Math.PI)
-    .line([A[0] + n[0] * R, A[1] + n[1] * R])
-    .close();
-}
+export const SINGLE = Object.freeze({ headC: [9.23, 19.61], stemX: 11.29, flagStart: 4.45, flagLen: 3.74 });
 
-/** Одиночная нота: голова + ножка + флаг. Замеры `musical-note.svg`. */
-export const SINGLE = Object.freeze({ headC: [9.23, 19.61], stemX: 11.29, stemTop: 4.0, flagStart: 4.45, flagLen: 3.74 });
+/** Скелет одиночной ноты: ножка и флаг — ОДИН штрих с локтем наверху. */
+function noteSpine(t, pen) {
+  const start = [SINGLE.stemX, SINGLE.flagStart];
+  const g = hairpinGeom(start, NOTE.flagTilt, SINGLE.flagLen, t.stroke.ring, pen);
+  const spine = new Path().move([SINGLE.stemX, SINGLE.headC[1]]).line(start);
+  return { spine: hairpinTo(spine, g), g };
+}
 
 defineGlyph('musical-note', {
   family: 'music',
   law:
-    'голова — обводка наклонного эллипса (полуоси 2.21 × перо, наклон −17.3°); ножка — ' +
-    'прямой штрих на 2.07 правее центра головы, от y = 4 до центра головы; флаг — ШПИЛЬКА: ' +
-    'прогон под −14.44°, разворот 180° радиусом (канал + перо)/2, прогон обратно. Канал 1.5',
+    'голова — обводка наклонного эллипса (полуоси 2.21 × перо, наклон −17.3°); ножка и флаг — ' +
+    'ОДИН штрих: вертикаль от центра головы вверх, локоть штрихового сустава, прогон под −14.44°, ' +
+    'разворот 180° радиусом (канал + перо)/2 и прогон обратно на ось ножки. Канал 1.5 = вес кольца',
   argument:
-    'Outline 2.7%, Filled 2.1% — оба под порогом. Остаток лежит на стыке ножки с головой ' +
-    'и на верхнем плече флага: рука сводит их кривыми Безье переменной кривизны, система — ' +
-    'точным круглым суставом пера. Наибольший кластер расхождения 0.24 ед² при площади ' +
-    'чернил около 60 ед².',
+    'остаток лежит на голове: рука рисует её скруглённым четырёхугольником (в `d` дуги ' +
+    '2.67 · 2.4 · 2.3 и фаска 0.5), система — обводкой наклонного эллипса. Ножка и флаг после ' +
+    'сборки в один штрих сходятся с рукой по построению: центр разворота (15.323, 5.115) против ' +
+    'записанного рукой (15.32, 5.10), наружная дуга разворота 2.55 против `a2.54`. Локоть ножки ' +
+    'здесь — обычный штриховой сустав corner.elbow: рука сводит вертикаль с флагом филетом, чей ' +
+    'наружный радиус по хорде (10.39, 5.01)→(11.60, 3.44) при повороте 75.4° равен 1.62, то есть ' +
+    '0.90 пера — середина корпусной полосы 0.85…1.00, из которой токен и выведен.',
   outline: (t) => {
     const pen = t.stroke.glyph;
     const p = head(t, SINGLE.headC);
-    p.add(strokeSegment([SINGLE.stemX, SINGLE.stemTop], [SINGLE.stemX, SINGLE.headC[1]], pen, { cap: 'butt' }));
-    p.add(
-      strokePath(
-        hairpin([SINGLE.stemX, SINGLE.flagStart], NOTE.flagTilt, SINGLE.flagLen, t.stroke.ring, pen),
-        pen,
-        { cap: 'butt' },
-      ),
-    );
+    p.add(strokePath(noteSpine(t, pen).spine, pen, { joint: t.corner, cap: 'butt' }));
     return p;
   },
-  /** Filled — тот же силуэт без счётчиков: голова становится диском, шпилька заливается. */
+  /**
+   * Filled — тот же скелет, счётчик флага заполнен: штрих по середине канала во
+   * всю его ширину (канал + перо) плюс диск того же радиуса в центре разворота,
+   * которым закрывается полукруглый носик счётчика. Торец заполнителя доведён до
+   * ОСИ ножки и потому целиком лежит в её чернилах.
+   */
   filled: (t) => {
     const pen = t.stroke.base;
     const h = pen / 2;
+    const { spine, g } = noteSpine(t, pen);
     const p = S.ellipse(SINGLE.headC, NOTE.headRx + h, pen + h, D(NOTE.headTilt));
-    p.add(strokeSegment([SINGLE.stemX, SINGLE.stemTop], [SINGLE.stemX, SINGLE.headC[1]], pen, { cap: 'butt' }));
-    p.add(hairpinSolid([SINGLE.stemX, SINGLE.flagStart], NOTE.flagTilt, SINGLE.flagLen, t.stroke.ring, pen));
+    p.add(strokePath(spine, pen, { joint: t.corner, cap: 'butt' }));
+    p.add(strokeSegment(g.mid, g.C, t.stroke.ring + pen, { cap: 'butt' }));
+    p.add(S.circle(g.C, (t.stroke.ring + pen) / 2));
     return p;
   },
 });
 
-/** Пара нот под балкой. Замеры `musical-notes.svg`. */
+/**
+ * Пара нот под балкой. Все числа — замеры контура `musical-notes.svg`.
+ *
+ *   leftStemX 9.16  — кромки ножки 8.25 и 10.07, ширина 1.82 ≈ перо;
+ *   rightStemX 19.08 — кромки 18.18 и 19.98, ширина 1.80 = перо ровно;
+ *   beamY 5.39 — ордината, на которой ОСЬ верхнего штриха балки пересекает ось
+ *     левой ножки (виртуальный угол локтя): ось = наружная кромка, сдвинутая
+ *     внутрь на перо/2, и в точке x = 9.16 она даёт y = 5.392.
+ */
 export const PAIR = Object.freeze({
-  leftStemX: 9.18,
+  leftStemX: 9.16,
   rightStemX: 19.08,
   leftHeadY: 19.36,
   rightHeadY: 17.24,
-  beamY: 5.32,
-  /** Негативный канал между двумя штрихами балки. Замер 1.70. */
-  channel: 1.77,
-  /** Скругление угла «балка → правая ножка», по скелету. Замер 2.15. */
-  corner: 2.15,
+  beamY: 5.39,
+  /**
+   * Негативный канал между двумя штрихами балки. Замер по перпендикуляру между
+   * кромками счётчика: 1.714 у левого конца и 1.781 у правого — канал у руки
+   * расширяется, потому что её плечи балки расходятся на 0.6°. Взято среднее.
+   */
+  channel: 1.75,
 });
+
+/**
+ * ГЕОМЕТРИЯ БАЛКИ — общая для обоих начертаний, считается один раз.
+ *
+ * `axisY(x)` — ось ВЕРХНЕГО штриха балки. `C1`/`C2` — центры локтей: каждый
+ * стоит на расстоянии r от оси своей ножки по горизонтали и на том же r от оси
+ * балки по нормали, что и есть определение галтели, вписанной в угол. Радиус r
+ * берётся из токена детали, а не объявляется здесь.
+ */
+function beamGeom(t) {
+  const P = PAIR;
+  const th = D(NOTE.beamTilt);
+  const d = [Math.cos(th), Math.sin(th)];
+  const n = [-d[1], d[0]]; // нормаль в сторону нижнего штриха
+  const r = t.corner.detail;
+  const axisY = (x) => P.beamY + (x - P.leftStemX) * Math.tan(th);
+  const drop = 1 / Math.cos(th); // перпендикулярный отступ → вертикальный
+  const C1 = [P.leftStemX + r, axisY(P.leftStemX + r) + r * drop];
+  const C2 = [P.rightStemX - r, axisY(P.rightStemX - r) + r * drop];
+  return { P, d, n, r, axisY, drop, C1, C2, aBeam: Math.atan2(-n[1], -n[0]) + 2 * Math.PI };
+}
+
+/**
+ * СКЕЛЕТ «левая ножка → локоть → балка → локоть → правая ножка» — один путь.
+ * Именно неразрывность и убирает пережим: два штриха, поставленные встык под
+ * углом, оставляют у наружного локтя шип, а у внутреннего — щель.
+ */
+function beamSpine(g) {
+  const { P, n, r, C1, C2, aBeam } = g;
+  return new Path()
+    .move([P.leftStemX, P.leftHeadY])
+    .line([P.leftStemX, C1[1]])
+    .arc(C1, r, Math.PI, aBeam)
+    .line(v2.mad(C2, n, -r))
+    .arc(C2, r, aBeam, 2 * Math.PI)
+    .line([P.rightStemX, P.rightHeadY]);
+}
+
+/**
+ * НИЖНИЙ ШТРИХ БАЛКИ. Оба конца доведены до ОСЕЙ ножек, а не до их кромок:
+ * торец с обрезанным терминалом наклонён к балке, и если поставить его на
+ * кромку, углы торца вылезают из ножки — это и был пережим 0.167 ед.
+ */
+function beamLower(g, pen) {
+  const { P, axisY, drop } = g;
+  const dy = (P.channel + pen) * drop;
+  return strokeSegment(
+    [P.leftStemX, P.beamY + dy],
+    [P.rightStemX, axisY(P.rightStemX) + dy],
+    pen,
+    { cap: 'butt' },
+  );
+}
 
 defineGlyph('musical-notes', {
   family: 'music',
   law:
-    'та же анатомия в двух экземплярах: две головы (эллипс-кольцо, наклон −17.3°), две ножки ' +
-    'на 2.07 правее своих голов, и БАЛКА вместо флага — два параллельных штриха под −14.9° ' +
-    'с негативным каналом между ними; верхний уходит в правую ножку скруглённым углом',
+    'та же анатомия в двух экземплярах: две головы (эллипс-кольцо, наклон −17.3°) и две ножки ' +
+    'на 2.07 правее своих голов. Левая ножка, БАЛКА и правая ножка — ОДИН непрерывный штрих: ' +
+    'вертикаль, локоть скелетным радиусом corner.detail, прогон под −15.48°, второй локоть тем же ' +
+    'радиусом, вертикаль вниз. Второй штрих балки идёт параллельно на (канал + перо) по нормали ' +
+    'и обоими торцами упирается в ОСИ ножек, чтобы торец целиком лежал в чернилах ножки. ' +
+    'Filled — тот же скелет, канал заполнен штрихом по своей середине во всю ширину канал + перо',
   argument:
-    'остаточные 3.6% — стык балки с левой ножкой: рука сводит их филетом переменной кривизны, ' +
-    'система ставит встык двух штрихов. Кластеры расхождения все меньше 0.3 ед² при площади ' +
-    'чернил около 105 ед². Головы, ножки и наклоны совпали с одиночной нотой до сотых — ' +
-    'это и есть доказательство, что глифов здесь один, а не два.',
+    'остаток лежит на головах: рука рисует голову скруглённым четырёхугольником (в `d` дуги ' +
+    '2.65 · 2.4 · 2.3 и фаска 0.5), система — обводкой наклонного эллипса. Балка и ножки после ' +
+    'сборки в один штрих совпали по построению: наружная дуга правого локтя у руки `a2.9 2.9`, ' +
+    'внутренняя дуга левого локтя в счётчике `a1.1 1.1`, разность ровно перо — обе выводятся из ' +
+    'скелетного радиуса corner.detail = 2, и точки касания сходятся с записью руки до 0.01 ед.',
   outline: (t) => {
+    const g = beamGeom(t);
     const pen = t.stroke.glyph;
-    const P = PAIR;
-    const tilt = Math.tan(D(NOTE.beamTilt));
-    const p = new Path();
-
-    // верхний штрих балки: от левой ножки вправо и скруглённым углом вниз в правую
-    const C = [P.rightStemX - P.corner, P.beamY + (P.rightStemX - P.corner - P.leftStemX) * tilt + P.corner];
-    const upper = new Path()
-      .move([P.leftStemX, P.beamY])
-      .line([C[0], C[1] - P.corner])
-      .arc(C, P.corner, -Math.PI / 2, 0)
-      .line([P.rightStemX, P.rightHeadY]);
-    p.add(strokePath(upper, pen, { cap: 'butt' }));
-
-    // нижний штрих балки — параллельно, на (канал + перо) по нормали
-    const n = [Math.sin(D(-NOTE.beamTilt)), Math.cos(D(NOTE.beamTilt))];
-    const off = P.channel + pen;
-    const endX = P.rightStemX - pen / 2;
-    p.add(
-      strokeSegment(
-        [P.leftStemX + n[0] * off, P.beamY + n[1] * off],
-        [endX + n[0] * off, P.beamY + (endX - P.leftStemX) * tilt + n[1] * off],
-        pen,
-        { cap: 'butt' },
-      ),
-    );
-
-    // левая ножка и обе головы
-    p.add(strokeSegment([P.leftStemX, P.beamY], [P.leftStemX, P.leftHeadY], pen, { cap: 'butt' }));
-    p.add(head(t, [P.leftStemX - NOTE.stemOffset, P.leftHeadY]));
-    p.add(head(t, [P.rightStemX - NOTE.stemOffset, P.rightHeadY]));
+    const p = strokePath(beamSpine(g), pen, { cap: 'butt' });
+    p.add(beamLower(g, pen));
+    p.add(head(t, [PAIR.leftStemX - NOTE.stemOffset, PAIR.leftHeadY]));
+    p.add(head(t, [PAIR.rightStemX - NOTE.stemOffset, PAIR.rightHeadY]));
     return p;
   },
-  /** Filled — тот же силуэт без счётчиков: головы диски, балка залита целиком. */
+  /**
+   * Filled — тот же силуэт без счётчиков. Контур оригинала Filled совпадает с
+   * наружным контуром Outline (те же дуги 2.9 · 2.3 · 2.64 · 2.4 и те же
+   * координаты), поэтому перо здесь остаётся Regular: жирнеют не штрихи, а
+   * заполняется счётчик. Заполнитель идёт по середине канала пером «канал +
+   * перо» — на пол-пера залезает в каждый из соседних штрихов, а торцами
+   * остаётся внутри ножек.
+   */
   filled: (t) => {
     const pen = t.stroke.base;
     const h = pen / 2;
+    const g = beamGeom(t);
     const P = PAIR;
-    const tilt = Math.tan(D(NOTE.beamTilt));
-    const n = [Math.sin(D(-NOTE.beamTilt)), Math.cos(D(NOTE.beamTilt))];
-    const mid = (P.channel + pen) / 2;
-    const p = new Path();
-    const C = [P.rightStemX - P.corner, P.beamY + (P.rightStemX - P.corner - P.leftStemX) * tilt + P.corner];
-    const upper = new Path()
-      .move([P.leftStemX + n[0] * mid, P.beamY + n[1] * mid])
-      .line([C[0] + n[0] * mid, C[1] - P.corner + n[1] * mid]);
-    p.add(strokePath(upper, P.channel + 2 * pen, { cap: 'butt' }));
-    const spine = new Path().move([C[0] + P.corner, C[1]]).arc(C, P.corner, 0, -Math.PI / 2).line([P.leftStemX, P.beamY]);
-    p.add(strokePath(spine, pen, { cap: 'butt' }));
-    p.add(strokeSegment([P.rightStemX, C[1]], [P.rightStemX, P.rightHeadY], pen, { cap: 'butt' }));
-    p.add(strokeSegment([P.leftStemX, P.beamY], [P.leftStemX, P.leftHeadY], pen, { cap: 'butt' }));
+    const p = strokePath(beamSpine(g), pen, { cap: 'butt' });
+    p.add(beamLower(g, pen));
+    const mid = ((P.channel + pen) / 2) * g.drop;
+    p.add(
+      strokeSegment(
+        [P.leftStemX, P.beamY + mid],
+        [P.rightStemX, g.axisY(P.rightStemX) + mid],
+        P.channel + pen,
+        { cap: 'butt' },
+      ),
+    );
     p.add(S.ellipse([P.leftStemX - NOTE.stemOffset, P.leftHeadY], NOTE.headRx + h, pen + h, D(NOTE.headTilt)));
     p.add(S.ellipse([P.rightStemX - NOTE.stemOffset, P.rightHeadY], NOTE.headRx + h, pen + h, D(NOTE.headTilt)));
     return p;

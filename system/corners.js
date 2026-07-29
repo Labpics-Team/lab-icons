@@ -29,6 +29,7 @@ import { edgesOfD, edgesOfPath, tangent, curvature, pointAt, edgeLen } from './c
 import { v2 } from './core/num.js';
 
 const DEG = 180 / Math.PI;
+const TAU = Math.PI * 2;
 
 /**
  * Кривизна, выше которой участок контура считается УГЛОВЫМ. 0.2 = радиус 5:
@@ -319,24 +320,269 @@ const r2 = (x) => Math.round(x * 100) / 100;
 
 /** Спектр по чужому d. */
 export const spectrumOfD = (d) => spectrum(edgesOfD(d));
+/**
+ * Спектр по НЕСКОЛЬКИМ `d` одного файла — по одному на каждый `<path>`.
+ *
+ * Склеивать `d` разных элементов в одну строку нельзя: относительный `m`
+ * первой командой отсчитывается от НАЧАЛА КООРДИНАТ, а после склейки попадает
+ * в хвост предыдущего пути и уезжает вместе с ним. На корпусе это ловится
+ * сразу: у `headphone_filled` два подпути уходили в (35…42, 24…34) — за
+ * пределы канвы 24, — и спектр руки в этих местах был выдумкой прибора.
+ */
+export const spectrumOfDs = (ds) => spectrum(ds.flatMap((d) => edgesOfD(d)));
 /** Спектр по системному пути. */
 export const spectrumOfPath = (p) => spectrum(edgesOfPath(p));
+
+/* ── СИЛУЭТ: сверка того, что НАРИСОВАНО, а не того, что записано ─────────
+ *
+ * Спектр снимается с ПОДПУТЕЙ, а глаз видит их ЗАЛИВКУ. Пока фигура — один
+ * контур, это одно и то же; как только в дело идёт nonzero, расходится:
+ *
+ *   • система кладёт клин на древко и полагается на заливку — у руки в месте
+ *     стыка два вогнутых узла, у системы в этом месте узла нет ни одного,
+ *     хотя силуэт совпадает до пикселя;
+ *   • угол одного подпути уходит ПОД чернила другого и не виден вовсе
+ *     (у `turn-off` дуговая полоса ломается на 90° ровно под колпачком-диском,
+ *     который к ней касателен: на экране — круглый терминал);
+ *   • рука пишет скругление составом `a3.6/a3.3/a3.6`, система — одной дугой.
+ *
+ * Во всех трёх случаях РИСУНОК один, а записи разные, и «угол потерян» —
+ * ложь прибора. Отличить их от настоящего дефекта можно только замером самого
+ * силуэта, и он здесь такой: доля окружности радиуса ρ вокруг узла, покрытая
+ * чернилами. Мера не зависит от того, чем и в сколько приёмов нарисовано:
+ * у гладкого места ровно половина, у выпуклого угла Θ — (180−Θ)/360, у
+ * вогнутого — (180+Θ)/360. Сравниваются не доли, а сами кольца поточечно:
+ * так рядом стоящая деталь не сойдёт за совпадение.
+ */
+
+/** Радиусы колец: мелкое ловит остроту, крупное — скелет. */
+const RING_R = [0.15, 0.35, 0.7];
+/** Отсчётов по кольцу; 120 = шаг 3°. */
+const RING_K = 120;
+/** Доля кольца, разошедшаяся сверх которой считается разным рисунком (6° ≈ 2 отсчёта). */
+const RING_TOL = 0.05;
+/**
+ * Допуск ПОСАДКИ узла. Рука дребезжит сама: у `chevron-down` два терминала
+ * ОДНОГО штриха стоят на 0.063 друг от друга, а вердикт `registration` в
+ * metrics.js считает сходимостью медиану смещения 0.06. Взято вдвое —
+ * смещение узла до 0.12 ед (6.7% пера) не является потерей угла, это посадка,
+ * и меряет её площадная метрика, а не спектр.
+ */
+const RING_FIT = 0.12;
+
+/** Плоские отрезки силуэта: ломаные ВСЕХ подпутей фигуры. */
+export function figureSegs(subs, step = 0.04) {
+  const segs = [];
+  for (const sub of subs) {
+    const pts = [];
+    for (const e of sub.edges) {
+      const L = edgeLen(e);
+      if (L < 1e-7) continue;
+      const m = Math.max(2, Math.ceil(L / step));
+      for (let q = 0; q < m; q++) pts.push(pointAt(e, q / m));
+    }
+    for (let i = 0; i < pts.length; i++) {
+      const a = pts[i];
+      const b = pts[(i + 1) % pts.length];
+      segs.push([a[0], a[1], b[0], b[1]]);
+    }
+  }
+  return segs;
+}
+
+/** Намотка nonzero в точке — лучом вправо по всей фигуре. */
+function windingAt(segs, x, y) {
+  let w = 0;
+  for (let i = 0; i < segs.length; i++) {
+    const s = segs[i];
+    if (s[1] <= y) {
+      if (s[3] > y && (s[2] - s[0]) * (y - s[1]) - (x - s[0]) * (s[3] - s[1]) > 0) w++;
+    } else if (s[3] <= y && (s[2] - s[0]) * (y - s[1]) - (x - s[0]) * (s[3] - s[1]) < 0) w--;
+  }
+  return w;
+}
+
+/** Отрезки, попадающие в круг радиуса rad вокруг c (для локального счёта). */
+function nearSegs(segs, c, rad) {
+  const out = [];
+  for (let i = 0; i < segs.length; i++) {
+    const s = segs[i];
+    if (Math.min(s[0], s[2]) > c[0] + rad || Math.max(s[0], s[2]) < c[0] - rad) continue;
+    if (Math.min(s[1], s[3]) > c[1] + rad || Math.max(s[1], s[3]) < c[1] - rad) continue;
+    out.push(s);
+  }
+  return out;
+}
+
+/**
+ * Приращение намотки на пути из c в q. Считается по ЛОКАЛЬНЫМ отрезкам: луч
+ * в бесконечность требует всей фигуры, короткий отрезок — только соседей.
+ */
+function windingDelta(local, cx, cy, qx, qy) {
+  const rx = qx - cx;
+  const ry = qy - cy;
+  let d = 0;
+  for (let i = 0; i < local.length; i++) {
+    const s = local[i];
+    const sx = s[2] - s[0];
+    const sy = s[3] - s[1];
+    const den = rx * sy - ry * sx;
+    if (den === 0) continue;
+    const ax = s[0] - cx;
+    const ay = s[1] - cy;
+    const t = (ax * sy - ay * sx) / den;
+    if (t < 0 || t >= 1) continue;
+    const u = (ax * ry - ay * rx) / den;
+    if (u < 0 || u >= 1) continue;
+    d += den > 0 ? -1 : 1;
+  }
+  return d;
+}
+
+/** Расстояние от точки до ближайшего из отрезков. */
+function distToSegs(segs, x, y) {
+  let best = Infinity;
+  for (let i = 0; i < segs.length; i++) {
+    const s = segs[i];
+    const vx = s[2] - s[0];
+    const vy = s[3] - s[1];
+    const l2 = vx * vx + vy * vy;
+    let t = l2 ? ((x - s[0]) * vx + (y - s[1]) * vy) / l2 : 0;
+    t = t < 0 ? 0 : t > 1 ? 1 : t;
+    const d = (s[0] + t * vx - x) ** 2 + (s[1] + t * vy - y) ** 2;
+    if (d < best) best = d;
+  }
+  return Math.sqrt(best);
+}
+
+/**
+ * Битовая карта покрытия чернилами окружности радиуса rho вокруг c.
+ *
+ * Намотка считается ОДИН раз лучом в бесконечность — в якорном отсчёте, — а
+ * дальше переносится по кольцу локальным счётом пересечений хорды. Якорем
+ * берётся отсчёт, отстоящий от контура ДАЛЬШЕ прочих: на самом контуре намотка
+ * не определена, а ошибка в якоре перевернула бы всё кольцо целиком. Центр
+ * кольца якорем быть не может по этой же причине — он лежит на контуре всегда.
+ */
+function ringMask(all, local, cx, cy, rho) {
+  const px = new Float64Array(RING_K);
+  const py = new Float64Array(RING_K);
+  for (let i = 0; i < RING_K; i++) {
+    const a = (i / RING_K) * TAU;
+    px[i] = cx + rho * Math.cos(a);
+    py[i] = cy + rho * Math.sin(a);
+  }
+  let anchor = 0;
+  let far = -1;
+  for (let i = 0; i < RING_K; i += 4) {
+    const d = distToSegs(local, px[i], py[i]);
+    if (d > far) {
+      far = d;
+      anchor = i;
+    }
+  }
+  const b = new Uint8Array(RING_K);
+  let w = windingAt(all, px[anchor], py[anchor]);
+  b[anchor] = w !== 0 ? 1 : 0;
+  for (let k = 1; k < RING_K; k++) {
+    const i = (anchor + k) % RING_K;
+    const j = (anchor + k - 1) % RING_K;
+    w += windingDelta(local, px[j], py[j], px[i], py[i]);
+    b[i] = w !== 0 ? 1 : 0;
+  }
+  return b;
+}
+
+const ringXor = (a, b) => {
+  let n = 0;
+  for (let i = 0; i < RING_K; i++) if (a[i] !== b[i]) n++;
+  return n / RING_K;
+};
+
+/**
+ * ОДИН ЛИ РИСУНОК в точке p у двух фигур.
+ *
+ * Возвращает наименьшее расхождение колец, достижимое сдвигом второй фигуры не
+ * дальше RING_FIT. Сдвиг обязателен: без него посадочный дребезг руки в сотые
+ * доли единицы читался бы как потерянный угол — на кольце радиуса 0.15 сдвиг
+ * 0.1 съедает треть окружности.
+ */
+export function silhouetteMismatch(aSegs, bSegs, p) {
+  const rmax = RING_R[RING_R.length - 1];
+  const aLocal = nearSegs(aSegs, p, rmax + 0.05);
+  const bLocal = nearSegs(bSegs, p, rmax + RING_FIT + 0.05);
+  const A = RING_R.map((r) => ringMask(aSegs, aLocal, p[0], p[1], r));
+  const at = (dx, dy) => {
+    let w = 0;
+    for (let k = 0; k < RING_R.length; k++) {
+      w = Math.max(w, ringXor(A[k], ringMask(bSegs, bLocal, p[0] + dx, p[1] + dy, RING_R[k])));
+      if (w > 0.5) break;
+    }
+    return w;
+  };
+  let best = at(0, 0);
+  // Посадка ищется по двум кольцам смещений внутри круга RING_FIT: 16 проб
+  // вместо сетки — расхождение по сдвигу гладкое, минимум не прячется.
+  for (const rad of [RING_FIT / 2, RING_FIT]) {
+    if (best <= RING_TOL) break;
+    for (let i = 0; i < 8; i++) {
+      const a = (i / 8) * TAU;
+      const w = at(rad * Math.cos(a), rad * Math.sin(a));
+      if (w < best) best = w;
+      if (best <= RING_TOL) break;
+    }
+  }
+  return best;
+}
+
+/** Ближайшая к p точка НА ломаных фигуры: вершина угла — экстраполяция и может висеть в воздухе. */
+function snapToSegs(segs, p) {
+  let bd = Infinity;
+  let bp = p;
+  for (let i = 0; i < segs.length; i++) {
+    const s = segs[i];
+    const vx = s[2] - s[0];
+    const vy = s[3] - s[1];
+    const l2 = vx * vx + vy * vy;
+    let t = l2 ? ((p[0] - s[0]) * vx + (p[1] - s[1]) * vy) / l2 : 0;
+    t = t < 0 ? 0 : t > 1 ? 1 : t;
+    const qx = s[0] + t * vx;
+    const qy = s[1] + t * vy;
+    const d = (qx - p[0]) ** 2 + (qy - p[1]) ** 2;
+    if (d < bd) {
+      bd = d;
+      bp = [qx, qy];
+    }
+  }
+  return bp;
+}
 
 /**
  * СВЕРКА СПЕКТРОВ. Углы сопоставляются по положению вершины; вершина —
  * пересечение прилежащих прямых, она не зависит от радиуса скругления, поэтому
  * пара «рука/генерат» находится даже когда радиусы разошлись вдвое.
+ *
+ * Непарные углы (потерянные и лишние) перед тем, как стать претензией,
+ * ПРОВЕРЯЮТСЯ ПО СИЛУЭТУ — если фигуры в этом месте нарисованы одинаково,
+ * разошлись не они, а записи, и претензии нет. Для проверки нужны сами
+ * фигуры: `o.refSubs`/`o.genSubs` (нормализованные подпути из contour.js).
+ * Без них сверка работает как раньше, но честно сообщает, что силуэт не
+ * смотрела — счётчик `unchecked`.
  */
 export function cornerDiff(ref, gen, o = {}) {
   const tol = o.tol ?? 1.6;
   const used = new Set();
   const pairs = [];
+  // Кольцо — не угол, а его ОТСУТСТВИЕ: `at` у него равен первому отсчёту
+  // гладкого контура, то есть месту, с которого автор начал писать путь.
+  // Сопоставлять кольца по положению — сравнивать записи, а не фигуры.
+  const skip = (c) => c.kind === 'колпачок' || c.kind === 'кольцо';
   for (const a of ref) {
-    if (a.kind === 'колпачок') continue;
+    if (skip(a)) continue;
     let best = -1;
     let bd = tol;
     for (let i = 0; i < gen.length; i++) {
-      if (used.has(i) || gen[i].kind === 'колпачок') continue;
+      if (used.has(i) || skip(gen[i])) continue;
       const d = v2.dist(a.at, gen[i].at);
       if (d < bd) {
         bd = d;
@@ -349,7 +595,7 @@ export function cornerDiff(ref, gen, o = {}) {
     } else pairs.push({ ref: a, gen: null, dist: null });
   }
   for (let i = 0; i < gen.length; i++) {
-    if (!used.has(i) && gen[i].kind !== 'колпачок') pairs.push({ ref: null, gen: gen[i], dist: null });
+    if (!used.has(i) && !skip(gen[i])) pairs.push({ ref: null, gen: gen[i], dist: null });
   }
 
   const issues = [];
@@ -358,14 +604,39 @@ export function cornerDiff(ref, gen, o = {}) {
     issues.push(`НЕДОСТОВЕРНО: разбиение контура даёт ${[...new Set(doubt.map((c) => c.doubt))].join('/')}° вместо 360° — по этому глифу спектру верить нельзя`);
     return { pairs, issues, unreliable: true };
   }
+
+  const refSegs = o.refSubs ? figureSegs(o.refSubs) : null;
+  const genSegs = o.genSubs ? figureSegs(o.genSubs) : null;
+  let sameDraw = 0;
+  let unchecked = 0;
+  /** Нарисовано ли это место одинаково: true — претензии нет. */
+  const drawnAlike = (c, mine, theirs) => {
+    if (!mine || !theirs) {
+      unchecked++;
+      return false;
+    }
+    const m = silhouetteMismatch(mine, theirs, snapToSegs(mine, c.at));
+    if (m <= RING_TOL) {
+      sameDraw++;
+      c.sameDraw = r2(m);
+      return true;
+    }
+    c.silh = r2(m);
+    return false;
+  };
+
   for (const p of pairs) {
     const at = (p.ref ?? p.gen).at.join(',');
     if (!p.gen) {
-      if (p.ref.turn >= 20) issues.push(`УГОЛ ПОТЕРЯН (${at}): у руки поворот ${p.ref.turn}° R=${p.ref.r}, у меня в этом месте угла нет`);
+      if (p.ref.turn >= 20 && !drawnAlike(p.ref, refSegs, genSegs)) {
+        issues.push(`УГОЛ ПОТЕРЯН (${at}): у руки поворот ${p.ref.turn}° R=${p.ref.r}, у меня в этом месте угла нет`);
+      }
       continue;
     }
     if (!p.ref) {
-      if (p.gen.turn >= 20) issues.push(`УГОЛ ЛИШНИЙ (${at}): поворот ${p.gen.turn}° R=${p.gen.r}, у руки его нет`);
+      if (p.gen.turn >= 20 && !drawnAlike(p.gen, genSegs, refSegs)) {
+        issues.push(`УГОЛ ЛИШНИЙ (${at}): поворот ${p.gen.turn}° R=${p.gen.r}, у руки его нет`);
+      }
       continue;
     }
     const a = p.ref;
@@ -386,7 +657,7 @@ export function cornerDiff(ref, gen, o = {}) {
       issues.push(`ПОВОРОТ (${at}): ${b.turn}° против ${a.turn}° — расходится скелет, а не скругление`);
     }
   }
-  return { pairs, issues };
+  return { pairs, issues, sameDraw, unchecked };
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
@@ -402,13 +673,15 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const fmt = (c) => `${c.kind} Θ=${String(c.turn).padStart(6)}° R=${String(c.r).padStart(5)} ε=${c.ease}`;
   let bad = 0;
   let seen = 0;
+  let alike = 0;
   for (const name of [...glyphs.keys()].sort()) {
     if (only && !only.has(name)) continue;
     for (const variant of ['outline', 'filled']) {
       const file = `${ROOT}/reference/${variant === 'filled' ? 'Filled' : 'Outline'}/${name}${variant === 'filled' ? '_filled' : ''}.svg`;
       if (!existsSync(file)) continue;
       const def = glyphs.get(name);
-      const refD = pathsFromSvg(readFileSync(file, 'utf8')).map((p) => p.d).join(' ');
+      // каждый <path> разбирается ОТДЕЛЬНО: склейка d ломает относительный `m`
+      const refSubs = pathsFromSvg(readFileSync(file, 'utf8')).flatMap((p) => edgesOfD(p.d));
       let genPath;
       try {
         genPath = buildGlyph(name, variant, def.refAxes ? { axes: def.refAxes } : {});
@@ -416,9 +689,11 @@ if (import.meta.url === `file://${process.argv[1]}`) {
         continue;
       }
       seen++;
-      const R = spectrumOfD(refD);
-      const G = spectrumOfPath(genPath);
-      const d = cornerDiff(R, G);
+      const genSubs = edgesOfPath(genPath);
+      const R = spectrum(refSubs);
+      const G = spectrum(genSubs);
+      const d = cornerDiff(R, G, { refSubs, genSubs });
+      alike += d.sameDraw ?? 0;
       if (d.issues.length || show) {
         if (d.issues.length) bad++;
         console.log(`\n${name}/${variant}`);
@@ -432,4 +707,5 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     }
   }
   console.log(`\nуглы: ${bad} из ${seen} вариантов расходятся по спектру углов`);
+  console.log(`непарных узлов снято сверкой силуэта (разница записи, не рисунка): ${alike}`);
 }
