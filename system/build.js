@@ -27,6 +27,10 @@ export const ARGUE_AT = 0.03;
 export function buildOne(name, variant = 'outline') {
   const def = glyphs.get(name);
   const path = buildGlyph(name, variant);
+  // Глиф может зависеть от внешнего состояния (calendar-number несёт СЕГОДНЯШНЕЕ
+  // число). Оригинал зафиксировал своё состояние в момент рисования, поэтому
+  // сравнивать с ним надо при `refAxes`, а показывать — при дефолтных.
+  const refPathObj = def.refAxes ? buildGlyph(name, variant, { axes: def.refAxes }) : path;
   const svg = toSvg(path);
   const file = refPath(variant, name);
   const out = {
@@ -45,13 +49,17 @@ export function buildOne(name, variant = 'outline') {
   if (!out.hasReference) return out;
   const refSvg = readFileSync(file, 'utf8');
   const a = maskFromSvg(refSvg);
-  const b = maskFromPath(path);
+  const b = maskFromPath(refPathObj);
   const cmp = compare(a, b);
   const clusters = diffClusters(a, b);
   const refPolys = pathsFromSvg(refSvg).flatMap((p) => polylinesFromD(p.d, 0.01));
-  const offset = contourOffset(refPolys, path.flatten(0.01));
+  const offset = contourOffset(refPolys, refPathObj.flatten(0.01));
   const pen = variant === 'filled' ? T.stroke.bold : T.stroke.base;
   out.reference = refSvg;
+  if (def.refAxes) {
+    out.refAxes = def.refAxes;
+    out.dRef = refPathObj.toD();
+  }
   out.deviation = cmp.deviation;
   out.missing = cmp.missing;
   out.extra = cmp.extra;

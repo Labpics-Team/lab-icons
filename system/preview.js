@@ -10,8 +10,9 @@
 
 import { writeFileSync, mkdirSync, readFileSync } from 'node:fs';
 import { buildAll, summarize, ROOT, ARGUE_AT } from './build.js';
-import { glyphs } from './registry.js';
+import { glyphs, buildGlyph } from './registry.js';
 import { TOKENS, AXES, T, NOMINAL_CANVAS } from './tokens.js';
+import { numeral, numeralString, numeralMetrics } from './numerals.js';
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const pct = (v) => (v * 100).toFixed(2) + '%';
@@ -92,6 +93,102 @@ function derivedTable() {
   </tbody></table>`;
 }
 
+/** Полоса одного глифа по значениям оси — доказательство вариативности. */
+function axisStrip(label, note, items) {
+  return `<div class="strip"><h4>${esc(label)}</h4><p>${esc(note)}</p><div class="cells">${items
+    .map(
+      (i) =>
+        `<figure><div class="box"><svg viewBox="0 0 24 24" class="ic"><path d="${i.d}"/></svg></div><figcaption>${esc(i.label)}</figcaption></figure>`,
+    )
+    .join('')}</div></div>`;
+}
+
+function variableSection() {
+  const strips = [];
+  const has = (n) => glyphs.has(n);
+  const safe = (fn) => {
+    try {
+      return fn();
+    } catch {
+      return null;
+    }
+  };
+
+  if (has('plus')) {
+    const items = [AXES.wght.min, 0.8, 1, 1.15, AXES.wght.max]
+      .map((w) => safe(() => ({ label: `wght ${w}`, d: buildGlyph('plus', 'outline', { wght: w }).toD() })))
+      .filter(Boolean);
+    strips.push(
+      axisStrip(
+        'ось веса — wght',
+        `Диапазон не выбран, а выведен: снизу [кап/кольцо = ${AXES.wght.min}] — тончайшее кольцо не имеет права стать тоньше собственного терминала; сверху [1 + (кольцо − зазор)/bold = ${AXES.wght.max}] — узчайший негатив-канал не имеет права просесть ниже охранного минимума.`,
+        items,
+      ),
+    );
+  }
+  if (has('sun')) {
+    const items = [0, 0.9, 1.8, 2.6, 3.4]
+      .map((r) => safe(() => ({ label: r === 0 ? 'ray 0 = sun-low' : `ray ${r}`, d: buildGlyph('sun', 'outline', { axes: { ray: r } }).toD() })))
+      .filter(Boolean);
+    strips.push(
+      axisStrip(
+        'ось луча — sun ↔ sun-low',
+        'Это не две иконки. Внешний терминал луча закреплён на keyline (Rkey − кап = 10.1), а длина растёт внутрь: 0 даёт sun-low, перо даёт sun, предел 3.4 — там, где охранный зазор до диска проседает ниже минимума.',
+        items,
+      ),
+    );
+  }
+  if (has('arrow-forward')) {
+    const items = [0, 0.25, 0.5, 0.75, 1]
+      .map((v) => safe(() => ({ label: v === 0 ? 'tail 0 = шеврон' : `tail ${v}`, d: buildGlyph('arrow-forward', 'outline', { axes: { tail: v } }).toD() })))
+      .filter(Boolean);
+    strips.push(
+      axisStrip(
+        'ось хвоста — стрелка ↔ шеврон',
+        'Шеврон — это стрелка с нулевым хвостом. Одна конструкция, из которой вырастают arrow-forward, download и resize; на этапе анимации хвост будет тем же параметром, что и здесь.',
+        items,
+      ),
+    );
+  }
+  if (has('square')) {
+    const items = [0, 0.3, 0.6, 0.85, 1]
+      .map((z) => safe(() => ({ label: `ζ ${z}`, d: buildGlyph('square', 'filled', { crnr: z }).toD() })))
+      .filter(Boolean);
+    strips.push(
+      axisStrip(
+        'ось сглаживания угла — ζ',
+        'Радиус вершины НЕ меняется: сокращается дуга, а вход в неё берёт кубика с нулевой кривизной у прямой стороны. При ζ = 0.6 генерат совпадает со скруглённым квадратом руки с отклонением 0.05% — это и есть значение, которое рука имела в виду.',
+        items,
+      ),
+    );
+  }
+  return strips.join('');
+}
+
+function numeralSection() {
+  const digits = [];
+  for (let d = 0; d <= 9; d++) {
+    digits.push({ label: String(d), d: numeral(d, { capHeight: 16, origin: [6.5, 4] }).toD() });
+  }
+  const words = ['1', '7', '13', '29', '31'].map((s) => ({
+    label: s,
+    d: numeralString(s, { capHeight: 12, center: [12, 12] }).toD(),
+  }));
+  const m = numeralMetrics(7.2);
+  return (
+    axisStrip(
+      'собственный округлый знак 0–9',
+      `Скелет из прямых и дуг + круглый терминал — то же перо, что у иконок. Метрики при высоте 7.2: перо ${m.pen.toFixed(2)} (рука в календаре: 1.46), ширина чернил ${m.inkWidth.toFixed(2)} (рука: 5.0). Никакого шрифтового файла и никакой зависимости от SF Rounded.`,
+      digits,
+    ) +
+    axisStrip(
+      'табулярный набор',
+      'Календарь меняет число ежедневно, поэтому «1» обязана занимать столько же места, сколько «8»: иначе иконка дёргалась бы раз в сутки. Девятка — шестёрка, повёрнутая на 180°; это же даёт бесплатный морф 6↔9.',
+      words,
+    )
+  );
+}
+
 export function render(rows) {
   const sum = summarize(rows);
   const families = [...new Set(rows.map((r) => r.family))].sort();
@@ -166,6 +263,11 @@ code{font:12.5px/1 ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--
   margin:14px 0;max-width:80ch}
 .note p{margin:0 0 8px} .note p:last-child{margin:0}
 .scroll{overflow-x:auto}
+.strip{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:0 0 12px}
+.strip h4{margin:0 0 4px;font-size:14px;letter-spacing:-.01em}
+.strip p{margin:0 0 12px;color:var(--dim);font-size:12.5px;max-width:80ch}
+.strip .cells{display:flex;gap:10px;flex-wrap:wrap}
+.strip .cells figure{width:92px}
 @media (max-width:640px){.row{grid-template-columns:repeat(3,1fr)}.wrap{padding:20px 12px 60px}}
 </style>
 <div class="wrap">
@@ -210,6 +312,17 @@ code{font:12.5px/1 ui-monospace,SFMono-Regular,Menlo,monospace;background:var(--
 <p class="sub">Эти числа нельзя задать — они следуют. Столбец «замер руки» показывает, что
 формула не подогнана под рисунок, а объясняет его.</p>
 <div class="scroll">${derivedTable()}</div>
+
+<h2>Оси вариативности</h2>
+<p class="sub">Иконка здесь — не файл, а функция от осей, как начертание вариативного шрифта.
+Границы диапазонов не выбраны на вкус: они выведены из негативного пространства и из
+предела различимости пера.</p>
+${variableSection()}
+
+<h2>Цифровой знак</h2>
+<p class="sub">calendar-number несёт СЕГОДНЯШНЕЕ число (${new Date().getDate()}) и рисует его
+собственным знаком.</p>
+${numeralSection()}
 
 <h2>Глифы</h2>
 <div class="controls">

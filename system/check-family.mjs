@@ -34,7 +34,7 @@ for (const [name, def] of glyphs) {
     if (variant === 'filled' && def.deriveFilled === 'none' && !def.filled) continue;
     let path;
     try {
-      path = buildGlyph(name, variant);
+      path = buildGlyph(name, variant, def.refAxes ? { axes: def.refAxes } : {});
     } catch (e) {
       rows.push({ name, variant, err: String(e.message || e) });
       continue;
