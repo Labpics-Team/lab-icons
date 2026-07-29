@@ -524,9 +524,13 @@ function cupShape(weight) {
 }
 
 function headphone(t, weight) {
-  const p = band([t.cx, t.cy], t.keyR - t.cap.base, rad(BAND_END_DEG), rad(720 - BAND_END_DEG), t.stroke.base);
+  const p = band([t.cx, t.cy], t.keyR - t.cap.base, rad(BAND_END_DEG), rad(540 - BAND_END_DEG), t.stroke.base);
   p.add(cupShape(weight));
-  p.add(cupShape(weight).mirrorX(t.cx));
+  // Зеркало меняет ЗНАК ОБХОДА (det < 0). Обод не зеркалится, поэтому левая
+  // чашка приходит в общий путь с обратной намоткой, и в месте, где она
+  // накрывает обод, nonzero даёт +1 − 1 = 0 — чернила гаснут. Разворот
+  // возвращает обход, и слои складываются, а не вычитаются.
+  p.add(cupShape(weight).mirrorX(t.cx).reverse());
   return p;
 }
 
