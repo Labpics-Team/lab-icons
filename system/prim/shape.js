@@ -318,14 +318,43 @@ export function insetPolygon(points, d) {
 
 /**
  * РАМКА-МНОГОУГОЛЬНИК: контур пером. Внутренний радиус выводится из внешнего
- * тем же законом, что и у прямоугольника: rInner = rOuter − перо.
+ * законом `rInner = rOuter − перо` — но ТОЛЬКО НА ВЫПУКЛОЙ вершине.
+ *
+ * На вогнутой знак обратный: эквидистанта внутрь распрямляет выпуклый угол и
+ * ЗАКРУГЛЯЕТ вогнутый, то есть там `rInner = rOuter + перо`. Корпус
+ * подтверждает дважды и независимо:
+ *
+ *   рупор — плечо между коробкой и конусом: снаружи 5.06, изнутри 6.90 (+1.8);
+ *   лента bookmark — остриё выреза: снаружи рука его НЕ скругляет (0), а на
+ *     счётчике даёт R = 1.99 при пере 1.8, и стоит оно ровно на 13.82 —
+ *     то есть на 1.8/sin45° выше наружного острия 16.37, как и обязано.
+ *
+ * Без учёта знака остриё счётчика выходило ГОЛЫМ, и на увеличении лента
+ * заканчивалась иглой вместо скругления. Ошибка была найдена в рупоре и
+ * закрыта ЛОКАЛЬНОЙ копией в media.js — то есть половина корпуса продолжала
+ * жить со сломанным общим примитивом. Место закона — здесь.
  */
 export function roundedPolygonRing(points, radius, weight, smoothing = 0) {
+  const n = points.length;
   const outer = roundedPolygon(points, radius, smoothing);
   const inPts = insetPolygon(points, weight);
-  const rIn = Array.isArray(radius)
-    ? radius.map((r) => Math.max(0, r - weight))
-    : Math.max(0, radius - weight);
+  // знак поворота считается ОТНОСИТЕЛЬНО ОБХОДА: у контура, намотанного в
+  // другую сторону, выпуклое и вогнутое меняются местами
+  let area = 0;
+  for (let i = 0; i < n; i++) {
+    const a = points[i];
+    const b = points[(i + 1) % n];
+    area += a[0] * b[1] - b[0] * a[1];
+  }
+  const wind = area >= 0 ? 1 : -1;
+  const convex = points.map((_, i) => {
+    const a = points[(i - 1 + n) % n];
+    const b = points[i];
+    const c = points[(i + 1) % n];
+    return wind * v2.cross(v2.norm(v2.sub(b, a)), v2.norm(v2.sub(c, b))) >= 0;
+  });
+  const at = (i) => (Array.isArray(radius) ? radius[i] : radius);
+  const rIn = points.map((_, i) => Math.max(0, convex[i] ? at(i) - weight : at(i) + weight));
   return outer.add(roundedPolygon(inPts, rIn, smoothing).reverse());
 }
 

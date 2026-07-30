@@ -23,7 +23,7 @@ import { cut } from '../core/boolean.js';
  * r·(1/sin(φ/2) − 1); при φ ≈ 56° и r = 1.87 это 2.1 ед. Задавать вершину —
  * значит задавать конструкцию; задавать кончик — значит задавать результат.
  */
-function ribbon(cx, halfW, top, tailVertex, apexY, rTop, rTail, pen) {
+function ribbon(cx, halfW, top, tailVertex, apexY, rTop, rTail, pen, z = 0) {
   const pts = [
     [cx - halfW, top],
     [cx + halfW, top],
@@ -31,7 +31,7 @@ function ribbon(cx, halfW, top, tailVertex, apexY, rTop, rTail, pen) {
     [cx, apexY],
     [cx - halfW, tailVertex],
   ];
-  return S.roundedPolygonRing(pts, [rTop, rTop, rTail, 0, rTail], pen);
+  return S.roundedPolygonRing(pts, [rTop, rTop, rTail, 0, rTail], pen, z);
 }
 
 /**
@@ -42,7 +42,7 @@ function ribbon(cx, halfW, top, tailVertex, apexY, rTop, rTail, pen) {
  * Радиус зажат снизу нулём: при отступе внутрь остриё, у которого радиус и
  * так ноль, ушло бы в отрицательный, а это была бы уже не фигура.
  */
-function ribbonSolid(cx, halfW, top, tailVertex, apexY, rTop, rTail, grow) {
+function ribbonSolid(cx, halfW, top, tailVertex, apexY, rTop, rTail, grow, z = 0) {
   const pts = [
     [cx - halfW, top - grow],
     [cx + halfW + grow, top - grow],
@@ -52,7 +52,7 @@ function ribbonSolid(cx, halfW, top, tailVertex, apexY, rTop, rTail, grow) {
   ];
   pts[0][0] = cx - halfW - grow;
   const r = (x) => Math.max(0, x);
-  return S.roundedPolygon(pts, [r(rTop + grow), r(rTop + grow), r(rTail + grow), r(grow), r(rTail + grow)]);
+  return S.roundedPolygon(pts, [r(rTop + grow), r(rTop + grow), r(rTail + grow), r(grow), r(rTail + grow)], z);
 }
 
 /** Одиночная лента, Outline (замеры оригинала `bookmark.svg`). */
@@ -114,16 +114,24 @@ defineGlyph('bookmark', {
     'корпусное, хвостов — детальное, остриё выреза острое. Вершина хвоста задаётся ' +
     'конструктивно (ниже канвы), видимый кончик поднимает скругление на r(1/sin(φ/2) − 1)',
   argument:
-    'Outline расходится на 3.4%, Filled — на 1.4%; в обоих случаях расхождение это форма хвоста. Рука довела кончик хвоста тремя кривыми Безье ' +
-    'переменной кривизны, система ставит одну дугу постоянного радиуса. Разница лежит ' +
-    'кольцевой каймой шириной около 0.1 ед. по двум хвостам; ни одна деталь не потеряна ' +
-    'и не добавлена. Дуга выбрана сознательно: у неё есть центр, то есть ось, вокруг ' +
-    'которой хвост будет двигаться при анимации закладки.',
+    'Outline расходится на 1.14%, Filled — на 0.43%; в обоих случаях расхождение это форма ' +
+    'хвоста. Рука довела кончик хвоста тремя кривыми Безье переменной кривизны, система ' +
+    'ставит одну дугу постоянного радиуса. Разница лежит кольцевой каймой шириной около ' +
+    '0.1 ед. по двум хвостам; ни одна деталь не потеряна и не добавлена. Дуга выбрана ' +
+    'сознательно: у неё есть центр, то есть ось, вокруг которой хвост будет двигаться при ' +
+    'анимации закладки. ПОЧЕМУ РАДИУС СЧЁТЧИКА НА ХВОСТЕ НЕ ОБЪЯВЛЕН ОТДЕЛЬНО: спектр ' +
+    'снимает у руки 0.65 и 0.71 против 0.13 у системы, и это выглядит как дефект, но ' +
+    'СТЕНКА у руки равна 1.790…1.819 при медиане 1.800 — ровно перу, как и у системы. ' +
+    'Постоянная стенка и радиусы, различающиеся не на перо, вместе невозможны: значит ' +
+    'спектр меряет не радиус, а сводку составной кривой переменной кривизны. Проверено и ' +
+    'то, нет ли у руки общего закона «на счётчике не бывает голого угла» — ОТВЕРГНУТО ' +
+    'замером: на счётчиках корпуса 34% углов идеально острые против 29% на внешних ' +
+    'контурах, то есть минимального радиуса у руки нет вовсе.',
   outline: (t) =>
-    ribbon(t.cx, RIBBON.halfW, RIBBON.top, RIBBON.tail, RIBBON.apex, RIBBON.rTop, RIBBON.rTail, t.stroke.glyph),
+    ribbon(t.cx, RIBBON.halfW, RIBBON.top, RIBBON.tail, RIBBON.apex, RIBBON.rTop, RIBBON.rTail, t.stroke.glyph, t.corner.smoothing),
   filled: (t) => {
     const F = RIBBON_FILLED;
-    return ribbonSolid(t.cx, F.halfW, F.top, F.tail, F.apex, F.rTop, F.rTail, 0);
+    return ribbonSolid(t.cx, F.halfW, F.top, F.tail, F.apex, F.rTop, F.rTail, 0, t.corner.smoothing);
   },
 });
 
@@ -138,9 +146,10 @@ defineGlyph('bookmarks', {
     'Передняя при этом отступает внутрь на 0.15 равномерным смещением кромки',
   outline: (t) => {
     const pen = t.stroke.glyph;
+    const z = t.corner.smoothing;
     const s = STACK.shift / 2;
-    const back = ribbon(t.cx + s, STACK.halfW, STACK.top - s, STACK.tail - s, STACK.apex - s, STACK.rTop, STACK.rTail, pen);
-    const front = ribbon(t.cx - s, STACK.halfW, STACK.top + s, STACK.tail + s, STACK.apex + s, STACK.rTop, STACK.rTail, pen);
+    const back = ribbon(t.cx + s, STACK.halfW, STACK.top - s, STACK.tail - s, STACK.apex - s, STACK.rTop, STACK.rTail, pen, z);
+    const front = ribbon(t.cx - s, STACK.halfW, STACK.top + s, STACK.tail + s, STACK.apex + s, STACK.rTop, STACK.rTail, pen, z);
     const shadow = ribbonSolid(
       t.cx - s,
       STACK.halfW,
@@ -150,6 +159,7 @@ defineGlyph('bookmarks', {
       STACK.rTop,
       STACK.rTail,
       STACK.clearance,
+      z,
     );
     return cut(back, shadow).add(front);
   },
@@ -167,9 +177,11 @@ defineGlyph('bookmarks', {
     const s = STACK.shift / 2;
     const back = ribbon(
       t.cx + s, STACK.halfW, STACK.top - s, STACK.tail - s, STACK.apex - s, STACK.rTop, STACK.rTail, t.stroke.base,
+      t.corner.smoothing,
     );
     const front = ribbonSolid(
-      t.cx - s, STACK.halfW, STACK.top + s, STACK.tail + s, STACK.apex + s, STACK.rTop, STACK.rTail, -STACK_FILLED.inset,
+      t.cx - s, STACK.halfW, STACK.top + s, STACK.tail + s, STACK.apex + s, STACK.rTop, STACK.rTail,
+      -STACK_FILLED.inset, t.corner.smoothing,
     );
     return back.add(front);
   },

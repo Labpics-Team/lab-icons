@@ -204,10 +204,26 @@ export function spectrum(subs) {
     // Кластеризация: составное скругление руки (три дуги подряд, `c…q…`)
     // даёт несколько пиков на расстоянии долей единицы — это ОДИН угол.
     const ord = seeds.map((i) => (i - cold + n) % n).sort((a, b) => a - b);
+    /**
+     * ЗНАК ПОВОРОТА В ПИКЕ. Выпуклый и вогнутый узлы — РАЗНЫЕ углы, сколько бы
+     * ни было между ними контура, и сливать их нельзя ни при каком расстоянии.
+     * Раньше сливались: у рупора прямой угол коробки (+90°) и вогнутое плечо
+     * (−34.5°) стоят в 0.72 по дуге, порог склейки 0.9 — и они попадали в одну
+     * область, где повороты ГАСИЛИ друг друга: спектр выдавал один узел на
+     * 54.92° в точке (5.56, 11.16), которой в фигуре нет вовсе, вместо двух
+     * настоящих. Ровно те же два узла рука имеет в volume_filled на (5.16, 8.98)
+     * и (9.31, 8.94), и они были записаны как «потерянные».
+     */
+    const sign = (o) => {
+      const q = at(o + cold);
+      const s = Math.abs(q.imp) > Math.abs(q.dturn) ? q.simp : q.sk;
+      return Math.sign(s) || 1;
+    };
     const clusters = [];
     for (const o of ord) {
       const last = clusters[clusters.length - 1];
-      if (last && gap((last[last.length - 1] + cold) % n, (o + cold) % n) <= GROUP) last.push(o);
+      const near = last && gap((last[last.length - 1] + cold) % n, (o + cold) % n) <= GROUP;
+      if (near && sign(last[last.length - 1]) === sign(o)) last.push(o);
       else clusters.push([o]);
     }
 
