@@ -25,7 +25,7 @@
  * записи к одной тройке чисел, поэтому оригинал и генерат сравнимы напрямую.
  */
 
-import { edgesOfD, edgesOfPath, tangent, curvature, pointAt, edgeLen } from './contour.js';
+import { edgesOfD, edgesOfPath, tangent, curvature, pointAt, edgeLen, SLOP } from './contour.js';
 import { v2 } from './core/num.js';
 
 const DEG = 180 / Math.PI;
@@ -102,7 +102,9 @@ function meet(p1, d1, p2, d2) {
  * поворот сосредоточен в нуле длины, у скругления размазан по дуге.
  */
 export function sampleSub(sub) {
-  const es = sub.edges.filter((e) => edgeLen(e) > 1e-7);
+  // огарки записи отбрасываются: см. SLOP в contour.js — их направление шум,
+  // а внесённый ими поворот подделка, вплоть до лишних 360° на контур
+  const es = sub.edges.filter((e) => edgeLen(e) > SLOP);
   const pts = [];
   for (const e of es) {
     const L = edgeLen(e);
@@ -558,6 +560,61 @@ function snapToSegs(segs, p) {
 }
 
 /**
+ * СОБСТВЕННЫЙ БЛИЗНЕЦ УЗЛА В ОРИГИНАЛЕ.
+ *
+ * Ищется тот же узел, отражённый по оси канвы или повёрнутый на 180°. Требуется
+ * совпадение положения (0.15), поворота (8°) и выпуклости: иначе это другой
+ * узел, а не отражение этого.
+ */
+function twinOf(list, c) {
+  const cands = [
+    [24 - c.at[0], c.at[1]],
+    [c.at[0], 24 - c.at[1]],
+    [24 - c.at[0], 24 - c.at[1]],
+  ];
+  let best = null;
+  let bd = 0.15;
+  for (const t of list) {
+    if (t === c || t.convex !== c.convex || Math.abs(t.turn - c.turn) > 8) continue;
+    for (const q of cands) {
+      if (Math.abs(q[0] - c.at[0]) < 0.3 && Math.abs(q[1] - c.at[1]) < 0.3) continue; // узел на самой оси
+      const d = v2.dist(t.at, q);
+      if (d < bd) {
+        bd = d;
+        best = t;
+      }
+    }
+  }
+  return best;
+}
+
+/**
+ * РУКА ОБЯЗАНА СНАЧАЛА СОГЛАСОВАТЬСЯ САМА С СОБОЙ.
+ *
+ * Претензия «у руки ε=1.37, у меня 1» звучит как измерение, но у руки на
+ * ЗЕРКАЛЬНОМ узле того же глифа ε нередко тоже 1: в bookmark пара (6.66,3.4)
+ * даёт 1.23, а её отражение (17.37,3.4) — 1.06; в globe пара (6.24,8.87) даёт
+ * 6.07 против 3.09. Замеренный по 419 зеркальным парам корпуса разброс руки
+ * внутри собственной пары: медиана 0.010, p75 0.10, p90 0.62 — то есть в 16%
+ * пар рука расходится с собой сильнее 0.2.
+ *
+ * Значит порог претензии не может быть абсолютным. Правило: обвинение должно
+ * превосходить разброс обвинителя В ЭТОМ ЖЕ УЗЛЕ. Если рука на отражении
+ * противоречит себе не слабее, чем мне, — спорят две записи одной руки, и
+ * судить по ним нечего.
+ *
+ * Это тот же принцип, что и сверка силуэта, но по другой оси: там «нарисовано
+ * ли одинаково», здесь «уверена ли рука в том, что утверждает».
+ */
+const handSure = (list, a, mine, get) => {
+  const t = twinOf(list, a);
+  if (!t) return true; // отражения нет — сверять не с чем, претензия в силе
+  const own = Math.abs(get(a) - get(t));
+  const claim = Math.abs(get(a) - mine);
+  return own < claim * 0.5;
+};
+
+/**
  * СВЕРКА СПЕКТРОВ. Углы сопоставляются по положению вершины; вершина —
  * пересечение прилежащих прямых, она не зависит от радиуса скругления, поэтому
  * пара «рука/генерат» находится даже когда радиусы разошлись вдвое.
@@ -609,6 +666,7 @@ export function cornerDiff(ref, gen, o = {}) {
   const genSegs = o.genSubs ? figureSegs(o.genSubs) : null;
   let sameDraw = 0;
   let unchecked = 0;
+  let selfContra = 0;
   /** Нарисовано ли это место одинаково: true — претензии нет. */
   const drawnAlike = (c, mine, theirs) => {
     if (!mine || !theirs) {
@@ -641,17 +699,29 @@ export function cornerDiff(ref, gen, o = {}) {
     }
     const a = p.ref;
     const b = p.gen;
+    // радиусы сравниваются в логарифме: «вдвое мельче» — это одно и то же
+    // расхождение и при R=0.5, и при R=5, а в единицах канвы разное
+    const lg = (c) => Math.log(Math.max(c.r, 0.01));
     if (a.r >= 0.2 && b.r < 0.08) {
-      issues.push(`ОСТРО (${at}): рука скруглила R=${a.r}, у меня голый угол — это и есть «угловато при сходящейся площади»`);
+      if (handSure(ref, a, lg(b), lg)) {
+        issues.push(`ОСТРО (${at}): рука скруглила R=${a.r}, у меня голый угол — это и есть «угловато при сходящейся площади»`);
+        continue;
+      }
+      selfContra++;
       continue;
     }
     if (a.r >= 0.15 && b.r >= 0.05) {
       const k = b.r / a.r;
-      if (k < 0.62) issues.push(`КРУЧЕ (${at}): R=${b.r} против ${a.r} у руки (×${r2(k)}) — скругление мельче, угол читается острее`);
-      else if (k > 1.7) issues.push(`ПОЛОЖЕ (${at}): R=${b.r} против ${a.r} у руки (×${r2(k)}) — скругление крупнее, форма расплылась`);
+      if (k < 0.62 || k > 1.7) {
+        if (!handSure(ref, a, lg(b), lg)) selfContra++;
+        else if (k < 0.62) issues.push(`КРУЧЕ (${at}): R=${b.r} против ${a.r} у руки (×${r2(k)}) — скругление мельче, угол читается острее`);
+        else issues.push(`ПОЛОЖЕ (${at}): R=${b.r} против ${a.r} у руки (×${r2(k)}) — скругление крупнее, форма расплылась`);
+      }
     }
     if (a.ease >= 1.25 && b.ease < 1.1) {
-      issues.push(`БЕЗ СГЛАЖИВАНИЯ (${at}): у руки мягкость ${a.ease}, у меня ${b.ease} — голая дуга встык вместо плавного входа`);
+      if (handSure(ref, a, b.ease, (c) => c.ease)) {
+        issues.push(`БЕЗ СГЛАЖИВАНИЯ (${at}): у руки мягкость ${a.ease}, у меня ${b.ease} — голая дуга встык вместо плавного входа`);
+      } else selfContra++;
     }
     /**
      * ПОВОРОТ — утверждение о СКЕЛЕТЕ, и только оно судится силуэтом.
@@ -667,10 +737,12 @@ export function cornerDiff(ref, gen, o = {}) {
      * написан; закрыть их силуэтом значило бы отменить его смысл.
      */
     if (Math.abs(a.turn - b.turn) > 9 && Math.min(a.turn, b.turn) > 20 && !drawnAlike(a, refSegs, genSegs)) {
-      issues.push(`ПОВОРОТ (${at}): ${b.turn}° против ${a.turn}° — расходится скелет, а не скругление`);
+      if (handSure(ref, a, b.turn, (c) => c.turn)) {
+        issues.push(`ПОВОРОТ (${at}): ${b.turn}° против ${a.turn}° — расходится скелет, а не скругление`);
+      } else selfContra++;
     }
   }
-  return { pairs, issues, sameDraw, unchecked };
+  return { pairs, issues, sameDraw, unchecked, selfContra };
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
@@ -687,6 +759,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   let bad = 0;
   let seen = 0;
   let alike = 0;
+  let contra = 0;
   for (const name of [...glyphs.keys()].sort()) {
     if (only && !only.has(name)) continue;
     for (const variant of ['outline', 'filled']) {
@@ -707,6 +780,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       const G = spectrum(genSubs);
       const d = cornerDiff(R, G, { refSubs, genSubs });
       alike += d.sameDraw ?? 0;
+      contra += d.selfContra ?? 0;
       if (d.issues.length || show) {
         if (d.issues.length) bad++;
         console.log(`\n${name}/${variant}`);
@@ -721,4 +795,5 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   }
   console.log(`\nуглы: ${bad} из ${seen} вариантов расходятся по спектру углов`);
   console.log(`непарных узлов снято сверкой силуэта (разница записи, не рисунка): ${alike}`);
+  console.log(`претензий снято: рука противоречит себе на зеркальном узле сильнее, чем мне: ${contra}`);
 }

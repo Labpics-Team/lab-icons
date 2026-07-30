@@ -17,8 +17,8 @@ import { numeral, numeralMetrics, numeralString } from '../system/numerals.js';
 import { glyphs, buildGlyph } from '../system/registry.js';
 import { toSvg } from '../system/render.js';
 import '../system/glyphs/index.js';
-import { edgesOfPath, curvature } from '../system/contour.js';
-import { sampleSub, spectrumOfPath } from '../system/corners.js';
+import { edgesOfPath, edgesOfD, edgeLen, pointAt, curvature, SLOP } from '../system/contour.js';
+import { sampleSub, spectrumOfPath, cornerDiff } from '../system/corners.js';
 import { intersectEdges } from '../system/core/intersect.js';
 import * as topo from '../system/topology.js';
 import * as P from '../system/parts.js';
@@ -492,5 +492,71 @@ describe('качество контура', () => {
       // радиус идёт за высотой, а не задан по месту
       for (const c of sp) expect(c.r / h, `высота ${h}`).toBeCloseTo(TOKENS.wedge.corner, 1);
     }
+  });
+});
+
+describe('честность приборов', () => {
+  it('огарок записи не рождает лишних 360°: контур `download` замыкается отрезком 0.01 НАЗАД', () => {
+    // Оригиналы записаны с двумя знаками, и у отрезка длиной 0.01 направление —
+    // шум. У `download` последний узел (12.01, 3.4) не совпал с первым (12, 3.4),
+    // и замыкающий огарок шёл против хода: он вносил +180° дважды, полный
+    // поворот выходил 720°, инвариант Гаусса рушился, и весь глиф уходил в
+    // «недостоверно» — прибор молчал там, где расхождений нет вовсе.
+    const d =
+      'M12 3.4A.9 .9 0 0 1 12.9 4.22L12.9 14.8L14.32 13.4A.9 .9 0 0 1 15.59 14.66' +
+      'L12.64 17.62A.9 .9 0 0 1 11.37 17.62L8.48 14.72A.9 .9 0 0 1 9.76 13.46' +
+      'L11.11 14.81L11.11 4.2A.9 .9 0 0 1 12.01 3.4';
+    const subs = edgesOfD(d);
+    expect(subs).toHaveLength(1);
+    const short = subs[0].edges.filter((e) => edgeLen(e) < SLOP);
+    expect(short.length, 'огарок в записи есть').toBeGreaterThan(0);
+    let total = 0;
+    for (const q of sampleSub(subs[0])) total += q.simp + q.dturn;
+    expect(Math.abs(Math.abs(total) - 360), `поворот ${total.toFixed(1)}°`).toBeLessThan(2);
+  });
+
+  it('рука не может обвинять, противореча себе на зеркальном узле сильнее', () => {
+    // Два узла-зеркала с ε 1.6 и 1.0 у «руки» против 1.0 у «системы»: рука
+    // расходится с собой на 0.6, обвиняет на 0.6 — претензии нет. Если же оба
+    // зеркальных узла руки согласны (1.6 и 1.55), претензия в силе.
+    const node = (x, ease) => ({ at: [x, 8], turn: 90, r: 2, ease, convex: true, kind: 'скруглённый' });
+    const mine = [node(6, 1), node(18, 1)];
+    const sure = cornerDiff([node(6, 1.6), node(18, 1.55)], mine, {});
+    expect(sure.issues.some((q) => q.startsWith('БЕЗ СГЛАЖИВАНИЯ')), 'рука согласна — судим').toBe(true);
+    const unsure = cornerDiff([node(6, 1.6), node(18, 1.0)], mine, {});
+    expect(unsure.issues.some((q) => q.startsWith('БЕЗ СГЛАЖИВАНИЯ')), 'рука спорит с собой — молчим').toBe(false);
+    expect(unsure.selfContra).toBeGreaterThan(0);
+  });
+
+  it('стенка чашки наушников равна ПЕРУ по всей длине — торцовая оконечность эквидистантна', () => {
+    // Колпачковая оконечность сводила стороны в точку, и счётчик вырождался в
+    // иглу. Торец поперёк оси плюс угловая галтель держит эквидистанту: у руки
+    // стенка 1.783…1.952 при медиане 1.799, у системы обязана быть ровно перо.
+    const subs = edgesOfPath(buildGlyph('headphone', 'outline'));
+    const dense = (sub, step) => {
+      const out = [];
+      for (const e of sub.edges) {
+        const m = Math.max(2, Math.ceil(edgeLen(e) / step));
+        for (let i = 0; i < m; i++) out.push(pointAt(e, i / m));
+      }
+      return out;
+    };
+    const outer = dense(subs[1], 0.02);
+    const seg = outer.map((p, i) => [p, outer[(i + 1) % outer.length]]);
+    const dist = (p) =>
+      Math.min(
+        ...seg.map(([a, b]) => {
+          const vx = b[0] - a[0];
+          const vy = b[1] - a[1];
+          const l2 = vx * vx + vy * vy;
+          let t = l2 ? ((p[0] - a[0]) * vx + (p[1] - a[1]) * vy) / l2 : 0;
+          t = t < 0 ? 0 : t > 1 ? 1 : t;
+          return Math.hypot(a[0] + t * vx - p[0], a[1] + t * vy - p[1]);
+        }),
+      );
+    const pen = resolve({}).stroke.base;
+    const w = dense(subs[2], 0.05).map(dist);
+    expect(Math.min(...w), `нигде тоньше пера ${pen}`).toBeGreaterThan(pen - 0.05);
+    expect(Math.max(...w), `нигде толще пера ${pen}`).toBeLessThan(pen + 0.05);
   });
 });

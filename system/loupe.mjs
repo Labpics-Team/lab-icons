@@ -77,7 +77,15 @@ function comb(subs) {
 
 const f = (p) => `${p[0].toFixed(3)} ${p[1].toFixed(3)}`;
 
-function panel(title, d, subs, x0, sc, PAD) {
+/**
+ * Оригинал состоит из НЕСКОЛЬКИХ `<path>`, у каждого своё `fill-rule`. Склейка
+ * их `d` в одну строку — та самая ошибка, от которой предупреждает comment в
+ * corners.js: относительный `m` уезжает вслед за предыдущим путём, а evenodd
+ * одного элемента применяется к nonzero другого. На headphone_filled это давало
+ * ЛОЖНУЮ картинку — счётчики рисовались чернилами и через икону шли диагонали, —
+ * то есть прибор, которым доказывают дефекты, сам их выдумывал.
+ */
+function panel(title, paths, subs, x0, sc, PAD) {
   const c = comb(subs);
   const sp = spectrum(subs).filter((k) => k.kind !== 'кольцо' && k.kind !== 'колпачок');
   const marks = sp
@@ -90,7 +98,7 @@ function panel(title, d, subs, x0, sc, PAD) {
   return `<g transform="translate(${x0} ${PAD}) scale(${sc}) translate(${-VX} ${-VY})">
     <clipPath id="cp${x0}"><rect x="${VX}" y="${VY}" width="${VW}" height="${VW}"/></clipPath>
     <g clip-path="url(#cp${x0})">
-      <path d="${d}" class="ink"/>
+      ${paths.map((q) => `<path d="${q.d}" fill-rule="${q.fillRule}" class="ink"/>`).join('\n      ')}
       ${inkOnly ? '' : `<path d="${c.teeth}" class="teeth" stroke-width="${1.1 / sc}"/>
       <path d="${c.hull}" class="hull" stroke-width="${2.2 / sc}"/>
       ${marks}`}
@@ -112,9 +120,10 @@ for (const name of names) {
     console.error(`глиф не объявлен: ${name}`);
     continue;
   }
-  const refD = pathsFromSvg(readFileSync(file, 'utf8')).map((p) => p.d).join(' ');
+  const refPaths = pathsFromSvg(readFileSync(file, 'utf8'));
   const path = buildGlyph(name, variant, def.refAxes ? { axes: def.refAxes } : {});
   const genD = path.toD();
+  const refSubs = refPaths.flatMap((q) => edgesOfD(q.d));
 
   const SIDE = 560; // пикселей на панель
   const PAD = SIDE * PAD_U;
@@ -135,8 +144,8 @@ for (const name of names) {
 <rect class="bg" x="0" y="0" width="${W}" height="${H}"/>
 <text x="${PAD + SIDE / 2}" y="${PAD * 0.72}" class="ti">рука — ${name}/${variant}</text>
 <text x="${PAD * 2 + SIDE * 1.5}" y="${PAD * 0.72}" class="ti">система</text>
-${panel('рука', refD, edgesOfD(refD), PAD, sc, PAD)}
-${panel('система', genD, edgesOfPath(path), PAD * 2 + SIDE, sc, PAD)}
+${panel('рука', refPaths, refSubs, PAD, sc, PAD)}
+${panel('система', [{ d: genD, fillRule: 'nonzero' }], edgesOfPath(path), PAD * 2 + SIDE, sc, PAD)}
 </svg>`;
 
   const svgPath = `${OUT}/loupe-${name}-${variant}.svg`;
