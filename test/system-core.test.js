@@ -18,7 +18,10 @@ import { glyphs, buildGlyph } from '../system/registry.js';
 import { toSvg } from '../system/render.js';
 import '../system/glyphs/index.js';
 import { edgesOfPath, edgesOfD, edgeLen, pointAt, curvature, SLOP } from '../system/contour.js';
-import { sampleSub, spectrumOfPath, cornerDiff } from '../system/corners.js';
+import { sampleSub, spectrum, spectrumOfPath, cornerDiff } from '../system/corners.js';
+
+/** Спектр одного подпути. */
+const spectrumSub = (sub) => spectrum([sub]).filter((c) => c.kind !== 'кольцо');
 import { intersectEdges } from '../system/core/intersect.js';
 import * as topo from '../system/topology.js';
 import * as P from '../system/parts.js';
@@ -496,6 +499,32 @@ describe('качество контура', () => {
 });
 
 describe('честность приборов', () => {
+  it('симметричные чернила ⟹ симметричный спектр: прибор не зависит от начала обхода', () => {
+    // Левая чашка наушников есть ЗЕРКАЛО правой, и sampleSub у них совпадает до
+    // числа: 2084 выборки, 758 горячих, kmax 0.588. А спектр читал справа два
+    // узла, слева три — потому что якорь разреза выбирался как ПЕРВЫЙ минимум
+    // на плато нулевой кривизны, и у правой чашки длинное прямое ребро идёт
+    // первым ребром подпути, у левой последним. Якорь садился на противоположные
+    // концы одного ребра, и кластеры разъезжались.
+    //
+    // Прибор, зависящий от того, с какого узла автор начал писать путь, измеряет
+    // ЗАПИСЬ, а не фигуру. Порог 0.25 — это шаг растра ss = 4, ниже него узлы
+    // считаются совпавшими.
+    const path = buildGlyph('headphone', 'filled');
+    const subs = edgesOfPath(path);
+    const cups = [spectrumSub(subs[1]), spectrumSub(subs[2])];
+    expect(cups[0].length, 'у правой чашки узлы есть').toBeGreaterThan(0);
+    expect(cups[1].length, 'у левой столько же, сколько у правой').toBe(cups[0].length);
+    for (const a of cups[0]) {
+      const twin = cups[1].find(
+        (b) => Math.abs(a.at[0] + b.at[0] - 24) < 0.25 && Math.abs(a.at[1] - b.at[1]) < 0.25,
+      );
+      expect(twin, `узел (${a.at}) Θ=${a.turn} обязан иметь зеркального близнеца`).toBeTruthy();
+      expect(twin.turn, `поворот в зеркальном узле (${a.at})`).toBeCloseTo(a.turn, 1);
+      expect(twin.r, `радиус в зеркальном узле (${a.at})`).toBeCloseTo(a.r, 1);
+    }
+  });
+
   it('огарок записи не рождает лишних 360°: контур `download` замыкается отрезком 0.01 НАЗАД', () => {
     // Оригиналы записаны с двумя знаками, и у отрезка длиной 0.01 направление —
     // шум. У `download` последний узел (12.01, 3.4) не совпал с первым (12, 3.4),
