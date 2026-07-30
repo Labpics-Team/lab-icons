@@ -55,22 +55,91 @@ const D = (deg) => (deg * Math.PI) / 180;
  *     руки НЕ параллельны. Система обязана выбрать один закон: взят наклон
  *     верхнего штриха, потому что именно он несёт оба локтя и обе ножки.
  */
+/**
+ * ГОЛОВА В ЧИСЛАХ. Ширина считается от кромки ножки: правая вертикаль головы и
+ * кромка ножки — одна прямая (12.19 = 11.29 + 0.90 у одиночной ноты), поэтому
+ * свободного числа здесь два, а не четыре: ширина и высота параллелограмма.
+ */
+export const HEAD = Object.freeze({
+  /** Между вертикальными сторонами (замер 12.19 − 6.15). */
+  width: 6.04,
+  /** Между наклонными сторонами по нормали (замер 5.189, счётчик подтверждает 1.592 + 3.6). */
+  height: 5.19,
+  /** Наклон сторон (замер двух ребёр: −18.67° и −18.62°). */
+  tilt: -18.65,
+  /** Радиус угла (рука пишет 2.3 / 2.4 / 2.67; счётчик подтверждает 0.6 = 2.4 − 1.8). */
+  corner: 2.4,
+});
+
 export const NOTE = Object.freeze({
   headRx: 2.21,
-  headTilt: -17.3,
+  headTilt: HEAD.tilt,
   stemOffset: 2.07,
   flagTilt: -14.44,
   beamTilt: -15.48,
 });
 
-/** Голова: обводка наклонного эллипса. Полуось ry — само перо. */
-function head(t, c, rot = NOTE.headTilt) {
-  const h = t.cap.glyph;
-  const rx = NOTE.headRx;
-  const ry = t.stroke.glyph;
-  return S.ellipse(c, rx + h, ry + h, D(rot)).add(
-    S.ellipse(c, Math.max(0.2, rx - h), Math.max(0.2, ry - h), D(rot)).reverse(),
-  );
+/**
+ * ГОЛОВА — ОБВОДКА СКРУГЛЁННОГО ПАРАЛЛЕЛОГРАММА, а не эллипса.
+ *
+ * Эллипс был неверен, и это видно узлами: у эллипса нет ни прямых участков, ни
+ * углов, а рука пишет и то и другое. Разбор `musical-note.svg` посегментно:
+ *
+ *   верхнее ребро   (7.78, 17.39) → (10.03, 16.63)   направление −18.67°
+ *   нижнее ребро    (10.61, 21.91) → (9.66, 22.23)   направление −18.62°
+ *   левое ребро     x = 6.15 (вертикаль)
+ *   правое ребро    x = 12.19 = ОСЬ НОЖКИ + кап — то есть кромка ножки
+ *   углы            `A2.3`, `A2.4`, `A2.67` — одно число 2.4 в пределах замера
+ *
+ * Два ребра параллельны с точностью 0.05°, два других вертикальны: это
+ * параллелограмм. Ширина между вертикалями 6.04, высота между наклонными по
+ * нормали 5.189.
+ *
+ * ПРОВЕРКА ПО СЧЁТЧИКУ — независимая и точная. Если голова есть обводка пером
+ * 1.8, счётчик обязан быть тем же параллелограммом, ужатым на перо:
+ *   ширина  6.04 − 3.6 = 2.44   замер по узлам руки (7.94…10.39) = 2.45
+ *   высота  5.19 − 3.6 = 1.59   замер между наклонными счётчика      = 1.592
+ *   углы    2.4 − 1.8 = 0.60    рука пишет `a.6` и `a.5`
+ * Три величины из трёх сходятся до 0.01 — модель верна, а не подогнана.
+ *
+ * Правая вертикаль головы совпадает с кромкой ножки, поэтому угол головы в этом
+ * месте лежит ПОД чернилами ножки, а видимый филет 0.5 — это сварка верхнего
+ * ребра головы с левой кромкой ножки (поворот 72.1° по замеру спектра). Счётчик
+ * при nonzero обрезается ножкой сам: +1 внешняя − 1 счётчик + 1 ножка = 1.
+ */
+function headPts(t, c, rot) {
+  const u = [Math.cos(D(rot)), Math.sin(D(rot))];
+  const n = [-u[1], u[0]];
+  const hw = HEAD.width / 2;
+  const hh = HEAD.height / 2;
+  // вершины = пересечения вертикалей x = cx ± hw с наклонными P·n = c·n ± hh
+  const at = (sx, sn) => {
+    const x = c[0] + sx * hw;
+    const y = c[1] + (sn * hh - (x - c[0]) * n[0]) / n[1];
+    return [x, y];
+  };
+  return [at(-1, -1), at(1, -1), at(1, 1), at(-1, 1)];
+}
+
+/**
+ * ЦЕНТР ГОЛОВЫ — ОТСТУП ОТ ОСИ НОЖКИ, ОДИН НА ОБА НАЧЕРТАНИЯ.
+ *
+ * Правая вертикаль головы совпадает с правой кромкой ножки в Regular
+ * (12.19 = 11.29 + 0.90), и напрашивается вывод `cx = stemX + кап − ширина/2`.
+ * ОН ПРОВЕРЕН И ОТВЕРГНУТ: кап зависит от начертания, и тогда голова ЕЗДИТ
+ * вместе с пером — musical-note/filled уходит с 2.27% на 4.26%, пара с 2.12% на
+ * 4.43%. Рука так не делает: габарит головы у неё один в обоих начертаниях, как
+ * и у шеврона. Отступ остаётся замером — 2.12 = 11.29 − 9.17 у одиночной ноты и
+ * 2.12 = 9.18 − 7.06 у пары, одно число на два независимых глифа.
+ */
+const headCx = (t, stemX) => stemX - NOTE.stemOffset;
+
+function head(t, c, rot = NOTE.headTilt, weight = t.stroke.glyph) {
+  const pts = headPts(t, c, rot);
+  const r4 = [HEAD.corner, HEAD.corner, HEAD.corner, HEAD.corner];
+  return weight
+    ? S.roundedPolygonRing(pts, r4, weight, t.corner.smoothing)
+    : S.roundedPolygon(pts, r4, t.corner.smoothing);
 }
 
 /**
@@ -113,13 +182,13 @@ function hairpinTo(path, g) {
  *   flagLen 3.74 — проверка: центр разворота выходит в (15.324, 5.115) против
  *     записанного рукой (15.32, 5.10).
  */
-export const SINGLE = Object.freeze({ headC: [9.23, 19.61], stemX: 11.29, flagStart: 4.45, flagLen: 3.74 });
+export const SINGLE = Object.freeze({ headY: 19.61, stemX: 11.29, flagStart: 4.45, flagLen: 3.74 });
 
 /** Скелет одиночной ноты: ножка и флаг — ОДИН штрих с локтем наверху. */
 function noteSpine(t, pen) {
   const start = [SINGLE.stemX, SINGLE.flagStart];
   const g = hairpinGeom(start, NOTE.flagTilt, SINGLE.flagLen, t.stroke.ring, pen);
-  const spine = new Path().move([SINGLE.stemX, SINGLE.headC[1]]).line(start);
+  const spine = new Path().move([SINGLE.stemX, SINGLE.headY]).line(start);
   return { spine: hairpinTo(spine, g), g };
 }
 
@@ -130,8 +199,16 @@ defineGlyph('musical-note', {
     'ОДИН штрих: вертикаль от центра головы вверх, локоть штрихового сустава, прогон под −14.44°, ' +
     'разворот 180° радиусом (канал + перо)/2 и прогон обратно на ось ножки. Канал 1.5 = вес кольца',
   argument:
-    'остаток лежит на голове: рука рисует её скруглённым четырёхугольником (в `d` дуги ' +
-    '2.67 · 2.4 · 2.3 и фаска 0.5), система — обводкой наклонного эллипса. Ножка и флаг после ' +
+    'ГОЛОВА ПЕРЕСТРОЕНА: была обводка наклонного эллипса, стал скруглённый параллелограмм — ' +
+    'см. HEAD. Модель подтверждена счётчиком независимо и точно: ширина 6.04 − 3.6 = 2.44 ' +
+    'против замера 2.45, высота 5.19 − 3.6 = 1.59 против 1.592, угол 2.4 − 1.8 = 0.60 против ' +
+    '`a.6` у руки. Претензии спектра по голове сняты полностью у одиночной ноты. ' +
+    'ЧТО ОСТАЛОСЬ: правая вертикаль головы у руки лежит РОВНО на кромке ножки (12.19 = ' +
+    '11.29 + 0.90), у системы она на 0.05 правее, потому что отступ центра оставлен замером ' +
+    '2.07 — вывод `stemX + кап − ширина/2` проверен и отвергнут: кап зависит от начертания, и ' +
+    'голова начинает ЕЗДИТЬ вместе с пером (Filled уходит с 2.27% на 4.26%). Из-за этих 0.05 ' +
+    'сварка верхнего ребра головы с кромкой ножки даёт узел вместо филета 0.5, который пишет ' +
+    'рука, — четыре узла на два варианта. Ножка и флаг после ' +
     'сборки в один штрих сходятся с рукой по построению: центр разворота (15.323, 5.115) против ' +
     'записанного рукой (15.32, 5.10), наружная дуга разворота 2.55 против `a2.54`. Локоть ножки ' +
     'здесь — обычный штриховой сустав corner.elbow: рука сводит вертикаль с флагом филетом, чей ' +
@@ -139,7 +216,7 @@ defineGlyph('musical-note', {
     '0.90 пера — середина корпусной полосы 0.85…1.00, из которой токен и выведен.',
   outline: (t) => {
     const pen = t.stroke.glyph;
-    const p = head(t, SINGLE.headC);
+    const p = head(t, [headCx(t, SINGLE.stemX), SINGLE.headY]);
     p.add(strokePath(noteSpine(t, pen).spine, pen, { joint: t.corner, cap: 'butt' }));
     return p;
   },
@@ -153,7 +230,7 @@ defineGlyph('musical-note', {
     const pen = t.stroke.base;
     const h = pen / 2;
     const { spine, g } = noteSpine(t, pen);
-    const p = S.ellipse(SINGLE.headC, NOTE.headRx + h, pen + h, D(NOTE.headTilt));
+    const p = head(t, [headCx(t, SINGLE.stemX), SINGLE.headY], NOTE.headTilt, 0);
     p.add(strokePath(spine, pen, { joint: t.corner, cap: 'butt' }));
     p.add(strokeSegment(g.mid, g.C, t.stroke.ring + pen, { cap: 'butt' }));
     p.add(S.circle(g.C, (t.stroke.ring + pen) / 2));
@@ -273,8 +350,8 @@ defineGlyph('musical-notes', {
     const pen = t.stroke.glyph;
     const p = strokePath(beamSpine(g), pen, { cap: 'butt' });
     p.add(beamLower(g, pen));
-    p.add(head(t, [PAIR.leftStemX - NOTE.stemOffset, PAIR.leftHeadY]));
-    p.add(head(t, [PAIR.rightStemX - NOTE.stemOffset, PAIR.rightHeadY]));
+    p.add(head(t, [headCx(t, PAIR.leftStemX), PAIR.leftHeadY]));
+    p.add(head(t, [headCx(t, PAIR.rightStemX), PAIR.rightHeadY]));
     return p;
   },
   /**
@@ -301,8 +378,8 @@ defineGlyph('musical-notes', {
         { cap: 'butt' },
       ),
     );
-    p.add(S.ellipse([P.leftStemX - NOTE.stemOffset, P.leftHeadY], NOTE.headRx + h, pen + h, D(NOTE.headTilt)));
-    p.add(S.ellipse([P.rightStemX - NOTE.stemOffset, P.rightHeadY], NOTE.headRx + h, pen + h, D(NOTE.headTilt)));
+    p.add(head(t, [headCx(t, P.leftStemX), P.leftHeadY], NOTE.headTilt, 0));
+    p.add(head(t, [headCx(t, P.rightStemX), P.rightHeadY], NOTE.headTilt, 0));
     return p;
   },
 });
