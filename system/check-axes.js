@@ -73,6 +73,27 @@ const realCracks = (path) => {
   return b.filter((w, i) => w >= (a[i] ?? 0) * 0.6).length;
 };
 
+/**
+ * ЧИСЛО КУСКОВ, УСТОЙЧИВОЕ ПО РАЗРЕШЕНИЮ.
+ *
+ * У share/filled голова стрелки лежит СНАРУЖИ корпуса, а диагональ вырезана
+ * негативом: контакт между ними краевой по построению. Счёт кусков от такого
+ * контакта пляшет с растром — 1/2/1/2/1 при ss = 8/12/16/24/32. И РУКА пляшет
+ * ровно так же, теми же числами: значит система воспроизводит топологию
+ * оригинала верно, а неустойчиво само измерение.
+ *
+ * Судить по неустойчивому числу нельзя. Двух растров при этом НЕ хватает:
+ * неустойчивость краевого контакта имеет период по разрешению, и 8 с 16 могут
+ * согласиться на «два», пока 12 и 24 дают «один». Поэтому спрашиваются три, и
+ * число берётся только при полном согласии.
+ */
+const stableInk = (path) => {
+  const c = [SS, SS + 4, SS * 2].map(
+    (ss) => topology(maskFromPath(path, CANVAS, ss, (0.02 * SS) / ss), { canvas: CANVAS, ss }).ink,
+  );
+  return c[0] === c[1] && c[1] === c[2] ? c[0] : null;
+};
+
 const shot = (path) => {
   const nums = [...path.toD().matchAll(/-?\d*\.?\d+/g)].map((m) => Number(m[0]));
   let bad = false;
@@ -82,10 +103,11 @@ const shot = (path) => {
     else if (Math.abs(v) > max) max = Math.abs(v);
   }
   const t = topology(maskFromPath(path, CANVAS, SS, 0.02), { canvas: CANVAS, ss: SS });
-  return { bad, max, ink: t.ink, counters: t.counters, cracks: realCracks(path) };
+  return { bad, max, ink: stableInk(path), counters: t.counters, cracks: realCracks(path) };
 };
 
 const problems = [];
+const unstable = new Set();
 let checked = 0;
 
 for (const name of [...glyphs.keys()].sort()) {
@@ -113,7 +135,9 @@ for (const name of [...glyphs.keys()].sort()) {
         checked++;
         if (cur.bad) problems.push(`${id}: в пути NaN/Infinity`);
         if (cur.max > CANVAS + 2) problems.push(`${id}: координата ${cur.max.toFixed(1)} — чернила ушли за канву`);
-        if (cur.ink > base.ink) {
+        if (cur.ink == null || base.ink == null) {
+          unstable.add(`${name}/${variant}`);
+        } else if (cur.ink > base.ink) {
           problems.push(`${id}: кусков чернил ${cur.ink} против ${base.ink} в дефолте — на краю оси глиф распадается`);
         }
         if (cur.counters < base.counters) {
@@ -128,6 +152,10 @@ for (const name of [...glyphs.keys()].sort()) {
 }
 
 console.log(`check-axes: ${checked} построений на краях диапазонов, ${glyphs.size} имён`);
+if (unstable.size) {
+  console.log(`check-axes: у ${unstable.size} глифов счёт кусков неустойчив по разрешению — сравнение пропущено:`);
+  for (const n of unstable) console.log('  ~ ' + n);
+}
 if (problems.length) {
   console.error(`\ncheck-axes: ${problems.length} нарушений вариативности\n`);
   for (const p of problems) console.error('  • ' + p);
