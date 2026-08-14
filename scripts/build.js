@@ -18,6 +18,7 @@ import { join, basename, dirname } from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';
 import { createRequire } from 'module';
 import { optimize } from 'svgo';
+import { authorPathEntries, sourcePathEntries } from './lib/icon-geometry.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -97,10 +98,14 @@ function optimiseDir(variant) {
   for (const file of files) {
     const src = readFileSync(join(srcDir, file), 'utf8');
     assertSourceContract(`${variant}/${file}`, src);
+    // Этот вызов — не извлечение ради метрики, а граница языка source SVG:
+    // неподдерживаемый clip/mask не должен дожить до root export и разойтись с IR.
+    authorPathEntries(src);
     const result = optimize(src, { ...svgoConfig, path: join(srcDir, file) });
     if (result.error) {
       throw new Error(`svgo error on ${file}: ${result.error}`);
     }
+    sourcePathEntries(result.data);
     writeFileSync(join(outDir, file), result.data, 'utf8');
     results.push({ file, data: result.data });
   }

@@ -21,6 +21,10 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { renderedPathData } from './lib/icon-geometry.js';
 import { samplePolylines } from './lib/curve-sampling.js';
+import {
+  compareDebtSnapshot,
+  validateLegacyQualitySnapshot,
+} from './lib/legacy-quality-snapshot.js';
 
 /** Площадь и центроид замкнутой полилинии (Гаусс). */
 function areaCentroid(poly) {
@@ -294,6 +298,10 @@ if (isMain) {
   }
   const strict = process.argv.includes('--strict');
   const { hard, report, stats } = validateVariantParity({ grid, pairs });
+  const debt = validateLegacyQualitySnapshot(
+    JSON.parse(readFileSync(join(root, 'semantics', 'legacy-quality-snapshot.json'), 'utf8')),
+  );
+  const debtErrors = compareDebtSnapshot(report, debt.variantParity);
   const covered =
     `проверено: ${stats.rings} колец, ${stats.discs} keyline-дисков, ` +
     `${stats.matchedGlyphs} сопоставленных глиф-контуров из ${pairs.length} пар`;
@@ -310,6 +318,13 @@ if (isMain) {
   if (hard.length === 0 && report.length === 0) {
     console.log(`check-variant-parity: OK — контракт пар держится (${covered})`);
   }
+  if (debtErrors.length > 0) {
+    console.error(
+      'check-variant-parity: HARD — frozen migration debt изменился; ' +
+      `сначала опровергнуть регрессию:\n  - ${debtErrors.join('\n  - ')}`,
+    );
+  }
+  if (debtErrors.length > 0) process.exit(1);
   if (strict && (hard.length > 0 || report.length > 0)) process.exit(1);
   if (!strict && hard.length > 0) process.exit(1);
 }

@@ -35,11 +35,11 @@ describe('validateAnatomy — декларация сходится с файл�
     expect(checked).toBeGreaterThanOrEqual(6);
   });
 
-  it('Д: мутант параметра generated-глифа (rTip +5%) → hard-дрейф', () => {
+  it('Д: мутант параметра generated-глифа (cell radius +5%) → hard-дрейф', () => {
     const mutant = JSON.parse(JSON.stringify(anatomy));
-    mutant.glyphs.cog.params.rTip *= 1.05;
+    mutant.glyphs.apps.parts[0].params.filled.r *= 1.05;
     const { hard } = validateAnatomy({ grid, anatomy: mutant, readSvg });
-    expect(hard.some((e) => e.includes('cog') && e.includes('дрейф'))).toBe(true);
+    expect(hard.some((e) => e.includes('apps/filled') && e.includes('дрейф'))).toBe(true);
   });
 
   it('Д: мутант якоря hand-глифа (сдвиг 1.5) → report-расхождение', () => {

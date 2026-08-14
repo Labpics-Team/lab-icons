@@ -1,0 +1,298 @@
+{
+ "version": 1,
+ "comment": "R0 public-axis proof measured on 2026-07-16. Geometry-active axes are advertised only after phase-stable component/counter topology across the normalized range, every public optical raster, and the declared analysis supersample.",
+ "policy": {
+  "targetRasterSizes": [
+   16,
+   24,
+   48
+  ],
+  "analysisSupersample": 4,
+  "normalizedSubdivisions": 128,
+  "phases": [
+   [
+    0.25,
+    0.25
+   ],
+   [
+    0.75,
+    0.25
+   ],
+   [
+    0.25,
+    0.75
+   ],
+   [
+    0.75,
+    0.75
+   ]
+  ],
+  "comparison": "phase-stable components:holes against the default master"
+ },
+ "disabled": {
+  "alert-circle/outline/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "aloof/outline/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "apps/outline/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "arrow-back-circle/outline/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "arrow-back/filled/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "arrow-back/outline/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "arrow-down-circle/outline/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "arrow-down/filled/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "arrow-down/outline/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "arrow-forward-circle/outline/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "arrow-forward/filled/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "arrow-forward/outline/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "arrow-up-circle/outline/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "arrow-up/filled/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "arrow-up/outline/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "ban/outline/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "bulb/outline/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "checkmark-circle/outline/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "checkmark/outline/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "checkmarks-circle/outline/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "checkmarks/outline/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "chevron-back-circle/filled/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "chevron-back-circle/outline/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "chevron-down-circle/filled/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "chevron-down-circle/outline/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "chevron-forward-circle/filled/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "chevron-forward-circle/outline/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "chevron-up-circle/filled/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "chevron-up-circle/outline/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "close-circle/outline/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "close/outline/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "cloud/outline/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "component/outline/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "download/outline/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "ellipse/outline/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "eye/outline/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "info-circle/outline/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "info/outline/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "minus-circle/outline/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "move/filled/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "move/outline/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "pause-circle/outline/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "pause/outline/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "play-back-circle/outline/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "play-circle/outline/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "play-forward-circle/outline/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "play-skip-back-circle/outline/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "play-skip-forward-circle/outline/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "plus-circle/outline/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "radio/filled/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "radio/outline/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "reload/filled/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "reload/outline/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "resize/filled/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "resize/outline/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "square/outline/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "sun-low/outline/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "swap-horizontal/filled/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "swap-horizontal/outline/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "swap-vertical/filled/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "swap-vertical/outline/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "tablet-landscape/outline/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "tablet-portrait/outline/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "time/filled/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "time/outline/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  },
+  "upload/outline/weight": {
+   "reason": "The continuous axis changes or destabilizes binary component/counter topology at a declared optical proof sample.",
+   "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+  }
+ }
+}

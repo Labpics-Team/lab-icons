@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Релизный тег vX.Y.Z для ручной пересборки dist'
+        description: 'Существующий source tag v<package.json#version>; branch/SHA запрещены'
         required: true
 
 # Единственное необходимое расширенное право — push братского тега.
@@ -30,7 +30,9 @@ jobs:
       - name: Checkout release tag
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
-          ref: ${{ github.event.inputs.tag || github.ref }}
+          # Verify включает historical-hand provenance и не работает shallow.
+          fetch-depth: 0
+          ref: ${{ github.event_name == 'workflow_dispatch' && format('refs/tags/{0}', inputs.tag) || github.ref }}
 
       - name: Setup pnpm
         uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
@@ -48,34 +50,38 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Validate exact source release ref
+        env:
+          RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+        run: node scripts/check-release-ref.js source "$RELEASE_TAG"
+
       # Единственный канонический список сборки, геометрических гейтов и тестов.
       - name: Verify release source
         run: pnpm verify
 
       - name: Build and push <tag>-dist
+        env:
+          RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
         run: |
           set -euo pipefail
-          TAG="${{ github.event.inputs.tag || github.ref_name }}"
-          case "$TAG" in
-            *-dist)
-              echo "::error::Ожидался релизный тег vX.Y.Z, а не -dist ($TAG)"
-              exit 1
-              ;;
-          esac
+          TAG="$RELEASE_TAG"
           DIST_TAG="${TAG}-dist"
 
           if git ls-remote --exit-code --tags origin "refs/tags/${DIST_TAG}" >/dev/null 2>&1; then
-            echo "Тег ${DIST_TAG} уже существует — иммутабельный артефакт не перезаписывается."
+            git fetch --no-tags origin "refs/tags/${DIST_TAG}:refs/tags/${DIST_TAG}"
+            node scripts/check-release-ref.js dist "$TAG"
+            echo "Тег ${DIST_TAG} уже существует и байт-в-байт соответствует source ${TAG}; не перезаписываем."
             exit 0
           fi
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          # dist/ gitignored. Принудительно добавляем ровно опубликованные входы
-          # из package.json#files, включая ESM/CJS/types подпути ./animate.
-          git add -f dist/index.js dist/index.d.ts dist/animate
+          # Скрипт читает единственный manifest release/contract.json, удаляет
+          # stale tracked dist из index и добавляет только точные файлы канона.
+          node scripts/stage-release-dist.js
           git commit -m "build: dist для ${DIST_TAG} (git-dep артефакт; master не трогаем)"
           git tag "${DIST_TAG}"
+          node scripts/check-release-ref.js dist "$TAG"
           git push origin "refs/tags/${DIST_TAG}"
           echo "Опубликован git-dep тег ${DIST_TAG}."

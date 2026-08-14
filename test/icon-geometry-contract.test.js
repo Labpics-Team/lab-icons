@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { iconGeometry, renderedPathEntries } from '../scripts/lib/icon-geometry.js';
+import {
+  iconGeometry,
+  renderedPathEntries,
+  sourcePathEntries,
+} from '../scripts/lib/icon-geometry.js';
 import { topologyOfSvg } from '../scripts/lib/ink-raster.js';
 
 const svg = (attrs, body) => `<svg ${attrs}>${body}</svg>`;
@@ -31,5 +35,16 @@ describe('icon-geometry SVG contract', () => {
     );
 
     expect(() => renderedPathEntries(content)).toThrow(/inherited fill-rule/);
+  });
+
+  it('source contract запрещает nested SVG viewport при неизменном path-data', () => {
+    const d = 'M0 0H24V24H0Z';
+    const content = svg(
+      `viewBox='0 0 24 24'`,
+      `<svg viewBox='0 0 48 48' width='24' height='24'><path d='${d}'/></svg>`,
+    );
+
+    expect(content.match(new RegExp(d, 'g'))).toHaveLength(1);
+    expect(() => sourcePathEntries(content)).toThrow(/ровно один корневой <svg>/);
   });
 });
