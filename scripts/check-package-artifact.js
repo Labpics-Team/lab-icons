@@ -2,10 +2,10 @@
 /**
  * Проверка реального package artifact, а не рабочего дерева.
  *
- * Сборка может быть зелёной, а опубликованный tarball — неполным: именно так
- * подпуть ./animate уже выпадал из -dist артефакта. Поэтому гейт упаковывает
- * пакет, ставит локальный tarball в чистый временный consumer и проверяет ESM,
- * CJS-подпуть, TypeScript declarations и отсутствие внутренних исходников.
+ * Сборка может быть зелёной, а опубликованный tarball — неполным. Поэтому гейт
+ * упаковывает пакет, ставит локальный tarball в чистый временный consumer и
+ * проверяет все ESM entrypoints, TypeScript declarations и отсутствие
+ * внутренних исходников.
  */
 
 import { execFileSync } from 'node:child_process';
@@ -79,7 +79,7 @@ export function shouldCopyCleanPackPath(copyRoot, source, pathApi = NATIVE_PATH)
  * Проверка из рабочего дерева опасна: старый dist мог случайно закрыть
  * отсутствующий build step. Копия намеренно не получает ни одного build
  * output; node_modules подключается только как инструментальная зависимость.
- * Поэтому единственный путь к десяти release-файлам — lifecycle prepack →
+ * Поэтому единственный путь к release-файлам — lifecycle prepack →
  * канонический pnpm build.
  */
 export function createCleanPackSource(root, destination) {
@@ -418,12 +418,10 @@ export function checkPackageArtifact({
     writeFileSync(
       join(consumer, 'smoke.mjs'),
       `import { accessibilityOutline } from '@labpics/icons';\n` +
-        `import { animatableNames, iconClass } from '@labpics/icons/animate';\n` +
         `import * as fullIr from '@labpics/icons/ir';\n` +
         `import { axisNames, calendarNumberGlyph, glyph, iconIds } from '@labpics/icons/ir';\n` +
         `import { buildDirectionalArrow } from '@labpics/icons/ir/recipes';\n` +
         `if (typeof accessibilityOutline !== 'string' || !accessibilityOutline.includes('<svg')) throw new Error('root ESM export broken');\n` +
-        `if (!animatableNames().includes('reload') || typeof iconClass('reload') !== 'string') throw new Error('animate ESM export broken');\n` +
         `if ('buildDirectionalArrow' in fullIr) throw new Error('full IR leaks lightweight recipe surface');\n` +
         `const ir = glyph({ icon: 'accessibility', variant: 'outline', modelMode: 'source-only' });\n` +
         `const calendar = calendarNumberGlyph({ date: new Date('2026-07-16T12:00:00Z'), timeZone: 'UTC', opsz: 24 });\n` +
@@ -441,21 +439,8 @@ export function checkPackageArtifact({
     });
 
     writeFileSync(
-      join(consumer, 'smoke.cjs'),
-      `const api = require('@labpics/icons/animate');\n` +
-        `if (typeof api.animateIcon !== 'function' || typeof api.iconClass !== 'function') throw new Error('animate CJS export broken');\n`,
-      'utf8',
-    );
-    execFileSync(process.execPath, [join(consumer, 'smoke.cjs')], {
-      cwd: consumer,
-      encoding: 'utf8',
-      stdio: ['ignore', 'pipe', 'pipe'],
-    });
-
-    writeFileSync(
       join(consumer, 'smoke.ts'),
       `import { accessibilityOutline, type IconName } from '@labpics/icons';\n` +
-        `import { animateIcon, type AnimateIconOptions } from '@labpics/icons/animate';\n` +
         `import { calendarNumberGlyph, glyph, type GlyphIR, type IconId } from '@labpics/icons/ir';\n` +
         `import { buildDirectionalArrow, type RecipeResult } from '@labpics/icons/ir/recipes';\n` +
         `const svg: string = accessibilityOutline;\n` +
@@ -464,8 +449,7 @@ export function checkPackageArtifact({
         `const ir: GlyphIR = glyph({ icon, variant: 'filled' });\n` +
         `const calendar: GlyphIR = calendarNumberGlyph({ date: new Date(0), timeZone: 'UTC' });\n` +
         `const recipe: RecipeResult = buildDirectionalArrow();\n` +
-        `const options: AnimateIconOptions = { name: 'reload', variant: 'outline' };\n` +
-        `void [svg, name, icon, ir, calendar, recipe, options, animateIcon];\n`,
+        `void [svg, name, icon, ir, calendar, recipe];\n`,
       'utf8',
     );
     writeFileSync(
@@ -493,69 +477,6 @@ export function checkPackageArtifact({
       [join(root, 'node_modules', 'typescript', 'bin', 'tsc'), '-p', join(consumer, 'tsconfig.json')],
       { cwd: consumer, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] },
     );
-
-    // Node16 CJS обязан получить .d.cts через require.types. Runtime require
-    // сам по себе этого не доказывает: прежний flat types path исполнялся, но
-    // TypeScript отклонял consumer с TS1479.
-    writeFileSync(
-      join(consumer, 'smoke-cjs.cts'),
-      `import { animateIcon, iconClass, type AnimateIconOptions } from '@labpics/icons/animate';\n` +
-        `declare const svg: SVGSVGElement;\n` +
-        `const options: AnimateIconOptions = { name: 'reload', variant: 'outline' };\n` +
-        `const handle = animateIcon(svg, options);\n` +
-        `const className: string | undefined = iconClass('reload');\n` +
-        `void [handle, className];\n`,
-      'utf8',
-    );
-    writeFileSync(
-      join(consumer, 'tsconfig.cjs.json'),
-      `${JSON.stringify(
-        {
-          compilerOptions: {
-            target: 'ES2022',
-            module: 'Node16',
-            moduleResolution: 'Node16',
-            lib: ['ES2022', 'DOM'],
-            strict: true,
-            noEmit: true,
-            skipLibCheck: false,
-          },
-          include: ['smoke-cjs.cts'],
-        },
-        null,
-        2,
-      )}\n`,
-      'utf8',
-    );
-    const tsc = join(root, 'node_modules', 'typescript', 'bin', 'tsc');
-    execFileSync(process.execPath, [tsc, '-p', join(consumer, 'tsconfig.cjs.json')], {
-      cwd: consumer,
-      encoding: 'utf8',
-      stdio: ['ignore', 'pipe', 'pipe'],
-    });
-
-    const installedPackageFile = join(installed, 'package.json');
-    const installedPackageSource = readFileSync(installedPackageFile, 'utf8');
-    const hostileTypes = JSON.parse(installedPackageSource);
-    hostileTypes.exports['./animate'].require.types = './dist/animate/index.d.ts';
-    writeFileSync(installedPackageFile, `${JSON.stringify(hostileTypes, null, 2)}\n`, 'utf8');
-    let cjsTypesFailure = '';
-    try {
-      execFileSync(process.execPath, [tsc, '-p', join(consumer, 'tsconfig.cjs.json')], {
-        cwd: consumer,
-        encoding: 'utf8',
-        stdio: ['ignore', 'pipe', 'pipe'],
-      });
-    } catch (error) {
-      cjsTypesFailure = commandFailure(error);
-    } finally {
-      writeFileSync(installedPackageFile, installedPackageSource, 'utf8');
-    }
-    if (!cjsTypesFailure.includes('TS1479')) {
-      throw new Error(
-        `CJS Node16 hostile types bite не воспроизвёл TS1479:\n${cjsTypesFailure || '<process succeeded>'}`,
-      );
-    }
 
     const rootEntry = join(installed, 'dist/index.js');
     const originalRootEntry = readFileSync(rootEntry, 'utf8');
@@ -722,6 +643,6 @@ if (isMain) {
   }
   console.log(
     `check-package-artifact: OK — установленный tarball чист; ${files.length} файлов, ` +
-      'ESM/CJS+Node16 types, 444 source fingerprints, root-attributes/coordinate/clip/viewport/fill-rule bites работают',
+      'ESM/types, 444 source fingerprints, root-attributes/coordinate/clip/viewport/fill-rule bites работают',
   );
 }

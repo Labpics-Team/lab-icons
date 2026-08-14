@@ -163,9 +163,6 @@ export function validateReadmeReleaseProjection(readme, pkg, contract) {
   if (!readme.includes(releaseCountClaim)) {
     errors.push(`README: отсутствует точный count release manifest «${releaseCountClaim}»`);
   }
-  if (!readme.includes('dist/animate/index.d.cts')) {
-    errors.push('README: CommonJS declaration boundary dist/animate/index.d.cts не документирована');
-  }
   // Ложные distribution-утверждения ловятся на НОРМАЛИЗОВАННОМ тексте:
   // regex по сырому markdown обходится бэктиками/переносами (урок #69).
   const plainReadme = normalizeDistributionText(readme);

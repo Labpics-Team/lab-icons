@@ -1,3 +1,2 @@
 * text=auto eol=lf
 *.svg text eol=lf
-src/animate/choreographies.generated.json linguist-generated=true -diff

@@ -58,7 +58,7 @@ function glyphSubs(file) {
 const subsToD = (subs) => subs.map(serializePath).join('');
 const transformSubs = (subs, op) => subs.map((s) => applyAffine(s, OPS[op]));
 
-// Контракт слоёв (semantics/layers.json, хореографии): у Outline-enclosure
+// Контракт semantic parts (semantics/anatomy.json): у Outline-enclosure
 // глиф — ОТДЕЛЬНЫЙ path[0] (анимируется), кольцо — path[1] (стоит).
 // Filled — один сваренный evenodd-path («бейдж целиком»).
 const OUTLINE_ENCLOSURE = (glyphD) => `<path d="${glyphD}"/><path d="${RING}"/>`;

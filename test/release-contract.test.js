@@ -109,47 +109,25 @@ describe('release contract', () => {
     for (const bad of cases) expect(validateReleaseContract(bad).length).toBeGreaterThan(0);
   });
 
-  it('запечатывает раздельные ESM/CJS type conditions и их порядок', () => {
-    const flatLegacy = {
+  it('запечатывает ESM type condition перед import и запрещает legacy animate surface', () => {
+    const legacyAnimate = {
       ...CONTRACT,
       exports: {
         ...CONTRACT.exports,
         './animate': {
-          types: './dist/animate/index.d.ts',
           import: './dist/animate/index.js',
-          require: './dist/animate/index.cjs',
         },
       },
     };
-    expect(validateReleaseContract(flatLegacy).some((error) => error.includes('./animate'))).toBe(true);
-
-    const wrongCjsTypes = {
-      ...CONTRACT,
-      exports: {
-        ...CONTRACT.exports,
-        './animate': {
-          ...CONTRACT.exports['./animate'],
-          require: {
-            types: './dist/animate/index.d.ts',
-            default: './dist/animate/index.cjs',
-          },
-        },
-      },
-    };
-    expect(validateReleaseContract(wrongCjsTypes)).toContain(
-      'release export ./animate.require.types обязан указывать на .d.cts',
-    );
+    expect(validateReleaseContract(legacyAnimate).some((error) => error.includes('./animate'))).toBe(true);
 
     const reordered = {
       ...CONTRACT,
       exports: {
         ...CONTRACT.exports,
-        './animate': {
-          ...CONTRACT.exports['./animate'],
-          require: {
-            default: './dist/animate/index.cjs',
-            types: './dist/animate/index.d.cts',
-          },
+        '.': {
+          import: './dist/index.js',
+          types: './dist/index.d.ts',
         },
       },
     };
