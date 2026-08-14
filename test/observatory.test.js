@@ -18,7 +18,11 @@ beforeAll(() => {
   temporaryRoot = mkdtempSync(join(tmpdir(), 'lab-icons-observatory-'));
   first = buildObservatory({ repo: root, outDir: join(temporaryRoot, 'first') });
   second = buildObservatory({ repo: root, outDir: join(temporaryRoot, 'second') });
-});
+// Это два полных corpus/raster proof, а не ожидание внешнего IO. Их wall time
+// зависит от CPU и конкуренции worker-ов; произвольный timeout изображал бы
+// perf-контракт без benchmark. CI-level timeout остаётся предохранителем от
+// зависания процесса, а 0 здесь означает только отсутствие ложного локального SLA.
+}, 0);
 
 afterAll(() => {
   if (temporaryRoot) rmSync(temporaryRoot, { recursive: true, force: true });

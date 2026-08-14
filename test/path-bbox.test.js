@@ -143,13 +143,19 @@ describe('path-bbox — дифференциал по ВСЕМ реальным 
         const pts = samplePath(d, 512);
         let sMinX = Infinity, sMinY = Infinity, sMaxX = -Infinity, sMaxY = -Infinity;
         for (const [x, y] of pts) {
-          expect(x >= b.minX - CONTAIN_EPS && x <= b.maxX + CONTAIN_EPS, `${file} x=${x} vs [${b.minX},${b.maxX}]`).toBe(true);
-          expect(y >= b.minY - CONTAIN_EPS && y <= b.maxY + CONTAIN_EPS, `${file} y=${y} vs [${b.minY},${b.maxY}]`).toBe(true);
           if (x < sMinX) sMinX = x;
           if (y < sMinY) sMinY = y;
           if (x > sMaxX) sMaxX = x;
           if (y > sMaxY) sMaxY = y;
         }
+        // Проверка четырёх экстремумов эквивалентна pointwise containment:
+        // если min/max всего sampled-множества лежат внутри bbox, каждый его
+        // элемент тоже внутри. Это убирает миллионы matcher-аллокаций Vitest,
+        // не уменьшая ни корпус, ни плотность независимого оракула.
+        expect(sMinX, `${file} containment minX`).toBeGreaterThanOrEqual(b.minX - CONTAIN_EPS);
+        expect(sMinY, `${file} containment minY`).toBeGreaterThanOrEqual(b.minY - CONTAIN_EPS);
+        expect(sMaxX, `${file} containment maxX`).toBeLessThanOrEqual(b.maxX + CONTAIN_EPS);
+        expect(sMaxY, `${file} containment maxY`).toBeLessThanOrEqual(b.maxY + CONTAIN_EPS);
         expect(sMinX - b.minX, `${file} тугость minX`).toBeLessThan(TOUCH_EPS);
         expect(sMinY - b.minY, `${file} тугость minY`).toBeLessThan(TOUCH_EPS);
         expect(b.maxX - sMaxX, `${file} тугость maxX`).toBeLessThan(TOUCH_EPS);
