@@ -7,15 +7,12 @@
  *
  *   1. Конкретные версии в README (`#vX.Y.Z-dist` пины, `git tag vX.Y.Z`
  *      примеры) == package.json.version. Плейсхолдеры `vX.Y.Z` разрешены.
- *   2. Числовые утверждения о корпусе («N имён/иконок/SVG/экспортов/файлов»
- *      в README и docs/*.md) принадлежат множеству фактов ФС
- *      {имена, файлы по весам, всего, экспорты}.
- *   3. `*-HANDOFF.md` в корне запрещены; `handoffs/*.md` обязаны нести
- *      строку `Статус:`.
- *   4. README не обещает конкретный hex чернил (противоречило бы
- *      check-colors, который запрещает hex в dist/svg).
- *   5. Каждый docs/*.md в первых 5 строках объявляет роль
- *      (справка | ADR | канон | гайд | отчёт | «Роль:»).
+ *   2. Числовые утверждения о корпусе принадлежат множеству фактов ФС.
+ *   3. Хендоффы живут только в handoffs/ и объявляют статус.
+ *   4. README не обещает конкретный hex чернил.
+ *   5. Каждый docs/*.md в первых 5 строках объявляет роль.
+ *   6. Каналы поставки README совпадают с release/contract.json и package.json;
+ *      ложные заявления private/git-only/PAT запрещены механически.
  *
  * Функции чистые и экспортируются — каждое поведение доказуемо юнитами
  * (test/docs-drift.test.js), включая «гейт кусается».
@@ -23,6 +20,7 @@
 
 import { readdirSync, readFileSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
+import { isDeepStrictEqual } from 'node:util';
 import { fileURLToPath, pathToFileURL } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -115,6 +113,98 @@ export function hasDocRole(text) {
 }
 
 /* ------------------------------------------------------------------ *
+ * 6. Каналы поставки                                                  *
+ * ------------------------------------------------------------------ */
+
+const FALSE_DISTRIBUTION_CLAIMS = [
+  {
+    re: /["']?private["']?\s*:\s*["']?true["']?/i,
+    why: 'package public, private:false',
+  },
+  {
+    re: /не\s+публикуется.{0,160}\bnpm\b/i,
+    why: 'npm — основной опубликованный канал',
+  },
+  { re: /почему\s+не\s+npm\b/i, why: 'npm — основной опубликованный канал' },
+  { re: /репозитор(?:ий|ия)[\s-]*приват/i, why: 'репозиторий public' },
+  {
+    re: /fine\s*-\s*grained\s+PAT|\bGH_PAT\b|Contents\s*:\s*read/i,
+    why: 'npm install не требует GitHub PAT',
+  },
+];
+
+function nonEmptyString(value) {
+  return typeof value === 'string' && value.trim().length > 0;
+}
+
+/**
+ * Нормализация нужна именно для guard-а утверждений: markdown, перенос строки
+ * и типографский дефис не должны превращать ложь в невидимую для regex форму.
+ */
+export function normalizeDistributionText(text) {
+  return String(text)
+    .normalize('NFKC')
+    .replace(/[`*_~]/g, '')
+    .replace(/[‐‑‒–—―]/g, '-')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/** Фактические аргументы исполняемой команды git add -f, не совпадения в комментариях. */
+export function releaseWorkflowFiles(releaseWorkflow) {
+  const match = releaseWorkflow.match(/^\s*git\s+add\s+-f\s+([^\n#]+?)\s*$/m);
+  return match ? match[1].trim().split(/\s+/) : [];
+}
+
+/**
+ * Release contract владеет устойчивой формой каналов; внешняя публикация
+ * проверяется release-probe, но README не имеет права противоречить контракту.
+ */
+export function distributionViolations({ readme, pkg, contract, releaseWorkflow }) {
+  const errors = [];
+  const plainReadme = normalizeDistributionText(readme);
+
+  if (contract.version !== 1) errors.push(`release contract: неизвестная schema version ${contract.version}`);
+  if (contract.packageName !== pkg.name)
+    errors.push(`release contract packageName ${contract.packageName} != package.json ${pkg.name}`);
+  if (pkg.private !== false) errors.push('package.json обязан нести private:false для public npm channel');
+  if (contract.primary?.kind !== 'npm') errors.push('release contract: primary channel обязан быть npm');
+  if (!nonEmptyString(contract.primary?.install))
+    errors.push('release contract: primary.install обязан быть непустой строкой');
+  if (contract.fallback?.kind !== 'github-dist-tag' || contract.fallback?.immutable !== true)
+    errors.push('release contract: fallback обязан быть immutable github-dist-tag');
+  if (!nonEmptyString(contract.fallback?.specifier))
+    errors.push('release contract: fallback.specifier обязан быть непустой строкой');
+  if (!isDeepStrictEqual(contract.files, pkg.files))
+    errors.push('release contract files != package.json#files');
+  if (!isDeepStrictEqual(contract.exports, pkg.exports))
+    errors.push('release contract exports != package.json#exports');
+
+  if (nonEmptyString(contract.primary?.install) && !readme.includes(contract.primary.install))
+    errors.push(`README не содержит primary install «${contract.primary.install}»`);
+  if (nonEmptyString(contract.fallback?.specifier) && !readme.includes(contract.fallback.specifier))
+    errors.push(`README не содержит fallback specifier «${contract.fallback.specifier}»`);
+  if (!/основн.{0,80}\bnpm\b/i.test(plainReadme))
+    errors.push('README не объявляет npm основным каналом');
+  if (!/(fallback|резервн|дополнительн).{0,120}-dist/i.test(plainReadme))
+    errors.push('README не объясняет -dist как дополнительный fallback');
+
+  for (const { re, why } of FALSE_DISTRIBUTION_CLAIMS) {
+    const match = plainReadme.match(re);
+    if (match) errors.push(`README ложное distribution-утверждение «${match[0]}» (${why})`);
+  }
+
+  const actualFiles = releaseWorkflowFiles(releaseWorkflow);
+  if (!isDeepStrictEqual(actualFiles, contract.files))
+    errors.push(
+      `release-dist git add files ${JSON.stringify(actualFiles)} != contract ${JSON.stringify(contract.files)}`,
+    );
+  if (!/^\s*run:\s*pnpm\s+verify\s*$/m.test(releaseWorkflow))
+    errors.push('release-dist workflow не запускает canonical pnpm verify');
+  return errors;
+}
+
+/* ------------------------------------------------------------------ *
  * Аудит целиком                                                       *
  * ------------------------------------------------------------------ */
 
@@ -170,6 +260,11 @@ export function auditRepo(root = ROOT) {
   for (const [file, text] of corpus.slice(1))
     if (!hasDocRole(text))
       errors.push(`${file}: роль не объявлена в первых 5 строках (справка/ADR/канон/гайд/отчёт)`);
+
+  // 6. Поставка
+  const contract = JSON.parse(readFileSync(join(root, 'release', 'contract.json'), 'utf8'));
+  const releaseWorkflow = readFileSync(join(root, '.github', 'workflows', 'release-dist.yml'), 'utf8');
+  errors.push(...distributionViolations({ readme, pkg, contract, releaseWorkflow }));
 
   return { errors, facts };
 }
