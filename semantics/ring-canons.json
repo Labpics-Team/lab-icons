@@ -1,0 +1,149 @@
+{
+ "version": 1,
+ "comment": "Реестр канонов keyline-кольца (легальные веса BL-017: контейнер 1.50 оптически легче глифа, предметный круг 1.80, Bold-штрих 2.40 в Filled). canon — заявленный вес shipped-кольца; hand — измеренный вес кольца руки владельца (Desktop). canon≠hand = задокументированное расхождение, унификация — вкусовой вопрос #43 (решает владелец, не гейт). spreadDebt — файлы с неравномерным кольцом (неконцентричная пара окружностей, thSpread > 0.08): долг может только уменьшаться.",
+ "rings": {
+  "Outline/alert-circle.svg": {
+   "canon": 1.5,
+   "hand": 1.8
+  },
+  "Outline/aloof.svg": {
+   "canon": 1.8,
+   "hand": 1.8
+  },
+  "Outline/arrow-back-circle.svg": {
+   "canon": 1.5,
+   "hand": 1.8
+  },
+  "Outline/arrow-down-circle.svg": {
+   "canon": 1.5,
+   "hand": 1.8
+  },
+  "Outline/arrow-forward-circle.svg": {
+   "canon": 1.5,
+   "hand": 1.8
+  },
+  "Outline/arrow-redo-circle.svg": {
+   "canon": 1.8,
+   "hand": 1.8
+  },
+  "Outline/arrow-undo-circle.svg": {
+   "canon": 1.8,
+   "hand": 1.8
+  },
+  "Outline/arrow-up-circle.svg": {
+   "canon": 1.5,
+   "hand": 1.8
+  },
+  "Outline/ban.svg": {
+   "canon": 1.8,
+   "hand": 1.8
+  },
+  "Outline/checkmark-circle.svg": {
+   "canon": 1.5,
+   "hand": 1.8
+  },
+  "Outline/checkmarks-circle.svg": {
+   "canon": 1.5,
+   "hand": 1.8
+  },
+  "Outline/chevron-back-circle.svg": {
+   "canon": 1.5,
+   "hand": 1.8
+  },
+  "Outline/chevron-down-circle.svg": {
+   "canon": 1.5,
+   "hand": 1.8
+  },
+  "Outline/chevron-forward-circle.svg": {
+   "canon": 1.5,
+   "hand": 1.8
+  },
+  "Outline/chevron-up-circle.svg": {
+   "canon": 1.5,
+   "hand": 1.8
+  },
+  "Outline/close-circle.svg": {
+   "canon": 1.5,
+   "hand": 1.8
+  },
+  "Outline/compas.svg": {
+   "canon": 1.8,
+   "hand": 1.8
+  },
+  "Outline/ellipse.svg": {
+   "canon": 1.8,
+   "hand": 1.8
+  },
+  "Outline/info-circle.svg": {
+   "canon": 1.5,
+   "hand": 1.8
+  },
+  "Outline/mic-circle.svg": {
+   "canon": 1.8,
+   "hand": 1.8
+  },
+  "Outline/minus-circle.svg": {
+   "canon": 1.5,
+   "hand": 1.8
+  },
+  "Outline/pause-circle.svg": {
+   "canon": 1.5,
+   "hand": 1.8
+  },
+  "Outline/play-back-circle.svg": {
+   "canon": 1.5,
+   "hand": 1.8
+  },
+  "Outline/play-circle.svg": {
+   "canon": 1.5,
+   "hand": 1.8
+  },
+  "Outline/play-forward-circle.svg": {
+   "canon": 1.5,
+   "hand": 1.8
+  },
+  "Outline/play-skip-back-circle.svg": {
+   "canon": 1.5,
+   "hand": 1.8
+  },
+  "Outline/play-skip-forward-circle.svg": {
+   "canon": 1.5,
+   "hand": 1.8
+  },
+  "Outline/plus-circle.svg": {
+   "canon": 1.5,
+   "hand": 1.8
+  },
+  "Outline/question-circle.svg": {
+   "canon": 1.5,
+   "hand": 1.8
+  },
+  "Outline/sad.svg": {
+   "canon": 1.8,
+   "hand": 1.8
+  },
+  "Outline/smile.svg": {
+   "canon": 1.8,
+   "hand": 1.8
+  },
+  "Outline/time.svg": {
+   "canon": 1.8,
+   "hand": 1.8
+  },
+  "Filled/ban_filled.svg": {
+   "canon": 2.4,
+   "hand": 2.4
+  },
+  "Filled/timer_filled.svg": {
+   "canon": 1.5
+  }
+ },
+ "spreadDebt": {
+  "Outline/archive-close.svg": 0.508,
+  "Outline/archive.svg": 0.508,
+  "Outline/group.svg": 0.195,
+  "Filled/archive-close_filled.svg": 1.391,
+  "Filled/archive_filled.svg": 1.402,
+  "Filled/video-camera-off_filled.svg": 6.738
+ }
+}
