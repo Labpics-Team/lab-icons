@@ -43,14 +43,14 @@
      "file": "svg/Outline/accessibility.svg",
      "parts": [
       {
-       "id": "source-34cc4c147f0f",
+       "id": "source-fadb0c811eb6",
        "identity": "geometry-derived",
        "role": "unclassified",
        "zIndex": 0,
        "fillRule": "evenodd",
-       "topologySignature": "MCCCCLLLLLLLLLLAAQCLLLALCCQAALLLLLLALLLQCCALCCLLLZ|MLLCCLLLLLALLQLLLLQQCCLLLLLLCCQCCQQCLCQQCALLLQCCQQLLLLLCLLLLCQLLLLLQLLALZ|MLLZ",
-       "sourceFingerprint": "sha256:34cc4c147f0fcd54ae479955b87bd76bd02d16f80b6e128caf275a43784e2fe3",
-       "artifactFingerprint": "sha256:34cc4c147f0fcd54ae479955b87bd76bd02d16f80b6e128caf275a43784e2fe3"
+       "topologySignature": "MCCCCLLLLLLAAQCLALCCQAALLALLQCCALCCLZ|MLCCLLLALQLQQCCLLLCCQCCQQCLCQQCALQCCQQLLCLCQLLQLALZ|MLZ",
+       "sourceFingerprint": "sha256:fadb0c811eb60e1ec1115f5267c92787af5e6b6fbe0252be0585843d2f03c246",
+       "artifactFingerprint": "sha256:046474d0b56cdcb8d1437eac2e9fb24aa5aa98425c3b7f3f35b7abc1e8d55f44"
       },
       {
        "id": "source-ae7715b394e3",
@@ -6370,14 +6370,14 @@
      "file": "svg/Outline/fire.svg",
      "parts": [
       {
-       "id": "source-5a22de01a52d",
+       "id": "source-3643df283175",
        "identity": "geometry-derived",
        "role": "unclassified",
        "zIndex": 0,
        "fillRule": "evenodd",
-       "topologySignature": "MCCCLALQLQACCCCCAA|MQACCQAALQCA|MAACCCCLQCACACCQLACA",
-       "sourceFingerprint": "sha256:5a22de01a52db4c89be28b5f2824b3e905398ce4c127cad4f0dcd643a7fa6e59",
-       "artifactFingerprint": "sha256:b06f7b80710698b4324ecebd476f7ba7d2e7c79b1121ff6e7679bf4b1989b3f1"
+       "topologySignature": "MQQLQQACALACLCQLCLCC|MALACQQALAA|MLCQCALALACALCQCLALACLQLQLCALLACACLZ",
+       "sourceFingerprint": "sha256:3643df28317558b2c9490f6b9dcd6c62e2211df4fa75b3b4c71fd73cfbc64d2d",
+       "artifactFingerprint": "sha256:10bf1844ab88d284e6211b739935b924029f4ef171d3137e1411a7269e077788"
       }
      ]
     },
@@ -6385,14 +6385,14 @@
      "file": "svg/Filled/fire_filled.svg",
      "parts": [
       {
-       "id": "source-59677a0480ab",
+       "id": "source-32b1c6f4e565",
        "identity": "geometry-derived",
        "role": "unclassified",
        "zIndex": 0,
        "fillRule": "evenodd",
-       "topologySignature": "MCCCLLQLAALALCCCCCAAZ|MCLCCCQCQQAALLCALZ",
-       "sourceFingerprint": "sha256:59677a0480abd746482388c723e78817a26df4d93562f652e375b62ae410f97e",
-       "artifactFingerprint": "sha256:ea9d8f9a4c1fd2c4ac71f24d55ef5f683dd512a0ab52593be7dcb0ce3525d7de"
+       "topologySignature": "MCCCACQCACAACCCC|MACACCQAQAQACCALA",
+       "sourceFingerprint": "sha256:32b1c6f4e5650bd956bc7fdf5cf585968ec9cf7e5a14ac0304a0278d23b3c02f",
+       "artifactFingerprint": "sha256:32b1c6f4e5650bd956bc7fdf5cf585968ec9cf7e5a14ac0304a0278d23b3c02f"
       }
      ]
     }
@@ -6695,14 +6695,14 @@
      "file": "svg/Filled/group-circle_filled.svg",
      "parts": [
       {
-       "id": "source-bf8641fb354b",
+       "id": "source-aed43fee3b72",
        "identity": "geometry-derived",
        "role": "unclassified",
        "zIndex": 0,
        "fillRule": "evenodd",
-       "topologySignature": "MALLLLLLLLLLQLLLLLLLLLALLLQLLLALLLALLQLLLLLLLLLLLLLLAALLLLLLLLLLLLLLLQLLLLLLLLA|MAAAACQA|MQCQLAAA|MAA|MAA",
-       "sourceFingerprint": "sha256:bf8641fb354b9b3c93345ee87ef5b24ff7b299db99f3686e159aae6bf1af6847",
-       "artifactFingerprint": "sha256:bf8641fb354b9b3c93345ee87ef5b24ff7b299db99f3686e159aae6bf1af6847"
+       "topologySignature": "MALLQLLALQLALALQLLLAALLLLQLLA|MAAAACQA|MQCQLAAA|MAA|MAA",
+       "sourceFingerprint": "sha256:aed43fee3b72629f3533b2a61addeb023d87a5eaa312833a15ae89051e6bd9dc",
+       "artifactFingerprint": "sha256:66d700d0e4b2e44974669102fca27b870ea9aaf792260d221b079aeeb1ba382b"
       }
      ]
     }
@@ -6965,40 +6965,20 @@
      "file": "svg/Outline/hourglass.svg",
      "parts": [
       {
-       "id": "source-4d0d88bf529f",
+       "id": "source-4b2a71ff6d14",
        "identity": "geometry-derived",
        "role": "unclassified",
        "zIndex": 0,
        "fillRule": "nonzero",
-       "topologySignature": "MALCLALALALAZ",
-       "sourceFingerprint": "sha256:4d0d88bf529fff076f1ea1462225a67909690105ee7af3c0c94f46de01b99d74",
-       "artifactFingerprint": "sha256:21e5a80c5e32f31810887ccdd48d5e074051d10e3e91f976b8df30a7f36efa71"
-      },
-      {
-       "id": "source-a0649205be1a",
-       "identity": "geometry-derived",
-       "role": "unclassified",
-       "zIndex": 1,
-       "fillRule": "nonzero",
-       "topologySignature": "MALLALZ",
-       "sourceFingerprint": "sha256:a0649205be1a9d815f44c6d5d367f233039da829985b860cc02807bcde7eebcd",
-       "artifactFingerprint": "sha256:a0649205be1a9d815f44c6d5d367f233039da829985b860cc02807bcde7eebcd"
-      },
-      {
-       "id": "source-f2abf711287d",
-       "identity": "geometry-derived",
-       "role": "unclassified",
-       "zIndex": 2,
-       "fillRule": "nonzero",
-       "topologySignature": "MALCLALALCLAZ",
-       "sourceFingerprint": "sha256:f2abf711287d1cf86af6f8333c6ae330d55b537e81783a88bb3194f1e9559764",
-       "artifactFingerprint": "sha256:7a7ba96316f7b96c06eff47785bdb18740e995adb88b9feaa90644a9f203e40d"
+       "topologySignature": "MALCLALCLALALCLALALAZ",
+       "sourceFingerprint": "sha256:4b2a71ff6d14564fc7e07a0fbae3b401ac59b1673f0d5cba797a07a047817194",
+       "artifactFingerprint": "sha256:3946e8ac7971a09eee08561ba20ce4c567773aa0dabb967f2d0e63a076b141be"
       },
       {
        "id": "source-63aee7d6486b",
        "identity": "geometry-derived",
        "role": "unclassified",
-       "zIndex": 3,
+       "zIndex": 1,
        "fillRule": "evenodd",
        "topologySignature": "MALALCACLALALALCLCLAALALAL|MCCLCLCCLACLCALCALCLCCZ",
        "sourceFingerprint": "sha256:63aee7d6486b5c08004ff5656249b8ad96f51b59a7aa248bdb81f7c18be86605",
@@ -9743,14 +9723,14 @@
      "file": "svg/Outline/plane.svg",
      "parts": [
       {
-       "id": "source-5ae193fa1d11",
+       "id": "source-7e2a7054441e",
        "identity": "geometry-derived",
        "role": "unclassified",
        "zIndex": 0,
        "fillRule": "evenodd",
-       "topologySignature": "MALLLLACCQQCLLALAALLLACLAALLALQLQLCLLLQLQLQLQZ|MLLLLALLLLQLLLLCLLLLLLLLLLLLLLLLLQLCQCACLLLLLLLZ",
-       "sourceFingerprint": "sha256:5ae193fa1d113f757aeb5970f511408e9187a1821954c5dfb28353379de576f9",
-       "artifactFingerprint": "sha256:5ae193fa1d113f757aeb5970f511408e9187a1821954c5dfb28353379de576f9"
+       "topologySignature": "MALLACCQQCLLALAALLLACLAALLALQLQLCLLLQLQLQLQZ|MLLALLQLLCLLLLLLQLCQCACLLLZ",
+       "sourceFingerprint": "sha256:7e2a7054441eb5c6f787d3c93bc725eeee7aec5f0cadadffc8c8c1872dffca65",
+       "artifactFingerprint": "sha256:d03ce977c7fe82060abdb3d2f1f48e014002cdd48225d2eff4051ab0be30ea3b"
       }
      ]
     },
@@ -11921,24 +11901,24 @@
      "file": "svg/Outline/signature.svg",
      "parts": [
       {
-       "id": "source-bbc033047026",
+       "id": "source-094329141cd5",
        "identity": "geometry-derived",
        "role": "unclassified",
        "zIndex": 0,
        "fillRule": "evenodd",
        "topologySignature": "MAQCACQALQQCCQLCLCCAAQLQAQLAAA|MQQCACAQA",
-       "sourceFingerprint": "sha256:bbc033047026882175ec35cf6b401ff723b68bc0bdef17a237c6675911ef8adc",
-       "artifactFingerprint": "sha256:936bd00dc3e5fb0696bacf1517f960ce4a3f31c1de8dcb67bf5b9dfd1c9a5d22"
+       "sourceFingerprint": "sha256:094329141cd54c1988dccb91e3d6a7c3bf5880432da59c3b51229e77fa9c7cbd",
+       "artifactFingerprint": "sha256:1f8ffb806cc17c19fb0700cfddbd3651f1ea033ca43eaf9301f7da5e7788162b"
       },
       {
-       "id": "source-87fe7c8ea08f",
+       "id": "source-671518f2a80a",
        "identity": "geometry-derived",
        "role": "unclassified",
        "zIndex": 1,
        "fillRule": "nonzero",
        "topologySignature": "MAZ|MALAZ|MALAZ|MALAZ",
-       "sourceFingerprint": "sha256:87fe7c8ea08fe07aac81ca356e37717c4afd9854680047cde32477b1a19351ad",
-       "artifactFingerprint": "sha256:87fe7c8ea08fe07aac81ca356e37717c4afd9854680047cde32477b1a19351ad"
+       "sourceFingerprint": "sha256:671518f2a80a233b57c3bcb6e15da100c9774de57995ee4adce3f610508c5721",
+       "artifactFingerprint": "sha256:671518f2a80a233b57c3bcb6e15da100c9774de57995ee4adce3f610508c5721"
       }
      ]
     },
@@ -12066,14 +12046,14 @@
      "file": "svg/Outline/sparkles.svg",
      "parts": [
       {
-       "id": "source-b077a5800f6d",
+       "id": "source-0f1691fac412",
        "identity": "geometry-derived",
        "role": "unclassified",
        "zIndex": 0,
        "fillRule": "nonzero",
-       "topologySignature": "MALLLALLLALLALLZ|MALLCLLLLQLLALZ|MALCQLLLLLLQCLCLLCQLLLLLLQCLLAAQLLLLLLQACCQLLLLLLQC|MALCQLLLLQCLQLLCQLLLLQCLLCCQLLLLQCACQLLLLQC|MQLQLLLLLQLLLLCLQLQLLLLCQCLLQLCACLZ|MLQLLLLLQLLLLCLQLLLLLLCQCLLLLCACLLZ",
-       "sourceFingerprint": "sha256:b077a5800f6df690235532e0ba73c384a3ae2e92e489476d6773bb622221d042",
-       "artifactFingerprint": "sha256:b077a5800f6df690235532e0ba73c384a3ae2e92e489476d6773bb622221d042"
+       "topologySignature": "MALLALLALLALLZ|MALLCLLQLLALZ|MALCQLLQCLCLCQLLQCLAAQLLQACCQLLQC|MALCQLLQCLQLCQLLQCLCCQLLQCACQLLQC|MQLQLLLQLLCLQLQLLCQCLQLCACLZ|MLQLLLQLLCLQLLLCQCLLCACLZ",
+       "sourceFingerprint": "sha256:0f1691fac412b41ae332474c906ea15da5328ee1b8e5abb1e775b4c886b9b5a9",
+       "artifactFingerprint": "sha256:2ed381ba8ef2931d645bada5f8919312fedf496092f03d5f0b139c84b0cb42ec"
       }
      ]
     },
