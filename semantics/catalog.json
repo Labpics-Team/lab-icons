@@ -9137,9 +9137,7 @@
     "variants": {
      "outline": {
       "state": "candidate",
-      "supportedAxes": [
-       "corner"
-      ],
+      "supportedAxes": [],
       "composition": {
        "kind": "compound",
        "fillRule": "evenodd"
@@ -10062,9 +10060,7 @@
     "variants": {
      "outline": {
       "state": "candidate",
-      "supportedAxes": [
-       "corner"
-      ],
+      "supportedAxes": [],
       "composition": {
        "kind": "compound",
        "fillRule": "nonzero"
@@ -10185,9 +10181,7 @@
     "variants": {
      "outline": {
       "state": "candidate",
-      "supportedAxes": [
-       "corner"
-      ],
+      "supportedAxes": [],
       "composition": {
        "kind": "compound",
        "fillRule": "nonzero"
@@ -10308,9 +10302,7 @@
     "variants": {
      "outline": {
       "state": "candidate",
-      "supportedAxes": [
-       "corner"
-      ],
+      "supportedAxes": [],
       "composition": {
        "kind": "compound",
        "fillRule": "nonzero"
