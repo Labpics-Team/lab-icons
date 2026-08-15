@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "comment": "Per-source debt (все находки, minor+major), переснят 2026-08-15. Причина: Импорт hand-ink (truth-reset): outline-чернила 3 иконок заменены рукой, их регистрация против старых filled честно входит в парный долг (arrow-down-circle, arrow-forward-circle, play-back-circle); выравнивание пар — отдельная волна. Правило: ни один файл не растёт против своего snapshot.",
+  "comment": "Per-source debt (все находки, minor+major), переснят 2026-08-15. Причина: Импорт hand ban.svg (вписанная капсула слэша, слитый evenodd-контур руки вместо касательной капсулы генерата) — долг руки честно замораживается как в предыдущих hand-импортах truth-reset. Правило: ни один файл не растёт против своего snapshot.",
   "byFile": {
     "Filled/accessibility_filled.svg": 12,
     "Filled/actions_filled.svg": 3,
@@ -250,7 +250,7 @@
     "Outline/bag-minus.svg": 2,
     "Outline/bag-plus.svg": 2,
     "Outline/bag.svg": 2,
-    "Outline/ban.svg": 4,
+    "Outline/ban.svg": 1,
     "Outline/bill.svg": 14,
     "Outline/bin.svg": 13,
     "Outline/book.svg": 8,

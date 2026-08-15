@@ -1,8 +1,8 @@
 {
-  "comment": "Measured full-corpus migration debt frozen on 2026-08-15. Причина переснятия: Импорт hand-ink (truth-reset): outline-чернила 3 иконок заменены рукой, их регистрация против старых filled честно входит в парный долг (arrow-down-circle, arrow-forward-circle, play-back-circle); выравнивание пар — отдельная волна. CI rejects count growth and every unreviewed finding-set substitution; lowering debt requires refreshing this proof in the same reviewed change.",
+  "comment": "Measured full-corpus migration debt frozen on 2026-08-15. Причина переснятия: Импорт hand ban.svg (вписанная капсула слэша, слитый evenodd-контур руки вместо касательной капсулы генерата) — долг руки честно замораживается как в предыдущих hand-импортах truth-reset. CI rejects count growth and every unreviewed finding-set substitution; lowering debt requires refreshing this proof in the same reviewed change.",
   "pathQuality": {
-    "findingSetSha256": "sha256:5253b4f5ccd37975c5326dfa34a25042d764ff807e88671d46ec080aa4e88b62",
-    "maximumFindings": 3351,
+    "findingSetSha256": "sha256:f85f414c0a6250a10640bf0775a32183ef64cdd89da63004ca653dfb35f0ede8",
+    "maximumFindings": 3348,
     "maximumMajorFindings": 1569
   },
   "variantParity": {

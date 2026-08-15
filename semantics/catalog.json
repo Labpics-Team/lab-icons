@@ -2059,14 +2059,14 @@
      "file": "svg/Outline/ban.svg",
      "parts": [
       {
-       "id": "source-cf0e37c900f6",
+       "id": "source-1bec047f5d83",
        "identity": "geometry-derived",
        "role": "unclassified",
        "zIndex": 0,
-       "fillRule": "nonzero",
-       "topologySignature": "MLALAZ|MAAZ|MAAZ",
-       "sourceFingerprint": "sha256:cf0e37c900f6e86eab737ecdaab08690330027a739d8178e275de517ce351274",
-       "artifactFingerprint": "sha256:bec9c5abdb390d48edf48ebb4a18d6dab921c877f7210177333550f9acf9e17b"
+       "fillRule": "evenodd",
+       "topologySignature": "MAA|MAZ|MALA",
+       "sourceFingerprint": "sha256:1bec047f5d83a55b98e8f96140dfe9c3ecefb283c56cfcb54579780986948a3d",
+       "artifactFingerprint": "sha256:1bec047f5d83a55b98e8f96140dfe9c3ecefb283c56cfcb54579780986948a3d"
       }
      ]
     },
@@ -2095,7 +2095,7 @@
       "supportedAxes": [],
       "composition": {
        "kind": "compound",
-       "fillRule": "nonzero"
+       "fillRule": "evenodd"
       },
       "parts": [
        {
