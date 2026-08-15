@@ -43,14 +43,14 @@
      "file": "svg/Outline/accessibility.svg",
      "parts": [
       {
-       "id": "source-fadb0c811eb6",
+       "id": "source-34cc4c147f0f",
        "identity": "geometry-derived",
        "role": "unclassified",
        "zIndex": 0,
        "fillRule": "evenodd",
-       "topologySignature": "MCCCCLLLLLLAAQCLALCCQAALLALLQCCALCCLZ|MLCCLLLALQLQQCCLLLCCQCCQQCLCQQCALQCCQQLLCLCQLLQLALZ|MLZ",
-       "sourceFingerprint": "sha256:fadb0c811eb60e1ec1115f5267c92787af5e6b6fbe0252be0585843d2f03c246",
-       "artifactFingerprint": "sha256:046474d0b56cdcb8d1437eac2e9fb24aa5aa98425c3b7f3f35b7abc1e8d55f44"
+       "topologySignature": "MCCCCLLLLLLLLLLAAQCLLLALCCQAALLLLLLALLLQCCALCCLLLZ|MLLCCLLLLLALLQLLLLQQCCLLLLLLCCQCCQQCLCQQCALLLQCCQQLLLLLCLLLLCQLLLLLQLLALZ|MLLZ",
+       "sourceFingerprint": "sha256:34cc4c147f0fcd54ae479955b87bd76bd02d16f80b6e128caf275a43784e2fe3",
+       "artifactFingerprint": "sha256:34cc4c147f0fcd54ae479955b87bd76bd02d16f80b6e128caf275a43784e2fe3"
       },
       {
        "id": "source-ae7715b394e3",
@@ -6695,14 +6695,14 @@
      "file": "svg/Filled/group-circle_filled.svg",
      "parts": [
       {
-       "id": "source-aed43fee3b72",
+       "id": "source-bf8641fb354b",
        "identity": "geometry-derived",
        "role": "unclassified",
        "zIndex": 0,
        "fillRule": "evenodd",
-       "topologySignature": "MALLQLLALQLALALQLLLAALLLLQLLA|MAAAACQA|MQCQLAAA|MAA|MAA",
-       "sourceFingerprint": "sha256:aed43fee3b72629f3533b2a61addeb023d87a5eaa312833a15ae89051e6bd9dc",
-       "artifactFingerprint": "sha256:66d700d0e4b2e44974669102fca27b870ea9aaf792260d221b079aeeb1ba382b"
+       "topologySignature": "MALLLLLLLLLLQLLLLLLLLLALLLQLLLALLLALLQLLLLLLLLLLLLLLAALLLLLLLLLLLLLLLQLLLLLLLLA|MAAAACQA|MQCQLAAA|MAA|MAA",
+       "sourceFingerprint": "sha256:bf8641fb354b9b3c93345ee87ef5b24ff7b299db99f3686e159aae6bf1af6847",
+       "artifactFingerprint": "sha256:bf8641fb354b9b3c93345ee87ef5b24ff7b299db99f3686e159aae6bf1af6847"
       }
      ]
     }
@@ -9723,14 +9723,14 @@
      "file": "svg/Outline/plane.svg",
      "parts": [
       {
-       "id": "source-7e2a7054441e",
+       "id": "source-5ae193fa1d11",
        "identity": "geometry-derived",
        "role": "unclassified",
        "zIndex": 0,
        "fillRule": "evenodd",
-       "topologySignature": "MALLACCQQCLLALAALLLACLAALLALQLQLCLLLQLQLQLQZ|MLLALLQLLCLLLLLLQLCQCACLLLZ",
-       "sourceFingerprint": "sha256:7e2a7054441eb5c6f787d3c93bc725eeee7aec5f0cadadffc8c8c1872dffca65",
-       "artifactFingerprint": "sha256:d03ce977c7fe82060abdb3d2f1f48e014002cdd48225d2eff4051ab0be30ea3b"
+       "topologySignature": "MALLLLACCQQCLLALAALLLACLAALLALQLQLCLLLQLQLQLQZ|MLLLLALLLLQLLLLCLLLLLLLLLLLLLLLLLQLCQCACLLLLLLLZ",
+       "sourceFingerprint": "sha256:5ae193fa1d113f757aeb5970f511408e9187a1821954c5dfb28353379de576f9",
+       "artifactFingerprint": "sha256:5ae193fa1d113f757aeb5970f511408e9187a1821954c5dfb28353379de576f9"
       }
      ]
     },
@@ -12046,14 +12046,14 @@
      "file": "svg/Outline/sparkles.svg",
      "parts": [
       {
-       "id": "source-0f1691fac412",
+       "id": "source-b077a5800f6d",
        "identity": "geometry-derived",
        "role": "unclassified",
        "zIndex": 0,
        "fillRule": "nonzero",
-       "topologySignature": "MALLALLALLALLZ|MALLCLLQLLALZ|MALCQLLQCLCLCQLLQCLAAQLLQACCQLLQC|MALCQLLQCLQLCQLLQCLCCQLLQCACQLLQC|MQLQLLLQLLCLQLQLLCQCLQLCACLZ|MLQLLLQLLCLQLLLCQCLLCACLZ",
-       "sourceFingerprint": "sha256:0f1691fac412b41ae332474c906ea15da5328ee1b8e5abb1e775b4c886b9b5a9",
-       "artifactFingerprint": "sha256:2ed381ba8ef2931d645bada5f8919312fedf496092f03d5f0b139c84b0cb42ec"
+       "topologySignature": "MALLLALLLALLALLZ|MALLCLLLLQLLALZ|MALCQLLLLLLQCLCLLCQLLLLLLQCLLAAQLLLLLLQACCQLLLLLLQC|MALCQLLLLQCLQLLCQLLLLQCLLCCQLLLLQCACQLLLLQC|MQLQLLLLLQLLLLCLQLQLLLLCQCLLQLCACLZ|MLQLLLLLQLLLLCLQLLLLLLCQCLLLLCACLLZ",
+       "sourceFingerprint": "sha256:b077a5800f6df690235532e0ba73c384a3ae2e92e489476d6773bb622221d042",
+       "artifactFingerprint": "sha256:b077a5800f6df690235532e0ba73c384a3ae2e92e489476d6773bb622221d042"
       }
      ]
     },

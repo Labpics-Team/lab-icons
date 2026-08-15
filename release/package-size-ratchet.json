@@ -13,10 +13,10 @@
       ]
     },
     "dist/index.js": {
-      "baselineBytes": 342279,
-      "baselineGzipBytes": 94670,
-      "maxBytes": 342279,
-      "maxGzipBytes": 94670,
+      "baselineBytes": 343280,
+      "baselineGzipBytes": 95083,
+      "maxBytes": 343280,
+      "maxGzipBytes": 95083,
       "allowedModules": [],
       "forbiddenNeedles": [
         "sourceMappingURL"
@@ -43,10 +43,10 @@
       ]
     },
     "dist/ir/index.js": {
-      "baselineBytes": 789007,
-      "baselineGzipBytes": 120752,
-      "maxBytes": 789007,
-      "maxGzipBytes": 120752,
+      "baselineBytes": 789165,
+      "baselineGzipBytes": 120642,
+      "maxBytes": 789165,
+      "maxGzipBytes": 120642,
       "allowedModules": [
         "scripts/lib/anatomy-gen.js",
         "scripts/lib/calendar-geometry.js",
