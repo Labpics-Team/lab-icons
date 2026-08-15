@@ -2,14 +2,6 @@
  "version": 1,
  "comment": "R0 quarantine measured by the deterministic Observatory on 2026-07-16. A generated law remains modeled, but accepted-only must use source fallback until its named geometric finding is closed.",
  "quarantined": {
-  "arrow-down-circle/outline": {
-   "reason": "at least one declared target raster reports component or counter divergence, while the adaptive topology oracle remains uncertain",
-   "exitCriteria": "make every target raster topology match and obtain a resolved adaptive-oracle match"
-  },
-  "arrow-forward-circle/outline": {
-   "reason": "at least one declared target raster reports component or counter divergence, while the adaptive topology oracle remains uncertain",
-   "exitCriteria": "make every target raster topology match and obtain a resolved adaptive-oracle match"
-  },
   "ban/outline": {
    "reason": "the adaptive topology oracle cannot resolve the normalized law against the historical hand; no topology difference is claimed",
    "exitCriteria": "obtain a resolved topology match before owner review of the remaining subpixel normalization"

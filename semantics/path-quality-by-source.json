@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "comment": "Per-source debt (все находки, minor+major), переснят 2026-08-15. Причина: Возврат компенсирующей чистки #78 (accessibility, sparkles, group-circle_filled, plane) легитимно вернул их долг; ledger починен — слойные находки теперь канонизируются в file-ключ и реально сравниваются (класс invert_filled). Правило: ни один файл не растёт против своего snapshot.",
+  "comment": "Per-source debt (все находки, minor+major), переснят 2026-08-15. Причина: Импорт hand-ink (truth-reset): outline-чернила 3 иконок заменены рукой, их регистрация против старых filled честно входит в парный долг (arrow-down-circle, arrow-forward-circle, play-back-circle); выравнивание пар — отдельная волна. Правило: ни один файл не растёт против своего snapshot.",
   "byFile": {
     "Filled/accessibility_filled.svg": 12,
     "Filled/actions_filled.svg": 3,
@@ -234,9 +234,9 @@
     "Outline/archive.svg": 4,
     "Outline/arrow-back-circle.svg": 7,
     "Outline/arrow-back.svg": 4,
-    "Outline/arrow-down-circle.svg": 4,
+    "Outline/arrow-down-circle.svg": 6,
     "Outline/arrow-down.svg": 9,
-    "Outline/arrow-forward-circle.svg": 4,
+    "Outline/arrow-forward-circle.svg": 6,
     "Outline/arrow-forward.svg": 5,
     "Outline/arrow-redo-circle.svg": 5,
     "Outline/arrow-redo.svg": 7,
@@ -375,7 +375,7 @@
     "Outline/pin.svg": 20,
     "Outline/place.svg": 4,
     "Outline/plane.svg": 31,
-    "Outline/play-back-circle.svg": 4,
+    "Outline/play-back-circle.svg": 13,
     "Outline/play-back.svg": 3,
     "Outline/play-circle.svg": 4,
     "Outline/play-forward-circle.svg": 9,

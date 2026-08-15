@@ -1,13 +1,13 @@
 {
-  "comment": "Measured full-corpus migration debt frozen on 2026-08-15. Причина переснятия: Возврат компенсирующей чистки #78 (accessibility, sparkles, group-circle_filled, plane) легитимно вернул их долг; ledger починен — слойные находки теперь канонизируются в file-ключ и реально сравниваются (класс invert_filled). CI rejects count growth and every unreviewed finding-set substitution; lowering debt requires refreshing this proof in the same reviewed change.",
+  "comment": "Measured full-corpus migration debt frozen on 2026-08-15. Причина переснятия: Импорт hand-ink (truth-reset): outline-чернила 3 иконок заменены рукой, их регистрация против старых filled честно входит в парный долг (arrow-down-circle, arrow-forward-circle, play-back-circle); выравнивание пар — отдельная волна. CI rejects count growth and every unreviewed finding-set substitution; lowering debt requires refreshing this proof in the same reviewed change.",
   "pathQuality": {
-    "findingSetSha256": "sha256:8d67b80c25a765c459bf737610c24e940655347a28c87a70ceeafec2d3a803bc",
-    "maximumFindings": 3338,
-    "maximumMajorFindings": 1561
+    "findingSetSha256": "sha256:5253b4f5ccd37975c5326dfa34a25042d764ff807e88671d46ec080aa4e88b62",
+    "maximumFindings": 3351,
+    "maximumMajorFindings": 1569
   },
   "variantParity": {
-    "findingSetSha256": "sha256:c6b3a3e15ae11257e6239ed235ac25625b735e09a9ff4e10be1ced1d17d9301b",
-    "maximumFindings": 14
+    "findingSetSha256": "sha256:ddc7e7632b93c7bec79d6a1c1d6d2441dbe28791d71a2c298a7929489829f1cd",
+    "maximumFindings": 17
   },
   "version": 1
 }

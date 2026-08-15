@@ -1148,14 +1148,14 @@
      "file": "svg/Outline/arrow-down-circle.svg",
      "parts": [
       {
-       "id": "source-a8b452963411",
+       "id": "source-fa30f83636cf",
        "identity": "geometry-derived",
        "role": "unclassified",
        "zIndex": 0,
        "fillRule": "nonzero",
-       "topologySignature": "MLALALLAZ|MLALAZ|MAAZ|MAAZ",
-       "sourceFingerprint": "sha256:a8b4529634112d04301f00f692d056a20bf91856b54b1356cf57d30873f703b7",
-       "artifactFingerprint": "sha256:97452cd4637fda52f26a43d313fd3aebbaf571593f16081c107455eb030f8b2f"
+       "topologySignature": "MALLLALLQQAAQLALLA|MAA|MAA",
+       "sourceFingerprint": "sha256:fa30f83636cfd68a8f60e0d8a839f9a24d243ed9201eb30d15182f313ff2be15",
+       "artifactFingerprint": "sha256:fa30f83636cfd68a8f60e0d8a839f9a24d243ed9201eb30d15182f313ff2be15"
       }
      ]
     },
@@ -1193,8 +1193,8 @@
         "role": "content",
         "zIndex": 0,
         "anchor": [
-         0.501771,
-         0.600207
+         0.501688,
+         0.615957
         ],
         "anchorSource": "geometry-bbox-center",
         "morphGroup": null,
@@ -1206,8 +1206,8 @@
         "role": "content",
         "zIndex": 1,
         "anchor": [
-         0.500833,
-         0.451583
+         0.500792,
+         0.473646
         ],
         "anchorSource": "geometry-bbox-center",
         "morphGroup": null,
@@ -1349,14 +1349,14 @@
      "file": "svg/Outline/arrow-forward-circle.svg",
      "parts": [
       {
-       "id": "source-737b1d385bcc",
+       "id": "source-cda1c7e0e4b3",
        "identity": "geometry-derived",
        "role": "unclassified",
        "zIndex": 0,
        "fillRule": "nonzero",
-       "topologySignature": "MLLALALAZ|MLALAZ|MAAZ|MAAZ",
-       "sourceFingerprint": "sha256:737b1d385bcc15302d387f2973cb9acee70ac13de4bd356a2ee281b6ed14fbcc",
-       "artifactFingerprint": "sha256:3adc94020c661301676f6f45fd936754168307975219f27e76a36cdceac74cce"
+       "topologySignature": "MALLQQAQQLALLALLLA|MAA|MAA",
+       "sourceFingerprint": "sha256:cda1c7e0e4b3e2c4ba6043a6840bf22478ec3a4ebc23af1f69edfe0124514619",
+       "artifactFingerprint": "sha256:cda1c7e0e4b3e2c4ba6043a6840bf22478ec3a4ebc23af1f69edfe0124514619"
       }
      ]
     },
@@ -1394,8 +1394,8 @@
         "role": "content",
         "zIndex": 0,
         "anchor": [
-         0.600103,
-         0.498854
+         0.600762,
+         0.511357
         ],
         "anchorSource": "geometry-bbox-center",
         "morphGroup": null,
@@ -1407,8 +1407,8 @@
         "role": "content",
         "zIndex": 1,
         "anchor": [
-         0.451542,
-         0.499792
+         0.453125,
+         0.512292
         ],
         "anchorSource": "geometry-bbox-center",
         "morphGroup": null,
@@ -9826,14 +9826,14 @@
      "file": "svg/Outline/play-back-circle.svg",
      "parts": [
       {
-       "id": "source-be4b78849677",
+       "id": "source-247c27acee54",
        "identity": "geometry-derived",
        "role": "unclassified",
        "zIndex": 0,
        "fillRule": "nonzero",
-       "topologySignature": "MCACLCACLCACLCACLCACLCACLCACZ|MAAZ|MAAZ",
-       "sourceFingerprint": "sha256:be4b78849677db7b9e7726cc4a808d1e5653f084c118c828a5317ef3ef21ed8c",
-       "artifactFingerprint": "sha256:df24e1fb24a7e0d4be4767f702d40de6b6a0f458fbea0f4bfd4bfd1b269ae2b3"
+       "topologySignature": "MCCQLQCCCQLLLQQAQLLAQLCQLQCCCQLLLQC|MAA|MAA",
+       "sourceFingerprint": "sha256:247c27acee5454fb0d17ad494fa709ec62a64c13df09d318438f164530fa05af",
+       "artifactFingerprint": "sha256:247c27acee5454fb0d17ad494fa709ec62a64c13df09d318438f164530fa05af"
       }
      ]
     },
@@ -9858,10 +9858,8 @@
     "archetype": "composite",
     "variants": {
      "outline": {
-      "state": "accepted",
-      "supportedAxes": [
-       "corner"
-      ],
+      "state": "candidate",
+      "supportedAxes": [],
       "composition": {
        "kind": "compound",
        "fillRule": "nonzero"
@@ -9873,8 +9871,8 @@
         "role": "ink",
         "zIndex": 0,
         "anchor": [
-         0.473374,
-         0.5
+         0.473805,
+         0.5125
         ],
         "anchorSource": "geometry-bbox-center",
         "morphGroup": null,

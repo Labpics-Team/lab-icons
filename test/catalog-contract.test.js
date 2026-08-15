@@ -241,9 +241,9 @@ describe('полный icon catalog', () => {
     const supported = Object.values(catalog.icons)
       .flatMap((icon) => Object.values(icon.model?.variants ?? {}))
       .flatMap((variant) => variant.supportedAxes);
-    expect(supported).toHaveLength(18);
+    expect(supported).toHaveLength(17);
     expect(supported.filter((axis) => axis === 'weight')).toHaveLength(9);
-    expect(supported.filter((axis) => axis === 'corner')).toHaveLength(9);
+    expect(supported.filter((axis) => axis === 'corner')).toHaveLength(8);
   });
 
   it('candidate-модель не рекламирует оси: default glyph() — accepted-only', () => {
@@ -264,8 +264,8 @@ describe('полный icon catalog', () => {
     const modeled = icons.flatMap((icon) => Object.values(icon.model?.variants ?? {}));
     expect(icons.filter((icon) => icon.model !== null)).toHaveLength(63);
     expect(modeled).toHaveLength(100);
-    expect(modeled.filter((variant) => variant.state === 'accepted')).toHaveLength(54);
-    expect(modeled.filter((variant) => variant.state === 'candidate')).toHaveLength(46);
+    expect(modeled.filter((variant) => variant.state === 'accepted')).toHaveLength(53);
+    expect(modeled.filter((variant) => variant.state === 'candidate')).toHaveLength(47);
     expect(444 - modeled.length).toBe(344);
   });
 });

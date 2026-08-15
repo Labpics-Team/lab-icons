@@ -256,7 +256,7 @@ describe('public Glyph IR', () => {
         }
       }
     }
-    expect(accepted).toBe(54);
+    expect(accepted).toBe(53);
     expect(topologyIssues).toEqual([]);
     expect(worst.deviationPct, worst.id).toBeLessThanOrEqual(AUTO_ACCEPTANCE_DEVIATION_PCT);
   });
