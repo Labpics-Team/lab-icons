@@ -28,6 +28,10 @@ import {
   compareDebtSnapshot,
   validateLegacyQualitySnapshot,
 } from './lib/legacy-quality-snapshot.js';
+import {
+  comparePerSourceDebt,
+  loadPerSourceSnapshot,
+} from './lib/path-quality-debt.js';
 
 const DEFAULT_RATIOS = {
   microSegment: 0.05 / 24,
@@ -410,6 +414,18 @@ if (isMain) {
       `сначала опровергнуть регрессию:\n  - ${debtErrors.join('\n  - ')}`,
     );
   }
+
+  // Per-source debt check: каждый файл не должен расти против своего snapshot
+  const perSourceDebt = loadPerSourceSnapshot(root);
+  const perSourceErrors = comparePerSourceDebt(findings, perSourceDebt);
+  if (perSourceErrors.length > 0) {
+    console.error(
+      'check-path-quality: PER-SOURCE HARD — per-source debt изменился; ' +
+      `сначала опровергнуть регрессию:\n  - ${perSourceErrors.join('\n  - ')}`,
+    );
+    process.exit(1);
+  }
+
   if (process.argv.includes('--strict') && findings.length > 0) process.exit(1);
   if (debtErrors.length > 0) process.exit(1);
 }

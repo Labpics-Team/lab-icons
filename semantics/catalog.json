@@ -43,14 +43,14 @@
      "file": "svg/Outline/accessibility.svg",
      "parts": [
       {
-       "id": "source-fadb0c811eb6",
+       "id": "source-34cc4c147f0f",
        "identity": "geometry-derived",
        "role": "unclassified",
        "zIndex": 0,
        "fillRule": "evenodd",
-       "topologySignature": "MCCCCLLLLLLAAQCLALCCQAALLALLQCCALCCLZ|MLCCLLLALQLQQCCLLLCCQCCQQCLCQQCALQCCQQLLCLCQLLQLALZ|MLZ",
-       "sourceFingerprint": "sha256:fadb0c811eb60e1ec1115f5267c92787af5e6b6fbe0252be0585843d2f03c246",
-       "artifactFingerprint": "sha256:046474d0b56cdcb8d1437eac2e9fb24aa5aa98425c3b7f3f35b7abc1e8d55f44"
+       "topologySignature": "MCCCCLLLLLLLLLLAAQCLLLALCCQAALLLLLLALLLQCCALCCLLLZ|MLLCCLLLLLALLQLLLLQQCCLLLLLLCCQCCQQCLCQQCALLLQCCQQLLLLLCLLLLCQLLLLLQLLALZ|MLLZ",
+       "sourceFingerprint": "sha256:34cc4c147f0fcd54ae479955b87bd76bd02d16f80b6e128caf275a43784e2fe3",
+       "artifactFingerprint": "sha256:34cc4c147f0fcd54ae479955b87bd76bd02d16f80b6e128caf275a43784e2fe3"
       },
       {
        "id": "source-ae7715b394e3",
@@ -1148,14 +1148,14 @@
      "file": "svg/Outline/arrow-down-circle.svg",
      "parts": [
       {
-       "id": "source-a8b452963411",
+       "id": "source-fa30f83636cf",
        "identity": "geometry-derived",
        "role": "unclassified",
        "zIndex": 0,
        "fillRule": "nonzero",
-       "topologySignature": "MLALALLAZ|MLALAZ|MAAZ|MAAZ",
-       "sourceFingerprint": "sha256:a8b4529634112d04301f00f692d056a20bf91856b54b1356cf57d30873f703b7",
-       "artifactFingerprint": "sha256:97452cd4637fda52f26a43d313fd3aebbaf571593f16081c107455eb030f8b2f"
+       "topologySignature": "MALLLALLQQAAQLALLA|MAA|MAA",
+       "sourceFingerprint": "sha256:fa30f83636cfd68a8f60e0d8a839f9a24d243ed9201eb30d15182f313ff2be15",
+       "artifactFingerprint": "sha256:fa30f83636cfd68a8f60e0d8a839f9a24d243ed9201eb30d15182f313ff2be15"
       }
      ]
     },
@@ -1193,8 +1193,8 @@
         "role": "content",
         "zIndex": 0,
         "anchor": [
-         0.501771,
-         0.600207
+         0.501688,
+         0.615957
         ],
         "anchorSource": "geometry-bbox-center",
         "morphGroup": null,
@@ -1206,8 +1206,8 @@
         "role": "content",
         "zIndex": 1,
         "anchor": [
-         0.500833,
-         0.451583
+         0.500792,
+         0.473646
         ],
         "anchorSource": "geometry-bbox-center",
         "morphGroup": null,
@@ -1349,14 +1349,14 @@
      "file": "svg/Outline/arrow-forward-circle.svg",
      "parts": [
       {
-       "id": "source-737b1d385bcc",
+       "id": "source-cda1c7e0e4b3",
        "identity": "geometry-derived",
        "role": "unclassified",
        "zIndex": 0,
        "fillRule": "nonzero",
-       "topologySignature": "MLLALALAZ|MLALAZ|MAAZ|MAAZ",
-       "sourceFingerprint": "sha256:737b1d385bcc15302d387f2973cb9acee70ac13de4bd356a2ee281b6ed14fbcc",
-       "artifactFingerprint": "sha256:3adc94020c661301676f6f45fd936754168307975219f27e76a36cdceac74cce"
+       "topologySignature": "MALLQQAQQLALLALLLA|MAA|MAA",
+       "sourceFingerprint": "sha256:cda1c7e0e4b3e2c4ba6043a6840bf22478ec3a4ebc23af1f69edfe0124514619",
+       "artifactFingerprint": "sha256:cda1c7e0e4b3e2c4ba6043a6840bf22478ec3a4ebc23af1f69edfe0124514619"
       }
      ]
     },
@@ -1394,8 +1394,8 @@
         "role": "content",
         "zIndex": 0,
         "anchor": [
-         0.600103,
-         0.498854
+         0.600762,
+         0.511357
         ],
         "anchorSource": "geometry-bbox-center",
         "morphGroup": null,
@@ -1407,8 +1407,8 @@
         "role": "content",
         "zIndex": 1,
         "anchor": [
-         0.451542,
-         0.499792
+         0.453125,
+         0.512292
         ],
         "anchorSource": "geometry-bbox-center",
         "morphGroup": null,
@@ -2059,14 +2059,14 @@
      "file": "svg/Outline/ban.svg",
      "parts": [
       {
-       "id": "source-cf0e37c900f6",
+       "id": "source-1bec047f5d83",
        "identity": "geometry-derived",
        "role": "unclassified",
        "zIndex": 0,
-       "fillRule": "nonzero",
-       "topologySignature": "MLALAZ|MAAZ|MAAZ",
-       "sourceFingerprint": "sha256:cf0e37c900f6e86eab737ecdaab08690330027a739d8178e275de517ce351274",
-       "artifactFingerprint": "sha256:bec9c5abdb390d48edf48ebb4a18d6dab921c877f7210177333550f9acf9e17b"
+       "fillRule": "evenodd",
+       "topologySignature": "MAA|MAZ|MALA",
+       "sourceFingerprint": "sha256:1bec047f5d83a55b98e8f96140dfe9c3ecefb283c56cfcb54579780986948a3d",
+       "artifactFingerprint": "sha256:1bec047f5d83a55b98e8f96140dfe9c3ecefb283c56cfcb54579780986948a3d"
       }
      ]
     },
@@ -2095,7 +2095,7 @@
       "supportedAxes": [],
       "composition": {
        "kind": "compound",
-       "fillRule": "nonzero"
+       "fillRule": "evenodd"
       },
       "parts": [
        {
@@ -6695,14 +6695,14 @@
      "file": "svg/Filled/group-circle_filled.svg",
      "parts": [
       {
-       "id": "source-aed43fee3b72",
+       "id": "source-bf8641fb354b",
        "identity": "geometry-derived",
        "role": "unclassified",
        "zIndex": 0,
        "fillRule": "evenodd",
-       "topologySignature": "MALLQLLALQLALALQLLLAALLLLQLLA|MAAAACQA|MQCQLAAA|MAA|MAA",
-       "sourceFingerprint": "sha256:aed43fee3b72629f3533b2a61addeb023d87a5eaa312833a15ae89051e6bd9dc",
-       "artifactFingerprint": "sha256:66d700d0e4b2e44974669102fca27b870ea9aaf792260d221b079aeeb1ba382b"
+       "topologySignature": "MALLLLLLLLLLQLLLLLLLLLALLLQLLLALLLALLQLLLLLLLLLLLLLLAALLLLLLLLLLLLLLLQLLLLLLLLA|MAAAACQA|MQCQLAAA|MAA|MAA",
+       "sourceFingerprint": "sha256:bf8641fb354b9b3c93345ee87ef5b24ff7b299db99f3686e159aae6bf1af6847",
+       "artifactFingerprint": "sha256:bf8641fb354b9b3c93345ee87ef5b24ff7b299db99f3686e159aae6bf1af6847"
       }
      ]
     }
@@ -9137,9 +9137,7 @@
     "variants": {
      "outline": {
       "state": "candidate",
-      "supportedAxes": [
-       "corner"
-      ],
+      "supportedAxes": [],
       "composition": {
        "kind": "compound",
        "fillRule": "evenodd"
@@ -9723,14 +9721,14 @@
      "file": "svg/Outline/plane.svg",
      "parts": [
       {
-       "id": "source-7e2a7054441e",
+       "id": "source-5ae193fa1d11",
        "identity": "geometry-derived",
        "role": "unclassified",
        "zIndex": 0,
        "fillRule": "evenodd",
-       "topologySignature": "MALLACCQQCLLALAALLLACLAALLALQLQLCLLLQLQLQLQZ|MLLALLQLLCLLLLLLQLCQCACLLLZ",
-       "sourceFingerprint": "sha256:7e2a7054441eb5c6f787d3c93bc725eeee7aec5f0cadadffc8c8c1872dffca65",
-       "artifactFingerprint": "sha256:d03ce977c7fe82060abdb3d2f1f48e014002cdd48225d2eff4051ab0be30ea3b"
+       "topologySignature": "MALLLLACCQQCLLALAALLLACLAALLALQLQLCLLLQLQLQLQZ|MLLLLALLLLQLLLLCLLLLLLLLLLLLLLLLLQLCQCACLLLLLLLZ",
+       "sourceFingerprint": "sha256:5ae193fa1d113f757aeb5970f511408e9187a1821954c5dfb28353379de576f9",
+       "artifactFingerprint": "sha256:5ae193fa1d113f757aeb5970f511408e9187a1821954c5dfb28353379de576f9"
       }
      ]
     },
@@ -9828,14 +9826,14 @@
      "file": "svg/Outline/play-back-circle.svg",
      "parts": [
       {
-       "id": "source-be4b78849677",
+       "id": "source-247c27acee54",
        "identity": "geometry-derived",
        "role": "unclassified",
        "zIndex": 0,
        "fillRule": "nonzero",
-       "topologySignature": "MCACLCACLCACLCACLCACLCACLCACZ|MAAZ|MAAZ",
-       "sourceFingerprint": "sha256:be4b78849677db7b9e7726cc4a808d1e5653f084c118c828a5317ef3ef21ed8c",
-       "artifactFingerprint": "sha256:df24e1fb24a7e0d4be4767f702d40de6b6a0f458fbea0f4bfd4bfd1b269ae2b3"
+       "topologySignature": "MCCQLQCCCQLLLQQAQLLAQLCQLQCCCQLLLQC|MAA|MAA",
+       "sourceFingerprint": "sha256:247c27acee5454fb0d17ad494fa709ec62a64c13df09d318438f164530fa05af",
+       "artifactFingerprint": "sha256:247c27acee5454fb0d17ad494fa709ec62a64c13df09d318438f164530fa05af"
       }
      ]
     },
@@ -9860,10 +9858,8 @@
     "archetype": "composite",
     "variants": {
      "outline": {
-      "state": "accepted",
-      "supportedAxes": [
-       "corner"
-      ],
+      "state": "candidate",
+      "supportedAxes": [],
       "composition": {
        "kind": "compound",
        "fillRule": "nonzero"
@@ -9875,8 +9871,8 @@
         "role": "ink",
         "zIndex": 0,
         "anchor": [
-         0.473374,
-         0.5
+         0.473805,
+         0.5125
         ],
         "anchorSource": "geometry-bbox-center",
         "morphGroup": null,
@@ -10062,9 +10058,7 @@
     "variants": {
      "outline": {
       "state": "candidate",
-      "supportedAxes": [
-       "corner"
-      ],
+      "supportedAxes": [],
       "composition": {
        "kind": "compound",
        "fillRule": "nonzero"
@@ -10185,9 +10179,7 @@
     "variants": {
      "outline": {
       "state": "candidate",
-      "supportedAxes": [
-       "corner"
-      ],
+      "supportedAxes": [],
       "composition": {
        "kind": "compound",
        "fillRule": "nonzero"
@@ -10308,9 +10300,7 @@
     "variants": {
      "outline": {
       "state": "candidate",
-      "supportedAxes": [
-       "corner"
-      ],
+      "supportedAxes": [],
       "composition": {
        "kind": "compound",
        "fillRule": "nonzero"
@@ -12046,14 +12036,14 @@
      "file": "svg/Outline/sparkles.svg",
      "parts": [
       {
-       "id": "source-0f1691fac412",
+       "id": "source-b077a5800f6d",
        "identity": "geometry-derived",
        "role": "unclassified",
        "zIndex": 0,
        "fillRule": "nonzero",
-       "topologySignature": "MALLALLALLALLZ|MALLCLLQLLALZ|MALCQLLQCLCLCQLLQCLAAQLLQACCQLLQC|MALCQLLQCLQLCQLLQCLCCQLLQCACQLLQC|MQLQLLLQLLCLQLQLLCQCLQLCACLZ|MLQLLLQLLCLQLLLCQCLLCACLZ",
-       "sourceFingerprint": "sha256:0f1691fac412b41ae332474c906ea15da5328ee1b8e5abb1e775b4c886b9b5a9",
-       "artifactFingerprint": "sha256:2ed381ba8ef2931d645bada5f8919312fedf496092f03d5f0b139c84b0cb42ec"
+       "topologySignature": "MALLLALLLALLALLZ|MALLCLLLLQLLALZ|MALCQLLLLLLQCLCLLCQLLLLLLQCLLAAQLLLLLLQACCQLLLLLLQC|MALCQLLLLQCLQLLCQLLLLQCLLCCQLLLLQCACQLLLLQC|MQLQLLLLLQLLLLCLQLQLLLLCQCLLQLCACLZ|MLQLLLLLQLLLLCLQLLLLLLCQCLLLLCACLLZ",
+       "sourceFingerprint": "sha256:b077a5800f6df690235532e0ba73c384a3ae2e92e489476d6773bb622221d042",
+       "artifactFingerprint": "sha256:b077a5800f6df690235532e0ba73c384a3ae2e92e489476d6773bb622221d042"
       }
      ]
     },

@@ -1,13 +1,13 @@
 {
-  "comment": "Measured full-corpus migration debt frozen on 2026-08-15. CI rejects count growth and every unreviewed finding-set substitution; lowering debt requires refreshing this proof in the same reviewed change.",
+  "comment": "Measured full-corpus migration debt frozen on 2026-08-15. Причина переснятия: Импорт hand ban.svg (вписанная капсула слэша, слитый evenodd-контур руки вместо касательной капсулы генерата) — долг руки честно замораживается как в предыдущих hand-импортах truth-reset. CI rejects count growth and every unreviewed finding-set substitution; lowering debt requires refreshing this proof in the same reviewed change.",
   "pathQuality": {
-    "findingSetSha256": "sha256:2f020e4ede7eaeb5ea23cf7900313e6cd6e40b1132ee2e6d03f8a4c5255323e2",
-    "maximumFindings": 3274,
-    "maximumMajorFindings": 1483
+    "findingSetSha256": "sha256:f85f414c0a6250a10640bf0775a32183ef64cdd89da63004ca653dfb35f0ede8",
+    "maximumFindings": 3348,
+    "maximumMajorFindings": 1569
   },
   "variantParity": {
-    "findingSetSha256": "sha256:c6b3a3e15ae11257e6239ed235ac25625b735e09a9ff4e10be1ced1d17d9301b",
-    "maximumFindings": 14
+    "findingSetSha256": "sha256:ddc7e7632b93c7bec79d6a1c1d6d2441dbe28791d71a2c298a7929489829f1cd",
+    "maximumFindings": 17
   },
   "version": 1
 }

@@ -1,98 +1,98 @@
 {
-  "version": 1,
-  "measurement": "fflate@0.8.3 gzipSync level=9 mtime=0 after pnpm build",
-  "artifacts": {
-    "dist/index.d.ts": {
-      "baselineBytes": 30262,
-      "baselineGzipBytes": 3600,
-      "maxBytes": 30262,
-      "maxGzipBytes": 3600,
-      "allowedModules": [],
-      "forbiddenNeedles": [
-        "sourceMappingURL"
-      ]
-    },
-    "dist/index.js": {
-      "baselineBytes": 342279,
-      "baselineGzipBytes": 94670,
-      "maxBytes": 342279,
-      "maxGzipBytes": 94670,
-      "allowedModules": [],
-      "forbiddenNeedles": [
-        "sourceMappingURL"
-      ]
-    },
-    "dist/ir/catalog.generated.d.ts": {
-      "baselineBytes": 3441,
-      "baselineGzipBytes": 1345,
-      "maxBytes": 3441,
-      "maxGzipBytes": 1345,
-      "allowedModules": [],
-      "forbiddenNeedles": [
-        "sourceMappingURL"
-      ]
-    },
-    "dist/ir/index.d.ts": {
-      "baselineBytes": 6799,
-      "baselineGzipBytes": 2252,
-      "maxBytes": 6799,
-      "maxGzipBytes": 2252,
-      "allowedModules": [],
-      "forbiddenNeedles": [
-        "sourceMappingURL"
-      ]
-    },
-    "dist/ir/index.js": {
-      "baselineBytes": 789007,
-      "baselineGzipBytes": 120752,
-      "maxBytes": 789007,
-      "maxGzipBytes": 120752,
-      "allowedModules": [
-        "scripts/lib/anatomy-gen.js",
-        "scripts/lib/calendar-geometry.js",
-        "scripts/lib/circle-dictionary.js",
-        "scripts/lib/glyph-operators.js",
-        "scripts/lib/icon-geometry.js",
-        "scripts/lib/path-data.js",
-        "semantics/anatomy.json",
-        "semantics/catalog.json",
-        "semantics/grid.json",
-        "src/ir/catalog.generated.ts",
-        "src/ir/index.ts",
-        "src/ir/recipes.ts",
-        "src/ir/sha256.ts"
-      ],
-      "forbiddenNeedles": [
-        "sourceMappingURL"
-      ]
-    },
-    "dist/ir/recipes.d.ts": {
-      "baselineBytes": 9239,
-      "baselineGzipBytes": 2341,
-      "maxBytes": 9239,
-      "maxGzipBytes": 2341,
-      "allowedModules": [],
-      "forbiddenNeedles": [
-        "sourceMappingURL"
-      ]
-    },
-    "dist/ir/recipes.js": {
-      "baselineBytes": 65222,
-      "baselineGzipBytes": 15364,
-      "maxBytes": 65222,
-      "maxGzipBytes": 15364,
-      "allowedModules": [
-        "scripts/lib/calendar-geometry.js",
-        "scripts/lib/glyph-operators.js",
-        "src/ir/recipes.ts"
-      ],
-      "forbiddenNeedles": [
-        "@labpics/icons",
-        "<svg",
-        "ICON_IDS",
-        "semantics/catalog",
-        "sourceMappingURL"
-      ]
-    }
+ "version": 1,
+ "measurement": "fflate@0.8.3 gzipSync level=9 mtime=0 after pnpm build",
+ "artifacts": {
+  "dist/index.d.ts": {
+   "baselineBytes": 30262,
+   "baselineGzipBytes": 3600,
+   "maxBytes": 30262,
+   "maxGzipBytes": 3600,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ]
+  },
+  "dist/index.js": {
+   "baselineBytes": 343611,
+   "baselineGzipBytes": 95188,
+   "maxBytes": 343611,
+   "maxGzipBytes": 95188,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ]
+  },
+  "dist/ir/catalog.generated.d.ts": {
+   "baselineBytes": 3441,
+   "baselineGzipBytes": 1345,
+   "maxBytes": 3441,
+   "maxGzipBytes": 1345,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ]
+  },
+  "dist/ir/index.d.ts": {
+   "baselineBytes": 6799,
+   "baselineGzipBytes": 2252,
+   "maxBytes": 6799,
+   "maxGzipBytes": 2252,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ]
+  },
+  "dist/ir/index.js": {
+   "baselineBytes": 790891,
+   "baselineGzipBytes": 120886,
+   "maxBytes": 790891,
+   "maxGzipBytes": 120886,
+   "allowedModules": [
+    "scripts/lib/anatomy-gen.js",
+    "scripts/lib/calendar-geometry.js",
+    "scripts/lib/circle-dictionary.js",
+    "scripts/lib/glyph-operators.js",
+    "scripts/lib/icon-geometry.js",
+    "scripts/lib/path-data.js",
+    "semantics/anatomy.json",
+    "semantics/catalog.json",
+    "semantics/grid.json",
+    "src/ir/catalog.generated.ts",
+    "src/ir/index.ts",
+    "src/ir/recipes.ts",
+    "src/ir/sha256.ts"
+   ],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ]
+  },
+  "dist/ir/recipes.d.ts": {
+   "baselineBytes": 9239,
+   "baselineGzipBytes": 2341,
+   "maxBytes": 9239,
+   "maxGzipBytes": 2341,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ]
+  },
+  "dist/ir/recipes.js": {
+   "baselineBytes": 65222,
+   "baselineGzipBytes": 15364,
+   "maxBytes": 65222,
+   "maxGzipBytes": 15364,
+   "allowedModules": [
+    "scripts/lib/calendar-geometry.js",
+    "scripts/lib/glyph-operators.js",
+    "src/ir/recipes.ts"
+   ],
+   "forbiddenNeedles": [
+    "@labpics/icons",
+    "<svg",
+    "ICON_IDS",
+    "semantics/catalog",
+    "sourceMappingURL"
+   ]
   }
+ }
 }

@@ -121,20 +121,26 @@ function modelFor(name, entry, grid, lib, source, quarantine, disabledAxes, seen
       throw new Error(`icon-catalog: ${name}/${variant} имеет неизвестный anatomy status ${String(status)}`);
     }
     const composition = modelComposition(source[variant]);
+    const state = status === 'generated' && !quarantine.has(`${name}/${variant}`)
+      ? 'accepted'
+      : 'candidate';
+    // Proof и debt-бухгалтерия выполняются для каждой модели (иначе reviewed
+    // debt становился бы orphaned), но публикуется ось только у accepted:
+    // default-режим glyph() — accepted-only, и capabilities кандидата с осями
+    // были бы ложным обещанием (RangeError на первом же запросе с осью).
+    const provenAxes = supportedAxes(
+      name,
+      entry,
+      variant,
+      grid,
+      lib,
+      composition.fillRule,
+      disabledAxes,
+      seenAxisDebt,
+    );
     variants[variant] = {
-      state: status === 'generated' && !quarantine.has(`${name}/${variant}`)
-        ? 'accepted'
-        : 'candidate',
-      supportedAxes: supportedAxes(
-        name,
-        entry,
-        variant,
-        grid,
-        lib,
-        composition.fillRule,
-        disabledAxes,
-        seenAxisDebt,
-      ),
+      state,
+      supportedAxes: state === 'accepted' ? provenAxes : [],
       composition,
       parts: parts[variant].map((part) => ({
         id: part.id,

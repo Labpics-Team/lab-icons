@@ -213,6 +213,26 @@ describe('public Glyph IR', () => {
     }
   });
 
+  it('каждая ось из glyphCapabilities принимается glyph() в default-режиме', () => {
+    // Класс дефекта truth-reset: capabilities обещали corner на candidate-
+    // моделях, а default glyph() (accepted-only) бросал RangeError. Контракт:
+    // capabilities ≡ runtime, без оговорок про modelMode.
+    const variants: readonly IconVariant[] = ['outline', 'filled'];
+    for (const icon of iconIds) {
+      for (const variant of variants) {
+        const capabilities = glyphCapabilities(icon, variant);
+        for (const axis of capabilities.supportedAxes) {
+          const contract = capabilities.axes[axis];
+          expect(contract, `${icon}/${variant}/${axis}`).toBeDefined();
+          for (const value of [contract!.min, contract!.default, contract!.max]) {
+            const built = glyph({ icon, variant, axes: { [axis]: value } });
+            expect(built.provenance.kind, `${icon}/${variant}/${axis}=${value}`).toBe('model');
+          }
+        }
+      }
+    }
+  });
+
   it('accepted default master не выходит за общий auto-acceptance предел от shipment source', () => {
     const variants: readonly IconVariant[] = ['outline', 'filled'];
     let accepted = 0;
@@ -236,7 +256,7 @@ describe('public Glyph IR', () => {
         }
       }
     }
-    expect(accepted).toBe(54);
+    expect(accepted).toBe(53);
     expect(topologyIssues).toEqual([]);
     expect(worst.deviationPct, worst.id).toBeLessThanOrEqual(AUTO_ACCEPTANCE_DEVIATION_PCT);
   });
