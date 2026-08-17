@@ -145,7 +145,7 @@ function viewportRectangleSegments(viewBox) {
  * Поэтому язык закрыт: только этот доказуемый no-op понижается в обычные paths,
  * любой иной clip обязан сначала получить явную IR-семантику.
  */
-function lowerViewportIdentityClip(svgContent) {
+export function lowerViewportIdentityClip(svgContent) {
   const hasClipPath = /<clipPath\b/i.test(svgContent);
   const hasClipReference = /\sclip-path\s*=/i.test(svgContent);
   if (!hasClipPath && !hasClipReference) return svgContent;
@@ -158,7 +158,7 @@ function lowerViewportIdentityClip(svgContent) {
   if (!svgTag || !closeSvg) throw new Error('icon-geometry: clipPath требует целый корневой <svg>');
   const body = svgContent.slice((svgContent.indexOf(svgTag) + svgTag.length), closeSvg.index);
   const structure = body.match(
-    /^\s*<g\b([^>]*)>([\s\S]*?)<\/g>\s*<defs\b([^>]*)>\s*<clipPath\b([^>]*)>\s*(<path\b[^>]*>)\s*<\/clipPath>\s*<\/defs>\s*$/i,
+    /^\s*<g\b([^>]*)>([\s\S]*?)<\/g>\s*<defs\b([^>]*)>\s*<clipPath\b([^>]*)>\s*(<(?:path|rect)\b[^>]*>)\s*<\/clipPath>\s*<\/defs>\s*$/i,
   );
   if (!structure) {
     throw new Error(
@@ -166,7 +166,7 @@ function lowerViewportIdentityClip(svgContent) {
     );
   }
 
-  const [, groupAttrs, renderedBody, defsAttrs, clipAttrs, clipPathTag] = structure;
+  const [, groupAttrs, renderedBody, defsAttrs, clipAttrs, clipShapeTag] = structure;
   if (defsAttrs.trim() !== '') {
     throw new Error('icon-geometry: атрибуты <defs> в identity clipPath запрещены');
   }
@@ -186,24 +186,71 @@ function lowerViewportIdentityClip(svgContent) {
     throw new Error('icon-geometry: clipPath не является локальным viewport identity');
   }
 
-  const clipD = attributeValue(clipPathTag, 'd');
-  if (!clipD) throw new Error('icon-geometry: identity clipPath не имеет d');
-  const extraClipPathAttrs = clipPathTag
-    .replace(/^<path\b/i, '')
-    .replace(/\/?\s*>$/, '')
-    .replace(/\sd\s*=\s*(?:"[^"]*"|'[^']*')/i, '')
-    .trim();
-  if (extraClipPathAttrs !== '') {
-    throw new Error('icon-geometry: identity clipPath path допускает только d');
-  }
-  const actual = JSON.stringify(parsePathData(normalizeHead(clipD)));
-  const expected = JSON.stringify(viewportRectangleSegments(parsedViewBox(svgContent)));
-  if (actual !== expected) {
-    throw new Error(
-      'icon-geometry: неэквивалентный clipPath запрещён; сначала выразить его в IR composition',
-    );
-  }
   const [viewX, viewY, viewWidth, viewHeight] = parsedViewBox(svgContent);
+  if (/^<path\b/i.test(clipShapeTag)) {
+    const clipD = attributeValue(clipShapeTag, 'd');
+    if (!clipD) throw new Error('icon-geometry: identity clipPath path не имеет d');
+    const extraClipPathAttrs = clipShapeTag
+      .replace(/^<path\b/i, '')
+      .replace(/\/?\s*>$/, '')
+      .replace(/\sd\s*=\s*(?:"[^"]*"|'[^']*')/i, '')
+      .trim();
+    if (extraClipPathAttrs !== '') {
+      throw new Error('icon-geometry: identity clipPath path допускает только d');
+    }
+    const actual = JSON.stringify(parsePathData(normalizeHead(clipD)));
+    const expected = JSON.stringify(viewportRectangleSegments([viewX, viewY, viewWidth, viewHeight]));
+    if (actual !== expected) {
+      throw new Error(
+        'icon-geometry: неэквивалентный clipPath запрещён; сначала выразить его в IR composition',
+      );
+    }
+  } else {
+    const rectAttrs = new Map();
+    let rest = clipShapeTag.replace(/^<rect\b/i, '').replace(/\/?\s*>$/, '');
+    while (rest.trim() !== '') {
+      const match = rest.match(/^\s+([a-zA-Z-]+)\s*=\s*(?:"([^"]*)"|'([^']*)')/);
+      if (!match) throw new Error('icon-geometry: невалидные атрибуты identity clipPath rect');
+      if (rectAttrs.has(match[1])) throw new Error(`icon-geometry: повторён атрибут rect.${match[1]}`);
+      rectAttrs.set(match[1], match[2] ?? match[3] ?? '');
+      rest = rest.slice(match[0].length);
+    }
+    const allowed = new Set(['x', 'y', 'width', 'height', 'fill']);
+    const extra = [...rectAttrs.keys()].filter((name) => !allowed.has(name));
+    if (extra.length > 0) {
+      throw new Error(`icon-geometry: identity clipPath rect не допускает ${extra.join(', ')}`);
+    }
+    const number = (name, fallback) => {
+      const raw = rectAttrs.get(name);
+      if (raw == null) {
+        if (!Number.isFinite(fallback)) {
+          throw new Error(`icon-geometry: rect.${name} обязателен`);
+        }
+        return fallback;
+      }
+      const normalized = raw.trim();
+      if (!/^[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?$/.test(normalized)) {
+        throw new Error(`icon-geometry: rect.${name} обязан быть числом без единиц`);
+      }
+      const value = Number(normalized);
+      if (!Number.isFinite(value)) throw new Error(`icon-geometry: rect.${name} обязан быть числом`);
+      return value;
+    };
+    const fill = rectAttrs.get('fill')?.trim().toLowerCase();
+    if (fill != null && !['white', '#fff', '#ffffff', 'currentcolor'].includes(fill)) {
+      throw new Error('icon-geometry: identity clipPath rect имеет недоказанную paint-семантику');
+    }
+    if (
+      number('x', 0) !== viewX ||
+      number('y', 0) !== viewY ||
+      number('width', Number.NaN) !== viewWidth ||
+      number('height', Number.NaN) !== viewHeight
+    ) {
+      throw new Error(
+        'icon-geometry: неэквивалентный clipPath запрещён; сначала выразить его в IR composition',
+      );
+    }
+  }
   for (const pathTag of renderedBody.match(PATH_TAG_RE) ?? []) {
     const d = attributeValue(pathTag, 'd');
     if (!d) continue;

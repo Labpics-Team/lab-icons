@@ -14,9 +14,11 @@
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { buildGlyph } from './lib/anatomy-gen.js';
-import { renderedPathData } from './lib/icon-geometry.js';
+import { buildGlyph, buildGlyphParts } from './lib/anatomy-gen.js';
+import { renderedPathEntries } from './lib/icon-geometry.js';
 import { samplePolylines } from './lib/curve-sampling.js';
+import { rasterizePathEntries } from './lib/ink-raster.js';
+import { lowerModelComposition } from './lib/model-composition.js';
 
 function inkAt(polys, x, y) {
   let hits = 0;
@@ -46,19 +48,60 @@ export function inkIoU(dA, dB, cw, step = 0.12) {
   return both / (both + onlyA + onlyB || 1);
 }
 
+function maskIoU(originalEntries, candidateEntries, canvas, step = 0.12) {
+  const original = rasterizePathEntries(originalEntries, {
+    width: canvas,
+    height: canvas,
+    step,
+    phaseX: 0.5,
+    phaseY: 0.5,
+  });
+  const candidate = rasterizePathEntries(candidateEntries, {
+    width: canvas,
+    height: canvas,
+    step,
+    phaseX: 0.5,
+    phaseY: 0.5,
+  });
+  let intersection = 0;
+  let union = 0;
+  for (let index = 0; index < original.mask.length; index++) {
+    const a = original.mask[index] !== 0;
+    const b = candidate.mask[index] !== 0;
+    if (a && b) intersection++;
+    if (a || b) union++;
+  }
+  return intersection / (union || 1);
+}
+
+function candidateEntriesFor({ name, variant, built, builtParts, catalog }) {
+  const composition = catalog?.icons?.[name]?.model?.variants?.[variant]?.composition;
+  if (!composition || !builtParts?.[variant]) {
+    return [{ d: built, fillRule: composition?.fillRule ?? 'nonzero' }];
+  }
+  return lowerModelComposition({
+    built,
+    parts: builtParts[variant],
+    composition,
+    label: `check-anatomy: ${name}/${variant}`,
+  });
+}
+
 /**
- * @param {{grid:any, anatomy:any, readSvg:(variant:string, name:string)=>string|null}} input
+ * @param {{grid:any, anatomy:any, catalog?:any, readSvg:(variant:string, name:string)=>string|null}} input
  * @returns {{hard:string[], report:string[], checked:number}}
  */
-export function validateAnatomy({ grid, anatomy, readSvg }) {
+export function validateAnatomy({ grid, anatomy, catalog = null, readSvg }) {
   const hard = [];
   const report = [];
   let checked = 0;
   const cw = grid.canvas.width;
   for (const [name, entry] of Object.entries(anatomy.glyphs)) {
     let built;
+    let builtParts;
     try {
       built = buildGlyph(entry, grid, {}, anatomy.glyphs);
+      builtParts = buildGlyphParts(entry, grid, {}, anatomy.glyphs);
     } catch (cause) {
       hard.push(`${name}: генератор упал (${cause.message})`);
       continue;
@@ -71,8 +114,18 @@ export function validateAnatomy({ grid, anatomy, readSvg }) {
         hard.push(`${name}/${variant}: файла нет, а анатомия заявлена`);
         continue;
       }
-      const dFile = renderedPathData(file).join('');
-      const iou = inkIoU(dGen, dFile, cw);
+      const originalEntries = renderedPathEntries(file);
+      const candidateEntries = candidateEntriesFor({
+        name,
+        variant,
+        built: dGen,
+        builtParts,
+        catalog,
+      });
+      const compositionKind = catalog?.icons?.[name]?.model?.variants?.[variant]?.composition?.kind;
+      const iou = catalog && compositionKind && compositionKind !== 'compound'
+        ? maskIoU(originalEntries, candidateEntries, cw)
+        : inkIoU(dGen, originalEntries.map((entry) => entry.d).join(''), cw);
       checked++;
       if (status === 'generated' && iou < 0.995) {
         hard.push(
@@ -93,6 +146,7 @@ if (isMain) {
   const root = join(dirname(fileURLToPath(import.meta.url)), '..');
   const grid = JSON.parse(readFileSync(join(root, 'semantics', 'grid.json'), 'utf8'));
   const anatomy = JSON.parse(readFileSync(join(root, 'semantics', 'anatomy.json'), 'utf8'));
+  const catalog = JSON.parse(readFileSync(join(root, 'semantics', 'catalog.json'), 'utf8'));
   const readSvg = (variant, name) => {
     const file =
       variant === 'outline'
@@ -105,7 +159,7 @@ if (isMain) {
     }
   };
   const strict = process.argv.includes('--strict');
-  const { hard, report, checked } = validateAnatomy({ grid, anatomy, readSvg });
+  const { hard, report, checked } = validateAnatomy({ grid, anatomy, catalog, readSvg });
   if (hard.length > 0) {
     console.error(`check-anatomy: HARD — ${hard.length} дрейфов:`);
     for (const e of hard) console.error('  - ' + e);

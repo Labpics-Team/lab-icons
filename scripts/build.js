@@ -19,6 +19,7 @@ import { fileURLToPath, pathToFileURL } from 'url';
 import { createRequire } from 'module';
 import { optimize } from 'svgo';
 import { authorPathEntries, sourcePathEntries } from './lib/icon-geometry.js';
+import { EXPECTED_SOURCE_VARIANTS } from './lib/corpus-contract.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -164,7 +165,7 @@ processResults(outlineResults, 'Outline');
 // словари, конфиги): union всех экспортов. Type-only — ноль рантайм-веса,
 // tree-shaking не затронут.
 dtsLines.push('');
-dtsLines.push('/** Имя иконки — union всех 444 экспортов (авто-генерация). */');
+dtsLines.push(`/** Имя иконки — union всех ${EXPECTED_SOURCE_VARIANTS} экспортов (авто-генерация). */`);
 dtsLines.push('export type IconName =');
 for (const name of exportNames) {
   dtsLines.push(`  | '${name}'`);
@@ -184,7 +185,7 @@ console.log(`✓  dist/index.js + dist/index.d.ts — ${totalExports} named expo
 
 // ── validate export count ─────────────────────────────────────────────────────
 
-const EXPECTED = 444;
+const EXPECTED = EXPECTED_SOURCE_VARIANTS;
 if (totalExports !== EXPECTED) {
   console.error(`✗  Export count mismatch: expected ${EXPECTED}, got ${totalExports}`);
   process.exit(1);

@@ -417,7 +417,11 @@ if (isMain) {
 
   // Per-source debt check: каждый файл не должен расти против своего snapshot
   const perSourceDebt = loadPerSourceSnapshot(root);
-  const perSourceErrors = comparePerSourceDebt(findings, perSourceDebt);
+  const perSourceErrors = comparePerSourceDebt(
+    findings,
+    perSourceDebt,
+    files.map((file) => file.name),
+  );
   if (perSourceErrors.length > 0) {
     console.error(
       'check-path-quality: PER-SOURCE HARD — per-source debt изменился; ' +

@@ -52,9 +52,10 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { buildGlyph } from './lib/anatomy-gen.js';
+import { buildGlyph, buildGlyphParts } from './lib/anatomy-gen.js';
 import { renderedPathData } from './lib/icon-geometry.js';
 import { samplePolylines, segmentsCross } from './lib/curve-sampling.js';
+import { lowerModelComposition } from './lib/model-composition.js';
 
 // ── токены сетки (ноль observer-fit) ─────────────────────────────────────────
 
@@ -434,15 +435,54 @@ export function measureStrokes(d, { cw, scale = 16, stepsPerSeg = 32, tolU, capU
   return { strokes, modes };
 }
 
+/**
+ * Измеряет составной глиф по его paint-операндам.
+ *
+ * `layers` рисует части как независимые opaque-слои, а `mask-subtract`
+ * вычисляет base − union(subtractors). Конкатенация их d под одним even-odd
+ * fill-rule не является ни одной из этих операций: в местах перекрытия она
+ * создаёт искусственные XOR-щели и может объявить супертонкий штрих там, где
+ * каждая авторская часть держит канон. Для веса измеряем каждую часть отдельно;
+ * операция mask-subtract меняет видимый силуэт, но не семантический вес пера
+ * части. Массы (например, filled dial) естественно отфильтровываются тем же
+ * правилом `extent >= 2 × width`, что и в одиночном измерителе.
+ *
+ * @param {Array<{id:string, role?:string, d:string}>} parts
+ * @param {{kind:string}} composition
+ * @param {object} options
+ */
+export function measureCompositionStrokes(parts, composition, options) {
+  if (composition?.kind === 'compound') {
+    throw new Error(`check-ink-weight: composition ${composition.kind} не является составной paint-композицией`);
+  }
+  const entries = lowerModelComposition({ parts, composition, label: 'check-ink-weight' });
+  const modes = [];
+  const strokes = [];
+  for (const entry of entries) {
+    const measured = measureStrokes(entry.d, options);
+    for (const mode of measured.modes) modes.push({ ...mode, partId: entry.partId, role: entry.role });
+    for (const stroke of measured.strokes) strokes.push({ ...stroke, partId: entry.partId, role: entry.role });
+  }
+  return { strokes, modes };
+}
+
 // ── инварианты весов ─────────────────────────────────────────────────────────
 
 /**
  * Дефекты веса чернил одного материализованного d.
  * @returns {{strokes:Array, modes:Array, defects:Array<{type:string,msg:string}>}}
  */
-export function inkWeightDefects({ grid, d, wScale = 1, scale = 16, stepsPerSeg = 32 }) {
+export function inkWeightDefects({
+  grid,
+  d,
+  parts = null,
+  composition = null,
+  wScale = 1,
+  scale = 16,
+  stepsPerSeg = 32,
+}) {
   const T = gridInkTokens(grid, wScale);
-  const { strokes, modes } = measureStrokes(d, {
+  const measureOptions = {
     cw: T.cw,
     scale,
     stepsPerSeg,
@@ -450,7 +490,11 @@ export function inkWeightDefects({ grid, d, wScale = 1, scale = 16, stepsPerSeg 
     capU: T.capU,
     keylineR: T.keylineR,
     boldU: T.canons.bold,
-  });
+  };
+  const measured = parts && composition
+    ? measureCompositionStrokes(parts, composition, measureOptions)
+    : measureStrokes(d, measureOptions);
+  const { strokes, modes } = measured;
   const defects = [];
   const fmt = (v) => v.toFixed(2);
   for (const s of strokes) {
@@ -492,6 +536,14 @@ export function inkWeightDefects({ grid, d, wScale = 1, scale = 16, stepsPerSeg 
     }
   }
   return { strokes, modes, defects };
+}
+
+function modelComposition(catalog, name, variant) {
+  return catalog?.icons?.[name]?.model?.variants?.[variant]?.composition ?? null;
+}
+
+function measureVariantInkWeight({ grid, d, parts, composition, wScale = 1, scale = 16, stepsPerSeg = 32 }) {
+  return inkWeightDefects({ grid, d, parts, composition, wScale, scale, stepsPerSeg });
 }
 
 /**
@@ -558,7 +610,7 @@ export const AXES_GRID = { weight: [0.8, 1, 1.2], corner: [0, 1] };
  * (каждый штрих default-замера обязан найтись в модах combo-замера как
  * ×weight ± tolerance×weight), клиренс ≥ clearanceMin на всех углах сетки.
  */
-export function axesSweepGlyph({ grid, entry, allGlyphs, scale = 8, stepsPerSeg = 16 }) {
+export function axesSweepGlyph({ grid, entry, allGlyphs, name = null, catalog = null, scale = 8, stepsPerSeg = 16 }) {
   const findings = [];
   let base;
   try {
@@ -570,9 +622,18 @@ export function axesSweepGlyph({ grid, entry, allGlyphs, scale = 8, stepsPerSeg 
   for (const variant of Object.keys(base)) {
     const d0 = base[variant];
     if (!d0) continue;
+    const composition = modelComposition(catalog, name, variant);
+    const baseParts = composition && composition.kind !== 'compound'
+      ? buildGlyphParts(entry, grid, {}, allGlyphs)[variant]
+      : null;
     const T0 = gridInkTokens(grid, 1);
-    const base0 = measureStrokes(d0, {
-      cw: T0.cw, scale, stepsPerSeg, tolU: T0.tolU, capU: T0.capU, keylineR: T0.keylineR, boldU: T0.canons.bold,
+    const base0 = measureVariantInkWeight({
+      grid,
+      d: d0,
+      parts: baseParts,
+      composition,
+      scale,
+      stepsPerSeg,
     });
     for (const w of AXES_GRID.weight) {
       for (const c of AXES_GRID.corner) {
@@ -587,7 +648,18 @@ export function axesSweepGlyph({ grid, entry, allGlyphs, scale = 8, stepsPerSeg 
         const d = built[variant];
         if (!d) continue;
         const combo = `w${w}/c${c}`;
-        const r = inkWeightDefects({ grid, d, wScale: w, scale, stepsPerSeg });
+        const comboParts = composition && composition.kind !== 'compound'
+          ? buildGlyphParts(entry, grid, { weight: w, corner: c }, allGlyphs)[variant]
+          : null;
+        const r = measureVariantInkWeight({
+          grid,
+          d,
+          parts: comboParts,
+          composition,
+          wScale: w,
+          scale,
+          stepsPerSeg,
+        });
         for (const df of r.defects) findings.push({ variant, combo, type: df.type, msg: df.msg });
         // пропорциональность: каждый default-штрих обязан отмасштабироваться
         const tolW = T0.tolU * w;
@@ -625,6 +697,7 @@ if (isMain) {
   const repo = join(dirname(fileURLToPath(import.meta.url)), '..');
   const grid = JSON.parse(readFileSync(join(repo, 'semantics', 'grid.json'), 'utf8'));
   const anatomy = JSON.parse(readFileSync(join(repo, 'semantics', 'anatomy.json'), 'utf8'));
+  const catalog = JSON.parse(readFileSync(join(repo, 'semantics', 'catalog.json'), 'utf8'));
   const strict = process.argv.includes('--strict');
   const axesMode = process.argv.includes('--axes');
   const targets = process.argv.slice(2).filter((a) => !a.startsWith('-'));
@@ -674,7 +747,12 @@ if (isMain) {
       }
       for (const [variant, d] of Object.entries(variants)) {
         if (!d) continue;
-        const { strokes, defects } = inkWeightDefects({ grid, d });
+        const entry = arg.endsWith('.svg') ? null : anatomy.glyphs[arg];
+        const composition = entry ? modelComposition(catalog, arg, variant) : null;
+        const parts = entry && composition && composition.kind !== 'compound'
+          ? buildGlyphParts(entry, grid, {}, anatomy.glyphs)[variant]
+          : null;
+        const { strokes, defects } = measureVariantInkWeight({ grid, d, parts, composition });
         printStrokes(variant, strokes);
         for (const df of defects) {
           console.log(`    ${variant}: FAIL [${df.type}] ${df.msg}`);
@@ -694,7 +772,7 @@ if (isMain) {
     // свип осей по корпусу: report-каталог + HARD для промоутнутых
     const offenders = [];
     for (const [name, entry] of Object.entries(anatomy.glyphs)) {
-      const findings = axesSweepGlyph({ grid, entry, allGlyphs: anatomy.glyphs });
+      const findings = axesSweepGlyph({ grid, name, entry, allGlyphs: anatomy.glyphs, catalog });
       for (const fnd of findings) offenders.push({ name, ...fnd });
     }
     if (offenders.length) {
@@ -721,8 +799,10 @@ if (isMain) {
   let measured = 0;
   for (const [name, entry] of Object.entries(anatomy.glyphs)) {
     let built;
+    let builtParts;
     try {
       built = buildGlyph(entry, grid, {}, anatomy.glyphs);
+      builtParts = buildGlyphParts(entry, grid, {}, anatomy.glyphs);
     } catch {
       continue; // невалидная декларация — зона других гейтов
     }
@@ -730,7 +810,9 @@ if (isMain) {
       if (!d) continue;
       let res;
       try {
-        res = inkWeightDefects({ grid, d });
+        const composition = modelComposition(catalog, name, variant);
+        const parts = composition && composition.kind !== 'compound' ? builtParts[variant] : null;
+        res = measureVariantInkWeight({ grid, d, parts, composition });
       } catch (cause) {
         offenders.push({ name, variant, type: 'error', msg: `замер не удался: ${cause.message}` });
         continue;

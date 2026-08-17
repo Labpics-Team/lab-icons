@@ -60,6 +60,30 @@ describe('comparePerSourceDebt — регрессия и closed world', () => {
   });
 });
 
+describe('comparePerSourceDebt — двусторонний closed world (покрытие корпуса)', () => {
+  it('файл корпуса без ключа в snapshot — нарушение, даже при 0 находках', () => {
+    // Класс дефекта: удаление ключа «чистого» файла из snapshot молча
+    // выводило файл из-под гейта — будущий долг стал бы невидим.
+    const errors = comparePerSourceDebt(
+      [],
+      { 'Outline/a.svg': 0 },
+      ['Outline/a.svg', 'Outline/b.svg'],
+    );
+    expect(errors).toEqual([
+      'Outline/b.svg: файла нет в snapshot — closed world обязан покрывать весь корпус',
+    ]);
+  });
+
+  it('полное покрытие корпуса — ошибок нет', () => {
+    expect(
+      comparePerSourceDebt([], { 'Outline/a.svg': 0, 'Outline/b.svg': 2 }, [
+        'Outline/a.svg',
+        'Outline/b.svg',
+      ]),
+    ).toEqual([]);
+  });
+});
+
 describe('buildPerSourceSnapshot — воспроизводимое переснятие', () => {
   it('фиксирует нулём файлы без находок (closed world)', () => {
     const snap = buildPerSourceSnapshot(

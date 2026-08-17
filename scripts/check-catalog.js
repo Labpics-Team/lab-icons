@@ -9,6 +9,10 @@ import {
   validateIconCatalog,
 } from './lib/icon-catalog.js';
 import { renderIrTypeProjection } from './lib/ir-type-projection.js';
+import {
+  EXPECTED_ICON_NAMES,
+  EXPECTED_SOURCE_VARIANTS,
+} from './lib/corpus-contract.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const file = join(ROOT, 'semantics', 'catalog.json');
@@ -42,12 +46,15 @@ const generatedVariants = Object.values(anatomy.glyphs)
   .flatMap((entry) => Object.values(entry.status ?? {}))
   .filter((status) => status === 'generated').length;
 const quarantinedGeneratedVariants = Object.keys(modelQuality.quarantined).length;
-const sourceOnlyVariants = 444 - modeledVariants.length;
+const sourceOnlyVariants = EXPECTED_SOURCE_VARIANTS - modeledVariants.length;
 const unclassifiedModelParts = modeledVariants
   .flatMap((variant) => variant.parts)
   .filter((part) => part.role === 'unclassified').length;
 const provenAxisCapabilities = modeledVariants
   .flatMap((variant) => variant.supportedAxes)
+  .length;
+const opszVariants = modeledVariants
+  .filter((variant) => variant.supportedAxes.includes('opsz'))
   .length;
 const disabledAxisCapabilities = Object.keys(axisQuality.disabled).length;
 const failures = [];
@@ -55,6 +62,12 @@ if (modeledNames < ratchet.minimumModeledNames) failures.push(`modeled names ${m
 if (modeledVariants.length < ratchet.minimumModeledVariants) failures.push(`modeled variants ${modeledVariants.length} < ${ratchet.minimumModeledVariants}`);
 if (generatedVariants < ratchet.minimumGeneratedVariants) failures.push(`generated variants ${generatedVariants} < ${ratchet.minimumGeneratedVariants}`);
 if (acceptedVariants < ratchet.minimumAcceptedVariants) failures.push(`accepted variants ${acceptedVariants} < ${ratchet.minimumAcceptedVariants}`);
+if (provenAxisCapabilities < ratchet.minimumProvenAxisCapabilities) {
+  failures.push(`proven axis capabilities ${provenAxisCapabilities} < ${ratchet.minimumProvenAxisCapabilities}`);
+}
+if (opszVariants < ratchet.minimumOpszVariants) {
+  failures.push(`opsz variants ${opszVariants} < ${ratchet.minimumOpszVariants}`);
+}
 if (quarantinedGeneratedVariants > ratchet.maximumQuarantinedGeneratedVariants) {
   failures.push(`quarantined generated variants ${quarantinedGeneratedVariants} > ${ratchet.maximumQuarantinedGeneratedVariants}`);
 }
@@ -67,7 +80,7 @@ if (failures.length > 0) {
   process.exit(1);
 }
 console.log(
-  `check-catalog: 222 icons / 444 source; model ${modeledNames} names / ` +
+  `check-catalog: ${EXPECTED_ICON_NAMES} icons / ${EXPECTED_SOURCE_VARIANTS} source; model ${modeledNames} names / ` +
   `${modeledVariants.length} variants (${generatedVariants} generated; ${acceptedVariants} accepted; ` +
   `${quarantinedGeneratedVariants} quarantined); ` +
   `source-only ${sourceOnlyVariants}; axes ${provenAxisCapabilities} proven / ` +

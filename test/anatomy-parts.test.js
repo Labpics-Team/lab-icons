@@ -73,4 +73,25 @@ describe('явные anatomy parts', () => {
     };
     expect(() => buildGlyphParts(repeated, grid)).toThrow(/повторный part\.id/);
   });
+
+  it.each([
+    ['small', 'anchorScale'],
+    ['small', 'weightScale'],
+    ['display', 'anchorScale'],
+    ['display', 'weightScale'],
+  ])('fail-closed rejects an incomplete optical master: %s.%s', (master, field) => {
+    const broken = structuredClone(anatomy.glyphs['chevron-up']);
+    delete broken.opticalSize[master][field];
+
+    expect(() => buildGlyph(broken, grid, { opsz: master === 'small' ? 16 : 48 }))
+      .toThrow(/opticalSize.*masters/);
+  });
+
+  it('distinguishes a non-finite opsz from a checked range violation', () => {
+    const gridWithoutOpsz = structuredClone(grid);
+    delete gridWithoutOpsz.axes.opsz;
+
+    expect(() => buildGlyph(anatomy.glyphs['chevron-up'], gridWithoutOpsz, { opsz: Number.NaN }))
+      .toThrow(/конечным числом/);
+  });
 });

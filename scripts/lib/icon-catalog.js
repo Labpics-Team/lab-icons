@@ -99,7 +99,53 @@ function supportedAxes(name, entry, variant, grid, lib, fillRule, disabledAxes, 
   );
 }
 
-export function modelComposition(sourceVariant) {
+export function modelComposition({
+  sourceVariant,
+  declaration = null,
+  modelParts = [],
+  label = 'model',
+}) {
+  if (declaration != null) {
+    if (!declaration || typeof declaration !== 'object' || typeof declaration.kind !== 'string') {
+      throw new TypeError(`icon-catalog: ${label} composition обязана быть объектом с kind`);
+    }
+    if (declaration.kind === 'layers') {
+      if (Object.keys(declaration).some((key) => key !== 'kind')) {
+        throw new Error(`icon-catalog: ${label} layers composition имеет неизвестные поля`);
+      }
+      return { kind: 'layers' };
+    }
+    if (declaration.kind === 'mask-subtract') {
+      const keys = Object.keys(declaration).sort();
+      if (JSON.stringify(keys) !== JSON.stringify(['basePartIds', 'kind', 'subtractPartIds'])) {
+        throw new Error(`icon-catalog: ${label} mask-subtract composition имеет неизвестные поля`);
+      }
+      const basePartIds = declaration.basePartIds;
+      const subtractPartIds = declaration.subtractPartIds;
+      const partIds = modelParts.map((part) => part.id);
+      const classified = [...(basePartIds ?? []), ...(subtractPartIds ?? [])];
+      if (
+        !Array.isArray(basePartIds) ||
+        !Array.isArray(subtractPartIds) ||
+        basePartIds.length === 0 ||
+        subtractPartIds.length === 0 ||
+        classified.some((id) => typeof id !== 'string') ||
+        new Set(classified).size !== classified.length ||
+        classified.length !== partIds.length ||
+        classified.some((id) => !partIds.includes(id))
+      ) {
+        throw new Error(
+          `icon-catalog: ${label} mask-subtract обязан классифицировать каждую model part ровно один раз`,
+        );
+      }
+      return {
+        kind: 'mask-subtract',
+        basePartIds: [...basePartIds],
+        subtractPartIds: [...subtractPartIds],
+      };
+    }
+    throw new Error(`icon-catalog: ${label} имеет неизвестную composition ${declaration.kind}`);
+  }
   const rules = new Set(sourceVariant.parts.map((part) => part.fillRule));
   // buildGlyph возвращает один compound path. Если исторический source был
   // разбит на элементы с разными rules, генераторный закон по конструкции
@@ -120,7 +166,12 @@ function modelFor(name, entry, grid, lib, source, quarantine, disabledAxes, seen
     if (status !== 'generated' && status !== 'hand') {
       throw new Error(`icon-catalog: ${name}/${variant} имеет неизвестный anatomy status ${String(status)}`);
     }
-    const composition = modelComposition(source[variant]);
+    const composition = modelComposition({
+      sourceVariant: source[variant],
+      declaration: entry.composition?.[variant] ?? null,
+      modelParts: parts[variant],
+      label: `${name}/${variant}`,
+    });
     const state = status === 'generated' && !quarantine.has(`${name}/${variant}`)
       ? 'accepted'
       : 'candidate';
@@ -128,13 +179,16 @@ function modelFor(name, entry, grid, lib, source, quarantine, disabledAxes, seen
     // debt становился бы orphaned), но публикуется ось только у accepted:
     // default-режим glyph() — accepted-only, и capabilities кандидата с осями
     // были бы ложным обещанием (RangeError на первом же запросе с осью).
+    const proofFillRule = composition.kind === 'compound'
+      ? composition.fillRule
+      : 'nonzero';
     const provenAxes = supportedAxes(
       name,
       entry,
       variant,
       grid,
       lib,
-      composition.fillRule,
+      proofFillRule,
       disabledAxes,
       seenAxisDebt,
     );
@@ -219,10 +273,10 @@ export function buildIconCatalog(root, anatomy, grid, modelQuality, axisQuality)
       },
       opsz: {
         kind: 'continuous',
-        min: 16,
-        default: 24,
-        max: 48,
-        lifecycle: 'active-in-recipe-kernels',
+        min: grid.axes.opsz.min,
+        default: grid.axes.opsz.default,
+        max: grid.axes.opsz.max,
+        lifecycle: 'active-after-sampled-optical-proof',
       },
     },
     icons,
@@ -257,6 +311,8 @@ export function validateCatalogRatchet(ratchet) {
     'minimumModeledVariants',
     'minimumGeneratedVariants',
     'minimumAcceptedVariants',
+    'minimumProvenAxisCapabilities',
+    'minimumOpszVariants',
     'maximumQuarantinedGeneratedVariants',
     'maximumSourceOnlyVariants',
     'maximumUnclassifiedModelParts',
@@ -270,6 +326,8 @@ export function validateCatalogRatchet(ratchet) {
     'minimumModeledVariants',
     'minimumGeneratedVariants',
     'minimumAcceptedVariants',
+    'minimumProvenAxisCapabilities',
+    'minimumOpszVariants',
     'maximumQuarantinedGeneratedVariants',
     'maximumSourceOnlyVariants',
     'maximumUnclassifiedModelParts',
@@ -390,12 +448,33 @@ export function validateIconCatalog(catalog) {
           model.supportedAxes.some((axis) => !Object.hasOwn(catalog.axes, axis))) {
         throw new Error(`icon-catalog: ${name}/${variant} имеет невалидный supportedAxes`);
       }
-      assertExactKeys(model.composition, ['kind', 'fillRule'], `${name}/${variant}.model.composition`);
-      if (
-        model.composition.kind !== 'compound' ||
-        !['nonzero', 'evenodd'].includes(model.composition.fillRule)
-      ) {
-        throw new Error(`icon-catalog: ${name}/${variant} имеет невалидную composition`);
+      if (model.composition.kind === 'compound') {
+        assertExactKeys(model.composition, ['kind', 'fillRule'], `${name}/${variant}.model.composition`);
+        if (!['nonzero', 'evenodd'].includes(model.composition.fillRule)) {
+          throw new Error(`icon-catalog: ${name}/${variant} имеет невалидную compound composition`);
+        }
+      } else if (model.composition.kind === 'layers') {
+        assertExactKeys(model.composition, ['kind'], `${name}/${variant}.model.composition`);
+      } else if (model.composition.kind === 'mask-subtract') {
+        assertExactKeys(
+          model.composition,
+          ['kind', 'basePartIds', 'subtractPartIds'],
+          `${name}/${variant}.model.composition`,
+        );
+        const baseIds = model.composition.basePartIds;
+        const subtractIds = model.composition.subtractPartIds;
+        if (
+          !Array.isArray(baseIds) ||
+          !Array.isArray(subtractIds) ||
+          baseIds.length === 0 ||
+          subtractIds.length === 0 ||
+          [...baseIds, ...subtractIds].some((id) => !validStableId(id)) ||
+          new Set([...baseIds, ...subtractIds]).size !== baseIds.length + subtractIds.length
+        ) {
+          throw new Error(`icon-catalog: ${name}/${variant} имеет невалидную mask-subtract composition`);
+        }
+      } else {
+        throw new Error(`icon-catalog: ${name}/${variant} имеет неизвестную composition`);
       }
       if (!Array.isArray(model.parts) || model.parts.length === 0) {
         throw new Error(`icon-catalog: ${name}/${variant}.model.parts обязан быть непустым массивом`);
@@ -427,6 +506,12 @@ export function validateIconCatalog(catalog) {
         }
       }
       if (ids.size === 0) throw new Error(`icon-catalog: ${name}/${variant} model пуст`);
+      if (model.composition.kind === 'mask-subtract') {
+        const classified = [...model.composition.basePartIds, ...model.composition.subtractPartIds];
+        if (classified.length !== ids.size || classified.some((id) => !ids.has(id))) {
+          throw new Error(`icon-catalog: ${name}/${variant} mask-subtract не классифицирует все parts`);
+        }
+      }
     }
   }
   return catalog;

@@ -42,5 +42,5 @@
    "reason": "concentric orbit and terminal correction exceeds the automatic silhouette acceptance threshold",
    "exitCriteria": "obtain explicit owner acceptance or reduce the geometric deviation below the policy threshold"
   }
- }
+}
 }
