@@ -1,13 +1,13 @@
 {
  "version": 1,
- "comment": "R0 fact baseline corrected by the deterministic Observatory on 2026-07-16; re-frozen 2026-08-15 (truth-reset), then expanded by 16 owner-drawn source-only names from the paired Figma export. The 32 added variants change only the source-only ceiling: modeled/generated/accepted floors and quarantine remain unchanged, so model debt cannot hide behind corpus growth.",
- "minimumModeledNames": 63,
- "minimumModeledVariants": 100,
+ "comment": "R0 fact baseline corrected by the deterministic Observatory on 2026-07-16; re-frozen 2026-08-15 (truth-reset), expanded by 16 owner-drawn names 2026-08-16. Wave1 anatomy coverage 2026-08-17: +12 candidate declarations (arc-chain transcription, status:hand, drift IoU>=0.95) raise modeled floors 63->75 names / 100->124 variants and lower the source-only ceiling 376->352; generated/accepted floors and quarantine unchanged - candidates cannot masquerade as accepted.",
+ "minimumModeledNames": 75,
+ "minimumModeledVariants": 124,
  "minimumGeneratedVariants": 63,
  "minimumAcceptedVariants": 53,
  "minimumProvenAxisCapabilities": 25,
  "minimumOpszVariants": 8,
  "maximumQuarantinedGeneratedVariants": 10,
- "maximumSourceOnlyVariants": 376,
+ "maximumSourceOnlyVariants": 352,
  "maximumUnclassifiedModelParts": 0
 }
