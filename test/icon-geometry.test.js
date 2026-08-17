@@ -14,6 +14,7 @@ import {
   sourcePathEntries,
 } from '../scripts/lib/icon-geometry.js';
 import { samplePolylines } from '../scripts/lib/curve-sampling.js';
+import { EXPECTED_SOURCE_VARIANTS } from '../scripts/lib/corpus-contract.js';
 
 const root = join(import.meta.dirname, '..', 'svg');
 
@@ -49,6 +50,24 @@ describe('icon-geometry — path внутри <defs> не геометрия (к
 
   it('Д: renderedPathData видит только рендерящийся глиф', () => {
     expect(renderedPathData(withClip)).toEqual(['M8 8h8v8H8z']);
+  });
+
+  it('Д: Figma rect во всю viewBox также lower-ится как доказанный identity clip', () => {
+    const withRectClip =
+      '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24">' +
+      '<g clip-path="url(#a)"><path d="M8 8h8v8H8z"/></g>' +
+      '<defs><clipPath id="a"><rect width="24" height="24" fill="white"/></clipPath></defs></svg>';
+
+    expect(renderedPathData(withRectClip)).toEqual(['M8 8h8v8H8z']);
+  });
+
+  it('does not parse an empty identity-clip rect coordinate as zero', () => {
+    const hostile =
+      '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24">' +
+      '<g clip-path="url(#a)"><path d="M8 8h8v8H8z"/></g>' +
+      '<defs><clipPath id="a"><rect x="" width="24" height="24" fill="white"/></clipPath></defs></svg>';
+
+    expect(() => renderedPathData(hostile)).toThrow(/rect\.x.*числом/);
   });
 
   it('Д: iconGeometry не отдаёт фантомный слой во всю канву', () => {
@@ -181,7 +200,7 @@ describe('icon-geometry — closed fill-rule grammar', () => {
   });
 });
 
-describe('icon-geometry — весь корпус 444', () => {
+describe('icon-geometry — весь корпус 476', () => {
   it('Б: каждый файл парсится; у каждого слоя якорь внутри viewBox, площадь > 0', () => {
     let files = 0;
     for (const variant of ['Outline', 'Filled']) {
@@ -199,6 +218,6 @@ describe('icon-geometry — весь корпус 444', () => {
         }
       }
     }
-    expect(files).toBe(444);
+    expect(files).toBe(EXPECTED_SOURCE_VARIANTS);
   });
 });

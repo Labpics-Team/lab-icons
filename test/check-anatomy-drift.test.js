@@ -11,6 +11,7 @@ import { validateAnatomy } from '../scripts/check-anatomy-drift.js';
 const root = join(import.meta.dirname, '..');
 const grid = JSON.parse(readFileSync(join(root, 'semantics', 'grid.json'), 'utf8'));
 const anatomy = JSON.parse(readFileSync(join(root, 'semantics', 'anatomy.json'), 'utf8'));
+const catalog = JSON.parse(readFileSync(join(root, 'semantics', 'catalog.json'), 'utf8'));
 const readSvg = (variant, name) => {
   const file =
     variant === 'outline'
@@ -25,7 +26,7 @@ const readSvg = (variant, name) => {
 
 describe('validateAnatomy — декларация сходится с файлами', () => {
   it('А: реальная анатомия — ноль hard; report только документированные отступления от руки', () => {
-    const { hard, report, checked } = validateAnatomy({ grid, anatomy, readSvg });
+    const { hard, report, checked } = validateAnatomy({ grid, anatomy, catalog, readSvg });
     expect(hard).toEqual([]);
     // допустимые report-строки: КАЖДАЯ несёт документацию в декларации —
     // reload/filled (дефект руки), swap-horizontal (закон смежности поверх
@@ -62,5 +63,10 @@ describe('validateAnatomy — декларация сходится с файл�
       readSvg: (v, n) => (n === 'cog' ? null : readSvg(v, n)),
     });
     expect(hard.some((e) => e.includes('cog') && e.includes('файла нет'))).toBe(true);
+  });
+
+  it('Д: composition-aware oracle не возвращает time layers/mask-subtract в XOR drift', () => {
+    const { hard } = validateAnatomy({ grid, anatomy, catalog, readSvg });
+    expect(hard.filter((finding) => finding.startsWith('time/'))).toEqual([]);
   });
 });

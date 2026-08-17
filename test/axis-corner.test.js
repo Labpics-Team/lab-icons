@@ -19,9 +19,10 @@ const baseline = JSON.parse(readFileSync(join(import.meta.dirname, 'fixtures', '
 const G = (n) => anatomy.glyphs[n];
 
 describe('ось угла — buildGlyph axes.corner', () => {
-  it('Б: без axes d-строки БИТ-В-БИТ равны до-осевому базлайну (весь корпус)', () => {
-    // фикстура снята с anatomy-gen.js ДО введения zTok (commit-база ветки):
-    // обратная совместимость 100% — не «похоже», а побайтово
+  it('Б: без axes d-строки БИТ-В-БИТ равны утверждённому default-базлайну (весь корпус)', () => {
+    // Фикстура началась как до-осевой baseline. Намеренная смена default-геометрии
+    // обновляет только доказанно изменившийся глиф после parity/fidelity/topology
+    // проверки; ось по-прежнему не имеет права сдвигать остальные d-строки.
     const names = Object.keys(anatomy.glyphs);
     expect(names.length).toBe(Object.keys(baseline).length);
     for (const name of names) {

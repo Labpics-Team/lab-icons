@@ -140,60 +140,178 @@ export function analyze(svgContent, canvasWidth) {
 }
 
 /**
- * Регистрация глифа между вариантами — сопоставлением КОНТУРОВ по сигнатуре
- * (площадь ±30%, габариты ±0.5): состав глифа в Filled легально отличается
- * (негативы сливаются с массами), сравнивать валовый bbox — ловить артефакты
- * (person-circle: внутренний край кольца в Outline срастается с плечами и
- * даёт мнимый разъезд > 3, при идеально совпадающей голове). Меряются только
- * уверенно совпавшие контуры; несопоставленные — структурная разница, не дрейф.
+ * Registration is meaningful only when a contour's geometry is demonstrably
+ * identical up to translation. Filled/outline mass, bbox, and area are not a
+ * semantic correspondence: either variant can legitimately change them.
+ *
+ * Repeated exact shapes (for example dot grids) vote for one translation
+ * vector. A source pair is considered registered only if that vector accounts
+ * for every contour on the smaller glyph side; a partial match has no proven
+ * semantic correspondence.
  */
-export function glyphRegistration(oGlyphs, fGlyphs, tolReg) {
-  const used = new Set();
-  const offsets = [];
-  const gross = [];
-  for (const og of oGlyphs) {
-    const candidates = [];
-    for (const fg of fGlyphs) {
-      if (used.has(fg)) continue;
-      const areaOk = Math.abs(og.area - fg.area) / Math.max(og.area, fg.area, 1e-9) <= 0.3;
-      const sizeOk = Math.abs(og.bbox.w - fg.bbox.w) <= 0.5 && Math.abs(og.bbox.h - fg.bbox.h) <= 0.5;
-      if (!areaOk || !sizeOk) continue;
-      const off = Math.hypot(fg.bbox.cx - og.bbox.cx, fg.bbox.cy - og.bbox.cy);
-      if (off > 3) continue; // дальше даже как грубый разъезд не читается
-      candidates.push({ off, dx: fg.bbox.cx - og.bbox.cx, dy: fg.bbox.cy - og.bbox.cy, fg });
+export function glyphIdentityRegistration(oGlyphs, fGlyphs, tolReg) {
+  // A path's starting point and winding are exporter details.  Comparing the
+  // raw sampled arrays therefore creates false negatives whenever Figma/SVGO
+  // rotates the start point or reverses a contour.  Normalize every closed
+  // contour to a fixed perimeter sampling, center it, and search cyclic
+  // shifts in both winding directions.  Translation remains the only allowed
+  // geometric difference: rotation, scale, and silhouette edits do not pass.
+  const sampleCount = 96;
+  // The source corpus is serialized to roughly 0.001u.  A 0.01u bound is
+  // enough for exporter rounding while rejecting a visibly re-shaped filled
+  // silhouette that merely happens to have the same outline class.
+  const shapeEpsilon = 0.01;
+  // The translation vote cannot be stricter than the contour identity proof:
+  // exporter rounding that is accepted inside the shape must not split one
+  // coherent translation into several artificial clusters.
+  const vectorEpsilon = shapeEpsilon;
+
+  function withoutClosure(poly) {
+    if (poly.length > 1) {
+      const first = poly[0];
+      const last = poly[poly.length - 1];
+      if (Math.hypot(last[0] - first[0], last[1] - first[1]) <= 1e-8) {
+        return poly.slice(0, -1);
+      }
     }
-    if (!candidates.length) continue;
-    candidates.sort((a, b) => a.off - b.off);
-    // взаимозаменяемые элементы (точки dice, зубцы ticket): два кандидата
-    // с близким off = неоднозначное сопоставление — мерить нельзя.
-    // ИЗВЕСТНЫЙ КОМПРОМИСС: реальный дрейф может замаскироваться контуром-
-    // обманкой с близким off — принято осознанно (иначе ложные FAIL на
-    // каждой сетке точек).
-    if (candidates.length > 1 && candidates[1].off - candidates[0].off < 0.5) continue;
-    const best = candidates[0];
-    if (best.off > 1.2) {
-      // однозначное совпадение сигнатуры, но слишком далеко для «съехал»:
-      // грубая рассинхронизация ЛИБО структурная разница — отдельная
-      // категория, не молчание (порог-фильтр не должен глотать грубое)
-      gross.push(best);
-      continue;
-    }
-    used.add(best.fg);
-    offsets.push(best);
+    return poly.slice();
   }
-  const worst = offsets.length ? offsets.reduce((a, b) => (b.off > a.off ? b : a)) : null;
+
+  function fixedPerimeter(poly, count) {
+    const points = withoutClosure(poly);
+    if (points.length < 3) return null;
+    const lengths = [];
+    let perimeter = 0;
+    for (let index = 0; index < points.length; index += 1) {
+      const a = points[index];
+      const b = points[(index + 1) % points.length];
+      const length = Math.hypot(b[0] - a[0], b[1] - a[1]);
+      lengths.push(length);
+      perimeter += length;
+    }
+    if (!(perimeter > 1e-8)) return null;
+
+    const out = [];
+    let edge = 0;
+    let edgeStart = 0;
+    for (let sample = 0; sample < count; sample += 1) {
+      const distance = (sample * perimeter) / count;
+      while (edge < lengths.length - 1 && edgeStart + lengths[edge] < distance) {
+        edgeStart += lengths[edge];
+        edge += 1;
+      }
+      const a = points[edge];
+      const b = points[(edge + 1) % points.length];
+      const span = lengths[edge] || 1;
+      const t = Math.max(0, Math.min(1, (distance - edgeStart) / span));
+      out.push([
+        a[0] + (b[0] - a[0]) * t,
+        a[1] + (b[1] - a[1]) * t,
+      ]);
+    }
+    const center = out.reduce(
+      (sum, [x, y]) => [sum[0] + x / count, sum[1] + y / count],
+      [0, 0],
+    );
+    return {
+      center,
+      points: out.map(([x, y]) => [x - center[0], y - center[1]]),
+    };
+  }
+
+  function distanceAt(a, b, shift, reverse) {
+    let worst = 0;
+    for (let index = 0; index < sampleCount; index += 1) {
+      const mapped = reverse
+        ? (shift - index + sampleCount * 2) % sampleCount
+        : (index + shift) % sampleCount;
+      const dx = a.points[index][0] - b.points[mapped][0];
+      const dy = a.points[index][1] - b.points[mapped][1];
+      worst = Math.max(worst, Math.hypot(dx, dy));
+      if (worst > shapeEpsilon) return worst;
+    }
+    return worst;
+  }
+
+  function identicalContour(outline, filled) {
+    const a = fixedPerimeter(outline.poly, sampleCount);
+    const b = fixedPerimeter(filled.poly, sampleCount);
+    if (!a || !b) return null;
+    let best = Infinity;
+    for (let shift = 0; shift < sampleCount; shift += 1) {
+      best = Math.min(best, distanceAt(a, b, shift, false), distanceAt(a, b, shift, true));
+      if (best <= shapeEpsilon) break;
+    }
+    if (best > shapeEpsilon) return null;
+    return {
+      dx: b.center[0] - a.center[0],
+      dy: b.center[1] - a.center[1],
+      off: Math.hypot(b.center[0] - a.center[0], b.center[1] - a.center[1]),
+    };
+  }
+
+  const translations = [];
+
+  for (const [outlineIndex, outline] of oGlyphs.entries()) {
+    for (const [filledIndex, filled] of fGlyphs.entries()) {
+      const match = identicalContour(outline, filled);
+      if (!match) continue;
+      translations.push({
+        outlineIndex,
+        filledIndex,
+        ...match,
+      });
+    }
+  }
+
+  const clusters = [];
+  for (const translation of translations) {
+    let cluster = clusters.find(
+      (candidate) => Math.hypot(candidate.dx - translation.dx, candidate.dy - translation.dy) <= vectorEpsilon,
+    );
+    if (!cluster) {
+      cluster = { dx: translation.dx, dy: translation.dy, matches: [] };
+      clusters.push(cluster);
+    }
+    cluster.matches.push(translation);
+  }
+
+  for (const cluster of clusters) {
+    const usedOutline = new Set();
+    const usedFilled = new Set();
+    cluster.pairs = [];
+    for (const match of cluster.matches) {
+      if (usedOutline.has(match.outlineIndex) || usedFilled.has(match.filledIndex)) continue;
+      usedOutline.add(match.outlineIndex);
+      usedFilled.add(match.filledIndex);
+      cluster.pairs.push(match);
+    }
+    cluster.support = cluster.pairs.length;
+    cluster.off = Math.hypot(cluster.dx, cluster.dy);
+  }
+
+  // Source variants often reuse a same-sized primitive in several positions
+  // (QR cells, sun rays). A subset can therefore vote for a false translation.
+  // Treat a source pair as registered only when every glyph contour on the
+  // smaller side is proven identical up to one vector; otherwise its semantic
+  // correspondence is intentionally unknown.
+  const minimumSupport = Math.min(oGlyphs.length, fGlyphs.length);
+  const coherent = minimumSupport > 0
+    ? clusters.filter((cluster) => cluster.support >= minimumSupport)
+    : [];
+  const shifted = coherent.filter((cluster) => cluster.off > tolReg);
+  const worst = shifted.length
+    ? shifted.reduce((a, b) => (b.off > a.off ? b : a))
+    : null;
+  const pairs = coherent.flatMap((cluster) => cluster.pairs);
+
   return {
-    matched: offsets.length,
-    worst: worst && worst.off > tolReg ? worst : null,
-    gross,
-    pairs: offsets, // полный список совпавших пар — для инструмента правки
+    matched: pairs.length,
+    worst,
+    pairs,
   };
 }
 
-/**
- * @param {{grid:any, pairs:Array<{name:string, outline:string, filled:string}>}} input
- * @returns {{hard:string[], report:string[], stats:{rings:number, discs:number, matchedGlyphs:number}}}
- */
 export function validateVariantParity({ grid, pairs }) {
   const hard = [];
   const report = [];
@@ -232,6 +350,16 @@ export function validateVariantParity({ grid, pairs }) {
     if (o.ring) {
       stats.rings++;
       const dOuter = o.ring.outer.fit.r * 2;
+      const ringCenterOffset = Math.hypot(
+        o.ring.outer.fit.cx - cw / 2,
+        o.ring.outer.fit.cy - cw / 2,
+      );
+      if (ringCenterOffset > tolReg) {
+        report.push(
+          `${name}: keyline ring center moved from the canvas center by ${ringCenterOffset.toFixed(2)}` +
+            ` (x ${o.ring.outer.fit.cx.toFixed(2)}, y ${o.ring.outer.fit.cy.toFixed(2)})`,
+        );
+      }
       if (Math.abs(dOuter - keylineD) > tolD) {
         report.push(
           `${name}: Ø кольца ${dOuter.toFixed(2)} ≠ keyline ${keylineD.toFixed(2)} (Outline)`,
@@ -252,10 +380,18 @@ export function validateVariantParity({ grid, pairs }) {
     // разъезды (Ø20 «не кандидат» → молчание)
     if (f.disc) {
       const dDisc = f.disc.fit.r * 2;
-      const centered =
-        Math.abs(f.disc.fit.cx - cw / 2) <= 1 && Math.abs(f.disc.fit.cy - cw / 2) <= 1;
-      if (centered && dDisc >= keylineD * 0.8) {
+      const discCenterOffset = Math.hypot(
+        f.disc.fit.cx - cw / 2,
+        f.disc.fit.cy - cw / 2,
+      );
+      if (dDisc >= keylineD * 0.8) {
         stats.discs++;
+        if (discCenterOffset > tolReg) {
+          report.push(
+            `${name}: keyline disc center moved from the canvas center by ${discCenterOffset.toFixed(2)}` +
+              ` (x ${f.disc.fit.cx.toFixed(2)}, y ${f.disc.fit.cy.toFixed(2)})`,
+          );
+        }
         if (Math.abs(dDisc - keylineD) > tolD) {
           report.push(
             `${name}: Ø диска ${dDisc.toFixed(2)} ≠ keyline ${keylineD.toFixed(2)} (Filled)`,
@@ -265,18 +401,12 @@ export function validateVariantParity({ grid, pairs }) {
     }
 
     // регистрация — по совпавшим контурам, для ВСЕХ пар (не только колец)
-    const reg = glyphRegistration(o.glyphs, f.glyphs, tolReg);
+    const reg = glyphIdentityRegistration(o.glyphs, f.glyphs, tolReg);
     stats.matchedGlyphs += reg.matched;
     if (reg.worst) {
       report.push(
         `${name}: регистрация глифа между вариантами разъехалась на ${reg.worst.off.toFixed(2)} ` +
           `(Δx ${reg.worst.dx.toFixed(2)}, Δy ${reg.worst.dy.toFixed(2)})`,
-      );
-    }
-    for (const g of reg.gross) {
-      report.push(
-        `${name}: контур совпал по сигнатуре, но стоит в ${g.off.toFixed(2)} — ` +
-          `грубая рассинхронизация или структурная разница (глазами)`,
       );
     }
   }

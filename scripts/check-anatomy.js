@@ -3,7 +3,7 @@
  * Гард анатомии @labpics/icons (этап 1) — кусается, не украшает.
  *
  * Проверяет dist/anatomy.json против dist/svg и модели этапа 1:
- *   1. Полнота: скелет есть у ВСЕХ иконок (444), лишних имён нет.
+ *   1. Полнота: скелет есть у всех 476 source-вариантов, лишних имён нет.
  *   2. Конечность: каждая метрика — конечное число (NaN в геометрии =
  *      битый парс, тихо пропускать нельзя).
  *   3. Домен: bbox внутри viewBox 0..24 с допуском 0.5px (артефакты
@@ -21,6 +21,7 @@ import { execFileSync } from 'child_process';
 import { readFileSync, readdirSync } from 'fs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
+import { EXPECTED_SOURCE_VARIANTS } from './lib/corpus-contract.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
@@ -51,7 +52,9 @@ for (const name of expected) {
 for (const name of Object.keys(icons)) {
   if (!expected.has(name)) fail(`лишний скелет: ${name}`);
 }
-if (expected.size !== 444) fail(`ожидалось 444 иконки, в dist/svg ${expected.size}`);
+if (expected.size !== EXPECTED_SOURCE_VARIANTS) {
+  fail(`ожидалось ${EXPECTED_SOURCE_VARIANTS} вариантов, в dist/svg ${expected.size}`);
+}
 
 // 2-3. Конечность и домен
 const finite = (x) => typeof x === 'number' && Number.isFinite(x);

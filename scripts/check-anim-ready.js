@@ -2,7 +2,9 @@
  * check-anim-ready.js — гейт ГОТОВНОСТИ КОНСТРУКЦИИ К АНИМАЦИИ.
  *
  * КЛАСС дефекта (уникальный — НЕ дублирует соседей): СВАРЕННАЯ ПОДВИЖНАЯ
- * ЧАСТЬ. Сами анимации отложены, но конструкция обязана быть готова:
+ * ЧАСТЬ. Этот lint проверяет только конструктивную готовность; semantic gesture
+ * и его trajectory proof принадлежат check-motion, target adapters — отдельным
+ * экспортерам. Подвижная конструкция обязана быть готова:
  * подвижная деталь (стрелка часов, …), сваренная с соседями в один
  * примитив или суб-путь, не анимируется transform'ом без разрезания на
  * рантайме; деталь без оси вращения не знает, вокруг чего вращаться.
@@ -145,7 +147,7 @@ if (isMain) {
   }
   if (hard.length === 0 && report.length === 0) {
     console.log(
-      `check-anim-ready: OK — ${checkedParts} подвижных частей готовы к анимации (anchor + раздельные суб-пути)`,
+      `check-anim-ready: OK — ${checkedParts} anchored movable parts are structurally separate; gesture contracts are checked by check-motion; target adapters are not exported`,
     );
   }
   if (hard.length > 0 || (strict && report.length > 0)) process.exit(1);

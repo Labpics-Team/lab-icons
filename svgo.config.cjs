@@ -21,9 +21,13 @@ module.exports = {
         overrides: {
           // SVGO 4 больше не включает removeViewBox в preset-default.
           // Отсутствие отдельного plugin и есть fail-closed сохранение viewBox;
-          // попытка override печатает 444 предупреждения и ничего не защищает.
+          // попытка override печатает сотни предупреждений и ничего не защищает.
           cleanupIds: { remove: true, minify: false },
           convertPathData: { floatPrecision: 2, transformPrecision: 2 },
+          // Граница path — часть source identity и будущего motion contract.
+          // Оптимизатор не имеет права склеивать семантически разные части,
+          // даже если итоговый статический силуэт совпадает.
+          mergePaths: false,
         },
       },
     },

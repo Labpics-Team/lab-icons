@@ -8,8 +8,16 @@ import {
   buildObservatory,
   isSubstantiveObservatoryReason,
 } from '../scripts/build-observatory.mjs';
+import {
+  EXPECTED_ICON_NAMES,
+  EXPECTED_SOURCE_VARIANTS,
+} from '../scripts/lib/corpus-contract.js';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
+const catalog = JSON.parse(readFileSync(join(root, 'semantics', 'catalog.json'), 'utf8'));
+const expectedModeledVariants = Object.values(catalog.icons)
+  .flatMap((icon) => Object.values(icon.model?.variants ?? {}))
+  .length;
 let temporaryRoot;
 let first;
 let second;
@@ -29,7 +37,7 @@ afterAll(() => {
 });
 
 describe('Quality Observatory corpus contract', () => {
-  it('covers every one of the 222 glyphs in both variants exactly once', () => {
+  it('covers every one of the 238 glyphs in both variants exactly once', () => {
     const outlineNames = readdirSync(join(root, 'svg', 'Outline'))
       .filter((file) => file.endsWith('.svg'))
       .map((file) => file.slice(0, -4))
@@ -40,11 +48,14 @@ describe('Quality Observatory corpus contract', () => {
       .sort();
     const ids = first.report.rows.map((row) => row.id);
 
-    expect(outlineNames).toHaveLength(222);
+    expect(outlineNames).toHaveLength(EXPECTED_ICON_NAMES);
     expect(filledNames).toEqual(outlineNames);
-    expect(first.report.summary).toMatchObject({ glyphs: 222, variants: 444 });
-    expect(ids).toHaveLength(444);
-    expect(new Set(ids).size).toBe(444);
+    expect(first.report.summary).toMatchObject({
+      glyphs: EXPECTED_ICON_NAMES,
+      variants: EXPECTED_SOURCE_VARIANTS,
+    });
+    expect(ids).toHaveLength(EXPECTED_SOURCE_VARIANTS);
+    expect(new Set(ids).size).toBe(EXPECTED_SOURCE_VARIANTS);
     for (const name of outlineNames) {
       expect(ids).toContain(`${name}/outline`);
       expect(ids).toContain(`${name}/filled`);
@@ -64,7 +75,7 @@ describe('Quality Observatory corpus contract', () => {
     }
   });
 
-  it('keeps historical paths currentColor-painted in both light and dark modes', () => {
+  it('keeps visible paths currentColor-painted without overriding SVG mask paint', () => {
     const html = first.html;
     const historicalStart = html.indexOf('data-source-kind="HISTORICAL_HAND"');
     const historicalEnd = html.indexOf('</tr>', historicalStart);
@@ -73,7 +84,7 @@ describe('Quality Observatory corpus contract', () => {
     expect(historicalStart).toBeGreaterThan(-1);
     expect(html).toContain('@media(prefers-color-scheme:dark)');
     expect(html).toContain(':root[data-theme="dark"]');
-    expect(html).toContain('.icon path{fill:currentColor}');
+    expect(html).not.toContain('.icon path{fill:currentColor}');
     expect(historicalRow).toMatch(
       /class="icon original"[\s\S]*?<path[^>]+fill="currentColor"/,
     );
@@ -82,7 +93,7 @@ describe('Quality Observatory corpus contract', () => {
   it('never turns absence of a model into a false 0% similarity', () => {
     const notModeled = first.report.rows.filter((row) => row.model.status === 'NOT_MODELED');
 
-    expect(notModeled).toHaveLength(344);
+    expect(notModeled).toHaveLength(EXPECTED_SOURCE_VARIANTS - expectedModeledVariants);
     for (const row of notModeled) {
       expect(row.metrics, row.id).toBeNull();
       expect(row.reason.status, row.id).toBe('NOT_APPLICABLE');
@@ -133,7 +144,7 @@ describe('Quality Observatory truthfulness', () => {
 
   it('reports all mandated metric dimensions for every modeled row', () => {
     const modeled = first.report.rows.filter((row) => row.model.status === 'MODELED');
-    expect(modeled).toHaveLength(100);
+    expect(modeled).toHaveLength(expectedModeledVariants);
     for (const row of modeled) {
       expect(row.metrics.deviationPct, row.id).not.toBeNull();
       expect(row.metrics.silhouette, row.id).toMatchObject({
@@ -161,6 +172,23 @@ describe('Quality Observatory truthfulness', () => {
     const cog = first.visuals.get('cog/outline');
     expect(arrow.candidateEntries).toMatchObject([{ fillRule: 'nonzero' }]);
     expect(cog.candidateEntries).toMatchObject([{ fillRule: 'evenodd' }]);
+  });
+
+  it('renders mask-subtract candidates with their declared silhouette in every visual', () => {
+    const start = first.html.indexOf('data-id="time/filled"');
+    const end = first.html.indexOf('</tr>', start);
+    const row = first.html.slice(start, end);
+    const cells = row.match(/<td class="visual-cell">[\s\S]*?<\/td>/g) ?? [];
+
+    expect(start).toBeGreaterThan(-1);
+    expect(cells).toHaveLength(4);
+    expect(cells[1]).toMatch(/mask="url\(#compose-time-filled-candidate\)"/);
+    expect(cells[1]).toMatch(/<mask id="compose-time-filled-candidate"/);
+    expect(cells[2]).toMatch(/mask="url\(#compose-time-filled-overlay-candidate\)"/);
+    expect(cells[2]).toMatch(/<mask id="compose-time-filled-overlay-candidate"/);
+    expect(cells[3]).toMatch(/mask="url\(#compose-time-filled-difference-candidate\)"/);
+    expect(cells[3]).toMatch(/<mask id="compose-time-filled-difference-candidate"/);
+    expect(cells[1]).toMatch(/fill="#000"[^>]*fill-rule="nonzero"/);
   });
 
   it('не называет fail-closed uncertainty доказанным topology mismatch', () => {

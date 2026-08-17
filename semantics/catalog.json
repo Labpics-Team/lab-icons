@@ -33,7 +33,7 @@
    "min": 16,
    "default": 24,
    "max": 48,
-   "lifecycle": "active-in-recipe-kernels"
+   "lifecycle": "active-after-sampled-optical-proof"
   }
  },
  "icons": {
@@ -2389,6 +2389,171 @@
    },
    "model": null
   },
+  "brain": {
+   "source": {
+    "outline": {
+     "file": "svg/Outline/brain.svg",
+     "parts": [
+      {
+       "id": "source-5034fb5df6ae",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 0,
+       "fillRule": "nonzero",
+       "topologySignature": "MCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCZ",
+       "sourceFingerprint": "sha256:5034fb5df6ae68f9819e304654e37acbc58f7583cb83cb6361cb47fa907a3abc",
+       "artifactFingerprint": "sha256:b5a2bb9f5757fc141e8a8a75d190060506d1d013623d9b5b113be81a0ce855f4"
+      },
+      {
+       "id": "source-3bac7222791a",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 1,
+       "fillRule": "nonzero",
+       "topologySignature": "MCCCCCCCCCCCCZ",
+       "sourceFingerprint": "sha256:3bac7222791a4ca48bfbcf32aff0d791e27d0cf23ffd7777c215a2a843e02ceb",
+       "artifactFingerprint": "sha256:ba838da1c7465ddd22a69207304b7b8122cf1c150a6cb4f0a5b567ff79b3cfd9"
+      }
+     ]
+    },
+    "filled": {
+     "file": "svg/Filled/brain_filled.svg",
+     "parts": [
+      {
+       "id": "source-117cb685ca1c",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 0,
+       "fillRule": "evenodd",
+       "topologySignature": "MCLCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCZ|MCCCCCCCCCCCCZ",
+       "sourceFingerprint": "sha256:117cb685ca1c0e087ce9419898e0ccb79e0e6d7950374dfe626b8bd56ba103a5",
+       "artifactFingerprint": "sha256:41bef6f7a980b20eee6c14ca48f939a726232b38b1a979ca0b9b8696eddf773e"
+      }
+     ]
+    }
+   },
+   "model": null
+  },
+  "branch": {
+   "source": {
+    "outline": {
+     "file": "svg/Outline/branch.svg",
+     "parts": [
+      {
+       "id": "source-7a532448a3e5",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 0,
+       "fillRule": "evenodd",
+       "topologySignature": "MCCCLLCCCCLCCCCLLCCCZ|MCCCCZ|MCCCCZ|MCCCCZ",
+       "sourceFingerprint": "sha256:7a532448a3e5e2513f4eb676e30641fe16958fbc21401805886b900d60ee51a9",
+       "artifactFingerprint": "sha256:e72a242aee7f6d46d2f5ae6459d0e9110e3024eea9fdfae7b9a267700e4f3dd5"
+      }
+     ]
+    },
+    "filled": {
+     "file": "svg/Filled/branch_filled.svg",
+     "parts": [
+      {
+       "id": "source-88ff05b67281",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 0,
+       "fillRule": "nonzero",
+       "topologySignature": "MCCCCCCCCCCCCZ",
+       "sourceFingerprint": "sha256:88ff05b6728168984102373cc5730ca0785deb38e3e53b2906d82fba301f565c",
+       "artifactFingerprint": "sha256:56c69d0a0ff1218d479578158958b78beeb671b53528718d77da30fe7084d4b7"
+      },
+      {
+       "id": "source-762becdcf0fd",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 1,
+       "fillRule": "nonzero",
+       "topologySignature": "MCCCLLLCCLLCCCZ",
+       "sourceFingerprint": "sha256:762becdcf0fd65d86bc0ebde298345832c80298b1887bd1eecab7bba2db155fb",
+       "artifactFingerprint": "sha256:cca9fe31973ed79839f7991be97a88405a7ecdb5e93162a76d9460b37a8db690"
+      },
+      {
+       "id": "source-69619982b198",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 2,
+       "fillRule": "nonzero",
+       "topologySignature": "MCCCCCCCCCCCCZ",
+       "sourceFingerprint": "sha256:69619982b1989cbf7b7a19e6869daff354400f49dd9d78268ea4a97b8c3b5e04",
+       "artifactFingerprint": "sha256:3d24ca970c79492aea7e775e48ef5ccddc20013f0202ea9255ae457f14180b7c"
+      }
+     ]
+    }
+   },
+   "model": null
+  },
+  "branches": {
+   "source": {
+    "outline": {
+     "file": "svg/Outline/branches.svg",
+     "parts": [
+      {
+       "id": "source-6bc09cf54c42",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 0,
+       "fillRule": "evenodd",
+       "topologySignature": "MCCLLCLCCCCCLCLLCCCCLLCLCCCCCLCLLCCZ|MCCCCZ|MCCCCZ|MCCCCZ|MCCCCZ",
+       "sourceFingerprint": "sha256:6bc09cf54c42be31e0652c9773017ff3dd46da76a80a4937dc8292c1f78b2a8a",
+       "artifactFingerprint": "sha256:ecd03be31207096ad4c464c8289cfb38aa55cd0629942875ad8ebe25aebe9d36"
+      }
+     ]
+    },
+    "filled": {
+     "file": "svg/Filled/branches_filled.svg",
+     "parts": [
+      {
+       "id": "source-0929a9875474",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 0,
+       "fillRule": "nonzero",
+       "topologySignature": "MCCCCCCCCCCCCCCCCZ",
+       "sourceFingerprint": "sha256:0929a9875474e4faca5b90a93772632247167a2871c1727c09efae0d61d228e0",
+       "artifactFingerprint": "sha256:85a538b17d16551ee3a2d8ce5c632bb76bace6a6fe3482082cdd709cc744ac7d"
+      },
+      {
+       "id": "source-707fb85c7278",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 1,
+       "fillRule": "nonzero",
+       "topologySignature": "MCCCCCCCCCCCCZ",
+       "sourceFingerprint": "sha256:707fb85c727889b0c20a208e0bba2124307657bb7fd5ddacd00289873ed72f35",
+       "artifactFingerprint": "sha256:f727f744c7b1529022048db722559da444576a933057bb71c894652e1bbe7553"
+      },
+      {
+       "id": "source-148a4c3583e5",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 2,
+       "fillRule": "nonzero",
+       "topologySignature": "MCCCCCCCCCCCCCCCCZ",
+       "sourceFingerprint": "sha256:148a4c3583e5306c1bd7b6b64c8f0a40aff8bea843ad616424a8951b8144cf65",
+       "artifactFingerprint": "sha256:2001f106b3af5e76b9ffcad5161a8cfaa14259a40a5971847c3c2944f4fbe68e"
+      },
+      {
+       "id": "source-e9152f048db7",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 3,
+       "fillRule": "nonzero",
+       "topologySignature": "MCCLLCCCLLCCLLCCCLLCCZ",
+       "sourceFingerprint": "sha256:e9152f048db7f94c507c8b04a41f0eddab4f52e461890128f457e7d370783f83",
+       "artifactFingerprint": "sha256:ee3cda9116ab4e067b8c9edc887fb258294445823cae899470fe8f3404f22b25"
+      }
+     ]
+    }
+   },
+   "model": null
+  },
   "brush": {
    "source": {
     "outline": {
@@ -3415,7 +3580,8 @@
      "outline": {
       "state": "accepted",
       "supportedAxes": [
-       "weight"
+       "weight",
+       "opsz"
       ],
       "composition": {
        "kind": "compound",
@@ -3440,7 +3606,8 @@
      "filled": {
       "state": "accepted",
       "supportedAxes": [
-       "weight"
+       "weight",
+       "opsz"
       ],
       "composition": {
        "kind": "compound",
@@ -3617,7 +3784,8 @@
      "outline": {
       "state": "accepted",
       "supportedAxes": [
-       "weight"
+       "weight",
+       "opsz"
       ],
       "composition": {
        "kind": "compound",
@@ -3642,7 +3810,8 @@
      "filled": {
       "state": "accepted",
       "supportedAxes": [
-       "weight"
+       "weight",
+       "opsz"
       ],
       "composition": {
        "kind": "compound",
@@ -3829,7 +3998,8 @@
      "outline": {
       "state": "accepted",
       "supportedAxes": [
-       "weight"
+       "weight",
+       "opsz"
       ],
       "composition": {
        "kind": "compound",
@@ -3854,7 +4024,8 @@
      "filled": {
       "state": "accepted",
       "supportedAxes": [
-       "weight"
+       "weight",
+       "opsz"
       ],
       "composition": {
        "kind": "compound",
@@ -4031,7 +4202,8 @@
      "outline": {
       "state": "accepted",
       "supportedAxes": [
-       "weight"
+       "weight",
+       "opsz"
       ],
       "composition": {
        "kind": "compound",
@@ -4056,7 +4228,8 @@
      "filled": {
       "state": "accepted",
       "supportedAxes": [
-       "weight"
+       "weight",
+       "opsz"
       ],
       "composition": {
        "kind": "compound",
@@ -4805,6 +4978,96 @@
    },
    "model": null
   },
+  "commit": {
+   "source": {
+    "outline": {
+     "file": "svg/Outline/commit.svg",
+     "parts": [
+      {
+       "id": "source-7a9ec7d64d8d",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 0,
+       "fillRule": "evenodd",
+       "topologySignature": "MCLCCLCCLCCLCZ|MCCCCZ",
+       "sourceFingerprint": "sha256:7a9ec7d64d8d0221380862d9288f17710c1ae07ef2f17d0bc7f673143c5e1155",
+       "artifactFingerprint": "sha256:9e66a2c767f1bbe9265b813e7d6478858f08948b7ca81fec51db3f27772b99e0"
+      }
+     ]
+    },
+    "filled": {
+     "file": "svg/Filled/commit_filled.svg",
+     "parts": [
+      {
+       "id": "source-545a7d2b5c90",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 0,
+       "fillRule": "nonzero",
+       "topologySignature": "MCCCCCCCCCCCCZ",
+       "sourceFingerprint": "sha256:545a7d2b5c90cb61d077b09bf53436fb88d96b1c82e3a69c470df479efea00d1",
+       "artifactFingerprint": "sha256:fae571cbaa0e5ec1e07e5f65ef6fc2e989615c87330a23297dfda2ae29aa3458"
+      },
+      {
+       "id": "source-d3eb20f40537",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 1,
+       "fillRule": "nonzero",
+       "topologySignature": "MCCLCCLZ",
+       "sourceFingerprint": "sha256:d3eb20f405376d5e1c103637c0d2494c81faf5724a9a86920404de3acbfe7470",
+       "artifactFingerprint": "sha256:b919b2f881b8d1b92fba582d6f2002a53438a8a2ca6b890b84da437b3ec4a6f1"
+      },
+      {
+       "id": "source-e00d1b66fe41",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 2,
+       "fillRule": "nonzero",
+       "topologySignature": "MCCLCCLZ",
+       "sourceFingerprint": "sha256:e00d1b66fe419457559d1c68364191353eb6defe2c670a710312cdb5b4479d1a",
+       "artifactFingerprint": "sha256:afed28627bd10853fe7cc39a2ccb912b1fdf174973f521e0d8744b6638f3bd47"
+      }
+     ]
+    }
+   },
+   "model": null
+  },
+  "commits": {
+   "source": {
+    "outline": {
+     "file": "svg/Outline/commits.svg",
+     "parts": [
+      {
+       "id": "source-4e4a026643e5",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 0,
+       "fillRule": "evenodd",
+       "topologySignature": "MCLCCLCCCLCCLCCCLCCLCZ|MCCCCZ|MCCCCZ",
+       "sourceFingerprint": "sha256:4e4a026643e5b53c6a059f7b2e858ac94e07bb92f3b4a6ede84efd078f5cb6ea",
+       "artifactFingerprint": "sha256:1429026a4e6b637947b4aa8e83f0190c904f43687b44a602436d449892a4d835"
+      }
+     ]
+    },
+    "filled": {
+     "file": "svg/Filled/commits_filled.svg",
+     "parts": [
+      {
+       "id": "source-a5ecaff33a0b",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 0,
+       "fillRule": "nonzero",
+       "topologySignature": "MCLCCLCCLCCLCCLCCLCZ",
+       "sourceFingerprint": "sha256:a5ecaff33a0ba669771a005c56aa71e88d6aff27b1876a63fbc8d4fd7bd68089",
+       "artifactFingerprint": "sha256:16537b9a45ffafe862e003f10bafb00463b23f6579f0af4cb607237954d5f634"
+      }
+     ]
+    }
+   },
+   "model": null
+  },
   "compas": {
    "source": {
     "outline": {
@@ -5024,6 +5287,121 @@
     }
    }
   },
+  "connect": {
+   "source": {
+    "outline": {
+     "file": "svg/Outline/connect.svg",
+     "parts": [
+      {
+       "id": "source-9121ad3aa32d",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 0,
+       "fillRule": "nonzero",
+       "topologySignature": "MCLLCCCLCCLCCLCCCCCLLCZ",
+       "sourceFingerprint": "sha256:9121ad3aa32d11e58e614a8193124f2337b0222a7a9efb17f06beef21b03cfc2",
+       "artifactFingerprint": "sha256:3fba2130ca685b7f4d979efacbf7e3365bf49bcac9c55482a3b42edaa9054f1c"
+      },
+      {
+       "id": "source-99ce39d9605e",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 1,
+       "fillRule": "nonzero",
+       "topologySignature": "MCCLCCCCCLLCCLLCCCLCCLZ",
+       "sourceFingerprint": "sha256:99ce39d9605e78e6ddc681c3fdc270bc74788664359918b7762d7e1d2d3df3a3",
+       "artifactFingerprint": "sha256:1032b202ac28bc04cce4e69f5d9cadec2687f294b548dbbf05076accfd346d6a"
+      },
+      {
+       "id": "source-d57d16e65d2d",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 2,
+       "fillRule": "nonzero",
+       "topologySignature": "MCCCCZ",
+       "sourceFingerprint": "sha256:d57d16e65d2d598c0d5ad26a4fd3c5285347eec8fa3addde4c2f4a393fb8c7cf",
+       "artifactFingerprint": "sha256:bbf2dcef06f5dd48c4f7f967015cd3e9b902be24c030724aa826d0fb9feed7c7"
+      },
+      {
+       "id": "source-2181e3ebd49d",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 3,
+       "fillRule": "nonzero",
+       "topologySignature": "MCCCCZ",
+       "sourceFingerprint": "sha256:2181e3ebd49dc808aad3bd100542b8b156177305fd43930a212266e704a44dd0",
+       "artifactFingerprint": "sha256:feb51c683a86fab7fcfa1bf8b9d7c0ef5e154ca4c7ddac37250f8174180f9c8b"
+      },
+      {
+       "id": "source-41ba650b23fe",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 4,
+       "fillRule": "nonzero",
+       "topologySignature": "MCCCCZ",
+       "sourceFingerprint": "sha256:41ba650b23fec787088f030c94a238183a083b0b03838c7784fa99fb9dcfea73",
+       "artifactFingerprint": "sha256:7321724ae5c2ea319a63d995782bba283dd762e0441cb3a251e54dc1d92d7222"
+      }
+     ]
+    },
+    "filled": {
+     "file": "svg/Filled/connect_filled.svg",
+     "parts": [
+      {
+       "id": "source-295e70655bc6",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 0,
+       "fillRule": "nonzero",
+       "topologySignature": "MCLLCCCLCCLCCLCCCCLLCZ",
+       "sourceFingerprint": "sha256:295e70655bc69c442d7402f8e88ef37d24caa2f0ed3194e60afe1a7b7d5e3777",
+       "artifactFingerprint": "sha256:6542591c177f8d68596f871decd8feabff5aa8635d137d078e0d19c516bb70ce"
+      },
+      {
+       "id": "source-4f5ee3f440ff",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 1,
+       "fillRule": "nonzero",
+       "topologySignature": "MCCLCCCCLLCCLLCCCLCCLZ",
+       "sourceFingerprint": "sha256:4f5ee3f440ffc998a42eb6975406eeef8c2d05f0e6a9d72b3be4ab27cc3ce003",
+       "artifactFingerprint": "sha256:ae30bc96245bbc1ab3a5515c3af0766242749b0a24ed4bde8ae196bfcb195ba2"
+      },
+      {
+       "id": "source-b29befca2319",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 2,
+       "fillRule": "nonzero",
+       "topologySignature": "MCCCCZ",
+       "sourceFingerprint": "sha256:b29befca2319b340cff5ef7b664f32a6646ac550783ffc42cada846e29e19729",
+       "artifactFingerprint": "sha256:bd5b955cb4b56a82a3f73920458ff8867320371036a5771ddff90f05aa43340c"
+      },
+      {
+       "id": "source-cfef8fdc5bc0",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 3,
+       "fillRule": "nonzero",
+       "topologySignature": "MCCCCZ",
+       "sourceFingerprint": "sha256:cfef8fdc5bc081808c5bae41358f318445170c3530822789e5427e1190d5414c",
+       "artifactFingerprint": "sha256:408914fa6ee4ac69ceda010ae5419f24dec30d901cab2ec92d0fad7ad452a51e"
+      },
+      {
+       "id": "source-3dac026be5ad",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 4,
+       "fillRule": "nonzero",
+       "topologySignature": "MCCCCZ",
+       "sourceFingerprint": "sha256:3dac026be5ad1d8379eb2d9c664a1f7b47d2dfbbcd7d1ef147904c3c25625061",
+       "artifactFingerprint": "sha256:3277321dc30dc2990dcc63ff70194ae8e2a8318db500b300795dd2133c902058"
+      }
+     ]
+    }
+   },
+   "model": null
+  },
   "console": {
    "source": {
     "outline": {
@@ -5153,6 +5531,61 @@
        "topologySignature": "MAAALQLQLQLCLCLCLALQLALLLQLQLALQLQLZ",
        "sourceFingerprint": "sha256:4cba8d27f85c843d4386535bdd258045d67cf0dfc6fe1bb8e5b54ee780d03d1a",
        "artifactFingerprint": "sha256:07426ce026dd8c33f0de8fc2cd075aa3806a211e092af4ae00fbba2f6fb4c8ff"
+      }
+     ]
+    }
+   },
+   "model": null
+  },
+  "database": {
+   "source": {
+    "outline": {
+     "file": "svg/Outline/database.svg",
+     "parts": [
+      {
+       "id": "source-6287966ecadd",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 0,
+       "fillRule": "nonzero",
+       "topologySignature": "MCCCCLCCCCLZ|MCCCCLCCCCLZ|MCCCCCCCCZ|MCCCCLCCCCLZ",
+       "sourceFingerprint": "sha256:6287966ecadda999e19848da6d9d4058109edfac5719caebefc891b023aebb18",
+       "artifactFingerprint": "sha256:14addaa68658bc2dba388658946bd94adcd65ca27800291ac6597faccdf0d935"
+      }
+     ]
+    },
+    "filled": {
+     "file": "svg/Filled/database_filled.svg",
+     "parts": [
+      {
+       "id": "source-6e413fb06672",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 0,
+       "fillRule": "nonzero",
+       "topologySignature": "MCCCCLCCCCLZ",
+       "sourceFingerprint": "sha256:6e413fb06672c1ab2297bb7385a77f4b803082489acadb62789c1238a48533f1",
+       "artifactFingerprint": "sha256:b989322e6f85ff29fa87f524f0808a765950058579c466ddf5c471893aae1c61"
+      },
+      {
+       "id": "source-dd2bd0dcf829",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 1,
+       "fillRule": "nonzero",
+       "topologySignature": "MCCCCLCCCCLZ",
+       "sourceFingerprint": "sha256:dd2bd0dcf829a8c48e54fce7200024ca88aa548a30418de4bbbca03bbd771c05",
+       "artifactFingerprint": "sha256:973b9e2b4cc6c20526ff2ea4e8ffa22472ea013f307eb10becdaa8662b46199f"
+      },
+      {
+       "id": "source-89ceb3db8af3",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 2,
+       "fillRule": "nonzero",
+       "topologySignature": "MCCCCCCCCZ",
+       "sourceFingerprint": "sha256:89ceb3db8af366667c650de3b226f181f47c39179df68c0dc908bfed3e3497f7",
+       "artifactFingerprint": "sha256:cacc2e70dd8262ce20f62451f0aabe0208c49856bf5ba339050d1836bee72c94"
       }
      ]
     }
@@ -6504,6 +6937,61 @@
    },
    "model": null
   },
+  "fork": {
+   "source": {
+    "outline": {
+     "file": "svg/Outline/fork.svg",
+     "parts": [
+      {
+       "id": "source-e84691613e1e",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 0,
+       "fillRule": "evenodd",
+       "topologySignature": "MCCLCLCCCCLCLCCCCCCCCZ|MCCCCZ|MCCCCZ|MCCCCZ",
+       "sourceFingerprint": "sha256:e84691613e1e4bcbfdcc64e2d0d1c88941a1b372b4b98fb415a6d143d130f21e",
+       "artifactFingerprint": "sha256:b5a3e56e05f14bb126b5c21e41e06f06a7439d4185bf6b5beb05a7308d8e5888"
+      }
+     ]
+    },
+    "filled": {
+     "file": "svg/Filled/fork_filled.svg",
+     "parts": [
+      {
+       "id": "source-e89932aadbe0",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 0,
+       "fillRule": "nonzero",
+       "topologySignature": "MCCLCCCCLCCCCZ",
+       "sourceFingerprint": "sha256:e89932aadbe0d19c2172fe0c286c8984102a6f8b80d9df3c70aa9d35bc90d3bb",
+       "artifactFingerprint": "sha256:b8ac0fafab2743e64e4af2f62b1d68316b4122902513711921df425426565ed6"
+      },
+      {
+       "id": "source-81b752c40a71",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 1,
+       "fillRule": "nonzero",
+       "topologySignature": "MCCCCCCCCCCCCCCZ",
+       "sourceFingerprint": "sha256:81b752c40a71bca717dfccfd9c86841e85a26ca1aebb22dd94d799da3c6c5d22",
+       "artifactFingerprint": "sha256:97b77da23b7b094491861f6e5c54065570dc1fcf60e579b0ec77e650b275795c"
+      },
+      {
+       "id": "source-128b4ae94082",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 2,
+       "fillRule": "nonzero",
+       "topologySignature": "MCCCCCCCCCCCCCCCCCCZ",
+       "sourceFingerprint": "sha256:128b4ae94082fc7059c0429a3972d96faa69b1260c54261602e95a6daa235bcb",
+       "artifactFingerprint": "sha256:aebd7ef973a9bf6ad871a5788ae50db4f9be898337ffdbeadac6754c261aea88"
+      }
+     ]
+    }
+   },
+   "model": null
+  },
   "glasses": {
    "source": {
     "outline": {
@@ -7340,6 +7828,51 @@
    },
    "model": null
   },
+  "key": {
+   "source": {
+    "outline": {
+     "file": "svg/Outline/key.svg",
+     "parts": [
+      {
+       "id": "source-c3ff293ca619",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 0,
+       "fillRule": "evenodd",
+       "topologySignature": "MCCCCZ|MCCCCZ",
+       "sourceFingerprint": "sha256:c3ff293ca6193c4598d8b3871c8caa9495f9272bf2fd7d466a807ab2c6075a80",
+       "artifactFingerprint": "sha256:e94fd16c4e623f9cb89cecbc75197a49c9f21f5d3f1814fc55cee210c7e5d47b"
+      },
+      {
+       "id": "source-12eb0756f344",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 1,
+       "fillRule": "evenodd",
+       "topologySignature": "MCCCCLCLCCLCLCLCLCCCCZ|MCCCLCLCLCLCCLCLCCCZ",
+       "sourceFingerprint": "sha256:12eb0756f3440d716825a9a5f2219f40f41c8a271d15d6d47b2b8ba5c14579e9",
+       "artifactFingerprint": "sha256:2725f8ffa304194e395081e0d9656f2dbf56fed59fbeb1498669afcd3d3fe691"
+      }
+     ]
+    },
+    "filled": {
+     "file": "svg/Filled/key_filled.svg",
+     "parts": [
+      {
+       "id": "source-c17b015cf727",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 0,
+       "fillRule": "evenodd",
+       "topologySignature": "MCCCLCLCLCLCCLCLCLCCCZ|MCCCCZ",
+       "sourceFingerprint": "sha256:c17b015cf72715e0c1ec64df9c1da7f48258a94ca08ccf238bc67fb665bf4f5a",
+       "artifactFingerprint": "sha256:58a3223eef76f0272594e59f2131f6363ef7bfc1c19574d336ee775627c512b2"
+      }
+     ]
+    }
+   },
+   "model": null
+  },
   "layers": {
    "source": {
     "outline": {
@@ -7926,6 +8459,61 @@
    },
    "model": null
   },
+  "mcp": {
+   "source": {
+    "outline": {
+     "file": "svg/Outline/mcp.svg",
+     "parts": [
+      {
+       "id": "source-a0e7b62e4e41",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 0,
+       "fillRule": "nonzero",
+       "topologySignature": "MCCCCLCCCCLCCLCCLCLCCLCCLZ",
+       "sourceFingerprint": "sha256:a0e7b62e4e41ee0e792c210fbc299fcab2be4ad787021162ed7614919729b192",
+       "artifactFingerprint": "sha256:abeb2a1accd98c1442229de815df5c3c4b56849753568d740d7a41e8824d8f4e"
+      },
+      {
+       "id": "source-b5dcaa2e9525",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 1,
+       "fillRule": "nonzero",
+       "topologySignature": "MCCLCCLCCLCCLZ",
+       "sourceFingerprint": "sha256:b5dcaa2e9525f508c12fcd043c69b0e22e74bc33ba0d55d792762422ce78c0f9",
+       "artifactFingerprint": "sha256:67a32fa5f1659dcb19c48880636c1beb71269a2c88322ae6b8d1b823ace20e07"
+      }
+     ]
+    },
+    "filled": {
+     "file": "svg/Filled/mcp_filled.svg",
+     "parts": [
+      {
+       "id": "source-2e5887be28d8",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 0,
+       "fillRule": "nonzero",
+       "topologySignature": "MCCCCLCCCCLCCLCCLCLCCLCCLZ",
+       "sourceFingerprint": "sha256:2e5887be28d80601e2333ede3b5526d2feea852382e2ab4dfdfaa109ba61c9e9",
+       "artifactFingerprint": "sha256:287e55a566cfb902ee873bb8cac56ce34f79d142bf7a4e4a3203759d1c50851b"
+      },
+      {
+       "id": "source-0904aec543d2",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 1,
+       "fillRule": "nonzero",
+       "topologySignature": "MCCLCCLCCLCCLZ",
+       "sourceFingerprint": "sha256:0904aec543d2651b7c8bfa8a405a98bb9ef8de636b6fd74bb9ba980d24f4d96f",
+       "artifactFingerprint": "sha256:b0b9e7dac658e004a99dacf7c97636de10ee2172df2681add33aface6bd5b978"
+      }
+     ]
+    }
+   },
+   "model": null
+  },
   "megaphone": {
    "source": {
     "outline": {
@@ -8072,6 +8660,61 @@
      }
     }
    }
+  },
+  "merge": {
+   "source": {
+    "outline": {
+     "file": "svg/Outline/merge.svg",
+     "parts": [
+      {
+       "id": "source-35aaeed77e5b",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 0,
+       "fillRule": "evenodd",
+       "topologySignature": "MCCLLCCCCCCCCCCCCCCCCLCCCCCCCCCCCCCCCCZ|MCCCCZ|MCCCCZ|MCCCCZ",
+       "sourceFingerprint": "sha256:35aaeed77e5b01657cbb06d97cfc0d36e758f8e5e3f54ea6c99d3378e7ce5a7f",
+       "artifactFingerprint": "sha256:eef99b22a69b734888d33f9593c30197e0b8a1e3de58c088e0317e7bdb7c4967"
+      }
+     ]
+    },
+    "filled": {
+     "file": "svg/Filled/merge_filled.svg",
+     "parts": [
+      {
+       "id": "source-04d62ad8f84e",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 0,
+       "fillRule": "nonzero",
+       "topologySignature": "MCCCCCCCCCCCCCCCCCCCCZ",
+       "sourceFingerprint": "sha256:04d62ad8f84e643dae7dcfbc271e1920777f956c8ee4166af53a79b4c238b8c1",
+       "artifactFingerprint": "sha256:674d61a73bb38142a2c6ef8631d1eb6c23c7e20b8a2d9e6c4bd20253775092a5"
+      },
+      {
+       "id": "source-bf541f7d3480",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 1,
+       "fillRule": "nonzero",
+       "topologySignature": "MCCCCCCCCCCCCCCCCCCCCZ",
+       "sourceFingerprint": "sha256:bf541f7d3480bd71462bf40f48969f1c1c413bed7d17dfdd3c3f34d9bc992009",
+       "artifactFingerprint": "sha256:d19bfbb6482be0d569eb2e15c82cfff0cf6d13bdfcf915b0e32f87af8f19cec0"
+      },
+      {
+       "id": "source-3846c52c7dba",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 2,
+       "fillRule": "nonzero",
+       "topologySignature": "MCCLCCCCCCCCCCCCCCCCCCLCCCZ",
+       "sourceFingerprint": "sha256:3846c52c7dbac52502bfc8a590ec3ae4d61e6fbc5dd89cf90aa00dd9b05214a4",
+       "artifactFingerprint": "sha256:e16a02cc4223a7b1ab803ce1c41f362865b6076d096c0d2d5e90a8c260d7272c"
+      }
+     ]
+    }
+   },
+   "model": null
   },
   "mic": {
    "source": {
@@ -10593,6 +11236,176 @@
    },
    "model": null
   },
+  "priority": {
+   "source": {
+    "outline": {
+     "file": "svg/Outline/priority.svg",
+     "parts": [
+      {
+       "id": "source-59d06c72da1d",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 0,
+       "fillRule": "nonzero",
+       "topologySignature": "MCCLCCLZ",
+       "sourceFingerprint": "sha256:59d06c72da1d2afb35442d5fa37f9b54e30dada681d750fbe38164d59949c21a",
+       "artifactFingerprint": "sha256:14e2eef8581404ba6d5b815501c4ea142cceaffe0740cb09658dadffe1ca8c77"
+      },
+      {
+       "id": "source-74ecad30931a",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 1,
+       "fillRule": "nonzero",
+       "topologySignature": "MCLLCLCCLLCLCLCCLCLCLLLCZ",
+       "sourceFingerprint": "sha256:74ecad30931a9a0ddbb260e7f8764cde8ba7fd44a3bc3ac5dc9f259d68d491fd",
+       "artifactFingerprint": "sha256:0857ec2c2e7311856038281963a9804162abd84add64a0ec0467b074b0da45a3"
+      },
+      {
+       "id": "source-7998c0a56c6e",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 2,
+       "fillRule": "nonzero",
+       "topologySignature": "MCCLCCLZ",
+       "sourceFingerprint": "sha256:7998c0a56c6e06be0e70f84e037c02915b2db0d7701fa088bdfaa0ddb450a630",
+       "artifactFingerprint": "sha256:635178080634c0a2de3eb0fd5c05715167bc47cee5231eee6dcccdf305e5f333"
+      },
+      {
+       "id": "source-9700e7bcdbe3",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 3,
+       "fillRule": "nonzero",
+       "topologySignature": "MCCLCCLZ",
+       "sourceFingerprint": "sha256:9700e7bcdbe37dad5386631b169ba13a9d3273518986604d5586e983178a9b2c",
+       "artifactFingerprint": "sha256:fe5a15006511a9bbf5c5b49eee4e0325c2c21f8fa995ca0c01a5e509c342e1ac"
+      }
+     ]
+    },
+    "filled": {
+     "file": "svg/Filled/priority_filled.svg",
+     "parts": [
+      {
+       "id": "source-2dfa0bcfe02b",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 0,
+       "fillRule": "nonzero",
+       "topologySignature": "MCLCLCLCLZ",
+       "sourceFingerprint": "sha256:2dfa0bcfe02b32d053934082786a892d92628c2d63e1156b93ef025a5ff2eb89",
+       "artifactFingerprint": "sha256:c2df74ba035d43c4a0bba5c73b46cf6643a030e43bec01d1060587acb91179e2"
+      },
+      {
+       "id": "source-be6977106dd1",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 1,
+       "fillRule": "evenodd",
+       "topologySignature": "MCLLLLLLCLCCLLCLCLCCLCLCLLLLLLLCZ",
+       "sourceFingerprint": "sha256:be6977106dd1d2e270c25c04194804c8354ee473eabd515bece78dac2dd7f610",
+       "artifactFingerprint": "sha256:ae8343f53e4f37bfbb992f9886ee06c11ae226f8b28fef97f7a9a53beb641442"
+      },
+      {
+       "id": "source-7d472cc7c00e",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 2,
+       "fillRule": "nonzero",
+       "topologySignature": "MCCLCCLZ",
+       "sourceFingerprint": "sha256:7d472cc7c00e111bd14651229804750fc3addbcff0f9cb7008d2536b8ac6abe9",
+       "artifactFingerprint": "sha256:302e1f19100d5fa0fbed23f6fbd2764de40ac4291574e90b86df5b7b2b554dd6"
+      },
+      {
+       "id": "source-807caf524fb1",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 3,
+       "fillRule": "nonzero",
+       "topologySignature": "MCCLCLCLLZ",
+       "sourceFingerprint": "sha256:807caf524fb1f85be9fcb9ab06b1011c021b3542ce10ea0d82a834f06d52124d",
+       "artifactFingerprint": "sha256:07c16f375a4ada42ba6ed9c1b030a79499a3094de5334cf16512e0292ab91ff7"
+      }
+     ]
+    }
+   },
+   "model": null
+  },
+  "pull-request": {
+   "source": {
+    "outline": {
+     "file": "svg/Outline/pull-request.svg",
+     "parts": [
+      {
+       "id": "source-f917cfad6965",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 0,
+       "fillRule": "evenodd",
+       "topologySignature": "MCLCLCLCLCLCLCLCLZ|MCCCCZ|MCCCCZ",
+       "sourceFingerprint": "sha256:f917cfad6965f2f9c7012e41f271d833a5b0bd66323f1759d3cdc2433d154be3",
+       "artifactFingerprint": "sha256:b12fdd7739252ac8f2e8fd4ed59a7f92f233cff0963aed0b95475a8f73598373"
+      },
+      {
+       "id": "source-59a3fefe7ee2",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 1,
+       "fillRule": "evenodd",
+       "topologySignature": "MCCLCCCCCLLCCLLCLCCLCCCCCLCCZ|MCCLCCZ",
+       "sourceFingerprint": "sha256:59a3fefe7ee24dce78d4fa0cc87e6cb793a472c56b6e1667922ebcdfbe92bf38",
+       "artifactFingerprint": "sha256:8e1df92953f7a2102969ca5a466f65aa98387ecb25008133f61a3d2ea1f5708b"
+      }
+     ]
+    },
+    "filled": {
+     "file": "svg/Filled/pull-request_filled.svg",
+     "parts": [
+      {
+       "id": "source-7d4d730c6608",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 0,
+       "fillRule": "nonzero",
+       "topologySignature": "MCLCCCLCLCCZ",
+       "sourceFingerprint": "sha256:7d4d730c6608db93d59d61fac4ee34a7da26dab460d6d903f4ebf825b9d28430",
+       "artifactFingerprint": "sha256:6914e00b33e2256bc9faa84ca9169671d45afe06f7bb9f66a773ba53da194c60"
+      },
+      {
+       "id": "source-54c1406b9cde",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 1,
+       "fillRule": "nonzero",
+       "topologySignature": "MCCCCLLLCCLLCCLLLCLCCLCCCCCCZ",
+       "sourceFingerprint": "sha256:54c1406b9cde242da69f4eecacbc7e2c7d50a39bb0a95a92cdd1b3d76118e608",
+       "artifactFingerprint": "sha256:70bcddb2ac49174765ae40288c29670c369b9d97fb6a09374d4314a180e4316a"
+      },
+      {
+       "id": "source-4c3c23ad5928",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 2,
+       "fillRule": "nonzero",
+       "topologySignature": "MCLCLCCLCLCLZ",
+       "sourceFingerprint": "sha256:4c3c23ad5928d21ff566290a67afeac3636b1d9793fc1e19358598e86e8aa694",
+       "artifactFingerprint": "sha256:4e22c444f6bdb2c2b24464599adaba8115c62645082c92696b8c212711c496c0"
+      },
+      {
+       "id": "source-db578bf79f25",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 3,
+       "fillRule": "nonzero",
+       "topologySignature": "MCCCCCCCCCCCCZ",
+       "sourceFingerprint": "sha256:db578bf79f254d71ef1f72172738a91cf43be550451765b629a112805f3d3312",
+       "artifactFingerprint": "sha256:016e9fbfcc473d675210d754ec572c255a96cad52d7a827b6ad6431512c7b0a5"
+      }
+     ]
+    }
+   },
+   "model": null
+  },
   "push": {
    "source": {
     "outline": {
@@ -11395,6 +12208,71 @@
     }
    }
   },
+  "revert": {
+   "source": {
+    "outline": {
+     "file": "svg/Outline/revert.svg",
+     "parts": [
+      {
+       "id": "source-3c5a7e741f11",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 0,
+       "fillRule": "nonzero",
+       "topologySignature": "MCCLLCCLLCCLLCCLLZ",
+       "sourceFingerprint": "sha256:3c5a7e741f112331e427d3c32da9334b16d9e42d1547a7cd942d41a4a4f208b5",
+       "artifactFingerprint": "sha256:5eac5ebe513bd7a64e156f5bfe5149c4ff1b584adb85f436e56f0ee7346ede7f"
+      },
+      {
+       "id": "source-5ab4daaa9e04",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 1,
+       "fillRule": "evenodd",
+       "topologySignature": "MCLCLCCLCLCCCZ|MCCCCZ",
+       "sourceFingerprint": "sha256:5ab4daaa9e044d7e95e3c0cfb1e833934ec3e27ee017d35625400d24ba9a743d",
+       "artifactFingerprint": "sha256:7081037bf5b57750f2d235906f5b93967daac20ab6bcbd662ddc275de7ac09b2"
+      }
+     ]
+    },
+    "filled": {
+     "file": "svg/Filled/revert_filled.svg",
+     "parts": [
+      {
+       "id": "source-b8a5e101af47",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 0,
+       "fillRule": "nonzero",
+       "topologySignature": "MCCLLCCLLCCLLCCLLZ",
+       "sourceFingerprint": "sha256:b8a5e101af473311d0c5463692605751a8e89898f8e4d433090aa08a99179253",
+       "artifactFingerprint": "sha256:b899b352eb706b20ec738c10e59b3af03195e1ede112e85c8f7d15e00b2679e3"
+      },
+      {
+       "id": "source-ec440c6ad3b1",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 1,
+       "fillRule": "nonzero",
+       "topologySignature": "MCLCCLCCCZ",
+       "sourceFingerprint": "sha256:ec440c6ad3b12c7ec3f492f9cf07d90483c91cd536aff3586eb39f3432d8ca08",
+       "artifactFingerprint": "sha256:ebfe35ac3a12c95d1d6ffaae1bc9db9384dfd8e407ceb989704deeac1d4e490e"
+      },
+      {
+       "id": "source-1f16a6edb9f1",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 2,
+       "fillRule": "nonzero",
+       "topologySignature": "MCCCCZ",
+       "sourceFingerprint": "sha256:1f16a6edb9f19c928ef070bda7c59762634739cb4a02dd0d0c86a4aea13bbde5",
+       "artifactFingerprint": "sha256:3d24ca970c79492aea7e775e48ef5ccddc20013f0202ea9255ae457f14180b7c"
+      }
+     ]
+    }
+   },
+   "model": null
+  },
   "rhomb": {
    "source": {
     "outline": {
@@ -11424,6 +12302,81 @@
        "topologySignature": "MCACLCACLCACLCACZ",
        "sourceFingerprint": "sha256:1fe939088c570890aaf8cc9cad8088b48bf036dfad8c31834ca00ee6af59b3c7",
        "artifactFingerprint": "sha256:1fe939088c570890aaf8cc9cad8088b48bf036dfad8c31834ca00ee6af59b3c7"
+      }
+     ]
+    }
+   },
+   "model": null
+  },
+  "rocket": {
+   "source": {
+    "outline": {
+     "file": "svg/Outline/rocket.svg",
+     "parts": [
+      {
+       "id": "source-3f0c0904d3c1",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 0,
+       "fillRule": "evenodd",
+       "topologySignature": "MCCCCZ|MCCCLCZ",
+       "sourceFingerprint": "sha256:3f0c0904d3c1dd1682de57fc4be381f09bedcdb28dbf71f54bd0ac193d4d0e95",
+       "artifactFingerprint": "sha256:eec03e4810d39e87b516bcb5b29e8ede8b9ee6c69abb0d453ce1ad1580a64684"
+      },
+      {
+       "id": "source-1532d938c7b8",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 1,
+       "fillRule": "evenodd",
+       "topologySignature": "MCCLCCCCCCCCCLCCCCLCCCCZ|MCCCCCCCZ|MCCCCZ|MCCCCCCZ|MCCCCCCCZ",
+       "sourceFingerprint": "sha256:1532d938c7b86942fb265455d0c4a05a3c5393f94b68797e58ecc32e639195bb",
+       "artifactFingerprint": "sha256:150620051f3b4a7eb2c34e7054ebcfda8d224cec9a0396eae6590fbd8e464f51"
+      }
+     ]
+    },
+    "filled": {
+     "file": "svg/Filled/rocket_filled.svg",
+     "parts": [
+      {
+       "id": "source-dd7ff3f38940",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 0,
+       "fillRule": "nonzero",
+       "topologySignature": "MCCCCCCCZ",
+       "sourceFingerprint": "sha256:dd7ff3f389400a6eaad209ee12851b86f4bacf47c6899d2edb02219865eb2a72",
+       "artifactFingerprint": "sha256:2cb4938312a7652ff805faf24631fbc85da4d4fa212d952d2f087bb8ad5c7e13"
+      },
+      {
+       "id": "source-63a97eee58b4",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 1,
+       "fillRule": "nonzero",
+       "topologySignature": "MCCCCCZ",
+       "sourceFingerprint": "sha256:63a97eee58b43cd59a1e9bd6a46e7b7e011c43e22dbdb528de4c76f8cc3a1e10",
+       "artifactFingerprint": "sha256:f91fec0470efc2fdff52a4fd25fee80b4b12005347ffca0c93231e7dbacfb1ff"
+      },
+      {
+       "id": "source-3999026cd431",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 2,
+       "fillRule": "evenodd",
+       "topologySignature": "MCCCCCCCCZ|MCCCCZ",
+       "sourceFingerprint": "sha256:3999026cd4313435613d47aa7d7b805279caaf1f00ee5982e0d70397f24fa264",
+       "artifactFingerprint": "sha256:e3961b7f91862e9c1210e5ea48f16c6793f81b20af7aa8e10c547973d930d2eb"
+      },
+      {
+       "id": "source-edfb4116caf5",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 3,
+       "fillRule": "nonzero",
+       "topologySignature": "MCLCCCCCZ",
+       "sourceFingerprint": "sha256:edfb4116caf586b1737217159a712fae910d90c53ade0a9387e176ccb057f1e7",
+       "artifactFingerprint": "sha256:b363ce4a47f86bef591a1790faca1bf827c763e97171640a0e1db90fa0b5b007"
       }
      ]
     }
@@ -13207,6 +14160,51 @@
     }
    }
   },
+  "tag": {
+   "source": {
+    "outline": {
+     "file": "svg/Outline/tag.svg",
+     "parts": [
+      {
+       "id": "source-dce041d1e3e0",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 0,
+       "fillRule": "nonzero",
+       "topologySignature": "MCCCCZ",
+       "sourceFingerprint": "sha256:dce041d1e3e0334e22118db145cc70455d59231891e22c902baac113aeefe006",
+       "artifactFingerprint": "sha256:167a5fc84f27006acff371643a4b7e55166959c698f32eccef648faacfb0f4d8"
+      },
+      {
+       "id": "source-3376081b9d16",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 1,
+       "fillRule": "evenodd",
+       "topologySignature": "MCCCLCLCLCLCLCLCLLCLCLCLLCLCCLZ|MCCCCCLCCCLCCCCCCCCCCLCCCLZ",
+       "sourceFingerprint": "sha256:3376081b9d16d96fd5f2c41edfe1e77f7e8967462ca981390c46dbd162b2dddd",
+       "artifactFingerprint": "sha256:c68efdc2cfd96e200d4e7ae2d498ce413936838698a494dc5840f36e74783b2e"
+      }
+     ]
+    },
+    "filled": {
+     "file": "svg/Filled/tag_filled.svg",
+     "parts": [
+      {
+       "id": "source-d080c5d7b073",
+       "identity": "geometry-derived",
+       "role": "unclassified",
+       "zIndex": 0,
+       "fillRule": "evenodd",
+       "topologySignature": "MCCCLCCCCCCLCCCLCCCLZ|MCCCCZ",
+       "sourceFingerprint": "sha256:d080c5d7b07365f33e6fb5aa346d17be515da63c445dab37fc8e1a611eee9c75",
+       "artifactFingerprint": "sha256:ace31d556553dbc82e092a6d0d8779f41e5075aaf9b4e38309e057c82ea0b020"
+      }
+     ]
+    }
+   },
+   "model": null
+  },
   "text": {
    "source": {
     "outline": {
@@ -13348,8 +14346,7 @@
       "state": "accepted",
       "supportedAxes": [],
       "composition": {
-       "kind": "compound",
-       "fillRule": "nonzero"
+       "kind": "layers"
       },
       "parts": [
        {
@@ -13397,8 +14394,14 @@
       "state": "accepted",
       "supportedAxes": [],
       "composition": {
-       "kind": "compound",
-       "fillRule": "nonzero"
+       "kind": "mask-subtract",
+       "basePartIds": [
+        "dial"
+       ],
+       "subtractPartIds": [
+        "hand-minute",
+        "hand-hour"
+       ]
       },
       "parts": [
        {

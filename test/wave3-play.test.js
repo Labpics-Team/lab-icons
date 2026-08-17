@@ -16,14 +16,16 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { buildGlyph } from '../scripts/lib/anatomy-gen.js';
+import { buildGlyph, buildGlyphParts } from '../scripts/lib/anatomy-gen.js';
 import { inkIoU } from '../scripts/check-anatomy-drift.js';
 import { samplePolylines } from '../scripts/lib/curve-sampling.js';
 import { renderedPathData } from '../scripts/lib/icon-geometry.js';
+import { lowerModelComposition } from '../scripts/lib/model-composition.js';
 
 const root = join(import.meta.dirname, '..');
 const grid = JSON.parse(readFileSync(join(root, 'semantics', 'grid.json'), 'utf8'));
 const anatomy = JSON.parse(readFileSync(join(root, 'semantics', 'anatomy.json'), 'utf8'));
+const catalog = JSON.parse(readFileSync(join(root, 'semantics', 'catalog.json'), 'utf8'));
 const cw = grid.canvas.width;
 
 const THRESHOLD = 0.95;
@@ -96,12 +98,29 @@ function eoNzMismatch(pathData, step) {
   return mismatch;
 }
 
+function variantEntries(name, entry, variant, d) {
+  const composition = catalog.icons?.[name]?.model?.variants?.[variant]?.composition;
+  if (!composition) return [{ d, fillRule: 'nonzero', operation: 'union' }];
+  const parts = buildGlyphParts(entry, grid, {}, anatomy.glyphs)[variant];
+  return lowerModelComposition({
+    built: d,
+    parts,
+    composition,
+    label: `wave3-play: ${name}/${variant}`,
+  });
+}
+
+function variantEoNzMismatch(name, entry, variant, d, step) {
+  return variantEntries(name, entry, variant, d)
+    .reduce((sum, path) => sum + eoNzMismatch(path.d, step), 0);
+}
+
 describe('wave3-play — генерат декларации сходится с рукой (IoU ≥ 0.95)', () => {
   for (const name of WAVE3) {
     it(`${name}: IoU против svg/Outline/${name}.svg`, () => {
       const entry = anatomy.glyphs[name];
       expect(entry, `${name} задекларирован в semantics/anatomy.json`).toBeTruthy();
-      const { outline } = buildGlyph(entry, grid);
+      const { outline } = buildGlyph(entry, grid, {}, anatomy.glyphs);
       const hand = renderedPathData(
         readFileSync(join(root, 'svg', 'Outline', `${name}.svg`), 'utf8'),
       ).join('');
@@ -117,10 +136,10 @@ describe('wave3-play — EO≡NZ (evenodd-гейт ≡ nonzero-браузер)',
   for (const name of WAVE3) {
     it(`${name}: ТОЧНОЕ равенство EO≡NZ по всем вариантам (шаг 0.12)`, () => {
       const entry = anatomy.glyphs[name];
-      const built = buildGlyph(entry, grid);
+      const built = buildGlyph(entry, grid, {}, anatomy.glyphs);
       for (const [variant, d] of Object.entries(built)) {
         if (!entry.status?.[variant]) continue;
-        const mismatch = eoNzMismatch(d, 0.12);
+        const mismatch = variantEoNzMismatch(name, entry, variant, d, 0.12);
         expect(mismatch, `${name}/${variant}: точек EO≠NZ`).toBe(0);
       }
     });
@@ -129,10 +148,12 @@ describe('wave3-play — EO≡NZ (evenodd-гейт ≡ nonzero-браузер)',
   it('корпус: нарушители EO≠NZ — только замороженное легаси (шаг 0.24)', () => {
     const offenders = [];
     for (const [name, entry] of Object.entries(anatomy.glyphs)) {
-      const built = buildGlyph(entry, grid);
+      const built = buildGlyph(entry, grid, {}, anatomy.glyphs);
       for (const [variant, d] of Object.entries(built)) {
         if (!entry.status?.[variant]) continue;
-        if (eoNzMismatch(d, 0.24) > 0) offenders.push(`${name}/${variant}`);
+        if (variantEoNzMismatch(name, entry, variant, d, 0.24) > 0) {
+          offenders.push(`${name}/${variant}`);
+        }
       }
     }
     console.log(`EO≠NZ нарушителей: ${offenders.length} (легаси-базлайн ${LEGACY_EO_NZ.size})`);

@@ -1,9 +1,11 @@
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { createRequire } from 'node:module';
 import { afterEach, describe, expect, it } from 'vitest';
 import {
   buildSourceVariantContract,
+  modelComposition,
   validateCatalogRatchet,
   validateIconCatalog,
 } from '../scripts/lib/icon-catalog.js';
@@ -13,6 +15,10 @@ import {
   validateAxisQuality,
 } from '../scripts/lib/axis-quality.js';
 import { validateModelQuality } from '../scripts/lib/model-quality.js';
+import {
+  EXPECTED_ICON_NAMES,
+  EXPECTED_SOURCE_VARIANTS,
+} from '../scripts/lib/corpus-contract.js';
 
 const root = join(import.meta.dirname, '..');
 const catalog = validateIconCatalog(JSON.parse(readFileSync(join(root, 'semantics/catalog.json'), 'utf8')));
@@ -20,15 +26,18 @@ const anatomy = JSON.parse(readFileSync(join(root, 'semantics/anatomy.json'), 'u
 const grid = JSON.parse(readFileSync(join(root, 'semantics/grid.json'), 'utf8'));
 const axisQuality = JSON.parse(readFileSync(join(root, 'semantics/axis-quality.json'), 'utf8'));
 const tempRoots = [];
+const require = createRequire(import.meta.url);
+const svgoConfig = require('../svgo.config.cjs');
 
 afterEach(() => {
   for (const tempRoot of tempRoots.splice(0)) rmSync(tempRoot, { recursive: true, force: true });
 });
 
 describe('полный icon catalog', () => {
-  it('покрывает все 222 имени и 444 точных source fallback', () => {
-    expect(Object.keys(catalog.icons)).toHaveLength(222);
-    expect(Object.values(catalog.icons).flatMap((icon) => Object.keys(icon.source))).toHaveLength(444);
+  it('покрывает все 238 имён и 476 точных source fallback', () => {
+    expect(Object.keys(catalog.icons)).toHaveLength(EXPECTED_ICON_NAMES);
+    expect(Object.values(catalog.icons).flatMap((icon) => Object.keys(icon.source)))
+      .toHaveLength(EXPECTED_SOURCE_VARIANTS);
   });
 
   it('не выдаёт немоделированные source-only SVG за параметрический закон', () => {
@@ -58,6 +67,47 @@ describe('полный icon catalog', () => {
       kind: 'compound',
       fillRule: 'nonzero',
     });
+  });
+
+  it('resolves declared composition generically without icon-name special cases', () => {
+    const parts = [{ id: 'body' }, { id: 'cutout' }];
+    expect(modelComposition({
+      sourceVariant: { parts: [{ fillRule: 'nonzero' }] },
+      declaration: {
+        kind: 'mask-subtract',
+        basePartIds: ['body'],
+        subtractPartIds: ['cutout'],
+      },
+      modelParts: parts,
+      label: 'sample/filled',
+    })).toEqual({
+      kind: 'mask-subtract',
+      basePartIds: ['body'],
+      subtractPartIds: ['cutout'],
+    });
+    expect(anatomy.glyphs.time.composition).toEqual({
+      outline: { kind: 'layers' },
+      filled: {
+        kind: 'mask-subtract',
+        basePartIds: ['dial'],
+        subtractPartIds: ['hand-minute', 'hand-hour'],
+      },
+    });
+    expect(anatomy.glyphs['tablet-landscape']).not.toHaveProperty('composition');
+  });
+
+  it('compiler сохраняет границы source path как motion-relevant identity', () => {
+    const tempRoot = mkdtempSync(join(tmpdir(), 'lab-icons-parts-'));
+    tempRoots.push(tempRoot);
+    mkdirSync(join(tempRoot, 'svg', 'Outline'), { recursive: true });
+    writeFileSync(
+      join(tempRoot, 'svg', 'Outline', 'multi.svg'),
+      '<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">' +
+        '<path d="M2 2H6V6H2Z"/><path d="M8 2H12V6H8Z"/></svg>',
+      'utf8',
+    );
+
+    expect(buildSourceVariantContract(tempRoot, 'multi', 'outline', svgoConfig).parts).toHaveLength(2);
   });
 
   it('fail-closed запрещает расширять закрытый контракт незамеченным полем', () => {
@@ -205,8 +255,61 @@ describe('полный icon catalog', () => {
       anatomy.glyphs,
       catalog.icons['chevron-up'].model.variants.outline.composition.fillRule,
     );
-    expect(chevronProof).toEqual([{ axis: 'weight', finding: null }]);
-    expect(catalog.icons['chevron-up'].model.variants.outline.supportedAxes).toEqual(['weight']);
+    expect(chevronProof).toEqual([
+      { axis: 'weight', finding: null },
+      { axis: 'opsz', finding: null },
+    ]);
+    expect(catalog.icons['chevron-up'].model.variants.outline.supportedAxes).toEqual(['weight', 'opsz']);
+
+    const chevronOpszProof = chevronProof.find(({ axis }) => axis === 'opsz');
+    expect(chevronOpszProof).toEqual({ axis: 'opsz', finding: null });
+  });
+
+  it.each(['weightScale', 'anchorScale'])(
+    'opsz proof отклоняет инвертированное направление %s между small/display masters',
+    (field) => {
+      const inverted = structuredClone(anatomy.glyphs['chevron-up']);
+      const small = inverted.opticalSize.small;
+      const display = inverted.opticalSize.display;
+      [small[field], display[field]] = [display[field], small[field]];
+
+      const proof = proveVariantAxes(
+        inverted,
+        'outline',
+        grid,
+        anatomy.glyphs,
+        catalog.icons['chevron-up'].model.variants.outline.composition.fillRule,
+      );
+
+      expect(proof.find(({ axis }) => axis === 'opsz')).toEqual({
+        axis: 'opsz',
+        finding: expect.objectContaining({
+          kind: 'optical-direction-invalid',
+          field,
+        }),
+      });
+    },
+  );
+
+  it('opsz proof отклоняет неположительный optical weight scale', () => {
+    const invalid = structuredClone(anatomy.glyphs['chevron-up']);
+    invalid.opticalSize.small.weightScale = 0;
+
+    const proof = proveVariantAxes(
+      invalid,
+      'outline',
+      grid,
+      anatomy.glyphs,
+      catalog.icons['chevron-up'].model.variants.outline.composition.fillRule,
+    );
+
+    expect(proof.find(({ axis }) => axis === 'opsz')).toEqual({
+      axis: 'opsz',
+      finding: expect.objectContaining({
+        kind: 'optical-direction-invalid',
+        field: 'weightScale',
+      }),
+    });
   });
 
   it('axis gate требует reviewed debt и отклоняет устаревшее отключение', () => {
@@ -241,9 +344,10 @@ describe('полный icon catalog', () => {
     const supported = Object.values(catalog.icons)
       .flatMap((icon) => Object.values(icon.model?.variants ?? {}))
       .flatMap((variant) => variant.supportedAxes);
-    expect(supported).toHaveLength(17);
+    expect(supported).toHaveLength(25);
     expect(supported.filter((axis) => axis === 'weight')).toHaveLength(9);
     expect(supported.filter((axis) => axis === 'corner')).toHaveLength(8);
+    expect(supported.filter((axis) => axis === 'opsz')).toHaveLength(8);
   });
 
   it('candidate-модель не рекламирует оси: default glyph() — accepted-only', () => {
@@ -266,6 +370,6 @@ describe('полный icon catalog', () => {
     expect(modeled).toHaveLength(100);
     expect(modeled.filter((variant) => variant.state === 'accepted')).toHaveLength(53);
     expect(modeled.filter((variant) => variant.state === 'candidate')).toHaveLength(47);
-    expect(444 - modeled.length).toBe(344);
+    expect(EXPECTED_SOURCE_VARIANTS - modeled.length).toBe(376);
   });
 });

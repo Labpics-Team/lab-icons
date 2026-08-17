@@ -4,7 +4,7 @@
  *
  * Outputs (ignored, reproducible artifacts):
  *   preview/observatory.html  — self-contained, filterable visual report;
- *   preview/observatory.json  — machine-readable facts for all 444 variants.
+ *   preview/observatory.json  — machine-readable facts for all 476 variants.
  *
  * Generated shipments are compared with the last proven hand blob from git
  * history. Hand and unmodelled shipments are compared from the current file.
@@ -23,6 +23,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { buildGlyphParts } from './lib/anatomy-gen.js';
 import { createHandHistory } from './lib/hand-history.js';
 import { renderedPathEntries } from './lib/icon-geometry.js';
+import { lowerModelComposition } from './lib/model-composition.js';
 import {
   compareSilhouettes,
   DEFAULT_OBSERVATORY_RASTER_SIZES,
@@ -248,6 +249,12 @@ function summarize(rows, glyphCount) {
     pass: count((row) => row.verdict.status === 'PASS'),
     review: count((row) => row.verdict.status === 'REVIEW'),
     fail: count((row) => row.verdict.status === 'FAIL'),
+    candidateFail: count(
+      (row) => row.model.catalogState === 'candidate' && row.verdict.status === 'FAIL',
+    ),
+    acceptedFail: count(
+      (row) => row.model.catalogState === 'accepted' && row.verdict.status === 'FAIL',
+    ),
     unexplained: count((row) => row.reason.status === 'UNEXPLAINED'),
     topologyDifferences: count((row) => row.metrics?.topology?.difference === true),
     topologyUncertain: count((row) => row.metrics?.topology?.uncertain === true),
@@ -315,10 +322,16 @@ export function createObservatoryReport({ repo = DEFAULT_REPO } = {}) {
       let metrics = null;
       if (model.status === 'MODELED') {
         const composition = catalog.icons?.[name]?.model?.variants?.[variant]?.composition;
-        if (!composition || composition.kind !== 'compound') {
+        const parts = builtParts?.[variant] ?? null;
+        if (!composition || !parts) {
           throw new Error(`build-observatory: ${name}/${variant} потерял model composition`);
         }
-        candidateEntries = [{ d: built[variant], fillRule: composition.fillRule }];
+        candidateEntries = lowerModelComposition({
+          built: built[variant],
+          parts,
+          composition,
+          label: `build-observatory: ${name}/${variant}`,
+        });
         metrics = compareSilhouettes(originalEntries, candidateEntries, {
           canvas: grid.canvas.width,
           rasterSizes: DEFAULT_OBSERVATORY_RASTER_SIZES,
@@ -377,32 +390,90 @@ function pathMarkup(entries, { fill = 'currentColor' } = {}) {
     .join('');
 }
 
-function iconSvg(entries, canvas, className, extra = '') {
-  return `<svg class="icon ${className}" viewBox="0 0 ${canvas} ${canvas}" role="img" ${extra}>${pathMarkup(entries)}</svg>`;
+function visualId(value) {
+  return String(value).replace(/[^a-z0-9_-]/gi, '-');
+}
+
+function unionEntries(entries) {
+  return entries.filter((entry) => (entry.operation ?? 'union') === 'union');
+}
+
+function subtractEntries(entries) {
+  return entries.filter((entry) => entry.operation === 'subtract');
+}
+
+function composedMarkup(entries, canvas, idPrefix, { fill = 'currentColor' } = {}) {
+  const subtract = subtractEntries(entries);
+  if (subtract.length === 0) {
+    return { defs: '', body: pathMarkup(unionEntries(entries), { fill }) };
+  }
+
+  const maskId = idPrefix;
+  return {
+    defs: `<mask id="${escapeHtml(maskId)}" maskUnits="userSpaceOnUse" x="0" y="0" width="${canvas}" height="${canvas}">
+        <rect width="${canvas}" height="${canvas}" fill="#fff"/>${pathMarkup(subtract, { fill: '#000' })}
+      </mask>`,
+    body: `<g mask="url(#${escapeHtml(maskId)})">${pathMarkup(unionEntries(entries), { fill })}</g>`,
+  };
+}
+
+function iconSvg(entries, canvas, className, extra = '', idPrefix = 'icon') {
+  const composed = composedMarkup(entries, canvas, idPrefix);
+  return `<svg class="icon ${className}" viewBox="0 0 ${canvas} ${canvas}" role="img" ${extra}><defs>${composed.defs}</defs>${composed.body}</svg>`;
 }
 
 function comparisonVisual(entries, canvas, id, kind) {
   const { originalEntries, candidateEntries } = entries;
   if (!candidateEntries) return '<div class="not-modeled">NOT MODELED</div>';
+  const safeId = visualId(id);
   if (kind === 'overlay') {
+    const original = composedMarkup(originalEntries, canvas, `compose-${safeId}-overlay-original`);
+    const candidate = composedMarkup(candidateEntries, canvas, `compose-${safeId}-overlay-candidate`);
     return `<svg class="icon overlay" viewBox="0 0 ${canvas} ${canvas}" role="img" aria-label="overlay">
-      <g class="overlay-original">${pathMarkup(originalEntries)}</g>
-      <g class="overlay-candidate">${pathMarkup(candidateEntries)}</g>
+      <defs>${original.defs}${candidate.defs}</defs>
+      <g class="overlay-original">${original.body}</g>
+      <g class="overlay-candidate">${candidate.body}</g>
     </svg>`;
   }
 
-  const safeId = `diff-${id.replace(/[^a-z0-9-]/gi, '-')}`;
+  const original = composedMarkup(
+    originalEntries,
+    canvas,
+    `compose-${safeId}-difference-original`,
+    { fill: 'currentColor' },
+  );
+  const candidate = composedMarkup(
+    candidateEntries,
+    canvas,
+    `compose-${safeId}-difference-candidate`,
+    { fill: 'currentColor' },
+  );
+  const originalMask = composedMarkup(
+    originalEntries,
+    canvas,
+    `compose-${safeId}-difference-original-mask`,
+    { fill: '#000' },
+  );
+  const candidateMask = composedMarkup(
+    candidateEntries,
+    canvas,
+    `compose-${safeId}-difference-candidate-mask`,
+    { fill: '#000' },
+  );
+  const withoutCandidateId = `diff-${safeId}-without-candidate`;
+  const withoutOriginalId = `diff-${safeId}-without-original`;
   return `<svg class="icon difference" viewBox="0 0 ${canvas} ${canvas}" role="img" aria-label="difference">
     <defs>
-      <mask id="${safeId}-without-candidate" maskUnits="userSpaceOnUse" x="0" y="0" width="${canvas}" height="${canvas}">
-        <rect width="${canvas}" height="${canvas}" fill="#fff"/>${pathMarkup(candidateEntries, { fill: '#000' })}
+      ${original.defs}${candidate.defs}${originalMask.defs}${candidateMask.defs}
+      <mask id="${withoutCandidateId}" maskUnits="userSpaceOnUse" x="0" y="0" width="${canvas}" height="${canvas}">
+        <rect width="${canvas}" height="${canvas}" fill="#fff"/>${candidateMask.body}
       </mask>
-      <mask id="${safeId}-without-original" maskUnits="userSpaceOnUse" x="0" y="0" width="${canvas}" height="${canvas}">
-        <rect width="${canvas}" height="${canvas}" fill="#fff"/>${pathMarkup(originalEntries, { fill: '#000' })}
+      <mask id="${withoutOriginalId}" maskUnits="userSpaceOnUse" x="0" y="0" width="${canvas}" height="${canvas}">
+        <rect width="${canvas}" height="${canvas}" fill="#fff"/>${originalMask.body}
       </mask>
     </defs>
-    <g class="difference-original" mask="url(#${safeId}-without-candidate)">${pathMarkup(originalEntries)}</g>
-    <g class="difference-candidate" mask="url(#${safeId}-without-original)">${pathMarkup(candidateEntries)}</g>
+    <g class="difference-original" mask="url(#${withoutCandidateId})">${original.body}</g>
+    <g class="difference-candidate" mask="url(#${withoutOriginalId})">${candidate.body}</g>
   </svg>`;
 }
 
@@ -488,8 +559,8 @@ export function renderObservatoryHtml(report, visuals, canvas = 24) {
           <div class="source">${escapeHtml(sourceLabel(row))}</div>
           <div class="source">${escapeHtml(row.model.archetype ?? 'no anatomy')}</div>
         </th>
-        <td class="visual-cell">${iconSvg(visual.originalEntries, canvas, 'original', `aria-label="${escapeHtml(row.id)} original"`)}</td>
-        <td class="visual-cell">${visual.candidateEntries ? iconSvg(visual.candidateEntries, canvas, 'candidate', `aria-label="${escapeHtml(row.id)} generated candidate"`) : `<div class="not-modeled">${row.model.status === 'MODEL_ERROR' ? 'MODEL ERROR' : 'NOT MODELED'}</div>`}</td>
+        <td class="visual-cell">${iconSvg(visual.originalEntries, canvas, 'original', `aria-label="${escapeHtml(row.id)} original"`, `compose-${visualId(row.id)}-original`)}</td>
+        <td class="visual-cell">${visual.candidateEntries ? iconSvg(visual.candidateEntries, canvas, 'candidate', `aria-label="${escapeHtml(row.id)} generated candidate"`, `compose-${visualId(row.id)}-candidate`) : `<div class="not-modeled">${row.model.status === 'MODEL_ERROR' ? 'MODEL ERROR' : 'NOT MODELED'}</div>`}</td>
         <td class="visual-cell">${comparisonVisual(visual, canvas, row.id, 'overlay')}</td>
         <td class="visual-cell">${comparisonVisual(visual, canvas, row.id, 'difference')}</td>
         <td class="deviation ${deviation != null && deviation > DEVIATION_REASON_THRESHOLD_PCT ? 'over' : ''}">${metric(deviation, '%')}</td>
@@ -513,7 +584,7 @@ export function renderObservatoryHtml(report, visuals, canvas = 24) {
   :root[data-theme="dark"]{color-scheme:dark;--bg:#101110;--panel:#181918;--ink:#f1f0ed;--muted:#aaa8a1;--line:#343532;--soft:#222321;--red:#ff6961;--red-bg:#361b1b;--amber:#ffc25c;--amber-bg:#352b15;--green:#69d39d;--green-bg:#153126;--blue:#62cee5;--original:#ff625b;--candidate:#4fd4ec}
   :root[data-theme="light"]{color-scheme:light}
   @media(prefers-color-scheme:dark){:root:not([data-theme]){--bg:#101110;--panel:#181918;--ink:#f1f0ed;--muted:#aaa8a1;--line:#343532;--soft:#222321;--red:#ff6961;--red-bg:#361b1b;--amber:#ffc25c;--amber-bg:#352b15;--green:#69d39d;--green-bg:#153126;--blue:#62cee5;--original:#ff625b;--candidate:#4fd4ec}}
-  *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:13px/1.45 ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header{padding:24px;display:grid;gap:14px;background:var(--bg);border-bottom:1px solid var(--line)}h1{font-size:24px;line-height:1.1;margin:0;letter-spacing:-.025em}.summary{display:flex;gap:8px;flex-wrap:wrap}.stat{padding:4px 8px;border:1px solid var(--line);border-radius:999px;background:var(--panel)}.stat.bad{border-color:var(--red);color:var(--red)}.controls{display:flex;gap:8px;flex-wrap:wrap}.controls input,.controls select,.controls button{font:inherit;color:inherit;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:7px 9px}.controls input[type="search"]{min-width:250px}.legend{color:var(--muted);max-width:1100px}.table-wrap{overflow:auto;padding:0 0 40px}table{border-collapse:separate;border-spacing:0;width:max-content;min-width:100%;background:var(--panel)}thead{position:sticky;top:0;z-index:10}thead th{background:var(--soft);font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);text-align:left;border-bottom:1px solid var(--line);padding:8px}tbody th,tbody td{border-bottom:1px solid var(--line);padding:10px 8px;vertical-align:top}tbody th{position:sticky;left:0;z-index:4;background:var(--panel);width:190px;text-align:left}tbody tr[data-verdict="FAIL"] th{box-shadow:inset 4px 0 var(--red)}tbody tr[data-verdict="REVIEW"] th{box-shadow:inset 4px 0 var(--amber)}.glyph-name{font-weight:750}.variant{color:var(--muted)}.source{font-size:10px;color:var(--muted);max-width:180px;overflow-wrap:anywhere;margin-top:3px}.verdict{display:inline-block;font-size:9px;line-height:1;padding:4px 5px;margin-top:5px;border-radius:4px;font-weight:800;letter-spacing:.05em}.verdict-fail{color:var(--red);background:var(--red-bg)}.verdict-review{color:var(--amber);background:var(--amber-bg)}.verdict-pass{color:var(--green);background:var(--green-bg)}.verdict-not_modeled{color:var(--muted);background:var(--soft)}.visual-cell{width:92px;text-align:center}.icon{display:block;width:72px;height:72px;margin:auto;color:var(--ink);overflow:visible}.icon path{fill:currentColor}.overlay-original{color:var(--original);opacity:.62}.overlay-candidate{color:var(--candidate);opacity:.62}.difference-original{color:var(--original)}.difference-candidate{color:var(--candidate)}.not-modeled{width:72px;height:72px;display:grid;place-items:center;border:1px dashed var(--line);border-radius:7px;color:var(--muted);font-size:9px;font-weight:800;letter-spacing:.04em}.deviation{width:84px;font-size:16px;font-variant-numeric:tabular-nums;font-weight:750}.deviation.over{color:var(--red)}.facts{width:220px;font-size:11px}.reason{width:360px;max-width:360px;font-size:11px}.reason-code{display:inline-block;color:var(--muted);font-size:9px;font-weight:800;letter-spacing:.06em;margin-bottom:4px}.rejected{margin-top:4px;color:var(--muted)}.bad{color:var(--red)}.good{color:var(--green)}.muted{color:var(--muted)}.raster-list{display:flex;flex-wrap:wrap;gap:4px}.raster-chip{padding:2px 4px;border:1px solid var(--line);border-radius:4px;font-variant-numeric:tabular-nums}.raster-bad{color:var(--red);border-color:var(--red)}[hidden]{display:none!important}
+  *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:13px/1.45 ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header{padding:24px;display:grid;gap:14px;background:var(--bg);border-bottom:1px solid var(--line)}h1{font-size:24px;line-height:1.1;margin:0;letter-spacing:-.025em}.summary{display:flex;gap:8px;flex-wrap:wrap}.stat{padding:4px 8px;border:1px solid var(--line);border-radius:999px;background:var(--panel)}.stat.bad{border-color:var(--red);color:var(--red)}.controls{display:flex;gap:8px;flex-wrap:wrap}.controls input,.controls select,.controls button{font:inherit;color:inherit;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:7px 9px}.controls input[type="search"]{min-width:250px}.legend{color:var(--muted);max-width:1100px}.table-wrap{overflow:auto;padding:0 0 40px}table{border-collapse:separate;border-spacing:0;width:max-content;min-width:100%;background:var(--panel)}thead{position:sticky;top:0;z-index:10}thead th{background:var(--soft);font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);text-align:left;border-bottom:1px solid var(--line);padding:8px}tbody th,tbody td{border-bottom:1px solid var(--line);padding:10px 8px;vertical-align:top}tbody th{position:sticky;left:0;z-index:4;background:var(--panel);width:190px;text-align:left}tbody tr[data-verdict="FAIL"] th{box-shadow:inset 4px 0 var(--red)}tbody tr[data-verdict="REVIEW"] th{box-shadow:inset 4px 0 var(--amber)}.glyph-name{font-weight:750}.variant{color:var(--muted)}.source{font-size:10px;color:var(--muted);max-width:180px;overflow-wrap:anywhere;margin-top:3px}.verdict{display:inline-block;font-size:9px;line-height:1;padding:4px 5px;margin-top:5px;border-radius:4px;font-weight:800;letter-spacing:.05em}.verdict-fail{color:var(--red);background:var(--red-bg)}.verdict-review{color:var(--amber);background:var(--amber-bg)}.verdict-pass{color:var(--green);background:var(--green-bg)}.verdict-not_modeled{color:var(--muted);background:var(--soft)}.visual-cell{width:92px;text-align:center}.icon{display:block;width:72px;height:72px;margin:auto;color:var(--ink);overflow:visible}.overlay-original{color:var(--original);opacity:.62}.overlay-candidate{color:var(--candidate);opacity:.62}.difference-original{color:var(--original)}.difference-candidate{color:var(--candidate)}.not-modeled{width:72px;height:72px;display:grid;place-items:center;border:1px dashed var(--line);border-radius:7px;color:var(--muted);font-size:9px;font-weight:800;letter-spacing:.04em}.deviation{width:84px;font-size:16px;font-variant-numeric:tabular-nums;font-weight:750}.deviation.over{color:var(--red)}.facts{width:220px;font-size:11px}.reason{width:360px;max-width:360px;font-size:11px}.reason-code{display:inline-block;color:var(--muted);font-size:9px;font-weight:800;letter-spacing:.06em;margin-bottom:4px}.rejected{margin-top:4px;color:var(--muted)}.bad{color:var(--red)}.good{color:var(--green)}.muted{color:var(--muted)}.raster-list{display:flex;flex-wrap:wrap;gap:4px}.raster-chip{padding:2px 4px;border:1px solid var(--line);border-radius:4px;font-variant-numeric:tabular-nums}.raster-bad{color:var(--red);border-color:var(--red)}[hidden]{display:none!important}
 </style>
 </head>
 <body>
@@ -522,7 +593,7 @@ export function renderObservatoryHtml(report, visuals, canvas = 24) {
   <div class="summary">
     <span class="stat">${summary.glyphs} glyphs</span><span class="stat">${summary.variants} variants</span>
     <span class="stat">${summary.modeled} modeled</span><span class="stat">${summary.notModeled} not modeled</span>
-    <span class="stat bad">${summary.fail} fail</span><span class="stat">${summary.review} review</span>
+    <span class="stat bad">${summary.fail} fail (${summary.candidateFail} candidate / ${summary.acceptedFail} accepted)</span><span class="stat">${summary.review} review</span>
     <span class="stat bad">${summary.unexplained} unexplained &gt;3%</span>
   </div>
   <div class="controls">
@@ -617,7 +688,8 @@ if (isMain) {
     console.log(
       `build-observatory: REPORT — ${result.report.summary.variants} variants; ` +
         `${result.report.summary.modeled} modeled; ${result.report.summary.notModeled} NOT_MODELED; ` +
-        `${result.report.summary.fail} FAIL; ${result.htmlPath}; ${result.jsonPath}`,
+        `${result.report.summary.fail} FAIL (${result.report.summary.candidateFail} candidate / ` +
+        `${result.report.summary.acceptedFail} accepted); ${result.htmlPath}; ${result.jsonPath}`,
     );
   } catch (error) {
     console.error(`build-observatory: FAIL — ${error instanceof Error ? error.message : String(error)}`);

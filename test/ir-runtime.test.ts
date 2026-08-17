@@ -19,15 +19,35 @@ import {
   type GlyphIR,
   type IconVariant,
 } from '../src/ir/index.js';
+import { EXPECTED_ICON_NAMES } from '../scripts/lib/corpus-contract.js';
 
-function silhouetteEntries(value: GlyphIR): Array<{ d: string; fillRule: FillRule }> {
+function silhouetteEntries(value: GlyphIR): Array<{
+  d: string;
+  fillRule: FillRule;
+  operation?: 'union' | 'subtract';
+}> {
   if (value.composition.kind === 'compound') {
     return [{ d: value.d, fillRule: value.composition.fillRule }];
   }
   if (value.composition.kind === 'layers') {
     return value.parts.map((part) => ({ d: part.d, fillRule: part.fillRule ?? 'nonzero' }));
   }
-  throw new Error('test oracle: mask-subtract не относится к catalog model');
+  if (value.composition.kind === 'mask-subtract') {
+    const byId = new Map(value.parts.map((part) => [part.id, part]));
+    return [
+      ...value.composition.basePartIds.map((id) => ({
+        d: byId.get(id)!.d,
+        fillRule: 'nonzero' as const,
+        operation: 'union' as const,
+      })),
+      ...value.composition.subtractPartIds.map((id) => ({
+        d: byId.get(id)!.d,
+        fillRule: 'nonzero' as const,
+        operation: 'subtract' as const,
+      })),
+    ];
+  }
+  throw new Error('test oracle: неизвестная composition');
 }
 
 describe('public Glyph IR', () => {
@@ -86,11 +106,12 @@ describe('public Glyph IR', () => {
       min: 16,
       default: 24,
       max: 48,
-      lifecycle: 'active-in-recipe-kernels',
+      lifecycle: 'active-after-sampled-optical-proof',
     });
     expect(axisContracts.weight.lifecycle).toBe('active-after-sampled-optical-proof');
     expect(glyphCapabilities('chevron-up', 'filled').axes).toEqual({
       weight: axisContracts.weight,
+      opsz: axisContracts.opsz,
     });
     expect(glyphCapabilities('reload', 'filled').axes).toEqual({});
     expect(() => glyph({
@@ -121,8 +142,29 @@ describe('public Glyph IR', () => {
     })).toThrow(/не имеет разрешённой модели/);
   });
 
-  it('даёт точный source fallback для всех 222 × 2 вариантов без DOM и IO', () => {
-    expect(iconIds).toHaveLength(222);
+  it('opsz chevron меняет конструкцию, сохраняет default master и остаётся независим от weight', () => {
+    for (const icon of ['chevron-down', 'chevron-up', 'chevron-back', 'chevron-forward'] as const) {
+      for (const variant of ['outline', 'filled'] as const) {
+        const baseline = glyph({ icon, variant });
+        const explicitDefault = glyph({ icon, variant, axes: { opsz: 24 } });
+        const small = glyph({ icon, variant, axes: { opsz: 16 } });
+        const display = glyph({ icon, variant, axes: { opsz: 48 } });
+        const smallHeavy = glyph({ icon, variant, axes: { opsz: 16, weight: 1.2 } });
+
+        expect(explicitDefault.d, `${icon}/${variant}/default`).toBe(baseline.d);
+        expect(small.d, `${icon}/${variant}/small`).not.toBe(baseline.d);
+        expect(display.d, `${icon}/${variant}/display`).not.toBe(baseline.d);
+        expect(smallHeavy.d, `${icon}/${variant}/small+weight`).not.toBe(small.d);
+        expect(small.provenance).toMatchObject({
+          kind: 'model',
+          axes: { opsz: 16, weight: 1 },
+        });
+      }
+    }
+  });
+
+  it('даёт точный source fallback для всех 238 × 2 вариантов без DOM и IO', () => {
+    expect(iconIds).toHaveLength(EXPECTED_ICON_NAMES);
     const variants: readonly IconVariant[] = ['outline', 'filled'];
 
     for (const icon of iconIds) {
@@ -165,6 +207,46 @@ describe('public Glyph IR', () => {
     expect(cog.composition).toEqual({ kind: 'compound', fillRule: 'evenodd' });
     expect(cog.parts.every((part) => part.fillRule === null)).toBe(true);
     expect(cog.svg).toContain('fill-rule="evenodd"');
+  });
+
+  it('publishes a fill rule for every independently rendered mask-subtract part', () => {
+    const time = glyph({ icon: 'time', variant: 'filled' });
+
+    expect(time.composition.kind).toBe('mask-subtract');
+    expect(time.parts.map((part) => [part.id, part.fillRule])).toEqual([
+      ['dial', 'nonzero'],
+      ['hand-minute', 'nonzero'],
+      ['hand-hour', 'nonzero'],
+    ]);
+  });
+
+  it('isolates and deeply freezes each returned composition from the catalog and later glyphs', () => {
+    const first = glyph({ icon: 'time', variant: 'filled' });
+    const firstComposition = first.composition;
+    if (firstComposition.kind !== 'mask-subtract') {
+      throw new Error('test precondition: time/filled must use mask-subtract composition');
+    }
+
+    expect(Object.isFrozen(firstComposition)).toBe(true);
+    expect(Object.isFrozen(firstComposition.basePartIds)).toBe(true);
+    expect(Object.isFrozen(firstComposition.subtractPartIds)).toBe(true);
+    expect(() => {
+      (firstComposition.basePartIds as unknown as string[]).push('poisoned-catalog-part');
+    }).toThrow(TypeError);
+
+    const second = glyph({ icon: 'time', variant: 'filled' });
+    const secondComposition = second.composition;
+    if (secondComposition.kind !== 'mask-subtract') {
+      throw new Error('test precondition: time/filled must use mask-subtract composition');
+    }
+    expect(secondComposition).not.toBe(firstComposition);
+    expect(secondComposition.basePartIds).not.toBe(firstComposition.basePartIds);
+    expect(secondComposition.subtractPartIds).not.toBe(firstComposition.subtractPartIds);
+    expect(secondComposition).toEqual({
+      kind: 'mask-subtract',
+      basePartIds: ['dial'],
+      subtractPartIds: ['hand-minute', 'hand-hour'],
+    });
   });
 
   it('строит каждую объявленную модель на границах осей со стабильными part.id', () => {

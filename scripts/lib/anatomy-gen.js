@@ -902,6 +902,16 @@ export function genClockHand(cx, cy, len, t, dir, socket = false) {
       'Z'                                                         // замыкание по грани сиблинга x=cx+t/2
     );
   }
+  if (dir === 'right' && !socket) {
+    const xTip = qcx + qlen;
+    return (
+      `M${f3(qcx)} ${f3(qcy - qh)}` +
+      `L${f3(xTip)} ${f3(qcy - qh)}` +
+      `A${f3(qh)} ${f3(qh)} 0 0 1 ${f3(xTip)} ${f3(qcy + qh)}` +
+      `L${f3(qcx)} ${f3(qcy + qh)}` +
+      `A${f3(qh)} ${f3(qh)} 0 0 1 ${f3(qcx)} ${f3(qcy - qh)}Z`
+    );
+  }
   throw new Error(`genClockHand: комбинация dir=«${dir}», socket=${socket} не реализована — нет потребителя`);
 }
 
@@ -1025,6 +1035,16 @@ export function genRoundedPolygonRing(verts, r, zeta, pen, rIn, corners) {
  */
 export function buildGlyph(entry, grid, axes = {}, lib = null) {
   const cw = grid.canvas.width;
+  const opszRange = grid.axes?.opsz;
+  const opsz = axes.opsz ?? opszRange?.default ?? 24;
+  if (!Number.isFinite(opsz)) {
+    throw new RangeError(`anatomy-gen: opsz ${String(opsz)} обязан быть конечным числом`);
+  }
+  if (opszRange && (opsz < opszRange.min || opsz > opszRange.max)) {
+    throw new RangeError(
+      `anatomy-gen: opsz ${String(opsz)} вне диапазона [${opszRange.min}, ${opszRange.max}]`,
+    );
+  }
   // ОСЬ ВЕСА (вариативность, север владельца): глобальный множитель на все
   // штриховые токены — одна правка restyle-ит ВЕСЬ задекларированный корпус
   // (как весовая ось шрифта). Дефолт 1 = идентичность (гейты держат default).
@@ -1067,7 +1087,43 @@ export function buildGlyph(entry, grid, axes = {}, lib = null) {
     if (entry.weights.filled) out.filled = genArcTerminal(skel, tok(entry.weights.filled));
   } else if (entry.archetype === 'stroke-v') {
     const a = entry.inkAnchors;
-    const anchors = { endL: Pt(a.endL), endR: Pt(a.endR), innerL: Pt(a.innerL), innerR: Pt(a.innerR) };
+    let anchors = { endL: Pt(a.endL), endR: Pt(a.endR), innerL: Pt(a.innerL), innerR: Pt(a.innerR) };
+    let opticalWeight = 1;
+    if (entry.opticalSize) {
+      const small = entry.opticalSize.small;
+      const display = entry.opticalSize.display;
+      if (
+        !small || !display ||
+        !Number.isFinite(small.size) ||
+        !Number.isFinite(display.size) ||
+        ![small.anchorScale, small.weightScale, display.anchorScale, display.weightScale]
+          .every((value) => Number.isFinite(value) && value > 0) ||
+        !(small.size < (entry.opticalSize.default ?? 24) && (entry.opticalSize.default ?? 24) < display.size)
+      ) {
+        throw new Error('stroke-v: opticalSize требует small/default/display masters');
+      }
+      const defaultSize = entry.opticalSize.default ?? 24;
+      const interpolate = (from, to, t) => from + (to - from) * t;
+      const normalized = Math.max(0, Math.min(1, opsz <= defaultSize
+        ? (opsz - small.size) / (defaultSize - small.size)
+        : (opsz - defaultSize) / (display.size - defaultSize)));
+      const smooth = normalized * normalized * (3 - 2 * normalized);
+      const anchorScale = opsz <= defaultSize
+        ? interpolate(small.anchorScale, 1, smooth)
+        : interpolate(1, display.anchorScale, smooth);
+      const weightScale = opsz <= defaultSize
+        ? interpolate(small.weightScale, 1, smooth)
+        : interpolate(1, display.weightScale, smooth);
+      const center = [cw / 2, cw / 2];
+      const scalePoint = ([x, y]) => [
+        center[0] + (x - center[0]) * anchorScale,
+        center[1] + (y - center[1]) * anchorScale,
+      ];
+      anchors = Object.fromEntries(
+        Object.entries(anchors).map(([name, point]) => [name, scalePoint(point)]),
+      );
+      opticalWeight = weightScale;
+    }
     // семья по ориентации: rotation (град) поворачивает знак вокруг центра
     // канвы — chevron up/down/back/forward = одна форма × поворот (DRY,
     // грамматика-консистентность). translate ([dx,dy] в долях) — малая
@@ -1086,8 +1142,8 @@ export function buildGlyph(entry, grid, axes = {}, lib = null) {
       const [dx, dy] = trV(v);
       return dx || dy ? translateD(d, L(dx), L(dy)) : d;
     };
-    if (entry.weights.outline) out.outline = spin(genStrokeV(anchors, tok(entry.weights.outline)), 'outline');
-    if (entry.weights.filled) out.filled = spin(genStrokeV(anchors, tok(entry.weights.filled)), 'filled');
+    if (entry.weights.outline) out.outline = spin(genStrokeV(anchors, tok(entry.weights.outline) * opticalWeight), 'outline');
+    if (entry.weights.filled) out.filled = spin(genStrokeV(anchors, tok(entry.weights.filled) * opticalWeight), 'filled');
   } else if (entry.archetype === 'rounded-rect-container') {
     // контейнер-рамка: внешний rounded-rect (ζ из сетки) + внутренний офсет
     // пером; filled = сплошной внешний. Внутренний радиус = R − перо.

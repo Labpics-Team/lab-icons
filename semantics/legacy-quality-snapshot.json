@@ -1,13 +1,13 @@
 {
-  "comment": "Measured full-corpus migration debt frozen on 2026-08-15. Причина переснятия: wave2: import 16 new icons from refreshed hand export CI rejects count growth and every unreviewed finding-set substitution; lowering debt requires refreshing this proof in the same reviewed change.",
+  "comment": "Measured full-corpus migration debt frozen on 2026-08-16. Relative to the 222-name base, 16 new names / 32 SVG add exactly 42 path-quality findings, including 40 major; the detector contributes zero net findings on the old corpus. Variant registration separately changes 17→0 because it now proves only exact contour identity plus keyline center instead of reporting bbox-mass false positives. CI rejects count growth and every unreviewed finding-set substitution; lowering debt requires refreshing this proof in the same reviewed change.",
   "pathQuality": {
     "findingSetSha256": "sha256:b32d540f7019aeca1b258f40dd818264cf2115401d46b390aab56e56a7e51694",
     "maximumFindings": 3390,
     "maximumMajorFindings": 1609
   },
   "variantParity": {
-    "findingSetSha256": "sha256:ddc7e7632b93c7bec79d6a1c1d6d2441dbe28791d71a2c298a7929489829f1cd",
-    "maximumFindings": 17
+    "findingSetSha256": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "maximumFindings": 0
   },
   "version": 1
 }

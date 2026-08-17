@@ -1,7 +1,7 @@
 # @labpics/icons
 
-Публичная библиотека иконок Labpics: **222 имени × 2 варианта = 444 SVG** и
-ровно 444 именованных ESM-экспорта. Исходная канва — `0 0 24 24`, чернила —
+Публичная библиотека иконок Labpics: **238 имён × 2 варианта = 476 SVG** и
+ровно 476 именованных ESM-экспортов. Исходная канва — `0 0 24 24`, чернила —
 `currentColor`, package surface — без runtime-зависимостей и с
 `sideEffects: false`.
 
@@ -40,12 +40,12 @@ pnpm add @labpics/icons
 | Импорт | Назначение |
 |---|---|
 | `@labpics/icons` | Статические SVG-строки и тип `IconName` |
-| `@labpics/icons/ir` | Строгий Glyph IR, каталог, capabilities, оси и calendar recipe |
+| `@labpics/icons/ir` | Строгий Glyph IR, каталог, capabilities, design contract, оси и calendar recipe |
 | `@labpics/icons/ir/recipes` | Лёгкие чистые kernels: стрелки, декораторы, лучи, ноты, календарные цифры |
 
 ```ts
 import { accessibilityOutline } from '@labpics/icons'
-import { glyph, glyphCapabilities } from '@labpics/icons/ir'
+import { glyph, glyphCapabilities, iconDesignContract } from '@labpics/icons/ir'
 import { buildDirectionalArrow } from '@labpics/icons/ir/recipes'
 
 const exactSource = glyph({
@@ -57,7 +57,7 @@ const exactSource = glyph({
 const capabilities = glyphCapabilities('reload', 'outline')
 const arrow = buildDirectionalArrow({ orientation: 'forward', shaftLength: 0.52 })
 
-void [accessibilityOutline, exactSource, capabilities, arrow]
+void [accessibilityOutline, exactSource, capabilities, iconDesignContract, arrow]
 ```
 
 `glyph()` по умолчанию использует только accepted‑модель и автоматически
@@ -66,6 +66,23 @@ void [accessibilityOutline, exactSource, capabilities, arrow]
 production surface. Поддержанные оси узнаются через `glyphCapabilities()`:
 наличие `weight`, `corner` или `opsz` не предполагается одинаковым у всех
 иконок.
+
+Первый доказанный optical-size slice — `chevron-{down,up,back,forward}` в обоих
+вариантах. На `opsz=16` закон усиливает штрих и открывает апертуру, на
+`opsz=48` делает display-мастер деликатнее; `opsz=24` остаётся byte-identical
+текущему master. Capability проверяется совместно с `weight` на всём sampled
+диапазоне и нескольких raster phases. Остальные варианты `opsz` не заявляют.
+
+`iconDesignContract` описывает machine-readable границу intake и экспорта.
+`glyphCapabilities().motion` различает source-only, candidate, semantic-parts,
+anchored-parts и `gesture-ready`. `time` публикует проверенный gesture
+`time.advance`: normalized progress `0..1`, minute `0→360°`, hour `0→30°`.
+Lottie и SF Symbols adapters имеют состояние `not-exported`: gesture contract
+не является готовым target-файлом.
+
+Для новой пары SVG используйте [agent workflow](docs/agent-workflow.md):
+сначала `pnpm validate:proposal`, затем явный `pnpm import:figma -- --write` и
+полный `pnpm verify`.
 
 Каждый geometry recipe публикует проверенные контрформы через
 `negativeSpace.constraints`: normalized minimum и фактическое измерение с
@@ -98,10 +115,10 @@ Chevron и shaft образуют стрелку через явный weld; enc
 семантической анимации. Эта статика не выдаёт generic scale/rotate за готовый
 SF Symbols‑класс motion.
 
-В частности, текущая анатомия `time` — корректный статический socket, но ещё не
-контракт независимого вращения стрелок. Motion-capability появится только после
-перехода к самостоятельным bearing-overlap capsules и доказанного lowering
-через `union`/`mask-subtract` на всём диапазоне поворотов.
+`time` использует самостоятельные bearing-overlap capsules. Для outline lowering
+равен `union(hands)`, для filled — `base − union(hands)`; порядок частей не меняет
+результат. Траектория `time.advance` проверена на всех объявленных progress,
+размерах 16/20/24/32/48 и четырёх raster phases.
 
 `calendarNumberGlyph()` принимает явные `Date`, IANA time zone и `opsz`, а
 цифры строит собственным rounded recipe с табличными слотами. Время остаётся
@@ -187,6 +204,7 @@ svg/{Outline,Filled}/       авторские исходники
 semantics/                  сетка, анатомия, каталог и quality policy
 src/ir/                     Glyph IR и публичные recipe types
 scripts/lib/                functional geometry core
+scripts/import-figma.mjs    fail-closed intake парного Figma-экспорта
 release/contract.json       SSOT npm/git-dist package surface
 docs/foundations.md         геометрическая конституция
 preview/                    локальный ignored Observatory output

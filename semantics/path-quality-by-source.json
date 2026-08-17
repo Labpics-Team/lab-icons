@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "comment": "Per-source debt (все находки, minor+major), переснят 2026-08-15. Причина: wave2: import 16 new icons from refreshed hand export Правило: ни один файл не растёт против своего snapshot.",
+  "comment": "Per-source debt (все находки, minor+major), переснят 2026-08-16. 16 новых имён / 32 SVG добавляют ровно 42 path-quality findings (40 major); на прежнем 222-name корпусе detector даёт нулевую net-дельту. Variant registration отдельно меняется 17→0, потому что теперь доказывает только exact contour identity plus keyline center вместо bbox-mass false positives. Правило: ни один файл не растёт против своего snapshot.",
   "byFile": {
     "Filled/accessibility_filled.svg": 12,
     "Filled/actions_filled.svg": 3,

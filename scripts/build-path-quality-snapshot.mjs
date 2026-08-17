@@ -2,7 +2,7 @@
 /**
  * scripts/build-path-quality-snapshot.mjs — воспроизводимое переснятие
  * debt-baseline гейтов чистоты:
- *   - semantics/path-quality-by-source.json (per-source ledger, closed world 444)
+ *   - semantics/path-quality-by-source.json (per-source ledger, closed world 476)
  *   - semantics/legacy-quality-snapshot.json: секция pathQuality всегда;
  *     секция variantParity — по флагу --variant-parity (пере-фиксация парного
  *     долга легитимна только когда сами файлы пары осознанно изменены)

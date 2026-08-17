@@ -3,10 +3,10 @@
  * Parity guard for @labpics/icons
  *
  * Verifies:
- *   1. Exactly 222 unique icon names exist in both Filled and Outline.
+ *   1. Exactly 238 unique icon names exist in both Filled and Outline.
  *   2. Every Filled name has a matching Outline name (triple comm -3 style check).
- *   3. Exactly 444 total SVG files across both variants.
- *   4. The built dist/index.js exports exactly 444 named symbols.
+ *   3. Exactly 476 total SVG files across both variants.
+ *   4. The built dist/index.js exports exactly 476 named symbols.
  *
  * Exits non-zero on ANY discrepancy — the check bites.
  */
@@ -14,6 +14,10 @@
 import { readdirSync, existsSync, readFileSync } from 'fs';
 import { join, basename, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import {
+  EXPECTED_ICON_NAMES,
+  EXPECTED_SOURCE_VARIANTS,
+} from './lib/corpus-contract.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
@@ -63,16 +67,16 @@ const outlineNames = outlineFiles.map(normOutline).sort();
 
 // ── check counts ──────────────────────────────────────────────────────────────
 
-if (filledFiles.length !== 222) {
-  fail(`Filled count: expected 222, got ${filledFiles.length}`);
+if (filledFiles.length !== EXPECTED_ICON_NAMES) {
+  fail(`Filled count: expected ${EXPECTED_ICON_NAMES}, got ${filledFiles.length}`);
 } else {
-  ok(`Filled count: 222`);
+  ok(`Filled count: ${EXPECTED_ICON_NAMES}`);
 }
 
-if (outlineFiles.length !== 222) {
-  fail(`Outline count: expected 222, got ${outlineFiles.length}`);
+if (outlineFiles.length !== EXPECTED_ICON_NAMES) {
+  fail(`Outline count: expected ${EXPECTED_ICON_NAMES}, got ${outlineFiles.length}`);
 } else {
-  ok(`Outline count: 222`);
+  ok(`Outline count: ${EXPECTED_ICON_NAMES}`);
 }
 
 // ── triple comm -3: pairwise symmetric diff ───────────────────────────────────
@@ -97,10 +101,10 @@ if (onlyOutline.length > 0) {
 
 // Check 2: unique names count
 const uniqueNames = new Set([...filledNames, ...outlineNames]);
-if (uniqueNames.size !== 222) {
-  fail(`Unique icon names: expected 222, got ${uniqueNames.size}`);
+if (uniqueNames.size !== EXPECTED_ICON_NAMES) {
+  fail(`Unique icon names: expected ${EXPECTED_ICON_NAMES}, got ${uniqueNames.size}`);
 } else {
-  ok(`Unique icon names: 222`);
+  ok(`Unique icon names: ${EXPECTED_ICON_NAMES}`);
 }
 
 // ── check dist/index.js export count ─────────────────────────────────────────
@@ -112,10 +116,10 @@ if (!existsSync(DIST_INDEX)) {
   // Count "export const <name> = " lines
   const matches = src.match(/^export const \w+ = /mg);
   const exportCount = matches ? matches.length : 0;
-  if (exportCount !== 444) {
-    fail(`dist/index.js export count: expected 444, got ${exportCount}`);
+  if (exportCount !== EXPECTED_SOURCE_VARIANTS) {
+    fail(`dist/index.js export count: expected ${EXPECTED_SOURCE_VARIANTS}, got ${exportCount}`);
   } else {
-    ok(`dist/index.js exports: 444`);
+    ok(`dist/index.js exports: ${EXPECTED_SOURCE_VARIANTS}`);
   }
 
   // Verify every Filled name appears as export (full set, not sampled)
@@ -128,7 +132,7 @@ if (!existsSync(DIST_INDEX)) {
       missingFilled++;
     }
   }
-  if (missingFilled === 0) ok(`All 222 Filled export names verified in dist/index.js`);
+  if (missingFilled === 0) ok(`All ${EXPECTED_ICON_NAMES} Filled export names verified in dist/index.js`);
 
   // Verify every Outline name appears as export (full set, not sampled)
   let missingOutline = 0;
@@ -140,7 +144,7 @@ if (!existsSync(DIST_INDEX)) {
       missingOutline++;
     }
   }
-  if (missingOutline === 0) ok(`All 222 Outline export names verified in dist/index.js`);
+  if (missingOutline === 0) ok(`All ${EXPECTED_ICON_NAMES} Outline export names verified in dist/index.js`);
 }
 
 // ── result ────────────────────────────────────────────────────────────────────
@@ -149,5 +153,5 @@ if (errors > 0) {
   console.error(`\nParity check FAILED with ${errors} error(s)`);
   process.exit(1);
 } else {
-  console.log(`\nParity check PASSED — 222 × 2 = 444`);
+  console.log(`\nParity check PASSED — ${EXPECTED_ICON_NAMES} × 2 = ${EXPECTED_SOURCE_VARIANTS}`);
 }

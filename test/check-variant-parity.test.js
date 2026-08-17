@@ -25,9 +25,16 @@ const grid = {
 };
 
 /** Кольцо из двух концентрических кругов + опциональный глиф-квадрат. */
-function outlineSvg({ rOuter = 11, rInner = 9.5, glyphCx = 12, glyphCy = 12 } = {}) {
+function outlineSvg({
+  rOuter = 11,
+  rInner = 9.5,
+  ringCx = 12,
+  ringCy = 12,
+  glyphCx = 12,
+  glyphCy = 12,
+} = {}) {
   const circle = (r) =>
-    `M${12 - r} 12a${r} ${r} 0 1 0 ${2 * r} 0a${r} ${r} 0 1 0 ${-2 * r} 0Z`;
+    `M${ringCx - r} ${ringCy}a${r} ${r} 0 1 0 ${2 * r} 0a${r} ${r} 0 1 0 ${-2 * r} 0Z`;
   const glyph = `M${glyphCx - 2} ${glyphCy - 2}h4v4h-4z`;
   return (
     '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24">' +
@@ -36,9 +43,15 @@ function outlineSvg({ rOuter = 11, rInner = 9.5, glyphCx = 12, glyphCy = 12 } = 
 }
 
 /** Диск + глиф-дырка (негатив). */
-function filledSvg({ rDisc = 11, glyphCx = 12, glyphCy = 12 } = {}) {
+function filledSvg({
+  rDisc = 11,
+  discCx = 12,
+  discCy = 12,
+  glyphCx = 12,
+  glyphCy = 12,
+} = {}) {
   const circle = (r) =>
-    `M${12 - r} 12a${r} ${r} 0 1 0 ${2 * r} 0a${r} ${r} 0 1 0 ${-2 * r} 0Z`;
+    `M${discCx - r} ${discCy}a${r} ${r} 0 1 0 ${2 * r} 0a${r} ${r} 0 1 0 ${-2 * r} 0Z`;
   const glyph = `M${glyphCx - 2} ${glyphCy - 2}h4v4h-4z`;
   return (
     '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="24" height="24">' +
@@ -109,13 +122,11 @@ describe('validateVariantParity — каноны колец и регистра�
     expect(report.some((e) => e.includes('диск-грубый') && e.includes('Ø диска'))).toBe(true);
   });
 
-  it('Д: однозначный дальний двойник (1.5) → категория «грубая рассинхронизация», не молчание', () => {
+  it('Д: идентичный контур, смещённый на 1.5, → нарушение регистрации, не молчание', () => {
     const { report } = run([
       { name: 'грубо', outline: outlineSvg(), filled: filledSvg({ glyphCy: 13.5 }) },
     ]);
-    expect(report.some((e) => e.includes('грубо') && e.includes('грубая рассинхронизация'))).toBe(
-      true,
-    );
+    expect(report.some((e) => e.includes('грубо') && e.includes('регистрация'))).toBe(true);
   });
 
   it('Д: нечитаемый вариант → hard (гейт не молчит)', () => {
