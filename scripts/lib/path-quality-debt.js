@@ -40,15 +40,29 @@ export function findingsByFile(findings) {
 
 /**
  * Сравнивает текущие находки с per-source snapshot.
- * Ошибки: рост против baseline и файл вне closed world snapshot.
+ * Ошибки: рост против baseline, файл вне closed world snapshot и — при
+ * переданном allFiles — файл корпуса без ключа в snapshot. Вторая сторона
+ * closed world обязательна: удаление ключа «чистого» файла молча выводило
+ * бы файл из-под гейта, и будущий долг стал бы невидим.
  *
  * @param {string[]} findings
  * @param {Record<string, number>} snapshot file -> baseline
+ * @param {string[]} [allFiles] полный корпус (`Variant/name.svg`)
  * @returns {string[]} ошибки регрессии
  */
-export function comparePerSourceDebt(findings, snapshot) {
+export function comparePerSourceDebt(findings, snapshot, allFiles = null) {
   const current = findingsByFile(findings);
   const errors = [];
+
+  if (allFiles) {
+    for (const file of allFiles) {
+      if (!(file in snapshot)) {
+        errors.push(
+          `${file}: файла нет в snapshot — closed world обязан покрывать весь корпус`,
+        );
+      }
+    }
+  }
 
   for (const [file, count] of Object.entries(current)) {
     const baseline = snapshot[file];
