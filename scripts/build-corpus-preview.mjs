@@ -16,12 +16,22 @@
  */
 
 import { copyFileSync, mkdirSync, readdirSync, writeFileSync } from 'node:fs';
+import { buildSync } from 'esbuild';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
 export function buildCorpusPreview({ root = ROOT, outDir = join(ROOT, 'preview') } = {}) {
+  // ir-bundle всегда пересобирается из текущего dist — stale-бандл показывал
+  // владельцу устаревший корпус (222 имени при живых 238) и старую модель.
+  buildSync({
+    entryPoints: [join(root, 'dist', 'ir', 'index.js')],
+    bundle: true,
+    format: 'esm',
+    outfile: join(outDir, 'ir-bundle.js'),
+    logLevel: 'silent',
+  });
   let copied = 0;
   for (const variant of ['Outline', 'Filled']) {
     const srcDir = join(root, 'svg', variant);
@@ -61,8 +71,8 @@ const CORPUS_HTML = `<!doctype html>
   .layer-label.shipped { color: #1d7a34; }
   .layer-label.model { color: #b25000; }
   .model-svg { border-top: 1px dashed #e5e5ea; margin-top: 6px; padding-top: 6px; }
-  .cell.small img, .cell.small .model-svg svg { width: 16px; height: 16px; }
-  .cell.mid img, .cell.mid .model-svg svg { width: 24px; height: 24px; }
+  main { --icon-size: 48px; }
+  .cell img, .cell .model-svg svg { width: var(--icon-size); height: var(--icon-size); }
   .count { margin: 8px 0 12px; color: #6e6e73; font-size: 12px; }
 </style>
 <header>
@@ -73,7 +83,9 @@ const CORPUS_HTML = `<!doctype html>
   </div>
   <div class="seg" id="sizeSeg">
     <button data-s="48" class="on">48</button>
+    <button data-s="32">32</button>
     <button data-s="24">24</button>
+    <button data-s="20">20</button>
     <button data-s="16">16</button>
   </div>
   <label class="sl"><input type="checkbox" id="showModel"> показать MODEL-колонку (генерат, не поставка)</label>
@@ -131,7 +143,7 @@ const CORPUS_HTML = `<!doctype html>
     for (const id of iconIds) {
       if (state.q && !id.includes(state.q)) continue;
       const cell = document.createElement('div');
-      cell.className = 'cell' + (state.size === 16 ? ' small' : state.size === 24 ? ' mid' : '');
+      cell.className = 'cell';
       let html =
         '<img src="' + shippedSrc(id, state.variant) + '" alt="' + id + '" loading="lazy">' +
         '<div class="layer-label shipped">shipped</div>';
@@ -161,6 +173,7 @@ const CORPUS_HTML = `<!doctype html>
     state.variant = b.dataset.v; render();
   });
   document.getElementById('sizeSeg').addEventListener('click', (e) => {
+    if (e.target.dataset.s) document.querySelector('main').style.setProperty('--icon-size', e.target.dataset.s + 'px');
     const b = e.target.closest('button'); if (!b) return;
     for (const x of e.currentTarget.querySelectorAll('button')) x.classList.toggle('on', x === b);
     state.size = Number(b.dataset.s); render();
