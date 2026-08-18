@@ -15,6 +15,7 @@ import { describe, expect, it } from 'vitest';
 import {
   arcFlags,
   buildAnatomyEntry,
+  pairSubpaths,
   circleFrom3Points,
   fitArcs,
   transcribeSubpath,
@@ -129,5 +130,39 @@ describe('buildAnatomyEntry — сквозная транскрипция стр
     const built = buildGlyph(entry, grid, {}, {});
     expect(built.outline).toMatch(/^M/);
     expect(built.filled).toMatch(/^M/);
+  });
+});
+
+describe('pairSubpaths — смысловая склейка частей между вариантами', () => {
+  // Контрпример ревьюера PR #83 (video-camera-off): жадный матч в порядке
+  // outline крал у части её законную пару, склеивая точки на расстоянии 8.3u.
+  const sub = (x, y) => ({ start: [x, y], segs: [{ cmd: 'L', x: x + 0.1, y }] });
+
+  it('RED контрпример: не крадёт законную пару у следующей части', () => {
+    // outline: A(19.8,12), B(12.2,15.6); filled: только B'(12.2,15.6).
+    // Жадность отдала бы B' части A (ближайший оставшийся). Оптимум: A без пары, B↔B'.
+    const outline = [sub(19.75, 11.95), sub(12.15, 15.55)];
+    const filled = [sub(12.15, 15.55)];
+    const { pairedFilled, tailFilled } = pairSubpaths(outline, filled);
+    expect(pairedFilled[0], 'дальняя часть остаётся без пары').toBeNull();
+    expect(pairedFilled[1], 'законная пара склеена').toBe(filled[0]);
+    expect(tailFilled).toEqual([]);
+  });
+
+  it('порог: пара дальше maxPairDist не склеивается', () => {
+    const outline = [sub(4, 4)];
+    const filled = [sub(12, 12)];
+    const { pairedFilled, tailFilled } = pairSubpaths(outline, filled, { maxPairDist: 3 });
+    expect(pairedFilled[0]).toBeNull();
+    expect(tailFilled).toEqual([filled[0]]);
+  });
+
+  it('глобальный минимум против локального: перекрёстная пара', () => {
+    // o0 ближе к f1, o1 ближе к f0 несимметрично: greedy(o0→f1) оставил бы o1 худшую пару.
+    const outline = [sub(10, 10), sub(11, 10)];
+    const filled = [sub(11.2, 10), sub(9.9, 10)];
+    const { pairedFilled } = pairSubpaths(outline, filled);
+    expect(pairedFilled[0]).toBe(filled[1]);
+    expect(pairedFilled[1]).toBe(filled[0]);
   });
 });

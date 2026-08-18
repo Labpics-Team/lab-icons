@@ -44,9 +44,9 @@
   },
   "dist/ir/index.js": {
    "baselineBytes": 1064174,
-   "baselineGzipBytes": 143993,
+   "baselineGzipBytes": 144005,
    "maxBytes": 1064174,
-   "maxGzipBytes": 143993,
+   "maxGzipBytes": 144005,
    "allowedModules": [
     "src/core/anatomy-gen.js",
     "src/core/calendar-geometry.js",

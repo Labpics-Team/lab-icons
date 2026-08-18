@@ -16632,23 +16632,10 @@
         "topologySignature": "MLCACLCACLCACLCACZ"
        },
        {
-        "id": "c1",
-        "identity": "declared",
-        "role": "counter",
-        "zIndex": 1,
-        "anchor": [
-         0.823541,
-         0.499636
-        ],
-        "anchorSource": "geometry-bbox-center",
-        "morphGroup": null,
-        "topologySignature": "MALALALLLLZ"
-       },
-       {
         "id": "c2",
         "identity": "declared",
         "role": "counter",
-        "zIndex": 2,
+        "zIndex": 1,
         "anchor": [
          0.315417,
          0.479167
@@ -16659,6 +16646,19 @@
        },
        {
         "id": "c3",
+        "identity": "declared",
+        "role": "counter",
+        "zIndex": 2,
+        "anchor": [
+         0.823541,
+         0.499636
+        ],
+        "anchorSource": "geometry-bbox-center",
+        "morphGroup": null,
+        "topologySignature": "MALALALLLLZ"
+       },
+       {
+        "id": "c4",
         "identity": "declared",
         "role": "counter",
         "zIndex": 3,
