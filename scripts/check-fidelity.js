@@ -36,7 +36,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import thresholds from '../semantics/quality-thresholds.json' with { type: 'json' };
 const FLOOR = thresholds.generated.fidelityToHandFloor; // пол узнаваемости — SSOT: semantics/quality-thresholds.json
-const EXPLAIN_BELOW = 0.99; // ниже — обязателен correctionReason
+const EXPLAIN_BELOW = thresholds.generated.explainBelowFidelity; // ниже — обязателен correctionReason (SSOT)
 
 export function validateFidelity({ anatomy }) {
   const hard = [];

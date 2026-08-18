@@ -222,18 +222,81 @@
    ]
   }
  },
- "bundle": null,
+ "bundle": {
+  "totalBytes": 934808,
+  "modules": [
+   {
+    "path": "semantics/catalog.json",
+    "bytes": 567071
+   },
+   {
+    "path": "semantics/anatomy.json",
+    "bytes": 214024
+   },
+   {
+    "path": "src/core/anatomy-gen.js",
+    "bytes": 48413
+   },
+   {
+    "path": "src/core/circle-dictionary.js",
+    "bytes": 22043
+   },
+   {
+    "path": "src/ir/index.ts",
+    "bytes": 21827
+   },
+   {
+    "path": "src/core/calendar-geometry.js",
+    "bytes": 16474
+   },
+   {
+    "path": "src/core/icon-geometry.js",
+    "bytes": 13813
+   },
+   {
+    "path": "src/core/path-data.js",
+    "bytes": 10648
+   },
+   {
+    "path": "src/core/glyph-operators.js",
+    "bytes": 5643
+   },
+   {
+    "path": "semantics/grid.json",
+    "bytes": 5314
+   },
+   {
+    "path": "src/ir/catalog.generated.ts",
+    "bytes": 3594
+   },
+   {
+    "path": "src/ir/sha256.ts",
+    "bytes": 3067
+   },
+   {
+    "path": "src/core/motion-sampler.js",
+    "bytes": 2724
+   },
+   {
+    "path": "src/ir/recipes.ts",
+    "bytes": 86
+   },
+   {
+    "path": "src/ir/index.ts",
+    "bytes": 67
+   }
+  ]
+ },
  "consumerBudgets": {
-  "comment": "SIZE-01: цена потребителю по маршрутам импорта; source = check-treeshake + gzip замер",
-  "oneStaticIconBytes": 784,
+  "comment": "SIZE-01: цена потребителю по маршрутам импорта; one-icon цену доказывает check-treeshake (rollup), здесь замер полных артефактов",
   "fullStaticCatalog": {
    "raw": 365324,
    "gzip": 96297
   },
   "glyphRuntime": {
-   "raw": 947265,
+   "raw": 934808,
    "gzip": 132519,
-   "note": "один glyph() тянет весь IR-бандл: catalog.json 61% + anatomy.json 23% — кандидат на split/lazy в REL-волне"
+   "note": "один glyph() тянет весь IR-бандл: JSON-данные доминируют — кандидат на split/lazy в REL-волне"
   }
  }
 }

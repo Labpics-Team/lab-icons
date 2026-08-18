@@ -8,7 +8,8 @@
  "generated": {
   "driftIoUFloor": 0.995,
   "fidelityToHandFloor": 0.97,
-  "meaning": "generated-глиф: drift = закон и файл идентичны (hard), fidelity = узнаваемость против руки на момент миграции (hard ниже пола)"
+  "meaning": "generated-глиф: drift = закон и файл идентичны (hard), fidelity = узнаваемость против руки на момент миграции (hard ниже пола); explainBelow = ниже этого fidelity обязателен correctionReason",
+  "explainBelowFidelity": 0.99
  },
  "acceptance": {
   "autoDeviationPct": 3,
