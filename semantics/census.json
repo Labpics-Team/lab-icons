@@ -1,21 +1,21 @@
 {
  "generatedBy": "scripts/census/build-census.mjs",
- "sourceOnlyCount": 157,
- "modeledCount": 81,
+ "sourceOnlyCount": 153,
+ "modeledCount": 85,
  "archetypes": {
   "radial-gear": 1,
   "arc-terminal": 1,
   "stroke-v": 4,
   "container-glyph": 4,
-  "composite": 67,
+  "composite": 71,
   "rounded-polygon": 1,
   "mirror": 3
  },
  "primitives": {
   "stroke-path": 56,
   "circle-dot": 53,
-  "arc-chain": 32,
-  "rounded-rect": 25,
+  "arc-chain": 44,
+  "rounded-rect": 29,
   "arc-band": 6,
   "tangent-chain": 6,
   "rounded-polygon": 5,
@@ -25,9 +25,9 @@
  },
  "roles": {
   "content": 74,
-  "ink": 38,
+  "ink": 42,
+  "counter": 31,
   "container": 21,
-  "counter": 19,
   "body": 18,
   "detail": 16,
   "control": 3,
@@ -54,16 +54,12 @@
    ]
   },
   "off-slash": {
-   "count": 8,
+   "count": 4,
    "names": [
-    "cloud-off",
     "eye-off",
     "flash-off",
-    "heart-off",
-    "mic-off",
     "notifications-off",
-    "turn-off",
-    "video-camera-off"
+    "turn-off"
    ]
   },
   "badge": {
@@ -276,15 +272,6 @@
  "offSlashLaw": [
   {
    "consumers": [
-    "cloud-off",
-    "heart-off",
-    "mic-off",
-    "video-camera-off"
-   ],
-   "shared": true
-  },
-  {
-   "consumers": [
     "eye-off"
    ],
    "shared": false
@@ -309,15 +296,15 @@
   }
  ],
  "bundle": {
-  "totalBytes": 990783,
+  "totalBytes": 1051453,
   "modules": [
    {
     "path": "semantics/catalog.json",
-    "bytes": 578506
+    "bytes": 593072
    },
    {
     "path": "semantics/anatomy.json",
-    "bytes": 258564
+    "bytes": 304668
    },
    {
     "path": "src/core/anatomy-gen.js",
@@ -380,8 +367,8 @@
    "gzip": 96297
   },
   "glyphRuntime": {
-   "raw": 990783,
-   "gzip": 135406,
+   "raw": 1051453,
+   "gzip": 138466,
    "note": "один glyph() тянет весь IR-бандл: JSON-данные доминируют — кандидат на split/lazy в REL-волне"
   }
  }

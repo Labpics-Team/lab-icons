@@ -270,6 +270,67 @@ function subpathArea(sub) {
  * Субпути каждого варианта сортируются по |площади|; спаривание по индексу,
  * недостающий вариант — null (прецедент counter bookmark/filled).
  */
+/** Центр bbox субпутя (по опорным точкам сегментов) — для смысловой склейки частей между вариантами. */
+function subCenter(sub) {
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  const eat = (x, y) => {
+    if (x == null || y == null) return;
+    minX = Math.min(minX, x); maxX = Math.max(maxX, x);
+    minY = Math.min(minY, y); maxY = Math.max(maxY, y);
+  };
+  eat(sub.start[0], sub.start[1]);
+  for (const s of sub.segs) {
+    eat(s.x, s.y);
+    eat(s.x1, s.y1);
+    eat(s.x2, s.y2);
+  }
+  return [(minX + maxX) / 2, (minY + maxY) / 2];
+}
+
+/**
+ * Оптимальная склейка субпутей двух вариантов: минимизация суммарной
+ * дистанции bbox-центров (полный перебор перестановок — субпутей ≤ ~10,
+ * а перебор режется порогом). Пара дальше maxPairDist юнитов канвы —
+ * НЕ пара: обе части остаются одиночными (жадная «ближайшая чужая»
+ * склейка доказуемо ложна: контрпример video-camera-off c3/c4).
+ */
+export function pairSubpaths(outlineSubs, filledSubs, { maxPairDist = 3 } = {}) {
+  const oc = outlineSubs.map(subCenter);
+  const fc = filledSubs.map(subCenter);
+  const dist = (i, j) => Math.hypot(oc[i][0] - fc[j][0], oc[i][1] - fc[j][1]);
+  const n = outlineSubs.length;
+  const m = filledSubs.length;
+  // Штраф непарности = maxPairDist: пара дешевле порога всегда выгоднее
+  // разрыва, пара дороже порога запрещена. Без штрафа skip-ветка бесплатна
+  // и «оптимум» — никого не спаривать (RED-тест «перекрёстная пара»).
+  let best = { cost: Infinity, assign: null };
+  const assign = new Array(n).fill(-1);
+  const usedF = new Array(m).fill(false);
+  const explore = (i, cost) => {
+    if (cost >= best.cost) return;
+    if (i === n) {
+      best = { cost, assign: assign.slice() };
+      return;
+    }
+    for (let j = 0; j < m; j++) {
+      if (usedF[j]) continue;
+      const d = dist(i, j);
+      if (d > maxPairDist) continue;
+      usedF[j] = true;
+      assign[i] = j;
+      explore(i + 1, cost + d);
+      usedF[j] = false;
+      assign[i] = -1;
+    }
+    explore(i + 1, cost + maxPairDist); // без пары — платно
+  };
+  explore(0, 0);
+  const pairedFilled = (best.assign ?? assign).map((j) => (j >= 0 ? filledSubs[j] : null));
+  const matched = new Set((best.assign ?? []).filter((j) => j >= 0));
+  const tailFilled = filledSubs.filter((_, j) => !matched.has(j));
+  return { pairedFilled, tailFilled };
+}
+
 export function buildAnatomyEntry({ outlineSvg, filledSvg, cw, tolerance = DEFAULT_TOLERANCE }) {
   const variantSubs = {};
   for (const [variant, svg] of [['outline', outlineSvg], ['filled', filledSvg]]) {
@@ -278,14 +339,19 @@ export function buildAnatomyEntry({ outlineSvg, filledSvg, cw, tolerance = DEFAU
     subs.sort((a, b) => Math.abs(subpathArea(b)) - Math.abs(subpathArea(a)));
     variantSubs[variant] = subs;
   }
-  const partCount = Math.max(variantSubs.outline.length, variantSubs.filled.length);
+  // Смысловая склейка: part i обязан быть ТОЙ ЖЕ частью знака в обоих
+  // вариантах — глобальный минимум суммы дистанций с порогом, не жадность.
+  const outlineSubs = variantSubs.outline;
+  const { pairedFilled, tailFilled } = pairSubpaths(outlineSubs, variantSubs.filled);
+  const partCount = outlineSubs.length + tailFilled.length;
   const parts = [];
   for (let i = 0; i < partCount; i++) {
-    const params = {};
-    for (const variant of ['outline', 'filled']) {
-      const sub = variantSubs[variant][i];
-      params[variant] = sub ? transcribeSubpath(sub, cw, tolerance) : null;
-    }
+    const oSub = outlineSubs[i] ?? null;
+    const fSub = i < outlineSubs.length ? pairedFilled[i] : tailFilled[i - outlineSubs.length];
+    const params = {
+      outline: oSub ? transcribeSubpath(oSub, cw, tolerance) : null,
+      filled: fSub ? transcribeSubpath(fSub, cw, tolerance) : null,
+    };
     parts.push({
       id: `c${i}`,
       role: i === 0 ? 'body' : 'counter',
