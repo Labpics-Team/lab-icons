@@ -270,6 +270,23 @@ function subpathArea(sub) {
  * Субпути каждого варианта сортируются по |площади|; спаривание по индексу,
  * недостающий вариант — null (прецедент counter bookmark/filled).
  */
+/** Центр bbox субпутя (по опорным точкам сегментов) — для смысловой склейки частей между вариантами. */
+function subCenter(sub) {
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  const eat = (x, y) => {
+    if (x == null || y == null) return;
+    minX = Math.min(minX, x); maxX = Math.max(maxX, x);
+    minY = Math.min(minY, y); maxY = Math.max(maxY, y);
+  };
+  eat(sub.start[0], sub.start[1]);
+  for (const s of sub.segs) {
+    eat(s.x, s.y);
+    eat(s.x1, s.y1);
+    eat(s.x2, s.y2);
+  }
+  return [(minX + maxX) / 2, (minY + maxY) / 2];
+}
+
 export function buildAnatomyEntry({ outlineSvg, filledSvg, cw, tolerance = DEFAULT_TOLERANCE }) {
   const variantSubs = {};
   for (const [variant, svg] of [['outline', outlineSvg], ['filled', filledSvg]]) {
@@ -278,14 +295,34 @@ export function buildAnatomyEntry({ outlineSvg, filledSvg, cw, tolerance = DEFAU
     subs.sort((a, b) => Math.abs(subpathArea(b)) - Math.abs(subpathArea(a)));
     variantSubs[variant] = subs;
   }
-  const partCount = Math.max(variantSubs.outline.length, variantSubs.filled.length);
+  // Смысловая склейка: part i обязан быть ТОЙ ЖЕ частью знака в обоих
+  // вариантах. Сортировка по площади этого не гарантирует (у filled массы
+  // иные: слэш тоньше тела → другой порядок). Жадный матч filled-субпутей
+  // к outline-порядку по расстоянию bbox-центров; непарные — в хвост.
+  const outlineSubs = variantSubs.outline;
+  const filledPool = variantSubs.filled.map((sub) => ({ sub, center: subCenter(sub), used: false }));
+  const pairedFilled = outlineSubs.map((oSub) => {
+    const oc = subCenter(oSub);
+    let best = null;
+    for (const cand of filledPool) {
+      if (cand.used) continue;
+      const dist = Math.hypot(cand.center[0] - oc[0], cand.center[1] - oc[1]);
+      if (!best || dist < best.dist) best = { cand, dist };
+    }
+    if (!best) return null;
+    best.cand.used = true;
+    return best.cand.sub;
+  });
+  const tailFilled = filledPool.filter((c) => !c.used).map((c) => c.sub);
+  const partCount = outlineSubs.length + tailFilled.length;
   const parts = [];
   for (let i = 0; i < partCount; i++) {
-    const params = {};
-    for (const variant of ['outline', 'filled']) {
-      const sub = variantSubs[variant][i];
-      params[variant] = sub ? transcribeSubpath(sub, cw, tolerance) : null;
-    }
+    const oSub = outlineSubs[i] ?? null;
+    const fSub = i < outlineSubs.length ? pairedFilled[i] : tailFilled[i - outlineSubs.length];
+    const params = {
+      outline: oSub ? transcribeSubpath(oSub, cw, tolerance) : null,
+      filled: fSub ? transcribeSubpath(fSub, cw, tolerance) : null,
+    };
     parts.push({
       id: `c${i}`,
       role: i === 0 ? 'body' : 'counter',

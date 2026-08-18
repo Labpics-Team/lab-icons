@@ -5034,7 +5034,110 @@
      ]
     }
    },
-   "model": null
+   "model": {
+    "declaration": "cloud-off",
+    "archetype": "composite",
+    "variants": {
+     "outline": {
+      "state": "candidate",
+      "supportedAxes": [],
+      "composition": {
+       "kind": "compound",
+       "fillRule": "nonzero"
+      },
+      "parts": [
+       {
+        "id": "slash",
+        "identity": "declared",
+        "role": "ink",
+        "zIndex": 0,
+        "anchor": [
+         0.498646,
+         0.501354
+        ],
+        "anchorSource": "geometry-bbox-center",
+        "morphGroup": null,
+        "topologySignature": "MLCACLCACLCACLCACZ"
+       },
+       {
+        "id": "c1",
+        "identity": "declared",
+        "role": "counter",
+        "zIndex": 1,
+        "anchor": [
+         0.355175,
+         0.433956
+        ],
+        "anchorSource": "geometry-bbox-center",
+        "morphGroup": null,
+        "topologySignature": "MALAAAAAALAAAAZ"
+       },
+       {
+        "id": "c2",
+        "identity": "declared",
+        "role": "counter",
+        "zIndex": 2,
+        "anchor": [
+         0.654869,
+         0.56631
+        ],
+        "anchorSource": "geometry-bbox-center",
+        "morphGroup": null,
+        "topologySignature": "MLAAAALLLAAAAALLZ"
+       }
+      ]
+     },
+     "filled": {
+      "state": "candidate",
+      "supportedAxes": [],
+      "composition": {
+       "kind": "compound",
+       "fillRule": "nonzero"
+      },
+      "parts": [
+       {
+        "id": "slash",
+        "identity": "declared",
+        "role": "ink",
+        "zIndex": 0,
+        "anchor": [
+         0.498646,
+         0.501354
+        ],
+        "anchorSource": "geometry-bbox-center",
+        "morphGroup": null,
+        "topologySignature": "MLCACLCACLCACLCACZ"
+       },
+       {
+        "id": "c1",
+        "identity": "declared",
+        "role": "counter",
+        "zIndex": 1,
+        "anchor": [
+         0.354966,
+         0.433956
+        ],
+        "anchorSource": "geometry-bbox-center",
+        "morphGroup": null,
+        "topologySignature": "MALAAAALZ"
+       },
+       {
+        "id": "c2",
+        "identity": "declared",
+        "role": "counter",
+        "zIndex": 2,
+        "anchor": [
+         0.654869,
+         0.56631
+        ],
+        "anchorSource": "geometry-bbox-center",
+        "morphGroup": null,
+        "topologySignature": "MLAAAALLZ"
+       }
+      ]
+     }
+    }
+   }
   },
   "cloud-upload": {
    "source": {
@@ -7752,7 +7855,110 @@
      ]
     }
    },
-   "model": null
+   "model": {
+    "declaration": "heart-off",
+    "archetype": "composite",
+    "variants": {
+     "outline": {
+      "state": "candidate",
+      "supportedAxes": [],
+      "composition": {
+       "kind": "compound",
+       "fillRule": "nonzero"
+      },
+      "parts": [
+       {
+        "id": "slash",
+        "identity": "declared",
+        "role": "ink",
+        "zIndex": 0,
+        "anchor": [
+         0.498646,
+         0.501354
+        ],
+        "anchorSource": "geometry-bbox-center",
+        "morphGroup": null,
+        "topologySignature": "MLCACLCACLCACLCACZ"
+       },
+       {
+        "id": "c1",
+        "identity": "declared",
+        "role": "counter",
+        "zIndex": 1,
+        "anchor": [
+         0.387734,
+         0.373941
+        ],
+        "anchorSource": "geometry-bbox-center",
+        "morphGroup": null,
+        "topologySignature": "MAAAAAALAAAAAAAAAAAAZ"
+       },
+       {
+        "id": "c2",
+        "identity": "declared",
+        "role": "counter",
+        "zIndex": 2,
+        "anchor": [
+         0.64855,
+         0.581931
+        ],
+        "anchorSource": "geometry-bbox-center",
+        "morphGroup": null,
+        "topologySignature": "MAAAAALAALAAAAAAZ"
+       }
+      ]
+     },
+     "filled": {
+      "state": "candidate",
+      "supportedAxes": [],
+      "composition": {
+       "kind": "compound",
+       "fillRule": "nonzero"
+      },
+      "parts": [
+       {
+        "id": "slash",
+        "identity": "declared",
+        "role": "ink",
+        "zIndex": 0,
+        "anchor": [
+         0.498646,
+         0.501354
+        ],
+        "anchorSource": "geometry-bbox-center",
+        "morphGroup": null,
+        "topologySignature": "MLCACLCACLCACLCACZ"
+       },
+       {
+        "id": "c1",
+        "identity": "declared",
+        "role": "counter",
+        "zIndex": 1,
+        "anchor": [
+         0.407424,
+         0.381812
+        ],
+        "anchorSource": "geometry-bbox-center",
+        "morphGroup": null,
+        "topologySignature": "MALAAAAAAZ"
+       },
+       {
+        "id": "c2",
+        "identity": "declared",
+        "role": "counter",
+        "zIndex": 2,
+        "anchor": [
+         0.640306,
+         0.564109
+        ],
+        "anchorSource": "geometry-bbox-center",
+        "morphGroup": null,
+        "topologySignature": "MAAAAALLZ"
+       }
+      ]
+     }
+    }
+   }
   },
   "history": {
    "source": {
@@ -9353,7 +9559,162 @@
      ]
     }
    },
-   "model": null
+   "model": {
+    "declaration": "mic-off",
+    "archetype": "composite",
+    "variants": {
+     "outline": {
+      "state": "candidate",
+      "supportedAxes": [],
+      "composition": {
+       "kind": "compound",
+       "fillRule": "nonzero"
+      },
+      "parts": [
+       {
+        "id": "slash",
+        "identity": "declared",
+        "role": "ink",
+        "zIndex": 0,
+        "anchor": [
+         0.498646,
+         0.501354
+        ],
+        "anchorSource": "geometry-bbox-center",
+        "morphGroup": null,
+        "topologySignature": "MLCACLCACLCACLCACZ"
+       },
+       {
+        "id": "c1",
+        "identity": "declared",
+        "role": "counter",
+        "zIndex": 1,
+        "anchor": [
+         0.598959,
+         0.707916
+        ],
+        "anchorSource": "geometry-bbox-center",
+        "morphGroup": null,
+        "topologySignature": "MAALALALAALZ"
+       },
+       {
+        "id": "c2",
+        "identity": "declared",
+        "role": "counter",
+        "zIndex": 2,
+        "anchor": [
+         0.487917,
+         0.294784
+        ],
+        "anchorSource": "geometry-bbox-center",
+        "morphGroup": null,
+        "topologySignature": "MALAALLALALZ"
+       },
+       {
+        "id": "c3",
+        "identity": "declared",
+        "role": "counter",
+        "zIndex": 3,
+        "anchor": [
+         0.584167,
+         0.577299
+        ],
+        "anchorSource": "geometry-bbox-center",
+        "morphGroup": null,
+        "topologySignature": "MLALALALLZ"
+       },
+       {
+        "id": "c4",
+        "identity": "declared",
+        "role": "counter",
+        "zIndex": 4,
+        "anchor": [
+         0.197083,
+         0.555833
+        ],
+        "anchorSource": "geometry-bbox-center",
+        "morphGroup": null,
+        "topologySignature": "MAALAAZ"
+       }
+      ]
+     },
+     "filled": {
+      "state": "candidate",
+      "supportedAxes": [],
+      "composition": {
+       "kind": "compound",
+       "fillRule": "nonzero"
+      },
+      "parts": [
+       {
+        "id": "slash",
+        "identity": "declared",
+        "role": "ink",
+        "zIndex": 0,
+        "anchor": [
+         0.498646,
+         0.501354
+        ],
+        "anchorSource": "geometry-bbox-center",
+        "morphGroup": null,
+        "topologySignature": "MLCACLCACLCACLCACZ"
+       },
+       {
+        "id": "c1",
+        "identity": "declared",
+        "role": "counter",
+        "zIndex": 1,
+        "anchor": [
+         0.598959,
+         0.707916
+        ],
+        "anchorSource": "geometry-bbox-center",
+        "morphGroup": null,
+        "topologySignature": "MAALALALAALZ"
+       },
+       {
+        "id": "c2",
+        "identity": "declared",
+        "role": "counter",
+        "zIndex": 2,
+        "anchor": [
+         0.487708,
+         0.294781
+        ],
+        "anchorSource": "geometry-bbox-center",
+        "morphGroup": null,
+        "topologySignature": "MALALAZ"
+       },
+       {
+        "id": "c3",
+        "identity": "declared",
+        "role": "counter",
+        "zIndex": 3,
+        "anchor": [
+         0.583958,
+         0.577674
+        ],
+        "anchorSource": "geometry-bbox-center",
+        "morphGroup": null,
+        "topologySignature": "MALLZ"
+       },
+       {
+        "id": "c4",
+        "identity": "declared",
+        "role": "counter",
+        "zIndex": 4,
+        "anchor": [
+         0.197083,
+         0.555833
+        ],
+        "anchorSource": "geometry-bbox-center",
+        "morphGroup": null,
+        "topologySignature": "MAALAAZ"
+       }
+      ]
+     }
+    }
+   }
   },
   "minus": {
    "source": {
@@ -16170,7 +16531,149 @@
      ]
     }
    },
-   "model": null
+   "model": {
+    "declaration": "video-camera-off",
+    "archetype": "composite",
+    "variants": {
+     "outline": {
+      "state": "candidate",
+      "supportedAxes": [],
+      "composition": {
+       "kind": "compound",
+       "fillRule": "nonzero"
+      },
+      "parts": [
+       {
+        "id": "slash",
+        "identity": "declared",
+        "role": "ink",
+        "zIndex": 0,
+        "anchor": [
+         0.498646,
+         0.501354
+        ],
+        "anchorSource": "geometry-bbox-center",
+        "morphGroup": null,
+        "topologySignature": "MLCACLCACLCACLCACZ"
+       },
+       {
+        "id": "c1",
+        "identity": "declared",
+        "role": "counter",
+        "zIndex": 1,
+        "anchor": [
+         0.823543,
+         0.499839
+        ],
+        "anchorSource": "geometry-bbox-center",
+        "morphGroup": null,
+        "topologySignature": "MALALALLZ"
+       },
+       {
+        "id": "c2",
+        "identity": "declared",
+        "role": "counter",
+        "zIndex": 2,
+        "anchor": [
+         0.315417,
+         0.478958
+        ],
+        "anchorSource": "geometry-bbox-center",
+        "morphGroup": null,
+        "topologySignature": "MALALALALALALZ"
+       },
+       {
+        "id": "c3",
+        "identity": "declared",
+        "role": "counter",
+        "zIndex": 3,
+        "anchor": [
+         0.823126,
+         0.499751
+        ],
+        "anchorSource": "geometry-bbox-center",
+        "morphGroup": null,
+        "topologySignature": "MALALLLALZ"
+       },
+       {
+        "id": "c4",
+        "identity": "declared",
+        "role": "counter",
+        "zIndex": 4,
+        "anchor": [
+         0.509792,
+         0.649375
+        ],
+        "anchorSource": "geometry-bbox-center",
+        "morphGroup": null,
+        "topologySignature": "MALLLALLLZ"
+       }
+      ]
+     },
+     "filled": {
+      "state": "candidate",
+      "supportedAxes": [],
+      "composition": {
+       "kind": "compound",
+       "fillRule": "nonzero"
+      },
+      "parts": [
+       {
+        "id": "slash",
+        "identity": "declared",
+        "role": "ink",
+        "zIndex": 0,
+        "anchor": [
+         0.498646,
+         0.501354
+        ],
+        "anchorSource": "geometry-bbox-center",
+        "morphGroup": null,
+        "topologySignature": "MLCACLCACLCACLCACZ"
+       },
+       {
+        "id": "c1",
+        "identity": "declared",
+        "role": "counter",
+        "zIndex": 1,
+        "anchor": [
+         0.823541,
+         0.499636
+        ],
+        "anchorSource": "geometry-bbox-center",
+        "morphGroup": null,
+        "topologySignature": "MALALALLLLZ"
+       },
+       {
+        "id": "c2",
+        "identity": "declared",
+        "role": "counter",
+        "zIndex": 2,
+        "anchor": [
+         0.315417,
+         0.479167
+        ],
+        "anchorSource": "geometry-bbox-center",
+        "morphGroup": null,
+        "topologySignature": "MALALALZ"
+       },
+       {
+        "id": "c3",
+        "identity": "declared",
+        "role": "counter",
+        "zIndex": 3,
+        "anchor": [
+         0.509792,
+         0.649375
+        ],
+        "anchorSource": "geometry-bbox-center",
+        "morphGroup": null,
+        "topologySignature": "MALLLZ"
+       }
+      ]
+     }
+    }
+   }
   },
   "volume": {
    "source": {

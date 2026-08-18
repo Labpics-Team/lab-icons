@@ -1,13 +1,13 @@
 {
  "version": 1,
- "comment": "R0 fact baseline corrected by the deterministic Observatory on 2026-07-16; re-frozen 2026-08-15 (truth-reset), expanded by 16 owner-drawn names 2026-08-16. Wave1 2026-08-17: +12 candidate arc-chain (63->75/124). SEM-01 mirror 2026-08-18: +3 базы direction-пар (транскрипция) +3 mirror-закона (75->81 имён, 124->136 вариантов, source-only 352->340); generated/accepted полы и карантин не двигались — candidate не маскируется под accepted.",
- "minimumModeledNames": 81,
- "minimumModeledVariants": 136,
+ "comment": "R0 fact baseline corrected by the deterministic Observatory on 2026-07-16; re-frozen 2026-08-15 (truth-reset), expanded by 16 owner-drawn names 2026-08-16. Wave1 2026-08-17: +12 candidate arc-chain (63->75/124). SEM-01 2026-08-18: mirror-закон (+3 базы +3 зеркала, 75->81) и slash-закон (+4 off-иконки с общей rounded-rect(rotation) капсулой, 81->85 имён / 144 вариантов, source-only 332); generated/accepted полы и карантин не двигались.",
+ "minimumModeledNames": 85,
+ "minimumModeledVariants": 144,
  "minimumGeneratedVariants": 63,
  "minimumAcceptedVariants": 53,
  "minimumProvenAxisCapabilities": 25,
  "minimumOpszVariants": 8,
  "maximumQuarantinedGeneratedVariants": 10,
- "maximumSourceOnlyVariants": 340,
+ "maximumSourceOnlyVariants": 332,
  "maximumUnclassifiedModelParts": 0
 }
