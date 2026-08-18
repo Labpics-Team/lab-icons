@@ -5,9 +5,9 @@
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { buildGlyphParts } from './lib/anatomy-gen.js';
+import { buildGlyphParts } from '../src/core/anatomy-gen.js';
 import { proveMotionTrajectory } from './lib/motion-trajectory.js';
-import { validateMotionGesture } from './lib/motion-sampler.js';
+import { validateMotionGesture } from '../src/core/motion-sampler.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 

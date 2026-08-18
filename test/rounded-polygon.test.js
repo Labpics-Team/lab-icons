@@ -8,7 +8,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { buildGlyph, genRoundedPolygon, genRoundedPolygonRing } from '../scripts/lib/anatomy-gen.js';
+import { buildGlyph, genRoundedPolygon, genRoundedPolygonRing } from '../src/core/anatomy-gen.js';
 import { samplePolylines } from '../scripts/lib/curve-sampling.js';
 
 const square = [[6, 6], [18, 6], [18, 18], [6, 18]];

@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { buildGlyph, buildGlyphParts, topologySignature } from '../scripts/lib/anatomy-gen.js';
+import { buildGlyph, buildGlyphParts, topologySignature } from '../src/core/anatomy-gen.js';
 
 const root = join(import.meta.dirname, '..');
 const anatomy = JSON.parse(readFileSync(join(root, 'semantics/anatomy.json'), 'utf8'));

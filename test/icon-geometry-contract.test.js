@@ -3,7 +3,7 @@ import {
   iconGeometry,
   renderedPathEntries,
   sourcePathEntries,
-} from '../scripts/lib/icon-geometry.js';
+} from '../src/core/icon-geometry.js';
 import { topologyOfSvg } from '../scripts/lib/ink-raster.js';
 
 const svg = (attrs, body) => `<svg ${attrs}>${body}</svg>`;

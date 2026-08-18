@@ -28,10 +28,10 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { buildGlyph } from '../lib/anatomy-gen.js';
-import { renderedPathData } from '../lib/icon-geometry.js';
+import { buildGlyph } from '../../src/core/anatomy-gen.js';
+import { renderedPathData } from '../../src/core/icon-geometry.js';
 import { samplePolylines } from '../lib/curve-sampling.js';
-import { pathBBox } from '../lib/path-data.js';
+import { pathBBox } from '../../src/core/path-data.js';
 import { eoNzDisagree } from '../lib/seeing-gates.js';
 import { inkIoU } from '../check-anatomy-drift.js';
 import { findBlobBugs } from '../check-fill-rule.js';

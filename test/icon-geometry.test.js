@@ -12,7 +12,7 @@ import {
   renderedPathData,
   renderedPathEntries,
   sourcePathEntries,
-} from '../scripts/lib/icon-geometry.js';
+} from '../src/core/icon-geometry.js';
 import { samplePolylines } from '../scripts/lib/curve-sampling.js';
 import { EXPECTED_SOURCE_VARIANTS } from '../scripts/lib/corpus-contract.js';
 

@@ -14,8 +14,8 @@
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { buildGlyph, buildGlyphParts } from './lib/anatomy-gen.js';
-import { renderedPathEntries } from './lib/icon-geometry.js';
+import { buildGlyph, buildGlyphParts } from '../src/core/anatomy-gen.js';
+import { renderedPathEntries } from '../src/core/icon-geometry.js';
 import { samplePolylines } from './lib/curve-sampling.js';
 import { rasterizePathEntries } from './lib/ink-raster.js';
 import { lowerModelComposition } from './lib/model-composition.js';

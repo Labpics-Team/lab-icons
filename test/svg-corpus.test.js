@@ -18,7 +18,7 @@
  *   8. Нет дублей геометрии внутри сета (две иконки с идентичным набором d).
  *   9. Точный bbox каждого подпути ⊆ viewBox [0..24]² (парсер path-data.js).
  *
- * Зона владения: только чтение svg/ и scripts/lib/path-data.js — не пересекается
+ * Зона владения: только чтение svg/ и src/core/path-data.js — не пересекается
  * с anatomy-gen.js (ветка fix/stroke-cap-quantization) и semantics/anatomy.json
  * (волна enclosure).
  */
@@ -26,7 +26,7 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { pathBBox } from '../scripts/lib/path-data.js';
+import { pathBBox } from '../src/core/path-data.js';
 
 const SETS = [
   { dir: 'Outline', nameRe: /^[a-z0-9]+(-[a-z0-9]+)*\.svg$/, strip: (f) => f.replace(/\.svg$/, '') },

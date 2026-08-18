@@ -14,7 +14,7 @@
  */
 import { readFileSync, writeFileSync } from 'node:fs';
 import { samplePolylines } from '../lib/curve-sampling.js';
-import { parsePathData } from '../lib/path-data.js';
+import { parsePathData } from '../../src/core/path-data.js';
 
 const REDUNDANT = 0.02;
 const MICRO = 0.05;

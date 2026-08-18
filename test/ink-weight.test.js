@@ -8,7 +8,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { buildGlyph, buildGlyphParts } from '../scripts/lib/anatomy-gen.js';
+import { buildGlyph, buildGlyphParts } from '../src/core/anatomy-gen.js';
 import {
   axesSweepGlyph,
   axesWeightRange,

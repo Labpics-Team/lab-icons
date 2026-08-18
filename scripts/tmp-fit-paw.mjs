@@ -1,9 +1,9 @@
 // Фит paw outline: ладонь tangent-chain(3 круга + 3 fillet) + 4 four-arc-oval
 // подушечки зеркальными парами о x=12 (преп §1/§2.4).
 import { readFileSync } from 'node:fs';
-import { buildDictPart } from './lib/circle-dictionary.js';
+import { buildDictPart } from '../src/core/circle-dictionary.js';
 import { inkIoU } from '../scripts/check-anatomy-drift.js';
-import { renderedPathData } from './lib/icon-geometry.js';
+import { renderedPathData } from '../src/core/icon-geometry.js';
 
 const grid = JSON.parse(readFileSync('semantics/grid.json', 'utf8'));
 const cw = grid.canvas.width, pen = grid.strokes?.base ?? 1.8;

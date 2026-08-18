@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { renderedPathEntries } from '../scripts/lib/icon-geometry.js';
+import { renderedPathEntries } from '../src/core/icon-geometry.js';
 import {
   rasterizePathEntries,
   topologyAcrossPhases,

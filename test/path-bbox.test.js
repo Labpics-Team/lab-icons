@@ -1,7 +1,7 @@
 /**
  * test/path-bbox.test.js — парсер SVG path `d` + точный bbox (t1 ch02, эпик ds-icons).
  *
- * Контракт scripts/lib/path-data.js:
+ * Контракт src/core/path-data.js:
  *   - parsePathData(d) → массив сегментов абсолютных команд (M/L/C/Q/A/Z),
  *     H/V/S/T/relative нормализованы; арк-флаги парсятся и в сжатой форме («011»).
  *   - pathBBox(d) → { minX, minY, maxX, maxY } ТОЧНЫЙ: экстремумы кубиков/
@@ -10,7 +10,7 @@
  *   - samplePath(d, stepsPerSeg) → плотная полилиния (независимая оценка:
  *     де Кастельжо / шаг по углу) — оракл для дифференциального теста.
  *
- * TDD RED-proof: написан до scripts/lib/path-data.js → импорт падает.
+ * TDD RED-proof: написан до src/core/path-data.js → импорт падает.
  * Классы: А (известные фигуры), В (дифференциал по ВСЕМ 476 реальным SVG:
  * каждый сэмпл ⊆ bbox и каждая грань bbox касается сэмпла).
  */
@@ -18,7 +18,7 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { parsePathData, pathBBox, samplePath } from '../scripts/lib/path-data.js';
+import { parsePathData, pathBBox, samplePath } from '../src/core/path-data.js';
 import { EXPECTED_SOURCE_VARIANTS } from '../scripts/lib/corpus-contract.js';
 
 describe('path-data — parsePathData: токенизация', () => {

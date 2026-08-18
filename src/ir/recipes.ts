@@ -4,9 +4,9 @@
  */
 
 // @ts-ignore — zero-IO JS functional core; публичную границу типизируем здесь.
-import * as operators from '../../scripts/lib/glyph-operators.js';
+import * as operators from '../core/glyph-operators.js';
 // @ts-ignore — zero-IO JS functional core; публичную границу типизируем здесь.
-import * as calendar from '../../scripts/lib/calendar-geometry.js';
+import * as calendar from '../core/calendar-geometry.js';
 
 export interface NormalizedPoint {
   readonly x: number;

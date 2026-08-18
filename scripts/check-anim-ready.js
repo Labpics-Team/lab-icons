@@ -31,7 +31,7 @@
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { buildGlyph } from './lib/anatomy-gen.js';
+import { buildGlyph } from '../src/core/anatomy-gen.js';
 
 /** Примитивы с подвижной семантикой: обязателен anchor:[x,y] (доли канвы 0..1). */
 export const MOVABLE_PRIMITIVES = new Set(['clock-hand']);

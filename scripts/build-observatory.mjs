@@ -20,9 +20,9 @@ import {
 } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { buildGlyphParts } from './lib/anatomy-gen.js';
+import { buildGlyphParts } from '../src/core/anatomy-gen.js';
 import { createHandHistory } from './lib/hand-history.js';
-import { renderedPathEntries } from './lib/icon-geometry.js';
+import { renderedPathEntries } from '../src/core/icon-geometry.js';
 import { lowerModelComposition } from './lib/model-composition.js';
 import {
   compareSilhouettes,

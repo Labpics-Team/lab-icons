@@ -18,12 +18,12 @@ import {
 // Эти zero-IO модули пока живут рядом с инструментами геометрии. Публичные
 // типы ниже намеренно не пропускают их нестрогие JS-типы через API.
 // @ts-expect-error — JS-модуль будет перенесён за package boundary отдельно.
-import { buildGlyphParts as buildAnatomyParts, topologySignature as computeTopologySignature } from '../../scripts/lib/anatomy-gen.js';
+import { buildGlyphParts as buildAnatomyParts, topologySignature as computeTopologySignature } from '../core/anatomy-gen.js';
 // @ts-expect-error — см. комментарий выше; функция чистая и bundleable.
-import { sourcePathEntries } from '../../scripts/lib/icon-geometry.js';
+import { sourcePathEntries } from '../core/icon-geometry.js';
 // @ts-expect-error — см. комментарий выше; функция чистая и bundleable.
-import { parsePathData, pathBBox } from '../../scripts/lib/path-data.js';
-import { sampleMotionGesture as sampleMotionGestureCore } from '../../scripts/lib/motion-sampler.js';
+import { parsePathData, pathBBox } from '../core/path-data.js';
+import { sampleMotionGesture as sampleMotionGestureCore } from '../core/motion-sampler.js';
 import {
   buildCalendarNumberGeometry as buildCalendarNumberRecipe,
   type CalendarNumberInput,

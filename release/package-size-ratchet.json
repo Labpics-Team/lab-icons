@@ -48,13 +48,13 @@
    "maxBytes": 947286,
    "maxGzipBytes": 138868,
    "allowedModules": [
-    "scripts/lib/anatomy-gen.js",
-    "scripts/lib/calendar-geometry.js",
-    "scripts/lib/circle-dictionary.js",
-    "scripts/lib/glyph-operators.js",
-    "scripts/lib/icon-geometry.js",
-    "scripts/lib/motion-sampler.js",
-    "scripts/lib/path-data.js",
+    "src/core/anatomy-gen.js",
+    "src/core/calendar-geometry.js",
+    "src/core/circle-dictionary.js",
+    "src/core/glyph-operators.js",
+    "src/core/icon-geometry.js",
+    "src/core/motion-sampler.js",
+    "src/core/path-data.js",
     "semantics/anatomy.json",
     "semantics/catalog.json",
     "semantics/grid.json",
@@ -83,8 +83,8 @@
    "maxBytes": 65222,
    "maxGzipBytes": 15364,
    "allowedModules": [
-    "scripts/lib/calendar-geometry.js",
-    "scripts/lib/glyph-operators.js",
+    "src/core/calendar-geometry.js",
+    "src/core/glyph-operators.js",
     "src/ir/recipes.ts"
    ],
    "forbiddenNeedles": [

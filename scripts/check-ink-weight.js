@@ -52,8 +52,8 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { buildGlyph, buildGlyphParts } from './lib/anatomy-gen.js';
-import { renderedPathData } from './lib/icon-geometry.js';
+import { buildGlyph, buildGlyphParts } from '../src/core/anatomy-gen.js';
+import { renderedPathData } from '../src/core/icon-geometry.js';
 import { samplePolylines, segmentsCross } from './lib/curve-sampling.js';
 import { lowerModelComposition } from './lib/model-composition.js';
 

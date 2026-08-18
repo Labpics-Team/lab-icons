@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 // @ts-expect-error — внутренний JS geometry oracle типизируется по фактическому результату.
-import { pathBBox } from '../scripts/lib/path-data.js';
+import { pathBBox } from '../src/core/path-data.js';
 // @ts-expect-error — внутренний deterministic raster oracle типизируется по факту.
 import { compareSilhouettes } from '../scripts/lib/quality-metrics.js';
 // @ts-expect-error — policy SSOT принадлежит build-time quality layer.

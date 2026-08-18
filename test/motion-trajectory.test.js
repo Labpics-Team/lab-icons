@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { buildGlyphParts } from '../scripts/lib/anatomy-gen.js';
+import { buildGlyphParts } from '../src/core/anatomy-gen.js';
 import { checkMotionContracts } from '../scripts/check-motion.js';
 import {
   motionEntriesAt,
   proveMotionTrajectory,
 } from '../scripts/lib/motion-trajectory.js';
-import { sampleMotionGesture } from '../scripts/lib/motion-sampler.js';
+import { sampleMotionGesture } from '../src/core/motion-sampler.js';
 import anatomy from '../semantics/anatomy.json';
 import grid from '../semantics/grid.json';
 import catalog from '../semantics/catalog.json';

@@ -8,7 +8,7 @@
  */
 import { readFileSync, writeFileSync } from 'node:fs';
 import { samplePolylines } from '../lib/curve-sampling.js';
-import { parsePathData } from '../lib/path-data.js';
+import { parsePathData } from '../../src/core/path-data.js';
 
 const fmt = (v) => {
   let s = (Math.round(v * 1000) / 1000).toFixed(3);

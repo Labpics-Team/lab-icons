@@ -9,7 +9,7 @@
  * части. Гейт: null-часть невидима в своём варианте и не трогает другой.
  */
 import { describe, expect, it } from 'vitest';
-import { buildGlyph } from '../scripts/lib/anatomy-gen.js';
+import { buildGlyph } from '../src/core/anatomy-gen.js';
 
 const grid = { canvas: { width: 24, height: 24 }, ratios: { cornerSmoothing: 0 } };
 

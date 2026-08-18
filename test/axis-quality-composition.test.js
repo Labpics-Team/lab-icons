@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { buildGlyphParts } from '../scripts/lib/anatomy-gen.js';
+import { buildGlyphParts } from '../src/core/anatomy-gen.js';
 import { proveVariantAxes } from '../scripts/lib/axis-quality.js';
 import { DEFAULT_RASTER_PHASES, topologyAcrossPhases } from '../scripts/lib/ink-raster.js';
 import { lowerModelComposition } from '../scripts/lib/model-composition.js';

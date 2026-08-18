@@ -18,7 +18,7 @@ import { join, basename, dirname } from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';
 import { createRequire } from 'module';
 import { optimize } from 'svgo';
-import { authorPathEntries, sourcePathEntries } from './lib/icon-geometry.js';
+import { authorPathEntries, sourcePathEntries } from '../src/core/icon-geometry.js';
 import { EXPECTED_SOURCE_VARIANTS } from './lib/corpus-contract.js';
 
 const __filename = fileURLToPath(import.meta.url);
