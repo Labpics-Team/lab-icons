@@ -364,14 +364,14 @@ describe('полный icon catalog', () => {
   });
 
   it('quality debt измеряется явно, а не скрывается зелёным полным корпусом', () => {
-    // Факт-снимок волны 1 (2026-08-17): 63 модели + 12 candidate-транскрипций
-    // (arc-chain, status:hand). Candidate ≠ accepted: accepted-пол не двигался.
+    // Факт-снимок SEM-01 mirror (2026-08-18): 63 модели + 12 транскрипций W1 +
+    // 3 базы direction-пар + 3 mirror-закона. Candidate ≠ accepted: пол не двигался.
     const icons = Object.values(catalog.icons);
     const modeled = icons.flatMap((icon) => Object.values(icon.model?.variants ?? {}));
-    expect(icons.filter((icon) => icon.model !== null)).toHaveLength(75);
-    expect(modeled).toHaveLength(124);
+    expect(icons.filter((icon) => icon.model !== null)).toHaveLength(81);
+    expect(modeled).toHaveLength(136);
     expect(modeled.filter((variant) => variant.state === 'accepted')).toHaveLength(53);
-    expect(modeled.filter((variant) => variant.state === 'candidate')).toHaveLength(71);
-    expect(EXPECTED_SOURCE_VARIANTS - modeled.length).toBe(352);
+    expect(modeled.filter((variant) => variant.state === 'candidate')).toHaveLength(83);
+    expect(EXPECTED_SOURCE_VARIANTS - modeled.length).toBe(340);
   });
 });

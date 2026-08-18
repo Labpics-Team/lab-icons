@@ -1465,7 +1465,71 @@
      ]
     }
    },
-   "model": null
+   "model": {
+    "declaration": "arrow-redo",
+    "archetype": "composite",
+    "variants": {
+     "outline": {
+      "state": "candidate",
+      "supportedAxes": [],
+      "composition": {
+       "kind": "compound",
+       "fillRule": "nonzero"
+      },
+      "parts": [
+       {
+        "id": "c0",
+        "identity": "declared",
+        "role": "body",
+        "zIndex": 0,
+        "anchor": [
+         0.4997,
+         0.500136
+        ],
+        "anchorSource": "geometry-bbox-center",
+        "morphGroup": null,
+        "topologySignature": "MALLAAALLALAAAAALAZ"
+       },
+       {
+        "id": "c1",
+        "identity": "declared",
+        "role": "counter",
+        "zIndex": 1,
+        "anchor": [
+         0.501632,
+         0.5
+        ],
+        "anchorSource": "geometry-bbox-center",
+        "morphGroup": null,
+        "topologySignature": "MAAAAAALLLLALALLLLLZ"
+       }
+      ]
+     },
+     "filled": {
+      "state": "candidate",
+      "supportedAxes": [],
+      "composition": {
+       "kind": "compound",
+       "fillRule": "nonzero"
+      },
+      "parts": [
+       {
+        "id": "c0",
+        "identity": "declared",
+        "role": "body",
+        "zIndex": 0,
+        "anchor": [
+         0.4997,
+         0.500136
+        ],
+        "anchorSource": "geometry-bbox-center",
+        "morphGroup": null,
+        "topologySignature": "MALLAAALLALAAAAALAZ"
+       }
+      ]
+     }
+    }
+   }
   },
   "arrow-redo-circle": {
    "source": {
@@ -1545,7 +1609,71 @@
      ]
     }
    },
-   "model": null
+   "model": {
+    "declaration": "arrow-undo",
+    "archetype": "mirror",
+    "variants": {
+     "outline": {
+      "state": "candidate",
+      "supportedAxes": [],
+      "composition": {
+       "kind": "compound",
+       "fillRule": "nonzero"
+      },
+      "parts": [
+       {
+        "id": "c0",
+        "identity": "declared",
+        "role": "body",
+        "zIndex": 0,
+        "anchor": [
+         0.5003,
+         0.500136
+        ],
+        "anchorSource": "declared",
+        "morphGroup": null,
+        "topologySignature": "MALLAAALLALAAAAALAZ"
+       },
+       {
+        "id": "c1",
+        "identity": "declared",
+        "role": "counter",
+        "zIndex": 1,
+        "anchor": [
+         0.498368,
+         0.5
+        ],
+        "anchorSource": "declared",
+        "morphGroup": null,
+        "topologySignature": "MAAAAAALLLLALALLLLLZ"
+       }
+      ]
+     },
+     "filled": {
+      "state": "candidate",
+      "supportedAxes": [],
+      "composition": {
+       "kind": "compound",
+       "fillRule": "nonzero"
+      },
+      "parts": [
+       {
+        "id": "c0",
+        "identity": "declared",
+        "role": "body",
+        "zIndex": 0,
+        "anchor": [
+         0.5003,
+         0.500136
+        ],
+        "anchorSource": "declared",
+        "morphGroup": null,
+        "topologySignature": "MALLAAALLALAAAAALAZ"
+       }
+      ]
+     }
+    }
+   }
   },
   "arrow-undo-circle": {
    "source": {
@@ -10935,7 +11063,84 @@
      ]
     }
    },
-   "model": null
+   "model": {
+    "declaration": "play-back",
+    "archetype": "mirror",
+    "variants": {
+     "outline": {
+      "state": "candidate",
+      "supportedAxes": [],
+      "composition": {
+       "kind": "compound",
+       "fillRule": "evenodd"
+      },
+      "parts": [
+       {
+        "id": "c0",
+        "identity": "declared",
+        "role": "body",
+        "zIndex": 0,
+        "anchor": [
+         0.474989,
+         0.5
+        ],
+        "anchorSource": "declared",
+        "morphGroup": null,
+        "topologySignature": "MALLLALAALLLAAALLLLAAALLLAAALLLLAAZ"
+       },
+       {
+        "id": "c1",
+        "identity": "declared",
+        "role": "counter",
+        "zIndex": 1,
+        "anchor": [
+         0.675606,
+         0.499792
+        ],
+        "anchorSource": "declared",
+        "morphGroup": null,
+        "topologySignature": "MALLLLLLLLLAALALALZ"
+       },
+       {
+        "id": "c2",
+        "identity": "declared",
+        "role": "counter",
+        "zIndex": 2,
+        "anchor": [
+         0.274356,
+         0.499583
+        ],
+        "anchorSource": "declared",
+        "morphGroup": null,
+        "topologySignature": "MALLLLLLLLLAALLLALZ"
+       }
+      ]
+     },
+     "filled": {
+      "state": "candidate",
+      "supportedAxes": [],
+      "composition": {
+       "kind": "compound",
+       "fillRule": "nonzero"
+      },
+      "parts": [
+       {
+        "id": "c0",
+        "identity": "declared",
+        "role": "body",
+        "zIndex": 0,
+        "anchor": [
+         0.474989,
+         0.499985
+        ],
+        "anchorSource": "declared",
+        "morphGroup": null,
+        "topologySignature": "MALLLLALALLLLLALALALLLLLALALALLLALALALLLLLALALZ"
+       }
+      ]
+     }
+    }
+   }
   },
   "play-back-circle": {
    "source": {
@@ -11124,7 +11329,84 @@
      ]
     }
    },
-   "model": null
+   "model": {
+    "declaration": "play-forward",
+    "archetype": "composite",
+    "variants": {
+     "outline": {
+      "state": "candidate",
+      "supportedAxes": [],
+      "composition": {
+       "kind": "compound",
+       "fillRule": "evenodd"
+      },
+      "parts": [
+       {
+        "id": "c0",
+        "identity": "declared",
+        "role": "body",
+        "zIndex": 0,
+        "anchor": [
+         0.525011,
+         0.5
+        ],
+        "anchorSource": "geometry-bbox-center",
+        "morphGroup": null,
+        "topologySignature": "MALLLALAALLLAAALLLLAAALLLAAALLLLAAZ"
+       },
+       {
+        "id": "c1",
+        "identity": "declared",
+        "role": "counter",
+        "zIndex": 1,
+        "anchor": [
+         0.324394,
+         0.499792
+        ],
+        "anchorSource": "geometry-bbox-center",
+        "morphGroup": null,
+        "topologySignature": "MALLLLLLLLLAALALALZ"
+       },
+       {
+        "id": "c2",
+        "identity": "declared",
+        "role": "counter",
+        "zIndex": 2,
+        "anchor": [
+         0.725644,
+         0.499583
+        ],
+        "anchorSource": "geometry-bbox-center",
+        "morphGroup": null,
+        "topologySignature": "MALLLLLLLLLAALLLALZ"
+       }
+      ]
+     },
+     "filled": {
+      "state": "candidate",
+      "supportedAxes": [],
+      "composition": {
+       "kind": "compound",
+       "fillRule": "nonzero"
+      },
+      "parts": [
+       {
+        "id": "c0",
+        "identity": "declared",
+        "role": "body",
+        "zIndex": 0,
+        "anchor": [
+         0.525011,
+         0.499985
+        ],
+        "anchorSource": "geometry-bbox-center",
+        "morphGroup": null,
+        "topologySignature": "MALLLLALALLLLLALALALLLLLALALALLLALALALLLLLALALZ"
+       }
+      ]
+     }
+    }
+   }
   },
   "play-forward-circle": {
    "source": {
@@ -11245,7 +11527,71 @@
      ]
     }
    },
-   "model": null
+   "model": {
+    "declaration": "play-skip-back",
+    "archetype": "mirror",
+    "variants": {
+     "outline": {
+      "state": "candidate",
+      "supportedAxes": [],
+      "composition": {
+       "kind": "compound",
+       "fillRule": "evenodd"
+      },
+      "parts": [
+       {
+        "id": "c0",
+        "identity": "declared",
+        "role": "body",
+        "zIndex": 0,
+        "anchor": [
+         0.461458,
+         0.502083
+        ],
+        "anchorSource": "declared",
+        "morphGroup": null,
+        "topologySignature": "MALALLLLAAALLLAAALLLLAZ"
+       },
+       {
+        "id": "c1",
+        "identity": "declared",
+        "role": "counter",
+        "zIndex": 1,
+        "anchor": [
+         0.461049,
+         0.5
+        ],
+        "anchorSource": "declared",
+        "morphGroup": null,
+        "topologySignature": "MALLLLLAALLLAAALLLALZ"
+       }
+      ]
+     },
+     "filled": {
+      "state": "candidate",
+      "supportedAxes": [],
+      "composition": {
+       "kind": "compound",
+       "fillRule": "nonzero"
+      },
+      "parts": [
+       {
+        "id": "c0",
+        "identity": "declared",
+        "role": "body",
+        "zIndex": 0,
+        "anchor": [
+         0.461458,
+         0.502083
+        ],
+        "anchorSource": "declared",
+        "morphGroup": null,
+        "topologySignature": "MALALLLLALALALLLALALALLLLAZ"
+       }
+      ]
+     }
+    }
+   }
   },
   "play-skip-back-circle": {
    "source": {
@@ -11366,7 +11712,71 @@
      ]
     }
    },
-   "model": null
+   "model": {
+    "declaration": "play-skip-forward",
+    "archetype": "composite",
+    "variants": {
+     "outline": {
+      "state": "candidate",
+      "supportedAxes": [],
+      "composition": {
+       "kind": "compound",
+       "fillRule": "evenodd"
+      },
+      "parts": [
+       {
+        "id": "c0",
+        "identity": "declared",
+        "role": "body",
+        "zIndex": 0,
+        "anchor": [
+         0.538542,
+         0.502083
+        ],
+        "anchorSource": "geometry-bbox-center",
+        "morphGroup": null,
+        "topologySignature": "MALALLLLAAALLLAAALLLLAZ"
+       },
+       {
+        "id": "c1",
+        "identity": "declared",
+        "role": "counter",
+        "zIndex": 1,
+        "anchor": [
+         0.538951,
+         0.5
+        ],
+        "anchorSource": "geometry-bbox-center",
+        "morphGroup": null,
+        "topologySignature": "MALLLLLAALLLAAALLLALZ"
+       }
+      ]
+     },
+     "filled": {
+      "state": "candidate",
+      "supportedAxes": [],
+      "composition": {
+       "kind": "compound",
+       "fillRule": "nonzero"
+      },
+      "parts": [
+       {
+        "id": "c0",
+        "identity": "declared",
+        "role": "body",
+        "zIndex": 0,
+        "anchor": [
+         0.538542,
+         0.502083
+        ],
+        "anchorSource": "geometry-bbox-center",
+        "morphGroup": null,
+        "topologySignature": "MALALLLLALALALLLALALALLLLAZ"
+       }
+      ]
+     }
+    }
+   }
   },
   "play-skip-forward-circle": {
    "source": {
