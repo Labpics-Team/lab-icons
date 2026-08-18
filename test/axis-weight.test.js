@@ -19,7 +19,7 @@ const G = (n) => anatomy.glyphs[n];
 describe('ось веса — buildGlyph axes.weight', () => {
   it('А: дефолт ≡ weight:1 для ВСЕХ задекларированных (идентичность — гейты держат)', () => {
     for (const [name, g] of Object.entries(anatomy.glyphs)) {
-      expect(JSON.stringify(buildGlyph(g, grid)), name).toBe(JSON.stringify(buildGlyph(g, grid, { weight: 1 })));
+      expect(JSON.stringify(buildGlyph(g, grid, {}, anatomy.glyphs)), name).toBe(JSON.stringify(buildGlyph(g, grid, { weight: 1 }, anatomy.glyphs)));
     }
   });
 

@@ -1,20 +1,21 @@
 {
  "generatedBy": "scripts/census/build-census.mjs",
- "sourceOnlyCount": 163,
- "modeledCount": 75,
+ "sourceOnlyCount": 157,
+ "modeledCount": 81,
  "archetypes": {
   "radial-gear": 1,
   "arc-terminal": 1,
   "stroke-v": 4,
   "container-glyph": 4,
-  "composite": 64,
-  "rounded-polygon": 1
+  "composite": 67,
+  "rounded-polygon": 1,
+  "mirror": 3
  },
  "primitives": {
   "stroke-path": 56,
   "circle-dot": 53,
+  "arc-chain": 32,
   "rounded-rect": 25,
-  "arc-chain": 25,
   "arc-band": 6,
   "tangent-chain": 6,
   "rounded-polygon": 5,
@@ -26,9 +27,9 @@
   "content": 74,
   "ink": 38,
   "container": 21,
+  "counter": 19,
+  "body": 18,
   "detail": 16,
-  "body": 15,
-  "counter": 15,
   "control": 3,
   "decorator": 1
  },
@@ -45,15 +46,11 @@
    ]
   },
   "directional": {
-   "count": 7,
+   "count": 3,
    "names": [
     "cloud-download",
     "cloud-upload",
-    "link-horizontal",
-    "play-back",
-    "play-forward",
-    "play-skip-back",
-    "play-skip-forward"
+    "link-horizontal"
    ]
   },
   "off-slash": {
@@ -78,14 +75,12 @@
    ]
   },
   "singleton": {
-   "count": 139,
+   "count": 137,
    "names": [
     "accessibility",
     "actions",
     "archive",
     "archive-close",
-    "arrow-redo",
-    "arrow-undo",
     "attach",
     "bag",
     "bag-checkmark",
@@ -314,15 +309,15 @@
   }
  ],
  "bundle": {
-  "totalBytes": 934808,
+  "totalBytes": 990783,
   "modules": [
    {
     "path": "semantics/catalog.json",
-    "bytes": 567071
+    "bytes": 578506
    },
    {
     "path": "semantics/anatomy.json",
-    "bytes": 214024
+    "bytes": 258564
    },
    {
     "path": "src/core/anatomy-gen.js",
@@ -385,8 +380,8 @@
    "gzip": 96297
   },
   "glyphRuntime": {
-   "raw": 934808,
-   "gzip": 132519,
+   "raw": 990783,
+   "gzip": 135406,
    "note": "один glyph() тянет весь IR-бандл: JSON-данные доминируют — кандидат на split/lazy в REL-волне"
   }
  }
