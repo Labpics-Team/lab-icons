@@ -8,7 +8,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { buildGlyph } from '../scripts/lib/anatomy-gen.js';
+import { buildGlyph, buildGlyphParts } from '../src/core/anatomy-gen.js';
 import {
   axesSweepGlyph,
   axesWeightRange,
@@ -19,6 +19,7 @@ import {
 
 const grid = JSON.parse(readFileSync(join(import.meta.dirname, '..', 'semantics', 'grid.json'), 'utf8'));
 const anatomy = JSON.parse(readFileSync(join(import.meta.dirname, '..', 'semantics', 'anatomy.json'), 'utf8'));
+const catalog = JSON.parse(readFileSync(join(import.meta.dirname, '..', 'semantics', 'catalog.json'), 'utf8'));
 const G = (n) => anatomy.glyphs[n];
 
 const T = gridInkTokens(grid, 1);
@@ -99,6 +100,47 @@ describe('инварианты весов кусаются (Д: мутанты �
 });
 
 describe('RED-протокол BL-021 забетонирован (Б: числа замера)', () => {
+  it('меряет независимые paint-операнды, а не XOR от конкатенации layers/mask-subtract', () => {
+    const built = buildGlyph(G('time'), grid, {}, anatomy.glyphs);
+    const parts = buildGlyphParts(G('time'), grid, {}, anatomy.glyphs);
+
+    const naiveOutline = inkWeightDefects({ grid, d: built.outline });
+    expect(naiveOutline.defects).toEqual([
+      expect.objectContaining({ type: 'thin', msg: expect.stringContaining('0.13') }),
+    ]);
+
+    const outline = inkWeightDefects({
+      grid,
+      d: built.outline,
+      parts: parts.outline,
+      composition: catalog.icons.time.model.variants.outline.composition,
+    });
+    expect(outline.defects).toEqual([]);
+    expect(outline.strokes.map((stroke) => stroke.partId)).toEqual([
+      'dial',
+      'hand-minute',
+      'hand-hour',
+    ]);
+    for (const stroke of outline.strokes) {
+      expect(Math.abs(stroke.w - 1.8), `${stroke.partId} outline`).toBeLessThan(0.01);
+    }
+
+    const filled = inkWeightDefects({
+      grid,
+      d: built.filled,
+      parts: parts.filled,
+      composition: catalog.icons.time.model.variants.filled.composition,
+    });
+    expect(filled.defects).toEqual([]);
+    expect(filled.strokes.map((stroke) => stroke.partId)).toEqual([
+      'hand-minute',
+      'hand-hour',
+    ]);
+    for (const stroke of filled.strokes) {
+      expect(Math.abs(stroke.w - 2), `${stroke.partId} filled`).toBeLessThan(0.01);
+    }
+  });
+
   it('chevron-down-circle: кольцо ≈1.5, шеврон ≈2.0 (containerGlyph) — как рука (2.003)', () => {
     const d = buildGlyph(G('chevron-down-circle'), grid, {}, anatomy.glyphs).outline;
     const { strokes } = measureStrokes(d, OPTS);

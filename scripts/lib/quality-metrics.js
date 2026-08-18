@@ -17,7 +17,7 @@
  */
 
 import { samplePolylines } from './curve-sampling.js';
-import { parsePathData, pathBBox } from './path-data.js';
+import { parsePathData, pathBBox } from '../../src/core/path-data.js';
 import {
   DEFAULT_RASTER_PHASES,
   rasterizePathEntries,
@@ -278,6 +278,7 @@ function polylineFacts(entries, stepsPerSeg, minimumFeatureArea) {
         algebraicCancellation,
         windingSign: Math.sign(signedArea),
         fillRule: entries[entryIndex].fillRule === 'evenodd' ? 'evenodd' : 'nonzero',
+        operation: entries[entryIndex].operation === 'subtract' ? 'subtract' : 'union',
         minorSpan: significant ? minorSpan : null,
         significant,
       });
@@ -824,6 +825,7 @@ function sanitizedEntries(entries, significantSubpaths) {
         .map(({ points }) => polylinePathData(points))
         .join(''),
       fillRule: entries[entryIndex].fillRule,
+      operation: entries[entryIndex].operation === 'subtract' ? 'subtract' : 'union',
     }));
 }
 
@@ -947,14 +949,21 @@ function topologyVectorGuide(entries, stepsPerSeg, maxSegmentPairs, minimumFeatu
         const positiveArea = hasPositiveAreaOverlap(leftSubpath, rightSubpath);
         if (positiveArea) positiveAreaWeldPairs++;
 
-        const compositorOr = leftSubpath.entryIndex !== rightSubpath.entryIndex;
+        const explicitBooleanComposition =
+          leftSubpath.operation === 'subtract' || rightSubpath.operation === 'subtract';
+        const compositorOr =
+          !explicitBooleanComposition && leftSubpath.entryIndex !== rightSubpath.entryIndex;
         const sameWindingNonzero =
           !compositorOr &&
           leftSubpath.fillRule === 'nonzero' &&
           rightSubpath.fillRule === 'nonzero' &&
           leftSubpath.windingSign !== 0 &&
           leftSubpath.windingSign === rightSubpath.windingSign;
-        if (compositorOr) compositorOrPairs++;
+        if (explicitBooleanComposition) {
+          // Boolean semantics are explicit and monotone: union base first,
+          // then subtract the union of negative parts. Overlap is not an
+          // unresolved fill-rule interaction and cannot create XOR faces.
+        } else if (compositorOr) compositorOrPairs++;
         else if (sameWindingNonzero) sameWindingNonzeroPairs++;
         else nonMonotonePairs++;
 
@@ -967,7 +976,7 @@ function topologyVectorGuide(entries, stepsPerSeg, maxSegmentPairs, minimumFeatu
           sharedComponents === 1 &&
           pairOffSeamContactPoints === 0 &&
           internallySimple &&
-          sameWindingNonzero;
+          (sameWindingNonzero || explicitBooleanComposition);
         if (exactSharedBoundary) exactSharedBoundaryPairs++;
         const exactCollinearSeam = exactSharedBoundary && collinearPieces.length > 0;
         if (exactCollinearSeam) exactCollinearSeamPairs++;
@@ -980,7 +989,9 @@ function topologyVectorGuide(entries, stepsPerSeg, maxSegmentPairs, minimumFeatu
         // Всё остальное может скрывать несколько components одного pair и
         // становится multigraph uncertainty.
         const connectedInteractionProven =
-          (positiveArea && bothConvex && internallySimple) || exactSharedBoundary;
+          explicitBooleanComposition ||
+          (positiveArea && bothConvex && internallySimple) ||
+          exactSharedBoundary;
         const disconnectedInteraction =
           sharedComponents > 1 ||
           (sharedComponents === 1 && pairOffSeamContactPoints > 0);

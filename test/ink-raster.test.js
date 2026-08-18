@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { renderedPathEntries } from '../scripts/lib/icon-geometry.js';
+import { renderedPathEntries } from '../src/core/icon-geometry.js';
 import {
+  rasterizePathEntries,
   topologyAcrossPhases,
   topologyOfSvg,
 } from '../scripts/lib/ink-raster.js';
@@ -12,6 +13,36 @@ const topology = (content, options = {}) =>
   topologyOfSvg(content, { width: 24, height: 24, step: 0.25, ...options });
 
 describe('path-aware ink raster', () => {
+  it('computes mask-subtract as union(base) minus union(subtractors), independent of entry order', () => {
+    const base = { d: 'M2 2H22V22H2Z', fillRule: 'nonzero', operation: 'union' };
+    const subtractA = { d: 'M5 5H14V14H5Z', fillRule: 'nonzero', operation: 'subtract' };
+    const subtractB = { d: 'M10 10H19V19H10Z', fillRule: 'nonzero', operation: 'subtract' };
+    const options = { width: 24, height: 24, step: 0.25, phaseX: 0.5, phaseY: 0.5 };
+
+    const expected = rasterizePathEntries([base, subtractA, subtractB], options);
+    const permutations = [
+      [subtractA, base, subtractB],
+      [subtractA, subtractB, base],
+      [subtractB, base, subtractA],
+    ];
+
+    expect(expected.mask.reduce((sum, cell) => sum + cell, 0) * options.step ** 2)
+      .toBeCloseTo(254, 8);
+    for (const entries of permutations) {
+      expect(Array.from(rasterizePathEntries(entries, options).mask)).toEqual(
+        Array.from(expected.mask),
+      );
+    }
+
+    const phases = topologyAcrossPhases([base, subtractA, subtractB], {
+      width: 24,
+      height: 24,
+      step: 0.25,
+    });
+    expect(phases.stable).toBe(true);
+    expect(new Set(phases.signatures)).toEqual(new Set(['1:1']));
+  });
+
   it('объединяет перекрывающиеся самостоятельные path, не вырезая overlap по evenodd', () => {
     const content = svg(
       '<path d="M2 2H12V12H2Z"/><path d="M8 2H18V12H8Z"/>',

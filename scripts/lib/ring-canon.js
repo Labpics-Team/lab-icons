@@ -9,7 +9,7 @@
  * слияниям глифа с кольцом (ban-слэш и т.п.); разброс — их детектор.
  */
 
-import { renderedPathData } from './icon-geometry.js';
+import { renderedPathData } from '../../src/core/icon-geometry.js';
 import { samplePolylines } from './curve-sampling.js';
 
 /**

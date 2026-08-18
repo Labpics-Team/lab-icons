@@ -9,7 +9,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { buildGlyph } from '../scripts/lib/anatomy-gen.js';
+import { buildGlyph } from '../src/core/anatomy-gen.js';
 import { inkIoU } from '../scripts/check-anatomy-drift.js';
 
 const grid = JSON.parse(readFileSync(join(import.meta.dirname, '..', 'semantics', 'grid.json'), 'utf8'));

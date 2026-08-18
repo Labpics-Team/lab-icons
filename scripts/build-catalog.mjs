@@ -4,6 +4,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildIconCatalog, serializeIconCatalog } from './lib/icon-catalog.js';
 import { renderIrTypeProjection } from './lib/ir-type-projection.js';
+import { EXPECTED_SOURCE_VARIANTS } from './lib/corpus-contract.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const anatomy = JSON.parse(readFileSync(join(ROOT, 'semantics', 'anatomy.json'), 'utf8'));
@@ -18,4 +19,6 @@ writeFileSync(
   renderIrTypeProjection(catalog),
   'utf8',
 );
-console.log(`build-catalog: ${Object.keys(JSON.parse(output).icons).length} icons / 444 source variants`);
+console.log(
+  `build-catalog: ${Object.keys(JSON.parse(output).icons).length} icons / ${EXPECTED_SOURCE_VARIANTS} source variants`,
+);

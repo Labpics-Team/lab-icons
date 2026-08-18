@@ -9,9 +9,9 @@
  */
 import { readFileSync, writeFileSync, readdirSync } from 'node:fs';
 import { samplePolylines } from '../lib/curve-sampling.js';
-import { buildGlyph } from '../lib/anatomy-gen.js';
+import { buildGlyph } from '../../src/core/anatomy-gen.js';
 import { inkIoU } from '../check-anatomy-drift.js';
-import { renderedPathData } from '../lib/icon-geometry.js';
+import { renderedPathData } from '../../src/core/icon-geometry.js';
 import { circleFit } from '../check-variant-parity.js';
 
 import { dirname } from 'node:path';

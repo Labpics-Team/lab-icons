@@ -22,7 +22,7 @@ import {
   genSuperellipseStroke,
   smoothCorner90,
   smoothCornerAny,
-} from '../scripts/lib/anatomy-gen.js';
+} from '../src/core/anatomy-gen.js';
 import { inkIoU } from '../scripts/check-anatomy-drift.js';
 import { samplePolylines } from '../scripts/lib/curve-sampling.js';
 

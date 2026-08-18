@@ -37,14 +37,14 @@ describe('версии: пины и примеры тегов', () => {
 
 describe('счётчики корпуса', () => {
   it('извлекает утверждения с единицами корпуса', () => {
-    const claims = extractCountClaims('222 имени × 2 = 444 SVG и 444 экспорта');
-    expect(claims.map((c) => c.n)).toEqual([222, 444, 444]);
+    const claims = extractCountClaims('238 имени × 2 = 476 SVG и 476 экспорта');
+    expect(claims.map((c) => c.n)).toEqual([238, 476, 476]);
   });
 
   it('игнорирует числа без единиц и субвыборки', () => {
-    // «28 из 222 иконок»: 28 — субвыборка без единицы, ловится только 222
-    const claims = extractCountClaims('28 из 222 иконок — чистые композиции');
-    expect(claims.map((c) => c.n)).toEqual([222]);
+    // «28 из 238 иконок»: 28 — субвыборка без единицы, ловится только 238
+    const claims = extractCountClaims('28 из 238 иконок — чистые композиции');
+    expect(claims.map((c) => c.n)).toEqual([238]);
   });
 
   it('факты ФС согласованы между собой', () => {

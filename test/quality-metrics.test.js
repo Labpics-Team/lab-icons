@@ -5,6 +5,29 @@ const path = (d) => ({ d, fillRule: 'evenodd' });
 const solidSquare = path('M0 0H10V10H0Z');
 
 describe('Quality Observatory topology oracle', () => {
+  it('treats overlapping subtractors as an order-independent union, not evenodd XOR', () => {
+    const base = { d: 'M2 2H22V22H2Z', fillRule: 'nonzero', operation: 'union' };
+    const subtractA = { d: 'M5 5H14V14H5Z', fillRule: 'nonzero', operation: 'subtract' };
+    const subtractB = { d: 'M10 10H19V19H10Z', fillRule: 'nonzero', operation: 'subtract' };
+    const canonical = [base, subtractA, subtractB];
+
+    for (const candidate of [
+      [subtractA, base, subtractB],
+      [subtractA, subtractB, base],
+      [subtractB, base, subtractA],
+    ]) {
+      const metrics = compareSilhouettes(canonical, candidate, { canvas: 24 });
+      expect(metrics.silhouette.symmetricDifferenceCells).toBe(0);
+      expect(metrics.raster.every(({ differingPixels }) => differingPixels === 0)).toBe(true);
+      expect(metrics.topology).toMatchObject({
+        original: { components: 1, holes: 1 },
+        candidate: { components: 1, holes: 1 },
+        difference: false,
+        uncertain: false,
+      });
+    }
+  });
+
   it('не отбрасывает arc-counter с точной площадью выше публичного floor', () => {
     const area = 0.01002;
     const radius = Math.sqrt(area / Math.PI);

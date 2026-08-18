@@ -21,9 +21,9 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { renderedPathData } from './lib/icon-geometry.js';
+import { renderedPathData } from '../src/core/icon-geometry.js';
 import { inkOverlap, samplePolylines, segmentsCross } from './lib/curve-sampling.js';
-import { parsePathData } from './lib/path-data.js';
+import { parsePathData } from '../src/core/path-data.js';
 import {
   compareDebtSnapshot,
   validateLegacyQualitySnapshot,
@@ -417,7 +417,11 @@ if (isMain) {
 
   // Per-source debt check: каждый файл не должен расти против своего snapshot
   const perSourceDebt = loadPerSourceSnapshot(root);
-  const perSourceErrors = comparePerSourceDebt(findings, perSourceDebt);
+  const perSourceErrors = comparePerSourceDebt(
+    findings,
+    perSourceDebt,
+    files.map((file) => file.name),
+  );
   if (perSourceErrors.length > 0) {
     console.error(
       'check-path-quality: PER-SOURCE HARD — per-source debt изменился; ' +

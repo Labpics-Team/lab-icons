@@ -14,8 +14,8 @@
 import { readFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { buildGlyph } from '../lib/anatomy-gen.js';
-import { renderedPathData } from '../lib/icon-geometry.js';
+import { buildGlyph } from '../../src/core/anatomy-gen.js';
+import { renderedPathData } from '../../src/core/icon-geometry.js';
 import { samplePolylines } from '../lib/curve-sampling.js';
 
 const REPO = dirname(dirname(dirname(fileURLToPath(import.meta.url))));

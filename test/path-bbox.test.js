@@ -1,7 +1,7 @@
 /**
  * test/path-bbox.test.js — парсер SVG path `d` + точный bbox (t1 ch02, эпик ds-icons).
  *
- * Контракт scripts/lib/path-data.js:
+ * Контракт src/core/path-data.js:
  *   - parsePathData(d) → массив сегментов абсолютных команд (M/L/C/Q/A/Z),
  *     H/V/S/T/relative нормализованы; арк-флаги парсятся и в сжатой форме («011»).
  *   - pathBBox(d) → { minX, minY, maxX, maxY } ТОЧНЫЙ: экстремумы кубиков/
@@ -10,15 +10,16 @@
  *   - samplePath(d, stepsPerSeg) → плотная полилиния (независимая оценка:
  *     де Кастельжо / шаг по углу) — оракл для дифференциального теста.
  *
- * TDD RED-proof: написан до scripts/lib/path-data.js → импорт падает.
- * Классы: А (известные фигуры), В (дифференциал по ВСЕМ 444 реальным SVG:
+ * TDD RED-proof: написан до src/core/path-data.js → импорт падает.
+ * Классы: А (известные фигуры), В (дифференциал по ВСЕМ 476 реальным SVG:
  * каждый сэмпл ⊆ bbox и каждая грань bbox касается сэмпла).
  */
 
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { parsePathData, pathBBox, samplePath } from '../scripts/lib/path-data.js';
+import { parsePathData, pathBBox, samplePath } from '../src/core/path-data.js';
+import { EXPECTED_SOURCE_VARIANTS } from '../scripts/lib/corpus-contract.js';
 
 describe('path-data — parsePathData: токенизация', () => {
   it('А: компактные числа svgo («.5.5», «1-1», экспоненты)', () => {
@@ -112,7 +113,7 @@ describe('path-bbox — известные фигуры (ручной расчё
   });
 });
 
-describe('path-bbox — дифференциал по ВСЕМ реальным иконкам (444 SVG)', () => {
+describe('path-bbox — дифференциал по ВСЕМ реальным иконкам (476 SVG)', () => {
   const root = join(import.meta.dirname, '..', 'svg');
   const files = [];
   for (const variant of ['Outline', 'Filled']) {
@@ -121,8 +122,8 @@ describe('path-bbox — дифференциал по ВСЕМ реальным 
     }
   }
 
-  it('В: 444 файла найдены', () => {
-    expect(files.length).toBe(444);
+  it('В: полный корпус найден', () => {
+    expect(files.length).toBe(EXPECTED_SOURCE_VARIANTS);
   });
 
   it('В: каждый path каждого файла — сэмплы ⊆ bbox (равенство краёв точное) и bbox плотный', () => {
@@ -162,7 +163,7 @@ describe('path-bbox — дифференциал по ВСЕМ реальным 
         expect(b.maxY - sMaxY, `${file} тугость maxY`).toBeLessThan(TOUCH_EPS);
       }
     }
-    expect(paths).toBeGreaterThan(600); // 444 файла, многие мульти-path
+    expect(paths).toBeGreaterThan(600); // 476 файлов, многие мульти-path
   });
 
   it('В: все bbox внутри viewBox 24×24 (с полем на сглаживание 0.5)', () => {

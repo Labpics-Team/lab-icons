@@ -15,7 +15,7 @@
 import { mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { buildGlyph } from './lib/anatomy-gen.js';
+import { buildGlyph } from '../src/core/anatomy-gen.js';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const arg = (flag, def) => {

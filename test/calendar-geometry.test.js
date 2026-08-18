@@ -4,7 +4,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { parsePathData } from '../scripts/lib/path-data.js';
+import { parsePathData } from '../src/core/path-data.js';
 import {
   CALENDAR_APERTURE_RATIO,
   CALENDAR_CANVAS_SIZE,
@@ -13,7 +13,7 @@ import {
   buildCalendarNumberGeometry,
   resolveCalendarDay,
   roundedDigitGeometry,
-} from '../scripts/lib/calendar-geometry.js';
+} from '../src/core/calendar-geometry.js';
 
 function commandSignature(d) {
   return parsePathData(d).map(({ cmd }) => cmd).join('');

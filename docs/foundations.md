@@ -6,8 +6,14 @@
 
 ## 1. Канон и выходные форматы
 
-Канон — параметрическая анатомия: recipes → semantic parts → contours. SVG,
-icon font, canvas, Lottie и нативные path API — компиляторные цели.
+Для моделируемого варианта канон — параметрическая анатомия: recipes →
+semantic parts → contours. Для `source-only` канон — авторский SVG без
+придуманной декомпозиции.
+
+Package отгружает статический SVG и Glyph IR. Icon font, Lottie, SF Symbols,
+canvas и нативные path API — возможные adapters, а не поддержанные форматы.
+Цель становится capability только после появления компилятора и проверки его
+артефакта.
 
 Icon font не может быть SSOT: он не хранит независимые motion anchors и роли
 частей, неудобен для декораторов и динамической даты, а совместимый morph в
@@ -106,6 +112,19 @@ Counter, aperture, gap, knockout и exterior clearance — геометрия п
 У каждой моделируемой части обязательны стабильные `id`, `role`, `zIndex`,
 anchor policy и topology signature. Порядок SVG path не является identity.
 
+`glyphCapabilities().motion` различает пять состояний:
+
+- `source-only` — части geometry-derived и не имеют смысловых имён;
+- `candidate` — semantic parts не входят в default production surface;
+- `semantic-parts` — accepted-модель имеет стабильные части, но жест не задан;
+- `anchored-parts` — подвижные части отделены и имеют transform anchors, но
+  жест, диапазон движения и target adapter не доказаны.
+- `gesture-ready` — gesture имеет смысл, нормированный progress, явные tracks и
+  прошёл trajectory/topology proof; target adapter всё ещё может быть не экспортирован.
+
+`lottie` и `sfSymbols` в capability contract имеют состояние `not-exported`.
+Наличие path IDs, anchors или topology signature не повышает это состояние.
+
 Topology signature — необходимое, но недостаточное условие morph. Для прямой
 интерполяции также совпадают соответствие контуров, направление обхода,
 стартовые точки и число on/off-curve points. Несовместимые состояния получают
@@ -115,13 +134,13 @@ Motion позже управляет смысловыми частями: reload
 earth — sphere/grid/terrain, brush — handle/bristles/paint trace. Статическая
 анатомия не содержит generic opacity/scale как замену смысловому движению.
 
-Текущее socket-разбиение стрелок `time` является только статическим lowering:
-форма одной стрелки зависит от положения другой. До объявления motion-
-capability обе стрелки должны стать самостоятельными capsules вокруг общего
-bearing; outline понижается через `union(hands)`, filled — через
-`base − union(hands)` (`mask-subtract`). Пока этот закон не реализован и не
-проверен на всём диапазоне поворотов, библиотека не обещает независимую
-анимацию стрелок.
+`time` использует самостоятельные capsules вокруг общего bearing. Outline
+понижается через `union(hands)`, filled — через `base − union(hands)`;
+перекрывающиеся вычитатели образуют union, а не XOR и не зависят от порядка.
+Жест `time.advance` задаёт normalized progress `0..1`, minute `0→360°` и hour
+`0→30°`. Его topology proof проходит все progress, target sizes 16/20/24/32/48
+и четыре raster phases. Это делает `time` `gesture-ready`, но не экспортирует
+Lottie/SF Symbols файл.
 
 ## 7. Оси
 
@@ -133,6 +152,13 @@ bearing; outline понижается через `union(hands)`, filled — че
   целевого размера;
 - `fill`: дискретные masters до появления доказанного совместимого morph;
 - grade/contrast/client axes добавляются только после отдельного закона.
+
+`opsz` в `axisContracts` описывает общий диапазон 16..48. Recipe-kernels и
+доказанные icon variants используют один диапазон, но capability принадлежит
+конкретному варианту: он появляется только при наличии `opsz` в собственном
+`supportedAxes` и полном sampled proof. Сейчас такой proof есть только у
+четырёх chevron-семейств (8 вариантов); остальные варианты не получают
+fallback на масштабирование SVG.
 
 Нелинейное отображение пользовательской координаты задаётся явно (аналог
 OpenType `avar`). Дискретное изменение topology разрешено только на именованном

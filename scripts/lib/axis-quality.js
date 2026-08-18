@@ -10,8 +10,9 @@
  * Failing axes stay modeled, but are named in an explicit reviewed debt
  * registry instead of being silently filtered from the catalog.
  */
-import { buildGlyph, topologySignature } from './anatomy-gen.js';
+import { buildGlyph, buildGlyphParts, topologySignature } from '../../src/core/anatomy-gen.js';
 import { DEFAULT_RASTER_PHASES, topologyAcrossPhases } from './ink-raster.js';
+import { lowerModelComposition } from './model-composition.js';
 
 export const AXIS_QUALITY_VERSION = 1;
 export const AXIS_QUALITY_TARGET_RASTERS = Object.freeze([16, 24, 48]);
@@ -29,7 +30,7 @@ export const AXIS_QUALITY_POLICY = Object.freeze({
   comparison: 'phase-stable components:holes against the default master',
 });
 
-const AXIS_NAMES = Object.freeze(['weight', 'corner']);
+const AXIS_NAMES = Object.freeze(['weight', 'corner', 'opsz']);
 const VARIANTS = new Set(['outline', 'filled']);
 
 function exactKeys(value, allowed, label) {
@@ -48,7 +49,7 @@ function exactKeys(value, allowed, label) {
 }
 
 function parseDebtId(id) {
-  const match = /^([a-z0-9]+(?:-[a-z0-9]+)*)\/(outline|filled)\/(weight|corner)$/.exec(id);
+  const match = /^([a-z0-9]+(?:-[a-z0-9]+)*)\/(outline|filled)\/(weight|corner|opsz)$/.exec(id);
   return match ? { name: match[1], variant: match[2], axis: match[3] } : null;
 }
 
@@ -92,6 +93,8 @@ export function validateAxisQuality(quality, anatomy = null) {
 }
 
 function axisContracts(grid) {
+  const optical = grid.axes?.opsz;
+  if (!optical) throw new TypeError('axis-quality: grid.axes.opsz обязателен для контракта оси opsz');
   return {
     weight: {
       min: grid.axes.weight.min,
@@ -103,7 +106,72 @@ function axisContracts(grid) {
       default: 1,
       max: 1 / grid.ratios.cornerSmoothing,
     },
+    opsz: {
+      min: optical.min,
+      default: optical.default,
+      max: optical.max,
+    },
   };
+}
+
+function opticalDirectionFinding(entry) {
+  const optical = entry.opticalSize;
+  if (!optical) return null;
+
+  const small = optical.small;
+  const display = optical.display;
+  const findingFor = (field, required) => {
+    const smallHasField = Object.hasOwn(small ?? {}, field);
+    const displayHasField = Object.hasOwn(display ?? {}, field);
+    if (!required && !smallHasField && !displayHasField) return null;
+
+    const smallValue = small?.[field];
+    const displayValue = display?.[field];
+    if (
+      Number.isFinite(smallValue) &&
+      Number.isFinite(displayValue) &&
+      smallValue > 0 &&
+      displayValue > 0 &&
+      smallValue > displayValue
+    ) {
+      return null;
+    }
+    return {
+      kind: 'optical-direction-invalid',
+      axis: 'opsz',
+      field,
+      value: smallValue,
+      axes: {},
+      rasterSize: null,
+      signatures: [
+        `small.${field}=${String(smallValue)}`,
+        `display.${field}=${String(displayValue)}`,
+      ],
+    };
+  };
+
+  return findingFor('weightScale', true) ?? findingFor('anchorScale', false);
+}
+
+function combinedAxisSamples(axis, contract, grid) {
+  const own = axisSamples(contract).map((value) => ({ [axis]: value }));
+  if (axis === 'opsz') {
+    return own.flatMap((sample) => [
+      { ...sample, weight: grid.axes.weight.min },
+      { ...sample, weight: 1 },
+      { ...sample, weight: grid.axes.weight.max },
+    ]);
+  }
+  const optical = grid.axes?.opsz;
+  if (!optical) return own;
+  // Deliberately prove only weight × opsz. Corner has no independent optical
+  // master and adding weight × corner × opsz would multiply the expensive
+  // raster proof without a declared product capability that consumes it.
+  return own.flatMap((sample) => [
+    { ...sample, opsz: optical.min },
+    { ...sample, opsz: optical.default },
+    { ...sample, opsz: optical.max },
+  ]);
 }
 
 function axisSamples(contract) {
@@ -123,9 +191,47 @@ function rasterSizes() {
   return [...AXIS_QUALITY_TARGET_RASTERS, largest * AXIS_QUALITY_ANALYSIS_SUPERSAMPLE];
 }
 
-function topologySample(d, fillRule, grid, rasterSize) {
+function commandTopologyFor(entries, built, composition) {
+  // A compound glyph remains byte-for-byte on the historical proof path.
+  // Independent parts must retain their boolean operation, otherwise two
+  // subtractors become an unrelated concatenated fill-rule expression.
+  if (!composition || composition.kind === 'compound') return topologySignature(built);
+  return entries
+    .map((entry) => `${entry.operation}:${entry.partId ?? ''}:${topologySignature(entry.d)}`)
+    .join('|');
+}
+
+function geometryForAxisProof(entry, variant, grid, axes, lib, fillRule) {
+  const composition = entry.composition?.[variant] ?? null;
+  if (!composition || composition.kind === 'compound') {
+    const built = buildGlyph(entry, grid, axes, lib)[variant];
+    if (!built) return null;
+    return {
+      built,
+      entries: [{ d: built, fillRule, operation: 'union' }],
+      commandTopology: commandTopologyFor(null, built, null),
+    };
+  }
+
+  const parts = buildGlyphParts(entry, grid, axes, lib)[variant];
+  if (!parts || parts.length === 0) return null;
+  const built = parts.map((part) => part.d).join('');
+  const entries = lowerModelComposition({
+    built,
+    parts,
+    composition,
+    label: `axis-quality:${variant}`,
+  });
+  return {
+    built,
+    entries,
+    commandTopology: commandTopologyFor(entries, built, composition),
+  };
+}
+
+function topologySample(entries, grid, rasterSize) {
   return topologyAcrossPhases(
-    [{ d, fillRule }],
+    entries,
     {
       width: grid.canvas.width,
       height: grid.canvas.height,
@@ -137,42 +243,75 @@ function topologySample(d, fillRule, grid, rasterSize) {
   );
 }
 
-function firstAxisFinding(entry, variant, axis, contract, grid, lib, fillRule, baseline) {
-  const baselineCommandTopology = topologySignature(baseline);
-  const baselineRaster = new Map();
-  for (const rasterSize of rasterSizes()) {
-    const sample = topologySample(baseline, fillRule, grid, rasterSize);
-    if (!sample.stable) {
-      return {
-        kind: 'default-phase-unstable',
-        axis,
-        value: contract.default,
-        rasterSize,
-        signatures: sample.signatures,
+function firstAxisFinding(entry, variant, axis, contract, grid, lib, fillRule) {
+  const axisCombinations = axis === 'opsz' || entry.opticalSize
+    ? combinedAxisSamples(axis, contract, grid)
+    : axisSamples(contract).map((value) => ({ [axis]: value }));
+  const baselineCache = new Map();
+  for (const axes of axisCombinations) {
+    // Compare an axis at a fixed point in every other active axis.  Comparing
+    // `weight` at opsz=16 to the default master would conflate two independent
+    // changes and could either hide a defect or create a false one.
+    const baseAxes = { ...axes };
+    delete baseAxes[axis];
+    const baselineKey = JSON.stringify(baseAxes);
+    let cached = baselineCache.get(baselineKey);
+    if (!cached) {
+      const baselineForCombination = geometryForAxisProof(
+        entry,
+        variant,
+        grid,
+        baseAxes,
+        lib,
+        fillRule,
+      );
+      if (!baselineForCombination) continue;
+      const baselineRaster = new Map();
+      for (const rasterSize of rasterSizes()) {
+        const sample = topologySample(baselineForCombination.entries, grid, rasterSize);
+        if (!sample.stable) {
+          return {
+            kind: 'default-phase-unstable',
+            axis,
+            value: contract.default,
+            axes: baseAxes,
+            rasterSize,
+            signatures: sample.signatures,
+          };
+        }
+        baselineRaster.set(rasterSize, sample.signatures[0]);
+      }
+      cached = {
+        commandTopology: baselineForCombination.commandTopology,
+        raster: baselineRaster,
       };
+      baselineCache.set(baselineKey, cached);
     }
-    baselineRaster.set(rasterSize, sample.signatures[0]);
-  }
+    const baselineCommandTopology = cached.commandTopology;
+    const baselineRaster = cached.raster;
 
-  for (const value of axisSamples(contract)) {
-    const d = buildGlyph(entry, grid, { [axis]: value }, lib)[variant];
-    if (topologySignature(d) !== baselineCommandTopology) {
+    const value = axes[axis];
+    const geometry = geometryForAxisProof(entry, variant, grid, axes, lib, fillRule);
+    if (!geometry) continue;
+    if (geometry.commandTopology !== baselineCommandTopology) {
       return {
         kind: 'command-topology-drift',
         axis,
         value,
+        axes,
         rasterSize: null,
-        signatures: [baselineCommandTopology, topologySignature(d)],
+        signatures: [baselineCommandTopology, geometry.commandTopology],
       };
     }
     for (const rasterSize of rasterSizes()) {
-      const sample = topologySample(d, fillRule, grid, rasterSize);
+      const sample = topologySample(geometry.entries, grid, rasterSize);
       const baselineSignature = baselineRaster.get(rasterSize);
       if (!sample.stable || sample.signatures.some((signature) => signature !== baselineSignature)) {
         return {
           kind: sample.stable ? 'axis-topology-drift' : 'axis-phase-unstable',
           axis,
           value,
+          axes,
           rasterSize,
           signatures: [baselineSignature, ...sample.signatures],
         };
@@ -191,7 +330,9 @@ export function proveVariantAxes(entry, variant, grid, lib, fillRule) {
   if (!['nonzero', 'evenodd'].includes(fillRule)) {
     throw new TypeError(`axis-quality: неизвестный fillRule ${fillRule}`);
   }
-  const baseline = buildGlyph(entry, grid, {}, lib)[variant];
+  const directionFinding = opticalDirectionFinding(entry);
+  if (directionFinding) return [{ axis: 'opsz', finding: directionFinding }];
+  const baseline = geometryForAxisProof(entry, variant, grid, {}, lib, fillRule);
   if (!baseline) return [];
   const contracts = axisContracts(grid);
   const results = [];
@@ -199,7 +340,7 @@ export function proveVariantAxes(entry, variant, grid, lib, fillRule) {
     const contract = contracts[axis];
     const samples = axisSamples(contract);
     const active = samples.some((value) => (
-      buildGlyph(entry, grid, { [axis]: value }, lib)[variant] !== baseline
+      geometryForAxisProof(entry, variant, grid, { [axis]: value }, lib, fillRule)?.built !== baseline.built
     ));
     if (!active) continue;
     results.push({
@@ -212,7 +353,6 @@ export function proveVariantAxes(entry, variant, grid, lib, fillRule) {
         grid,
         lib,
         fillRule,
-        baseline,
       ),
     });
   }

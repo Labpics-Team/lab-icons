@@ -7,7 +7,7 @@
  * evenodd. Все видящие гейты должны пользоваться одной моделью рендера.
  */
 
-import { renderedPathEntries } from './icon-geometry.js';
+import { renderedPathEntries } from '../../src/core/icon-geometry.js';
 import { samplePolylines } from './curve-sampling.js';
 
 const EPS = 1e-9;
@@ -92,10 +92,13 @@ function paintIntervals(mask, row, cols, step, phaseX, intervals) {
 
 /**
  * Растеризация списка самостоятельных SVG path. Каждый path сначала получает
- * собственную маску по своему fill-rule, затем маски объединяются OR — как
- * source-over у одноцветных непрозрачных элементов.
+ * собственную маску по своему fill-rule. По умолчанию маски объединяются OR,
+ * как source-over у одноцветных непрозрачных элементов. Явный
+ * `operation:'subtract'` очищает чернила и моделирует mask-subtract как
+ * `base - union(subtractors)`: перекрывающиеся негативные части не превращаются
+ * в XOR, как произошло бы при наивной конкатенации под evenodd.
  *
- * @param {Array<{d:string, fillRule?:'evenodd'|'nonzero'}>} entries
+ * @param {Array<{d:string, fillRule?:'evenodd'|'nonzero', operation?:'union'|'subtract'}>} entries
  * @returns {{mask:Uint8Array, cols:number, rows:number, step:number, phase:[number,number]}}
  */
 export function rasterizePathEntries(
@@ -127,15 +130,30 @@ export function rasterizePathEntries(
     const fillRule = entry.fillRule === 'evenodd' ? 'evenodd' : 'nonzero';
     return {
       fillRule,
+      operation: entry.operation === 'subtract' ? 'subtract' : 'union',
       polys: samplePolylines(entry.d, stepsPerSeg).filter((poly) => poly.length > 2),
     };
   });
 
+  const unionRow = new Uint8Array(cols);
+  const subtractRow = new Uint8Array(cols);
   for (let row = 0; row < rows; row++) {
     const y = (row + phaseY) * step;
     if (y < 0 || y >= height) continue;
+
+    // Boolean composition is evaluated as sets, not as painter's order:
+    // union(all positive paths) − union(all subtractors).  Keeping the two
+    // accumulators separate makes the result commutative and prevents a
+    // later positive path from accidentally repainting a knockout.
+    unionRow.fill(0);
+    subtractRow.fill(0);
     for (const path of sampled) {
-      paintIntervals(mask, row, cols, step, phaseX, inkIntervals(path.polys, y, path.fillRule));
+      const target = path.operation === 'subtract' ? subtractRow : unionRow;
+      paintIntervals(target, 0, cols, step, phaseX, inkIntervals(path.polys, y, path.fillRule));
+    }
+    const offset = row * cols;
+    for (let col = 0; col < cols; col++) {
+      mask[offset + col] = unionRow[col] && !subtractRow[col] ? 1 : 0;
     }
   }
 

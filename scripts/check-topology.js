@@ -24,7 +24,7 @@
 import { readFileSync, readdirSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { renderedPathData } from './lib/icon-geometry.js';
+import { renderedPathData } from '../src/core/icon-geometry.js';
 import { topologyDefects } from './lib/topology.js';
 
 /**

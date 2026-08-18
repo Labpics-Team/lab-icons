@@ -2,7 +2,7 @@
   "name": "@labpics/icons",
   "version": "0.3.0",
   "private": false,
-  "description": "Labpics icon library — 444 SVG (Filled + Outline), tree-shakeable ESM",
+  "description": "Labpics icon library — 476 SVG (238 Filled + 238 Outline), tree-shakeable ESM",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Labpics-Team/lab-icons.git"
@@ -40,6 +40,8 @@
     "dist/ir/recipes.js"
   ],
   "scripts": {
+    "import:figma": "node scripts/import-figma.mjs",
+    "validate:proposal": "node scripts/validate-icon-proposal.mjs",
     "build": "pnpm build:static && pnpm build:catalog && pnpm build:ir",
     "build:static": "node scripts/build.js && node scripts/build-anatomy.js",
     "build:ir": "node scripts/build-ir.mjs",
@@ -69,14 +71,16 @@
     "check:ink-weight": "node scripts/check-ink-weight.js",
     "check:ink-weight:axes": "node scripts/check-ink-weight.js --axes",
     "check:grammar": "node scripts/check-grammar.js",
-    "check:anim-ready": "node scripts/check-anim-ready.js",
+    "check:motion-parts": "node scripts/check-anim-ready.js",
+    "check:motion": "node scripts/check-motion.js",
     "check:fidelity": "node scripts/check-fidelity.js",
     "check:dry-coverage": "node scripts/check-dry-coverage.js",
     "check:docs-drift": "node scripts/check-docs-drift.js",
     "prepack": "pnpm build",
     "test": "vitest run",
-    "verify": "node scripts/check-repo-contract.js && node scripts/check-catalog.js && pnpm check:security && tsc --noEmit && pnpm build && node scripts/check-package-size.js && node scripts/check-package-artifact.js && pnpm check:publint && pnpm check:attw && node scripts/check-parity.js && node scripts/check-colors.js && node scripts/check-treeshake.js && node scripts/check-variant-parity.js && node scripts/check-anatomy.js && node scripts/check-anatomy-drift.js && node scripts/check-path-quality.js && node scripts/check-static-grid.js && node scripts/check-ring-canon.js && node scripts/check-fill-rule.js && node scripts/check-topology.js && node scripts/check-corners.js && node scripts/check-adjacency.js && node scripts/check-ink-weight.js && node scripts/check-ink-weight.js --axes && node scripts/check-grammar.js && node scripts/check-fidelity.js && node scripts/check-dry-coverage.js && node scripts/check-anim-ready.js && node scripts/check-docs-drift.js && vitest run",
-    "check:ring-canon": "node scripts/check-ring-canon.js"
+    "verify": "node scripts/check-repo-contract.js && node scripts/check-catalog.js && pnpm check:security && tsc --noEmit && pnpm build && node scripts/check-package-size.js && node scripts/check-package-artifact.js && pnpm check:publint && pnpm check:attw && node scripts/check-parity.js && node scripts/check-colors.js && node scripts/check-treeshake.js && node scripts/check-variant-parity.js && node scripts/check-anatomy.js && node scripts/check-anatomy-drift.js && node scripts/check-path-quality.js && node scripts/check-static-grid.js && node scripts/check-ring-canon.js && node scripts/check-fill-rule.js && node scripts/check-topology.js && node scripts/check-corners.js && node scripts/check-adjacency.js && node scripts/check-ink-weight.js && node scripts/check-ink-weight.js --axes && node scripts/check-grammar.js && node scripts/check-fidelity.js && node scripts/check-dry-coverage.js && pnpm check:motion-parts && pnpm check:motion && node scripts/check-docs-drift.js && node scripts/check-census-fresh.js && vitest run",
+    "check:ring-canon": "node scripts/check-ring-canon.js",
+    "check:census": "node scripts/census/build-census.mjs && node scripts/check-census-fresh.js"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "0.18.5",

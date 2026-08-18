@@ -18,11 +18,12 @@ import {
 // Эти zero-IO модули пока живут рядом с инструментами геометрии. Публичные
 // типы ниже намеренно не пропускают их нестрогие JS-типы через API.
 // @ts-expect-error — JS-модуль будет перенесён за package boundary отдельно.
-import { buildGlyphParts as buildAnatomyParts, topologySignature as computeTopologySignature } from '../../scripts/lib/anatomy-gen.js';
+import { buildGlyphParts as buildAnatomyParts, topologySignature as computeTopologySignature } from '../core/anatomy-gen.js';
 // @ts-expect-error — см. комментарий выше; функция чистая и bundleable.
-import { sourcePathEntries } from '../../scripts/lib/icon-geometry.js';
+import { sourcePathEntries } from '../core/icon-geometry.js';
 // @ts-expect-error — см. комментарий выше; функция чистая и bundleable.
-import { parsePathData, pathBBox } from '../../scripts/lib/path-data.js';
+import { parsePathData, pathBBox } from '../core/path-data.js';
+import { sampleMotionGesture as sampleMotionGestureCore } from '../core/motion-sampler.js';
 import {
   buildCalendarNumberGeometry as buildCalendarNumberRecipe,
   type CalendarNumberInput,
@@ -154,12 +155,27 @@ export type GlyphComposition =
       subtractPartIds: readonly string[];
     }>;
 
+function cloneGlyphComposition(composition: GlyphComposition): GlyphComposition {
+  if (composition.kind === 'layers') {
+    return Object.freeze({ kind: 'layers' });
+  }
+  if (composition.kind === 'compound') {
+    return Object.freeze({ kind: 'compound', fillRule: composition.fillRule });
+  }
+  return Object.freeze({
+    kind: 'mask-subtract',
+    basePartIds: Object.freeze([...composition.basePartIds]),
+    subtractPartIds: Object.freeze([...composition.subtractPartIds]),
+  });
+}
+
 export interface GlyphCapabilities {
   readonly icon: IconId;
   readonly variant: IconVariant;
   readonly modelState: ModelState | null;
   readonly supportedAxes: readonly AxisName[];
   readonly axes: Readonly<Partial<Record<AxisName, AxisContract>>>;
+  readonly motion: MotionCapabilities;
 }
 
 export interface AxisContract {
@@ -168,6 +184,101 @@ export interface AxisContract {
   readonly default: number;
   readonly max: number;
   readonly lifecycle: string;
+}
+
+export type MotionCapabilityState =
+  | 'source-only'
+  | 'candidate'
+  | 'semantic-parts'
+  | 'anchored-parts'
+  | 'gesture-ready';
+
+export interface MotionGestureTrackContract {
+  readonly partId: string;
+  readonly kind: 'rotate';
+  readonly anchor: readonly [number, number];
+  readonly from: number;
+  readonly to: number;
+  readonly unit: 'degrees';
+  readonly interpolation: 'linear';
+}
+
+export interface MotionGestureContract {
+  readonly id: string;
+  readonly kind: string;
+  readonly partIds: readonly string[];
+  readonly meaning: string;
+  readonly progress: 'normalized-0-to-1';
+  readonly tracks: readonly MotionGestureTrackContract[];
+}
+
+export interface MotionGestureSample {
+  readonly partId: string;
+  readonly kind: 'rotate';
+  readonly anchor: readonly [number, number];
+  readonly rotation: number;
+}
+
+export interface MotionTrackContract {
+  readonly id: string;
+  readonly kind: 'rotate';
+  readonly partIds: readonly string[];
+  readonly anchor: readonly [number, number];
+}
+
+export interface MotionCapabilities {
+  readonly state: MotionCapabilityState;
+  readonly partIds: readonly string[];
+  readonly tracks: readonly MotionTrackContract[];
+  readonly gestures: readonly MotionGestureContract[];
+  readonly adapters: Readonly<{
+    readonly lottie: 'not-exported';
+    readonly sfSymbols: 'not-exported';
+  }>;
+}
+
+export function sampleMotionGesture(
+  gesture: MotionGestureContract,
+  progress: number,
+): readonly MotionGestureSample[] {
+  return sampleMotionGestureCore(gesture, progress);
+}
+
+export interface IconDesignContract {
+  readonly version: 1;
+  readonly canvas: Readonly<{
+    readonly viewBox: readonly [number, number, number, number];
+    readonly declarationUnits: 'fraction-of-canvas';
+  }>;
+  readonly variants: readonly IconVariant[];
+  readonly source: Readonly<{
+    readonly paint: 'currentColor';
+    readonly geometry: 'path-only';
+    readonly intake: 'figma-import';
+  }>;
+  readonly constraints: Readonly<{
+    readonly margin: number;
+    readonly clearanceMin: number;
+    readonly opticalCenterBias: number;
+    readonly angleScale: readonly number[];
+  }>;
+  readonly axes: Readonly<Record<AxisName, AxisContract>>;
+  readonly lifecycle: Readonly<{
+    readonly sourceOnly: 'exact-source-fallback';
+    readonly candidate: 'research-only';
+    readonly accepted: 'public-after-proof';
+  }>;
+  readonly targets: Readonly<{
+    readonly staticSvg: 'supported';
+    readonly glyphIr: 'supported';
+    readonly lottie: 'not-exported';
+    readonly sfSymbols: 'not-exported';
+  }>;
+  readonly agent: Readonly<{
+    readonly proposalCommand: 'pnpm validate:proposal';
+    readonly promotionCommand: 'pnpm import:figma --write';
+    readonly finalGate: 'pnpm verify';
+  }>;
 }
 
 interface SourcePartContract {
@@ -200,7 +311,7 @@ interface ModelPartContract {
 interface ModelVariantContract {
   readonly state: ModelState;
   readonly supportedAxes: readonly AxisName[];
-  readonly composition: Readonly<{ kind: 'compound'; fillRule: FillRule }>;
+  readonly composition: GlyphComposition;
   readonly parts: readonly ModelPartContract[];
 }
 
@@ -248,8 +359,43 @@ interface PathBounds {
 
 const catalog = catalogJson as unknown as CatalogContract;
 const anatomy = anatomyJson as unknown as {
-  readonly glyphs: Readonly<Record<string, unknown>>;
+  readonly glyphs: Readonly<Record<string, Readonly<{
+    readonly status?: Readonly<Partial<Record<IconVariant, string>>>;
+    readonly motion?: Readonly<{
+      readonly state?: string;
+      readonly gestures?: readonly Readonly<{
+        readonly id: string;
+        readonly kind: string;
+        readonly partIds: readonly string[];
+        readonly meaning: string;
+        readonly progress: 'normalized-0-to-1';
+        readonly tracks: readonly Readonly<{
+          readonly partId: string;
+          readonly kind: 'rotate';
+          readonly anchor: readonly [number, number];
+          readonly from: number;
+          readonly to: number;
+          readonly unit: 'degrees';
+          readonly interpolation: 'linear';
+        }>[];
+      }>[];
+    }>;
+    readonly parts?: readonly Readonly<{
+      readonly id?: string;
+      readonly primitive?: string;
+      readonly anchor?: readonly [number, number];
+    }>[];
+   }>>>;
 };
+const designGrid = gridJson as unknown as Readonly<{
+  canvas: Readonly<{ width: number; height: number }>;
+  ratios: Readonly<{
+    margin: number;
+    clearanceMin: number;
+    opticalCenterBias: number;
+    angleScale: readonly number[];
+  }>;
+}>;
 const grid = gridJson as unknown;
 
 const VARIANTS = new Set<IconVariant>(['outline', 'filled']);
@@ -285,6 +431,53 @@ export const axisContracts: Readonly<Record<AxisName, AxisContract>> = Object.fr
     Object.freeze({ ...catalog.axes[name] }),
   ])) as Record<AxisName, AxisContract>,
 );
+
+const motionAdapters = Object.freeze({
+  lottie: 'not-exported',
+  sfSymbols: 'not-exported',
+} as const);
+
+export const iconDesignContract: IconDesignContract = Object.freeze({
+  version: 1,
+  canvas: Object.freeze({
+    viewBox: Object.freeze([0, 0, designGrid.canvas.width, designGrid.canvas.height]) as unknown as readonly [
+      number,
+      number,
+      number,
+      number,
+    ],
+    declarationUnits: 'fraction-of-canvas',
+  }),
+  variants: Object.freeze(['outline', 'filled'] as const),
+  source: Object.freeze({
+    paint: 'currentColor',
+    geometry: 'path-only',
+    intake: 'figma-import',
+  }),
+  constraints: Object.freeze({
+    margin: designGrid.ratios.margin,
+    clearanceMin: designGrid.ratios.clearanceMin,
+    opticalCenterBias: designGrid.ratios.opticalCenterBias,
+    angleScale: Object.freeze([...designGrid.ratios.angleScale]),
+  }),
+  axes: axisContracts,
+  lifecycle: Object.freeze({
+    sourceOnly: 'exact-source-fallback',
+    candidate: 'research-only',
+    accepted: 'public-after-proof',
+  }),
+  targets: Object.freeze({
+    staticSvg: 'supported',
+    glyphIr: 'supported',
+    lottie: 'not-exported',
+    sfSymbols: 'not-exported',
+  }),
+  agent: Object.freeze({
+    proposalCommand: 'pnpm validate:proposal',
+    promotionCommand: 'pnpm import:figma --write',
+    finalGate: 'pnpm verify',
+  }),
+});
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
@@ -475,6 +668,7 @@ function modelParts(
   variant: IconVariant,
   contract: ModelContract,
   model: ModelVariantContract,
+  composition: GlyphComposition,
   axes: Readonly<Partial<Record<AxisName, number>>>,
 ): readonly GlyphPart[] {
   const declaration = anatomy.glyphs[contract.declaration];
@@ -514,6 +708,7 @@ function modelParts(
     ) {
       throw new Error(`@labpics/icons/ir: drift anchor ${icon}/${variant}/${part.id}`);
     }
+    const independentlyRendered = composition.kind !== 'compound';
     return Object.freeze({
       id: part.id,
       role: part.role,
@@ -521,7 +716,7 @@ function modelParts(
       d: built.d,
       // Отдельная часть compound-модели не имеет самостоятельного fill rule:
       // cog/tablet доказывают, что присвоить здесь nonzero — публичная ложь.
-      fillRule: null,
+      fillRule: independentlyRendered ? 'nonzero' : null,
       paint: Object.freeze({ kind: 'fill', fill: 'currentColor' }),
       anchor: Object.freeze([built.anchor[0], built.anchor[1]] as const),
       anchorSource: part.anchorSource as 'declared' | 'geometry-bbox-center',
@@ -626,6 +821,73 @@ function modelAllowed(model: ModelVariantContract, mode: ModelMode): boolean {
 }
 
 /** Состояние модели читается без её построения и без побочных эффектов. */
+function motionCapabilities(icon: IconId, variant: IconVariant, model?: ModelVariantContract): MotionCapabilities {
+  if (!model) {
+    return Object.freeze({
+      state: 'source-only',
+      partIds: Object.freeze([]),
+      tracks: Object.freeze([]),
+      gestures: Object.freeze([]),
+      adapters: motionAdapters,
+    });
+  }
+  if (model.state !== 'accepted') {
+    return Object.freeze({
+      state: 'candidate',
+      partIds: Object.freeze([]),
+      tracks: Object.freeze([]),
+      gestures: Object.freeze([]),
+      adapters: motionAdapters,
+    });
+  }
+
+  const partIds = Object.freeze(model.parts.map((part) => part.id));
+  const declaredParts = anatomy.glyphs[icon]?.parts ?? [];
+  const tracks = declaredParts
+    .filter((part) =>
+      part.primitive === 'clock-hand' &&
+      typeof part.id === 'string' &&
+      Array.isArray(part.anchor) &&
+      part.anchor.length === 2 &&
+      part.anchor.every((value) => Number.isFinite(value)) &&
+      partIds.includes(part.id),
+    )
+    .map((part) => Object.freeze({
+      id: `rotate.${part.id!}`,
+      kind: 'rotate' as const,
+      partIds: Object.freeze([part.id!]),
+      anchor: Object.freeze([...part.anchor!] as [number, number]),
+    }));
+
+  const declaredGestures = anatomy.glyphs[icon]?.motion?.gestures ?? [];
+  const gestures = declaredGestures
+    .filter((gesture) => gesture.partIds.every((partId) => partIds.includes(partId)))
+    .map((gesture) => Object.freeze({
+      id: gesture.id,
+      kind: gesture.kind,
+      partIds: Object.freeze([...gesture.partIds]),
+      meaning: gesture.meaning,
+      progress: gesture.progress,
+      tracks: Object.freeze(gesture.tracks.map((track) => Object.freeze({
+        partId: track.partId,
+        kind: track.kind,
+        anchor: Object.freeze([...track.anchor] as [number, number]),
+        from: track.from,
+        to: track.to,
+        unit: track.unit,
+        interpolation: track.interpolation,
+      }))),
+    }));
+
+  return Object.freeze({
+    state: gestures.length > 0 ? 'gesture-ready' : tracks.length > 0 ? 'anchored-parts' : 'semantic-parts',
+    partIds,
+    tracks: Object.freeze(tracks),
+    gestures: Object.freeze(gestures),
+    adapters: motionAdapters,
+  });
+}
+
 export function glyphCapabilities(
   iconValue: unknown,
   variantValue: unknown = 'outline',
@@ -642,6 +904,7 @@ export function glyphCapabilities(
     axes: Object.freeze(Object.fromEntries(
       supportedAxes.map((name) => [name, axisContracts[name]]),
     )),
+    motion: motionCapabilities(icon, variant, model),
   });
 }
 
@@ -668,6 +931,7 @@ export function glyph(request: unknown): GlyphIR {
       parsed.variant,
       modelContract,
       model,
+      model.composition,
       axes,
     );
     provenance = Object.freeze({
@@ -677,7 +941,7 @@ export function glyph(request: unknown): GlyphIR {
       state: model.state,
       axes,
     });
-    composition = Object.freeze({ ...model.composition });
+    composition = cloneGlyphComposition(model.composition);
   } else {
     const requestedAxes = Object.keys(parsed.axes);
     if (requestedAxes.length > 0) {
@@ -689,7 +953,7 @@ export function glyph(request: unknown): GlyphIR {
     const source = iconContract.source[parsed.variant];
     parts = sourceParts(parsed.icon, parsed.variant, source);
     provenance = Object.freeze({ kind: 'source', file: source.file });
-    composition = Object.freeze({ kind: 'layers' });
+    composition = cloneGlyphComposition({ kind: 'layers' });
   }
 
   const d = parts.map((part) => part.d).join('');

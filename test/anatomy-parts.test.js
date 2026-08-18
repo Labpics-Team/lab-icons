@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { buildGlyph, buildGlyphParts, topologySignature } from '../scripts/lib/anatomy-gen.js';
+import { buildGlyph, buildGlyphParts, topologySignature } from '../src/core/anatomy-gen.js';
 
 const root = join(import.meta.dirname, '..');
 const anatomy = JSON.parse(readFileSync(join(root, 'semantics/anatomy.json'), 'utf8'));
@@ -72,5 +72,26 @@ describe('явные anatomy parts', () => {
       ],
     };
     expect(() => buildGlyphParts(repeated, grid)).toThrow(/повторный part\.id/);
+  });
+
+  it.each([
+    ['small', 'anchorScale'],
+    ['small', 'weightScale'],
+    ['display', 'anchorScale'],
+    ['display', 'weightScale'],
+  ])('fail-closed rejects an incomplete optical master: %s.%s', (master, field) => {
+    const broken = structuredClone(anatomy.glyphs['chevron-up']);
+    delete broken.opticalSize[master][field];
+
+    expect(() => buildGlyph(broken, grid, { opsz: master === 'small' ? 16 : 48 }))
+      .toThrow(/opticalSize.*masters/);
+  });
+
+  it('distinguishes a non-finite opsz from a checked range violation', () => {
+    const gridWithoutOpsz = structuredClone(grid);
+    delete gridWithoutOpsz.axes.opsz;
+
+    expect(() => buildGlyph(anatomy.glyphs['chevron-up'], gridWithoutOpsz, { opsz: Number.NaN }))
+      .toThrow(/конечным числом/);
   });
 });

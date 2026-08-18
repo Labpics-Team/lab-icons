@@ -18,7 +18,7 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { iconGeometry, renderedPathData } from './lib/icon-geometry.js';
+import { iconGeometry, renderedPathData } from '../src/core/icon-geometry.js';
 import { samplePolylines, segmentsCross } from './lib/curve-sampling.js';
 
 /**

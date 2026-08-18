@@ -16,7 +16,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { cornerRadii } from '../scripts/lib/corners.js';
-import { renderedPathData } from '../scripts/lib/icon-geometry.js';
+import { renderedPathData } from '../src/core/icon-geometry.js';
 import { cornerDefectsBetween, findCornerDefects } from '../scripts/check-corners.js';
 import { findBlobBugs } from '../scripts/check-fill-rule.js';
 import { validatePathQuality } from '../scripts/check-path-quality.js';

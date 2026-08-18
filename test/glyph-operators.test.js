@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parsePathData, pathBBox, samplePath } from '../scripts/lib/path-data.js';
+import { parsePathData, pathBBox, samplePath } from '../src/core/path-data.js';
 import {
   GLYPH_OPSZ_RANGE,
   GLYPH_OPERATOR_TOKENS,
@@ -13,7 +13,7 @@ import {
   generateRadialRays,
   opticalLimits,
   placeNotificationBadge,
-} from '../scripts/lib/glyph-operators.js';
+} from '../src/core/glyph-operators.js';
 
 const NEGATIVE_SPACE_KEYS = [
   'kind',

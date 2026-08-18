@@ -35,9 +35,9 @@
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { buildGlyph } from './lib/anatomy-gen.js';
-import { renderedPathData } from './lib/icon-geometry.js';
-import { samplePath } from './lib/path-data.js';
+import { buildGlyph } from '../src/core/anatomy-gen.js';
+import { renderedPathData } from '../src/core/icon-geometry.js';
+import { samplePath } from '../src/core/path-data.js';
 
 // ── пороги: ВЫВОД из semantics/grid.json, не хардкод ────────────────────────
 // Конструкция (ноль observer-fit): части «должны-смыкаться» обязаны ПЕРЕКРЫВАТЬСЯ

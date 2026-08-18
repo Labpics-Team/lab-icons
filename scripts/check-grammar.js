@@ -21,8 +21,8 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { renderedPathData } from './lib/icon-geometry.js';
-import { parsePathData } from './lib/path-data.js';
+import { renderedPathData } from '../src/core/icon-geometry.js';
+import { parsePathData } from '../src/core/path-data.js';
 
 const MIN_EDGE = 1.0; // короче — микроребро скругления, не несёт направления
 const EXACT_EPS = 0.5; // уже на шкале (в пределах сериализации 3 знаков)

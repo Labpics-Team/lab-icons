@@ -39,7 +39,7 @@ export function buildCorpusPreview({ root = ROOT, outDir = join(ROOT, 'preview')
 const CORPUS_HTML = `<!doctype html>
 <html lang="ru">
 <meta charset="utf-8">
-<title>lab-icons — корпус 444: shipped = truth</title>
+<title>lab-icons — корпус 476: shipped = truth</title>
 <style>
   :root { color-scheme: light; }
   body { font: 14px/1.45 system-ui; margin: 0; background: #f5f5f7; color: #1d1d1f; }
@@ -66,7 +66,7 @@ const CORPUS_HTML = `<!doctype html>
   .count { margin: 8px 0 12px; color: #6e6e73; font-size: 12px; }
 </style>
 <header>
-  <h1>lab-icons · 222 × 2 · shipped = truth</h1>
+  <h1>lab-icons · 238 × 2 · shipped = truth</h1>
   <div class="seg" id="variantSeg">
     <button data-v="outline" class="on">Outline</button>
     <button data-v="filled">Filled</button>

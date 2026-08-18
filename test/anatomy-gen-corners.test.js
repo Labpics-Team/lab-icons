@@ -20,7 +20,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { genRoundedPolygon, genRoundedRect } from '../scripts/lib/anatomy-gen.js';
+import { genRoundedPolygon, genRoundedRect } from '../src/core/anatomy-gen.js';
 import { cornerRadii } from '../scripts/lib/corners.js';
 
 // Радиус скругления, замеренный на вершине пути, ближайшей к точке V.

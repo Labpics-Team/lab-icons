@@ -1,0 +1,393 @@
+{
+ "generatedBy": "scripts/census/build-census.mjs",
+ "sourceOnlyCount": 163,
+ "modeledCount": 75,
+ "archetypes": {
+  "radial-gear": 1,
+  "arc-terminal": 1,
+  "stroke-v": 4,
+  "container-glyph": 4,
+  "composite": 64,
+  "rounded-polygon": 1
+ },
+ "primitives": {
+  "stroke-path": 56,
+  "circle-dot": 53,
+  "rounded-rect": 25,
+  "arc-chain": 25,
+  "arc-band": 6,
+  "tangent-chain": 6,
+  "rounded-polygon": 5,
+  "superellipse-stroke": 4,
+  "clock-hand": 2,
+  "circle-hull": 1
+ },
+ "roles": {
+  "content": 74,
+  "ink": 38,
+  "container": 21,
+  "detail": 16,
+  "body": 15,
+  "counter": 15,
+  "control": 3,
+  "decorator": 1
+ },
+ "structuralFamilies": {
+  "enclosure": {
+   "count": 6,
+   "names": [
+    "arrow-redo-circle",
+    "arrow-undo-circle",
+    "group-circle",
+    "mic-circle",
+    "person-circle",
+    "question-circle"
+   ]
+  },
+  "directional": {
+   "count": 7,
+   "names": [
+    "cloud-download",
+    "cloud-upload",
+    "link-horizontal",
+    "play-back",
+    "play-forward",
+    "play-skip-back",
+    "play-skip-forward"
+   ]
+  },
+  "off-slash": {
+   "count": 8,
+   "names": [
+    "cloud-off",
+    "eye-off",
+    "flash-off",
+    "heart-off",
+    "mic-off",
+    "notifications-off",
+    "turn-off",
+    "video-camera-off"
+   ]
+  },
+  "badge": {
+   "count": 3,
+   "names": [
+    "alert",
+    "notifications",
+    "notifications-unread"
+   ]
+  },
+  "singleton": {
+   "count": 139,
+   "names": [
+    "accessibility",
+    "actions",
+    "archive",
+    "archive-close",
+    "arrow-redo",
+    "arrow-undo",
+    "attach",
+    "bag",
+    "bag-checkmark",
+    "bag-close",
+    "bag-minus",
+    "bag-plus",
+    "bill",
+    "bin",
+    "book",
+    "bookmarks",
+    "boolean",
+    "brain",
+    "branch",
+    "branches",
+    "brush",
+    "calendar",
+    "calendar-clear",
+    "calendar-number",
+    "calendar-today",
+    "camera",
+    "camera-reverse",
+    "cart",
+    "chart",
+    "chatbubble-ellipses",
+    "chatbubbles",
+    "cloud-checkmark",
+    "color-filter",
+    "color-wand",
+    "commit",
+    "commits",
+    "compas",
+    "connect",
+    "console",
+    "copy",
+    "database",
+    "dice",
+    "duplicate",
+    "ear",
+    "earth",
+    "enter",
+    "exit",
+    "extension-puzzle",
+    "eyedrop",
+    "file",
+    "file-clear",
+    "files",
+    "fire",
+    "flash",
+    "folder",
+    "fork",
+    "glasses",
+    "globe",
+    "golf",
+    "group",
+    "hash",
+    "headphone",
+    "history",
+    "home",
+    "hourglass",
+    "image",
+    "images",
+    "invert",
+    "key",
+    "layers",
+    "link",
+    "lock",
+    "mail",
+    "mail-open",
+    "mail-unread",
+    "mcp",
+    "megaphone",
+    "merge",
+    "mic",
+    "moon-sparkles",
+    "musical-note",
+    "musical-notes",
+    "navigate",
+    "options",
+    "palette",
+    "paw",
+    "pencil",
+    "person",
+    "person-minus",
+    "person-plus",
+    "phone",
+    "pin",
+    "place",
+    "plane",
+    "print",
+    "priority",
+    "pull-request",
+    "push",
+    "qr",
+    "repeat",
+    "revert",
+    "rhomb",
+    "rocket",
+    "sad",
+    "scan",
+    "school",
+    "send",
+    "settings",
+    "share",
+    "share-display",
+    "share-social",
+    "shield-checkmark",
+    "signature",
+    "smile",
+    "sparkle",
+    "sparkles",
+    "speed",
+    "star",
+    "stats",
+    "steps",
+    "sun",
+    "sync",
+    "tag",
+    "text",
+    "ticket",
+    "timer",
+    "translate",
+    "trophy",
+    "unlock",
+    "video",
+    "video-camera",
+    "volume",
+    "volume-high",
+    "volume-low",
+    "volume-middle",
+    "volume-mute",
+    "volume-muted",
+    "wallet",
+    "warning"
+   ]
+  }
+ },
+ "enclosureScale": {
+  "arrow-redo-circle": {
+   "base": "arrow-redo",
+   "scaleW": 0.51,
+   "scaleH": 0.51,
+   "contentCenter": [
+    12.01,
+    11.52
+   ]
+  },
+  "arrow-undo-circle": {
+   "base": "arrow-undo",
+   "scaleW": 0.511,
+   "scaleH": 0.509,
+   "contentCenter": [
+    12.01,
+    11.49
+   ]
+  },
+  "group-circle": {
+   "base": "group",
+   "scaleW": 0.668,
+   "scaleH": 0.489,
+   "contentCenter": [
+    12,
+    11.28
+   ]
+  },
+  "mic-circle": {
+   "base": "mic",
+   "scaleW": 0.762,
+   "scaleH": 0.685,
+   "contentCenter": [
+    12.01,
+    12.53
+   ]
+  },
+  "person-circle": {
+   "base": "person",
+   "scaleW": 0.44,
+   "scaleH": 0.41,
+   "contentCenter": [
+    12,
+    10.92
+   ]
+  },
+  "question-circle": {
+   "base": "question",
+   "scaleW": 0.746,
+   "scaleH": 0.719,
+   "contentCenter": [
+    12.08,
+    11.99
+   ]
+  }
+ },
+ "offSlashLaw": [
+  {
+   "consumers": [
+    "cloud-off",
+    "heart-off",
+    "mic-off",
+    "video-camera-off"
+   ],
+   "shared": true
+  },
+  {
+   "consumers": [
+    "eye-off"
+   ],
+   "shared": false
+  },
+  {
+   "consumers": [
+    "flash-off"
+   ],
+   "shared": false
+  },
+  {
+   "consumers": [
+    "notifications-off"
+   ],
+   "shared": false
+  },
+  {
+   "consumers": [
+    "turn-off"
+   ],
+   "shared": false
+  }
+ ],
+ "bundle": {
+  "totalBytes": 934808,
+  "modules": [
+   {
+    "path": "semantics/catalog.json",
+    "bytes": 567071
+   },
+   {
+    "path": "semantics/anatomy.json",
+    "bytes": 214024
+   },
+   {
+    "path": "src/core/anatomy-gen.js",
+    "bytes": 48413
+   },
+   {
+    "path": "src/core/circle-dictionary.js",
+    "bytes": 22043
+   },
+   {
+    "path": "src/ir/index.ts",
+    "bytes": 21827
+   },
+   {
+    "path": "src/core/calendar-geometry.js",
+    "bytes": 16474
+   },
+   {
+    "path": "src/core/icon-geometry.js",
+    "bytes": 13813
+   },
+   {
+    "path": "src/core/path-data.js",
+    "bytes": 10648
+   },
+   {
+    "path": "src/core/glyph-operators.js",
+    "bytes": 5643
+   },
+   {
+    "path": "semantics/grid.json",
+    "bytes": 5314
+   },
+   {
+    "path": "src/ir/catalog.generated.ts",
+    "bytes": 3594
+   },
+   {
+    "path": "src/ir/sha256.ts",
+    "bytes": 3067
+   },
+   {
+    "path": "src/core/motion-sampler.js",
+    "bytes": 2724
+   },
+   {
+    "path": "src/ir/recipes.ts",
+    "bytes": 86
+   },
+   {
+    "path": "src/ir/index.ts",
+    "bytes": 67
+   }
+  ]
+ },
+ "consumerBudgets": {
+  "comment": "SIZE-01: цена потребителю по маршрутам импорта; one-icon цену доказывает check-treeshake (rollup), здесь замер полных артефактов",
+  "fullStaticCatalog": {
+   "raw": 365324,
+   "gzip": 96297
+  },
+  "glyphRuntime": {
+   "raw": 934808,
+   "gzip": 132519,
+   "note": "один glyph() тянет весь IR-бандл: JSON-данные доминируют — кандидат на split/lazy в REL-волне"
+  }
+ }
+}

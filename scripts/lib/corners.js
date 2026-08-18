@@ -22,7 +22,7 @@
  */
 
 import { samplePolylines } from './curve-sampling.js';
-import { pathBBox } from './path-data.js';
+import { pathBBox } from '../../src/core/path-data.js';
 
 // Плотность сэмплинга кривых: филлет-дуга разбивается на N рёбер — достаточно
 // для устойчивого Δs/Δθ, не переусердствуя (16 → погрешность радиуса < 0.1%).

@@ -15,7 +15,7 @@
  */
 import { readFileSync, writeFileSync } from 'node:fs';
 import { samplePolylines } from '../lib/curve-sampling.js';
-import { parsePathData } from '../lib/path-data.js';
+import { parsePathData } from '../../src/core/path-data.js';
 
 /**
  * Число в стиле корпуса: 3 знака (округление до 2 знаков создавало

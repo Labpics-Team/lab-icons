@@ -15,9 +15,9 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { buildGlyph } from '../scripts/lib/anatomy-gen.js';
+import { buildGlyph } from '../src/core/anatomy-gen.js';
 import { inkIoU } from '../scripts/check-anatomy-drift.js';
-import { renderedPathData } from '../scripts/lib/icon-geometry.js';
+import { renderedPathData } from '../src/core/icon-geometry.js';
 import { samplePolylines } from '../scripts/lib/curve-sampling.js';
 
 const root = join(import.meta.dirname, '..');
