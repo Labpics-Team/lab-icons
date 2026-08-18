@@ -8,6 +8,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { gzipSync } from 'node:zlib';
+import { pathBBox } from '../../src/core/path-data.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const read = (p) => JSON.parse(readFileSync(join(ROOT, p), 'utf8'));
@@ -65,6 +66,40 @@ const consumerBudgets = {
   },
 };
 
+// --- SEM-00: замер enclosure-семьи — масштаб контента внутри кольца ---
+// Факт для SEM-01: закон "standalone → в кольце" не один; каждый вход несёт
+// свой измеренный scale (перерисовка руки, не аффинное сжатие).
+function contentBBox(file, dropRing) {
+  const svg = readFileSync(join(ROOT, file), 'utf8');
+  let boxes = [...svg.matchAll(/ d="([^"]+)"/g)].map((m) => ({ box: pathBBox(m[1]) }));
+  if (dropRing) {
+    boxes.sort((a, b) => (b.box.maxX - b.box.minX) - (a.box.maxX - a.box.minX));
+    boxes = boxes.slice(1);
+  }
+  let minX = 99, minY = 99, maxX = -99, maxY = -99;
+  for (const { box: b } of boxes) {
+    minX = Math.min(minX, b.minX); minY = Math.min(minY, b.minY);
+    maxX = Math.max(maxX, b.maxX); maxY = Math.max(maxY, b.maxY);
+  }
+  return { w: maxX - minX, h: maxY - minY, cx: (minX + maxX) / 2, cy: (minY + maxY) / 2 };
+}
+const enclosureScale = {};
+for (const enc of structural.enclosure) {
+  const base = enc.replace(/-circle$/, '');
+  try {
+    const solo = contentBBox(`svg/Outline/${base}.svg`, false);
+    const inner = contentBBox(`svg/Outline/${enc}.svg`, true);
+    enclosureScale[enc] = {
+      base,
+      scaleW: Number((inner.w / solo.w).toFixed(3)),
+      scaleH: Number((inner.h / solo.h).toFixed(3)),
+      contentCenter: [Number(inner.cx.toFixed(2)), Number(inner.cy.toFixed(2))],
+    };
+  } catch {
+    enclosureScale[enc] = { base, error: 'no standalone counterpart' };
+  }
+}
+
 const census = {
   generatedBy: 'scripts/census/build-census.mjs',
   sourceOnlyCount: sourceOnly.length,
@@ -75,6 +110,7 @@ const census = {
   structuralFamilies: Object.fromEntries(
     Object.entries(structural).map(([k, v]) => [k, { count: v.length, names: v }]),
   ),
+  enclosureScale,
   bundle,
   consumerBudgets,
 };

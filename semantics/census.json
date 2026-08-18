@@ -222,6 +222,62 @@
    ]
   }
  },
+ "enclosureScale": {
+  "arrow-redo-circle": {
+   "base": "arrow-redo",
+   "scaleW": 0.51,
+   "scaleH": 0.51,
+   "contentCenter": [
+    12.01,
+    11.52
+   ]
+  },
+  "arrow-undo-circle": {
+   "base": "arrow-undo",
+   "scaleW": 0.511,
+   "scaleH": 0.509,
+   "contentCenter": [
+    12.01,
+    11.49
+   ]
+  },
+  "group-circle": {
+   "base": "group",
+   "scaleW": 0.668,
+   "scaleH": 0.489,
+   "contentCenter": [
+    12,
+    11.28
+   ]
+  },
+  "mic-circle": {
+   "base": "mic",
+   "scaleW": 0.762,
+   "scaleH": 0.685,
+   "contentCenter": [
+    12.01,
+    12.53
+   ]
+  },
+  "person-circle": {
+   "base": "person",
+   "scaleW": 0.44,
+   "scaleH": 0.41,
+   "contentCenter": [
+    12,
+    10.92
+   ]
+  },
+  "question-circle": {
+   "base": "question",
+   "scaleW": 0.746,
+   "scaleH": 0.719,
+   "contentCenter": [
+    12.08,
+    11.99
+   ]
+  }
+ },
  "bundle": {
   "totalBytes": 934808,
   "modules": [
