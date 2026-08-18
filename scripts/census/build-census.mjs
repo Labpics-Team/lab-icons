@@ -100,6 +100,24 @@ for (const enc of structural.enclosure) {
   }
 }
 
+// --- SEM-00: замер off-slash семьи — общность капсулы слэша ---
+// Слэш = первый субпуть (до Z) первого path. Кластеризация по нормализованной
+// строке даёт reuse-кластеры для SEM-01 (INV-07: закон при ≥2 consumers).
+const slashClusters = {};
+for (const off of structural['off-slash']) {
+  try {
+    const svg = readFileSync(join(ROOT, `svg/Outline/${off}.svg`), 'utf8');
+    const d = svg.match(/ d="([^"]+)"/)[1];
+    const first = d.split(/[Zz]/)[0].replace(/\s+/g, ' ').trim();
+    // ключ кластера: округляем числа до 1 знака — ловим бит-в-бит и почти-равные
+    const key = first.replace(/-?\d+\.?\d*/g, (n) => Number(n).toFixed(1));
+    (slashClusters[key] ??= []).push(off);
+  } catch { /* нет файла — имя уйдёт в residual других гейтов */ }
+}
+const offSlashLaw = Object.values(slashClusters)
+  .map((names) => ({ consumers: names.sort(), shared: names.length >= 2 }))
+  .sort((a, b) => b.consumers.length - a.consumers.length);
+
 const census = {
   generatedBy: 'scripts/census/build-census.mjs',
   sourceOnlyCount: sourceOnly.length,
@@ -111,6 +129,7 @@ const census = {
     Object.entries(structural).map(([k, v]) => [k, { count: v.length, names: v }]),
   ),
   enclosureScale,
+  offSlashLaw,
   bundle,
   consumerBudgets,
 };

@@ -278,6 +278,41 @@
    ]
   }
  },
+ "offSlashLaw": [
+  {
+   "consumers": [
+    "cloud-off",
+    "heart-off",
+    "mic-off",
+    "video-camera-off"
+   ],
+   "shared": true
+  },
+  {
+   "consumers": [
+    "eye-off"
+   ],
+   "shared": false
+  },
+  {
+   "consumers": [
+    "flash-off"
+   ],
+   "shared": false
+  },
+  {
+   "consumers": [
+    "notifications-off"
+   ],
+   "shared": false
+  },
+  {
+   "consumers": [
+    "turn-off"
+   ],
+   "shared": false
+  }
+ ],
  "bundle": {
   "totalBytes": 934808,
   "modules": [
