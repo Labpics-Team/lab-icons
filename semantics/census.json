@@ -222,5 +222,18 @@
    ]
   }
  },
- "bundle": null
+ "bundle": null,
+ "consumerBudgets": {
+  "comment": "SIZE-01: цена потребителю по маршрутам импорта; source = check-treeshake + gzip замер",
+  "oneStaticIconBytes": 784,
+  "fullStaticCatalog": {
+   "raw": 365324,
+   "gzip": 96297
+  },
+  "glyphRuntime": {
+   "raw": 947265,
+   "gzip": 132519,
+   "note": "один glyph() тянет весь IR-бандл: catalog.json 61% + anatomy.json 23% — кандидат на split/lazy в REL-волне"
+  }
+ }
 }
