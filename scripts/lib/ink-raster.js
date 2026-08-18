@@ -7,7 +7,7 @@
  * evenodd. Все видящие гейты должны пользоваться одной моделью рендера.
  */
 
-import { renderedPathEntries } from './icon-geometry.js';
+import { renderedPathEntries } from '../../src/core/icon-geometry.js';
 import { samplePolylines } from './curve-sampling.js';
 
 const EPS = 1e-9;

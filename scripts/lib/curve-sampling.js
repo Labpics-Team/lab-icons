@@ -14,7 +14,7 @@
  *   parseTransformString / transformPoint / transformAt — моушн-модель
  */
 
-import { parsePathData } from './path-data.js';
+import { parsePathData } from '../../src/core/path-data.js';
 
 // ─── Transform-строки генерата ───────────────────────────────────────────────
 

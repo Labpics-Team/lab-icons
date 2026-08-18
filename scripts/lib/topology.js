@@ -21,7 +21,7 @@
  * (DRY — свой парсер не пишем).
  */
 
-import { parsePathData } from './path-data.js';
+import { parsePathData } from '../../src/core/path-data.js';
 
 /**
  * Разрывы незакрытых суб-путей d. Суб-путь, начерченный командами рисования, но

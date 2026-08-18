@@ -43,10 +43,10 @@
    ]
   },
   "dist/ir/index.js": {
-   "baselineBytes": 947286,
-   "baselineGzipBytes": 138868,
-   "maxBytes": 947286,
-   "maxGzipBytes": 138868,
+   "baselineBytes": 947265,
+   "baselineGzipBytes": 138856,
+   "maxBytes": 947265,
+   "maxGzipBytes": 138856,
    "allowedModules": [
     "src/core/anatomy-gen.js",
     "src/core/calendar-geometry.js",
@@ -78,10 +78,10 @@
    ]
   },
   "dist/ir/recipes.js": {
-   "baselineBytes": 65222,
-   "baselineGzipBytes": 15364,
-   "maxBytes": 65222,
-   "maxGzipBytes": 15364,
+   "baselineBytes": 65216,
+   "baselineGzipBytes": 15356,
+   "maxBytes": 65216,
+   "maxGzipBytes": 15356,
    "allowedModules": [
     "src/core/calendar-geometry.js",
     "src/core/glyph-operators.js",

@@ -19,6 +19,10 @@ import { renderedPathEntries } from '../src/core/icon-geometry.js';
 import { samplePolylines } from './lib/curve-sampling.js';
 import { rasterizePathEntries } from './lib/ink-raster.js';
 import { lowerModelComposition } from './lib/model-composition.js';
+import thresholds from '../semantics/quality-thresholds.json' with { type: 'json' };
+
+const GENERATED_FLOOR = thresholds.generated.driftIoUFloor;
+const HAND_FLOOR = thresholds.transcript.fitIoUFloor;
 
 function inkAt(polys, x, y) {
   let hits = 0;
@@ -127,13 +131,13 @@ export function validateAnatomy({ grid, anatomy, catalog = null, readSvg }) {
         ? maskIoU(originalEntries, candidateEntries, cw)
         : inkIoU(dGen, originalEntries.map((entry) => entry.d).join(''), cw);
       checked++;
-      if (status === 'generated' && iou < 0.995) {
+      if (status === 'generated' && iou < GENERATED_FLOOR) {
         hard.push(
-          `${name}/${variant}: дрейф генерата и файла — IoU ${(iou * 100).toFixed(2)}% < 99.5% (status=generated)`,
+          `${name}/${variant}: дрейф генерата и файла — IoU ${(iou * 100).toFixed(2)}% < ${GENERATED_FLOOR * 100}% (status=generated)`,
         );
-      } else if (status === 'hand' && iou < 0.95) {
+      } else if (status === 'hand' && iou < HAND_FLOOR) {
         report.push(
-          `${name}/${variant}: анатомия разошлась с рукой — IoU ${(iou * 100).toFixed(2)}% < 95%`,
+          `${name}/${variant}: анатомия разошлась с рукой — IoU ${(iou * 100).toFixed(2)}% < ${HAND_FLOOR * 100}%`,
         );
       }
     }

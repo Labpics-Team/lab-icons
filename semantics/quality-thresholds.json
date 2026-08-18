@@ -1,0 +1,17 @@
+{
+ "version": 1,
+ "comment": "SSOT порогов качества (r2 DOC-01). Гейты читают отсюда; правка порога = осознанное версионируемое решение, не тихая константа в коде.",
+ "transcript": {
+  "fitIoUFloor": 0.95,
+  "meaning": "candidate/hand транскрипция: генерат сходится с рукой по чернилам; ниже — report (расхождение видно), не hard"
+ },
+ "generated": {
+  "driftIoUFloor": 0.995,
+  "fidelityToHandFloor": 0.97,
+  "meaning": "generated-глиф: drift = закон и файл идентичны (hard), fidelity = узнаваемость против руки на момент миграции (hard ниже пола)"
+ },
+ "acceptance": {
+  "autoDeviationPct": 3,
+  "meaning": "автоматическая приёмка размерных отклонений в дифференциальных гейтах"
+ }
+}

@@ -5,7 +5,7 @@
 //   2. eoNzDisagree — примитив: доля площади, где evenodd ≠ nonzero для одного d.
 // Меры детерминированы и считаются по ВСЕМУ корпусу, не по выборке-глазу.
 import { samplePolylines } from './curve-sampling.js';
-import { renderedPathEntries } from './icon-geometry.js';
+import { renderedPathEntries } from '../../src/core/icon-geometry.js';
 
 // ── точка внутри чернил: even-odd (чётность) и nonzero (винтинг) ──
 function insideEO(px, py, polys) {

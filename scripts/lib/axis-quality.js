@@ -10,7 +10,7 @@
  * Failing axes stay modeled, but are named in an explicit reviewed debt
  * registry instead of being silently filtered from the catalog.
  */
-import { buildGlyph, buildGlyphParts, topologySignature } from './anatomy-gen.js';
+import { buildGlyph, buildGlyphParts, topologySignature } from '../../src/core/anatomy-gen.js';
 import { DEFAULT_RASTER_PHASES, topologyAcrossPhases } from './ink-raster.js';
 import { lowerModelComposition } from './model-composition.js';
 

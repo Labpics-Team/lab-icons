@@ -17,7 +17,7 @@
  */
 
 import { samplePolylines } from './curve-sampling.js';
-import { parsePathData, pathBBox } from './path-data.js';
+import { parsePathData, pathBBox } from '../../src/core/path-data.js';
 import {
   DEFAULT_RASTER_PHASES,
   rasterizePathEntries,

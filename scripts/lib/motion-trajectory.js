@@ -8,13 +8,13 @@
  * source of truth.
  */
 
-import { rotatePath } from './anatomy-gen.js';
+import { rotatePath } from '../../src/core/anatomy-gen.js';
 import {
   DEFAULT_RASTER_PHASES,
   rasterizePathEntries,
   topologyOfMask,
 } from './ink-raster.js';
-import { sampleMotionGesture, validateMotionGesture } from './motion-sampler.js';
+import { sampleMotionGesture, validateMotionGesture } from '../../src/core/motion-sampler.js';
 import { lowerModelComposition } from './model-composition.js';
 
 export const DEFAULT_MOTION_PROGRESS = Object.freeze([
@@ -31,7 +31,7 @@ export const DEFAULT_MOTION_PROGRESS = Object.freeze([
 
 export const DEFAULT_MOTION_RASTER_SIZES = Object.freeze([16, 20, 24, 32, 48]);
 
-export { sampleMotionGesture } from './motion-sampler.js';
+export { sampleMotionGesture } from '../../src/core/motion-sampler.js';
 
 function compositionEntries(parts, composition, rotations, canvas) {
   const transformed = parts.map((part) => {

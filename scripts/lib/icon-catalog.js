@@ -10,9 +10,9 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { join } from 'node:path';
 import { optimize } from 'svgo';
-import { buildGlyph, buildGlyphParts, topologySignature } from './anatomy-gen.js';
-import { authorPathEntries, sourcePathEntries } from './icon-geometry.js';
-import { parsePathData } from './path-data.js';
+import { buildGlyph, buildGlyphParts, topologySignature } from '../../src/core/anatomy-gen.js';
+import { authorPathEntries, sourcePathEntries } from '../../src/core/icon-geometry.js';
+import { parsePathData } from '../../src/core/path-data.js';
 import { axisDebtIds, proveVariantAxes, resolvePublicAxes } from './axis-quality.js';
 import { quarantinedModelIds } from './model-quality.js';
 

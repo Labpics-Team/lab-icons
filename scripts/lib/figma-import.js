@@ -7,7 +7,7 @@
 import {
   authorPathEntries,
   lowerViewportIdentityClip,
-} from './icon-geometry.js';
+} from '../../src/core/icon-geometry.js';
 
 const ICON_ID_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const MONOCHROME_PAINT = new Set(['none', 'currentcolor', '#101012']);
