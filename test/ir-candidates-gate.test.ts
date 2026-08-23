@@ -10,7 +10,7 @@
  */
 import { describe, expect, it } from 'vitest';
 
-import { glyph } from '../src/ir/index.js';
+import { glyph, registerCandidateAnatomy } from '../src/ir/index.js';
 import catalogJson from '../semantics/catalog.json';
 import runtimeJson from '../semantics/anatomy.runtime.json';
 
@@ -71,5 +71,13 @@ describe('INV-06: candidate-гейт fail-closed без registerCandidates()', (
       const ir = glyph({ icon: icon as never, variant });
       expect(ir.provenance.kind).toBe('source');
     }
+  });
+
+  it('пустая регистрация не открывает гейт (обход из финального ревью PR #85)', () => {
+    registerCandidateAnatomy({});
+    const { icon, variant } = mixed[0]!;
+    expect(() =>
+      glyph({ icon: icon as never, variant, modelMode: 'allow-candidate' }),
+    ).toThrowError(/ir\/candidates/);
   });
 });

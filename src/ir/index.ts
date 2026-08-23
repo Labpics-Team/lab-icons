@@ -406,6 +406,9 @@ let candidatesRegistered = false;
 export function registerCandidateAnatomy(
   glyphs: Readonly<Record<string, AnatomyGlyph>>,
 ): void {
+  // Гейт открывается только непустым корпусом: пустой вызов не должен
+  // включать построение mixed-моделей без candidate-деклараций.
+  if (Object.keys(glyphs).length === 0) return;
   candidatesRegistered = true;
   for (const [name, glyph] of Object.entries(glyphs)) {
     if (name in anatomy.glyphs) continue; // runtime-проекция авторитетна
