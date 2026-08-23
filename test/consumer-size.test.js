@@ -22,7 +22,8 @@ async function fixture() {
   mkdirSync(join(root, 'release'), { recursive: true });
   writeFileSync(
     join(root, 'dist/index.js'),
-    'export const alertFilled = "<svg>alert</svg>";\nexport const unusedFilled = "<svg>unused</svg>";\n',
+    `export const alertFilled = "<svg>alert</svg>";\n` +
+      `export const unusedFilled = "UNUSED_SENTINEL_${'x'.repeat(2048)}";\n`,
   );
   const entry = "import { alertFilled } from '@labpics/icons';\nconsole.log(alertFilled);\n";
   const measured = await bundleScenario(entry, { root });
@@ -58,8 +59,22 @@ describe('consumer size ratchet', () => {
       "import { alertFilled } from '@labpics/icons';\nconsole.log(alertFilled);\n",
       { root },
     );
-    // tree-shake обязан работать в измерении: unusedFilled не попадает в бандл
-    expect(bundled.bytes).toBeLessThan(90);
+    // 2KB sentinel гарантирует: при сломанном tree-shake порог будет превышен.
+    expect(bundled.bytes).toBeLessThan(200);
+    const withoutImport = "console.log('@labpics/icons');";
+    expect(() => parseConsumerSizeRatchet({
+      version: 1,
+      measurement: CONSUMER_SIZE_MEASUREMENT,
+      scenarios: {
+        fake: {
+          entry: withoutImport,
+          baselineBytes: 1,
+          baselineGzipBytes: 1,
+          maxBytes: 1,
+          maxGzipBytes: 1,
+        },
+      },
+    })).toThrow(/static import/);
   });
 
   it('кусается при дрейфе baseline в обе стороны и при превышении max', async () => {
@@ -76,7 +91,9 @@ describe('consumer size ratchet', () => {
     writeFileSync(join(shrank.root, 'dist/index.js'), 'export const alertFilled = "x";\n');
     const shrankResult = await checkConsumerSize({ root: shrank.root });
     // уменьшение — тоже дрейф: baseline опускается коммитом, не молчанием
-    expect(shrankResult.errors.join('\n')).toMatch(/!= factual baselineBytes/);
+    expect(shrankResult.errors.join('\n')).toMatch(
+      /!= factual baselineBytes|package import не внёс байтов/,
+    );
   });
 
   it('fail-closed: невалидная форма ratchet — ошибка, не пропуск', async () => {

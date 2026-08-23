@@ -45,6 +45,11 @@ const SCENARIO_FIELDS = [
   'maxGzipBytes',
 ];
 const SCENARIO_NAME = /^[a-z][a-z0-9-]*$/;
+const STATIC_PACKAGE_IMPORT = /\bimport\s+(?:[^'";]+?\s+from\s+)?['"](@labpics\/icons(?:\/[^'"]*)?)['"]/g;
+
+function packageImports(entry) {
+  return [...entry.matchAll(STATIC_PACKAGE_IMPORT)].map((match) => match[1]);
+}
 
 function isRecord(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
@@ -93,8 +98,8 @@ export function parseConsumerSizeRatchet(value) {
     }
     const where = `consumer size ratchet.scenarios.${name}`;
     assertExactKeys(limits, SCENARIO_FIELDS, where);
-    if (typeof limits.entry !== 'string' || !limits.entry.includes('@labpics/icons')) {
-      throw new TypeError(`${where}.entry обязан быть импортом из @labpics/icons`);
+    if (typeof limits.entry !== 'string' || packageImports(limits.entry).length === 0) {
+      throw new TypeError(`${where}.entry обязан содержать static import из @labpics/icons`);
     }
     const baselineBytes = positiveInteger(limits.baselineBytes, `${where}.baselineBytes`);
     const baselineGzipBytes = positiveInteger(
@@ -136,10 +141,34 @@ export async function bundleScenario(entry, { root = ROOT } = {}) {
     format: 'esm',
     platform: 'browser',
     target: 'es2022',
-    alias,
+    plugins: [{
+      name: 'consumer-package-entry',
+      setup(buildApi) {
+        buildApi.onResolve({ filter: /^@labpics\/icons(?:\/.*)?$/ }, (args) => {
+          const path = alias[args.path];
+          if (!path) return { errors: [{ text: `неизвестный package subpath ${args.path}` }] };
+          return { path, namespace: 'consumer-package-entry' };
+        });
+        buildApi.onLoad({ filter: /.*/, namespace: 'consumer-package-entry' }, (args) => ({
+          contents: readFileSync(args.path, 'utf8'),
+          loader: 'js',
+          resolveDir: dirname(args.path),
+        }));
+      },
+    }],
+    metafile: true,
     write: false,
     logLevel: 'silent',
   });
+  const contributedBytes = Object.values(out.metafile.outputs).reduce(
+    (sum, output) => sum + Object.entries(output.inputs)
+      .filter(([input]) => input.includes('consumer-package-entry:'))
+      .reduce((subtotal, [, input]) => subtotal + input.bytesInOutput, 0),
+    0,
+  );
+  if (contributedBytes === 0) {
+    throw new Error('package import не внёс байтов в consumer-бандл');
+  }
   const bytes = Buffer.from(out.outputFiles[0].contents);
   return Object.freeze({
     bytes: bytes.byteLength,
