@@ -1,0 +1,34 @@
+{
+ "version": 1,
+ "measurement": "esbuild@0.28.1 bundle+minify+treeshake es2022 browser; fflate@0.8.3 gzipSync level=9 mtime=0",
+ "scenarios": {
+  "one-static": {
+   "entry": "import { accessibilityFilled } from '@labpics/icons';\nconsole.log(accessibilityFilled);\n",
+   "baselineBytes": 637,
+   "baselineGzipBytes": 394,
+   "maxBytes": 700,
+   "maxGzipBytes": 433
+  },
+  "glyph-one": {
+   "entry": "import { glyph } from '@labpics/icons/ir';\nconsole.log(glyph({ icon: 'alert' }));\n",
+   "baselineBytes": 837563,
+   "baselineGzipBytes": 210010,
+   "maxBytes": 921319,
+   "maxGzipBytes": 231011
+  },
+  "full-catalog": {
+   "entry": "import * as icons from '@labpics/icons';\nconsole.log(icons);\n",
+   "baselineBytes": 362391,
+   "baselineGzipBytes": 102372,
+   "maxBytes": 398630,
+   "maxGzipBytes": 112609
+  },
+  "recipes-only": {
+   "entry": "import { buildCalendarNumberGeometry } from '@labpics/icons/ir/recipes';\nconsole.log(buildCalendarNumberGeometry);\n",
+   "baselineBytes": 11537,
+   "baselineGzipBytes": 4590,
+   "maxBytes": 12690,
+   "maxGzipBytes": 5049
+  }
+ }
+}
