@@ -22,6 +22,29 @@
     "sourceMappingURL"
    ]
   },
+  "dist/ir/candidates.d.ts": {
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ],
+   "baselineBytes": 154,
+   "maxBytes": 154,
+   "baselineGzipBytes": 160,
+   "maxGzipBytes": 160
+  },
+  "dist/ir/candidates.js": {
+   "baselineBytes": 259809,
+   "baselineGzipBytes": 19330,
+   "maxBytes": 259809,
+   "maxGzipBytes": 19330,
+   "allowedModules": [
+    "semantics/anatomy.candidates.json",
+    "src/ir/candidates.ts"
+   ],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ]
+  },
   "dist/ir/catalog.generated.d.ts": {
    "baselineBytes": 3602,
    "baselineGzipBytes": 1407,
@@ -43,10 +66,10 @@
    ]
   },
   "dist/ir/index.js": {
-   "baselineBytes": 1064174,
-   "baselineGzipBytes": 144005,
-   "maxBytes": 1064174,
-   "maxGzipBytes": 144005,
+   "baselineBytes": 805449,
+   "baselineGzipBytes": 125314,
+   "maxBytes": 805449,
+   "maxGzipBytes": 125314,
    "allowedModules": [
     "src/core/anatomy-gen.js",
     "src/core/calendar-geometry.js",
@@ -55,7 +78,7 @@
     "src/core/icon-geometry.js",
     "src/core/motion-sampler.js",
     "src/core/path-data.js",
-    "semantics/anatomy.json",
+    "semantics/anatomy.runtime.json",
     "semantics/catalog.json",
     "semantics/grid.json",
     "src/ir/catalog.generated.ts",

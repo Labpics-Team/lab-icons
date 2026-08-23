@@ -31,6 +31,7 @@ const DECLARATIONS = Object.freeze({
     `export type { RecipeResult } from './recipes.js';\n` +
     'export declare const iconIds: readonly CatalogIconId[];\n',
   'dist/ir/recipes.d.ts': 'export interface RecipeResult { readonly kind: string }\n',
+  'dist/ir/candidates.d.ts': 'export declare function registerCandidates(): void;\n',
 });
 
 function write(root, path, content = '') {

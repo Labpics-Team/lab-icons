@@ -4,6 +4,7 @@
     "declaration": true,
     "declarationMap": false,
     "emitDeclarationOnly": true,
+    "stripInternal": true,
     "noEmit": false,
     "rootDir": "./src/ir"
   },

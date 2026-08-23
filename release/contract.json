@@ -1,40 +1,46 @@
 {
-  "version": 4,
-  "packageName": "@labpics/icons",
-  "primary": {
-    "kind": "npm",
-    "access": "public",
-    "install": "pnpm add @labpics/icons"
+ "version": 4,
+ "packageName": "@labpics/icons",
+ "primary": {
+  "kind": "npm",
+  "access": "public",
+  "install": "pnpm add @labpics/icons"
+ },
+ "fallback": {
+  "kind": "github-dist-tag",
+  "specifier": "github:Labpics-Team/lab-icons#vX.Y.Z-dist",
+  "immutable": true
+ },
+ "files": [
+  "dist/index.d.ts",
+  "dist/index.js",
+  "dist/ir/candidates.d.ts",
+  "dist/ir/candidates.js",
+  "dist/ir/catalog.generated.d.ts",
+  "dist/ir/index.d.ts",
+  "dist/ir/index.js",
+  "dist/ir/recipes.d.ts",
+  "dist/ir/recipes.js"
+ ],
+ "typeDependencies": [
+  "dist/ir/catalog.generated.d.ts"
+ ],
+ "exports": {
+  ".": {
+   "types": "./dist/index.d.ts",
+   "import": "./dist/index.js"
   },
-  "fallback": {
-    "kind": "github-dist-tag",
-    "specifier": "github:Labpics-Team/lab-icons#vX.Y.Z-dist",
-    "immutable": true
+  "./ir": {
+   "types": "./dist/ir/index.d.ts",
+   "import": "./dist/ir/index.js"
   },
-  "files": [
-    "dist/index.d.ts",
-    "dist/index.js",
-    "dist/ir/catalog.generated.d.ts",
-    "dist/ir/index.d.ts",
-    "dist/ir/index.js",
-    "dist/ir/recipes.d.ts",
-    "dist/ir/recipes.js"
-  ],
-  "typeDependencies": [
-    "dist/ir/catalog.generated.d.ts"
-  ],
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
-    },
-    "./ir": {
-      "types": "./dist/ir/index.d.ts",
-      "import": "./dist/ir/index.js"
-    },
-    "./ir/recipes": {
-      "types": "./dist/ir/recipes.d.ts",
-      "import": "./dist/ir/recipes.js"
-    }
+  "./ir/recipes": {
+   "types": "./dist/ir/recipes.d.ts",
+   "import": "./dist/ir/recipes.js"
+  },
+  "./ir/candidates": {
+   "types": "./dist/ir/candidates.d.ts",
+   "import": "./dist/ir/candidates.js"
   }
+ }
 }

@@ -65,6 +65,8 @@ function validPackage() {
   write(root, 'dist/ir/catalog.generated.d.ts', "export type CatalogIconId = 'fixture';\n");
   write(root, 'dist/ir/recipes.js', 'export const buildDirectionalArrow = () => ({});\n');
   write(root, 'dist/ir/recipes.d.ts', 'export declare function buildDirectionalArrow(): unknown;\n');
+  write(root, 'dist/ir/candidates.js', 'export const registerCandidates = () => {};\n');
+  write(root, 'dist/ir/candidates.d.ts', 'export declare function registerCandidates(): void;\n');
   return root;
 }
 

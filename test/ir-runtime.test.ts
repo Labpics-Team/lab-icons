@@ -19,6 +19,10 @@ import {
   type GlyphIR,
   type IconVariant,
 } from '../src/ir/index.js';
+import { registerCandidates } from '../src/ir/candidates.js';
+
+// INV-06: candidate-модели — opt-in корпус; тесты candidate-веток регистрируют его явно.
+registerCandidates();
 import { EXPECTED_ICON_NAMES } from '../scripts/lib/corpus-contract.js';
 
 function silhouetteEntries(value: GlyphIR): Array<{

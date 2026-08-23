@@ -432,14 +432,18 @@ export function checkPackageArtifact({
         `import * as fullIr from '@labpics/icons/ir';\n` +
         `import { axisNames, calendarNumberGlyph, glyph, glyphCapabilities, iconDesignContract, iconIds } from '@labpics/icons/ir';\n` +
         `import { buildDirectionalArrow } from '@labpics/icons/ir/recipes';\n` +
+        `import { registerCandidates } from '@labpics/icons/ir/candidates';\n` +
         `if (typeof accessibilityOutline !== 'string' || !accessibilityOutline.includes('<svg')) throw new Error('root ESM export broken');\n` +
         `if ('buildDirectionalArrow' in fullIr) throw new Error('full IR leaks lightweight recipe surface');\n` +
+        `if (typeof registerCandidates !== 'function') throw new Error('candidates ESM export broken');\n` +
         `const ir = glyph({ icon: 'accessibility', variant: 'outline', modelMode: 'source-only' });\n` +
         `const calendar = calendarNumberGlyph({ date: new Date('2026-07-16T12:00:00Z'), timeZone: 'UTC', opsz: 24 });\n` +
         `const arrow = buildDirectionalArrow({ orientation: 'forward', shaftLength: 0.52 });\n` +
         `if (iconIds.length !== ${EXPECTED_ICON_NAMES} || axisNames.length !== 3 || !Object.isFrozen(iconIds) || !Object.isFrozen(axisNames) || ir.provenance.kind !== 'source' || ir.parts.length < 1) throw new Error('ir ESM export broken');\n` +
         `if (iconDesignContract.targets.lottie !== 'not-exported' || glyphCapabilities('time', 'outline').motion.state !== 'gesture-ready' || glyphCapabilities('time', 'outline').motion.gestures[0]?.id !== 'time.advance') throw new Error('capability contract broken');\n` +
         `for (const icon of iconIds) for (const variant of ['outline', 'filled']) glyph({ icon, variant, modelMode: 'source-only' });\n` +
+        `registerCandidates();\n` +
+        `for (const icon of iconIds) for (const variant of ['outline', 'filled']) glyph({ icon, variant, modelMode: 'allow-candidate' });\n` +
         `if (calendar.provenance.kind !== 'recipe' || calendar.provenance.context.day !== 16) throw new Error('calendar recipe broken');\n` +
         `if (arrow.parts.length !== 2 || arrow.joins?.[0]?.lowering !== 'expand-strokes-then-union') throw new Error('operator recipe broken');\n`,
       'utf8',

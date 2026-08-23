@@ -32,11 +32,14 @@ const OUT_DIR = join(ROOT, 'dist/ir');
 const BACKUP_DIR = join(ROOT, 'dist/.ir-previous');
 const DTS_CONFIG = join(ROOT, 'tsconfig.build.json');
 const REQUIRED_DECLARATIONS = Object.freeze([
+  'candidates.d.ts',
   'catalog.generated.d.ts',
   'index.d.ts',
   'recipes.d.ts',
 ]);
 const EXPECTED_OUTPUTS = Object.freeze([
+  'candidates.d.ts',
+  'candidates.js',
   'catalog.generated.d.ts',
   'index.d.ts',
   'index.js',
@@ -73,6 +76,9 @@ async function bundle(outDir, entry, outfile, external = []) {
   });
 }
 
+// INV-06: проекция анатомии — часть IR-сборки (runtime vs candidates).
+execFileSync(process.execPath, [join(ROOT, 'scripts', 'build-anatomy-projection.mjs')], { stdio: 'inherit' });
+
 mkdirSync(DIST_DIR, { recursive: true });
 recoverOwnedDirectory({ output: OUT_DIR, backup: BACKUP_DIR });
 const staging = mkdtempSync(join(DIST_DIR, '.ir-build-'));
@@ -81,6 +87,7 @@ try {
   await Promise.all([
     bundle(staging, 'src/ir/index.ts', 'index.js', ['@labpics/icons']),
     bundle(staging, 'src/ir/recipes.ts', 'recipes.js'),
+    bundle(staging, 'src/ir/candidates.ts', 'candidates.js', ['./index.js']),
   ]);
   emitDeclarations(declarations);
   for (const file of REQUIRED_DECLARATIONS) {
@@ -124,6 +131,6 @@ try {
 }
 
 console.log(
-  `build-ir: ESM 2 + declarations ${REQUIRED_DECLARATIONS.length}; ` +
+  `build-ir: ESM 3 + declarations ${REQUIRED_DECLARATIONS.length}; ` +
     'esbuild и TypeScript используют один pinned dependency graph',
 );

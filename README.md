@@ -42,6 +42,7 @@ pnpm add @labpics/icons
 | `@labpics/icons` | Статические SVG-строки и тип `IconName` |
 | `@labpics/icons/ir` | Строгий Glyph IR, каталог, capabilities, design contract, оси и calendar recipe |
 | `@labpics/icons/ir/recipes` | Лёгкие чистые kernels: стрелки, декораторы, лучи, ноты, календарные цифры |
+| `@labpics/icons/ir/candidates` | Opt-in корпус candidate-деклараций: явный вызов `registerCandidates()` включает `modelMode: 'allow-candidate'`; default `./ir` несёт только accepted-модели. Bare-импорт субпата запрещён — модуль без side effects вырезается бандлером |
 
 ```ts
 import { accessibilityOutline } from '@labpics/icons'
@@ -157,12 +158,13 @@ pnpm verify
    анатомический diagnostic output;
 2. `build:catalog` пересобирает catalog и TypeScript‑проекцию из актуальной
    геометрии до компиляции публичного IR;
-3. `build:ir` собирает `/ir`, `/ir/recipes` и их точную declaration closure во
+3. `build:ir` проецирует анатомию (runtime vs candidates), собирает `/ir`,
+   `/ir/candidates`, `/ir/recipes` и их точную declaration closure во
    временный каталог, проверяет закрытый набор output и транзакционно заменяет
    owned `dist/ir` с восстановлением после ошибки или прерванного swap;
 4. lifecycle `prepack` вызывает тот же `pnpm build`.
 
-Публичный tarball содержит ровно 7 release‑файлов из `release/contract.json` плюс npm
+Публичный tarball содержит ровно 9 release‑файлов из `release/contract.json` плюс npm
 metadata. `check:package-artifact` копирует исходники без `dist/`, запускает
 реальный `pnpm pack`/`prepack`, ставит tarball в пустого offline‑consumer и
 проверяет все ESM entrypoints, bundler/NodeNext TypeScript declarations,
