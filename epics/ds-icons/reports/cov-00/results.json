@@ -1,0 +1,4447 @@
+{
+ "commit": "423506dc00e0453ab12332be27f238d7d0b20095",
+ "step": 0.12,
+ "canvas": 24,
+ "minFeatureArea": 0.072,
+ "elapsedSec": 8.5,
+ "targets": 153,
+ "results": [
+  {
+   "name": "accessibility",
+   "variants": {
+    "outline": {
+     "iou": 0.9937,
+     "hausdorffCells": 1,
+     "topoOrig": "2:2",
+     "topoCand": "2:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "5→5",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9937,
+     "hausdorffCells": 1,
+     "topoOrig": "2:0",
+     "topoCand": "2:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 5,
+   "segs": 173
+  },
+  {
+   "name": "actions",
+   "variants": {
+    "outline": {
+     "iou": 0.9991,
+     "hausdorffCells": 1,
+     "topoOrig": "4:2",
+     "topoCand": "4:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "6→6",
+     "fillRules": "evenodd+nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 1,
+     "hausdorffCells": 0,
+     "topoOrig": "1:4",
+     "topoCand": "1:4",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "5→5",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 6,
+   "segs": 116
+  },
+  {
+   "name": "alert",
+   "variants": {
+    "outline": {
+     "iou": 0.9986,
+     "hausdorffCells": 1,
+     "topoOrig": "2:0",
+     "topoCand": "2:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.999,
+     "hausdorffCells": 1,
+     "topoOrig": "2:0",
+     "topoCand": "2:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "evenodd+nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 2,
+   "segs": 29
+  },
+  {
+   "name": "archive",
+   "variants": {
+    "outline": {
+     "iou": 0.9997,
+     "hausdorffCells": 1,
+     "topoOrig": "2:2",
+     "topoCand": "2:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "evenodd+nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 1,
+     "hausdorffCells": 0,
+     "topoOrig": "1:2",
+     "topoCand": "1:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 4,
+   "segs": 68
+  },
+  {
+   "name": "archive-close",
+   "variants": {
+    "outline": {
+     "iou": 0.9995,
+     "hausdorffCells": 1,
+     "topoOrig": "2:2",
+     "topoCand": "2:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "evenodd+nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9998,
+     "hausdorffCells": 1,
+     "topoOrig": "1:2",
+     "topoCand": "1:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 4,
+   "segs": 70
+  },
+  {
+   "name": "arrow-redo-circle",
+   "variants": {
+    "outline": {
+     "iou": 0.9991,
+     "hausdorffCells": 1,
+     "topoOrig": "2:1",
+     "topoCand": "2:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd+nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9996,
+     "hausdorffCells": 1,
+     "topoOrig": "1:1",
+     "topoCand": "1:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 3,
+   "segs": 33
+  },
+  {
+   "name": "arrow-undo-circle",
+   "variants": {
+    "outline": {
+     "iou": 0.9994,
+     "hausdorffCells": 1,
+     "topoOrig": "2:1",
+     "topoCand": "2:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd+nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9993,
+     "hausdorffCells": 1,
+     "topoOrig": "1:1",
+     "topoCand": "1:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 3,
+   "segs": 33
+  },
+  {
+   "name": "attach",
+   "variants": {
+    "outline": {
+     "iou": 1,
+     "hausdorffCells": 0,
+     "topoOrig": "1:0",
+     "topoCand": "1:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "1→1",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 1,
+     "hausdorffCells": 0,
+     "topoOrig": "1:0",
+     "topoCand": "1:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "1→1",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 1,
+   "segs": 32
+  },
+  {
+   "name": "bag",
+   "variants": {
+    "outline": {
+     "iou": 0.9929,
+     "hausdorffCells": 1,
+     "topoOrig": "1:2",
+     "topoCand": "1:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9987,
+     "hausdorffCells": 1,
+     "topoOrig": "1:1",
+     "topoCand": "1:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 3,
+   "segs": 93
+  },
+  {
+   "name": "bag-checkmark",
+   "variants": {
+    "outline": {
+     "iou": 0.9937,
+     "hausdorffCells": 1,
+     "topoOrig": "2:2",
+     "topoCand": "2:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "evenodd+nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9984,
+     "hausdorffCells": 1,
+     "topoOrig": "1:2",
+     "topoCand": "1:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 4,
+   "segs": 117
+  },
+  {
+   "name": "bag-close",
+   "variants": {
+    "outline": {
+     "iou": 0.994,
+     "hausdorffCells": 1,
+     "topoOrig": "2:2",
+     "topoCand": "2:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "evenodd+nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9986,
+     "hausdorffCells": 1,
+     "topoOrig": "1:2",
+     "topoCand": "1:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 4,
+   "segs": 118
+  },
+  {
+   "name": "bag-minus",
+   "variants": {
+    "outline": {
+     "iou": 0.9936,
+     "hausdorffCells": 1,
+     "topoOrig": "2:2",
+     "topoCand": "2:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "evenodd+nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9986,
+     "hausdorffCells": 1,
+     "topoOrig": "1:2",
+     "topoCand": "1:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 4,
+   "segs": 101
+  },
+  {
+   "name": "bag-plus",
+   "variants": {
+    "outline": {
+     "iou": 0.994,
+     "hausdorffCells": 1,
+     "topoOrig": "2:2",
+     "topoCand": "2:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "evenodd+nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9986,
+     "hausdorffCells": 1,
+     "topoOrig": "1:2",
+     "topoCand": "1:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 4,
+   "segs": 120
+  },
+  {
+   "name": "bill",
+   "variants": {
+    "outline": {
+     "iou": 0.9994,
+     "hausdorffCells": 1,
+     "topoOrig": "3:2",
+     "topoCand": "3:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "5→5",
+     "fillRules": "evenodd+nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9989,
+     "hausdorffCells": 1,
+     "topoOrig": "2:2",
+     "topoCand": "2:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "evenodd+nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 5,
+   "segs": 97
+  },
+  {
+   "name": "bin",
+   "variants": {
+    "outline": {
+     "iou": 0.9807,
+     "hausdorffCells": 1,
+     "topoOrig": "2:1",
+     "topoCand": "2:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd+nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9921,
+     "hausdorffCells": 1,
+     "topoOrig": "2:1",
+     "topoCand": "2:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd+nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 3,
+   "segs": 85
+  },
+  {
+   "name": "book",
+   "variants": {
+    "outline": {
+     "iou": 0.9917,
+     "hausdorffCells": 1,
+     "topoOrig": "1:2",
+     "topoCand": "1:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9977,
+     "hausdorffCells": 1,
+     "topoOrig": "2:0",
+     "topoCand": "2:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 3,
+   "segs": 69
+  },
+  {
+   "name": "bookmarks",
+   "variants": {
+    "outline": {
+     "iou": 0.9991,
+     "hausdorffCells": 1,
+     "topoOrig": "1:2",
+     "topoCand": "1:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9999,
+     "hausdorffCells": 1,
+     "topoOrig": "1:1",
+     "topoCand": "1:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 3,
+   "segs": 108
+  },
+  {
+   "name": "boolean",
+   "variants": {
+    "outline": {
+     "iou": 1,
+     "hausdorffCells": 0,
+     "topoOrig": "2:2",
+     "topoCand": "2:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 1,
+     "hausdorffCells": 0,
+     "topoOrig": "1:1",
+     "topoCand": "1:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 4,
+   "segs": 23
+  },
+  {
+   "name": "brain",
+   "variants": {
+    "outline": {
+     "iou": 0.9984,
+     "hausdorffCells": 1,
+     "topoOrig": "2:0",
+     "topoCand": "2:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9973,
+     "hausdorffCells": 1,
+     "topoOrig": "1:1",
+     "topoCand": "1:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 2,
+   "segs": 118
+  },
+  {
+   "name": "branch",
+   "variants": {
+    "outline": {
+     "iou": 0.9995,
+     "hausdorffCells": 1,
+     "topoOrig": "1:3",
+     "topoCand": "1:3",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9989,
+     "hausdorffCells": 1,
+     "topoOrig": "3:0",
+     "topoCand": "3:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 4,
+   "segs": 68
+  },
+  {
+   "name": "branches",
+   "variants": {
+    "outline": {
+     "iou": 0.9996,
+     "hausdorffCells": 1,
+     "topoOrig": "1:4",
+     "topoCand": "1:4",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "5→5",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9992,
+     "hausdorffCells": 1,
+     "topoOrig": "4:0",
+     "topoCand": "4:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 5,
+   "segs": 114
+  },
+  {
+   "name": "brush",
+   "variants": {
+    "outline": {
+     "iou": 0.9965,
+     "hausdorffCells": 1,
+     "topoOrig": "1:2",
+     "topoCand": "1:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9996,
+     "hausdorffCells": 1,
+     "topoOrig": "2:0",
+     "topoCand": "2:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 3,
+   "segs": 97
+  },
+  {
+   "name": "calendar",
+   "variants": {
+    "outline": {
+     "iou": 1,
+     "hausdorffCells": 0,
+     "topoOrig": "10:2",
+     "topoCand": "10:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "12→12",
+     "fillRules": "evenodd+nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 1,
+     "hausdorffCells": 0,
+     "topoOrig": "2:9",
+     "topoCand": "2:9",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "11→11",
+     "fillRules": "evenodd+nonzero→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 12,
+   "segs": 90
+  },
+  {
+   "name": "calendar-clear",
+   "variants": {
+    "outline": {
+     "iou": 0.9999,
+     "hausdorffCells": 1,
+     "topoOrig": "1:2",
+     "topoCand": "1:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 1,
+     "hausdorffCells": 0,
+     "topoOrig": "2:0",
+     "topoCand": "2:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 3,
+   "segs": 54
+  },
+  {
+   "name": "calendar-number",
+   "variants": {
+    "outline": {
+     "iou": 0.9989,
+     "hausdorffCells": 1,
+     "topoOrig": "3:2",
+     "topoCand": "3:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "5→5",
+     "fillRules": "evenodd+nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9991,
+     "hausdorffCells": 1,
+     "topoOrig": "2:2",
+     "topoCand": "2:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "evenodd+nonzero→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 5,
+   "segs": 130
+  },
+  {
+   "name": "calendar-today",
+   "variants": {
+    "outline": {
+     "iou": 0.9986,
+     "hausdorffCells": 1,
+     "topoOrig": "2:3",
+     "topoCand": "2:3",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "5→5",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 1,
+     "hausdorffCells": 0,
+     "topoOrig": "3:1",
+     "topoCand": "3:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "evenodd+nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 5,
+   "segs": 86
+  },
+  {
+   "name": "camera",
+   "variants": {
+    "outline": {
+     "iou": 0.992,
+     "hausdorffCells": 1,
+     "topoOrig": "2:2",
+     "topoCand": "2:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9978,
+     "hausdorffCells": 1,
+     "topoOrig": "2:1",
+     "topoCand": "2:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd+nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 4,
+   "segs": 116
+  },
+  {
+   "name": "camera-reverse",
+   "variants": {
+    "outline": {
+     "iou": 0.9911,
+     "hausdorffCells": 1,
+     "topoOrig": "3:1",
+     "topoCand": "3:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "evenodd+nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9973,
+     "hausdorffCells": 1,
+     "topoOrig": "1:2",
+     "topoCand": "1:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 4,
+   "segs": 184
+  },
+  {
+   "name": "cart",
+   "variants": {
+    "outline": {
+     "iou": 0.9976,
+     "hausdorffCells": 1,
+     "topoOrig": "3:1",
+     "topoCand": "3:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "evenodd+nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9988,
+     "hausdorffCells": 1,
+     "topoOrig": "3:0",
+     "topoCand": "3:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 4,
+   "segs": 117
+  },
+  {
+   "name": "chart",
+   "variants": {
+    "outline": {
+     "iou": 1,
+     "hausdorffCells": 0,
+     "topoOrig": "2:1",
+     "topoCand": "2:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd+nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9997,
+     "hausdorffCells": 1,
+     "topoOrig": "2:0",
+     "topoCand": "2:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 3,
+   "segs": 31
+  },
+  {
+   "name": "chatbubble-ellipses",
+   "variants": {
+    "outline": {
+     "iou": 0.9992,
+     "hausdorffCells": 1,
+     "topoOrig": "4:1",
+     "topoCand": "4:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "5→5",
+     "fillRules": "evenodd+nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9999,
+     "hausdorffCells": 1,
+     "topoOrig": "1:3",
+     "topoCand": "1:3",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 5,
+   "segs": 39
+  },
+  {
+   "name": "chatbubbles",
+   "variants": {
+    "outline": {
+     "iou": 0.9981,
+     "hausdorffCells": 1,
+     "topoOrig": "2:1",
+     "topoCand": "2:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd+nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9994,
+     "hausdorffCells": 1,
+     "topoOrig": "2:0",
+     "topoCand": "2:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 3,
+   "segs": 71
+  },
+  {
+   "name": "cloud-checkmark",
+   "variants": {
+    "outline": {
+     "iou": 0.9938,
+     "hausdorffCells": 1,
+     "topoOrig": "2:1",
+     "topoCand": "2:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd+nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9978,
+     "hausdorffCells": 1,
+     "topoOrig": "1:1",
+     "topoCand": "1:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 3,
+   "segs": 63
+  },
+  {
+   "name": "cloud-download",
+   "variants": {
+    "outline": {
+     "iou": 0.9946,
+     "hausdorffCells": 1,
+     "topoOrig": "2:0",
+     "topoCand": "2:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9983,
+     "hausdorffCells": 1,
+     "topoOrig": "1:1",
+     "topoCand": "1:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 2,
+   "segs": 63
+  },
+  {
+   "name": "cloud-upload",
+   "variants": {
+    "outline": {
+     "iou": 0.9946,
+     "hausdorffCells": 1,
+     "topoOrig": "2:0",
+     "topoCand": "2:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.998,
+     "hausdorffCells": 1,
+     "topoOrig": "1:1",
+     "topoCand": "1:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 2,
+   "segs": 64
+  },
+  {
+   "name": "color-filter",
+   "variants": {
+    "outline": {
+     "iou": 0.9992,
+     "hausdorffCells": 1,
+     "topoOrig": "1:6",
+     "topoCand": "1:6",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "8→8",
+     "fillRules": "evenodd+nonzero→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 1,
+     "hausdorffCells": 0,
+     "topoOrig": "1:3",
+     "topoCand": "1:3",
+     "topoStableOrig": false,
+     "topoStableCand": false,
+     "subpaths": "3→3",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 8,
+   "segs": 47
+  },
+  {
+   "name": "color-wand",
+   "variants": {
+    "outline": {
+     "iou": 0.9999,
+     "hausdorffCells": 1,
+     "topoOrig": "6:1",
+     "topoCand": "6:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "7→7",
+     "fillRules": "evenodd+nonzero→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 1,
+     "hausdorffCells": 0,
+     "topoOrig": "7:0",
+     "topoCand": "7:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "7→7",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 7,
+   "segs": 73
+  },
+  {
+   "name": "commit",
+   "variants": {
+    "outline": {
+     "iou": 1,
+     "hausdorffCells": 0,
+     "topoOrig": "1:1",
+     "topoCand": "1:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.998,
+     "hausdorffCells": 1,
+     "topoOrig": "3:0",
+     "topoCand": "3:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 3,
+   "segs": 40
+  },
+  {
+   "name": "commits",
+   "variants": {
+    "outline": {
+     "iou": 1,
+     "hausdorffCells": 0,
+     "topoOrig": "1:2",
+     "topoCand": "1:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9997,
+     "hausdorffCells": 1,
+     "topoOrig": "1:0",
+     "topoCand": "1:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "1→1",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 3,
+   "segs": 46
+  },
+  {
+   "name": "compas",
+   "variants": {
+    "outline": {
+     "iou": 0.998,
+     "hausdorffCells": 1,
+     "topoOrig": "2:2",
+     "topoCand": "2:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9989,
+     "hausdorffCells": 1,
+     "topoOrig": "2:1",
+     "topoCand": "2:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd+nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 4,
+   "segs": 35
+  },
+  {
+   "name": "connect",
+   "variants": {
+    "outline": {
+     "iou": 0.9987,
+     "hausdorffCells": 1,
+     "topoOrig": "5:0",
+     "topoCand": "5:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "5→5",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9989,
+     "hausdorffCells": 1,
+     "topoOrig": "5:0",
+     "topoCand": "5:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "5→5",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 5,
+   "segs": 106
+  },
+  {
+   "name": "console",
+   "variants": {
+    "outline": {
+     "iou": 0.9902,
+     "hausdorffCells": 1,
+     "topoOrig": "3:1",
+     "topoCand": "3:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "evenodd+nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9978,
+     "hausdorffCells": 1,
+     "topoOrig": "1:2",
+     "topoCand": "1:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 4,
+   "segs": 102
+  },
+  {
+   "name": "copy",
+   "variants": {
+    "outline": {
+     "iou": 0.9955,
+     "hausdorffCells": 1,
+     "topoOrig": "2:1",
+     "topoCand": "2:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd+nonzero→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9978,
+     "hausdorffCells": 1,
+     "topoOrig": "2:0",
+     "topoCand": "2:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 3,
+   "segs": 174
+  },
+  {
+   "name": "database",
+   "variants": {
+    "outline": {
+     "iou": 0.9888,
+     "hausdorffCells": 1,
+     "topoOrig": "1:3",
+     "topoCand": "1:3",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9922,
+     "hausdorffCells": 1,
+     "topoOrig": "3:0",
+     "topoCand": "3:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 4,
+   "segs": 66
+  },
+  {
+   "name": "dice",
+   "variants": {
+    "outline": {
+     "iou": 0.9946,
+     "hausdorffCells": 1,
+     "topoOrig": "8:3",
+     "topoCand": "8:3",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "11→11",
+     "fillRules": "evenodd+nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9954,
+     "hausdorffCells": 1,
+     "topoOrig": "3:7",
+     "topoCand": "3:7",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "10→10",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 11,
+   "segs": 120
+  },
+  {
+   "name": "duplicate",
+   "variants": {
+    "outline": {
+     "iou": 0.989,
+     "hausdorffCells": 1,
+     "topoOrig": "2:2",
+     "topoCand": "2:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "evenodd+nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9945,
+     "hausdorffCells": 1,
+     "topoOrig": "1:2",
+     "topoCand": "1:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 4,
+   "segs": 169
+  },
+  {
+   "name": "ear",
+   "variants": {
+    "outline": {
+     "iou": 0.9967,
+     "hausdorffCells": 1,
+     "topoOrig": "2:1",
+     "topoCand": "2:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "evenodd+nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9957,
+     "hausdorffCells": 1,
+     "topoOrig": "1:1",
+     "topoCand": "1:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 4,
+   "segs": 76
+  },
+  {
+   "name": "earth",
+   "variants": {
+    "outline": {
+     "iou": 0.992,
+     "hausdorffCells": 1,
+     "topoOrig": "1:5",
+     "topoCand": "1:5",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "6→6",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9933,
+     "hausdorffCells": 1,
+     "topoOrig": "1:2",
+     "topoCand": "1:3",
+     "topoStableOrig": true,
+     "topoStableCand": false,
+     "subpaths": "9→9",
+     "fillRules": "evenodd+nonzero→evenodd",
+     "reason": "TOPOLOGY_UNSTABLE_INTRODUCED"
+    }
+   },
+   "parts": 9,
+   "segs": 321
+  },
+  {
+   "name": "enter",
+   "variants": {
+    "outline": {
+     "iou": 0.9968,
+     "hausdorffCells": 1,
+     "topoOrig": "2:0",
+     "topoCand": "2:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9972,
+     "hausdorffCells": 1,
+     "topoOrig": "2:0",
+     "topoCand": "2:0",
+     "topoStableOrig": false,
+     "topoStableCand": false,
+     "subpaths": "2→2",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 2,
+   "segs": 95
+  },
+  {
+   "name": "exit",
+   "variants": {
+    "outline": {
+     "iou": 0.998,
+     "hausdorffCells": 1,
+     "topoOrig": "2:0",
+     "topoCand": "2:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9987,
+     "hausdorffCells": 1,
+     "topoOrig": "1:1",
+     "topoCand": "1:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 2,
+   "segs": 91
+  },
+  {
+   "name": "extension-puzzle",
+   "variants": {
+    "outline": {
+     "iou": 0.998,
+     "hausdorffCells": 1,
+     "topoOrig": "1:1",
+     "topoCand": "1:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9999,
+     "hausdorffCells": 1,
+     "topoOrig": "1:0",
+     "topoCand": "1:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "1→1",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 2,
+   "segs": 113
+  },
+  {
+   "name": "eye-off",
+   "variants": {
+    "outline": {
+     "iou": 0.9967,
+     "hausdorffCells": 1,
+     "topoOrig": "5:0",
+     "topoCand": "5:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "5→5",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9983,
+     "hausdorffCells": 1,
+     "topoOrig": "3:0",
+     "topoCand": "3:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 5,
+   "segs": 106
+  },
+  {
+   "name": "eyedrop",
+   "variants": {
+    "outline": {
+     "iou": 0.9975,
+     "hausdorffCells": 1,
+     "topoOrig": "1:3",
+     "topoCand": "1:3",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9981,
+     "hausdorffCells": 1,
+     "topoOrig": "1:1",
+     "topoCand": "1:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 4,
+   "segs": 76
+  },
+  {
+   "name": "file",
+   "variants": {
+    "outline": {
+     "iou": 0.996,
+     "hausdorffCells": 1,
+     "topoOrig": "3:2",
+     "topoCand": "3:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "5→5",
+     "fillRules": "evenodd+nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9984,
+     "hausdorffCells": 1,
+     "topoOrig": "1:3",
+     "topoCand": "1:3",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 5,
+   "segs": 113
+  },
+  {
+   "name": "file-clear",
+   "variants": {
+    "outline": {
+     "iou": 0.9941,
+     "hausdorffCells": 1,
+     "topoOrig": "1:2",
+     "topoCand": "1:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9984,
+     "hausdorffCells": 1,
+     "topoOrig": "1:1",
+     "topoCand": "1:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 3,
+   "segs": 97
+  },
+  {
+   "name": "files",
+   "variants": {
+    "outline": {
+     "iou": 0.9958,
+     "hausdorffCells": 1,
+     "topoOrig": "1:5",
+     "topoCand": "1:5",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "6→6",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9981,
+     "hausdorffCells": 1,
+     "topoOrig": "1:4",
+     "topoCand": "1:4",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "5→5",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 6,
+   "segs": 149
+  },
+  {
+   "name": "fire",
+   "variants": {
+    "outline": {
+     "iou": 0.994,
+     "hausdorffCells": 1,
+     "topoOrig": "1:2",
+     "topoCand": "1:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.997,
+     "hausdorffCells": 1,
+     "topoOrig": "1:1",
+     "topoCand": "1:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 3,
+   "segs": 98
+  },
+  {
+   "name": "flash",
+   "variants": {
+    "outline": {
+     "iou": 1,
+     "hausdorffCells": 0,
+     "topoOrig": "1:1",
+     "topoCand": "1:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 1,
+     "hausdorffCells": 0,
+     "topoOrig": "1:0",
+     "topoCand": "1:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "1→1",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 2,
+   "segs": 48
+  },
+  {
+   "name": "flash-off",
+   "variants": {
+    "outline": {
+     "iou": 1,
+     "hausdorffCells": 0,
+     "topoOrig": "3:0",
+     "topoCand": "3:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 1,
+     "hausdorffCells": 0,
+     "topoOrig": "3:0",
+     "topoCand": "3:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 3,
+   "segs": 71
+  },
+  {
+   "name": "folder",
+   "variants": {
+    "outline": {
+     "iou": 0.9851,
+     "hausdorffCells": 1,
+     "topoOrig": "1:1",
+     "topoCand": "1:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.997,
+     "hausdorffCells": 1,
+     "topoOrig": "1:0",
+     "topoCand": "1:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "1→1",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 2,
+   "segs": 88
+  },
+  {
+   "name": "fork",
+   "variants": {
+    "outline": {
+     "iou": 0.9988,
+     "hausdorffCells": 1,
+     "topoOrig": "1:3",
+     "topoCand": "1:3",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9996,
+     "hausdorffCells": 1,
+     "topoOrig": "3:0",
+     "topoCand": "3:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 4,
+   "segs": 76
+  },
+  {
+   "name": "glasses",
+   "variants": {
+    "outline": {
+     "iou": 0.9831,
+     "hausdorffCells": 1,
+     "topoOrig": "1:2",
+     "topoCand": "1:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9944,
+     "hausdorffCells": 1,
+     "topoOrig": "1:0",
+     "topoCand": "1:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "1→1",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 3,
+   "segs": 71
+  },
+  {
+   "name": "globe",
+   "variants": {
+    "outline": {
+     "iou": 0.9976,
+     "hausdorffCells": 1,
+     "topoOrig": "1:9",
+     "topoCand": "1:9",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "10→10",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9931,
+     "hausdorffCells": 1,
+     "topoOrig": "9:0",
+     "topoCand": "9:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "9→9",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 10,
+   "segs": 155
+  },
+  {
+   "name": "golf",
+   "variants": {
+    "outline": {
+     "iou": 0.9912,
+     "hausdorffCells": 1,
+     "topoOrig": "2:1",
+     "topoCand": "2:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd+nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9965,
+     "hausdorffCells": 1,
+     "topoOrig": "1:1",
+     "topoCand": "1:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 3,
+   "segs": 57
+  },
+  {
+   "name": "group",
+   "variants": {
+    "outline": {
+     "iou": 0.9989,
+     "hausdorffCells": 1,
+     "topoOrig": "4:2",
+     "topoCand": "4:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "6→6",
+     "fillRules": "evenodd+nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.999,
+     "hausdorffCells": 1,
+     "topoOrig": "4:0",
+     "topoCand": "4:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 6,
+   "segs": 68
+  },
+  {
+   "name": "group-circle",
+   "variants": {
+    "outline": {
+     "iou": 0.9996,
+     "hausdorffCells": 1,
+     "topoOrig": "3:1",
+     "topoCand": "3:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "evenodd+nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9996,
+     "hausdorffCells": 1,
+     "topoOrig": "1:4",
+     "topoCand": "1:4",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "5→5",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 5,
+   "segs": 124
+  },
+  {
+   "name": "hash",
+   "variants": {
+    "outline": {
+     "iou": 0.9719,
+     "hausdorffCells": 1,
+     "topoOrig": "1:1",
+     "topoCand": "1:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 1,
+     "hausdorffCells": 0,
+     "topoOrig": "1:1",
+     "topoCand": "1:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 2,
+   "segs": 68
+  },
+  {
+   "name": "headphone",
+   "variants": {
+    "outline": {
+     "iou": 0.9905,
+     "hausdorffCells": 1,
+     "topoOrig": "1:2",
+     "topoCand": "1:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9056,
+     "hausdorffCells": 4,
+     "topoOrig": "1:0",
+     "topoCand": "1:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "8→8",
+     "fillRules": "nonzero→nonzero",
+     "reason": "TOPOLOGY_DIFF"
+    }
+   },
+   "parts": 8,
+   "segs": 135
+  },
+  {
+   "name": "history",
+   "variants": {
+    "outline": {
+     "iou": 0.9963,
+     "hausdorffCells": 1,
+     "topoOrig": "2:0",
+     "topoCand": "2:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9999,
+     "hausdorffCells": 1,
+     "topoOrig": "2:0",
+     "topoCand": "2:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 2,
+   "segs": 61
+  },
+  {
+   "name": "home",
+   "variants": {
+    "outline": {
+     "iou": 0.9949,
+     "hausdorffCells": 1,
+     "topoOrig": "1:1",
+     "topoCand": "1:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.999,
+     "hausdorffCells": 1,
+     "topoOrig": "1:0",
+     "topoCand": "1:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "1→1",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 2,
+   "segs": 171
+  },
+  {
+   "name": "hourglass",
+   "variants": {
+    "outline": {
+     "iou": 0.9984,
+     "hausdorffCells": 1,
+     "topoOrig": "2:1",
+     "topoCand": "2:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd+nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9987,
+     "hausdorffCells": 1,
+     "topoOrig": "1:1",
+     "topoCand": "1:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 3,
+   "segs": 115
+  },
+  {
+   "name": "image",
+   "variants": {
+    "outline": {
+     "iou": 0.9965,
+     "hausdorffCells": 1,
+     "topoOrig": "2:4",
+     "topoCand": "2:4",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "6→6",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9985,
+     "hausdorffCells": 1,
+     "topoOrig": "1:3",
+     "topoCand": "1:3",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 6,
+   "segs": 141
+  },
+  {
+   "name": "images",
+   "variants": {
+    "outline": {
+     "iou": 0.9954,
+     "hausdorffCells": 1,
+     "topoOrig": "2:5",
+     "topoCand": "2:5",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "7→7",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9957,
+     "hausdorffCells": 1,
+     "topoOrig": "1:4",
+     "topoCand": "1:4",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "5→5",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 7,
+   "segs": 191
+  },
+  {
+   "name": "invert",
+   "variants": {
+    "outline": {
+     "iou": 1,
+     "hausdorffCells": 0,
+     "topoOrig": "1:2",
+     "topoCand": "1:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 1,
+     "hausdorffCells": 0,
+     "topoOrig": "1:2",
+     "topoCand": "1:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd+nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 3,
+   "segs": 16
+  },
+  {
+   "name": "key",
+   "variants": {
+    "outline": {
+     "iou": 0.9937,
+     "hausdorffCells": 1,
+     "topoOrig": "2:2",
+     "topoCand": "2:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.998,
+     "hausdorffCells": 1,
+     "topoOrig": "1:1",
+     "topoCand": "1:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 4,
+   "segs": 70
+  },
+  {
+   "name": "layers",
+   "variants": {
+    "outline": {
+     "iou": 0.9979,
+     "hausdorffCells": 1,
+     "topoOrig": "1:3",
+     "topoCand": "1:3",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9989,
+     "hausdorffCells": 1,
+     "topoOrig": "3:0",
+     "topoCand": "3:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 4,
+   "segs": 104
+  },
+  {
+   "name": "link",
+   "variants": {
+    "outline": {
+     "iou": 1,
+     "hausdorffCells": 0,
+     "topoOrig": "3:0",
+     "topoCand": "3:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9998,
+     "hausdorffCells": 1,
+     "topoOrig": "3:0",
+     "topoCand": "3:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 3,
+   "segs": 80
+  },
+  {
+   "name": "link-horizontal",
+   "variants": {
+    "outline": {
+     "iou": 1,
+     "hausdorffCells": 0,
+     "topoOrig": "3:0",
+     "topoCand": "3:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9999,
+     "hausdorffCells": 1,
+     "topoOrig": "3:0",
+     "topoCand": "3:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 3,
+   "segs": 64
+  },
+  {
+   "name": "lock",
+   "variants": {
+    "outline": {
+     "iou": 1,
+     "hausdorffCells": 0,
+     "topoOrig": "2:2",
+     "topoCand": "2:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "evenodd+nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9999,
+     "hausdorffCells": 1,
+     "topoOrig": "1:2",
+     "topoCand": "1:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 4,
+   "segs": 59
+  },
+  {
+   "name": "mail",
+   "variants": {
+    "outline": {
+     "iou": 0.9999,
+     "hausdorffCells": 1,
+     "topoOrig": "1:2",
+     "topoCand": "1:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9975,
+     "hausdorffCells": 1,
+     "topoOrig": "1:1",
+     "topoCand": "1:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 3,
+   "segs": 84
+  },
+  {
+   "name": "mail-open",
+   "variants": {
+    "outline": {
+     "iou": 0.9997,
+     "hausdorffCells": 1,
+     "topoOrig": "1:2",
+     "topoCand": "1:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 1,
+     "hausdorffCells": 0,
+     "topoOrig": "1:1",
+     "topoCand": "1:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 3,
+   "segs": 61
+  },
+  {
+   "name": "mail-unread",
+   "variants": {
+    "outline": {
+     "iou": 0.9992,
+     "hausdorffCells": 1,
+     "topoOrig": "2:0",
+     "topoCand": "2:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9975,
+     "hausdorffCells": 1,
+     "topoOrig": "2:0",
+     "topoCand": "2:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 2,
+   "segs": 108
+  },
+  {
+   "name": "mcp",
+   "variants": {
+    "outline": {
+     "iou": 0.9999,
+     "hausdorffCells": 1,
+     "topoOrig": "2:0",
+     "topoCand": "2:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9998,
+     "hausdorffCells": 1,
+     "topoOrig": "2:0",
+     "topoCand": "2:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 2,
+   "segs": 72
+  },
+  {
+   "name": "megaphone",
+   "variants": {
+    "outline": {
+     "iou": 0.9966,
+     "hausdorffCells": 1,
+     "topoOrig": "1:3",
+     "topoCand": "1:3",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9997,
+     "hausdorffCells": 1,
+     "topoOrig": "2:0",
+     "topoCand": "2:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 4,
+   "segs": 67
+  },
+  {
+   "name": "merge",
+   "variants": {
+    "outline": {
+     "iou": 0.9966,
+     "hausdorffCells": 1,
+     "topoOrig": "1:3",
+     "topoCand": "1:3",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9961,
+     "hausdorffCells": 1,
+     "topoOrig": "3:0",
+     "topoCand": "3:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 4,
+   "segs": 114
+  },
+  {
+   "name": "mic",
+   "variants": {
+    "outline": {
+     "iou": 0.9999,
+     "hausdorffCells": 1,
+     "topoOrig": "2:1",
+     "topoCand": "2:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd+nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9995,
+     "hausdorffCells": 1,
+     "topoOrig": "2:0",
+     "topoCand": "2:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 3,
+   "segs": 39
+  },
+  {
+   "name": "mic-circle",
+   "variants": {
+    "outline": {
+     "iou": 1,
+     "hausdorffCells": 0,
+     "topoOrig": "3:1",
+     "topoCand": "3:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "evenodd+nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9999,
+     "hausdorffCells": 1,
+     "topoOrig": "1:2",
+     "topoCand": "1:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 4,
+   "segs": 63
+  },
+  {
+   "name": "moon-sparkles",
+   "variants": {
+    "outline": {
+     "iou": 0.9986,
+     "hausdorffCells": 1,
+     "topoOrig": "3:1",
+     "topoCand": "3:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "evenodd+nonzero→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9992,
+     "hausdorffCells": 1,
+     "topoOrig": "3:0",
+     "topoCand": "3:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 4,
+   "segs": 128
+  },
+  {
+   "name": "musical-note",
+   "variants": {
+    "outline": {
+     "iou": 0.9998,
+     "hausdorffCells": 1,
+     "topoOrig": "1:2",
+     "topoCand": "1:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9983,
+     "hausdorffCells": 1,
+     "topoOrig": "1:0",
+     "topoCand": "1:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "1→1",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 3,
+   "segs": 50
+  },
+  {
+   "name": "musical-notes",
+   "variants": {
+    "outline": {
+     "iou": 0.9998,
+     "hausdorffCells": 1,
+     "topoOrig": "1:3",
+     "topoCand": "1:3",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 1,
+     "hausdorffCells": 0,
+     "topoOrig": "1:0",
+     "topoCand": "1:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "1→1",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 4,
+   "segs": 74
+  },
+  {
+   "name": "navigate",
+   "variants": {
+    "outline": {
+     "iou": 0.9951,
+     "hausdorffCells": 1,
+     "topoOrig": "1:1",
+     "topoCand": "1:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9987,
+     "hausdorffCells": 1,
+     "topoOrig": "1:0",
+     "topoCand": "1:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "1→1",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 2,
+   "segs": 50
+  },
+  {
+   "name": "notifications",
+   "variants": {
+    "outline": {
+     "iou": 0.9934,
+     "hausdorffCells": 1,
+     "topoOrig": "2:1",
+     "topoCand": "2:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd+nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9984,
+     "hausdorffCells": 1,
+     "topoOrig": "2:0",
+     "topoCand": "2:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 3,
+   "segs": 84
+  },
+  {
+   "name": "notifications-off",
+   "variants": {
+    "outline": {
+     "iou": 0.9967,
+     "hausdorffCells": 1,
+     "topoOrig": "4:0",
+     "topoCand": "4:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9984,
+     "hausdorffCells": 1,
+     "topoOrig": "4:0",
+     "topoCand": "4:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 4,
+   "segs": 92
+  },
+  {
+   "name": "notifications-unread",
+   "variants": {
+    "outline": {
+     "iou": 0.9941,
+     "hausdorffCells": 1,
+     "topoOrig": "3:0",
+     "topoCand": "3:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9985,
+     "hausdorffCells": 1,
+     "topoOrig": "3:0",
+     "topoCand": "3:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 3,
+   "segs": 91
+  },
+  {
+   "name": "options",
+   "variants": {
+    "outline": {
+     "iou": 0.9999,
+     "hausdorffCells": 1,
+     "topoOrig": "3:3",
+     "topoCand": "3:3",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "6→6",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9999,
+     "hausdorffCells": 1,
+     "topoOrig": "3:0",
+     "topoCand": "3:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 6,
+   "segs": 66
+  },
+  {
+   "name": "palette",
+   "variants": {
+    "outline": {
+     "iou": 0.9978,
+     "hausdorffCells": 1,
+     "topoOrig": "6:1",
+     "topoCand": "6:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "7→7",
+     "fillRules": "evenodd+nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9992,
+     "hausdorffCells": 1,
+     "topoOrig": "1:5",
+     "topoCand": "1:5",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "6→6",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 7,
+   "segs": 86
+  },
+  {
+   "name": "paw",
+   "variants": {
+    "outline": {
+     "iou": 0.9929,
+     "hausdorffCells": 1,
+     "topoOrig": "5:5",
+     "topoCand": "5:5",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "10→10",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9969,
+     "hausdorffCells": 1,
+     "topoOrig": "5:0",
+     "topoCand": "5:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "5→5",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 10,
+   "segs": 209
+  },
+  {
+   "name": "pencil",
+   "variants": {
+    "outline": {
+     "iou": 0.9959,
+     "hausdorffCells": 1,
+     "topoOrig": "1:2",
+     "topoCand": "1:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.997,
+     "hausdorffCells": 1,
+     "topoOrig": "1:1",
+     "topoCand": "1:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 3,
+   "segs": 91
+  },
+  {
+   "name": "person",
+   "variants": {
+    "outline": {
+     "iou": 0.9992,
+     "hausdorffCells": 1,
+     "topoOrig": "2:1",
+     "topoCand": "2:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd+nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9994,
+     "hausdorffCells": 1,
+     "topoOrig": "2:0",
+     "topoCand": "2:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 3,
+   "segs": 28
+  },
+  {
+   "name": "person-circle",
+   "variants": {
+    "outline": {
+     "iou": 1,
+     "hausdorffCells": 0,
+     "topoOrig": "2:1",
+     "topoCand": "2:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd+nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 1,
+     "hausdorffCells": 1,
+     "topoOrig": "1:2",
+     "topoCand": "1:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 3,
+   "segs": 29
+  },
+  {
+   "name": "person-minus",
+   "variants": {
+    "outline": {
+     "iou": 0.9993,
+     "hausdorffCells": 1,
+     "topoOrig": "3:1",
+     "topoCand": "3:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "evenodd+nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9993,
+     "hausdorffCells": 1,
+     "topoOrig": "3:0",
+     "topoCand": "3:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 4,
+   "segs": 33
+  },
+  {
+   "name": "person-plus",
+   "variants": {
+    "outline": {
+     "iou": 0.9992,
+     "hausdorffCells": 1,
+     "topoOrig": "3:1",
+     "topoCand": "3:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "evenodd+nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9993,
+     "hausdorffCells": 1,
+     "topoOrig": "3:0",
+     "topoCand": "3:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 4,
+   "segs": 51
+  },
+  {
+   "name": "phone",
+   "variants": {
+    "outline": {
+     "iou": 0.9886,
+     "hausdorffCells": 1,
+     "topoOrig": "1:1",
+     "topoCand": "1:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.995,
+     "hausdorffCells": 1,
+     "topoOrig": "1:0",
+     "topoCand": "1:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "1→1",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 2,
+   "segs": 72
+  },
+  {
+   "name": "pin",
+   "variants": {
+    "outline": {
+     "iou": 0.9928,
+     "hausdorffCells": 1,
+     "topoOrig": "1:1",
+     "topoCand": "1:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9996,
+     "hausdorffCells": 1,
+     "topoOrig": "2:0",
+     "topoCand": "2:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 2,
+   "segs": 105
+  },
+  {
+   "name": "place",
+   "variants": {
+    "outline": {
+     "iou": 0.9924,
+     "hausdorffCells": 1,
+     "topoOrig": "2:2",
+     "topoCand": "2:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9985,
+     "hausdorffCells": 1,
+     "topoOrig": "1:1",
+     "topoCand": "1:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 4,
+   "segs": 48
+  },
+  {
+   "name": "plane",
+   "variants": {
+    "outline": {
+     "iou": 0.9986,
+     "hausdorffCells": 1,
+     "topoOrig": "1:1",
+     "topoCand": "1:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.999,
+     "hausdorffCells": 1,
+     "topoOrig": "1:0",
+     "topoCand": "1:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "1→1",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 2,
+   "segs": 130
+  },
+  {
+   "name": "print",
+   "variants": {
+    "outline": {
+     "iou": 0.9934,
+     "hausdorffCells": 1,
+     "topoOrig": "2:3",
+     "topoCand": "2:3",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "5→5",
+     "fillRules": "evenodd+nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9974,
+     "hausdorffCells": 1,
+     "topoOrig": "2:2",
+     "topoCand": "2:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "evenodd+nonzero→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 5,
+   "segs": 179
+  },
+  {
+   "name": "priority",
+   "variants": {
+    "outline": {
+     "iou": 0.9993,
+     "hausdorffCells": 1,
+     "topoOrig": "4:0",
+     "topoCand": "4:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 1,
+     "hausdorffCells": 0,
+     "topoOrig": "4:0",
+     "topoCand": "4:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "evenodd+nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 4,
+   "segs": 94
+  },
+  {
+   "name": "pull-request",
+   "variants": {
+    "outline": {
+     "iou": 0.9974,
+     "hausdorffCells": 1,
+     "topoOrig": "2:3",
+     "topoCand": "2:3",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "5→5",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9972,
+     "hausdorffCells": 1,
+     "topoOrig": "4:0",
+     "topoCand": "4:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 5,
+   "segs": 116
+  },
+  {
+   "name": "push",
+   "variants": {
+    "outline": {
+     "iou": 0.9962,
+     "hausdorffCells": 1,
+     "topoOrig": "2:0",
+     "topoCand": "2:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9972,
+     "hausdorffCells": 1,
+     "topoOrig": "1:1",
+     "topoCand": "1:1",
+     "topoStableOrig": false,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "nonzero→nonzero",
+     "reason": "TOPOLOGY_PHASE_MISMATCH"
+    }
+   },
+   "parts": 2,
+   "segs": 100
+  },
+  {
+   "name": "qr",
+   "variants": {
+    "outline": {
+     "iou": 0.9785,
+     "hausdorffCells": 1,
+     "topoOrig": "8:3",
+     "topoCand": "8:3",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "11→11",
+     "fillRules": "evenodd+nonzero→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9858,
+     "hausdorffCells": 1,
+     "topoOrig": "8:3",
+     "topoCand": "8:3",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "11→11",
+     "fillRules": "evenodd+nonzero→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 11,
+   "segs": 221
+  },
+  {
+   "name": "question-circle",
+   "variants": {
+    "outline": {
+     "iou": 0.9999,
+     "hausdorffCells": 1,
+     "topoOrig": "3:1",
+     "topoCand": "3:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "evenodd+nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9999,
+     "hausdorffCells": 1,
+     "topoOrig": "1:2",
+     "topoCand": "1:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 4,
+   "segs": 52
+  },
+  {
+   "name": "repeat",
+   "variants": {
+    "outline": {
+     "iou": 0.9914,
+     "hausdorffCells": 1,
+     "topoOrig": "2:0",
+     "topoCand": "2:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9915,
+     "hausdorffCells": 1,
+     "topoOrig": "2:0",
+     "topoCand": "2:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 4,
+   "segs": 96
+  },
+  {
+   "name": "revert",
+   "variants": {
+    "outline": {
+     "iou": 0.9994,
+     "hausdorffCells": 1,
+     "topoOrig": "2:1",
+     "topoCand": "2:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd+nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9988,
+     "hausdorffCells": 1,
+     "topoOrig": "3:0",
+     "topoCand": "3:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 3,
+   "segs": 60
+  },
+  {
+   "name": "rhomb",
+   "variants": {
+    "outline": {
+     "iou": 0.9925,
+     "hausdorffCells": 1,
+     "topoOrig": "1:1",
+     "topoCand": "1:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9996,
+     "hausdorffCells": 1,
+     "topoOrig": "1:0",
+     "topoCand": "1:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "1→1",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 2,
+   "segs": 78
+  },
+  {
+   "name": "rocket",
+   "variants": {
+    "outline": {
+     "iou": 0.9926,
+     "hausdorffCells": 1,
+     "topoOrig": "2:5",
+     "topoCand": "2:5",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "7→7",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9958,
+     "hausdorffCells": 1,
+     "topoOrig": "4:1",
+     "topoCand": "4:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "5→5",
+     "fillRules": "evenodd+nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 7,
+   "segs": 91
+  },
+  {
+   "name": "sad",
+   "variants": {
+    "outline": {
+     "iou": 0.9974,
+     "hausdorffCells": 1,
+     "topoOrig": "4:1",
+     "topoCand": "4:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "5→5",
+     "fillRules": "evenodd+nonzero→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9989,
+     "hausdorffCells": 1,
+     "topoOrig": "1:3",
+     "topoCand": "1:3",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 5,
+   "segs": 56
+  },
+  {
+   "name": "scan",
+   "variants": {
+    "outline": {
+     "iou": 0.9879,
+     "hausdorffCells": 1,
+     "topoOrig": "4:0",
+     "topoCand": "4:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9944,
+     "hausdorffCells": 1,
+     "topoOrig": "4:0",
+     "topoCand": "4:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 4,
+   "segs": 116
+  },
+  {
+   "name": "school",
+   "variants": {
+    "outline": {
+     "iou": 0.9995,
+     "hausdorffCells": 1,
+     "topoOrig": "1:3",
+     "topoCand": "1:3",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 1,
+     "hausdorffCells": 0,
+     "topoOrig": "2:0",
+     "topoCand": "2:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 4,
+   "segs": 78
+  },
+  {
+   "name": "send",
+   "variants": {
+    "outline": {
+     "iou": 0.9961,
+     "hausdorffCells": 1,
+     "topoOrig": "1:1",
+     "topoCand": "1:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9993,
+     "hausdorffCells": 1,
+     "topoOrig": "1:0",
+     "topoCand": "1:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "1→1",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 2,
+   "segs": 77
+  },
+  {
+   "name": "settings",
+   "variants": {
+    "outline": {
+     "iou": 0.9957,
+     "hausdorffCells": 1,
+     "topoOrig": "2:2",
+     "topoCand": "2:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9974,
+     "hausdorffCells": 1,
+     "topoOrig": "1:1",
+     "topoCand": "1:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 4,
+   "segs": 183
+  },
+  {
+   "name": "share",
+   "variants": {
+    "outline": {
+     "iou": 0.9951,
+     "hausdorffCells": 1,
+     "topoOrig": "2:0",
+     "topoCand": "2:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.998,
+     "hausdorffCells": 1,
+     "topoOrig": "2:0",
+     "topoCand": "2:0",
+     "topoStableOrig": false,
+     "topoStableCand": false,
+     "subpaths": "2→2",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 2,
+   "segs": 94
+  },
+  {
+   "name": "share-display",
+   "variants": {
+    "outline": {
+     "iou": 0.9978,
+     "hausdorffCells": 1,
+     "topoOrig": "2:0",
+     "topoCand": "2:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9986,
+     "hausdorffCells": 1,
+     "topoOrig": "1:0",
+     "topoCand": "1:0",
+     "topoStableOrig": false,
+     "topoStableCand": false,
+     "subpaths": "2→2",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 2,
+   "segs": 120
+  },
+  {
+   "name": "share-social",
+   "variants": {
+    "outline": {
+     "iou": 1,
+     "hausdorffCells": 0,
+     "topoOrig": "1:3",
+     "topoCand": "1:3",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 1,
+     "hausdorffCells": 0,
+     "topoOrig": "1:0",
+     "topoCand": "1:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "1→1",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 4,
+   "segs": 32
+  },
+  {
+   "name": "shield-checkmark",
+   "variants": {
+    "outline": {
+     "iou": 0.9843,
+     "hausdorffCells": 1,
+     "topoOrig": "2:1",
+     "topoCand": "2:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd+nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9947,
+     "hausdorffCells": 1,
+     "topoOrig": "1:1",
+     "topoCand": "1:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 3,
+   "segs": 73
+  },
+  {
+   "name": "signature",
+   "variants": {
+    "outline": {
+     "iou": 0.9963,
+     "hausdorffCells": 1,
+     "topoOrig": "4:1",
+     "topoCand": "4:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "6→6",
+     "fillRules": "evenodd+nonzero→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9973,
+     "hausdorffCells": 1,
+     "topoOrig": "4:1",
+     "topoCand": "4:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "5→5",
+     "fillRules": "evenodd+nonzero→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 6,
+   "segs": 96
+  },
+  {
+   "name": "smile",
+   "variants": {
+    "outline": {
+     "iou": 0.9987,
+     "hausdorffCells": 1,
+     "topoOrig": "4:1",
+     "topoCand": "4:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "5→5",
+     "fillRules": "evenodd+nonzero→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9996,
+     "hausdorffCells": 1,
+     "topoOrig": "1:3",
+     "topoCand": "1:3",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 5,
+   "segs": 56
+  },
+  {
+   "name": "sparkle",
+   "variants": {
+    "outline": {
+     "iou": 0.9919,
+     "hausdorffCells": 1,
+     "topoOrig": "1:1",
+     "topoCand": "1:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9947,
+     "hausdorffCells": 1,
+     "topoOrig": "1:0",
+     "topoCand": "1:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "1→1",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 2,
+   "segs": 166
+  },
+  {
+   "name": "sparkles",
+   "variants": {
+    "outline": {
+     "iou": 0.9978,
+     "hausdorffCells": 1,
+     "topoOrig": "3:3",
+     "topoCand": "3:3",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "6→6",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9979,
+     "hausdorffCells": 1,
+     "topoOrig": "3:0",
+     "topoCand": "3:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 6,
+   "segs": 292
+  },
+  {
+   "name": "speed",
+   "variants": {
+    "outline": {
+     "iou": 0.9998,
+     "hausdorffCells": 1,
+     "topoOrig": "7:1",
+     "topoCand": "7:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "8→8",
+     "fillRules": "evenodd+nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9998,
+     "hausdorffCells": 1,
+     "topoOrig": "1:6",
+     "topoCand": "1:6",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "7→7",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 8,
+   "segs": 94
+  },
+  {
+   "name": "star",
+   "variants": {
+    "outline": {
+     "iou": 0.9915,
+     "hausdorffCells": 1,
+     "topoOrig": "1:1",
+     "topoCand": "1:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9961,
+     "hausdorffCells": 1,
+     "topoOrig": "1:0",
+     "topoCand": "1:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "1→1",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 2,
+   "segs": 131
+  },
+  {
+   "name": "stats",
+   "variants": {
+    "outline": {
+     "iou": 0.9999,
+     "hausdorffCells": 1,
+     "topoOrig": "4:4",
+     "topoCand": "4:4",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "8→8",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9999,
+     "hausdorffCells": 1,
+     "topoOrig": "4:0",
+     "topoCand": "4:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 8,
+   "segs": 62
+  },
+  {
+   "name": "steps",
+   "variants": {
+    "outline": {
+     "iou": 0.9918,
+     "hausdorffCells": 1,
+     "topoOrig": "4:4",
+     "topoCand": "4:4",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "8→8",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9954,
+     "hausdorffCells": 1,
+     "topoOrig": "4:0",
+     "topoCand": "4:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 8,
+   "segs": 146
+  },
+  {
+   "name": "sun",
+   "variants": {
+    "outline": {
+     "iou": 0.9981,
+     "hausdorffCells": 1,
+     "topoOrig": "9:1",
+     "topoCand": "9:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "10→10",
+     "fillRules": "evenodd+nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9984,
+     "hausdorffCells": 1,
+     "topoOrig": "9:0",
+     "topoCand": "9:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "9→9",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 10,
+   "segs": 84
+  },
+  {
+   "name": "sync",
+   "variants": {
+    "outline": {
+     "iou": 0.9951,
+     "hausdorffCells": 1,
+     "topoOrig": "2:0",
+     "topoCand": "2:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9947,
+     "hausdorffCells": 1,
+     "topoOrig": "2:0",
+     "topoCand": "2:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 4,
+   "segs": 93
+  },
+  {
+   "name": "tag",
+   "variants": {
+    "outline": {
+     "iou": 0.9908,
+     "hausdorffCells": 1,
+     "topoOrig": "2:1",
+     "topoCand": "2:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd+nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9966,
+     "hausdorffCells": 1,
+     "topoOrig": "1:1",
+     "topoCand": "1:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 3,
+   "segs": 81
+  },
+  {
+   "name": "text",
+   "variants": {
+    "outline": {
+     "iou": 0.9973,
+     "hausdorffCells": 1,
+     "topoOrig": "2:2",
+     "topoCand": "2:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "5→5",
+     "fillRules": "evenodd+nonzero→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9979,
+     "hausdorffCells": 1,
+     "topoOrig": "2:2",
+     "topoCand": "2:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "5→5",
+     "fillRules": "evenodd+nonzero→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 5,
+   "segs": 81
+  },
+  {
+   "name": "ticket",
+   "variants": {
+    "outline": {
+     "iou": 0.9991,
+     "hausdorffCells": 1,
+     "topoOrig": "2:1",
+     "topoCand": "2:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd+nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9998,
+     "hausdorffCells": 1,
+     "topoOrig": "1:2",
+     "topoCand": "1:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 3,
+   "segs": 102
+  },
+  {
+   "name": "timer",
+   "variants": {
+    "outline": {
+     "iou": 0.9999,
+     "hausdorffCells": 1,
+     "topoOrig": "2:0",
+     "topoCand": "2:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9968,
+     "hausdorffCells": 1,
+     "topoOrig": "1:2",
+     "topoCand": "1:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 3,
+   "segs": 57
+  },
+  {
+   "name": "translate",
+   "variants": {
+    "outline": {
+     "iou": 0.9987,
+     "hausdorffCells": 1,
+     "topoOrig": "2:1",
+     "topoCand": "2:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→3",
+     "fillRules": "evenodd+nonzero→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9975,
+     "hausdorffCells": 1,
+     "topoOrig": "2:1",
+     "topoCand": "2:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "evenodd+nonzero→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 4,
+   "segs": 106
+  },
+  {
+   "name": "trophy",
+   "variants": {
+    "outline": {
+     "iou": 0.9978,
+     "hausdorffCells": 1,
+     "topoOrig": "1:3",
+     "topoCand": "1:3",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9994,
+     "hausdorffCells": 1,
+     "topoOrig": "1:2",
+     "topoCand": "1:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 4,
+   "segs": 140
+  },
+  {
+   "name": "turn-off",
+   "variants": {
+    "outline": {
+     "iou": 0.9999,
+     "hausdorffCells": 1,
+     "topoOrig": "2:0",
+     "topoCand": "2:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 1,
+     "hausdorffCells": 0,
+     "topoOrig": "2:0",
+     "topoCand": "2:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 2,
+   "segs": 50
+  },
+  {
+   "name": "unlock",
+   "variants": {
+    "outline": {
+     "iou": 1,
+     "hausdorffCells": 0,
+     "topoOrig": "2:1",
+     "topoCand": "2:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd+nonzero→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9999,
+     "hausdorffCells": 1,
+     "topoOrig": "1:1",
+     "topoCand": "1:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 3,
+   "segs": 58
+  },
+  {
+   "name": "video",
+   "variants": {
+    "outline": {
+     "iou": 0.9956,
+     "hausdorffCells": 1,
+     "topoOrig": "1:10",
+     "topoCand": "1:10",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "11→11",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9969,
+     "hausdorffCells": 1,
+     "topoOrig": "1:9",
+     "topoCand": "1:9",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "10→10",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 11,
+   "segs": 290
+  },
+  {
+   "name": "video-camera",
+   "variants": {
+    "outline": {
+     "iou": 1,
+     "hausdorffCells": 0,
+     "topoOrig": "2:2",
+     "topoCand": "2:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 1,
+     "hausdorffCells": 0,
+     "topoOrig": "2:0",
+     "topoCand": "2:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 4,
+   "segs": 49
+  },
+  {
+   "name": "volume",
+   "variants": {
+    "outline": {
+     "iou": 0.9944,
+     "hausdorffCells": 1,
+     "topoOrig": "1:1",
+     "topoCand": "1:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9979,
+     "hausdorffCells": 1,
+     "topoOrig": "1:0",
+     "topoCand": "1:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "1→1",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 2,
+   "segs": 85
+  },
+  {
+   "name": "volume-high",
+   "variants": {
+    "outline": {
+     "iou": 0.9968,
+     "hausdorffCells": 1,
+     "topoOrig": "4:1",
+     "topoCand": "4:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "6→6",
+     "fillRules": "evenodd+nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9974,
+     "hausdorffCells": 1,
+     "topoOrig": "4:0",
+     "topoCand": "4:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 6,
+   "segs": 174
+  },
+  {
+   "name": "volume-low",
+   "variants": {
+    "outline": {
+     "iou": 0.9959,
+     "hausdorffCells": 1,
+     "topoOrig": "2:1",
+     "topoCand": "2:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd+nonzero→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9965,
+     "hausdorffCells": 1,
+     "topoOrig": "2:0",
+     "topoCand": "2:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 3,
+   "segs": 116
+  },
+  {
+   "name": "volume-middle",
+   "variants": {
+    "outline": {
+     "iou": 0.9984,
+     "hausdorffCells": 1,
+     "topoOrig": "3:1",
+     "topoCand": "3:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "5→5",
+     "fillRules": "evenodd+nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9985,
+     "hausdorffCells": 1,
+     "topoOrig": "3:0",
+     "topoCand": "3:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 5,
+   "segs": 152
+  },
+  {
+   "name": "volume-mute",
+   "variants": {
+    "outline": {
+     "iou": 0.9966,
+     "hausdorffCells": 1,
+     "topoOrig": "6:0",
+     "topoCand": "6:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "7→7",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9978,
+     "hausdorffCells": 1,
+     "topoOrig": "6:0",
+     "topoCand": "6:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "6→6",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 7,
+   "segs": 192
+  },
+  {
+   "name": "volume-muted",
+   "variants": {
+    "outline": {
+     "iou": 0.9979,
+     "hausdorffCells": 1,
+     "topoOrig": "2:1",
+     "topoCand": "2:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd+nonzero→evenodd",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9989,
+     "hausdorffCells": 1,
+     "topoOrig": "2:0",
+     "topoCand": "2:0",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "2→2",
+     "fillRules": "nonzero→nonzero",
+     "reason": null
+    }
+   },
+   "parts": 3,
+   "segs": 134
+  },
+  {
+   "name": "wallet",
+   "variants": {
+    "outline": {
+     "iou": 0.9997,
+     "hausdorffCells": 1,
+     "topoOrig": "2:2",
+     "topoCand": "2:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "evenodd+nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9998,
+     "hausdorffCells": 1,
+     "topoOrig": "1:2",
+     "topoCand": "1:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 4,
+   "segs": 47
+  },
+  {
+   "name": "warning",
+   "variants": {
+    "outline": {
+     "iou": 0.9801,
+     "hausdorffCells": 1,
+     "topoOrig": "3:1",
+     "topoCand": "3:1",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "4→4",
+     "fillRules": "evenodd+nonzero→nonzero",
+     "reason": null
+    },
+    "filled": {
+     "iou": 0.9949,
+     "hausdorffCells": 1,
+     "topoOrig": "1:2",
+     "topoCand": "1:2",
+     "topoStableOrig": true,
+     "topoStableCand": true,
+     "subpaths": "3→3",
+     "fillRules": "evenodd→evenodd",
+     "reason": null
+    }
+   },
+   "parts": 4,
+   "segs": 82
+  }
+ ]
+}
