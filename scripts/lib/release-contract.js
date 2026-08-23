@@ -13,10 +13,12 @@ const ROOT_KEYS = [
 ];
 const PRIMARY_KEYS = ['access', 'install', 'kind'];
 const FALLBACK_KEYS = ['immutable', 'kind', 'specifier'];
-const EXPORT_KEYS = ['.', './ir', './ir/recipes'];
+const EXPORT_KEYS = ['.', './ir', './ir/candidates', './ir/recipes'];
 const EXPORT_CONDITIONS = Object.freeze({
   '.': ['types', 'import'],
   './ir': ['types', 'import'],
+  // INV-06: candidate-корпус — отдельный opt-in субпат, не default-поставка.
+  './ir/candidates': ['types', 'import'],
   './ir/recipes': ['types', 'import'],
 });
 export const STRICT_SEMVER = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*)(?:\.(?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*))*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$/;

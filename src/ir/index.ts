@@ -5,7 +5,7 @@
  */
 
 import * as staticIcons from '@labpics/icons';
-import anatomyJson from '../../semantics/anatomy.json';
+import anatomyJson from '../../semantics/anatomy.runtime.json';
 import catalogJson from '../../semantics/catalog.json';
 import gridJson from '../../semantics/grid.json';
 import {
@@ -387,6 +387,42 @@ const anatomy = anatomyJson as unknown as {
     }>[];
    }>>>;
 };
+
+type AnatomyGlyph = (typeof anatomy)['glyphs'][string];
+
+// INV-06: default `./ir` несёт только runtime-проекцию (accepted-модели и их
+// mirror-источники). Candidate-декларации — отдельный opt-in корпус
+// `@labpics/icons/ir/candidates`; без его регистрации allow-candidate
+// падает понятной ошибкой, а не тащит 78KB координат каждому потребителю.
+const candidateGlyphs = new Map<string, AnatomyGlyph>();
+let candidatesRegistered = false;
+
+/**
+ * Реестр candidate-деклараций; вызывается ТОЛЬКО субпатом ./ir/candidates.
+ * First-write-wins: повторная регистрация имени не перезаписывает тело —
+ * публичной точки мутации реестра у потребителя нет.
+ * @internal
+ */
+export function registerCandidateAnatomy(
+  glyphs: Readonly<Record<string, AnatomyGlyph>>,
+): void {
+  candidatesRegistered = true;
+  for (const [name, glyph] of Object.entries(glyphs)) {
+    if (name in anatomy.glyphs) continue; // runtime-проекция авторитетна
+    if (candidateGlyphs.has(name)) continue;
+    candidateGlyphs.set(name, glyph);
+  }
+}
+
+function anatomyGlyph(name: string): AnatomyGlyph | undefined {
+  return anatomy.glyphs[name] ?? candidateGlyphs.get(name);
+}
+
+function anatomyLibrary(): Readonly<Record<string, AnatomyGlyph>> {
+  if (candidateGlyphs.size === 0) return anatomy.glyphs;
+  return { ...Object.fromEntries(candidateGlyphs), ...anatomy.glyphs };
+}
+
 const designGrid = gridJson as unknown as Readonly<{
   canvas: Readonly<{ width: number; height: number }>;
   ratios: Readonly<{
@@ -671,17 +707,18 @@ function modelParts(
   composition: GlyphComposition,
   axes: Readonly<Partial<Record<AxisName, number>>>,
 ): readonly GlyphPart[] {
-  const declaration = anatomy.glyphs[contract.declaration];
+  const declaration = anatomyGlyph(contract.declaration);
   if (!declaration) {
     throw new Error(
-      `@labpics/icons/ir: anatomy-декларация ${contract.declaration} отсутствует`,
+      `@labpics/icons/ir: anatomy-декларация ${contract.declaration} не входит в runtime-проекцию; ` +
+        `candidate-модели подключаются через @labpics/icons/ir/candidates (registerCandidates)`,
     );
   }
   const generated = buildAnatomyParts(
     declaration,
     grid,
     axes,
-    anatomy.glyphs,
+    anatomyLibrary(),
   ) as Partial<Record<IconVariant, BuiltPart[]>>;
   const parts = generated[variant];
   if (!parts || parts.length !== model.parts.length) {
@@ -842,7 +879,7 @@ function motionCapabilities(icon: IconId, variant: IconVariant, model?: ModelVar
   }
 
   const partIds = Object.freeze(model.parts.map((part) => part.id));
-  const declaredParts = anatomy.glyphs[icon]?.parts ?? [];
+  const declaredParts = anatomyGlyph(icon)?.parts ?? [];
   const tracks = declaredParts
     .filter((part) =>
       part.primitive === 'clock-hand' &&
@@ -859,7 +896,7 @@ function motionCapabilities(icon: IconId, variant: IconVariant, model?: ModelVar
       anchor: Object.freeze([...part.anchor!] as [number, number]),
     }));
 
-  const declaredGestures = anatomy.glyphs[icon]?.motion?.gestures ?? [];
+  const declaredGestures = anatomyGlyph(icon)?.motion?.gestures ?? [];
   const gestures = declaredGestures
     .filter((gesture) => gesture.partIds.every((partId) => partIds.includes(partId)))
     .map((gesture) => Object.freeze({
@@ -925,6 +962,15 @@ export function glyph(request: unknown): GlyphIR {
   let composition: GlyphComposition;
 
   if (modelContract && model && modelAllowed(model, parsed.modelMode)) {
+    // INV-06: гейт по состоянию модели, не по наличию декларации — mixed-иконки
+    // (candidate-вариант при декларации, попавшей в runtime через accepted-соседа)
+    // без регистрации корпуса тоже обязаны падать, а не строиться молча.
+    if (model.state !== 'accepted' && !candidatesRegistered) {
+      throw new Error(
+        `@labpics/icons/ir: candidate-модель ${parsed.icon}/${parsed.variant} требует ` +
+          'регистрации корпуса: @labpics/icons/ir/candidates (registerCandidates)',
+      );
+    }
     const axes = effectiveAxes(model, parsed.axes);
     parts = modelParts(
       parsed.icon,

@@ -15,5 +15,9 @@
 export default {
   test: {
     testTimeout: 120_000,
+    // Изолированные worktree субагентов живут в .claude/worktrees/** внутри
+    // чекаута; без exclude vitest глобит их копии тестов и авторитетный
+    // verify гоняет чужие деревья (наблюдалось: 8 «падений» из чужих worktree).
+    exclude: ['**/node_modules/**', '**/dist/**', '**/.claude/**'],
   },
 };

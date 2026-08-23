@@ -27,12 +27,18 @@
     "./ir/recipes": {
       "types": "./dist/ir/recipes.d.ts",
       "import": "./dist/ir/recipes.js"
+    },
+    "./ir/candidates": {
+      "types": "./dist/ir/candidates.d.ts",
+      "import": "./dist/ir/candidates.js"
     }
   },
   "sideEffects": false,
   "files": [
     "dist/index.d.ts",
     "dist/index.js",
+    "dist/ir/candidates.d.ts",
+    "dist/ir/candidates.js",
     "dist/ir/catalog.generated.d.ts",
     "dist/ir/index.d.ts",
     "dist/ir/index.js",

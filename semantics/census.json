@@ -296,27 +296,27 @@
   }
  ],
  "bundle": {
-  "totalBytes": 1051453,
+  "totalBytes": 797369,
   "modules": [
    {
     "path": "semantics/catalog.json",
     "bytes": 593072
    },
    {
-    "path": "semantics/anatomy.json",
-    "bytes": 304668
+    "path": "semantics/anatomy.runtime.json",
+    "bytes": 49591
    },
    {
     "path": "src/core/anatomy-gen.js",
     "bytes": 48413
    },
    {
-    "path": "src/core/circle-dictionary.js",
-    "bytes": 22043
+    "path": "src/ir/index.ts",
+    "bytes": 22820
    },
    {
-    "path": "src/ir/index.ts",
-    "bytes": 21827
+    "path": "src/core/circle-dictionary.js",
+    "bytes": 22043
    },
    {
     "path": "src/core/calendar-geometry.js",
@@ -367,8 +367,8 @@
    "gzip": 96297
   },
   "glyphRuntime": {
-   "raw": 1051453,
-   "gzip": 138466,
+   "raw": 797369,
+   "gzip": 120347,
    "note": "один glyph() тянет весь IR-бандл: JSON-данные доминируют — кандидат на split/lazy в REL-волне"
   }
  }
