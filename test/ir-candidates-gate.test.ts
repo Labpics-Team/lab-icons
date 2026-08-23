@@ -10,7 +10,7 @@
  */
 import { describe, expect, it } from 'vitest';
 
-import { glyph, registerCandidateAnatomy } from '../src/ir/index.js';
+import { GlyphModelError, glyph, registerCandidateAnatomy } from '../src/ir/index.js';
 import catalogJson from '../semantics/catalog.json';
 import runtimeJson from '../semantics/anatomy.runtime.json';
 
@@ -43,25 +43,39 @@ for (const [icon, contract] of Object.entries(catalog.icons)) {
   }
 }
 
+// Контракт ошибки гейта: машинный код (публичный контракт) + субпат в тексте
+// (подсказка человеку; текст контрактом не является, но упоминание пути полезно).
+function expectCandidatesRequired(fn: () => unknown): void {
+  let thrown: unknown;
+  try {
+    fn();
+  } catch (error) {
+    thrown = error;
+  }
+  expect(thrown).toBeInstanceOf(GlyphModelError);
+  expect((thrown as GlyphModelError).code).toBe('CANDIDATES_REQUIRED');
+  expect((thrown as GlyphModelError).message).toMatch(/ir\/candidates/);
+}
+
 describe('INV-06: candidate-гейт fail-closed без registerCandidates()', () => {
   it('корпус содержит оба класса candidate-моделей (иначе тест-театр)', () => {
     expect(pure.length).toBeGreaterThan(0);
     expect(mixed.length).toBeGreaterThan(0);
   });
 
-  it('pure-candidate падает ошибкой с указанием субпата', () => {
+  it('pure-candidate падает кодом CANDIDATES_REQUIRED с указанием субпата', () => {
     for (const { icon, variant } of pure.slice(0, 5)) {
-      expect(() =>
+      expectCandidatesRequired(() =>
         glyph({ icon: icon as never, variant, modelMode: 'allow-candidate' }),
-      ).toThrowError(/ir\/candidates/);
+      );
     }
   });
 
   it('mixed-candidate (декларация в runtime) падает так же, не строится молча', () => {
     for (const { icon, variant } of mixed) {
-      expect(() =>
+      expectCandidatesRequired(() =>
         glyph({ icon: icon as never, variant, modelMode: 'allow-candidate' }),
-      ).toThrowError(/ir\/candidates/);
+      );
     }
   });
 
@@ -76,8 +90,8 @@ describe('INV-06: candidate-гейт fail-closed без registerCandidates()', (
   it('пустая регистрация не открывает гейт (обход из финального ревью PR #85)', () => {
     registerCandidateAnatomy({});
     const { icon, variant } = mixed[0]!;
-    expect(() =>
+    expectCandidatesRequired(() =>
       glyph({ icon: icon as never, variant, modelMode: 'allow-candidate' }),
-    ).toThrowError(/ir\/candidates/);
+    );
   });
 });

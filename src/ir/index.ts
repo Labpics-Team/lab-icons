@@ -394,6 +394,24 @@ type AnatomyGlyph = (typeof anatomy)['glyphs'][string];
 // mirror-источники). Candidate-декларации — отдельный opt-in корпус
 // `@labpics/icons/ir/candidates`; без его регистрации allow-candidate
 // падает понятной ошибкой, а не тащит 78KB координат каждому потребителю.
+
+/** Машинные коды ошибок глиф-модели; код — контракт, текст сообщения — нет. */
+export type GlyphModelErrorCode = 'CANDIDATES_REQUIRED';
+
+/**
+ * Ошибка candidate-гейта: потребитель ветвится по `code`, не по тексту —
+ * текст сообщения свободно меняется patch'ем.
+ */
+export class GlyphModelError extends Error {
+  readonly code: GlyphModelErrorCode;
+
+  constructor(code: GlyphModelErrorCode, message: string) {
+    super(message);
+    this.name = 'GlyphModelError';
+    this.code = code;
+  }
+}
+
 const candidateGlyphs = new Map<string, AnatomyGlyph>();
 let candidatesRegistered = false;
 
@@ -712,7 +730,8 @@ function modelParts(
 ): readonly GlyphPart[] {
   const declaration = anatomyGlyph(contract.declaration);
   if (!declaration) {
-    throw new Error(
+    throw new GlyphModelError(
+      'CANDIDATES_REQUIRED',
       `@labpics/icons/ir: anatomy-декларация ${contract.declaration} не входит в runtime-проекцию; ` +
         `candidate-модели подключаются через @labpics/icons/ir/candidates (registerCandidates)`,
     );
@@ -969,7 +988,8 @@ export function glyph(request: unknown): GlyphIR {
     // (candidate-вариант при декларации, попавшей в runtime через accepted-соседа)
     // без регистрации корпуса тоже обязаны падать, а не строиться молча.
     if (model.state !== 'accepted' && !candidatesRegistered) {
-      throw new Error(
+      throw new GlyphModelError(
+        'CANDIDATES_REQUIRED',
         `@labpics/icons/ir: candidate-модель ${parsed.icon}/${parsed.variant} требует ` +
           'регистрации корпуса: @labpics/icons/ir/candidates (registerCandidates)',
       );
