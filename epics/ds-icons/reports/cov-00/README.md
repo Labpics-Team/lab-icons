@@ -1,14 +1,21 @@
 # COV-00 — offline-эксперимент транскрипции (2026-08-23)
 
-Вход: 153 имени (все Outline без semantic-модели) на pinned commit `423506d`
-(PINNED_COMMIT.txt / PINNED_INPUT.txt). Метод: транскрайбер arc-chain из
-RED-среза (stash `wip/cov-arc-chain-red-2026-08-18`), метрики — IoU по маскам
-чернил (справочно), дискретный Хаусдорф ≤1 клетки растра (шаг 0.12),
-topology через 4 фазы; sabotage-доказательства способности упасть.
+Вход: 153 имени (все Outline без semantic-модели) на pinned commit
+`423506dc00e0453ab12332be27f238d7d0b20095` (PINNED_COMMIT.txt /
+PINNED_INPUT.txt). Метод: транскрайбер arc-chain из RED-среза, метрики —
+IoU по маскам чернил (справочно), дискретный Хаусдорф ≤1 клетки растра
+(шаг 0.12), topology через 4 фазы; sabotage-доказательства способности
+упасть. Инструменты и их тесты лежат рядом (transcribe-arc-chain.mjs,
+measure.mjs + *.test.js, cost-rows.json): на pinned commit
+`npx vitest run epics/ds-icons/reports/cov-00/` воспроизводит
+14 тестов, прогон обоих скриптов — полную таблицу.
 
-Результат: 150/153 PASS; провалы earth/filled, headphone/filled, push/filled
-(topology, см. per-variant-table.md — все 153 имени, results.json — сырые
-данные). Semantic-authoring cost: конверсия transcript→semantic = 100%
+Результат: 150/153 PASS; провалы earth/filled, headphone/filled, push/filled.
+Колонка reason в per-variant-table.md — первичный код (primary-only);
+полный набор нарушенных предикатов и фазовые сигнатуры topology — в
+results.json (headphone/filled нарушает и Хаусдорф=4, и topology;
+push/filled — расхождение наборов фазовых сигнатур при равной финальной
+топологии). Semantic-authoring cost: конверсия transcript→semantic = 100%
 прямого authoring + стоимость транскрипции (раздутие решений 5.1–14.1×
 на 5 архетипах); 35% входа выводимо законами семей SEM-01.
 
@@ -20,5 +27,6 @@ topology через 4 фазы; sabotage-доказательства спосо
 не затронуты).
 
 Переносимый артефакт — методика измерения (Хаусдорф-по-маскам + фазовая
-topology); транскрайбер и measure-инструменты сохранены в stash, в SSOT
-не входят намеренно.
+topology, measure.mjs с sabotage-тестами); инструменты сохранены в этом
+каталоге как исторический отчёт, в runtime/verify-конвейер не входят
+намеренно (эксперимент закрыт решением discard).

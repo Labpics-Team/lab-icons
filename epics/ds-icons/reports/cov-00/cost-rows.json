@@ -1,0 +1,52 @@
+[
+ {
+  "name": "warning",
+  "desc": "треугольник+восклицание",
+  "semPlan": "rounded-polygon + stroke-path + circle-dot",
+  "tLeaf": 361,
+  "tNum": 256,
+  "tParts": 4,
+  "sLeaf": 46,
+  "sNum": 47
+ },
+ {
+  "name": "home",
+  "desc": "дом: контур+дверь",
+  "semPlan": "tangent-chain/arc-chain конструктив + rounded-rect",
+  "tLeaf": 606,
+  "tNum": 422,
+  "tParts": 2,
+  "sLeaf": 43,
+  "sNum": 22
+ },
+ {
+  "name": "mail",
+  "desc": "конверт",
+  "semPlan": "rounded-rect + stroke-path (клапан)",
+  "tLeaf": 338,
+  "tNum": 236,
+  "tParts": 3,
+  "sLeaf": 44,
+  "sNum": 22
+ },
+ {
+  "name": "volume-high",
+  "desc": "динамик+волны",
+  "semPlan": "composite + arc-band ×2",
+  "tLeaf": 725,
+  "tNum": 518,
+  "tParts": 6,
+  "sLeaf": 142,
+  "sNum": 74
+ },
+ {
+  "name": "earth",
+  "desc": "глобус: круг+материки",
+  "semPlan": "circle-dot + arc-chain материки",
+  "tLeaf": 1354,
+  "tNum": 985,
+  "tParts": 9,
+  "sLeaf": 113,
+  "sNum": 65
+ }
+]
