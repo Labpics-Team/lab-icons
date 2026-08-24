@@ -82,6 +82,13 @@ describe('MO-00 motion census', () => {
     }] } })).toThrow(/duplicate compatible exclusion/);
   });
 
+  it('не принимает модель без вариантов', () => {
+    const mutated = structuredClone(catalog);
+    mutated.icons['cloud-off'].model.variants = {};
+    expect(() => buildMotionCensus({ catalogInput: mutated }))
+      .toThrow(/обязан содержать варианты/);
+  });
+
   it('не принимает part-set только в одном варианте и мёртвый альтернативный set', () => {
     const mutated = structuredClone(catalog);
     for (const variant of Object.values(mutated.icons['heart-off'].model.variants).slice(0, 1)) {

@@ -111,11 +111,7 @@ export function buildMotionCensus({
       }
     }
     const compatibleUniverse = Object.entries(catalogInput.icons)
-      .filter(([, icon]) => icon.model)
-      .filter(([, icon]) => Object.values(icon.model.variants ?? {}).every((variant) => {
-        const ids = new Set((variant.parts ?? []).map((part) => part.id));
-        return family.requiredPartSets.some((required) => required.every((id) => ids.has(id)));
-      }))
+      .filter(([, icon]) => icon.model && modelMatchesPartSets(icon.model, family.requiredPartSets))
       .map(([icon]) => icon)
       .sort();
     const omitted = compatibleUniverse.filter(
@@ -136,11 +132,10 @@ export function buildMotionCensus({
         exclusions.push({ icon, code: 'SOURCE_ONLY' });
         continue;
       }
-      const variantsMatch = Object.values(model.variants ?? {}).every((variant) => {
-        const ids = new Set((variant.parts ?? []).map((part) => part.id));
-        return family.requiredPartSets.some((required) => required.every((id) => ids.has(id)));
-      });
-      if (!variantsMatch) {
+      if (Object.keys(model.variants ?? {}).length === 0) {
+        throw new Error(`${family.id}: model ${icon} обязан содержать варианты`);
+      }
+      if (!modelMatchesPartSets(model, family.requiredPartSets)) {
         exclusions.push({ icon, code: 'REQUIRED_PART_SET_MISSING' });
         continue;
       }
