@@ -27,6 +27,14 @@ function variantParts(model) {
   return Object.values(model.variants ?? {}).flatMap((variant) => variant.parts ?? []);
 }
 
+function modelMatchesPartSets(model, requiredPartSets) {
+  const variants = Object.values(model.variants ?? {});
+  return variants.length > 0 && variants.every((variant) => {
+    const ids = new Set((variant.parts ?? []).map((part) => part.id));
+    return requiredPartSets.some((required) => required.every((id) => ids.has(id)));
+  });
+}
+
 export function buildMotionCensus({
   catalogInput = catalog,
   anatomyInput = anatomy,

@@ -70,5 +70,26 @@ describe('MO-00 motion census', () => {
     const omitted = { id: 'mark-family', meaning: 'mark', icons: ['checkmark', 'checkmark-circle'], requiredPartSets: [['mark']], requiredTrackKinds: ['reveal'], readiness: 'needs-core', compatibleExclusions: [] };
     expect(() => buildMotionCensus({ familySpec: { version: 1, families: [omitted] } }))
       .toThrow(/не классифицированы/);
+    expect(() => buildMotionCensus({ familySpec: { version: 1, families: [{
+      ...omitted,
+      compatibleExclusions: [
+        { icon: 'chevron-back', code: 'SEMANTIC_MEANING_MISMATCH' },
+        { icon: 'chevron-back', code: 'SEMANTIC_MEANING_MISMATCH' },
+      ],
+    }] } })).toThrow(/duplicate compatible exclusion/);
+  });
+
+  it('не принимает part-set только в одном варианте и мёртвый альтернативный set', () => {
+    const mutated = structuredClone(catalog);
+    for (const variant of Object.values(mutated.icons['heart-off'].model.variants).slice(0, 1)) {
+      variant.parts = variant.parts.filter((part) => part.id !== 'slash');
+    }
+    const partialVariant = { id: 'slash-family', meaning: 'slash', icons: ['heart-off', 'cloud-off'], requiredPartSets: [['slash']], requiredTrackKinds: ['reveal'], readiness: 'needs-core', compatibleExclusions: [{ icon: 'mic-off', code: 'SEMANTIC_MEANING_MISMATCH' }, { icon: 'video-camera-off', code: 'SEMANTIC_MEANING_MISMATCH' }] };
+    expect(() => buildMotionCensus({ catalogInput: mutated, familySpec: { version: 1, families: [partialVariant] } }))
+      .toThrow(/не менее двух/);
+
+    const deadSet = { ...partialVariant, requiredPartSets: [['slash'], ['slash', 'ghost-part']] };
+    expect(() => buildMotionCensus({ familySpec: { version: 1, families: [deadSet] } }))
+      .toThrow(/requiredPartSet не встречается/);
   });
 });
