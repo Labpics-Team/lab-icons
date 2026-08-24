@@ -67,6 +67,9 @@ describe('MO-00 motion census', () => {
     const contour = { id: 'whirl', meaning: 'whirl', icons: ['heart', 'refresh'], requiredPartSets: [['c0']], requiredTrackKinds: ['rotate'], readiness: 'existing-core', compatibleExclusions: [] };
     expect(() => buildMotionCensus({ familySpec: { version: 1, families: [contour] } }))
       .toThrow(/невалидные/);
+    const mixedContour = { ...contour, requiredPartSets: [['mark', 'c0']] };
+    expect(() => buildMotionCensus({ familySpec: { version: 1, families: [mixedContour] } }))
+      .toThrow(/невалидные/);
     const omitted = { id: 'mark-family', meaning: 'mark', icons: ['checkmark', 'checkmark-circle'], requiredPartSets: [['mark']], requiredTrackKinds: ['reveal'], readiness: 'needs-core', compatibleExclusions: [] };
     expect(() => buildMotionCensus({ familySpec: { version: 1, families: [omitted] } }))
       .toThrow(/не классифицированы/);
