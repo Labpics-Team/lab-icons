@@ -1,0 +1,224 @@
+{
+ "version": 1,
+ "families": [
+  {
+   "id": "chevron-nudge",
+   "meaning": "направленный кивок",
+   "icons": [
+    "chevron-back",
+    "chevron-down",
+    "chevron-forward",
+    "chevron-up",
+    "chevron-back-circle",
+    "chevron-down-circle",
+    "chevron-forward-circle",
+    "chevron-up-circle"
+   ],
+   "requiredTrackKinds": [
+    "translate"
+   ],
+   "readiness": "needs-core",
+   "requiredPartSets": [
+    [
+     "mark"
+    ]
+   ]
+  },
+  {
+   "id": "arrow-directional-emphasis",
+   "meaning": "подчёркивание направления",
+   "icons": [
+    "arrow-back",
+    "arrow-down",
+    "arrow-forward",
+    "arrow-up",
+    "arrow-back-circle",
+    "arrow-down-circle",
+    "arrow-forward-circle",
+    "arrow-up-circle"
+   ],
+   "requiredTrackKinds": [
+    "translate"
+   ],
+   "readiness": "needs-core",
+   "requiredPartSets": [
+    [
+     "head",
+     "shaft"
+    ]
+   ]
+  },
+  {
+   "id": "spin",
+   "meaning": "обновление вращением",
+   "icons": [
+    "refresh",
+    "reload",
+    "arrow-redo",
+    "arrow-undo"
+   ],
+   "requiredTrackKinds": [
+    "rotate"
+   ],
+   "readiness": "existing-core",
+   "requiredPartSets": [
+    [
+     "c0"
+    ],
+    [
+     "orbit"
+    ]
+   ]
+  },
+  {
+   "id": "off-slash-draw",
+   "meaning": "прочерчивание выключения",
+   "icons": [
+    "cloud-off",
+    "heart-off",
+    "mic-off",
+    "video-camera-off"
+   ],
+   "requiredTrackKinds": [
+    "reveal"
+   ],
+   "readiness": "needs-core",
+   "requiredPartSets": [
+    [
+     "slash"
+    ]
+   ]
+  },
+  {
+   "id": "play-state-toggle",
+   "meaning": "переход медиа-состояния",
+   "icons": [
+    "play",
+    "pause",
+    "play-circle",
+    "pause-circle",
+    "play-back",
+    "play-forward",
+    "play-skip-back",
+    "play-skip-forward"
+   ],
+   "requiredTrackKinds": [
+    "morph"
+   ],
+   "readiness": "needs-morph",
+   "requiredPartSets": [
+    [
+     "c0"
+    ],
+    [
+     "triangle"
+    ],
+    [
+     "bar-left",
+     "bar-right"
+    ]
+   ]
+  },
+  {
+   "id": "plus-minus-actuate",
+   "meaning": "добавление или удаление",
+   "icons": [
+    "plus",
+    "plus-circle",
+    "minus",
+    "minus-circle"
+   ],
+   "requiredTrackKinds": [
+    "scale",
+    "opacity"
+   ],
+   "readiness": "needs-core",
+   "requiredPartSets": [
+    [
+     "stem",
+     "arm-left",
+     "arm-right"
+    ],
+    [
+     "bar"
+    ],
+    [
+     "dash"
+    ]
+   ]
+  },
+  {
+   "id": "checkmark-confirm",
+   "meaning": "подтверждение",
+   "icons": [
+    "checkmark",
+    "checkmark-circle"
+   ],
+   "requiredTrackKinds": [
+    "reveal"
+   ],
+   "readiness": "needs-core",
+   "requiredPartSets": [
+    [
+     "mark"
+    ]
+   ]
+  },
+  {
+   "id": "double-check-stagger",
+   "meaning": "двойное подтверждение",
+   "icons": [
+    "checkmarks",
+    "checkmarks-circle"
+   ],
+   "requiredTrackKinds": [
+    "reveal"
+   ],
+   "readiness": "needs-core",
+   "requiredPartSets": [
+    [
+     "mark-primary",
+     "mark-secondary"
+    ]
+   ]
+  },
+  {
+   "id": "ellipsis-typing",
+   "meaning": "ожидание ввода",
+   "icons": [
+    "ellipsis-horizontal",
+    "ellipsis-vertical"
+   ],
+   "requiredTrackKinds": [
+    "scale",
+    "opacity"
+   ],
+   "readiness": "needs-core",
+   "requiredPartSets": [
+    [
+     "dot-center"
+    ]
+   ]
+  },
+  {
+   "id": "swap-exchange",
+   "meaning": "обмен направлениями",
+   "icons": [
+    "swap-horizontal",
+    "swap-vertical"
+   ],
+   "requiredTrackKinds": [
+    "translate"
+   ],
+   "readiness": "needs-core",
+   "requiredPartSets": [
+    [
+     "head-a",
+     "shaft-a",
+     "head-b",
+     "shaft-b"
+    ]
+   ]
+  }
+ ]
+}
