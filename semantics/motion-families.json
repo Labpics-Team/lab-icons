@@ -22,6 +22,16 @@
     [
      "mark"
     ]
+   ],
+   "compatibleExclusions": [
+    {
+     "icon": "checkmark",
+     "code": "SEMANTIC_MEANING_MISMATCH"
+    },
+    {
+     "icon": "checkmark-circle",
+     "code": "SEMANTIC_MEANING_MISMATCH"
+    }
    ]
   },
   {
@@ -46,7 +56,8 @@
      "head",
      "shaft"
     ]
-   ]
+   ],
+   "compatibleExclusions": []
   },
   {
    "id": "off-slash-draw",
@@ -65,7 +76,8 @@
     [
      "slash"
     ]
-   ]
+   ],
+   "compatibleExclusions": []
   },
   {
    "id": "plus-minus-actuate",
@@ -93,7 +105,8 @@
     [
      "dash"
     ]
-   ]
+   ],
+   "compatibleExclusions": []
   },
   {
    "id": "checkmark-confirm",
@@ -110,6 +123,40 @@
     [
      "mark"
     ]
+   ],
+   "compatibleExclusions": [
+    {
+     "icon": "chevron-back",
+     "code": "SEMANTIC_MEANING_MISMATCH"
+    },
+    {
+     "icon": "chevron-back-circle",
+     "code": "SEMANTIC_MEANING_MISMATCH"
+    },
+    {
+     "icon": "chevron-down",
+     "code": "SEMANTIC_MEANING_MISMATCH"
+    },
+    {
+     "icon": "chevron-down-circle",
+     "code": "SEMANTIC_MEANING_MISMATCH"
+    },
+    {
+     "icon": "chevron-forward",
+     "code": "SEMANTIC_MEANING_MISMATCH"
+    },
+    {
+     "icon": "chevron-forward-circle",
+     "code": "SEMANTIC_MEANING_MISMATCH"
+    },
+    {
+     "icon": "chevron-up",
+     "code": "SEMANTIC_MEANING_MISMATCH"
+    },
+    {
+     "icon": "chevron-up-circle",
+     "code": "SEMANTIC_MEANING_MISMATCH"
+    }
    ]
   },
   {
@@ -128,7 +175,8 @@
      "mark-primary",
      "mark-secondary"
     ]
-   ]
+   ],
+   "compatibleExclusions": []
   },
   {
    "id": "ellipsis-typing",
@@ -146,7 +194,8 @@
     [
      "dot-center"
     ]
-   ]
+   ],
+   "compatibleExclusions": []
   },
   {
    "id": "swap-exchange",
@@ -166,7 +215,8 @@
      "head-b",
      "shaft-b"
     ]
-   ]
+   ],
+   "compatibleExclusions": []
   }
  ]
 }

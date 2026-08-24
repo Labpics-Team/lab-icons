@@ -10,7 +10,7 @@ const catalog = read('semantics/catalog.json');
 const anatomy = read('semantics/anatomy.json');
 const spec = read('semantics/motion-families.json');
 
-const FAMILY_KEYS = ['id', 'meaning', 'icons', 'requiredPartSets', 'requiredTrackKinds', 'readiness'];
+const FAMILY_KEYS = ['id', 'meaning', 'icons', 'requiredPartSets', 'requiredTrackKinds', 'readiness', 'compatibleExclusions'];
 const READINESS = new Set(['existing-core', 'needs-core', 'needs-morph']);
 const TRACK_KINDS = new Set(['rotate', 'translate', 'reveal', 'morph', 'scale', 'opacity']);
 const FAMILY_ID = /^[a-z][a-z0-9-]*$/;
@@ -40,7 +40,9 @@ export function buildMotionCensus({
     for (const gesture of glyph.motion?.gestures ?? []) {
       declaredGestures.push({ icon, id: gesture.id, kind: gesture.kind });
     }
-    for (const part of variantParts(catalogInput.icons[icon]?.model ?? {})) {
+  }
+  for (const [icon, contract] of Object.entries(catalogInput.icons)) {
+    for (const part of variantParts(contract.model ?? {})) {
       if (!part.morphGroup) continue;
       const names = morphGroups.get(part.morphGroup) ?? new Set();
       names.add(icon);
@@ -49,7 +51,7 @@ export function buildMotionCensus({
   }
 
   const familyIds = new Set();
-  const families = familySpec.families.map((family) => {
+  for (const family of familySpec.families) {
     exactKeys(family, FAMILY_KEYS, `motion family ${family.id ?? '<unknown>'}`);
     if (typeof family.id !== 'string' || !FAMILY_ID.test(family.id) ||
         typeof family.meaning !== 'string' || family.meaning.length === 0) {
@@ -57,6 +59,8 @@ export function buildMotionCensus({
     }
     if (familyIds.has(family.id)) throw new TypeError(`${family.id}: duplicate family id`);
     familyIds.add(family.id);
+  }
+  const families = familySpec.families.map((family) => {
     if (!READINESS.has(family.readiness)) {
       throw new TypeError(`${family.id}: неизвестная readiness ${family.readiness}`);
     }
@@ -65,10 +69,52 @@ export function buildMotionCensus({
         new Set(family.icons).size !== family.icons.length ||
         !Array.isArray(family.requiredPartSets) || family.requiredPartSets.length === 0 ||
         !family.requiredPartSets.every((set) => Array.isArray(set) && set.length > 0 &&
-          set.every((id) => typeof id === 'string') && new Set(set).size === set.length) ||
+          set.every((id) => typeof id === 'string' && !/^c\d+$/.test(id)) && new Set(set).size === set.length) ||
         !Array.isArray(family.requiredTrackKinds) || family.requiredTrackKinds.length === 0 ||
-        !family.requiredTrackKinds.every((kind) => TRACK_KINDS.has(kind))) {
+        !family.requiredTrackKinds.every((kind) => TRACK_KINDS.has(kind)) ||
+        !Array.isArray(family.compatibleExclusions) ||
+        !family.compatibleExclusions.every((item) => item && typeof item.icon === 'string' &&
+          item.code === 'SEMANTIC_MEANING_MISMATCH')) {
       throw new TypeError(`${family.id}: невалидные icons/requiredPartSets/requiredTrackKinds`);
+    }
+    for (const icon of family.icons) {
+      if (!Object.hasOwn(catalogInput.icons, icon)) {
+        throw new Error(`${family.id}: unknown icon ${icon}`);
+      }
+    }
+    const declaredPartSets = family.icons
+      .filter((icon) => catalogInput.icons[icon].model)
+      .map((icon) => new Set(variantParts(catalogInput.icons[icon].model).map((part) => part.id)));
+    for (const required of family.requiredPartSets) {
+      if (!declaredPartSets.some((ids) => required.every((id) => ids.has(id)))) {
+        throw new Error(`${family.id}: requiredPartSet не встречается ни у одного declared icon (${required.join(',')})`);
+      }
+    }
+    const explicitExclusions = new Map(family.compatibleExclusions.map((item) => [item.icon, item.code]));
+    if (explicitExclusions.size !== family.compatibleExclusions.length) {
+      throw new TypeError(`${family.id}: duplicate compatible exclusion`);
+    }
+    for (const icon of explicitExclusions.keys()) {
+      if (!Object.hasOwn(catalogInput.icons, icon)) {
+        throw new Error(`${family.id}: unknown compatible exclusion ${icon}`);
+      }
+      if (family.icons.includes(icon)) {
+        throw new Error(`${family.id}: icon ${icon} одновременно consumer и exclusion`);
+      }
+    }
+    const compatibleUniverse = Object.entries(catalogInput.icons)
+      .filter(([, icon]) => icon.model)
+      .filter(([, icon]) => Object.values(icon.model.variants ?? {}).every((variant) => {
+        const ids = new Set((variant.parts ?? []).map((part) => part.id));
+        return family.requiredPartSets.some((required) => required.every((id) => ids.has(id)));
+      }))
+      .map(([icon]) => icon)
+      .sort();
+    const omitted = compatibleUniverse.filter(
+      (icon) => !family.icons.includes(icon) && !explicitExclusions.has(icon),
+    );
+    if (omitted.length > 0) {
+      throw new Error(`${family.id}: compatible consumers не классифицированы: ${omitted.join(', ')}`);
     }
     const accepted = [];
     const candidate = [];
@@ -82,8 +128,11 @@ export function buildMotionCensus({
         exclusions.push({ icon, code: 'SOURCE_ONLY' });
         continue;
       }
-      const ids = new Set(variantParts(model).map((part) => part.id));
-      if (!family.requiredPartSets.some((required) => required.every((id) => ids.has(id)))) {
+      const variantsMatch = Object.values(model.variants ?? {}).every((variant) => {
+        const ids = new Set((variant.parts ?? []).map((part) => part.id));
+        return family.requiredPartSets.some((required) => required.every((id) => ids.has(id)));
+      });
+      if (!variantsMatch) {
         exclusions.push({ icon, code: 'REQUIRED_PART_SET_MISSING' });
         continue;
       }
