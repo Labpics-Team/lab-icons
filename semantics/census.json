@@ -296,7 +296,7 @@
   }
  ],
  "bundle": {
-  "totalBytes": 797683,
+  "totalBytes": 797784,
   "modules": [
    {
     "path": "semantics/catalog.json",
@@ -312,7 +312,7 @@
    },
    {
     "path": "src/ir/index.ts",
-    "bytes": 23134
+    "bytes": 23235
    },
    {
     "path": "src/core/circle-dictionary.js",
@@ -367,8 +367,8 @@
    "gzip": 96297
   },
   "glyphRuntime": {
-   "raw": 797683,
-   "gzip": 120481,
+   "raw": 797784,
+   "gzip": 120508,
    "note": "один glyph() тянет весь IR-бандл: JSON-данные доминируют — кандидат на split/lazy в REL-волне"
   }
  }

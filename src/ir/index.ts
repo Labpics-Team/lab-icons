@@ -413,21 +413,26 @@ export class GlyphModelError extends Error {
 }
 
 const candidateGlyphs = new Map<string, AnatomyGlyph>();
-let candidatesRegistered = false;
+const registeredCandidateVariants = new Set<string>();
+
+type CandidateVariantRegistration = `${string}/${IconVariant}`;
 
 /**
  * Реестр candidate-деклараций; вызывается ТОЛЬКО субпатом ./ir/candidates.
- * First-write-wins: повторная регистрация имени не перезаписывает тело —
- * публичной точки мутации реестра у потребителя нет.
+ * First-write-wins: повторная регистрация имени не перезаписывает тело.
+ * Runtime-export остаётся достижимым для JS по Хайраму, но без явного списка
+ * variant registrations не открывает ни одной candidate-модели.
  * @internal
  */
 export function registerCandidateAnatomy(
   glyphs: Readonly<Record<string, AnatomyGlyph>>,
+  variants: readonly CandidateVariantRegistration[],
 ): void {
-  // Гейт открывается только непустым корпусом: пустой вызов не должен
-  // включать построение mixed-моделей без candidate-деклараций.
-  if (Object.keys(glyphs).length === 0) return;
-  candidatesRegistered = true;
+  // Доступ открывает только канонический субпат: мусорный объект не может
+  // включить mixed-модель, чья declaration уже находится в runtime-проекции.
+  for (const registration of variants) {
+    registeredCandidateVariants.add(registration);
+  }
   for (const [name, glyph] of Object.entries(glyphs)) {
     if (name in anatomy.glyphs) continue; // runtime-проекция авторитетна
     if (candidateGlyphs.has(name)) continue;
@@ -987,7 +992,7 @@ export function glyph(request: unknown): GlyphIR {
     // INV-06: гейт по состоянию модели, не по наличию декларации — mixed-иконки
     // (candidate-вариант при декларации, попавшей в runtime через accepted-соседа)
     // без регистрации корпуса тоже обязаны падать, а не строиться молча.
-    if (model.state !== 'accepted' && !candidatesRegistered) {
+    if (model.state !== 'accepted' && !registeredCandidateVariants.has(`${parsed.icon}/${parsed.variant}`)) {
       throw new GlyphModelError(
         'CANDIDATES_REQUIRED',
         `@labpics/icons/ir: candidate-модель ${parsed.icon}/${parsed.variant} требует ` +

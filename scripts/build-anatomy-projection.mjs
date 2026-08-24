@@ -62,6 +62,18 @@ writeFileSync(
   join(ROOT, 'semantics', 'anatomy.candidates.json'),
   JSON.stringify({ ...header('candidates'), glyphs: candidateGlyphs }, null, 1) + '\n',
 );
+
+const candidateVariants = [];
+for (const [icon, entry] of Object.entries(catalog.icons)) {
+  for (const [variant, model] of Object.entries(entry.model?.variants ?? {})) {
+    if (model.state === 'candidate') candidateVariants.push(`${icon}/${variant}`);
+  }
+}
+candidateVariants.sort();
+writeFileSync(
+  join(ROOT, 'semantics', 'candidate-variants.json'),
+  JSON.stringify({ version: 1, variants: candidateVariants }, null, 1) + '\n',
+);
 console.log(
   `anatomy-projection: runtime ${Object.keys(runtimeGlyphs).length} глифов, ` +
     `candidates ${Object.keys(candidateGlyphs).length}`,

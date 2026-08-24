@@ -10,6 +10,7 @@
  * не имеет side effects и будет вырезан бандлером (sideEffects: false).
  */
 import candidatesJson from '../../semantics/anatomy.candidates.json';
+import candidateVariantsJson from '../../semantics/candidate-variants.json';
 import { registerCandidateAnatomy } from './index.js';
 
 let registered = false;
@@ -20,6 +21,7 @@ export function registerCandidates(): void {
   registered = true;
   registerCandidateAnatomy(
     (candidatesJson as { glyphs: Parameters<typeof registerCandidateAnatomy>[0] }).glyphs,
+    (candidateVariantsJson as { variants: Parameters<typeof registerCandidateAnatomy>[1] }).variants,
   );
 }
 

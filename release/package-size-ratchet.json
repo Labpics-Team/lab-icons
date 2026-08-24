@@ -33,12 +33,13 @@
    "maxGzipBytes": 160
   },
   "dist/ir/candidates.js": {
-   "baselineBytes": 259809,
-   "baselineGzipBytes": 19330,
-   "maxBytes": 259809,
-   "maxGzipBytes": 19330,
+   "baselineBytes": 262248,
+   "baselineGzipBytes": 19874,
+   "maxBytes": 262248,
+   "maxGzipBytes": 19874,
    "allowedModules": [
     "semantics/anatomy.candidates.json",
+    "semantics/candidate-variants.json",
     "src/ir/candidates.ts"
    ],
    "forbiddenNeedles": [
@@ -66,10 +67,10 @@
    ]
   },
   "dist/ir/index.js": {
-   "baselineBytes": 805715,
-   "baselineGzipBytes": 125425,
-   "maxBytes": 805715,
-   "maxGzipBytes": 125425,
+   "baselineBytes": 805816,
+   "baselineGzipBytes": 125445,
+   "maxBytes": 805816,
+   "maxGzipBytes": 125445,
    "allowedModules": [
     "src/core/anatomy-gen.js",
     "src/core/calendar-geometry.js",
