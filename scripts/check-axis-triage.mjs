@@ -67,6 +67,10 @@ export function checkTriage(triage, disabled) {
   if (phantom.length) errors.push(`фантомные записи вне axis-quality (${phantom.length}): ${phantom.join(', ')}`);
 
   for (const [key, entry] of Object.entries(triage.entries ?? {})) {
+    if (entry === null || typeof entry !== 'object') {
+      errors.push(`${key}: запись не является объектом триажа`);
+      continue;
+    }
     if (!TRIAGE_CLASSES.includes(entry.class)) {
       errors.push(`${key}: класс '${entry.class}' вне enum [${TRIAGE_CLASSES.join(', ')}]`);
     }

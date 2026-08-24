@@ -47,6 +47,13 @@ describe('check-axis-triage: RED — гейт кусается (синтетич
     const { errors } = checkTriage(bad, synthDisabled);
     expect(errors.some((e) => e.includes('alpha/outline/weight') && e.includes('пустой evidence'))).toBe(true);
   });
+
+  it('null-запись падает ошибкой валидации, не TypeError', () => {
+    const bad = buildTriage(synthDisabled);
+    bad.entries['alpha/outline/weight'] = null;
+    const { errors } = checkTriage(bad, synthDisabled);
+    expect(errors.some((e) => e.includes('alpha/outline/weight') && e.includes('не является объектом'))).toBe(true);
+  });
 });
 
 describe('axis-debt-triage: GREEN — живая проекция валидна', () => {
