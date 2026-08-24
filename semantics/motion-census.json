@@ -1,0 +1,199 @@
+{
+ "version": 1,
+ "generatedBy": "scripts/build-motion-census.mjs",
+ "declaredGestures": [
+  {
+   "icon": "time",
+   "id": "time.advance",
+   "kind": "clock-advance"
+  }
+ ],
+ "morphReadyPairs": [],
+ "families": [
+  {
+   "id": "arrow-directional-emphasis",
+   "meaning": "подчёркивание направления",
+   "requiredPartSets": [
+    [
+     "head",
+     "shaft"
+    ]
+   ],
+   "requiredTrackKinds": [
+    "translate"
+   ],
+   "readiness": "needs-core",
+   "accepted": [],
+   "candidate": [
+    "arrow-back",
+    "arrow-back-circle",
+    "arrow-down",
+    "arrow-down-circle",
+    "arrow-forward",
+    "arrow-forward-circle",
+    "arrow-up",
+    "arrow-up-circle"
+   ],
+   "exclusions": []
+  },
+  {
+   "id": "checkmark-confirm",
+   "meaning": "подтверждение",
+   "requiredPartSets": [
+    [
+     "mark"
+    ]
+   ],
+   "requiredTrackKinds": [
+    "reveal"
+   ],
+   "readiness": "needs-core",
+   "accepted": [
+    "checkmark",
+    "checkmark-circle"
+   ],
+   "candidate": [],
+   "exclusions": []
+  },
+  {
+   "id": "chevron-nudge",
+   "meaning": "направленный кивок",
+   "requiredPartSets": [
+    [
+     "mark"
+    ]
+   ],
+   "requiredTrackKinds": [
+    "translate"
+   ],
+   "readiness": "needs-core",
+   "accepted": [
+    "chevron-back",
+    "chevron-back-circle",
+    "chevron-down",
+    "chevron-down-circle",
+    "chevron-forward",
+    "chevron-forward-circle",
+    "chevron-up"
+   ],
+   "candidate": [
+    "chevron-up-circle"
+   ],
+   "exclusions": []
+  },
+  {
+   "id": "double-check-stagger",
+   "meaning": "двойное подтверждение",
+   "requiredPartSets": [
+    [
+     "mark-primary",
+     "mark-secondary"
+    ]
+   ],
+   "requiredTrackKinds": [
+    "reveal"
+   ],
+   "readiness": "needs-core",
+   "accepted": [
+    "checkmarks",
+    "checkmarks-circle"
+   ],
+   "candidate": [],
+   "exclusions": []
+  },
+  {
+   "id": "ellipsis-typing",
+   "meaning": "ожидание ввода",
+   "requiredPartSets": [
+    [
+     "dot-center"
+    ]
+   ],
+   "requiredTrackKinds": [
+    "opacity",
+    "scale"
+   ],
+   "readiness": "needs-core",
+   "accepted": [
+    "ellipsis-horizontal",
+    "ellipsis-vertical"
+   ],
+   "candidate": [],
+   "exclusions": []
+  },
+  {
+   "id": "off-slash-draw",
+   "meaning": "прочерчивание выключения",
+   "requiredPartSets": [
+    [
+     "slash"
+    ]
+   ],
+   "requiredTrackKinds": [
+    "reveal"
+   ],
+   "readiness": "needs-core",
+   "accepted": [],
+   "candidate": [
+    "cloud-off",
+    "heart-off",
+    "mic-off",
+    "video-camera-off"
+   ],
+   "exclusions": []
+  },
+  {
+   "id": "plus-minus-actuate",
+   "meaning": "добавление или удаление",
+   "requiredPartSets": [
+    [
+     "arm-left",
+     "arm-right",
+     "stem"
+    ],
+    [
+     "bar"
+    ],
+    [
+     "dash"
+    ]
+   ],
+   "requiredTrackKinds": [
+    "opacity",
+    "scale"
+   ],
+   "readiness": "needs-core",
+   "accepted": [
+    "minus",
+    "minus-circle"
+   ],
+   "candidate": [
+    "plus",
+    "plus-circle"
+   ],
+   "exclusions": []
+  },
+  {
+   "id": "swap-exchange",
+   "meaning": "обмен направлениями",
+   "requiredPartSets": [
+    [
+     "head-a",
+     "head-b",
+     "shaft-a",
+     "shaft-b"
+    ]
+   ],
+   "requiredTrackKinds": [
+    "translate"
+   ],
+   "readiness": "needs-core",
+   "accepted": [],
+   "candidate": [
+    "swap-horizontal",
+    "swap-vertical"
+   ],
+   "exclusions": []
+  }
+ ]
+}
