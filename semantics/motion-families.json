@@ -49,28 +49,6 @@
    ]
   },
   {
-   "id": "spin",
-   "meaning": "обновление вращением",
-   "icons": [
-    "refresh",
-    "reload",
-    "arrow-redo",
-    "arrow-undo"
-   ],
-   "requiredTrackKinds": [
-    "rotate"
-   ],
-   "readiness": "existing-core",
-   "requiredPartSets": [
-    [
-     "c0"
-    ],
-    [
-     "orbit"
-    ]
-   ]
-  },
-  {
    "id": "off-slash-draw",
    "meaning": "прочерчивание выключения",
    "icons": [
@@ -86,36 +64,6 @@
    "requiredPartSets": [
     [
      "slash"
-    ]
-   ]
-  },
-  {
-   "id": "play-state-toggle",
-   "meaning": "переход медиа-состояния",
-   "icons": [
-    "play",
-    "pause",
-    "play-circle",
-    "pause-circle",
-    "play-back",
-    "play-forward",
-    "play-skip-back",
-    "play-skip-forward"
-   ],
-   "requiredTrackKinds": [
-    "morph"
-   ],
-   "readiness": "needs-morph",
-   "requiredPartSets": [
-    [
-     "c0"
-    ],
-    [
-     "triangle"
-    ],
-    [
-     "bar-left",
-     "bar-right"
     ]
    ]
   },

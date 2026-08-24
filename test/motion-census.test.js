@@ -7,7 +7,7 @@ const byId = (census, id) => census.families.find((family) => family.id === id);
 describe('MO-00 motion census', () => {
   it('выводит только семьи с двумя и более совместимыми consumers', () => {
     const census = buildMotionCensus();
-    expect(census.families).toHaveLength(10);
+    expect(census.families).toHaveLength(8);
     for (const family of census.families) {
       expect(family.accepted.length + family.candidate.length).toBeGreaterThanOrEqual(2);
     }
@@ -19,15 +19,16 @@ describe('MO-00 motion census', () => {
       { icon: 'time', id: 'time.advance', kind: 'clock-advance' },
     ]);
     expect(census.morphReadyPairs).toEqual([]);
-    expect(byId(census, 'spin')).toMatchObject({ readiness: 'existing-core', accepted: [], candidate: ['arrow-redo', 'arrow-undo', 'refresh', 'reload'] });
+    expect(census.families.map((family) => family.id)).not.toContain('spin');
+    expect(census.families.map((family) => family.id)).not.toContain('play-state-toggle');
   });
 
   it('не допускает source-only или несовместимого consumer в compatible set', () => {
     const mutated = structuredClone(catalog);
-    mutated.icons.refresh.model = null;
+    mutated.icons['cloud-off'].model = null;
     const census = buildMotionCensus({ catalogInput: mutated });
-    expect(byId(census, 'spin').candidate).not.toContain('refresh');
-    expect(byId(census, 'spin').exclusions).toContainEqual({ icon: 'refresh', code: 'SOURCE_ONLY' });
+    expect(byId(census, 'off-slash-draw').candidate).not.toContain('cloud-off');
+    expect(byId(census, 'off-slash-draw').exclusions).toContainEqual({ icon: 'cloud-off', code: 'SOURCE_ONLY' });
   });
 
   it('отклоняет family с менее чем двумя consumers, duplicate id/icon и unknown icon', () => {
