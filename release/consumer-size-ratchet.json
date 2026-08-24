@@ -11,8 +11,8 @@
   },
   "glyph-one": {
    "entry": "import { glyph } from '@labpics/icons/ir';\nconsole.log(glyph({ icon: 'alert' }));\n",
-   "baselineBytes": 837563,
-   "baselineGzipBytes": 210010,
+   "baselineBytes": 837598,
+   "baselineGzipBytes": 210016,
    "maxBytes": 921319,
    "maxGzipBytes": 231011
   },

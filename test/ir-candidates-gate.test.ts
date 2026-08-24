@@ -87,9 +87,13 @@ describe('INV-06: candidate-гейт fail-closed без registerCandidates()', (
     }
   });
 
-  it('пустая регистрация не открывает гейт (обход из финального ревью PR #85)', () => {
-    registerCandidateAnatomy({});
+  it('пустая или мусорная регистрация не открывает mixed candidate-гейт', () => {
+    registerCandidateAnatomy({}, []);
     const { icon, variant } = mixed[0]!;
+    expectCandidatesRequired(() =>
+      glyph({ icon: icon as never, variant, modelMode: 'allow-candidate' }),
+    );
+    registerCandidateAnatomy({ 'poison-glyph': { parts: [] } } as never, []);
     expectCandidatesRequired(() =>
       glyph({ icon: icon as never, variant, modelMode: 'allow-candidate' }),
     );
