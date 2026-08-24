@@ -1,0 +1,277 @@
+{
+ "version": 1,
+ "generatedBy": "scripts/build-axis-debt-triage.mjs",
+ "source": "semantics/axis-quality.json",
+ "classes": [
+  "oracle-defect",
+  "law-fix",
+  "redraw-required",
+  "owner-blocked-rect-pen"
+ ],
+ "entries": {
+  "alert-circle/outline/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "aloof/outline/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "apps/outline/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "arrow-back-circle/outline/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "arrow-back/filled/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "arrow-back/outline/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "arrow-down-circle/outline/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "arrow-down/filled/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "arrow-down/outline/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "arrow-forward-circle/outline/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "arrow-forward/filled/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "arrow-forward/outline/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "arrow-up-circle/outline/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "arrow-up/filled/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "arrow-up/outline/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "ban/outline/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "bulb/outline/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "checkmark-circle/outline/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "checkmark/outline/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "checkmarks-circle/outline/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "checkmarks/outline/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "chevron-back-circle/filled/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "chevron-back-circle/outline/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "chevron-down-circle/filled/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "chevron-down-circle/outline/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "chevron-forward-circle/filled/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "chevron-forward-circle/outline/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "chevron-up-circle/filled/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "chevron-up-circle/outline/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "close-circle/outline/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "close/outline/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "cloud/outline/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "component/outline/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "download/outline/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "ellipse/outline/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "eye/outline/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "info-circle/outline/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "info/outline/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "minus-circle/outline/weight": {
+   "class": "owner-blocked-rect-pen",
+   "evidence": "rect-семья 'minus-circle' из Issue #43 п.3: rect-штрихи не масштабируются осью weight, решение за владельцем"
+  },
+  "move/filled/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "move/outline/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "pause-circle/outline/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "pause/outline/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "play-back-circle/outline/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "play-circle/outline/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "play-forward-circle/outline/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "play-skip-back-circle/outline/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "play-skip-forward-circle/outline/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "plus-circle/outline/weight": {
+   "class": "owner-blocked-rect-pen",
+   "evidence": "rect-семья 'plus-circle' из Issue #43 п.3: rect-штрихи не масштабируются осью weight, решение за владельцем"
+  },
+  "radio/filled/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "radio/outline/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "reload/filled/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "reload/outline/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "resize/filled/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "resize/outline/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "square/outline/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "sun-low/outline/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "swap-horizontal/filled/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "swap-horizontal/outline/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "swap-vertical/filled/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "swap-vertical/outline/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "tablet-landscape/outline/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "tablet-portrait/outline/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "time/filled/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "time/outline/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  },
+  "upload/outline/weight": {
+   "class": "redraw-required",
+   "evidence": "awaiting-measurement"
+  }
+ }
+}
