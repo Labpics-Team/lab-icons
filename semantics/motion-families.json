@@ -1,0 +1,222 @@
+{
+ "version": 1,
+ "families": [
+  {
+   "id": "chevron-nudge",
+   "meaning": "направленный кивок",
+   "icons": [
+    "chevron-back",
+    "chevron-down",
+    "chevron-forward",
+    "chevron-up",
+    "chevron-back-circle",
+    "chevron-down-circle",
+    "chevron-forward-circle",
+    "chevron-up-circle"
+   ],
+   "requiredTrackKinds": [
+    "translate"
+   ],
+   "readiness": "needs-core",
+   "requiredPartSets": [
+    [
+     "mark"
+    ]
+   ],
+   "compatibleExclusions": [
+    {
+     "icon": "checkmark",
+     "code": "SEMANTIC_MEANING_MISMATCH"
+    },
+    {
+     "icon": "checkmark-circle",
+     "code": "SEMANTIC_MEANING_MISMATCH"
+    }
+   ]
+  },
+  {
+   "id": "arrow-directional-emphasis",
+   "meaning": "подчёркивание направления",
+   "icons": [
+    "arrow-back",
+    "arrow-down",
+    "arrow-forward",
+    "arrow-up",
+    "arrow-back-circle",
+    "arrow-down-circle",
+    "arrow-forward-circle",
+    "arrow-up-circle"
+   ],
+   "requiredTrackKinds": [
+    "translate"
+   ],
+   "readiness": "needs-core",
+   "requiredPartSets": [
+    [
+     "head",
+     "shaft"
+    ]
+   ],
+   "compatibleExclusions": []
+  },
+  {
+   "id": "off-slash-draw",
+   "meaning": "прочерчивание выключения",
+   "icons": [
+    "cloud-off",
+    "heart-off",
+    "mic-off",
+    "video-camera-off"
+   ],
+   "requiredTrackKinds": [
+    "reveal"
+   ],
+   "readiness": "needs-core",
+   "requiredPartSets": [
+    [
+     "slash"
+    ]
+   ],
+   "compatibleExclusions": []
+  },
+  {
+   "id": "plus-minus-actuate",
+   "meaning": "добавление или удаление",
+   "icons": [
+    "plus",
+    "plus-circle",
+    "minus",
+    "minus-circle"
+   ],
+   "requiredTrackKinds": [
+    "scale",
+    "opacity"
+   ],
+   "readiness": "needs-core",
+   "requiredPartSets": [
+    [
+     "stem",
+     "arm-left",
+     "arm-right"
+    ],
+    [
+     "bar"
+    ],
+    [
+     "dash"
+    ]
+   ],
+   "compatibleExclusions": []
+  },
+  {
+   "id": "checkmark-confirm",
+   "meaning": "подтверждение",
+   "icons": [
+    "checkmark",
+    "checkmark-circle"
+   ],
+   "requiredTrackKinds": [
+    "reveal"
+   ],
+   "readiness": "needs-core",
+   "requiredPartSets": [
+    [
+     "mark"
+    ]
+   ],
+   "compatibleExclusions": [
+    {
+     "icon": "chevron-back",
+     "code": "SEMANTIC_MEANING_MISMATCH"
+    },
+    {
+     "icon": "chevron-back-circle",
+     "code": "SEMANTIC_MEANING_MISMATCH"
+    },
+    {
+     "icon": "chevron-down",
+     "code": "SEMANTIC_MEANING_MISMATCH"
+    },
+    {
+     "icon": "chevron-down-circle",
+     "code": "SEMANTIC_MEANING_MISMATCH"
+    },
+    {
+     "icon": "chevron-forward",
+     "code": "SEMANTIC_MEANING_MISMATCH"
+    },
+    {
+     "icon": "chevron-forward-circle",
+     "code": "SEMANTIC_MEANING_MISMATCH"
+    },
+    {
+     "icon": "chevron-up",
+     "code": "SEMANTIC_MEANING_MISMATCH"
+    },
+    {
+     "icon": "chevron-up-circle",
+     "code": "SEMANTIC_MEANING_MISMATCH"
+    }
+   ]
+  },
+  {
+   "id": "double-check-stagger",
+   "meaning": "двойное подтверждение",
+   "icons": [
+    "checkmarks",
+    "checkmarks-circle"
+   ],
+   "requiredTrackKinds": [
+    "reveal"
+   ],
+   "readiness": "needs-core",
+   "requiredPartSets": [
+    [
+     "mark-primary",
+     "mark-secondary"
+    ]
+   ],
+   "compatibleExclusions": []
+  },
+  {
+   "id": "ellipsis-typing",
+   "meaning": "ожидание ввода",
+   "icons": [
+    "ellipsis-horizontal",
+    "ellipsis-vertical"
+   ],
+   "requiredTrackKinds": [
+    "scale",
+    "opacity"
+   ],
+   "readiness": "needs-core",
+   "requiredPartSets": [
+    [
+     "dot-center"
+    ]
+   ],
+   "compatibleExclusions": []
+  },
+  {
+   "id": "swap-exchange",
+   "meaning": "обмен направлениями",
+   "icons": [
+    "swap-horizontal",
+    "swap-vertical"
+   ],
+   "requiredTrackKinds": [
+    "translate"
+   ],
+   "readiness": "needs-core",
+   "requiredPartSets": [
+    [
+     "head-a",
+     "shaft-a",
+     "head-b",
+     "shaft-b"
+    ]
+   ],
+   "compatibleExclusions": []
+  }
+ ]
+}
