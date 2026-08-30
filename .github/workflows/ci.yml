@@ -3,108 +3,109 @@ name: CI
 on:
   push:
     branches: [master]
-  # Stacked PR тоже обязан получить доказательство exact head SHA.
+   # Stacked PR тоже обязан полу чить доказательство exact h ead SHA.
   pull_request:
   merge_group:
 
-permissions:
+perm issions:
   contents: read
 
 concurrency:
-  group: ci-${{ github.workflow }}-${{ github.ref }}
+  gro up: ci-${{ github.workflow }}-${{ github.ref  }}
   cancel-in-progress: true
 
 jobs:
-  verify:
-    name: Verify ${{ matrix.os }} / Node ${{ matrix.node }}
-    runs-on: ${{ matrix.os }}
+  verify :
+    name: Verify ${{ matrix.os }} / Node ${ { matrix.node }}
+    runs-on: ${{ matrix.os } }
     timeout-minutes: 30
     strategy:
-      fail-fast: false
+       fail-fast: false
       matrix:
-        include:
+        inclu de:
           - os: self-hosted
-            node: '22.14.0'
+            n ode: '22.14.0'
           - os: self-hosted
-            node: '24'
-          - os: self-hosted
+             node: '24'
+          - os: self-hos ted
             node: '26'
-          - os: windows-latest
+          - os: wi ndows-latest
             node: '24'
-          - os: macos-latest
+           - os: macos-latest
             node: '24'
 
-    steps:
-      # Все third-party actions закреплены commit SHA; tag используется только
-      # как человекочитаемая биография обновления.
-      - name: Checkout
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-        with:
-          # Observatory сравнивает generated с доказанным hand blob из history.
-          fetch-depth: 0
+     steps:
+      # Все third-party actions  закреплены commit SHA; tag испо льзуется только
+      # как  человекочитаемая биогра фия обновления.
+      - name: Ch eckout
+        uses: actions/checkout@9c091bb 21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+         with:
+          # Observatory срав� �ивает generated с доказанным  hand blob из history.
+          fetch-dept h: 0
           persist-credentials: false
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+       - name: Setup pnpm
+        uses: pnpm/act ion-setup@0ebf47130e4866e96fce0953f49152a6119 0b271 # v6.0.9
         with:
-          # Дословно совпадает с package.json#packageManager; repo-contract
-          # запрещает второй источник версии.
+          # До словно совпадает с package.js on#packageManager; repo-contract
+          #  запрещает второй источн� �к версии.
           version: 11.13.1
-          dest: ${{ runner.temp }}/setup-pnpm
+           dest: ${{ runner.temp }}/setup-pnpm 
 
       - name: Setup Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        uses: a ctions/setup-node@820762786026740c76f36085b0e fc47a31fe5020 # v7.0.0
         with:
-          node-version: ${{ matrix.node }}
-          package-manager-cache: false
+           node-version: ${{ matrix.node }}
+           package-manager-cache: false
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: I nstall dependencies
+        run: pnpm install  --frozen-lockfile
 
-      # Один список обязательных проверок живёт в package.json#scripts.verify.
-      - name: Verify repository, geometry, package and tests
+      # Один спис ок обязательных проверо� � живёт в package.json#scripts.verify.
+       - name: Verify repository, geometry, pa ckage and tests
         run: pnpm verify
 
-      # Bite tests выполняются один раз на основной LTS: их задача — доказать
-      # запрещающую ветку guard, а не повторить platform matrix.
-      - name: Parity guard bites on extra icon
-        if: matrix.os == 'self-hosted' && matrix.node == '24'
+       # Bite tests выполняются оди н раз на основной LTS: их з� �дача — доказать
+      # зап рещающую ветку guard, а не п овторить platform matrix.
+      - nam e: Parity guard bites on extra icon
+        i f: matrix.os == 'self-hosted' && matrix.node  == '24'
         shell: bash
         run: |
-          cp svg/Filled/accessibility_filled.svg svg/Filled/_EXTRA_TEST_filled.svg
-          trap 'rm -f svg/Filled/_EXTRA_TEST_filled.svg' EXIT
+           cp svg/Filled/accessibility_filled.sv g svg/Filled/_EXTRA_TEST_filled.svg
+           trap 'rm -f svg/Filled/_EXTRA_TEST_filled.sv g' EXIT
           if pnpm check:parity; then
-            echo "ERROR: parity should have failed"
+             echo "ERROR: parity should have f ailed"
             exit 1
           fi
 
-      - name: Colour guard bites on hardcoded hex
-        if: matrix.os == 'self-hosted' && matrix.node == '24'
+       - name: Colour guard bites on hardcoded hex
+         if: matrix.os == 'self-hosted' && mat rix.node == '24'
         shell: bash
-        run: |
-          echo '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#101012"><path d="M0 0"/></svg>' \
-            > dist/svg/Filled/_colour_test.svg
-          trap 'rm -f dist/svg/Filled/_colour_test.svg' EXIT
+         run: |
+          echo '<svg xmlns="http://www .w3.org/2000/svg" viewBox="0 0 24 24" fill="# 101012"><path d="M0 0"/></svg>' \
+             > dist/svg/Filled/_colour_test.svg
+           trap 'rm -f dist/svg/Filled/_colour_test.svg ' EXIT
           if pnpm check:colors; then
-            echo "ERROR: colours should have failed"
+             echo "ERROR: colours should have f ailed"
             exit 1
           fi
 
-  # Внешний ruleset не должен знать о составе matrix. Один стабильный check
-  # разрешает менять поддерживаемые Node/OS только вместе с версионируемым CI,
-  # не оставляя защиту master привязанной к устаревающим именам job.
+  # � �нешний ruleset не должен зн� �ть о составе matrix. Один ст абильный check
+  # разрешает  менять поддерживаемые No de/OS только вместе с верси онируемым CI,
+  # не оставл� �я защиту master привязанно� � к устаревающим именам jo b.
   required:
     name: Required CI
-    if: ${{ always() }}
+    if:  ${{ always() }}
     needs: verify
-    runs-on: self-hosted
+    runs-on : self-hosted
     timeout-minutes: 2
-    permissions: {}
+    perm issions: {}
     steps:
-      - name: Require the entire verification matrix
+      - name: Require  the entire verification matrix
         env:
-          MATRIX_RESULT: ${{ needs.verify.result }}
+           MATRIX_RESULT: ${{ needs.verify.resu lt }}
         shell: bash
         run: |
-          set -euo pipefail
-          [[ "$MATRIX_RESULT" == 'success' ]]
+           set -euo pipefail
+          [[ "$MATRIX _RESULT" == 'success' ]]
+ 
