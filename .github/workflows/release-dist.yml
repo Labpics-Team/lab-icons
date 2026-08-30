@@ -1,88 +1,89 @@
 name: Release dist tag
 
-# Публикует иммутабельный git-dependency артефакт поверх релизного тега.
-# Канал npm проверяется и документируется отдельно; этот workflow отвечает
-# только за братский <tag>-dist и не должен менять master.
+# Публикует  иммутабельный git-dependency а� �тефакт поверх релизного  тега.
+# Канал npm проверяе� �ся и документируется от� �ельно; этот workflow отвечае т
+# только за братский <tag> -dist и не должен менять maste r.
 on:
   push:
     tags:
       - 'v*'
-      # Push собственного -dist тега не должен зациклить workflow.
+      #  Push собственного -dist тега  не должен зациклить workflo w.
       - '!v*-dist'
   workflow_dispatch:
-    inputs:
+     inputs:
       tag:
-        description: 'Существующий source tag v<package.json#version>; branch/SHA запрещены'
-        required: true
+        description: 'С уществующий source tag v<package.j son#version>; branch/SHA запрещены'
+         required: true
 
-# Единственное необходимое расширенное право — push братского тега.
+# Единствен� �ое необходимое расширен ное право — push братского  тега.
 permissions:
   contents: write
 
-jobs:
+jo bs:
   release-dist:
-    name: Verify gate + push <tag>-dist
-    runs-on: self-hosted
-    timeout-minutes: 30
+    name: Verify gate + p ush <tag>-dist
+    runs-on: ubuntu-latest
+    t imeout-minutes: 30
 
     steps:
-      # Те же SHA-пины, что в ci.yml. persist-credentials здесь нужен для push.
+      # Те � �е SHA-пины, что в ci.yml. persist-c redentials здесь нужен для push. 
       - name: Checkout release tag
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        u ses: actions/checkout@9c091bb21b7c1c1d1991bb9 08d89e4e9dddfe3e0 # v7.0.0
         with:
-          # Verify включает historical-hand provenance и не работает shallow.
+           # Verify включает historical-ha nd provenance и не работает shallo w.
           fetch-depth: 0
-          ref: ${{ github.event_name == 'workflow_dispatch' && format('refs/tags/{0}', inputs.tag) || github.ref }}
+          ref: ${ { github.event_name == 'workflow_dispatch' &&  format('refs/tags/{0}', inputs.tag) || githu b.ref }}
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+        us es: pnpm/action-setup@0ebf47130e4866e96fce095 3f49152a61190b271 # v6.0.9
         with:
-          # Должно совпадать с package.json#packageManager; это держит
-          # scripts/check-repo-contract.js внутри pnpm verify.
-          version: 11.13.1
-          dest: ${{ runner.temp }}/setup-pnpm
+           # Должно совпадать с pa ckage.json#packageManager; это держи� �
+          # scripts/check-repo-contract.js  внутри pnpm verify.
+          version:  11.13.1
+          dest: ${{ runner.temp }}/se tup-pnpm
 
       - name: Setup Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+         uses: actions/setup-node@820762786026740c76f 36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: '24'
-          package-manager-cache: false
+           node-version: '24'
+          packag e-manager-cache: false
 
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Install  dependencies
+        run: pnpm install --fro zen-lockfile
 
-      - name: Validate exact source release ref
+      - name: Validate exact so urce release ref
         env:
-          RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
-        run: node scripts/check-release-ref.js source "$RELEASE_TAG"
+          RELEA SE_TAG: ${{ inputs.tag || github.ref_name }}
+         run: node scripts/check-release-ref.j s source "$RELEASE_TAG"
 
-      # Единственный канонический список сборки, геометрических гейтов и тестов.
-      - name: Verify release source
-        run: pnpm verify
+      # Единст венный канонический спи� �ок сборки, геометрическ� �х гейтов и тестов.
+      - nam e: Verify release source
+        run: pnpm ve rify
 
-      - name: Build and push <tag>-dist
+      - name: Build and push <tag>-dist 
         env:
-          RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+          RELEASE_TAG: ${{ inpu ts.tag || github.ref_name }}
         run: |
-          set -euo pipefail
-          TAG="$RELEASE_TAG"
+           set -euo pipefail
+          TAG="$RE LEASE_TAG"
           DIST_TAG="${TAG}-dist"
 
-          if git ls-remote --exit-code --tags origin "refs/tags/${DIST_TAG}" >/dev/null 2>&1; then
-            git fetch --no-tags origin "refs/tags/${DIST_TAG}:refs/tags/${DIST_TAG}"
-            node scripts/check-release-ref.js dist "$TAG"
-            echo "Тег ${DIST_TAG} уже существует и байт-в-байт соответствует source ${TAG}; не перезаписываем."
+           if git ls-remote --exit-code --tags  origin "refs/tags/${DIST_TAG}" >/dev/null 2> &1; then
+            git fetch --no-tags orig in "refs/tags/${DIST_TAG}:refs/tags/${DIST_TA G}"
+            node scripts/check-release-re f.js dist "$TAG"
+            echo "Тег ${D IST_TAG} уже существует и ба� �т-в-байт соответствует so urce ${TAG}; не перезаписывае� �."
             exit 0
           fi
 
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+           git config user.name "github-actions[bot]"
+           git config user.email "41898282+git hub-actions[bot]@users.noreply.github.com"
 
-          # Скрипт читает единственный manifest release/contract.json, удаляет
-          # stale tracked dist из index и добавляет только точные файлы канона.
-          node scripts/stage-release-dist.js
-          git commit -m "build: dist для ${DIST_TAG} (git-dep артефакт; master не трогаем)"
-          git tag "${DIST_TAG}"
-          node scripts/check-release-ref.js dist "$TAG"
-          git push origin "refs/tags/${DIST_TAG}"
-          echo "Опубликован git-dep тег ${DIST_TAG}."
+           # Скрипт читает един ственный manifest release/contract.js on, удаляет
+          # stale tracked  dist из index и добавляет тол� �ко точные файлы канона.
+           node scripts/stage-release-dist.js
+           git commit -m "build: dist для ${ DIST_TAG} (git-dep артефакт; master � �е трогаем)"
+          git tag "${DIS T_TAG}"
+          node scripts/check-release- ref.js dist "$TAG"
+          git push origin  "refs/tags/${DIST_TAG}"
+          echo "Оп� �бликован git-dep тег ${DIST_TAG}. "
+ 
