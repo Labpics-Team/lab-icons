@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [master]
+    branches: [main]
   # Stacked PR тоже обязан получить доказательство exact head SHA.
   pull_request:
   merge_group:
@@ -93,9 +93,9 @@ jobs:
 
   # Внешний ruleset не должен знать о составе matrix. Один стабильный check
   # разрешает менять поддерживаемые Node/OS только вместе с версионируемым CI,
-  # не оставляя защиту master привязанной к устаревающим именам job.
+  # не оставляя защиту main привязанной к устаревающим именам job.
   required:
-    name: Required CI
+    name: CI
     if: ${{ always() }}
     needs: verify
     runs-on: ubuntu-latest
