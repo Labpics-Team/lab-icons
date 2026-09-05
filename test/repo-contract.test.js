@@ -302,12 +302,23 @@ jobs:
     );
   });
 
-  it.each(['ubuntu-latest', 'self-hosted', 'windows-latest', 'macos-latest'])(
-    'сохраняет обязательный verify-контракт на runner %s', (runner) => {
-      const ci = workflow({ jobs: [job({ runner })] });
-      expect(fixture({ filesPatch: { '.github/workflows/ci.yml': ci } })).toEqual([]);
-      const bypass = workflow({ jobs: [job({ runner, verify: 'bypass' })] });
-      expect(fixture({ filesPatch: { '.github/workflows/ci.yml': bypass } })).not.toEqual([]);
+  it('запрещает persistent self-hosted runner', () => {
+    const ci = workflow({ jobs: [job({ runner: '[self-hosted, linux]' })] });
+    expect(fixture({ filesPatch: { '.github/workflows/ci.yml': ci } })).toContain(
+      '.github/workflows/ci.yml: persistent self-hosted runner запрещён для repository code',
+    );
+  });
+
+  it.each(['self-hosted', '[self-hosted, Linux, X64]'])(
+    'не допускает contents:write publisher в общий persistent pool: %s', (runner) => {
+      const source = readFileSync(new URL('../.github/workflows/release-dist.yml', import.meta.url), 'utf8');
+      expect(source).toMatch(/^    runs-on: ubuntu-latest$/m);
+      expect(source).toMatch(/^  contents: write$/m);
+      expect(fixture({ filesPatch: { '.github/workflows/release-dist.yml': source } })).toEqual([]);
+      const unsafe = source.replace(/^    runs-on: .*$/m, `    runs-on: ${runner}`);
+      expect(fixture({ filesPatch: { '.github/workflows/release-dist.yml': unsafe } })).toContain(
+        '.github/workflows/release-dist.yml: persistent self-hosted runner запрещён для repository code',
+      );
     },
   );
 
