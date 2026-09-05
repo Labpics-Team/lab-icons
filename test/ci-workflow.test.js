@@ -21,6 +21,43 @@ const matrix = [
 ];
 const gateCommand = `set -euo pipefail
 [[ "$MATRIX_RESULT" == 'success' ]]`;
+const biteSpecs = [
+  {
+    name: 'Parity guard bites on extra icon',
+    command: 'pnpm check:parity',
+    mutation: 'cp svg/Filled/accessibility_filled.svg svg/Filled/_EXTRA_TEST_filled.svg',
+    capture: 'parity_output="$(pnpm check:parity 2>&1)"',
+    status: 'parity_status',
+    witness: 'grep -F -- \'_EXTRA_TEST\' <<<"$parity_output"',
+  },
+  {
+    name: 'Colour guard bites on hardcoded hex',
+    command: 'pnpm check:colors',
+    mutation: '> dist/svg/Filled/_colour_test.svg',
+    capture: 'colour_output="$(pnpm check:colors 2>&1)"',
+    status: 'colour_status',
+    witness: 'grep -F -- \'_colour_test.svg\' <<<"$colour_output"',
+  },
+];
+
+function assertBiteStep(step, spec) {
+  expect(step).toBeDefined();
+  expect(step.if).toBe("matrix.os == 'ubuntu-latest' && matrix.node == '24'");
+  expect(step.shell).toBe('bash');
+  expect(step['continue-on-error']).toBeUndefined();
+  expect(step.run.startsWith(`${spec.command}\n`)).toBe(true);
+  expect(step.run.split(spec.command)).toHaveLength(3);
+  const clean = step.run.indexOf(spec.command);
+  const mutation = step.run.indexOf(spec.mutation);
+  const capture = step.run.indexOf(spec.capture);
+  const statusCheck = step.run.indexOf(`if [[ "$${spec.status}" -eq 0 ]]; then`);
+  const witness = step.run.indexOf(spec.witness);
+  expect(clean).toBeGreaterThanOrEqual(0);
+  expect(mutation).toBeGreaterThan(clean);
+  expect(capture).toBeGreaterThan(mutation);
+  expect(statusCheck).toBeGreaterThan(capture);
+  expect(witness).toBeGreaterThan(statusCheck);
+}
 
 function assertNativeGraph(files) {
   const workflows = new Map([...files].map(([name, source]) => [name, parse(source)]));
@@ -48,6 +85,9 @@ function assertNativeGraph(files) {
     expect(steps[0]['continue-on-error']).toBeUndefined();
     expect(steps[0].shell).toBeUndefined();
     expect(steps[0]['working-directory']).toBeUndefined();
+  }
+  for (const spec of biteSpecs) {
+    assertBiteStep(verify.steps.find((step) => step.name === spec.name), spec);
   }
   const gate = workflow.jobs.required;
   expect(gate.name).toBe('CI');
@@ -93,6 +133,22 @@ describe('нативный итог CI', () => {
     }],
     ['смена shell verify', (w) => { w.jobs.verify.steps.find((s) => s.run === 'pnpm verify').shell = 'bash {0}'; }],
     ['смена default shell', (w) => { w.defaults = { run: { shell: 'bash {0}' } }; }],
+    ['parity bite без clean baseline', (w) => {
+      const step = w.jobs.verify.steps.find((s) => s.name === biteSpecs[0].name);
+      step.run = step.run.replace(`${biteSpecs[0].command}\n`, '');
+    }],
+    ['parity bite без diagnostic witness', (w) => {
+      const step = w.jobs.verify.steps.find((s) => s.name === biteSpecs[0].name);
+      step.run = step.run.replace(`${biteSpecs[0].witness}\n`, '');
+    }],
+    ['colour bite без clean baseline', (w) => {
+      const step = w.jobs.verify.steps.find((s) => s.name === biteSpecs[1].name);
+      step.run = step.run.replace(`${biteSpecs[1].command}\n`, '');
+    }],
+    ['colour bite без diagnostic witness', (w) => {
+      const step = w.jobs.verify.steps.find((s) => s.name === biteSpecs[1].name);
+      step.run = step.run.replace(`${biteSpecs[1].witness}\n`, '');
+    }],
     ['фальшивый результат', (w) => { w.jobs.required.steps[0].env.MATRIX_RESULT = 'success'; }],
     ['пустой успех', (w) => { w.jobs.required.steps[0].run = 'true\n'; }],
     ['пропуск shell итога', (w) => { w.jobs.required.steps[0].if = false; }],
