@@ -1,264 +1,106 @@
 #!/usr/bin/env node
-/**
- * docs-drift guard for @labpics/icons
- *
- * Доки vs реальность (сверяет утверждения, а не файловые инварианты —
- * файлы/экспорты держит check-parity, чернила dist — check-colors):
- *
- *   1. Конкретные версии в README (`#vX.Y.Z-dist` пины, `git tag vX.Y.Z`
- *      примеры) == package.json.version. Плейсхолдеры `vX.Y.Z` разрешены.
- *   2. Числовые утверждения о корпусе («N имён/иконок/SVG/экспортов/файлов»
- *      в README и docs/*.md) принадлежат множеству фактов ФС
- *      {имена, файлы по весам, всего, экспорты}.
- *   3. `*-HANDOFF.md` в корне запрещены; `handoffs/*.md` обязаны нести
- *      строку `Статус:`.
- *   4. README не обещает конкретный hex чернил (противоречило бы
- *      check-colors, который запрещает hex в dist/svg).
- *   5. Каждый docs/*.md в первых 5 строках объявляет роль
- *      (справка | ADR | канон | гайд | отчёт | «Роль:»).
- *   6. README проецирует public npm/fallback/exports из release contract и
- *      не может вернуться к устаревшему private/git-only рассказу.
- *
- * Функции чистые и экспортируются — каждое поведение доказуемо юнитами
- * (test/docs-drift.test.js), включая «гейт кусается».
- */
+/** Проверяет проекцию поставки и известные противоречия каналам установки. */
+import { existsSync, mkdtempSync, readdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import { validatePackageProjection, validateReleaseContract } from './lib/release-contract.js';
+import { packageReferenceErrors, renderPackageReference } from './lib/docs-reference.js';
 
-import { readdirSync, readFileSync, existsSync } from 'fs';
-import { join, dirname } from 'path';
-import { fileURLToPath, pathToFileURL } from 'url';
+export const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-export const ROOT = join(__dirname, '..');
-
-/* ------------------------------------------------------------------ *
- * 1. Версии                                                           *
- * ------------------------------------------------------------------ */
-
-/** Конкретные (не-плейсхолдерные) версии, на которые ссылается текст. */
-export function extractVersionRefs(text) {
-  const refs = [];
-  for (const m of text.matchAll(/#v(\d+\.\d+\.\d+)-dist/g))
-    refs.push({ kind: 'dist-pin', version: m[1] });
-  for (const m of text.matchAll(/git tag v(\d+\.\d+\.\d+)/g))
-    refs.push({ kind: 'tag-example', version: m[1] });
-  return refs;
-}
-
-/* ------------------------------------------------------------------ *
- * 2. Счётчики корпуса                                                 *
- * ------------------------------------------------------------------ */
-
-const COUNT_UNITS =
-  /(\d{2,})\s*(имени|имён|иконки|иконок|SVG|экспорта|экспортов|именованных|файла|файлов)/gi;
-
-/** Числовые утверждения «N <единица корпуса>» из текста дока. */
-export function extractCountClaims(text) {
-  return [...text.matchAll(COUNT_UNITS)].map((m) => ({
-    n: Number(m[1]),
-    unit: m[2],
-    context: m[0],
-  }));
-}
-
-/** Факты ФС: имена (union по весам), файлы, экспорты. */
-export function computeCorpusFacts(root) {
-  const read = (w) =>
-    readdirSync(join(root, 'svg', w)).filter((f) => f.endsWith('.svg'));
-  const base = (f) => f.replace(/(_(filled|outline))?\.svg$/i, '');
-  const outline = read('Outline');
-  const filled = read('Filled');
-  const names = new Set([...outline.map(base), ...filled.map(base)]);
-  return {
-    names: names.size,
-    outline: outline.length,
-    filled: filled.length,
-    total: outline.length + filled.length,
-    exports: names.size * 2,
-  };
-}
-
-export function allowedCounts(facts) {
-  return new Set([facts.names, facts.outline, facts.filled, facts.total, facts.exports]);
-}
-
-/* ------------------------------------------------------------------ *
- * 3. Хендоффы                                                         *
- * ------------------------------------------------------------------ */
-
-/** @returns список нарушений размещения/оформления хендоффов. */
-export function handoffViolations({ rootFiles, handoffs }) {
-  const errs = [];
-  for (const f of rootFiles)
-    if (/-HANDOFF\.md$/i.test(f))
-      errs.push(`хендофф в корне запрещён: ${f} → handoffs/${f}`);
-  for (const [name, text] of Object.entries(handoffs))
-    if (!/^Статус:/m.test(text))
-      errs.push(`handoffs/${name}: нет строки «Статус:» — судьба волны нечитаема`);
-  return errs;
-}
-
-/* ------------------------------------------------------------------ *
- * 4. Чернила                                                          *
- * ------------------------------------------------------------------ */
-
-/** Обещания конкретного hex чернил в тексте дока. */
-export function findInkHexClaims(text) {
-  return [...text.matchAll(/чернила[^\n]*#[0-9a-fA-F]{3,8}/gi)].map((m) => m[0]);
-}
-
-/* ------------------------------------------------------------------ *
- * 5. Роли доков                                                       *
- * ------------------------------------------------------------------ */
-
-/** Роль объявлена в первых 5 строках дока. */
-export function hasDocRole(text) {
-  const head = text.split('\n').slice(0, 5).join('\n');
-  return /(справка|ADR|канон|гайд|отчёт|роль:)/i.test(head);
-}
-
-/* ------------------------------------------------------------------ *
- * 6. Public release surface                                           *
- * ------------------------------------------------------------------ */
-
-/**
- * Нормализация нужна именно для guard-а утверждений: markdown, перенос строки
- * и типографский дефис не должны превращать ложь в невидимую для regex форму.
- * (Унаследовано из #69 — замена projection-версией не имеет права ослаблять guard.)
- */
 export function normalizeDistributionText(text) {
-  return String(text)
-    .normalize('NFKC')
-    .replace(/[`*_~]/g, '')
-    .replace(/[‐‑‒–—―]/g, '-')
-    .replace(/\s+/g, ' ')
-    .trim();
+  return text.normalize('NFKC').replace(/[`*_~]/g, '')
+    .replace(/[‐‑‒–—―]/g, '-').replace(/\s+/g, ' ').trim();
 }
 
-/** README — человекочитаемая проекция release SSOT, не второй канон. */
-export function validateReadmeReleaseProjection(readme, pkg, contract) {
-  const errors = [];
-  if (pkg.private !== false) {
-    errors.push('package.json#private обязан быть false для документированного public npm channel');
-  }
-  const install = contract?.primary?.install;
-  if (typeof install !== 'string' || !readme.includes(install)) {
-    errors.push(`README: отсутствует primary install из release contract: ${String(install)}`);
-  }
-  const fallback = contract?.fallback?.specifier?.replace('vX.Y.Z', `v${pkg.version}`);
-  if (typeof fallback !== 'string' || !readme.includes(fallback)) {
-    errors.push(`README: отсутствует versioned fallback из release contract: ${String(fallback)}`);
-  }
-  for (const subpath of Object.keys(contract?.exports ?? {})) {
-    const specifier = subpath === '.'
-      ? contract.packageName
-      : `${contract.packageName}${subpath.slice(1)}`;
-    if (!readme.includes(`\`${specifier}\``)) {
-      errors.push(`README: публичный export ${specifier} не документирован как code literal`);
+// Это контроль известных противоречий, не доказательство истинности произвольной прозы.
+export function distributionClaimErrors(text) {
+  const plain = normalizeDistributionText(text);
+  const rules = [
+    [/["']?private["']?\s*:\s*["']?true["']?/i, 'пакет объявлен публичным'],
+    [/не\s+публикуется.{0,160}\bnpm\b/i, 'npm является основным каналом, не обещанием публикации каждой версии'],
+    [/почему\s+не\s+npm\b/i, 'npm является основным каналом'],
+    [/репозитор(?:ий|ия)[\s-]*приват/i, 'репозиторий публичный'],
+    [/ставится\s+только\s+как\s+git[- ]зависимость/i, 'Git не является единственным каналом'],
+    [/fine\s*-\s*grained\s+PAT|\bGH_PAT\b|Contents\s*:\s*read/i, 'установка из публичного npm не требует GitHub PAT'],
+  ];
+  return rules.flatMap(([pattern, reason]) => {
+    const match = plain.match(pattern);
+    return match ? [`противоречие каналу поставки «${match[0]}»: ${reason}`] : [];
+  });
+}
+
+/** Рекурсивный обход авторской Markdown-документации; экспериментальные данные не входят. */
+export function documentationFiles(root) {
+  const files = ['README.md'];
+  function walk(directory) {
+    for (const entry of readdirSync(join(root, directory), { withFileTypes: true })) {
+      const path = join(directory, entry.name);
+      if (entry.isSymbolicLink()) throw new Error(`документация не должна уходить за checkout через symlink: ${path}`);
+      if (entry.isDirectory()) walk(path);
+      else if (entry.isFile() && /\.md$/i.test(entry.name)) files.push(path);
     }
   }
-  for (const required of ['release/contract.json', 'pnpm observatory', 'prepack']) {
-    if (!readme.includes(required)) errors.push(`README: отсутствует обязательный release/QA marker «${required}»`);
-  }
-  const releaseCountClaim = `ровно ${contract?.files?.length} release‑файлов`;
-  if (!readme.includes(releaseCountClaim)) {
-    errors.push(`README: отсутствует точный count release manifest «${releaseCountClaim}»`);
-  }
-  // Ложные distribution-утверждения ловятся на НОРМАЛИЗОВАННОМ тексте:
-  // regex по сырому markdown обходится бэктиками/переносами (урок #69).
-  const plainReadme = normalizeDistributionText(readme);
-  const stalePrivateClaims = [
-    { re: /["']?private["']?\s*:\s*["']?true["']?/i, why: 'package public, private:false' },
-    { re: /не\s+публикуется.{0,160}\bnpm\b/i, why: 'npm — основной опубликованный канал' },
-    { re: /почему\s+не\s+npm\b/i, why: 'npm — основной опубликованный канал' },
-    { re: /репозитор(?:ий|ия)[\s-]*приват/i, why: 'репозиторий public' },
-    { re: /ставится\s+только\s+как\s+git[- ]зависимость/i, why: 'npm — основной канал' },
-    { re: /fine\s*-\s*grained\s+PAT|\bGH_PAT\b|Contents\s*:\s*read/i, why: 'npm install не требует GitHub PAT' },
-  ];
-  for (const { re, why } of stalePrivateClaims) {
-    const match = plainReadme.match(re);
-    if (match) errors.push(`README ложное distribution-утверждение «${match[0]}» (${why})`);
-  }
-  return errors;
+  walk('docs');
+  return files.sort();
 }
 
-/* ------------------------------------------------------------------ *
- * Аудит целиком                                                       *
- * ------------------------------------------------------------------ */
+export function findInkHexClaims(text) {
+  return [...text.matchAll(/чернила[^\n]*#[0-9a-fA-F]{3,8}/gi)].map((match) => match[0]);
+}
+
+function inputs(root) {
+  const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
+  const contract = JSON.parse(readFileSync(join(root, 'release/contract.json'), 'utf8'));
+  const errors = validateReleaseContract(contract);
+  if (errors.length === 0) errors.push(...validatePackageProjection(pkg, contract));
+  return { pkg, contract, errors };
+}
 
 export function auditRepo(root = ROOT) {
-  const errors = [];
-  const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
-  const readme = readFileSync(join(root, 'README.md'), 'utf8');
-  const releaseContract = JSON.parse(readFileSync(join(root, 'release/contract.json'), 'utf8'));
-
-  // 1. Версии
-  for (const ref of extractVersionRefs(readme))
-    if (ref.version !== pkg.version)
-      errors.push(
-        `README ${ref.kind} v${ref.version} != package.json ${pkg.version}`,
-      );
-
-  // 2. Счётчики (README + docs/*.md)
-  const facts = computeCorpusFacts(root);
-  const allowed = allowedCounts(facts);
-  const docsDir = join(root, 'docs');
-  const docFiles = existsSync(docsDir)
-    ? readdirSync(docsDir).filter((f) => f.endsWith('.md'))
-    : [];
-  const corpus = [
-    ['README.md', readme],
-    ...docFiles.map((f) => [`docs/${f}`, readFileSync(join(docsDir, f), 'utf8')]),
-  ];
-  for (const [file, text] of corpus)
-    for (const c of extractCountClaims(text))
-      if (!allowed.has(c.n))
-        errors.push(
-          `${file}: заявлено «${c.context}», факт ФС: ${JSON.stringify(facts)}`,
-        );
-
-  // 3. Хендоффы
-  const rootFiles = readdirSync(root).filter((f) => f.endsWith('.md'));
-  const handoffDir = join(root, 'handoffs');
-  const handoffs = existsSync(handoffDir)
-    ? Object.fromEntries(
-        readdirSync(handoffDir)
-          .filter((f) => f.endsWith('.md'))
-          .map((f) => [f, readFileSync(join(handoffDir, f), 'utf8')]),
-      )
-    : {};
-  errors.push(...handoffViolations({ rootFiles, handoffs }));
-
-  // 4. Чернила
-  for (const claim of findInkHexClaims(readme))
-    errors.push(
-      `README обещает hex чернил («${claim}») — противоречит check:colors (hex в dist запрещён)`,
-    );
-
-  // 5. Роли
-  for (const [file, text] of corpus.slice(1))
-    if (!hasDocRole(text))
-      errors.push(`${file}: роль не объявлена в первых 5 строках (справка/ADR/канон/гайд/отчёт)`);
-
-  // 6. Public npm + exports + fallback
-  errors.push(...validateReadmeReleaseProjection(readme, pkg, releaseContract));
-
-  return { errors, facts };
+  const { pkg, contract, errors } = inputs(root);
+  if (errors.length) return { errors, files: [] };
+  const reference = join(root, 'docs/package.md');
+  if (!existsSync(reference)) errors.push('отсутствует docs/package.md');
+  else errors.push(...packageReferenceErrors(readFileSync(reference, 'utf8'), pkg, contract));
+  for (const claim of findInkHexClaims(readFileSync(join(root, 'README.md'), 'utf8'))) {
+    errors.push(`README.md: фиксированные чернила «${claim}» противоречат currentColor`);
+  }
+  const files = documentationFiles(root);
+  for (const file of files) {
+    for (const error of distributionClaimErrors(readFileSync(join(root, file), 'utf8'))) {
+      errors.push(`${file}: ${error}`);
+    }
+  }
+  return { errors, files };
 }
 
-/* ------------------------------------------------------------------ */
-
-const isCLI =
-  process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
-
-if (isCLI) {
-  const { errors, facts } = auditRepo(ROOT);
-  console.log(
-    `check-docs-drift: факт ФС — имён ${facts.names}, файлов ${facts.total}, экспортов ${facts.exports}`,
-  );
-  if (errors.length) {
-    for (const e of errors) console.error(`  ✗ ${e}`);
-    console.error(`check-docs-drift: FAIL (${errors.length})`);
-    process.exit(1);
+export function writePackageReference(root = ROOT) {
+  const { pkg, contract, errors } = inputs(root);
+  if (errors.length) throw new Error(errors.join('\n'));
+  const target = join(root, 'docs/package.md');
+  const temporary = mkdtempSync(join(dirname(target), '.package-reference-'));
+  try {
+    const file = join(temporary, 'package.md');
+    writeFileSync(file, renderPackageReference(pkg, contract), { encoding: 'utf8', flag: 'wx' });
+    renameSync(file, target);
+  } finally {
+    rmSync(temporary, { recursive: true, force: true });
   }
-  console.log('check-docs-drift: PASS — доки совпадают с реальностью');
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  try {
+    const args = process.argv.slice(2);
+    if (args.length > 1 || (args.length === 1 && !['--check', '--write'].includes(args[0]))) {
+      throw new Error('использование: node scripts/check-docs-drift.js [--check|--write]');
+    }
+    if (args[0] === '--write') writePackageReference();
+    const { errors, files } = auditRepo();
+    if (errors.length) throw new Error(errors.join('\n'));
+    console.log(`check-docs-drift: PASS — проекция поставки актуальна; известные противоречия проверены в ${files.length} документах`);
+  } catch (error) {
+    console.error(`check-docs-drift: FAIL — ${error.message}`);
+    process.exitCode = 1;
+  }
 }
