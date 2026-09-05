@@ -19,6 +19,11 @@ on:
 permissions:
   contents: write
 
+# Push тега и manual dispatch используют один lock до проверки и публикации dist.
+concurrency:
+  group: release-dist-${{ inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
 jobs:
   release-dist:
     name: Verify gate + push <tag>-dist
