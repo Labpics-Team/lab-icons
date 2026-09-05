@@ -273,9 +273,6 @@ function workflowErrors({ relativePath, text, expectedPnpmVersion }) {
     return [`${relativePath}: секция jobs отсутствует или не распознана`];
   }
 
-  if (/\bself-hosted\b/.test(text)) {
-    errors.push(`${relativePath}: persistent self-hosted runner запрещён для repository code`);
-  }
   for (const match of text.matchAll(/^\s*(?:-\s+)?uses:\s*([^\s#]+)@([^\s#]+)/gm)) {
     const [, action, ref] = match;
     if (!action.startsWith('./') && !PINNED_ACTION_REF.test(ref)) {

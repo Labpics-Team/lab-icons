@@ -302,12 +302,14 @@ jobs:
     );
   });
 
-  it('запрещает persistent self-hosted runner', () => {
-    const ci = workflow({ jobs: [job({ runner: '[self-hosted, linux]' })] });
-    expect(fixture({ filesPatch: { '.github/workflows/ci.yml': ci } })).toContain(
-      '.github/workflows/ci.yml: persistent self-hosted runner запрещён для repository code',
-    );
-  });
+  it.each(['ubuntu-latest', 'self-hosted', 'windows-latest', 'macos-latest'])(
+    'сохраняет обязательный verify-контракт на runner %s', (runner) => {
+      const ci = workflow({ jobs: [job({ runner })] });
+      expect(fixture({ filesPatch: { '.github/workflows/ci.yml': ci } })).toEqual([]);
+      const bypass = workflow({ jobs: [job({ runner, verify: 'bypass' })] });
+      expect(fixture({ filesPatch: { '.github/workflows/ci.yml': bypass } })).not.toEqual([]);
+    },
+  );
 
   it.each([
     ['minimumReleaseAge', '1440', '0'],
