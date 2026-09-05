@@ -101,7 +101,10 @@ function releaseWorkflow() {
           node scripts/check-release-ref.js dist "$TAG"
           git push origin "refs/tags/\${DIST_TAG}"
 `;
-  return `on:
+  return `concurrency:
+  group: release-dist-\${{ inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+on:
   workflow_dispatch:
     inputs:
       tag:
@@ -163,6 +166,23 @@ function fixture({ packagePatch = {}, filesPatch = {}, existingPatch = {} } = {}
 }
 
 describe('check-repo-contract', () => {
+  it('сериализует push и manual публикацию одного source tag без отмены', () => {
+    const source = readFileSync(new URL('../.github/workflows/release-dist.yml', import.meta.url), 'utf8');
+    expect(source).toMatch(/^concurrency:\n  group: release-dist-\$\{\{ inputs\.tag \|\| github\.ref_name \}\}\n  cancel-in-progress: false$/m);
+    expect(releaseWorkflowErrors(source)).toEqual([]);
+  });
+
+  it.each([
+    ['отсутствующий lock', (text) => text.replace(/concurrency:[\s\S]*?(?=on:)/, '')],
+    ['разные группы событий', (text) => text.replace('inputs.tag || github.ref_name', 'github.ref')],
+    ['уникальная группа запуска', (text) => text.replace('inputs.tag || github.ref_name', 'github.run_id')],
+    ['отмена активной публикации', (text) => text.replace('cancel-in-progress: false', 'cancel-in-progress: true')],
+  ])('отвергает гонку публикации: %s', (_, mutate) => {
+    expect(releaseWorkflowErrors(mutate(releaseWorkflow()))).toContain(
+      '.github/workflows/release-dist.yml: публикации одного source tag должны иметь общий concurrency без отмены',
+    );
+  });
+
   it('принимает один pnpm, один lockfile и единый verify-вход', () => {
     expect(fixture()).toEqual([]);
   });
@@ -308,6 +328,19 @@ jobs:
       '.github/workflows/ci.yml: persistent self-hosted runner запрещён для repository code',
     );
   });
+
+  it.each(['self-hosted', '[self-hosted, Linux, X64]'])(
+    'не допускает contents:write publisher в общий persistent pool: %s', (runner) => {
+      const source = readFileSync(new URL('../.github/workflows/release-dist.yml', import.meta.url), 'utf8');
+      expect(source).toMatch(/^    runs-on: ubuntu-latest$/m);
+      expect(source).toMatch(/^  contents: write$/m);
+      expect(fixture({ filesPatch: { '.github/workflows/release-dist.yml': source } })).toEqual([]);
+      const unsafe = source.replace(/^    runs-on: .*$/m, `    runs-on: ${runner}`);
+      expect(fixture({ filesPatch: { '.github/workflows/release-dist.yml': unsafe } })).toContain(
+        '.github/workflows/release-dist.yml: persistent self-hosted runner запрещён для repository code',
+      );
+    },
+  );
 
   it.each([
     ['minimumReleaseAge', '1440', '0'],

@@ -49,6 +49,18 @@ export function findInkHexClaims(text) {
   return [...text.matchAll(/чернила[^\n]*#[0-9a-fA-F]{3,8}/gi)].map((match) => match[0]);
 }
 
+/** Сессионные инструкции живут в PR, а не рядом с действующей документацией. */
+export function sessionHandoffErrors(root) {
+  const errors = readdirSync(root, { withFileTypes: true })
+    .filter((entry) => entry.isFile() && /^(?:HANDOFF(?:-.*)?|.*-HANDOFF)\.md$/i.test(entry.name))
+    .map((entry) => `сессионный handoff в корне: ${entry.name}`);
+  const directory = join(root, 'handoffs');
+  if (existsSync(directory) && readdirSync(directory).length > 0) {
+    errors.push('handoffs/ содержит сессионные инструкции; сохраните незакрытые работы в PR до удаления');
+  }
+  return errors;
+}
+
 function inputs(root) {
   const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
   const contract = JSON.parse(readFileSync(join(root, 'release/contract.json'), 'utf8'));
@@ -60,6 +72,7 @@ function inputs(root) {
 export function auditRepo(root = ROOT) {
   const { pkg, contract, errors } = inputs(root);
   if (errors.length) return { errors, files: [] };
+  errors.push(...sessionHandoffErrors(root));
   const reference = join(root, 'docs/package.md');
   if (!existsSync(reference)) errors.push('отсутствует docs/package.md');
   else errors.push(...packageReferenceErrors(readFileSync(reference, 'utf8'), pkg, contract));

@@ -7,7 +7,7 @@ import { packageReferenceErrors, renderPackageReference } from '../scripts/lib/d
 
 const pkg = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'));
 const contract = JSON.parse(readFileSync(join(ROOT, 'release/contract.json'), 'utf8'));
-const reference = readFileSync(join(ROOT, 'docs/package.md'), 'utf8');
+const reference = readFileSync(join(ROOT, 'docs/package.md'), 'utf8').replace(/\r\n/g, '\n');
 
 function fixture(run) {
   const root = mkdtempSync(join(tmpdir(), 'lab-icons-docs-'));
@@ -76,6 +76,16 @@ describe('проверяемая граница утверждений', () => {
     expect(auditRepo(root).errors.some((error) => error.includes('install.md'))).toBe(true);
   }));
 
+  it('сессионные handoffs не становятся вечной инструкцией после merge', () => fixture((root) => {
+    expect(auditRepo(root).errors).toEqual([]);
+    writeFileSync(join(root, 'WAVE7-HANDOFF.md'), 'Статус: выполнено');
+    expect(auditRepo(root).errors.some((error) => error.includes('WAVE7-HANDOFF.md'))).toBe(true);
+    unlinkSync(join(root, 'WAVE7-HANDOFF.md'));
+    mkdirSync(join(root, 'handoffs'));
+    writeFileSync(join(root, 'handoffs/WAVE7-HANDOFF.md'), 'Статус: выполнено');
+    expect(auditRepo(root).errors.some((error) => error.includes('handoffs/'))).toBe(true);
+  }));
+
   it('отсутствующая справка не даёт пустого успеха', () => fixture((root) => {
     unlinkSync(join(root, 'docs/package.md'));
     expect(auditRepo(root).errors).toContain('отсутствует docs/package.md');
@@ -86,7 +96,7 @@ describe('проверяемая граница утверждений', () => {
     writeFileSync(join(root, 'release/contract.json'), JSON.stringify(broken));
     expect(auditRepo(root).errors.length).toBeGreaterThan(0);
     expect(() => writePackageReference(root)).toThrow();
-    expect(readFileSync(join(root, 'docs/package.md'), 'utf8')).toBe(reference);
+    expect(readFileSync(join(root, 'docs/package.md'), 'utf8').replace(/\r\n/g, '\n')).toBe(reference);
   }));
 
   it('явная регенерация меняет только производный документ', () => fixture((root) => {

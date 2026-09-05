@@ -308,6 +308,9 @@ function workflowErrors({ relativePath, text, expectedPnpmVersion }) {
 /** Release manual dispatch принимает только существующий tag package version. */
 export function releaseWorkflowErrors(text) {
   const errors = [];
+  if (!/^concurrency:\r?\n  group: release-dist-\$\{\{ inputs\.tag \|\| github\.ref_name \}\}\r?\n  cancel-in-progress: false$/m.test(text)) {
+    errors.push('.github/workflows/release-dist.yml: публикации одного source tag должны иметь общий concurrency без отмены');
+  }
   const jobs = workflowJobBlocks(text);
   const owner = jobs.length === 1 && jobs[0].id === 'release-dist' ? jobs[0].text : '';
   if (jobs.length !== 1 || jobs[0]?.id !== 'release-dist') {
