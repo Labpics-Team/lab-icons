@@ -66,36 +66,50 @@ jobs:
       - name: Verify repository, geometry, package and tests
         run: pnpm verify
 
-      # Bite tests выполняются один раз на основной LTS: их задача — доказать
-      # запрещающую ветку guard, а не повторить platform matrix.
+      # Bite tests выполняются один раз на основной LTS: сначала доказывают
+      # исправность guard на чистом дереве, затем — его запрещающую ветку.
       - name: Parity guard bites on extra icon
         if: matrix.os == 'ubuntu-latest' && matrix.node == '24'
         shell: bash
         run: |
+          pnpm check:parity
           cp svg/Filled/accessibility_filled.svg svg/Filled/_EXTRA_TEST_filled.svg
           trap 'rm -f svg/Filled/_EXTRA_TEST_filled.svg' EXIT
-          if pnpm check:parity; then
-            echo "ERROR: parity should have failed"
+          set +e
+          parity_output="$(pnpm check:parity 2>&1)"
+          parity_status=$?
+          set -e
+          printf '%s\n' "$parity_output"
+          if [[ "$parity_status" -eq 0 ]]; then
+            echo "ERROR: parity accepted the injected extra icon"
             exit 1
           fi
+          grep -F -- '_EXTRA_TEST' <<<"$parity_output"
 
       - name: Colour guard bites on hardcoded hex
         if: matrix.os == 'ubuntu-latest' && matrix.node == '24'
         shell: bash
         run: |
+          pnpm check:colors
           echo '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#101012"><path d="M0 0"/></svg>' \
             > dist/svg/Filled/_colour_test.svg
           trap 'rm -f dist/svg/Filled/_colour_test.svg' EXIT
-          if pnpm check:colors; then
-            echo "ERROR: colours should have failed"
+          set +e
+          colour_output="$(pnpm check:colors 2>&1)"
+          colour_status=$?
+          set -e
+          printf '%s\n' "$colour_output"
+          if [[ "$colour_status" -eq 0 ]]; then
+            echo "ERROR: colour guard accepted the injected hardcoded colour"
             exit 1
           fi
+          grep -F -- '_colour_test.svg' <<<"$colour_output"
 
   # Внешний ruleset не должен знать о составе matrix. Один стабильный check
   # разрешает менять поддерживаемые Node/OS только вместе с версионируемым CI,
   # не оставляя защиту main привязанной к устаревающим именам job.
   required:
-    name: Required CI
+    name: CI
     if: ${{ always() }}
     needs: verify
     runs-on: ubuntu-latest
