@@ -71,8 +71,8 @@ Source tag должен совпадать с `v<package.json#version>`. В Bash
 проверенного checkout:
 
 ```sh
-version=$(node --input-type=module -e 'import { readFileSync } from "node:fs"; console.log(JSON.parse(readFileSync("package.json", "utf8")).version)')
-git tag "v$version"
+version=$(git show HEAD:package.json | node --input-type=module -e 'import { readFileSync } from "node:fs"; console.log(JSON.parse(readFileSync(0, "utf8")).version)')
+git tag "v$version" HEAD
 git push origin "v$version"
 ```
 
