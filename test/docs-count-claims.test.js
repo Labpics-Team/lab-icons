@@ -26,7 +26,7 @@ describe('ручные счётчики не становятся вторым �
       mkdirSync(join(root, 'docs/reference'), { recursive: true });
       for (const file of ['README.md', 'docs/reference/corpus.md']) {
         writeFileSync(join(root, file), '# Корпус\n\n' + claim);
-        expect(auditRepo(root).errors.some((error) => error.includes(file) && error.includes('ручной счётчик'))).toBe(true);
+        expect(auditRepo(root).errors.some((error) => error.replaceAll('\\', '/').includes(file) && error.includes('ручной счётчик'))).toBe(true);
         writeFileSync(join(root, file), '# Корпус\n');
       }
     }));
