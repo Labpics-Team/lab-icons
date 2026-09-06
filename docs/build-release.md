@@ -71,10 +71,16 @@ Source tag должен совпадать с `v<package.json#version>`. В Bash
 проверенного checkout:
 
 ```sh
-version=$(git show HEAD:package.json | node --input-type=module -e 'import { readFileSync } from "node:fs"; console.log(JSON.parse(readFileSync(0, "utf8")).version)')
-git tag "v$version" HEAD
-git push origin "v$version"
+set -euo pipefail
+source_commit=$(git rev-parse --verify 'HEAD^{commit}')
+version=$(git show "$source_commit:package.json" | node --input-type=module -e 'import { readFileSync } from "node:fs"; console.log(JSON.parse(readFileSync(0, "utf8")).version)')
+git tag "v$version" "$source_commit"
+git push origin "refs/tags/v$version"
 ```
+
+Версия и тег относятся к одному зафиксированному commit; изменения рабочего
+`package.json` и индекса в выпуск не попадают. Ошибка любой команды останавливает
+последующие действия. При отказе push проверьте удалённый тег; не используйте force.
 
 Правила приёма тега и построения артефактного тега задаёт
 [release workflow](../.github/workflows/release-dist.yml). Повторное использование

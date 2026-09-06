@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /** Проверяет проекцию поставки и известные противоречия каналам установки. */
-import { existsSync, mkdtempSync, readdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, lstatSync, mkdtempSync, readdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve, relative, isAbsolute } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { validatePackageProjection, validateReleaseContract } from './lib/release-contract.js';
@@ -38,7 +38,7 @@ export function distributionClaimErrors(text) {
  */
 export function manualCorpusCountErrors(source) {
   const text = normalizeDistributionText(source);
-  const number = '(?:\\d+(?:[.,]\\d+)?|один|одна|одно|два|две|три|четыре|пять|шесть|семь|восемь|девять|десять|семи|девяти)';
+  const number = '(?:\\d+(?:[.,]\\d+)?|один|одна|одно|два|две|три|четыре|пять|шесть|семь|восемь|девять|десять|семи|девяти|zero|one|two|three|four|five|six|seven|eight|nine|ten)';
   const unit = '(?:икон(?:ка|ки|ок|ку)|имён|имени|имен|SVG|глиф(?:а|ов)?|(?:именованных\\s+)?(?:ESM[- ]?)?экспорт(?:а|ов)?|(?:release[- ]?)?файл(?:а|ов)?|icons?|glyphs?|exports?|files?)';
   const patterns = [
     new RegExp(`(?:^|[^\\p{L}\\p{N}_])(${number}\\s+${unit})(?=$|[^\\p{L}\\p{N}_])`, 'giu'),
@@ -50,9 +50,16 @@ export function manualCorpusCountErrors(source) {
 
 /** Рекурсивный обход авторской Markdown-документации; экспериментальные данные не входят. */
 export function documentationFiles(root) {
-  const files = readdirSync(root, { withFileTypes: true })
-    .filter((entry) => entry.isFile() && /\.md$/i.test(entry.name))
-    .map((entry) => entry.name);
+  const docs = lstatSync(join(root, 'docs'));
+  if (docs.isSymbolicLink() || !docs.isDirectory()) {
+    throw new Error('docs должен быть обычным каталогом, не symlink');
+  }
+  const files = [];
+  for (const entry of readdirSync(root, { withFileTypes: true })) {
+    if (!/\.md$/i.test(entry.name)) continue;
+    if (entry.isSymbolicLink()) throw new Error(`документация не должна уходить за checkout через symlink: ${entry.name}`);
+    if (entry.isFile()) files.push(entry.name);
+  }
   function walk(directory) {
     for (const entry of readdirSync(join(root, directory), { withFileTypes: true })) {
       const path = join(directory, entry.name);
@@ -110,6 +117,7 @@ function inputs(root) {
 }
 
 export function auditRepo(root = ROOT) {
+  const files = documentationFiles(root);
   const { pkg, contract, errors } = inputs(root);
   if (errors.length) return { errors, files: [] };
   errors.push(...sessionHandoffErrors(root));
@@ -119,7 +127,6 @@ export function auditRepo(root = ROOT) {
   for (const claim of findInkHexClaims(readFileSync(join(root, 'README.md'), 'utf8'))) {
     errors.push(`README.md: фиксированные чернила «${claim}» противоречат currentColor`);
   }
-  const files = documentationFiles(root);
   for (const file of files) {
     const source = readFileSync(join(root, file), 'utf8');
     errors.push(...documentationLinkErrors(root, file, source));
@@ -134,6 +141,9 @@ export function auditRepo(root = ROOT) {
 }
 
 export function writePackageReference(root = ROOT) {
+  // Та же проверка путей выполняется до чтения справки и любых операций записи.
+  // Checkout не должен одновременно изменяться другим процессом: это не sandbox.
+  documentationFiles(root);
   const { pkg, contract, errors } = inputs(root);
   if (errors.length) throw new Error(errors.join('\n'));
   const target = join(root, 'docs/package.md');
