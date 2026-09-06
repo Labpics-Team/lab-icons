@@ -1,0 +1,213 @@
+diff --git a/scripts/build-anatomy.js b/scripts/build-anatomy.js
+index da6a507..51470bd 100644
+--- a/scripts/build-anatomy.js
++++ b/scripts/build-anatomy.js
+@@ -3,31 +3,5 @@
+- * Анатомическая модель @labpics/icons — этап 1: скелет-экстракция.
+- *
+- * Видение (владелец, 2026-07-03): иконка — не картинка, а машинно-читаемая
+- * АНАТОМИЯ: примитивы → скелет → семантические привязки, поверх которых
+- * строятся SF Symbols-класса анимации ПО СМЫСЛУ (песочные часы
+- * переворачиваются, кисть красит). Этап 1 добывает скелет из существующих
+- * 476 SVG детерминированной геометрией — ноль придуманных значений, каждая
+- * метрика воспроизводима из path-данных. Модель и дорожная карта этапов —
+- * docs/anatomy-model.md.
+- *
+- * Выход: dist/anatomy.json
+- *   icons.<exportName> = {
+- *     variant, file, viewBox,
+- *     subpaths: [{ closed, points, bbox, areaSigned, centroid, perimeter }],
+- *     bbox, area, centroid,                  // агрегаты по контурам
+- *     holes,                                 // контуры-вырезы (противо-ориентация)
+- *     symmetry: { x, y },                    // зеркальный overlap-скор [0..1]
+- *   }
+- *
+- * Геометрия:
+- *   - парсер полной path-грамматики (MmLlHhVvCcSsQqTtAaZz), кривые
+- *     сэмплируются фиксированным N=16 на сегмент (детерминизм);
+- *   - площадь — шнуровка Гаусса (знак = ориентация обхода);
+- *   - «вырез» — контур, чья ориентация противоположна максимальному по
+- *     |площади| контуру своего path-элемента (модель even-odd/nonzero
+- *     вырезов Figma-экспорта — этап 1 фиксирует факт, не рендерит);
+- *   - симметрия — доля точек контуров, чьё зеркало относительно центра
+- *     bbox попадает в контурное множество с допуском 0.15px (метрика
+- *     сходства, не бинарный вердикт).
+- *
+- * Числа округлены до 3 знаков (стабильность артефакта между платформами).
++ * Описательный скелет SVG: контуры и воспроизводимые геометрические измерения.
++ * Выход — dist/anatomy.json. Единицы, дискретизация и округление определены
++ * реализацией ниже; структура и ограничения — docs/anatomy-model.md.
++ * Ориентационные признаки не заменяют SVG-рендеринг и не устанавливают
++ * смысловые части, корректность анимации или готовность выходного адаптера.
+diff --git a/scripts/build-observatory.mjs b/scripts/build-observatory.mjs
+index 168f342..21c56d4 100644
+--- a/scripts/build-observatory.mjs
++++ b/scripts/build-observatory.mjs
+@@ -427 +427 @@ function comparisonVisual(entries, canvas, id, kind) {
+-  if (!candidateEntries) return '<div class="not-modeled">NOT MODELED</div>';
++  if (!candidateEntries) return '<div class="not-modeled">Нет модели</div>';
+@@ -432 +432 @@ function comparisonVisual(entries, canvas, id, kind) {
+-    return `<svg class="icon overlay" viewBox="0 0 ${canvas} ${canvas}" role="img" aria-label="overlay">
++    return `<svg class="icon overlay" viewBox="0 0 ${canvas} ${canvas}" role="img" aria-label="Наложение">
+@@ -465 +465 @@ function comparisonVisual(entries, canvas, id, kind) {
+-  return `<svg class="icon difference" viewBox="0 0 ${canvas} ${canvas}" role="img" aria-label="difference">
++  return `<svg class="icon difference" viewBox="0 0 ${canvas} ${canvas}" role="img" aria-label="Разница">
+@@ -485 +485 @@ function sourceLabel(row) {
+-    return `hand@${row.original.shortCommitSha} · blob ${row.original.blobSha.slice(0, 8)} · ${row.original.date}`;
++    return `мастер@${row.original.shortCommitSha} · blob ${row.original.blobSha.slice(0, 8)} · ${row.original.date}`;
+@@ -487 +487 @@ function sourceLabel(row) {
+-  return 'current shipment';
++  return 'текущая поставка';
+@@ -493 +493 @@ function reasonMarkup(reason) {
+-      ? `<div class="rejected">rejected ${escapeHtml(reason.rejection)}: ${escapeHtml(reason.rejectedText)}</div>`
++      ? `<div class="rejected">Отклонено ${escapeHtml(reason.rejection)}: ${escapeHtml(reason.rejectedText)}</div>`
+@@ -500 +500 @@ function reasonMarkup(reason) {
+-  return '<span class="muted">not required</span>';
++  return '<span class="muted">Не требуется</span>';
+@@ -504 +504 @@ function metricsMarkup(metrics) {
+-  if (!metrics) return '<span class="muted">metrics unavailable</span>';
++  if (!metrics) return '<span class="muted">Измерения отсутствуют</span>';
+@@ -515,3 +515,3 @@ function metricsMarkup(metrics) {
+-      : '<span class="good">match</span>';
+-  return `<div>boundary p95 <b>${metric(metrics.boundary.p95)}</b> · max <b>${metric(metrics.boundary.max)}</b></div>
+-    <div>topology ${signature(topology.original)} → ${signature(topology.candidate)}
++      : '<span class="good">совпадает</span>';
++  return `<div>Граница p95 <b>${metric(metrics.boundary.p95)}</b> · max <b>${metric(metrics.boundary.max)}</b></div>
++    <div>Топология ${signature(topology.original)} → ${signature(topology.candidate)}
+@@ -519 +519 @@ function metricsMarkup(metrics) {
+-    <div>oracle ${confidence} · step <b>${metric(topology.resolution.step)}</b> · ${topology.resolution.phases.length} phases</div>`;
++    <div>Проверка ${confidence} · шаг <b>${metric(topology.resolution.step)}</b> · ${topology.resolution.phases.length} фаз</div>`;
+@@ -526,2 +526,2 @@ function inkMarkup(metrics) {
+-  return `<div>area Δ <b>${metric(area.deltaPctOriginal, '%')}</b> <span class="muted">(${metric(area.delta)})</span></div>
+-    <div>centroid Δ <b>${metric(centroid?.distance)}</b> <span class="muted">(${metric(centroid?.x)}, ${metric(centroid?.y)})</span></div>`;
++  return `<div>Площадь Δ <b>${metric(area.deltaPctOriginal, '%')}</b> <span class="muted">(${metric(area.delta)})</span></div>
++    <div>Центроид Δ <b>${metric(centroid?.distance)}</b> <span class="muted">(${metric(centroid?.x)}, ${metric(centroid?.y)})</span></div>`;
+@@ -535 +535 @@ function rasterMarkup(metrics) {
+-        `<span class="raster-chip${sample.topology.mismatch ? ' raster-bad' : ''}" title="${sample.differingPixels} differing binary-occupancy samples; topology ${sample.topology.original.components}:${sample.topology.original.holes} → ${sample.topology.candidate.components}:${sample.topology.candidate.holes}">${sample.size}px · ${metric(sample.deviationPct, '%')}</span>`,
++        `<span class="raster-chip${sample.topology.mismatch ? ' raster-bad' : ''}" title="${sample.differingPixels} различающихся отсчётов бинарного растра; топология ${sample.topology.original.components}:${sample.topology.original.holes} → ${sample.topology.candidate.components}:${sample.topology.candidate.holes}">${sample.size}px · ${metric(sample.deviationPct, '%')}</span>`,
+@@ -544,0 +545,5 @@ export function renderObservatoryHtml(report, visuals, canvas = 24) {
++  const title = 'Проверка геометрии Lab Icons';
++  const reasonThreshold = report.policy.deviationReasonThresholdPct;
++  if (!Number.isFinite(reasonThreshold) || reasonThreshold < 0) {
++    throw new RangeError('Отчёт не задаёт допустимый порог пояснения отклонения');
++  }
+@@ -560 +565 @@ export function renderObservatoryHtml(report, visuals, canvas = 24) {
+-          <div class="source">${escapeHtml(row.model.archetype ?? 'no anatomy')}</div>
++          <div class="source">${escapeHtml(row.model.archetype ?? 'без анатомии')}</div>
+@@ -562,2 +567,2 @@ export function renderObservatoryHtml(report, visuals, canvas = 24) {
+-        <td class="visual-cell">${iconSvg(visual.originalEntries, canvas, 'original', `aria-label="${escapeHtml(row.id)} original"`, `compose-${visualId(row.id)}-original`)}</td>
+-        <td class="visual-cell">${visual.candidateEntries ? iconSvg(visual.candidateEntries, canvas, 'candidate', `aria-label="${escapeHtml(row.id)} generated candidate"`, `compose-${visualId(row.id)}-candidate`) : `<div class="not-modeled">${row.model.status === 'MODEL_ERROR' ? 'MODEL ERROR' : 'NOT MODELED'}</div>`}</td>
++        <td class="visual-cell">${iconSvg(visual.originalEntries, canvas, 'original', `aria-label="${escapeHtml(row.id)} — исходник"`, `compose-${visualId(row.id)}-original`)}</td>
++        <td class="visual-cell">${visual.candidateEntries ? iconSvg(visual.candidateEntries, canvas, 'candidate', `aria-label="${escapeHtml(row.id)} — кандидат"`, `compose-${visualId(row.id)}-candidate`) : `<div class="not-modeled">${row.model.status === 'MODEL_ERROR' ? 'Ошибка модели' : 'Нет модели'}</div>`}</td>
+@@ -566 +571 @@ export function renderObservatoryHtml(report, visuals, canvas = 24) {
+-        <td class="deviation ${deviation != null && deviation > DEVIATION_REASON_THRESHOLD_PCT ? 'over' : ''}">${metric(deviation, '%')}</td>
++        <td class="deviation ${deviation != null && deviation > reasonThreshold ? 'over' : ''}">${metric(deviation, '%')}</td>
+@@ -577 +582 @@ export function renderObservatoryHtml(report, visuals, canvas = 24) {
+-<html lang="en">
++<html lang="ru">
+@@ -581 +586 @@ export function renderObservatoryHtml(report, visuals, canvas = 24) {
+-<title>${escapeHtml(report.title)}</title>
++<title>${escapeHtml(title)}</title>
+@@ -592 +597 @@ export function renderObservatoryHtml(report, visuals, canvas = 24) {
+-  <h1>${escapeHtml(report.title)}</h1>
++  <h1>${escapeHtml(title)}</h1>
+@@ -594,4 +599,4 @@ export function renderObservatoryHtml(report, visuals, canvas = 24) {
+-    <span class="stat">${summary.glyphs} glyphs</span><span class="stat">${summary.variants} variants</span>
+-    <span class="stat">${summary.modeled} modeled</span><span class="stat">${summary.notModeled} not modeled</span>
+-    <span class="stat bad">${summary.fail} fail (${summary.candidateFail} candidate / ${summary.acceptedFail} accepted)</span><span class="stat">${summary.review} review</span>
+-    <span class="stat bad">${summary.unexplained} unexplained &gt;3%</span>
++    <span class="stat">${summary.glyphs} глифов</span><span class="stat">${summary.variants} вариантов</span>
++    <span class="stat">${summary.modeled} с моделью</span><span class="stat">${summary.notModeled} без модели</span>
++    <span class="stat bad">${summary.fail} отказов (${summary.candidateFail} кандидатов / ${summary.acceptedFail} принятых)</span><span class="stat">${summary.review} требуют ревью</span>
++    <span class="stat bad">${summary.unexplained} без объяснения &gt;${reasonThreshold}%</span>
+@@ -600,6 +605,6 @@ export function renderObservatoryHtml(report, visuals, canvas = 24) {
+-    <input id="search" type="search" placeholder="glyph, variant, archetype" aria-label="Search"/>
+-    <select id="verdict" aria-label="Verdict"><option value="">all verdicts</option><option>FAIL</option><option>REVIEW</option><option>NOT_MODELED</option><option>PASS</option></select>
+-    <select id="model" aria-label="Model"><option value="">all model states</option><option>MODELED</option><option>NOT_MODELED</option><option>MODEL_ERROR</option></select>
+-    <select id="variant" aria-label="Variant"><option value="">both variants</option><option>outline</option><option>filled</option></select>
+-    <label><input id="problems" type="checkbox"/> problems only</label>
+-    <button id="theme" type="button">theme: system</button>
++    <input id="search" type="search" placeholder="глиф, вариант, архетип" aria-label="Поиск"/>
++    <select id="verdict" aria-label="Результат"><option value="">все результаты</option><option>FAIL</option><option>REVIEW</option><option>NOT_MODELED</option><option>PASS</option></select>
++    <select id="model" aria-label="Модель"><option value="">все состояния модели</option><option>MODELED</option><option>NOT_MODELED</option><option>MODEL_ERROR</option></select>
++    <select id="variant" aria-label="Вариант"><option value="">оба варианта</option><option>outline</option><option>filled</option></select>
++    <label><input id="problems" type="checkbox"/> только проблемы</label>
++    <button id="theme" type="button">Тема: системная</button>
+@@ -607 +612 @@ export function renderObservatoryHtml(report, visuals, canvas = 24) {
+-  <div class="legend">Rows are severity-first (red first). Original = historical hand for generated shipments, current shipment for hand/unmodelled. Deviation and target-size raster use binary centre-sampled occupancy, not alpha coverage. Target-size deviation is diagnostic; target topology is acceptance-gated. Topology is a separate adaptive vector-guided, multiphase oracle; unresolved confidence fails closed. Difference: <span class="bad">red is original-only</span>, <span style="color:var(--candidate)">cyan is candidate-only</span>. Missing anatomy is NOT MODELED and never reported as 0%.</div>
++  <div class="legend">Сначала показаны наиболее серьёзные нарушения. Исходник — сохранённый авторский мастер для генерируемой поставки и текущий SVG для остальных вариантов. Отклонение измерено бинарными отсчётами в центрах клеток, а не альфа-покрытием. Процент на целевом размере диагностический; топология участвует в приёмке. Адаптивная проверка топологии использует несколько растровых фаз; неопределённость не считается совпадением. На разнице <span class="bad">красным показан только исходник</span>, <span style="color:var(--candidate)">голубым — только кандидат</span>. Отсутствие анатомии имеет код NOT_MODELED, а не нулевое отклонение.</div>
+@@ -611 +616 @@ export function renderObservatoryHtml(report, visuals, canvas = 24) {
+-  <thead><tr><th>glyph / provenance</th><th>original</th><th>generated candidate</th><th>overlay</th><th>difference</th><th>deviation</th><th>boundary / topology</th><th>ink / centroid</th><th>diagnostic occupancy 16–48</th><th>reason &gt;3%</th></tr></thead>
++  <thead><tr><th>глиф / происхождение</th><th>исходник</th><th>кандидат</th><th>наложение</th><th>разница</th><th>отклонение</th><th>граница / топология</th><th>чернила / центроид</th><th>диагностический растр</th><th>пояснение &gt;${reasonThreshold}%</th></tr></thead>
+@@ -642 +647 @@ export function renderObservatoryHtml(report, visuals, canvas = 24) {
+-    event.currentTarget.textContent = 'theme: ' + (theme || 'system');
++    event.currentTarget.textContent = 'Тема: ' + ({ light: 'светлая', dark: 'тёмная' }[theme] || 'системная');
+diff --git a/src/ir/index.ts b/src/ir/index.ts
+index 9e383cf..ed86f42 100644
+--- a/src/ir/index.ts
++++ b/src/ir/index.ts
+@@ -18,3 +18,3 @@ import {
+-// Эти zero-IO модули пока живут рядом с инструментами геометрии. Публичные
+-// типы ниже намеренно не пропускают их нестрогие JS-типы через API.
+-// @ts-expect-error — JS-модуль будет перенесён за package boundary отдельно.
++// Чистые внутренние JS-модули подключаются через типизированную границу.
++// Их нестрогие типы не передаются потребителю публичного API.
++// @ts-expect-error — Внутренний JS-модуль не имеет отдельной декларации типов.
+diff --git a/test/docs-observatory.test.js b/test/docs-observatory.test.js
+new file mode 100644
+index 0000000..10ce311
+--- /dev/null
++++ b/test/docs-observatory.test.js
+@@ -0,0 +1,52 @@
++import { describe, expect, it } from 'vitest';
++import { renderObservatoryHtml } from '../scripts/build-observatory.mjs';
++
++function fixture() {
++  const row = {
++    id: 'sample/outline', name: 'sample', variant: 'outline',
++    original: { kind: 'CURRENT_SHIPMENT' },
++    model: { status: 'NOT_MODELED', archetype: null },
++    verdict: { status: 'NOT_MODELED' }, reason: { status: 'NOT_APPLICABLE' },
++    metrics: null,
++  };
++  return {
++    report: {
++      policy: { deviationReasonThresholdPct: 7.5 }, rows: [row],
++      summary: { glyphs: 1, variants: 1, modeled: 0, notModeled: 1,
++        fail: 0, candidateFail: 0, acceptedFail: 0, review: 0, unexplained: 0 },
++    },
++    visuals: new Map([[row.id, { originalEntries: [], candidateEntries: null }]]),
++  };
++}
++
++describe('человекочитаемое представление отчёта', () => {
++  it('читает порог из того же отчёта и не меняет машинные данные', () => {
++    const { report, visuals } = fixture();
++    const before = structuredClone(report);
++    const html = renderObservatoryHtml(report, visuals);
++    expect(html).toContain('<html lang="ru">');
++    expect(html).toContain('пояснение &gt;7.5%');
++    expect(html).not.toContain('&gt;3%');
++    expect(html).toContain('Нет модели');
++    expect(html).toContain('data-verdict="NOT_MODELED"');
++    expect(report).toEqual(before);
++    report.policy.deviationReasonThresholdPct = 4;
++    expect(renderObservatoryHtml(report, visuals)).toContain('пояснение &gt;4%');
++  });
++
++  it('не подменяет отсутствующий или неверный порог текущим значением из кода', () => {
++    for (const invalid of [undefined, NaN, Infinity, -1, '3']) {
++      const { report, visuals } = fixture();
++      report.policy.deviationReasonThresholdPct = invalid;
++      expect(() => renderObservatoryHtml(report, visuals)).toThrow(RangeError);
++    }
++  });
++
++  it('сохраняет экранирование данных при переводе подписей', () => {
++    const { report, visuals } = fixture();
++    report.rows[0].name = '<script>alert(1)</script>';
++    const html = renderObservatoryHtml(report, visuals);
++    expect(html).not.toContain('<script>alert(1)</script>');
++    expect(html).toContain('&lt;script&gt;alert(1)&lt;/script&gt;');
++  });
++});
