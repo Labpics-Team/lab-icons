@@ -19,9 +19,16 @@ function fixture(run) {
 }
 
 describe('ручные счётчики не становятся вторым источником корпуса', () => {
-  for (const claim of ['999 иконок', '**999**\nSVG', '999 именованных ESM-экспортов',
+  const claims = [
+    '999 иконок', '**999**\nSVG', '999 именованных ESM-экспортов',
     'SVG: 999', 'Количество иконок: **999**', 'ровно семь release-файлов',
-    '238 имён', '476 SVG', '999 icons', 'one icon', 'nine icons', 'ten SVG files']) {
+    '238 имён', '476 SVG', '999 icons', 'one icon', 'nine icons', 'ten SVG files',
+    'одиннадцать иконок', 'двенадцать SVG', 'сто иконок', 'двухсот глифов',
+    'две тысячи иконок', 'один миллион иконок', 'дюжина иконок',
+    'eleven icons', 'one hundred and eleven icons', 'two thousand SVG files',
+    'one million exports', 'a dozen icons',
+  ];
+  for (const claim of claims) {
     it(`отклоняет даже случайно верный ручной счётчик: ${claim}`, () => fixture((root) => {
       mkdirSync(join(root, 'docs/reference'), { recursive: true });
       for (const file of ['README.md', 'docs/reference/corpus.md']) {
@@ -31,8 +38,14 @@ describe('ручные счётчики не становятся вторым �
       }
     }));
   }
-  it('сохраняет параметры геометрии и различие границы проверки', () => fixture((root) => {
-    writeFileSync(join(root, 'docs/geometry.md'), '# Геометрия\n\nРазмер 24 px. Отдельный contour ID, API и JSON не являются счётчиком.');
+
+  it('сохраняет параметры геометрии и не принимает произвольное слово за число', () => fixture((root) => {
+    writeFileSync(join(root, 'docs/geometry.md'), [
+      '# Геометрия',
+      '',
+      'Размер 24 px. Отдельный contour ID, API и JSON не являются счётчиком.',
+      'Публичные exports описаны в справке поставки; статические icons используют currentColor.',
+    ].join('\n'));
     expect(auditRepo(root).errors).toEqual([]);
   }));
 });
