@@ -2,7 +2,7 @@ name: Release dist tag
 
 # Публикует иммутабельный git-dependency артефакт поверх релизного тега.
 # Канал npm проверяется и документируется отдельно; этот workflow отвечает
-# только за братский <tag>-dist и не должен менять master.
+# только за братский <tag>-dist и не должен менять основную ветку.
 on:
   push:
     tags:
@@ -86,7 +86,7 @@ jobs:
           # Скрипт читает единственный manifest release/contract.json, удаляет
           # stale tracked dist из index и добавляет только точные файлы канона.
           node scripts/stage-release-dist.js
-          git commit -m "build: dist для ${DIST_TAG} (git-dep артефакт; master не трогаем)"
+          git commit -m "build: dist для ${DIST_TAG} (git-dep артефакт; основную ветку не трогаем)"
           git tag "${DIST_TAG}"
           node scripts/check-release-ref.js dist "$TAG"
           git push origin "refs/tags/${DIST_TAG}"
