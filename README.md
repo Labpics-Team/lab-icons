@@ -197,7 +197,7 @@ SemVer, совпадение checkout HEAD с source tag, выполняет `pn
 создаёт `v0.3.0-dist`. Ручной запуск принимает только уже существующий source
 tag; branch и SHA не являются допустимыми release ref. Существующий sibling не
 считается успехом вслепую: его parent, manifest и байты сравниваются с текущей
-clean‑сборкой. `master` workflow не изменяет.
+clean‑сборкой. workflow основную ветку не изменяет.
 
 ## Структура
 
