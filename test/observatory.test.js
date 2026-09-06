@@ -164,7 +164,7 @@ describe('Quality Observatory truthfulness', () => {
     }
     expect(first.report.policy.targetRaster).toContain('diagnostic-only');
     expect(first.report.policy.targetRaster).toContain('target topology is acceptance-gated');
-    expect(first.html).toContain('diagnostic occupancy 16–48');
+    expect(first.html).toContain('диагностический растр');
   });
 
   it('measures the declared model composition instead of a hardcoded fill rule', () => {
