@@ -15,9 +15,9 @@ import {
   type CatalogIconId,
 } from './catalog.generated.js';
 
-// Эти zero-IO модули пока живут рядом с инструментами геометрии. Публичные
-// типы ниже намеренно не пропускают их нестрогие JS-типы через API.
-// @ts-expect-error — JS-модуль будет перенесён за package boundary отдельно.
+// Чистые внутренние JS-модули подключаются через типизированную границу.
+// Их нестрогие типы не передаются потребителю публичного API.
+// @ts-expect-error — Внутренний JS-модуль не имеет отдельной декларации типов.
 import { buildGlyphParts as buildAnatomyParts, topologySignature as computeTopologySignature } from '../core/anatomy-gen.js';
 // @ts-expect-error — см. комментарий выше; функция чистая и bundleable.
 import { sourcePathEntries } from '../core/icon-geometry.js';
