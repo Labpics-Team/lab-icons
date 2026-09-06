@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /** Проверяет проекцию поставки и известные противоречия каналам установки. */
-import { existsSync, lstatSync, mkdtempSync, readdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, lstatSync, mkdtempSync, readdirSync, readFileSync, realpathSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve, relative, isAbsolute } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { validatePackageProjection, validateReleaseContract } from './lib/release-contract.js';
@@ -32,13 +32,44 @@ export function distributionClaimErrors(text) {
   });
 }
 
-/** Авторская проза не хранит размер корпуса; точная справка имеет генератор.
- * Это детектор известных числовых форм, не семантический анализ любого языка.
+/**
+ * Авторская русская/английская проза не хранит точный размер корпуса.
+ * Числовая грамматика намеренно шире текущих значений: арабская запись,
+ * стандартные cardinal number words, их падежные формы для обычных count claims
+ * и масштабные слова. Мы не пытаемся решить NLP-задачу; вместо этого запрещаем
+ * поддерживаемые точные количественные конструкции рядом с защищаемой единицей.
  * Исторические эксперименты не входят в текущую пользовательскую справку.
  */
 export function manualCorpusCountErrors(source) {
   const text = normalizeDistributionText(source);
-  const number = '(?:\\d+(?:[.,]\\d+)?|один|одна|одно|два|две|три|четыре|пять|шесть|семь|восемь|девять|десять|семи|девяти|zero|one|two|three|four|five|six|seven|eight|nine|ten)';
+  const ru = [
+    'ноль', 'нуль',
+    'один', 'одна', 'одно', 'одну', 'одного', 'одной',
+    'два', 'две', 'двух', 'три', 'трех', 'трёх', 'четыре', 'четырех', 'четырёх',
+    'пять', 'пяти', 'шесть', 'шести', 'семь', 'семи', 'восемь', 'восьми', 'девять', 'девяти',
+    'десять', 'десяти', 'одиннадцать', 'одиннадцати', 'двенадцать', 'двенадцати',
+    'тринадцать', 'тринадцати', 'четырнадцать', 'четырнадцати', 'пятнадцать', 'пятнадцати',
+    'шестнадцать', 'шестнадцати', 'семнадцать', 'семнадцати', 'восемнадцать', 'восемнадцати',
+    'девятнадцать', 'девятнадцати', 'двадцать', 'двадцати', 'тридцать', 'тридцати',
+    'сорок', 'сорока', 'пятьдесят', 'пятидесяти', 'шестьдесят', 'шестидесяти',
+    'семьдесят', 'семидесяти', 'восемьдесят', 'восьмидесяти', 'девяносто', 'девяноста',
+    'сто', 'ста', 'двести', 'двухсот', 'триста', 'трехсот', 'трёхсот', 'четыреста', 'четырехсот', 'четырёхсот',
+    'пятьсот', 'пятисот', 'шестьсот', 'шестисот', 'семьсот', 'семисот', 'восемьсот', 'восьмисот', 'девятьсот', 'девятисот',
+    'тысяча', 'тысячи', 'тысяч', 'миллион', 'миллиона', 'миллионов',
+    'миллиард', 'миллиарда', 'миллиардов', 'триллион', 'триллиона', 'триллионов',
+    'квадриллион', 'квадриллиона', 'квадриллионов', 'дюжина', 'дюжины', 'дюжин',
+  ];
+  const en = [
+    'zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten',
+    'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen',
+    'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety',
+    'hundred', 'hundreds', 'thousand', 'thousands', 'million', 'millions',
+    'billion', 'billions', 'trillion', 'trillions', 'quadrillion', 'quadrillions', 'dozen', 'dozens',
+  ];
+  const word = `(?:${[...ru, ...en].join('|')})`;
+  const connector = '(?:and|и)';
+  const words = `${word}(?:[\\s-]+(?:${word}|${connector})){0,12}`;
+  const number = `(?:\\d+(?:[.,]\\d+)?|${words})`;
   const unit = '(?:икон(?:ка|ки|ок|ку)|имён|имени|имен|SVG|глиф(?:а|ов)?|(?:именованных\\s+)?(?:ESM[- ]?)?экспорт(?:а|ов)?|(?:release[- ]?)?файл(?:а|ов)?|icons?|glyphs?|exports?|files?)';
   const patterns = [
     new RegExp(`(?:^|[^\\p{L}\\p{N}_])(${number}\\s+${unit})(?=$|[^\\p{L}\\p{N}_])`, 'giu'),
@@ -88,6 +119,11 @@ export function sessionHandoffErrors(root) {
   return errors;
 }
 
+function outsideRoot(root, destination) {
+  const rel = relative(realpathSync(root), realpathSync(destination));
+  return isAbsolute(rel) || rel === '..' || rel.startsWith(`..${process.platform === 'win32' ? '\\' : '/'}`);
+}
+
 /** Проверка файловых Markdown-ссылок, включая reference-style и изображения. */
 export function documentationLinkErrors(root, file, source) {
   const errors = [];
@@ -97,10 +133,14 @@ export function documentationLinkErrors(root, file, source) {
       const target = decodeURIComponent(href.split(/[?#]/, 1)[0]);
       if (!target) continue;
       const destination = resolve(root, dirname(file), target);
-      const rel = relative(resolve(root), destination);
-      if (isAbsolute(rel) || rel === '..' || rel.startsWith(`..${process.platform === 'win32' ? '\\' : '/'}`)) {
+      const lexicalRel = relative(resolve(root), destination);
+      if (isAbsolute(lexicalRel) || lexicalRel === '..' || lexicalRel.startsWith(`..${process.platform === 'win32' ? '\\' : '/'}`)) {
         errors.push(`${file}: ссылка за пределы checkout: ${href}`);
-      } else if (!existsSync(destination)) errors.push(`${file}: отсутствует цель ссылки ${href}`);
+      } else if (!existsSync(destination)) {
+        errors.push(`${file}: отсутствует цель ссылки ${href}`);
+      } else if (outsideRoot(root, destination)) {
+        errors.push(`${file}: цель ссылки через symlink находится за пределами checkout: ${href}`);
+      }
     } catch {
       errors.push(`${file}: некорректная ссылка ${href}`);
     }
