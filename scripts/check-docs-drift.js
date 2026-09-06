@@ -1,15 +1,17 @@
 #!/usr/bin/env node
 /** Проверяет проекцию поставки и известные противоречия каналам установки. */
 import { existsSync, mkdtempSync, readdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { dirname, join, resolve, relative, isAbsolute } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { validatePackageProjection, validateReleaseContract } from './lib/release-contract.js';
 import { packageReferenceErrors, renderPackageReference } from './lib/docs-reference.js';
 
+import { parseDocumentation } from './lib/docs-markdown.js';
+
 export const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
 export function normalizeDistributionText(text) {
-  return text.normalize('NFKC').replace(/[`*_~]/g, '')
+  return parseDocumentation(text).text.normalize('NFKC')
     .replace(/[‐‑‒–—―]/g, '-').replace(/\s+/g, ' ').trim();
 }
 
@@ -32,7 +34,9 @@ export function distributionClaimErrors(text) {
 
 /** Рекурсивный обход авторской Markdown-документации; экспериментальные данные не входят. */
 export function documentationFiles(root) {
-  const files = ['README.md'];
+  const files = readdirSync(root, { withFileTypes: true })
+    .filter((entry) => entry.isFile() && /\.md$/i.test(entry.name))
+    .map((entry) => entry.name);
   function walk(directory) {
     for (const entry of readdirSync(join(root, directory), { withFileTypes: true })) {
       const path = join(directory, entry.name);
@@ -61,6 +65,26 @@ export function sessionHandoffErrors(root) {
   return errors;
 }
 
+/** Проверка файловых Markdown-ссылок, включая reference-style и изображения. */
+export function documentationLinkErrors(root, file, source) {
+  const errors = [];
+  for (const href of parseDocumentation(source).links) {
+    if (/^[a-z][a-z0-9+.-]*:/i.test(href) || href.startsWith('//') || href.startsWith('#')) continue;
+    try {
+      const target = decodeURIComponent(href.split(/[?#]/, 1)[0]);
+      if (!target) continue;
+      const destination = resolve(root, dirname(file), target);
+      const rel = relative(resolve(root), destination);
+      if (isAbsolute(rel) || rel === '..' || rel.startsWith(`..${process.platform === 'win32' ? '\\' : '/'}`)) {
+        errors.push(`${file}: ссылка за пределы checkout: ${href}`);
+      } else if (!existsSync(destination)) errors.push(`${file}: отсутствует цель ссылки ${href}`);
+    } catch {
+      errors.push(`${file}: некорректная ссылка ${href}`);
+    }
+  }
+  return errors;
+}
+
 function inputs(root) {
   const pkg = JSON.parse(readFileSync(join(root, 'package.json'), 'utf8'));
   const contract = JSON.parse(readFileSync(join(root, 'release/contract.json'), 'utf8'));
@@ -81,6 +105,7 @@ export function auditRepo(root = ROOT) {
   }
   const files = documentationFiles(root);
   for (const file of files) {
+    errors.push(...documentationLinkErrors(root, file, readFileSync(join(root, file), 'utf8')));
     for (const error of distributionClaimErrors(readFileSync(join(root, file), 'utf8'))) {
       errors.push(`${file}: ${error}`);
     }
@@ -111,7 +136,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     if (args[0] === '--write') writePackageReference();
     const { errors, files } = auditRepo();
     if (errors.length) throw new Error(errors.join('\n'));
-    console.log(`check-docs-drift: PASS — проекция поставки актуальна; известные противоречия проверены в ${files.length} документах`);
+    console.log(`check-docs-drift: PASS — проекция поставки актуальна; файловые ссылки и известные противоречия проверены в ${files.length} документах`);
   } catch (error) {
     console.error(`check-docs-drift: FAIL — ${error.message}`);
     process.exitCode = 1;

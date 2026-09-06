@@ -2,7 +2,7 @@ import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, unlinkSync, write
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { ROOT, auditRepo, distributionClaimErrors, findInkHexClaims, writePackageReference } from '../scripts/check-docs-drift.js';
+import { ROOT, auditRepo, documentationLinkErrors, distributionClaimErrors, findInkHexClaims, writePackageReference } from '../scripts/check-docs-drift.js';
 import { packageReferenceErrors, renderPackageReference } from '../scripts/lib/docs-reference.js';
 
 const pkg = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'));
@@ -14,9 +14,10 @@ function fixture(run) {
   try {
     mkdirSync(join(root, 'docs'));
     mkdirSync(join(root, 'release'));
-    for (const path of ['package.json', 'release/contract.json', 'README.md', 'docs/package.md']) {
+    for (const path of ['package.json', 'release/contract.json', 'docs/package.md']) {
       cpSync(join(ROOT, path), join(root, path));
     }
+    writeFileSync(join(root, 'README.md'), '# Проверяемый пакет\n');
     return run(root);
   } finally {
     rmSync(root, { recursive: true, force: true });
@@ -58,7 +59,7 @@ describe('справка поставки из единственного кон
 
 describe('проверяемая граница утверждений', () => {
   it('сохраняет защиту npm channel, включая переносы и Markdown', () => {
-    for (const text of ['private: true', 'Пакет не **публикуется**\nв `npm`', 'Ставится только как git-зависимость', 'Нужен GH_PAT']) {
+    for (const text of ['private: true', 'Пакет не **публикуется**\nв `npm`', 'Ставится только как git-зависимость', 'Нужен GH_PAT', 'Нужен **GH_PAT**', 'Пакет _не публикуется_ в `npm`']) {
       expect(distributionClaimErrors(text).length).toBeGreaterThan(0);
     }
     expect(distributionClaimErrors('Основной канал — npm. Публикацию конкретной версии проверяют отдельно.')).toEqual([]);
@@ -116,3 +117,17 @@ describe('проверяемая граница утверждений', () => {
 it('актуальный checkout проходит заявленные проверки документации', () => {
   expect(auditRepo(ROOT).errors).toEqual([]);
 });
+
+it('проверяет файловые ссылки из Markdown, а не случайный текст в code blocks', () => fixture((root) => {
+  writeFileSync(join(root, 'docs/имя с пробелом.md'), '# Цель');
+  const valid = '[цель][ref]\n\n[ref]: %D0%B8%D0%BC%D1%8F%20%D1%81%20%D0%BF%D1%80%D0%BE%D0%B1%D0%B5%D0%BB%D0%BE%D0%BC.md#заголовок\n\n![image](package.md)\n\n```md\n[не ссылка](absent.md)\n```';
+  expect(documentationLinkErrors(root, 'docs/test.md', valid)).toEqual([]);
+  expect(documentationLinkErrors(root, 'docs/test.md', '[цель](missing.md)')).toHaveLength(1);
+  expect(documentationLinkErrors(root, 'docs/test.md', '![image](missing.png)')).toHaveLength(1);
+  expect(documentationLinkErrors(root, 'docs/test.md', '[цель][ref]\n\n[ref]: missing.md')).toHaveLength(1);
+  expect(documentationLinkErrors(root, 'docs/test.md', '[выход](../../outside.md)')).toHaveLength(1);
+  expect(documentationLinkErrors(root, 'docs/test.md', '[ошибка](%ZZ)')).toHaveLength(1);
+  expect(documentationLinkErrors(root, 'docs/test.md', '[внешняя](https://example.invalid/path) [anchor](#here)')).toEqual([]);
+  writeFileSync(join(root, 'NAMING.md'), '[отсутствует](docs/missing.md)');
+  expect(auditRepo(root).errors.some((error) => error.includes('NAMING.md'))).toBe(true);
+}));

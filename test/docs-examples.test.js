@@ -2,33 +2,18 @@ import { spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
+import { parseDocumentation } from '../scripts/lib/docs-markdown.js';
+import { validateIconProposal } from '../scripts/lib/icon-proposal.js';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 
-// README использует обычные fenced blocks. Разбор охватывает только этот
-// формат и не выдаётся за произвольный Markdown-парсер или запуск shell-релиза.
+// Примеры извлекаются тем же Markdown-парсером, что текст и ссылки справки.
 function javascriptExamples(markdown) {
-  const result = [];
-  let fence = null;
-  let body = [];
-  for (const line of markdown.replace(/\r\n/g, '\n').split('\n')) {
-    const marker = line.match(/^(`{3,}|~{3,})([^`]*)$/);
-    if (fence === null) {
-      if (marker) {
-        fence = { marker: marker[1], javascript: ['js', 'javascript'].includes(marker[2].trim()) };
-        body = [];
-      }
-    } else if (line.trim() === fence.marker) {
-      if (fence.javascript) {
-        if (!body.join('\n').trim()) throw new Error('пустой JavaScript-пример');
-        result.push(body.join('\n'));
-      }
-      fence = null;
-    } else body.push(line);
+  const { examples } = parseDocumentation(markdown);
+  if (examples.length === 0 || examples.some((source) => !source.trim())) {
+    throw new Error('в README отсутствует содержательный JavaScript-пример');
   }
-  if (fence !== null) throw new Error('незакрытый блок кода в README');
-  if (result.length === 0) throw new Error('в README нет исполняемого JavaScript-примера');
-  return result;
+  return examples;
 }
 
 function runExample(source) {
@@ -65,4 +50,17 @@ describe('первый сценарий из README', () => {
     expect(javascriptExamples('```sh\nexit 1\n```\n```js\nconsole.log(1);\n```')).toEqual(['console.log(1);']);
     expect(javascriptExamples('~~~javascript\r\nconsole.log(1);\r\n~~~')).toEqual(['console.log(1);']);
   });
+});
+
+it('пример предложения проходит настоящий parser, но не подменяет визуальную приёмку', () => {
+  const { jsonExamples } = parseDocumentation(readFileSync(new URL('../docs/agent-workflow.md', import.meta.url), 'utf8'));
+  expect(jsonExamples.length).toBeGreaterThan(0);
+  const catalog = JSON.parse(readFileSync(new URL('../semantics/catalog.json', import.meta.url), 'utf8'));
+  const catalogIconIds = Object.keys(catalog.icons);
+  for (const source of jsonExamples) {
+    const proposal = JSON.parse(source);
+    expect(() => validateIconProposal(proposal, { catalogIconIds })).not.toThrow();
+    expect(() => validateIconProposal({ ...proposal, unsupported: true }, { catalogIconIds })).toThrow(/unsupported/);
+    expect(() => validateIconProposal({ ...proposal, family: { ...proposal.family, references: ['not-a-real-icon'] } }, { catalogIconIds })).toThrow(/not-a-real-icon/);
+  }
 });

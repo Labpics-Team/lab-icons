@@ -62,30 +62,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # Временная диагностика PR #100; удалить до merge. Нет секретов или записи в Git.
-      - name: Capture documentation diagnostic inputs
-        if: github.event_name == 'pull_request' && github.event.pull_request.number == 100 && matrix.os == 'ubuntu-latest' && matrix.node == '24'
-        shell: bash
-        run: |
-          mkdir "$RUNNER_TEMP/docs-diagnostic"
-          curl --fail --silent --show-error --location \
-            'https://api.github.com/repos/Labpics-Team/lab-icons/check-runs/101393867405/annotations' \
-            > "$RUNNER_TEMP/docs-diagnostic/previous-annotations.json"
-          tar -czf "$RUNNER_TEMP/docs-diagnostic/dependencies.tar.gz" node_modules
-          git bundle create "$RUNNER_TEMP/docs-diagnostic/source.bundle" HEAD
-          git bundle verify "$RUNNER_TEMP/docs-diagnostic/source.bundle"
-          (cd "$RUNNER_TEMP/docs-diagnostic" && sha256sum dependencies.tar.gz source.bundle > SHA256SUMS)
-
-      - name: Preserve documentation diagnostic inputs
-        if: github.event_name == 'pull_request' && github.event.pull_request.number == 100 && matrix.os == 'ubuntu-latest' && matrix.node == '24'
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
-          name: docs-diagnostic-${{ github.run_id }}-${{ github.run_attempt }}
-          path: ${{ runner.temp }}/docs-diagnostic/
-          if-no-files-found: error
-          compression-level: 0
-          retention-days: 3
-
       # Один список обязательных проверок живёт в package.json#scripts.verify.
       - name: Verify repository, geometry, package and tests
         run: pnpm verify
