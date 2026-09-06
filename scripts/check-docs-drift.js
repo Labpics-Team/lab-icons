@@ -32,6 +32,22 @@ export function distributionClaimErrors(text) {
   });
 }
 
+/** Авторская проза не хранит размер корпуса; точная справка имеет генератор.
+ * Это детектор известных числовых форм, не семантический анализ любого языка.
+ * Исторические эксперименты не входят в текущую пользовательскую справку.
+ */
+export function manualCorpusCountErrors(source) {
+  const text = normalizeDistributionText(source);
+  const number = '(?:\\d+(?:[.,]\\d+)?|один|одна|одно|два|две|три|четыре|пять|шесть|семь|восемь|девять|десять|семи|девяти)';
+  const unit = '(?:икон(?:ка|ки|ок|ку)|имён|имени|имен|SVG|глиф(?:а|ов)?|(?:именованных\\s+)?(?:ESM[- ]?)?экспорт(?:а|ов)?|(?:release[- ]?)?файл(?:а|ов)?|icons?|glyphs?|exports?|files?)';
+  const patterns = [
+    new RegExp(`(?:^|[^\\p{L}\\p{N}_])(${number}\\s+${unit})(?=$|[^\\p{L}\\p{N}_])`, 'giu'),
+    new RegExp(`(?:^|[^\\p{L}\\p{N}_])(${unit}\\s*[:=]\\s*${number})(?=$|[^\\p{L}\\p{N}_])`, 'giu'),
+  ];
+  return [...new Set(patterns.flatMap((pattern) => [...text.matchAll(pattern)].map((match) => match[1])))]
+    .map((claim) => `ручной счётчик «${claim}»: используйте ссылку на контракт или генерируемую справку`);
+}
+
 /** Рекурсивный обход авторской Markdown-документации; экспериментальные данные не входят. */
 export function documentationFiles(root) {
   const files = readdirSync(root, { withFileTypes: true })
@@ -105,8 +121,12 @@ export function auditRepo(root = ROOT) {
   }
   const files = documentationFiles(root);
   for (const file of files) {
-    errors.push(...documentationLinkErrors(root, file, readFileSync(join(root, file), 'utf8')));
-    for (const error of distributionClaimErrors(readFileSync(join(root, file), 'utf8'))) {
+    const source = readFileSync(join(root, file), 'utf8');
+    errors.push(...documentationLinkErrors(root, file, source));
+    if (file.replaceAll('\\', '/') !== 'docs/package.md') {
+      errors.push(...manualCorpusCountErrors(source).map((error) => `${file}: ${error}`));
+    }
+    for (const error of distributionClaimErrors(source)) {
       errors.push(`${file}: ${error}`);
     }
   }
