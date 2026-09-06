@@ -17,6 +17,9 @@ importers:
       fflate:
         specifier: 0.8.3
         version: 0.8.3
+      marked:
+        specifier: 9.1.6
+        version: 9.1.6
       publint:
         specifier: 0.3.21
         version: 0.3.21

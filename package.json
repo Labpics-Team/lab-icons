@@ -2,7 +2,7 @@
   "name": "@labpics/icons",
   "version": "0.3.0",
   "private": false,
-  "description": "Labpics icon library — 476 SVG (238 Filled + 238 Outline), tree-shakeable ESM",
+  "description": "Статические SVG и геометрические модели иконок Labpics",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Labpics-Team/lab-icons.git"
@@ -97,6 +97,7 @@
     "@arethetypeswrong/cli": "0.18.5",
     "esbuild": "0.28.1",
     "fflate": "0.8.3",
+    "marked": "9.1.6",
     "publint": "0.3.21",
     "rollup": "4.62.2",
     "svgo": "4.0.2",

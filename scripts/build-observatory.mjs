@@ -424,12 +424,12 @@ function iconSvg(entries, canvas, className, extra = '', idPrefix = 'icon') {
 
 function comparisonVisual(entries, canvas, id, kind) {
   const { originalEntries, candidateEntries } = entries;
-  if (!candidateEntries) return '<div class="not-modeled">NOT MODELED</div>';
+  if (!candidateEntries) return '<div class="not-modeled">Нет модели</div>';
   const safeId = visualId(id);
   if (kind === 'overlay') {
     const original = composedMarkup(originalEntries, canvas, `compose-${safeId}-overlay-original`);
     const candidate = composedMarkup(candidateEntries, canvas, `compose-${safeId}-overlay-candidate`);
-    return `<svg class="icon overlay" viewBox="0 0 ${canvas} ${canvas}" role="img" aria-label="overlay">
+    return `<svg class="icon overlay" viewBox="0 0 ${canvas} ${canvas}" role="img" aria-label="Наложение">
       <defs>${original.defs}${candidate.defs}</defs>
       <g class="overlay-original">${original.body}</g>
       <g class="overlay-candidate">${candidate.body}</g>
@@ -462,7 +462,7 @@ function comparisonVisual(entries, canvas, id, kind) {
   );
   const withoutCandidateId = `diff-${safeId}-without-candidate`;
   const withoutOriginalId = `diff-${safeId}-without-original`;
-  return `<svg class="icon difference" viewBox="0 0 ${canvas} ${canvas}" role="img" aria-label="difference">
+  return `<svg class="icon difference" viewBox="0 0 ${canvas} ${canvas}" role="img" aria-label="Разница">
     <defs>
       ${original.defs}${candidate.defs}${originalMask.defs}${candidateMask.defs}
       <mask id="${withoutCandidateId}" maskUnits="userSpaceOnUse" x="0" y="0" width="${canvas}" height="${canvas}">
@@ -482,26 +482,26 @@ const metric = (value, suffix = '') =>
 
 function sourceLabel(row) {
   if (row.original.kind === 'HISTORICAL_HAND') {
-    return `hand@${row.original.shortCommitSha} · blob ${row.original.blobSha.slice(0, 8)} · ${row.original.date}`;
+    return `мастер@${row.original.shortCommitSha} · blob ${row.original.blobSha.slice(0, 8)} · ${row.original.date}`;
   }
-  return 'current shipment';
+  return 'текущая поставка';
 }
 
 function reasonMarkup(reason) {
   if (reason.status === 'UNEXPLAINED') {
     const rejected = reason.rejectedText
-      ? `<div class="rejected">rejected ${escapeHtml(reason.rejection)}: ${escapeHtml(reason.rejectedText)}</div>`
+      ? `<div class="rejected">Отклонено ${escapeHtml(reason.rejection)}: ${escapeHtml(reason.rejectedText)}</div>`
       : '';
     return `<strong class="bad">FAIL / UNEXPLAINED</strong>${rejected}`;
   }
   if (reason.text) {
     return `<span class="reason-code">${escapeHtml(reason.code)}</span><div>${escapeHtml(reason.text)}</div>`;
   }
-  return '<span class="muted">not required</span>';
+  return '<span class="muted">Не требуется</span>';
 }
 
 function metricsMarkup(metrics) {
-  if (!metrics) return '<span class="muted">metrics unavailable</span>';
+  if (!metrics) return '<span class="muted">Измерения отсутствуют</span>';
   const topology = metrics.topology;
   const signature = ({ components, holes }) =>
     components == null || holes == null ? '?:?' : `${components}:${holes}`;
@@ -512,19 +512,19 @@ function metricsMarkup(metrics) {
     ? '<b class="bad">UNCERTAIN</b>'
     : topology.difference
       ? '<b class="bad">MISMATCH</b>'
-      : '<span class="good">match</span>';
-  return `<div>boundary p95 <b>${metric(metrics.boundary.p95)}</b> · max <b>${metric(metrics.boundary.max)}</b></div>
-    <div>topology ${signature(topology.original)} → ${signature(topology.candidate)}
+      : '<span class="good">совпадает</span>';
+  return `<div>Граница p95 <b>${metric(metrics.boundary.p95)}</b> · max <b>${metric(metrics.boundary.max)}</b></div>
+    <div>Топология ${signature(topology.original)} → ${signature(topology.candidate)}
       ${topologyVerdict}</div>
-    <div>oracle ${confidence} · step <b>${metric(topology.resolution.step)}</b> · ${topology.resolution.phases.length} phases</div>`;
+    <div>Проверка ${confidence} · шаг <b>${metric(topology.resolution.step)}</b> · ${topology.resolution.phases.length} фаз</div>`;
 }
 
 function inkMarkup(metrics) {
   if (!metrics) return '<span class="muted">—</span>';
   const area = metrics.ink.area;
   const centroid = metrics.ink.centroid.delta;
-  return `<div>area Δ <b>${metric(area.deltaPctOriginal, '%')}</b> <span class="muted">(${metric(area.delta)})</span></div>
-    <div>centroid Δ <b>${metric(centroid?.distance)}</b> <span class="muted">(${metric(centroid?.x)}, ${metric(centroid?.y)})</span></div>`;
+  return `<div>Площадь Δ <b>${metric(area.deltaPctOriginal, '%')}</b> <span class="muted">(${metric(area.delta)})</span></div>
+    <div>Центроид Δ <b>${metric(centroid?.distance)}</b> <span class="muted">(${metric(centroid?.x)}, ${metric(centroid?.y)})</span></div>`;
 }
 
 function rasterMarkup(metrics) {
@@ -532,7 +532,7 @@ function rasterMarkup(metrics) {
   return `<div class="raster-list">${metrics.raster
     .map(
       (sample) =>
-        `<span class="raster-chip${sample.topology.mismatch ? ' raster-bad' : ''}" title="${sample.differingPixels} differing binary-occupancy samples; topology ${sample.topology.original.components}:${sample.topology.original.holes} → ${sample.topology.candidate.components}:${sample.topology.candidate.holes}">${sample.size}px · ${metric(sample.deviationPct, '%')}</span>`,
+        `<span class="raster-chip${sample.topology.mismatch ? ' raster-bad' : ''}" title="${sample.differingPixels} различающихся отсчётов бинарного растра; топология ${sample.topology.original.components}:${sample.topology.original.holes} → ${sample.topology.candidate.components}:${sample.topology.candidate.holes}">${sample.size}px · ${metric(sample.deviationPct, '%')}</span>`,
     )
     .join('')}</div>`;
 }
@@ -542,6 +542,11 @@ function severityRank(status) {
 }
 
 export function renderObservatoryHtml(report, visuals, canvas = 24) {
+  const title = 'Проверка геометрии Lab Icons';
+  const reasonThreshold = report.policy.deviationReasonThresholdPct;
+  if (!Number.isFinite(reasonThreshold) || reasonThreshold < 0) {
+    throw new RangeError('Отчёт не задаёт допустимый порог пояснения отклонения');
+  }
   const sortedRows = report.rows.slice().sort((a, b) => {
     const severity = severityRank(a.verdict.status) - severityRank(b.verdict.status);
     if (severity !== 0) return severity;
@@ -557,13 +562,13 @@ export function renderObservatoryHtml(report, visuals, canvas = 24) {
         <th scope="row"><span class="glyph-name">${escapeHtml(row.name)}</span><span class="variant">/${row.variant}</span>
           <div><span class="verdict verdict-${row.verdict.status.toLowerCase()}">${row.verdict.status}</span></div>
           <div class="source">${escapeHtml(sourceLabel(row))}</div>
-          <div class="source">${escapeHtml(row.model.archetype ?? 'no anatomy')}</div>
+          <div class="source">${escapeHtml(row.model.archetype ?? 'без анатомии')}</div>
         </th>
-        <td class="visual-cell">${iconSvg(visual.originalEntries, canvas, 'original', `aria-label="${escapeHtml(row.id)} original"`, `compose-${visualId(row.id)}-original`)}</td>
-        <td class="visual-cell">${visual.candidateEntries ? iconSvg(visual.candidateEntries, canvas, 'candidate', `aria-label="${escapeHtml(row.id)} generated candidate"`, `compose-${visualId(row.id)}-candidate`) : `<div class="not-modeled">${row.model.status === 'MODEL_ERROR' ? 'MODEL ERROR' : 'NOT MODELED'}</div>`}</td>
+        <td class="visual-cell">${iconSvg(visual.originalEntries, canvas, 'original', `aria-label="${escapeHtml(row.id)} — исходник"`, `compose-${visualId(row.id)}-original`)}</td>
+        <td class="visual-cell">${visual.candidateEntries ? iconSvg(visual.candidateEntries, canvas, 'candidate', `aria-label="${escapeHtml(row.id)} — кандидат"`, `compose-${visualId(row.id)}-candidate`) : `<div class="not-modeled">${row.model.status === 'MODEL_ERROR' ? 'Ошибка модели' : 'Нет модели'}</div>`}</td>
         <td class="visual-cell">${comparisonVisual(visual, canvas, row.id, 'overlay')}</td>
         <td class="visual-cell">${comparisonVisual(visual, canvas, row.id, 'difference')}</td>
-        <td class="deviation ${deviation != null && deviation > DEVIATION_REASON_THRESHOLD_PCT ? 'over' : ''}">${metric(deviation, '%')}</td>
+        <td class="deviation ${deviation != null && deviation > reasonThreshold ? 'over' : ''}">${metric(deviation, '%')}</td>
         <td class="facts">${metricsMarkup(row.metrics)}</td>
         <td class="facts">${inkMarkup(row.metrics)}</td>
         <td class="facts">${rasterMarkup(row.metrics)}</td>
@@ -574,11 +579,11 @@ export function renderObservatoryHtml(report, visuals, canvas = 24) {
 
   const summary = report.summary;
   return `<!doctype html>
-<html lang="en">
+<html lang="ru">
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>${escapeHtml(report.title)}</title>
+<title>${escapeHtml(title)}</title>
 <style>
   :root{color-scheme:light dark;--bg:#f5f5f3;--panel:#fff;--ink:#171716;--muted:#6d6b66;--line:#d8d6d0;--soft:#ebe9e3;--red:#c72727;--red-bg:#fff0ef;--amber:#955d00;--amber-bg:#fff6dc;--green:#167447;--green-bg:#eaf8f0;--blue:#087e9b;--original:#df2b2b;--candidate:#008da8}
   :root[data-theme="dark"]{color-scheme:dark;--bg:#101110;--panel:#181918;--ink:#f1f0ed;--muted:#aaa8a1;--line:#343532;--soft:#222321;--red:#ff6961;--red-bg:#361b1b;--amber:#ffc25c;--amber-bg:#352b15;--green:#69d39d;--green-bg:#153126;--blue:#62cee5;--original:#ff625b;--candidate:#4fd4ec}
@@ -589,26 +594,26 @@ export function renderObservatoryHtml(report, visuals, canvas = 24) {
 </head>
 <body>
 <header>
-  <h1>${escapeHtml(report.title)}</h1>
+  <h1>${escapeHtml(title)}</h1>
   <div class="summary">
-    <span class="stat">${summary.glyphs} glyphs</span><span class="stat">${summary.variants} variants</span>
-    <span class="stat">${summary.modeled} modeled</span><span class="stat">${summary.notModeled} not modeled</span>
-    <span class="stat bad">${summary.fail} fail (${summary.candidateFail} candidate / ${summary.acceptedFail} accepted)</span><span class="stat">${summary.review} review</span>
-    <span class="stat bad">${summary.unexplained} unexplained &gt;3%</span>
+    <span class="stat">${summary.glyphs} глифов</span><span class="stat">${summary.variants} вариантов</span>
+    <span class="stat">${summary.modeled} с моделью</span><span class="stat">${summary.notModeled} без модели</span>
+    <span class="stat bad">${summary.fail} отказов (${summary.candidateFail} кандидатов / ${summary.acceptedFail} принятых)</span><span class="stat">${summary.review} требуют ревью</span>
+    <span class="stat bad">${summary.unexplained} без объяснения &gt;${reasonThreshold}%</span>
   </div>
   <div class="controls">
-    <input id="search" type="search" placeholder="glyph, variant, archetype" aria-label="Search"/>
-    <select id="verdict" aria-label="Verdict"><option value="">all verdicts</option><option>FAIL</option><option>REVIEW</option><option>NOT_MODELED</option><option>PASS</option></select>
-    <select id="model" aria-label="Model"><option value="">all model states</option><option>MODELED</option><option>NOT_MODELED</option><option>MODEL_ERROR</option></select>
-    <select id="variant" aria-label="Variant"><option value="">both variants</option><option>outline</option><option>filled</option></select>
-    <label><input id="problems" type="checkbox"/> problems only</label>
-    <button id="theme" type="button">theme: system</button>
+    <input id="search" type="search" placeholder="глиф, вариант, архетип" aria-label="Поиск"/>
+    <select id="verdict" aria-label="Результат"><option value="">все результаты</option><option>FAIL</option><option>REVIEW</option><option>NOT_MODELED</option><option>PASS</option></select>
+    <select id="model" aria-label="Модель"><option value="">все состояния модели</option><option>MODELED</option><option>NOT_MODELED</option><option>MODEL_ERROR</option></select>
+    <select id="variant" aria-label="Вариант"><option value="">оба варианта</option><option>outline</option><option>filled</option></select>
+    <label><input id="problems" type="checkbox"/> только проблемы</label>
+    <button id="theme" type="button">Тема: системная</button>
   </div>
-  <div class="legend">Rows are severity-first (red first). Original = historical hand for generated shipments, current shipment for hand/unmodelled. Deviation and target-size raster use binary centre-sampled occupancy, not alpha coverage. Target-size deviation is diagnostic; target topology is acceptance-gated. Topology is a separate adaptive vector-guided, multiphase oracle; unresolved confidence fails closed. Difference: <span class="bad">red is original-only</span>, <span style="color:var(--candidate)">cyan is candidate-only</span>. Missing anatomy is NOT MODELED and never reported as 0%.</div>
+  <div class="legend">Сначала показаны наиболее серьёзные нарушения. Исходник — сохранённый авторский мастер для генерируемой поставки и текущий SVG для остальных вариантов. Отклонение измерено бинарными отсчётами в центрах клеток, а не альфа-покрытием. Процент на целевом размере диагностический; топология участвует в приёмке. Адаптивная проверка топологии использует несколько растровых фаз; неопределённость не считается совпадением. На разнице <span class="bad">красным показан только исходник</span>, <span style="color:var(--candidate)">голубым — только кандидат</span>. Отсутствие анатомии имеет код NOT_MODELED, а не нулевое отклонение.</div>
 </header>
 <div class="table-wrap">
 <table>
-  <thead><tr><th>glyph / provenance</th><th>original</th><th>generated candidate</th><th>overlay</th><th>difference</th><th>deviation</th><th>boundary / topology</th><th>ink / centroid</th><th>diagnostic occupancy 16–48</th><th>reason &gt;3%</th></tr></thead>
+  <thead><tr><th>глиф / происхождение</th><th>исходник</th><th>кандидат</th><th>наложение</th><th>разница</th><th>отклонение</th><th>граница / топология</th><th>чернила / центроид</th><th>диагностический растр</th><th>пояснение &gt;${reasonThreshold}%</th></tr></thead>
   <tbody>${body}</tbody>
 </table>
 </div>
@@ -639,7 +644,7 @@ export function renderObservatoryHtml(report, visuals, canvas = 24) {
     const theme = themes[themeIndex];
     if (theme) document.documentElement.dataset.theme = theme;
     else delete document.documentElement.dataset.theme;
-    event.currentTarget.textContent = 'theme: ' + (theme || 'system');
+    event.currentTarget.textContent = 'Тема: ' + ({ light: 'светлая', dark: 'тёмная' }[theme] || 'системная');
   });
 })();
 </script>
