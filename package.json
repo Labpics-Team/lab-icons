@@ -100,10 +100,10 @@
     "marked": "9.1.6",
     "publint": "0.3.21",
     "rollup": "4.62.2",
-    "svgo": "4.0.2",
+    "svgo": "4.1.0",
     "typescript": "7.0.2",
     "vite": "8.1.4",
-    "vitest": "4.1.10",
+    "vitest": "4.1.11",
     "yaml": "2.9.0"
   },
   "license": "MIT",
