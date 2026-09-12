@@ -21,12 +21,50 @@ export const DEFAULT_MANDATORY_TRAIN = Object.freeze([
   'sun-low',
   'time',
 ]);
+export const REQUIRED_MOVABLE_MISSION_FAMILIES = Object.freeze(['earth', 'fire', 'reload']);
+export const NOVEL_CHALLENGE_TARGET_COUNT = 32;
+export const NOVEL_CHALLENGE_MAX_PER_STRATUM = 8;
+export const AUTHORING_DYNAMIC_SLOTS = Object.freeze(['boundedFeedbackPayload', 'briefPayload']);
+export const ENVELOPE_REQUIRED_FIELDS = Object.freeze([
+  'providerEndpoint',
+  'apiVersion',
+  'modelRevision',
+  'accountProjectRegion',
+  'safetySettings',
+  'orderedMessageFrame',
+  'responseSchema',
+  'toolSchemas',
+  'toolPermissions',
+  'toolChoice',
+  'reasoningMode',
+  'reasoningEffort',
+  'temperature',
+  'topP',
+  'seed',
+  'maxOutput',
+  'stopSequences',
+  'parallelToolPolicy',
+  'cachePolicy',
+  'sessionPolicy',
+  'retryPolicy',
+  'runtimeIdentity',
+  'dependencyLockDigest',
+]);
 
 const VARIANTS = Object.freeze(['outline', 'filled']);
 const SHA40 = /^[a-f0-9]{40}$/;
 const SHA64 = /^[a-f0-9]{64}$/;
 const SOURCE_STATES = new Set(['accepted', 'candidate', 'source-only']);
 const PART_CLASSES = Object.freeze(['single', 'pair', 'multi']);
+const MOTION_INTENT_KINDS = new Set(['movable', 'static-by-design', 'unsupported-discrete']);
+const FORBIDDEN_AUTHORING_ARTIFACT_IDS = Object.freeze([
+  /(^|\/)semantics\/catalog\.json$/i,
+  /(^|\/)src\/ir\/catalog\.generated\.ts$/i,
+  /(^|\/)dist\/index\.(?:js|d\.ts)$/i,
+  /(^|\/)package(?:-root)?(?:\.json|\/|$)/i,
+  /(^|\/)holdout(?:\/|$)/i,
+  /(^|\/)sealed(?:\/|$)/i,
+]);
 
 const asciiCompare = (left, right) => left < right ? -1 : left > right ? 1 : 0;
 const sha256 = (value) => createHash('sha256').update(value).digest('hex');
@@ -348,6 +386,411 @@ export function buildTrainManifestProjection(sealedManifest) {
     strata: stratumAggregates,
     families: trainFamilies,
   };
+}
+
+function assertExactFamilyUniverse(rows, expectedNames, label) {
+  if (!Array.isArray(rows)) throw new TypeError(`baseline-freeze: ${label} должен быть массивом`);
+  const actual = rows.map((row) => row?.familyId);
+  if (actual.some((name) => typeof name !== 'string' || name.length === 0)) {
+    throw new Error(`baseline-freeze: ${label} содержит строку без familyId`);
+  }
+  const duplicates = actual.filter((name, index) => actual.indexOf(name) !== index);
+  if (duplicates.length > 0) {
+    throw new Error(`baseline-freeze: ${label} содержит дубликат ${duplicates.sort(asciiCompare)[0]}`);
+  }
+  const actualSorted = [...actual].sort(asciiCompare);
+  const expectedSorted = [...expectedNames].sort(asciiCompare);
+  if (actualSorted.length !== expectedSorted.length
+      || actualSorted.some((name, index) => name !== expectedSorted[index])) {
+    throw new Error(`baseline-freeze: ${label} не замыкает exact family universe`);
+  }
+}
+
+/**
+ * Проверяет target-neutral motion-intent census до разработки новой геометрии.
+ * Здесь намеренно нет Lottie/SF/Lab Motion полей: baseline фиксирует только
+ * семантическую обязанность формы, а не будущую реализацию адаптера.
+ */
+export function validateMotionIntentCensus({ catalog, rows }) {
+  assertObject(catalog, 'catalog');
+  assertObject(catalog.icons, 'catalog.icons');
+  const names = Object.keys(catalog.icons).sort(asciiCompare);
+  if (names.length !== EXPECTED_ICON_NAMES) {
+    throw new Error(`baseline-freeze: motion census ожидал ${EXPECTED_ICON_NAMES} families`);
+  }
+  assertExactFamilyUniverse(rows, names, 'motion-intent census');
+
+  const staticWitnessDigests = new Set();
+  const normalized = rows.map((row) => {
+    assertObject(row, `motion-intent ${row?.familyId ?? '?'}`);
+    if (!MOTION_INTENT_KINDS.has(row.kind)) {
+      throw new Error(`baseline-freeze: ${row.familyId} имеет неизвестный motion kind=${String(row.kind)}`);
+    }
+    if (/(?:lottie|sf[- ]?symbols?|lab[- ]?motion)/i.test(JSON.stringify(row))) {
+      throw new Error(`baseline-freeze: ${row.familyId} motion intent зависит от target runtime`);
+    }
+
+    if (row.kind === 'movable') {
+      assertExactKeys(row, ['familyId', 'kind', 'parts'], `motion-intent ${row.familyId}`);
+      if (!Array.isArray(row.parts) || row.parts.length === 0) {
+        throw new Error(`baseline-freeze: ${row.familyId} movable intent не называет semantic parts`);
+      }
+      const partIds = new Set();
+      for (const part of row.parts) {
+        assertObject(part, `${row.familyId}.parts`);
+        assertExactKeys(part, ['partId', 'affordance', 'domain'], `${row.familyId}.parts`);
+        for (const field of ['partId', 'affordance', 'domain']) {
+          if (typeof part[field] !== 'string' || part[field].trim().length === 0) {
+            throw new Error(`baseline-freeze: ${row.familyId} movable part не имеет ${field}`);
+          }
+        }
+        if (partIds.has(part.partId)) {
+          throw new Error(`baseline-freeze: ${row.familyId} дублирует semantic part ${part.partId}`);
+        }
+        partIds.add(part.partId);
+      }
+      if (Object.hasOwn(row, 'witnessCode')) {
+        throw new Error(`baseline-freeze: ${row.familyId} movable intent не должен маскироваться static witness`);
+      }
+    } else {
+      assertExactKeys(
+        row,
+        ['familyId', 'kind', 'witnessCode', 'witnessDigest'],
+        `motion-intent ${row.familyId}`,
+      );
+      if (typeof row.witnessCode !== 'string' || row.witnessCode.trim().length === 0) {
+        throw new Error(`baseline-freeze: ${row.familyId} ${row.kind} требует независимый witnessCode`);
+      }
+      if (!SHA64.test(row.witnessDigest ?? '')) {
+        throw new Error(`baseline-freeze: ${row.familyId} ${row.kind} требует row-bound witnessDigest`);
+      }
+      if (staticWitnessDigests.has(row.witnessDigest)) {
+        throw new Error(`baseline-freeze: ${row.familyId} переиспользует static witness другого family`);
+      }
+      staticWitnessDigests.add(row.witnessDigest);
+      if (Array.isArray(row.parts) && row.parts.length > 0) {
+        throw new Error(`baseline-freeze: ${row.familyId} ${row.kind} не может одновременно заявлять movable parts`);
+      }
+    }
+    return canonicalize(row);
+  }).sort((left, right) => asciiCompare(left.familyId, right.familyId));
+
+  for (const familyId of REQUIRED_MOVABLE_MISSION_FAMILIES) {
+    const row = normalized.find((candidate) => candidate.familyId === familyId);
+    if (row?.kind !== 'movable') {
+      throw new Error(`baseline-freeze: mission family ${familyId} обязана сохранить movable semantic intent`);
+    }
+  }
+
+  return {
+    version: BASELINE_FREEZE_VERSION,
+    familyCount: normalized.length,
+    rows: normalized,
+    digest: canonicalDigest(normalized),
+  };
+}
+
+function assertAuthoringArtifactId(id) {
+  if (typeof id !== 'string' || id.length === 0) {
+    throw new TypeError('baseline-freeze: authoring artifact id обязателен');
+  }
+  const normalized = id.replaceAll('\\', '/').replace(/^\.\//, '');
+  if (FORBIDDEN_AUTHORING_ARTIFACT_IDS.some((pattern) => pattern.test(normalized))) {
+    throw new Error(`baseline-freeze: ${id} запрещён в corpus-free authoring projection`);
+  }
+  return normalized;
+}
+
+/**
+ * Материализует ровно ту поверхность, которую можно монтировать fresh authoring
+ * lineage. Holdout membership остаётся только у verifier; train registry не
+ * содержит reference digests/allocation, а каждый общий contract повторно
+ * проходит leak scanner перед выдачей projection receipt.
+ */
+export function buildCorpusFreeAuthoringProjection({
+  sealedManifest,
+  signals,
+  motionCensus,
+  contracts = [],
+}) {
+  assertObject(sealedManifest, 'sealedManifest');
+  assertObject(signals, 'signals');
+  assertObject(motionCensus, 'motionCensus');
+  assertExactKeys(motionCensus, ['version', 'familyCount', 'rows', 'digest'], 'motionCensus');
+  if (motionCensus.version !== BASELINE_FREEZE_VERSION
+      || motionCensus.familyCount !== EXPECTED_ICON_NAMES
+      || !Array.isArray(motionCensus.rows)
+      || motionCensus.rows.length !== EXPECTED_ICON_NAMES
+      || motionCensus.digest !== canonicalDigest(motionCensus.rows)) {
+    throw new Error('baseline-freeze: motionCensus не является полным frozen census');
+  }
+  if (!Array.isArray(contracts)) throw new TypeError('baseline-freeze: contracts должен быть массивом');
+  const train = buildTrainManifestProjection(sealedManifest);
+  const trainIds = new Set(train.families.map((family) => family.id));
+  const trainMotionRows = motionCensus.rows
+    .filter((row) => trainIds.has(row.familyId))
+    .map(canonicalize)
+    .sort((left, right) => asciiCompare(left.familyId, right.familyId));
+  if (trainMotionRows.length !== trainIds.size
+      || new Set(trainMotionRows.map((row) => row.familyId)).size !== trainIds.size) {
+    throw new Error('baseline-freeze: motionCensus не покрывает ровно train family universe');
+  }
+  const trainMotion = {
+    familyCount: trainMotionRows.length,
+    rows: trainMotionRows,
+    digest: canonicalDigest(trainMotionRows),
+  };
+  const normalizedContracts = contracts.map((artifact) => {
+    assertObject(artifact, 'authoring contract');
+    const id = assertAuthoringArtifactId(artifact.id);
+    const content = Buffer.isBuffer(artifact.content)
+      ? artifact.content.toString('utf8')
+      : String(artifact.content ?? '');
+    return { id, content, sha256: sha256(Buffer.from(content)) };
+  }).sort((left, right) => asciiCompare(left.id, right.id));
+
+  const mountedArtifacts = [
+    { id: 'train-registry.json', content: JSON.stringify(train) },
+    { id: 'train-motion-intent.json', content: JSON.stringify(trainMotion) },
+    ...normalizedContracts.map(({ id, content }) => ({ id, content })),
+  ];
+  const findings = scanHoldoutLeakage({ artifacts: mountedArtifacts, signals });
+  if (findings.length > 0) {
+    const first = findings[0];
+    throw new Error(`baseline-freeze: authoring projection leak ${first.artifact}/${first.kind}`);
+  }
+
+  return {
+    version: BASELINE_FREEZE_VERSION,
+    sourceFenceDigest: sealedManifest.sourceFenceDigest,
+    registry: train,
+    motion: trainMotion,
+    contracts: normalizedContracts.map(({ id, sha256: digest }) => ({ id, sha256: digest })),
+    projectionDigest: canonicalDigest({
+      sourceFenceDigest: sealedManifest.sourceFenceDigest,
+      registry: train,
+      motion: trainMotion,
+      contracts: normalizedContracts.map(({ id, sha256: digest }) => ({ id, sha256: digest })),
+    }),
+  };
+}
+
+function assertNonEmptyString(value, where) {
+  if (typeof value !== 'string' || value.trim().length === 0) {
+    throw new Error(`baseline-freeze: ${where} обязателен`);
+  }
+  return value;
+}
+
+function assertExactKeys(value, expected, where) {
+  assertObject(value, where);
+  const actual = Object.keys(value).sort(asciiCompare);
+  const wanted = [...expected].sort(asciiCompare);
+  if (actual.length !== wanted.length || actual.some((key, index) => key !== wanted[index])) {
+    throw new Error(`baseline-freeze: ${where} имеет неполный или скрытый набор полей`);
+  }
+}
+
+/**
+ * Policy существует до чтения upstream identifiers. Она фиксирует источник
+ * semantic vocabulary, классификацию и квоты, но принципиально не содержит
+ * выбранных brief IDs или geometry.
+ */
+export function validateNovelChallengePolicy(policy) {
+  assertObject(policy, 'novel-challenge-policy');
+  if (Object.hasOwn(policy, 'selectedBriefs') || Object.hasOwn(policy, 'eligibleIds')) {
+    throw new Error('baseline-freeze: pre-freeze novel policy не может содержать выбранные/eligible IDs');
+  }
+  assertExactKeys(
+    policy,
+    ['upstream', 'equivalence', 'semanticStrata', 'quota', 'selection'],
+    'novel-challenge-policy',
+  );
+  assertExactKeys(
+    policy.upstream,
+    ['repository', 'commit', 'identifiersPath', 'identifiersOnly', 'geometryAllowed', 'codepointValuesAllowed'],
+    'novel-challenge-policy.upstream',
+  );
+  if (policy.upstream.repository !== 'google/material-design-icons') {
+    throw new Error('baseline-freeze: novel challenge использует неизвестный semantic vocabulary owner');
+  }
+  if (!SHA40.test(policy.upstream.commit ?? '')) {
+    throw new Error('baseline-freeze: novel challenge upstream commit должен быть exact SHA');
+  }
+  if (policy.upstream.identifiersPath !== 'font/MaterialIconsOutlined-Regular.codepoints') {
+    throw new Error('baseline-freeze: novel challenge должен читать только pinned identifiers file');
+  }
+  if (policy.upstream.identifiersOnly !== true || policy.upstream.geometryAllowed !== false
+      || policy.upstream.codepointValuesAllowed !== false) {
+    throw new Error('baseline-freeze: novel challenge upstream boundary допускает geometry/codepoint leakage');
+  }
+
+  assertExactKeys(
+    policy.equivalence,
+    ['ruleVersion', 'reasonCodes', 'forbiddenInputs'],
+    'novel-challenge-policy.equivalence',
+  );
+  assertNonEmptyString(policy.equivalence.ruleVersion, 'equivalence.ruleVersion');
+  if (!Array.isArray(policy.equivalence.reasonCodes) || policy.equivalence.reasonCodes.length === 0
+      || policy.equivalence.reasonCodes.some((code) => typeof code !== 'string' || code.length === 0)) {
+    throw new Error('baseline-freeze: equivalence reasonCodes обязаны быть заморожены');
+  }
+  const requiredForbiddenInputs = ['grammar', 'recipe-coverage', 'benchmark-score', 'model-trace', 'difficulty'];
+  if (!Array.isArray(policy.equivalence.forbiddenInputs)
+      || requiredForbiddenInputs.some((item) => !policy.equivalence.forbiddenInputs.includes(item))) {
+    throw new Error('baseline-freeze: equivalence classifier не закрывает implementability/difficulty inputs');
+  }
+
+  if (!Array.isArray(policy.semanticStrata) || policy.semanticStrata.length === 0) {
+    throw new Error('baseline-freeze: semantic challenge strata обязательны');
+  }
+  const stratumIds = policy.semanticStrata.map((row) => assertNonEmptyString(row?.id, 'semantic stratum id'));
+  if (new Set(stratumIds).size !== stratumIds.length) {
+    throw new Error('baseline-freeze: semantic challenge strata имеют duplicate id');
+  }
+  for (const row of policy.semanticStrata) {
+    assertExactKeys(row, ['id', 'assignmentRule', 'goldenVectors'], `semantic stratum ${row?.id ?? '?'}`);
+    assertNonEmptyString(row.assignmentRule, `${row.id}.assignmentRule`);
+    if (!Array.isArray(row.goldenVectors) || row.goldenVectors.length === 0) {
+      throw new Error(`baseline-freeze: ${row.id} не имеет frozen golden vectors`);
+    }
+  }
+
+  assertExactKeys(
+    policy.quota,
+    ['algorithm', 'targetCount', 'maxPerStratum', 'tieBreak'],
+    'novel-challenge-policy.quota',
+  );
+  if (policy.quota.algorithm !== 'one-per-nonempty+capped-hamilton-v1'
+      || policy.quota.targetCount !== NOVEL_CHALLENGE_TARGET_COUNT
+      || policy.quota.maxPerStratum !== NOVEL_CHALLENGE_MAX_PER_STRATUM
+      || policy.quota.tieBreak !== 'stable-stratum-id') {
+    throw new Error('baseline-freeze: novel challenge quota algorithm не совпадает с r10');
+  }
+  assertExactKeys(
+    policy.selection,
+    ['entropy', 'seed', 'order'],
+    'novel-challenge-policy.selection',
+  );
+  if (policy.selection.entropy !== 'nist-beacon-v2-first-valid-after-author-bench'
+      || policy.selection.seed !== 'sha256(policyDigest||freezeHead||pulse.outputValue)'
+      || policy.selection.order !== 'sha256(seed||stratum||briefId)') {
+    throw new Error('baseline-freeze: novel challenge selection rule не совпадает с r10');
+  }
+  return { policy: canonicalize(policy), digest: canonicalDigest(policy) };
+}
+
+/**
+ * Замораживает форму generation envelope. Значения provider/model появятся
+ * перед AUTHOR-BENCH, но их нельзя дополнить новым скрытым полем после brief.
+ */
+export function validateGenerationEnvelopeProtocol(protocol) {
+  assertExactKeys(
+    protocol,
+    ['immutableFields', 'dynamicSlots', 'providerDefaults', 'sessionState', 'retry'],
+    'generation-envelope protocol',
+  );
+  if (!Array.isArray(protocol.immutableFields)) {
+    throw new Error('baseline-freeze: generation envelope immutableFields обязателен');
+  }
+  const fields = [...protocol.immutableFields].sort(asciiCompare);
+  const expected = [...ENVELOPE_REQUIRED_FIELDS].sort(asciiCompare);
+  if (fields.length !== expected.length || fields.some((field, index) => field !== expected[index])) {
+    throw new Error('baseline-freeze: generation envelope не замораживает полный required field set');
+  }
+  const dynamicSlots = [...(protocol.dynamicSlots ?? [])].sort(asciiCompare);
+  const expectedSlots = [...AUTHORING_DYNAMIC_SLOTS].sort(asciiCompare);
+  if (dynamicSlots.length !== expectedSlots.length
+      || dynamicSlots.some((slot, index) => slot !== expectedSlots[index])) {
+    throw new Error('baseline-freeze: generation envelope имеет скрытый dynamic slot');
+  }
+  if (protocol.providerDefaults !== 'explicit-value-or-unsupported') {
+    throw new Error('baseline-freeze: provider defaults должны быть сериализованы явно');
+  }
+  assertExactKeys(
+    protocol.retry,
+    [
+      'preDispatchFailureConsumesAttempt',
+      'uncertainDispatchConsumesAttempt',
+      'lostResponseConsumesAttempt',
+      'byteIdenticalResendIsSameAttempt',
+    ],
+    'generation-envelope.retry',
+  );
+  if (protocol.retry.preDispatchFailureConsumesAttempt !== false
+      || protocol.retry.uncertainDispatchConsumesAttempt !== true
+      || protocol.retry.lostResponseConsumesAttempt !== true
+      || protocol.retry.byteIdenticalResendIsSameAttempt !== 'provider-idempotency-or-no-execution-proof-only') {
+    throw new Error('baseline-freeze: generation envelope retry semantics ослабляют attempt budget');
+  }
+  if (protocol.sessionState !== 'empty-or-byte-bound') {
+    throw new Error('baseline-freeze: generation envelope допускает hidden session/prefill state');
+  }
+  return { protocol: canonicalize(protocol), digest: canonicalDigest(protocol) };
+}
+
+/**
+ * Протокол durable dispatch ledger отделяет автора candidate от provider
+ * execution identity. Он не задаёт конкретное хранилище, но не позволяет
+ * выбрать его позже без owner/readback/retention и negative capability proof.
+ */
+export function validateRunLedgerProtocol(protocol) {
+  assertExactKeys(
+    protocol,
+    [
+      'sinkType',
+      'owner',
+      'retention',
+      'readback',
+      'canonicalRunRule',
+      'dispatchOrder',
+      'sequence',
+      'authorCapabilities',
+      'verifierCapabilities',
+      'hardInvalidations',
+    ],
+    'run-ledger protocol',
+  );
+  for (const field of ['sinkType', 'owner', 'retention', 'readback']) {
+    assertNonEmptyString(protocol[field], `run-ledger.${field}`);
+  }
+  if (protocol.canonicalRunRule !== 'first-valid-run-start-per-freeze-identity') {
+    throw new Error('baseline-freeze: run-ledger допускает cherry-pick canonical run');
+  }
+  if (protocol.dispatchOrder !== 'durable-intent-before-provider-dispatch') {
+    throw new Error('baseline-freeze: run-ledger не гарантирует pre-dispatch intent');
+  }
+  if (protocol.sequence !== 'monotonic-contiguous') {
+    throw new Error('baseline-freeze: run-ledger не требует contiguous sequence');
+  }
+  assertObject(protocol.authorCapabilities, 'run-ledger.authorCapabilities');
+  assertExactKeys(protocol.authorCapabilities, ['appendIntent', 'directProviderCredential', 'directProviderEgress', 'delete', 'update'], 'run-ledger.authorCapabilities');
+  if (protocol.authorCapabilities.update !== false
+      || protocol.authorCapabilities.delete !== false
+      || protocol.authorCapabilities.directProviderCredential !== false
+      || protocol.authorCapabilities.directProviderEgress !== false
+      || protocol.authorCapabilities.appendIntent !== false) {
+    throw new Error('baseline-freeze: benchmark author имеет недопустимую ledger/provider capability');
+  }
+  assertExactKeys(
+    protocol.verifierCapabilities,
+    ['appendIntent', 'providerCredential', 'providerEgress'],
+    'run-ledger.verifierCapabilities',
+  );
+  if (protocol.verifierCapabilities.appendIntent !== true
+      || protocol.verifierCapabilities.providerCredential !== true
+      || protocol.verifierCapabilities.providerEgress !== true) {
+    throw new Error('baseline-freeze: verifier не владеет dispatch boundary');
+  }
+  if (!Array.isArray(protocol.hardInvalidations)) {
+    throw new Error('baseline-freeze: run-ledger hardInvalidations обязателен');
+  }
+  for (const required of ['gap', 'unlogged-execution', 'extra-execution', 'second-canonical-run-after-dispatch']) {
+    if (!protocol.hardInvalidations.includes(required)) {
+      throw new Error(`baseline-freeze: run-ledger не инвалидирует ${required}`);
+    }
+  }
+  return { protocol: canonicalize(protocol), digest: canonicalDigest(protocol) };
 }
 
 function normalizedGeometryDigest(pathData) {

@@ -1,15 +1,23 @@
+import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
   DEFAULT_MANDATORY_TRAIN,
+  ENVELOPE_REQUIRED_FIELDS,
+  REQUIRED_MOVABLE_MISSION_FAMILIES,
   RETROSPECTIVE_HOLDOUT_SIZE,
   buildHoldoutLeakSignals,
+  buildCorpusFreeAuthoringProjection,
   buildRetrospectivePartition,
   buildSealedCorpusManifest,
   buildTrainManifestProjection,
   scanHoldoutLeakage,
   structuralRows,
+  validateGenerationEnvelopeProtocol,
+  validateMotionIntentCensus,
+  validateNovelChallengePolicy,
+  validateRunLedgerProtocol,
 } from '../scripts/lib/baseline-freeze.js';
 import {
   EXPECTED_ICON_NAMES,
@@ -34,6 +42,25 @@ function baseline() {
   const sealed = buildSealedCorpusManifest({ catalog, axisQuality, sourceFence, partition });
   const projection = buildTrainManifestProjection(sealed);
   return { partition, sealed, projection };
+}
+
+function motionRows() {
+  const names = Object.keys(catalog.icons).sort();
+  const rows = names.map((familyId) => ({
+    familyId,
+    kind: 'static-by-design',
+    witnessCode: 'semantic-static-review',
+    witnessDigest: createHash('sha256').update(`static-witness\0${familyId}`).digest('hex'),
+  }));
+  for (const familyId of REQUIRED_MOVABLE_MISSION_FAMILIES) {
+    const index = rows.findIndex((row) => row.familyId === familyId);
+    rows[index] = {
+      familyId,
+      kind: 'movable',
+      parts: [{ partId: 'primary', affordance: 'semantic-motion', domain: 'target-neutral-parameter' }],
+    };
+  }
+  return rows;
 }
 
 describe('BASELINE-08 freeze boundary', () => {
@@ -190,5 +217,221 @@ describe('BASELINE-08 freeze boundary', () => {
       sourceFence: driftedFence,
       partition: first,
     })).toThrow(/другому source fence/);
+  });
+
+  it('corpus-free projection допускает только train registry + leak-clean contracts', () => {
+    const { partition, sealed } = baseline();
+    const signals = buildHoldoutLeakSignals({ root, catalog, partition });
+    const motionCensus = validateMotionIntentCensus({ catalog, rows: motionRows() });
+    const projection = buildCorpusFreeAuthoringProjection({
+      sealedManifest: sealed,
+      signals,
+      motionCensus,
+      contracts: [
+        { id: 'contracts/design-spec.schema.json', content: '{"type":"object","title":"DesignSpec"}' },
+        { id: 'contracts/negative-space.md', content: 'Counter and aperture are first-class constraints.' },
+      ],
+    });
+    expect(projection.registry.families).toHaveLength(EXPECTED_ICON_NAMES - RETROSPECTIVE_HOLDOUT_SIZE);
+    expect(projection.motion.rows).toHaveLength(EXPECTED_ICON_NAMES - RETROSPECTIVE_HOLDOUT_SIZE);
+    expect(projection.motion.rows.map((row) => row.familyId).sort()).toEqual(partition.train);
+    expect(projection.motion.rows.some((row) => partition.holdout.includes(row.familyId))).toBe(false);
+    expect(projection.contracts).toHaveLength(2);
+    expect(projection.projectionDigest).toMatch(/^[a-f0-9]{64}$/);
+
+    expect(() => buildCorpusFreeAuthoringProjection({
+      sealedManifest: sealed,
+      signals,
+      motionCensus,
+      contracts: [{ id: 'semantics/catalog.json', content: '{}' }],
+    })).toThrow(/запрещён/);
+
+    const holdoutName = partition.holdout[0];
+    expect(() => buildCorpusFreeAuthoringProjection({
+      sealedManifest: sealed,
+      signals,
+      motionCensus,
+      contracts: [{ id: 'contracts/briefs.json', content: JSON.stringify({ target: holdoutName }) }],
+    })).toThrow(/projection leak/);
+
+    expect(() => buildCorpusFreeAuthoringProjection({
+      sealedManifest: sealed,
+      signals,
+      contracts: [],
+    })).toThrow(/motionCensus/);
+  });
+
+  it('motion-intent census требует ровно 238 target-neutral semantic rows', () => {
+    const rows = motionRows();
+    const census = validateMotionIntentCensus({ catalog, rows });
+    expect(census.familyCount).toBe(EXPECTED_ICON_NAMES);
+    expect(census.rows).toHaveLength(EXPECTED_ICON_NAMES);
+    expect(census.digest).toMatch(/^[a-f0-9]{64}$/);
+
+    const missing = rows.slice(1);
+    expect(() => validateMotionIntentCensus({ catalog, rows: missing }))
+      .toThrow(/exact family universe/);
+
+    const targetBound = structuredClone(rows);
+    const targetBoundIndex = targetBound.findIndex((row) => !REQUIRED_MOVABLE_MISSION_FAMILIES.includes(row.familyId));
+    targetBound[targetBoundIndex] = {
+      familyId: targetBound[targetBoundIndex].familyId,
+      kind: 'movable',
+      parts: [{ partId: 'body', affordance: 'rotate', domain: 'lottie layer' }],
+    };
+    expect(() => validateMotionIntentCensus({ catalog, rows: targetBound }))
+      .toThrow(/target runtime/);
+
+    const movable = structuredClone(rows);
+    const movableIndex = movable.findIndex((row) => !REQUIRED_MOVABLE_MISSION_FAMILIES.includes(row.familyId));
+    movable[movableIndex] = {
+      familyId: movable[movableIndex].familyId,
+      kind: 'movable',
+      parts: [{ partId: 'body', affordance: 'rotate', domain: 'cyclic-angle' }],
+    };
+    expect(() => validateMotionIntentCensus({ catalog, rows: movable })).not.toThrow();
+
+    const vacuous = structuredClone(rows);
+    const staticRows = vacuous.filter((row) => row.kind !== 'movable');
+    staticRows[1].witnessDigest = staticRows[0].witnessDigest;
+    expect(() => validateMotionIntentCensus({ catalog, rows: vacuous }))
+      .toThrow(/переиспользует static witness/);
+
+    const lostMissionIntent = structuredClone(rows);
+    const reloadIndex = lostMissionIntent.findIndex((row) => row.familyId === 'reload');
+    lostMissionIntent[reloadIndex] = {
+      familyId: 'reload',
+      kind: 'static-by-design',
+      witnessCode: 'incorrect-static-reclassification',
+      witnessDigest: createHash('sha256').update('incorrect-static-reload').digest('hex'),
+    };
+    expect(() => validateMotionIntentCensus({ catalog, rows: lostMissionIntent }))
+      .toThrow(/mission family reload/);
+
+    const hiddenRowChannel = structuredClone(rows);
+    const hiddenRowIndex = hiddenRowChannel.findIndex((row) => row.kind !== 'movable');
+    hiddenRowChannel[hiddenRowIndex].postHocHint = 'convenient later override';
+    expect(() => validateMotionIntentCensus({ catalog, rows: hiddenRowChannel }))
+      .toThrow(/скрытый набор полей/);
+
+    const hiddenPartChannel = structuredClone(rows);
+    const hiddenPartIndex = hiddenPartChannel.findIndex((row) => row.kind === 'movable');
+    hiddenPartChannel[hiddenPartIndex].parts[0].postHocHint = 'convenient later override';
+    expect(() => validateMotionIntentCensus({ catalog, rows: hiddenPartChannel }))
+      .toThrow(/скрытый набор полей/);
+  });
+
+  it('prospective policy замораживает semantics/quota/entropy до чтения candidate IDs', () => {
+    const policy = {
+      upstream: {
+        repository: 'google/material-design-icons',
+        commit: 'd'.repeat(40),
+        identifiersPath: 'font/MaterialIconsOutlined-Regular.codepoints',
+        identifiersOnly: true,
+        geometryAllowed: false,
+        codepointValuesAllowed: false,
+      },
+      equivalence: {
+        ruleVersion: 'semantic-equivalence-v1',
+        reasonCodes: ['same-referent-action-state'],
+        forbiddenInputs: ['grammar', 'recipe-coverage', 'benchmark-score', 'model-trace', 'difficulty'],
+      },
+      semanticStrata: [
+        { id: 'action', assignmentRule: 'action-before-state', goldenVectors: ['refresh=>action'] },
+        { id: 'referent', assignmentRule: 'referent-fallback', goldenVectors: ['pet=>referent'] },
+      ],
+      quota: {
+        algorithm: 'one-per-nonempty+capped-hamilton-v1',
+        targetCount: 32,
+        maxPerStratum: 8,
+        tieBreak: 'stable-stratum-id',
+      },
+      selection: {
+        entropy: 'nist-beacon-v2-first-valid-after-author-bench',
+        seed: 'sha256(policyDigest||freezeHead||pulse.outputValue)',
+        order: 'sha256(seed||stratum||briefId)',
+      },
+    };
+    expect(validateNovelChallengePolicy(policy).digest).toMatch(/^[a-f0-9]{64}$/);
+    expect(() => validateNovelChallengePolicy({ ...policy, selectedBriefs: ['convenient-target'] }))
+      .toThrow(/не может содержать/);
+    expect(() => validateNovelChallengePolicy({
+      ...policy,
+      equivalence: { ...policy.equivalence, forbiddenInputs: ['benchmark-score'] },
+    })).toThrow(/не закрывает implementability/);
+    expect(() => validateNovelChallengePolicy({ ...policy, postHocHint: 'prefer easy targets' }))
+      .toThrow(/скрытый набор полей/);
+    expect(() => validateNovelChallengePolicy({
+      ...policy,
+      quota: { ...policy.quota, postHocHint: 'rebalance after seeing pool' },
+    })).toThrow(/скрытый набор полей/);
+  });
+
+  it('generation envelope и durable ledger закрывают скрытые попытки', () => {
+    const envelope = {
+      immutableFields: ENVELOPE_REQUIRED_FIELDS,
+      dynamicSlots: ['briefPayload', 'boundedFeedbackPayload'],
+      providerDefaults: 'explicit-value-or-unsupported',
+      sessionState: 'empty-or-byte-bound',
+      retry: {
+        preDispatchFailureConsumesAttempt: false,
+        uncertainDispatchConsumesAttempt: true,
+        lostResponseConsumesAttempt: true,
+        byteIdenticalResendIsSameAttempt: 'provider-idempotency-or-no-execution-proof-only',
+      },
+    };
+    expect(validateGenerationEnvelopeProtocol(envelope).digest).toMatch(/^[a-f0-9]{64}$/);
+    expect(() => validateGenerationEnvelopeProtocol({
+      ...envelope,
+      dynamicSlots: [...envelope.dynamicSlots, 'hiddenSystemPrompt'],
+    })).toThrow(/скрытый dynamic slot/);
+    expect(() => validateGenerationEnvelopeProtocol({
+      ...envelope,
+      retry: { ...envelope.retry, uncertainDispatchConsumesAttempt: false },
+    })).toThrow(/attempt budget/);
+    expect(() => validateGenerationEnvelopeProtocol({ ...envelope, postHocHint: 'hidden prefill' }))
+      .toThrow(/скрытый набор полей/);
+    expect(() => validateGenerationEnvelopeProtocol({
+      ...envelope,
+      retry: { ...envelope.retry, postHocHint: 'free retry' },
+    })).toThrow(/скрытый набор полей/);
+
+    const ledger = {
+      sinkType: 'trusted-append-only-store',
+      owner: 'verifier',
+      retention: 'through-r10-terminal-plus-audit-window',
+      readback: 'identity+contiguous-sequence+provider-outcome',
+      canonicalRunRule: 'first-valid-run-start-per-freeze-identity',
+      dispatchOrder: 'durable-intent-before-provider-dispatch',
+      sequence: 'monotonic-contiguous',
+      authorCapabilities: {
+        appendIntent: false,
+        directProviderCredential: false,
+        directProviderEgress: false,
+        delete: false,
+        update: false,
+      },
+      verifierCapabilities: {
+        appendIntent: true,
+        providerCredential: true,
+        providerEgress: true,
+      },
+      hardInvalidations: ['gap', 'unlogged-execution', 'extra-execution', 'second-canonical-run-after-dispatch'],
+    };
+    expect(validateRunLedgerProtocol(ledger).digest).toMatch(/^[a-f0-9]{64}$/);
+    expect(() => validateRunLedgerProtocol({
+      ...ledger,
+      authorCapabilities: { ...ledger.authorCapabilities, directProviderEgress: true },
+    })).toThrow(/недопустимую ledger\/provider capability/);
+    expect(() => validateRunLedgerProtocol({
+      ...ledger,
+      hardInvalidations: ledger.hardInvalidations.filter((item) => item !== 'extra-execution'),
+    })).toThrow(/extra-execution/);
+    expect(() => validateRunLedgerProtocol({ ...ledger, postHocHint: 'alternate canonical run' }))
+      .toThrow(/скрытый набор полей/);
+    expect(() => validateRunLedgerProtocol({
+      ...ledger,
+      verifierCapabilities: { ...ledger.verifierCapabilities, rewriteOutcome: true },
+    })).toThrow(/скрытый набор полей/);
   });
 });
