@@ -4,6 +4,7 @@ import {
   GLYPH_OPSZ_RANGE,
   GLYPH_OPERATOR_TOKENS,
   GLYPH_RASTER_POLICY,
+  buildConstructivePrimitive,
   buildDirectionalArrow,
   buildDirectionalChevron,
   buildMusicalNote,
@@ -82,6 +83,28 @@ function expectCanonicalPartBounds(result) {
     }
   }
 }
+
+describe('конструктивные примитивы authoring grammar', () => {
+  it('шесть primitive laws сериализуются с канонической topology и точным bbox', () => {
+    const cases = [
+      { kind: 'circle', center: { x: 0.5, y: 0.5 }, radius: 0.2 },
+      { kind: 'ellipse', center: { x: 0.5, y: 0.5 }, rx: 0.22, ry: 0.12, rotation: 25 },
+      { kind: 'line', from: { x: 0.2, y: 0.3 }, to: { x: 0.8, y: 0.7 } },
+      { kind: 'arc', center: { x: 0.5, y: 0.5 }, radius: 0.25, startAngle: 15, endAngle: 220, direction: 'cw' },
+      { kind: 'arc', center: { x: 0.5, y: 0.5 }, radius: 0.25, startAngle: 15, endAngle: 220, direction: 'ccw' },
+      { kind: 'capsule', from: { x: 0.3, y: 0.4 }, to: { x: 0.7, y: 0.6 }, radius: 0.08 },
+      { kind: 'rect', center: { x: 0.5, y: 0.5 }, width: 0.6, height: 0.4, cornerRadius: 0.08 },
+    ];
+    for (const input of cases) {
+      const primitive = buildConstructivePrimitive(input);
+      expect(parsePathData(primitive.geometry.d).map(({ cmd }) => cmd).join('')).toBe(primitive.topologySignature);
+      const actual = pathBBox(primitive.geometry.d);
+      for (const key of ['minX', 'minY', 'maxX', 'maxY']) {
+        expect(Math.abs(primitive.bbox[key] - actual[key]), `${input.kind}.${key}`).toBeLessThanOrEqual(1e-6);
+      }
+    }
+  });
+});
 
 describe('оптический профиль', () => {
   it('задаёт реальный raster minimum, а не масштабирует всю иконку', () => {
