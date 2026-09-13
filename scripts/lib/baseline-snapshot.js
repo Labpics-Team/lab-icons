@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { execFileSync, spawnSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
-import { isAbsolute, relative, resolve } from 'node:path';
+import { existsSync, readFileSync, realpathSync } from 'node:fs';
+import { dirname, isAbsolute, relative, resolve, sep } from 'node:path';
 
 import {
   EXPECTED_ICON_NAMES,
@@ -62,9 +62,11 @@ function variantKey(familyId, variant) {
   return `${familyId}/${variant}`;
 }
 
-function parseDebtKey(key, knownVariants, label) {
+function parseDebtKey(key, knownVariants, label, expectedSegments) {
   const parts = key.split('/');
-  if (parts.length < 2) throw new Error(`baseline-snapshot: malformed ${label} key ${key}`);
+  if (parts.length !== expectedSegments) {
+    throw new Error(`baseline-snapshot: malformed ${label} key ${key}`);
+  }
   const base = parts.slice(0, 2).join('/');
   if (!knownVariants.has(base)) throw new Error(`baseline-snapshot: ${label} references unknown variant ${base}`);
   return parts;
@@ -200,11 +202,11 @@ export function buildBaselineSnapshot({
     throw new Error(`baseline-snapshot: expected ${EXPECTED_SOURCE_VARIANTS} variants`);
   }
   const knownVariants = new Set(rows.map((row) => variantKey(row.familyId, row.variant)));
-  for (const key of candidateSet) parseDebtKey(key, knownVariants, 'candidate');
-  for (const key of Object.keys(quarantined)) parseDebtKey(key, knownVariants, 'quarantine');
+  for (const key of candidateSet) parseDebtKey(key, knownVariants, 'candidate', 2);
+  for (const key of Object.keys(quarantined)) parseDebtKey(key, knownVariants, 'quarantine', 2);
   for (const key of Object.keys(disabledAxes)) {
-    const parts = parseDebtKey(key, knownVariants, 'axis debt');
-    if (parts.length !== 3 || !Object.hasOwn(catalog.axes ?? {}, parts[2])) {
+    const parts = parseDebtKey(key, knownVariants, 'axis debt', 3);
+    if (!Object.hasOwn(catalog.axes ?? {}, parts[2])) {
       throw new Error(`baseline-snapshot: invalid axis debt ${key}`);
     }
   }
@@ -279,15 +281,34 @@ export function buildToolIdentity(toolRoot) {
   };
 }
 
+function isPathInside(base, candidate) {
+  const pathFromBase = relative(base, candidate);
+  return pathFromBase === ''
+    || (!pathFromBase.startsWith(`..${sep}`)
+      && pathFromBase !== '..'
+      && !isAbsolute(pathFromBase));
+}
+
+function nearestExistingAncestor(path) {
+  let current = resolve(path);
+  while (!existsSync(current)) {
+    const parent = dirname(current);
+    if (parent === current) {
+      throw new Error(`baseline-freeze: cannot resolve output parent ${path}`);
+    }
+    current = parent;
+  }
+  return current;
+}
+
 export function assertOutputOutsideSource({ output, sourceRoot }) {
-  const source = resolve(sourceRoot);
+  const source = realpathSync(resolve(sourceRoot));
   const target = resolve(output);
-  const pathFromSource = relative(source, target);
-  const insideSource = pathFromSource === ''
-    || (!pathFromSource.startsWith(`..${process.platform === 'win32' ? '\\' : '/'}`)
-      && pathFromSource !== '..'
-      && !isAbsolute(pathFromSource));
-  if (insideSource) {
+  const existingParent = nearestExistingAncestor(dirname(target));
+  const resolvedParent = realpathSync(existingParent);
+  const resolvedTarget = existsSync(target) ? realpathSync(target) : null;
+  if (isPathInside(source, resolvedParent)
+      || (resolvedTarget != null && isPathInside(source, resolvedTarget))) {
     throw new Error('baseline-freeze: output must stay outside the frozen source checkout');
   }
 }

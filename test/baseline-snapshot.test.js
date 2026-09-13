@@ -1,4 +1,12 @@
-import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  cpSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -108,6 +116,25 @@ describe('BASELINE-08 public full-corpus snapshot', () => {
     expect(() => snapshot(fixture)).toThrow(/238 families/);
   });
 
+  it('отвергает debt keys с лишними сегментами для каждого registry', () => {
+    const catalog = JSON.parse(readFileSync(join(root, 'semantics', 'catalog.json'), 'utf8').replace(/^\uFEFF+/, ''));
+    const key = `${Object.keys(catalog.icons)[0]}/outline`;
+    const cases = [
+      ['candidate-variants.json', (value) => value.variants.push(`${key}/extra`), /malformed candidate key/],
+      ['model-quality.json', (value) => { value.quarantined[`${key}/extra`] = {}; }, /malformed quarantine key/],
+      ['axis-quality.json', (value) => { value.disabled[`${key}/weight/extra`] = {}; }, /malformed axis debt key/],
+    ];
+
+    for (const [file, mutate, error] of cases) {
+      const fixture = fixtureRoot();
+      const path = join(fixture, 'semantics', file);
+      const value = JSON.parse(readFileSync(path, 'utf8').replace(/^\uFEFF+/, ''));
+      mutate(value);
+      writeFileSync(path, `${JSON.stringify(value, null, 2)}\n`);
+      expect(() => snapshot(fixture)).toThrow(error);
+    }
+  });
+
   it('source и tool mutation инвалидируют immutable receipt', () => {
     const fixture = fixtureRoot();
     const frozen = snapshot(fixture);
@@ -122,9 +149,11 @@ describe('BASELINE-08 public full-corpus snapshot', () => {
       verifyReceipt,
     })).toThrow(/snapshot drift/);
 
+    const toolFixture = fixtureRoot();
+    const toolFrozen = snapshot(toolFixture);
     expect(() => verifyBaselineSnapshot({
-      expected: frozen,
-      sourceRoot: fixture,
+      expected: toolFrozen,
+      sourceRoot: toolFixture,
       sourceFence,
       toolIdentity: { ...toolIdentity, librarySha256: '0'.repeat(64) },
       verifyReceipt,
@@ -177,6 +206,22 @@ describe('BASELINE-08 public full-corpus snapshot', () => {
     expect(() => assertOutputOutsideSource({
       sourceRoot: root,
       output: join(root, '..', 'baseline.json'),
+    })).not.toThrow();
+  });
+
+  it('output fence разрешает symlink/junction только если его realpath остаётся вне source', () => {
+    const outside = mkdtempSync(join(tmpdir(), 'lab-icons-baseline-output-'));
+    tempRoots.push(outside);
+    const sourceLink = join(outside, 'source-link');
+    symlinkSync(root, sourceLink, process.platform === 'win32' ? 'junction' : 'dir');
+
+    expect(() => assertOutputOutsideSource({
+      sourceRoot: root,
+      output: join(sourceLink, 'evidence', 'baseline.json'),
+    })).toThrow(/outside the frozen source/);
+    expect(() => assertOutputOutsideSource({
+      sourceRoot: root,
+      output: join(outside, 'evidence', 'baseline.json'),
     })).not.toThrow();
   });
 });
