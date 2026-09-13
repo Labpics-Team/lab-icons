@@ -516,14 +516,25 @@ function parseDecorator(value: unknown, index: number): DesignDecorator {
 function parseNegativeSpace(value: unknown, index: number): DesignNegativeSpace {
   const at = `negativeSpace[${index}]`;
   const source = exact(value, at, ['id', 'kind', 'minimum', 'participants', 'measurement']);
+  const kind = oneOf(source.kind, NEGATIVE_SPACE_KINDS, `${at}.kind`);
   const measurement = oneOf(source.measurement, NEGATIVE_SPACE_MEASUREMENTS, `${at}.measurement`);
+  const requiredMeasurement = kind === 'exterior-margin'
+    ? 'ink-bounds-to-canvas'
+    : 'axis-aligned-group-bounds-separation';
+  if (measurement !== requiredMeasurement) {
+    fail(
+      'CONTRADICTORY_CONSTRAINT',
+      `${at}.measurement`,
+      `kind=${kind} требует measurement=${requiredMeasurement}`,
+    );
+  }
   const participants = idList(source.participants, `${at}.participants`);
   if (measurement === 'axis-aligned-group-bounds-separation' && participants.length !== 2) {
     fail('UNDERDEFINED_CONSTRAINT', `${at}.participants`, 'bbox separation требует ровно двух participants');
   }
   return {
     id: stableId(source.id, `${at}.id`),
-    kind: oneOf(source.kind, NEGATIVE_SPACE_KINDS, `${at}.kind`),
+    kind,
     minimum: finite(source.minimum, `${at}.minimum`, 0, 0.5),
     participants,
     measurement,
