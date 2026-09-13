@@ -91,7 +91,8 @@
     "check:ring-canon": "node scripts/check-ring-canon.js",
     "check:census": "node scripts/census/build-census.mjs && node scripts/check-census-fresh.js",
     "build:motion-census": "node scripts/build-motion-census.mjs",
-    "check:motion-census": "node scripts/check-motion-census.mjs"
+    "check:motion-census": "node scripts/check-motion-census.mjs",
+    "baseline:freeze": "node scripts/freeze-baseline.mjs"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "0.18.5",

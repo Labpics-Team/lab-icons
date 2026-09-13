@@ -1,4 +1,4 @@
-import { createHash } from 'node:crypto';
+import { createHash, createHmac } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { authorPathEntries } from '../../src/core/icon-geometry.js';
@@ -21,39 +21,21 @@ export const DEFAULT_MANDATORY_TRAIN = Object.freeze([
   'sun-low',
   'time',
 ]);
-export const REQUIRED_MOVABLE_MISSION_FAMILIES = Object.freeze(['earth', 'fire', 'reload']);
-export const NOVEL_CHALLENGE_TARGET_COUNT = 32;
-export const NOVEL_CHALLENGE_MAX_PER_STRATUM = 8;
-export const AUTHORING_DYNAMIC_SLOTS = Object.freeze(['boundedFeedbackPayload', 'briefPayload']);
-export const ENVELOPE_REQUIRED_FIELDS = Object.freeze([
-  'providerEndpoint',
-  'apiVersion',
-  'modelRevision',
-  'accountProjectRegion',
-  'safetySettings',
-  'orderedMessageFrame',
-  'responseSchema',
-  'toolSchemas',
-  'toolPermissions',
-  'toolChoice',
-  'reasoningMode',
-  'reasoningEffort',
-  'temperature',
-  'topP',
-  'seed',
-  'maxOutput',
-  'stopSequences',
-  'parallelToolPolicy',
-  'cachePolicy',
-  'sessionPolicy',
-  'retryPolicy',
-  'runtimeIdentity',
-  'dependencyLockDigest',
+export const REQUIRED_MOVABLE_MISSION_FAMILIES = Object.freeze([
+  'cloud-off',
+  'earth',
+  'fire',
+  'reload',
+  'sun',
+  'sun-low',
+  'time',
 ]);
+export const REQUIRED_DISCRETE_MISSION_FAMILIES = Object.freeze(['calendar-number']);
 
 const VARIANTS = Object.freeze(['outline', 'filled']);
 const SHA40 = /^[a-f0-9]{40}$/;
 const SHA64 = /^[a-f0-9]{64}$/;
+const PARTITION_SEED = /^[a-f0-9]{64}$/i;
 const SOURCE_STATES = new Set(['accepted', 'candidate', 'source-only']);
 const PART_CLASSES = Object.freeze(['single', 'pair', 'multi']);
 const MOTION_INTENT_KINDS = new Set(['movable', 'static-by-design', 'unsupported-discrete']);
@@ -68,6 +50,13 @@ const FORBIDDEN_AUTHORING_ARTIFACT_IDS = Object.freeze([
 
 const asciiCompare = (left, right) => left < right ? -1 : left > right ? 1 : 0;
 const sha256 = (value) => createHash('sha256').update(value).digest('hex');
+
+function normalizePartitionSeed(seed) {
+  if (typeof seed !== 'string' || !PARTITION_SEED.test(seed)) {
+    throw new Error('baseline-freeze: private partition seed must be 32-byte hex');
+  }
+  return seed.toLowerCase();
+}
 
 function assertObject(value, where) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
@@ -234,10 +223,13 @@ function proportionalQuotas(counts, totalQuota) {
 export function buildRetrospectivePartition({
   catalog,
   sourceFence,
+  partitionSeed,
   holdoutSize = RETROSPECTIVE_HOLDOUT_SIZE,
   mandatoryTrain = DEFAULT_MANDATORY_TRAIN,
 }) {
   validateSourceFence(sourceFence);
+  const seed = normalizePartitionSeed(partitionSeed);
+  const seedBytes = Buffer.from(seed, 'hex');
   const rows = structuralRows(catalog);
   const byName = new Map(rows.map((row) => [row.name, row]));
   const mandatory = [...new Set(mandatoryTrain)].sort(asciiCompare);
@@ -258,11 +250,11 @@ export function buildRetrospectivePartition({
       .filter((row) => row.structuralStratum === stratum)
       .map((row) => ({
         ...row,
-        selectionKey: sha256([
+        selectionKey: createHmac('sha256', seedBytes).update([
           `baseline-freeze-v${BASELINE_FREEZE_VERSION}`,
           stratum,
           row.name,
-        ].join('\0')),
+        ].join('\0')).digest('hex'),
       }))
       .sort((left, right) => asciiCompare(left.selectionKey, right.selectionKey) || asciiCompare(left.name, right.name));
     selected.push(...candidates.slice(0, quotas[stratum]).map((row) => row.name));
@@ -280,7 +272,8 @@ export function buildRetrospectivePartition({
 
   return {
     version: BASELINE_FREEZE_VERSION,
-    method: 'source-structure-stratified-sha256-v1',
+    method: 'source-structure-stratified-hmac-sha256-v1',
+    seedCommitment: sha256(seedBytes),
     sourceFenceDigest: canonicalDigest(sourceFence),
     holdoutSize,
     trainSize: train.length,
@@ -352,6 +345,7 @@ export function buildSealedCorpusManifest({ catalog, axisQuality, sourceFence, p
     sourceFenceDigest: canonicalDigest(sourceFence),
     partition: {
       method: partition.method,
+      seedCommitment: partition.seedCommitment,
       holdoutSize: partition.holdoutSize,
       trainSize: partition.trainSize,
       mandatoryTrain: partition.mandatoryTrain,
@@ -481,6 +475,12 @@ export function validateMotionIntentCensus({ catalog, rows }) {
       throw new Error(`baseline-freeze: mission family ${familyId} обязана сохранить movable semantic intent`);
     }
   }
+  for (const familyId of REQUIRED_DISCRETE_MISSION_FAMILIES) {
+    const row = normalized.find((candidate) => candidate.familyId === familyId);
+    if (row?.kind !== 'unsupported-discrete') {
+      throw new Error(`baseline-freeze: mission family ${familyId} обязана сохранить discrete semantic state intent`);
+    }
+  }
 
   return {
     version: BASELINE_FREEZE_VERSION,
@@ -488,6 +488,138 @@ export function validateMotionIntentCensus({ catalog, rows }) {
     rows: normalized,
     digest: canonicalDigest(normalized),
   };
+}
+
+/**
+ * Static/unsupported classification is evidence only when its opaque digest is
+ * bound to a separately retained verifier rationale. This prevents a hash from
+ * becoming a post-hoc permission to skip kinematics.
+ */
+export function validateMotionIntentEvidence({ motionCensus, evidence }) {
+  assertObject(motionCensus, 'motionCensus');
+  if (!Array.isArray(motionCensus.rows)) {
+    throw new TypeError('baseline-freeze: motionCensus.rows должен быть массивом');
+  }
+  if (!Array.isArray(evidence)) {
+    throw new TypeError('baseline-freeze: motion evidence должен быть массивом');
+  }
+
+  const expectedRows = motionCensus.rows
+    .filter((row) => row.kind !== 'movable')
+    .sort((left, right) => asciiCompare(left.familyId, right.familyId));
+  const evidenceByFamily = new Map();
+  for (const row of evidence) {
+    assertObject(row, `motion evidence ${row?.familyId ?? '?'}`);
+    assertExactKeys(row, ['familyId', 'kind', 'witnessCode', 'rationale'], `motion evidence ${row?.familyId ?? '?'}`);
+    assertNonEmptyString(row.familyId, 'motion evidence familyId');
+    if (evidenceByFamily.has(row.familyId)) {
+      throw new Error(`baseline-freeze: motion evidence дублирует ${row.familyId}`);
+    }
+    if (!['static-by-design', 'unsupported-discrete'].includes(row.kind)) {
+      throw new Error(`baseline-freeze: motion evidence ${row.familyId} имеет недопустимый kind=${String(row.kind)}`);
+    }
+    assertNonEmptyString(row.witnessCode, `${row.familyId}.witnessCode`);
+    const rationale = assertNonEmptyString(row.rationale, `${row.familyId}.rationale`);
+    if (rationale.trim().length < 24) {
+      throw new Error(`baseline-freeze: motion evidence ${row.familyId} имеет слишком слабый rationale`);
+    }
+    evidenceByFamily.set(row.familyId, canonicalize(row));
+  }
+
+  if (evidenceByFamily.size !== expectedRows.length) {
+    throw new Error('baseline-freeze: motion evidence не замыкает static/unsupported family universe');
+  }
+
+  const normalized = [];
+  for (const motionRow of expectedRows) {
+    const witness = evidenceByFamily.get(motionRow.familyId);
+    if (!witness) {
+      throw new Error(`baseline-freeze: motion evidence отсутствует для ${motionRow.familyId}`);
+    }
+    if (witness.kind !== motionRow.kind || witness.witnessCode !== motionRow.witnessCode) {
+      throw new Error(`baseline-freeze: motion evidence contract mismatch для ${motionRow.familyId}`);
+    }
+    if (canonicalDigest(witness) !== motionRow.witnessDigest) {
+      throw new Error(`baseline-freeze: motion evidence digest mismatch для ${motionRow.familyId}`);
+    }
+    normalized.push(witness);
+  }
+  return {
+    version: BASELINE_FREEZE_VERSION,
+    familyCount: normalized.length,
+    rows: normalized,
+    digest: canonicalDigest(normalized),
+  };
+}
+
+/**
+ * Связывает baseline с реальным consumer gate на том же source fence. Поля
+ * намеренно описывают наблюдаемый запуск и канонические проверки, а не копируют
+ * их реализацию в новый verifier.
+ */
+export function validateStaticConsumerBaseline({ sourceFence, baseline }) {
+  validateSourceFence(sourceFence);
+  assertExactKeys(
+    baseline,
+    ['schema', 'sourceFenceDigest', 'command', 'exitCode', 'toolchain', 'checks', 'digests'],
+    'static-consumer baseline',
+  );
+  if (baseline.schema !== 'labpics.icons-static-consumer-baseline/1') {
+    throw new Error('baseline-freeze: static consumer baseline schema неизвестна');
+  }
+  if (baseline.sourceFenceDigest !== canonicalDigest(sourceFence)) {
+    throw new Error('baseline-freeze: static consumer baseline относится к другому source fence');
+  }
+  if (baseline.command !== 'CI=true pnpm verify' || baseline.exitCode !== 0) {
+    throw new Error('baseline-freeze: static consumer baseline не доказывает canonical GREEN verify');
+  }
+
+  assertExactKeys(baseline.toolchain, ['node', 'pnpm'], 'static-consumer toolchain');
+  for (const field of ['node', 'pnpm']) assertNonEmptyString(baseline.toolchain[field], `static-consumer.toolchain.${field}`);
+
+  assertExactKeys(
+    baseline.checks,
+    [
+      'testFilesPassed',
+      'testsPassed',
+      'cleanSourcePackFreshInstall',
+      'candidateOptInFailClosed',
+      'unsupportedAxisRefusal',
+      'staticSvgAndAcceptedIr',
+      'motionAdaptersNotExported',
+      'sourceCleanAfter',
+    ],
+    'static-consumer checks',
+  );
+  if (!Number.isInteger(baseline.checks.testFilesPassed) || baseline.checks.testFilesPassed <= 0
+      || !Number.isInteger(baseline.checks.testsPassed) || baseline.checks.testsPassed <= 0) {
+    throw new Error('baseline-freeze: static consumer baseline не содержит выполненный test suite');
+  }
+  for (const field of [
+    'cleanSourcePackFreshInstall',
+    'candidateOptInFailClosed',
+    'unsupportedAxisRefusal',
+    'staticSvgAndAcceptedIr',
+    'motionAdaptersNotExported',
+    'sourceCleanAfter',
+  ]) {
+    if (baseline.checks[field] !== true) {
+      throw new Error(`baseline-freeze: static consumer baseline не доказал ${field}`);
+    }
+  }
+
+  assertExactKeys(
+    baseline.digests,
+    ['packageJsonSha256', 'pnpmLockSha256', 'releaseContractSha256'],
+    'static-consumer digests',
+  );
+  for (const [field, digest] of Object.entries(baseline.digests)) {
+    if (!SHA64.test(digest ?? '')) throw new Error(`baseline-freeze: static consumer ${field} не sha256`);
+  }
+  if (baseline.digests.packageJsonSha256 !== sourceFence.package.contractSha256) {
+    throw new Error('baseline-freeze: static consumer package.json digest не совпадает с source fence');
+  }
+  return { baseline: canonicalize(baseline), digest: canonicalDigest(baseline) };
 }
 
 function assertAuthoringArtifactId(id) {
@@ -589,208 +721,6 @@ function assertExactKeys(value, expected, where) {
   if (actual.length !== wanted.length || actual.some((key, index) => key !== wanted[index])) {
     throw new Error(`baseline-freeze: ${where} имеет неполный или скрытый набор полей`);
   }
-}
-
-/**
- * Policy существует до чтения upstream identifiers. Она фиксирует источник
- * semantic vocabulary, классификацию и квоты, но принципиально не содержит
- * выбранных brief IDs или geometry.
- */
-export function validateNovelChallengePolicy(policy) {
-  assertObject(policy, 'novel-challenge-policy');
-  if (Object.hasOwn(policy, 'selectedBriefs') || Object.hasOwn(policy, 'eligibleIds')) {
-    throw new Error('baseline-freeze: pre-freeze novel policy не может содержать выбранные/eligible IDs');
-  }
-  assertExactKeys(
-    policy,
-    ['upstream', 'equivalence', 'semanticStrata', 'quota', 'selection'],
-    'novel-challenge-policy',
-  );
-  assertExactKeys(
-    policy.upstream,
-    ['repository', 'commit', 'identifiersPath', 'identifiersOnly', 'geometryAllowed', 'codepointValuesAllowed'],
-    'novel-challenge-policy.upstream',
-  );
-  if (policy.upstream.repository !== 'google/material-design-icons') {
-    throw new Error('baseline-freeze: novel challenge использует неизвестный semantic vocabulary owner');
-  }
-  if (!SHA40.test(policy.upstream.commit ?? '')) {
-    throw new Error('baseline-freeze: novel challenge upstream commit должен быть exact SHA');
-  }
-  if (policy.upstream.identifiersPath !== 'font/MaterialIconsOutlined-Regular.codepoints') {
-    throw new Error('baseline-freeze: novel challenge должен читать только pinned identifiers file');
-  }
-  if (policy.upstream.identifiersOnly !== true || policy.upstream.geometryAllowed !== false
-      || policy.upstream.codepointValuesAllowed !== false) {
-    throw new Error('baseline-freeze: novel challenge upstream boundary допускает geometry/codepoint leakage');
-  }
-
-  assertExactKeys(
-    policy.equivalence,
-    ['ruleVersion', 'reasonCodes', 'forbiddenInputs'],
-    'novel-challenge-policy.equivalence',
-  );
-  assertNonEmptyString(policy.equivalence.ruleVersion, 'equivalence.ruleVersion');
-  if (!Array.isArray(policy.equivalence.reasonCodes) || policy.equivalence.reasonCodes.length === 0
-      || policy.equivalence.reasonCodes.some((code) => typeof code !== 'string' || code.length === 0)) {
-    throw new Error('baseline-freeze: equivalence reasonCodes обязаны быть заморожены');
-  }
-  const requiredForbiddenInputs = ['grammar', 'recipe-coverage', 'benchmark-score', 'model-trace', 'difficulty'];
-  if (!Array.isArray(policy.equivalence.forbiddenInputs)
-      || requiredForbiddenInputs.some((item) => !policy.equivalence.forbiddenInputs.includes(item))) {
-    throw new Error('baseline-freeze: equivalence classifier не закрывает implementability/difficulty inputs');
-  }
-
-  if (!Array.isArray(policy.semanticStrata) || policy.semanticStrata.length === 0) {
-    throw new Error('baseline-freeze: semantic challenge strata обязательны');
-  }
-  const stratumIds = policy.semanticStrata.map((row) => assertNonEmptyString(row?.id, 'semantic stratum id'));
-  if (new Set(stratumIds).size !== stratumIds.length) {
-    throw new Error('baseline-freeze: semantic challenge strata имеют duplicate id');
-  }
-  for (const row of policy.semanticStrata) {
-    assertExactKeys(row, ['id', 'assignmentRule', 'goldenVectors'], `semantic stratum ${row?.id ?? '?'}`);
-    assertNonEmptyString(row.assignmentRule, `${row.id}.assignmentRule`);
-    if (!Array.isArray(row.goldenVectors) || row.goldenVectors.length === 0) {
-      throw new Error(`baseline-freeze: ${row.id} не имеет frozen golden vectors`);
-    }
-  }
-
-  assertExactKeys(
-    policy.quota,
-    ['algorithm', 'targetCount', 'maxPerStratum', 'tieBreak'],
-    'novel-challenge-policy.quota',
-  );
-  if (policy.quota.algorithm !== 'one-per-nonempty+capped-hamilton-v1'
-      || policy.quota.targetCount !== NOVEL_CHALLENGE_TARGET_COUNT
-      || policy.quota.maxPerStratum !== NOVEL_CHALLENGE_MAX_PER_STRATUM
-      || policy.quota.tieBreak !== 'stable-stratum-id') {
-    throw new Error('baseline-freeze: novel challenge quota algorithm не совпадает с r10');
-  }
-  assertExactKeys(
-    policy.selection,
-    ['entropy', 'seed', 'order'],
-    'novel-challenge-policy.selection',
-  );
-  if (policy.selection.entropy !== 'nist-beacon-v2-first-valid-after-author-bench'
-      || policy.selection.seed !== 'sha256(policyDigest||freezeHead||pulse.outputValue)'
-      || policy.selection.order !== 'sha256(seed||stratum||briefId)') {
-    throw new Error('baseline-freeze: novel challenge selection rule не совпадает с r10');
-  }
-  return { policy: canonicalize(policy), digest: canonicalDigest(policy) };
-}
-
-/**
- * Замораживает форму generation envelope. Значения provider/model появятся
- * перед AUTHOR-BENCH, но их нельзя дополнить новым скрытым полем после brief.
- */
-export function validateGenerationEnvelopeProtocol(protocol) {
-  assertExactKeys(
-    protocol,
-    ['immutableFields', 'dynamicSlots', 'providerDefaults', 'sessionState', 'retry'],
-    'generation-envelope protocol',
-  );
-  if (!Array.isArray(protocol.immutableFields)) {
-    throw new Error('baseline-freeze: generation envelope immutableFields обязателен');
-  }
-  const fields = [...protocol.immutableFields].sort(asciiCompare);
-  const expected = [...ENVELOPE_REQUIRED_FIELDS].sort(asciiCompare);
-  if (fields.length !== expected.length || fields.some((field, index) => field !== expected[index])) {
-    throw new Error('baseline-freeze: generation envelope не замораживает полный required field set');
-  }
-  const dynamicSlots = [...(protocol.dynamicSlots ?? [])].sort(asciiCompare);
-  const expectedSlots = [...AUTHORING_DYNAMIC_SLOTS].sort(asciiCompare);
-  if (dynamicSlots.length !== expectedSlots.length
-      || dynamicSlots.some((slot, index) => slot !== expectedSlots[index])) {
-    throw new Error('baseline-freeze: generation envelope имеет скрытый dynamic slot');
-  }
-  if (protocol.providerDefaults !== 'explicit-value-or-unsupported') {
-    throw new Error('baseline-freeze: provider defaults должны быть сериализованы явно');
-  }
-  assertExactKeys(
-    protocol.retry,
-    [
-      'preDispatchFailureConsumesAttempt',
-      'uncertainDispatchConsumesAttempt',
-      'lostResponseConsumesAttempt',
-      'byteIdenticalResendIsSameAttempt',
-    ],
-    'generation-envelope.retry',
-  );
-  if (protocol.retry.preDispatchFailureConsumesAttempt !== false
-      || protocol.retry.uncertainDispatchConsumesAttempt !== true
-      || protocol.retry.lostResponseConsumesAttempt !== true
-      || protocol.retry.byteIdenticalResendIsSameAttempt !== 'provider-idempotency-or-no-execution-proof-only') {
-    throw new Error('baseline-freeze: generation envelope retry semantics ослабляют attempt budget');
-  }
-  if (protocol.sessionState !== 'empty-or-byte-bound') {
-    throw new Error('baseline-freeze: generation envelope допускает hidden session/prefill state');
-  }
-  return { protocol: canonicalize(protocol), digest: canonicalDigest(protocol) };
-}
-
-/**
- * Протокол durable dispatch ledger отделяет автора candidate от provider
- * execution identity. Он не задаёт конкретное хранилище, но не позволяет
- * выбрать его позже без owner/readback/retention и negative capability proof.
- */
-export function validateRunLedgerProtocol(protocol) {
-  assertExactKeys(
-    protocol,
-    [
-      'sinkType',
-      'owner',
-      'retention',
-      'readback',
-      'canonicalRunRule',
-      'dispatchOrder',
-      'sequence',
-      'authorCapabilities',
-      'verifierCapabilities',
-      'hardInvalidations',
-    ],
-    'run-ledger protocol',
-  );
-  for (const field of ['sinkType', 'owner', 'retention', 'readback']) {
-    assertNonEmptyString(protocol[field], `run-ledger.${field}`);
-  }
-  if (protocol.canonicalRunRule !== 'first-valid-run-start-per-freeze-identity') {
-    throw new Error('baseline-freeze: run-ledger допускает cherry-pick canonical run');
-  }
-  if (protocol.dispatchOrder !== 'durable-intent-before-provider-dispatch') {
-    throw new Error('baseline-freeze: run-ledger не гарантирует pre-dispatch intent');
-  }
-  if (protocol.sequence !== 'monotonic-contiguous') {
-    throw new Error('baseline-freeze: run-ledger не требует contiguous sequence');
-  }
-  assertObject(protocol.authorCapabilities, 'run-ledger.authorCapabilities');
-  assertExactKeys(protocol.authorCapabilities, ['appendIntent', 'directProviderCredential', 'directProviderEgress', 'delete', 'update'], 'run-ledger.authorCapabilities');
-  if (protocol.authorCapabilities.update !== false
-      || protocol.authorCapabilities.delete !== false
-      || protocol.authorCapabilities.directProviderCredential !== false
-      || protocol.authorCapabilities.directProviderEgress !== false
-      || protocol.authorCapabilities.appendIntent !== false) {
-    throw new Error('baseline-freeze: benchmark author имеет недопустимую ledger/provider capability');
-  }
-  assertExactKeys(
-    protocol.verifierCapabilities,
-    ['appendIntent', 'providerCredential', 'providerEgress'],
-    'run-ledger.verifierCapabilities',
-  );
-  if (protocol.verifierCapabilities.appendIntent !== true
-      || protocol.verifierCapabilities.providerCredential !== true
-      || protocol.verifierCapabilities.providerEgress !== true) {
-    throw new Error('baseline-freeze: verifier не владеет dispatch boundary');
-  }
-  if (!Array.isArray(protocol.hardInvalidations)) {
-    throw new Error('baseline-freeze: run-ledger hardInvalidations обязателен');
-  }
-  for (const required of ['gap', 'unlogged-execution', 'extra-execution', 'second-canonical-run-after-dispatch']) {
-    if (!protocol.hardInvalidations.includes(required)) {
-      throw new Error(`baseline-freeze: run-ledger не инвалидирует ${required}`);
-    }
-  }
-  return { protocol: canonicalize(protocol), digest: canonicalDigest(protocol) };
 }
 
 function normalizedGeometryDigest(pathData) {

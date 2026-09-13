@@ -4,9 +4,10 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
   DEFAULT_MANDATORY_TRAIN,
-  ENVELOPE_REQUIRED_FIELDS,
+  REQUIRED_DISCRETE_MISSION_FAMILIES,
   REQUIRED_MOVABLE_MISSION_FAMILIES,
   RETROSPECTIVE_HOLDOUT_SIZE,
+  canonicalDigest,
   buildHoldoutLeakSignals,
   buildCorpusFreeAuthoringProjection,
   buildRetrospectivePartition,
@@ -14,10 +15,9 @@ import {
   buildTrainManifestProjection,
   scanHoldoutLeakage,
   structuralRows,
-  validateGenerationEnvelopeProtocol,
   validateMotionIntentCensus,
-  validateNovelChallengePolicy,
-  validateRunLedgerProtocol,
+  validateMotionIntentEvidence,
+  validateStaticConsumerBaseline,
 } from '../scripts/lib/baseline-freeze.js';
 import {
   EXPECTED_ICON_NAMES,
@@ -36,22 +36,29 @@ const sourceFence = Object.freeze({
     contractSha256: 'c'.repeat(64),
   },
 });
+const partitionSeed = '11'.repeat(32);
+const alternatePartitionSeed = '22'.repeat(32);
 
 function baseline() {
-  const partition = buildRetrospectivePartition({ catalog, sourceFence });
+  const partition = buildRetrospectivePartition({ catalog, sourceFence, partitionSeed });
   const sealed = buildSealedCorpusManifest({ catalog, axisQuality, sourceFence, partition });
   const projection = buildTrainManifestProjection(sealed);
   return { partition, sealed, projection };
 }
 
-function motionRows() {
+function motionFixture() {
   const names = Object.keys(catalog.icons).sort();
-  const rows = names.map((familyId) => ({
-    familyId,
-    kind: 'static-by-design',
-    witnessCode: 'semantic-static-review',
-    witnessDigest: createHash('sha256').update(`static-witness\0${familyId}`).digest('hex'),
-  }));
+  const evidence = [];
+  const rows = names.map((familyId) => {
+    const witness = {
+      familyId,
+      kind: 'static-by-design',
+      witnessCode: 'semantic-static-review',
+      rationale: `No intrinsic target-neutral continuous kinematics are asserted for ${familyId}; motion requires product-state context or would be decorative.`,
+    };
+    evidence.push(witness);
+    return { ...witness, rationale: undefined, witnessDigest: canonicalDigest(witness) };
+  }).map(({ rationale: _rationale, ...row }) => row);
   for (const familyId of REQUIRED_MOVABLE_MISSION_FAMILIES) {
     const index = rows.findIndex((row) => row.familyId === familyId);
     rows[index] = {
@@ -59,14 +66,49 @@ function motionRows() {
       kind: 'movable',
       parts: [{ partId: 'primary', affordance: 'semantic-motion', domain: 'target-neutral-parameter' }],
     };
+    const evidenceIndex = evidence.findIndex((row) => row.familyId === familyId);
+    evidence.splice(evidenceIndex, 1);
   }
-  return rows;
+  for (const familyId of REQUIRED_DISCRETE_MISSION_FAMILIES) {
+    const index = rows.findIndex((row) => row.familyId === familyId);
+    const witness = {
+      familyId,
+      kind: 'unsupported-discrete',
+      witnessCode: 'semantic-discrete-state',
+      rationale: `${familyId} changes semantic content between discrete states; baseline must preserve state identity without inventing a continuous interpolation.`,
+    };
+    rows[index] = { ...witness, rationale: undefined, witnessDigest: canonicalDigest(witness) };
+    rows[index] = (({ rationale: _rationale, ...row }) => row)(rows[index]);
+    const evidenceIndex = evidence.findIndex((row) => row.familyId === familyId);
+    evidence[evidenceIndex] = witness;
+  }
+  return { rows, evidence };
 }
 
+function motionRows() { return motionFixture().rows; }
+
 describe('BASELINE-08 freeze boundary', () => {
+  it('не позволяет восстановить blind partition только из публичного corpus и алгоритма', () => {
+    expect(() => buildRetrospectivePartition({ catalog, sourceFence }))
+      .toThrow(/private partition seed/);
+
+    const first = buildRetrospectivePartition({ catalog, sourceFence, partitionSeed });
+    const repeated = buildRetrospectivePartition({ catalog, sourceFence, partitionSeed });
+    const alternate = buildRetrospectivePartition({
+      catalog,
+      sourceFence,
+      partitionSeed: alternatePartitionSeed,
+    });
+    expect(repeated).toEqual(first);
+    expect(first.seedCommitment).toMatch(/^[a-f0-9]{64}$/);
+    expect(first).not.toHaveProperty('partitionSeed');
+    expect(alternate.seedCommitment).not.toBe(first.seedCommitment);
+    expect(alternate.holdout).not.toEqual(first.holdout);
+  });
+
   it('замыкает 238 семейств в детерминированные 32 holdout + 206 train без mission-примеров в holdout', () => {
-    const first = buildRetrospectivePartition({ catalog, sourceFence });
-    const second = buildRetrospectivePartition({ catalog, sourceFence });
+    const first = buildRetrospectivePartition({ catalog, sourceFence, partitionSeed });
+    const second = buildRetrospectivePartition({ catalog, sourceFence, partitionSeed });
     expect(second).toEqual(first);
     expect(first.holdout).toHaveLength(RETROSPECTIVE_HOLDOUT_SIZE);
     expect(first.train).toHaveLength(EXPECTED_ICON_NAMES - RETROSPECTIVE_HOLDOUT_SIZE);
@@ -173,9 +215,9 @@ describe('BASELINE-08 freeze boundary', () => {
   });
 
   it('смена source fence меняет allocation identity и не переносит старую partition молча', () => {
-    const first = buildRetrospectivePartition({ catalog, sourceFence });
+    const first = buildRetrospectivePartition({ catalog, sourceFence, partitionSeed });
     const driftedFence = { ...sourceFence, treeSha: 'd'.repeat(40) };
-    const second = buildRetrospectivePartition({ catalog, sourceFence: driftedFence });
+    const second = buildRetrospectivePartition({ catalog, sourceFence: driftedFence, partitionSeed });
     expect(second.sourceFenceDigest).not.toBe(first.sourceFenceDigest);
     // Fence связывает evidence с exact source, но не является управляемым seed:
     // нерелевантный metadata drift не имеет права перетасовать blind allocation.
@@ -188,7 +230,7 @@ describe('BASELINE-08 freeze boundary', () => {
         source.file = `renamed/${source.file.split('/').at(-1)}`;
       }
     }
-    const renamed = buildRetrospectivePartition({ catalog: renamedCatalog, sourceFence });
+    const renamed = buildRetrospectivePartition({ catalog: renamedCatalog, sourceFence, partitionSeed });
     expect(renamed.holdout).toEqual(first.holdout);
     expect(renamed.train).toEqual(first.train);
 
@@ -207,6 +249,7 @@ describe('BASELINE-08 freeze boundary', () => {
     const coordinateDrift = buildRetrospectivePartition({
       catalog: coordinateDriftCatalog,
       sourceFence,
+      partitionSeed,
     });
     expect(coordinateDrift.holdout).toEqual(first.holdout);
     expect(coordinateDrift.train).toEqual(first.train);
@@ -308,6 +351,30 @@ describe('BASELINE-08 freeze boundary', () => {
     expect(() => validateMotionIntentCensus({ catalog, rows: lostMissionIntent }))
       .toThrow(/mission family reload/);
 
+    for (const familyId of ['sun', 'sun-low', 'time']) {
+      const lostExplicitMissionIntent = structuredClone(rows);
+      const index = lostExplicitMissionIntent.findIndex((row) => row.familyId === familyId);
+      lostExplicitMissionIntent[index] = {
+        familyId,
+        kind: 'static-by-design',
+        witnessCode: 'incorrect-static-reclassification',
+        witnessDigest: createHash('sha256').update(`incorrect-static-${familyId}`).digest('hex'),
+      };
+      expect(() => validateMotionIntentCensus({ catalog, rows: lostExplicitMissionIntent }))
+        .toThrow(new RegExp(`mission family ${familyId}`));
+    }
+
+    const lostCalendarState = structuredClone(rows);
+    const calendarIndex = lostCalendarState.findIndex((row) => row.familyId === 'calendar-number');
+    lostCalendarState[calendarIndex] = {
+      familyId: 'calendar-number',
+      kind: 'static-by-design',
+      witnessCode: 'incorrect-static-reclassification',
+      witnessDigest: createHash('sha256').update('incorrect-static-calendar-number').digest('hex'),
+    };
+    expect(() => validateMotionIntentCensus({ catalog, rows: lostCalendarState }))
+      .toThrow(/discrete semantic state intent/);
+
     const hiddenRowChannel = structuredClone(rows);
     const hiddenRowIndex = hiddenRowChannel.findIndex((row) => row.kind !== 'movable');
     hiddenRowChannel[hiddenRowIndex].postHocHint = 'convenient later override';
@@ -321,117 +388,66 @@ describe('BASELINE-08 freeze boundary', () => {
       .toThrow(/скрытый набор полей/);
   });
 
-  it('prospective policy замораживает semantics/quota/entropy до чтения candidate IDs', () => {
-    const policy = {
-      upstream: {
-        repository: 'google/material-design-icons',
-        commit: 'd'.repeat(40),
-        identifiersPath: 'font/MaterialIconsOutlined-Regular.codepoints',
-        identifiersOnly: true,
-        geometryAllowed: false,
-        codepointValuesAllowed: false,
-      },
-      equivalence: {
-        ruleVersion: 'semantic-equivalence-v1',
-        reasonCodes: ['same-referent-action-state'],
-        forbiddenInputs: ['grammar', 'recipe-coverage', 'benchmark-score', 'model-trace', 'difficulty'],
-      },
-      semanticStrata: [
-        { id: 'action', assignmentRule: 'action-before-state', goldenVectors: ['refresh=>action'] },
-        { id: 'referent', assignmentRule: 'referent-fallback', goldenVectors: ['pet=>referent'] },
-      ],
-      quota: {
-        algorithm: 'one-per-nonempty+capped-hamilton-v1',
-        targetCount: 32,
-        maxPerStratum: 8,
-        tieBreak: 'stable-stratum-id',
-      },
-      selection: {
-        entropy: 'nist-beacon-v2-first-valid-after-author-bench',
-        seed: 'sha256(policyDigest||freezeHead||pulse.outputValue)',
-        order: 'sha256(seed||stratum||briefId)',
-      },
-    };
-    expect(validateNovelChallengePolicy(policy).digest).toMatch(/^[a-f0-9]{64}$/);
-    expect(() => validateNovelChallengePolicy({ ...policy, selectedBriefs: ['convenient-target'] }))
-      .toThrow(/не может содержать/);
-    expect(() => validateNovelChallengePolicy({
-      ...policy,
-      equivalence: { ...policy.equivalence, forbiddenInputs: ['benchmark-score'] },
-    })).toThrow(/не закрывает implementability/);
-    expect(() => validateNovelChallengePolicy({ ...policy, postHocHint: 'prefer easy targets' }))
-      .toThrow(/скрытый набор полей/);
-    expect(() => validateNovelChallengePolicy({
-      ...policy,
-      quota: { ...policy.quota, postHocHint: 'rebalance after seeing pool' },
-    })).toThrow(/скрытый набор полей/);
+  it('static/unsupported motion classification связан с независимым sealed rationale', () => {
+    const fixture = motionFixture();
+    const census = validateMotionIntentCensus({ catalog, rows: fixture.rows });
+    const receipt = validateMotionIntentEvidence({ motionCensus: census, evidence: fixture.evidence });
+    expect(receipt.familyCount).toBe(EXPECTED_ICON_NAMES - REQUIRED_MOVABLE_MISSION_FAMILIES.length);
+    expect(receipt.digest).toMatch(/^[a-f0-9]{64}$/);
+
+    expect(() => validateMotionIntentEvidence({
+      motionCensus: census,
+      evidence: fixture.evidence.slice(1),
+    })).toThrow(/не замыкает|отсутствует/);
+
+    const changed = structuredClone(fixture.evidence);
+    changed[0].rationale += ' post-hoc change';
+    expect(() => validateMotionIntentEvidence({ motionCensus: census, evidence: changed }))
+      .toThrow(/digest mismatch/);
+
+    const relabeled = structuredClone(fixture.evidence);
+    relabeled[0].witnessCode = 'post-hoc-skip';
+    expect(() => validateMotionIntentEvidence({ motionCensus: census, evidence: relabeled }))
+      .toThrow(/contract mismatch/);
   });
 
-  it('generation envelope и durable ledger закрывают скрытые попытки', () => {
-    const envelope = {
-      immutableFields: ENVELOPE_REQUIRED_FIELDS,
-      dynamicSlots: ['briefPayload', 'boundedFeedbackPayload'],
-      providerDefaults: 'explicit-value-or-unsupported',
-      sessionState: 'empty-or-byte-bound',
-      retry: {
-        preDispatchFailureConsumesAttempt: false,
-        uncertainDispatchConsumesAttempt: true,
-        lostResponseConsumesAttempt: true,
-        byteIdenticalResendIsSameAttempt: 'provider-idempotency-or-no-execution-proof-only',
+  it('static consumer baseline обязан доказывать canonical verify на том же source fence', () => {
+    const consumer = {
+      schema: 'labpics.icons-static-consumer-baseline/1',
+      sourceFenceDigest: canonicalDigest(sourceFence),
+      command: 'CI=true pnpm verify',
+      exitCode: 0,
+      toolchain: { node: 'v24.15.0', pnpm: '11.13.1' },
+      checks: {
+        testFilesPassed: 78,
+        testsPassed: 901,
+        cleanSourcePackFreshInstall: true,
+        candidateOptInFailClosed: true,
+        unsupportedAxisRefusal: true,
+        staticSvgAndAcceptedIr: true,
+        motionAdaptersNotExported: true,
+        sourceCleanAfter: true,
+      },
+      digests: {
+        packageJsonSha256: sourceFence.package.contractSha256,
+        pnpmLockSha256: 'd'.repeat(64),
+        releaseContractSha256: 'e'.repeat(64),
       },
     };
-    expect(validateGenerationEnvelopeProtocol(envelope).digest).toMatch(/^[a-f0-9]{64}$/);
-    expect(() => validateGenerationEnvelopeProtocol({
-      ...envelope,
-      dynamicSlots: [...envelope.dynamicSlots, 'hiddenSystemPrompt'],
-    })).toThrow(/скрытый dynamic slot/);
-    expect(() => validateGenerationEnvelopeProtocol({
-      ...envelope,
-      retry: { ...envelope.retry, uncertainDispatchConsumesAttempt: false },
-    })).toThrow(/attempt budget/);
-    expect(() => validateGenerationEnvelopeProtocol({ ...envelope, postHocHint: 'hidden prefill' }))
-      .toThrow(/скрытый набор полей/);
-    expect(() => validateGenerationEnvelopeProtocol({
-      ...envelope,
-      retry: { ...envelope.retry, postHocHint: 'free retry' },
-    })).toThrow(/скрытый набор полей/);
-
-    const ledger = {
-      sinkType: 'trusted-append-only-store',
-      owner: 'verifier',
-      retention: 'through-r10-terminal-plus-audit-window',
-      readback: 'identity+contiguous-sequence+provider-outcome',
-      canonicalRunRule: 'first-valid-run-start-per-freeze-identity',
-      dispatchOrder: 'durable-intent-before-provider-dispatch',
-      sequence: 'monotonic-contiguous',
-      authorCapabilities: {
-        appendIntent: false,
-        directProviderCredential: false,
-        directProviderEgress: false,
-        delete: false,
-        update: false,
-      },
-      verifierCapabilities: {
-        appendIntent: true,
-        providerCredential: true,
-        providerEgress: true,
-      },
-      hardInvalidations: ['gap', 'unlogged-execution', 'extra-execution', 'second-canonical-run-after-dispatch'],
-    };
-    expect(validateRunLedgerProtocol(ledger).digest).toMatch(/^[a-f0-9]{64}$/);
-    expect(() => validateRunLedgerProtocol({
-      ...ledger,
-      authorCapabilities: { ...ledger.authorCapabilities, directProviderEgress: true },
-    })).toThrow(/недопустимую ledger\/provider capability/);
-    expect(() => validateRunLedgerProtocol({
-      ...ledger,
-      hardInvalidations: ledger.hardInvalidations.filter((item) => item !== 'extra-execution'),
-    })).toThrow(/extra-execution/);
-    expect(() => validateRunLedgerProtocol({ ...ledger, postHocHint: 'alternate canonical run' }))
-      .toThrow(/скрытый набор полей/);
-    expect(() => validateRunLedgerProtocol({
-      ...ledger,
-      verifierCapabilities: { ...ledger.verifierCapabilities, rewriteOutcome: true },
-    })).toThrow(/скрытый набор полей/);
+    expect(validateStaticConsumerBaseline({ sourceFence, baseline: consumer }).digest)
+      .toMatch(/^[a-f0-9]{64}$/);
+    expect(() => validateStaticConsumerBaseline({
+      sourceFence,
+      baseline: { ...consumer, exitCode: 1 },
+    })).toThrow(/canonical GREEN verify/);
+    expect(() => validateStaticConsumerBaseline({
+      sourceFence,
+      baseline: { ...consumer, checks: { ...consumer.checks, cleanSourcePackFreshInstall: false } },
+    })).toThrow(/cleanSourcePackFreshInstall/);
+    expect(() => validateStaticConsumerBaseline({
+      sourceFence,
+      baseline: { ...consumer, sourceFenceDigest: 'f'.repeat(64) },
+    })).toThrow(/другому source fence/);
   });
+
 });
