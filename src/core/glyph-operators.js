@@ -113,6 +113,7 @@ function positive(value, name) {
 }
 
 export {
+  canonicalPoint as _canonicalPoint,
   closedRecord as _closedRecord,
   deepFreeze as _deepFreeze,
   finite as _finite,
@@ -334,6 +335,173 @@ function canonicalPolyline(points, name) {
       maxY: Math.max(...canonicalPoints.map(({ y }) => y)),
     },
   };
+}
+
+function primitiveBoundsInCanvas(bounds, name) {
+  const canonical = {
+    minX: canonicalNumber(bounds.minX),
+    minY: canonicalNumber(bounds.minY),
+    maxX: canonicalNumber(bounds.maxX),
+    maxY: canonicalNumber(bounds.maxY),
+  };
+  if (
+    canonical.minX < -EPSILON
+    || canonical.minY < -EPSILON
+    || canonical.maxX > 1 + EPSILON
+    || canonical.maxY > 1 + EPSILON
+  ) {
+    throw new RangeError(`${name}: geometry выходит за normalized canvas`);
+  }
+  return canonical;
+}
+
+function canonicalArc({ center, radius, startAngle, endAngle, direction }, name) {
+  const c = point(center, `${name}.center`);
+  const r = interval(radius, Number.EPSILON, 0.5, `${name}.radius`);
+  const start = interval(startAngle, -360, 360, `${name}.startAngle`);
+  const end = interval(endAngle, -360, 360, `${name}.endAngle`);
+  const sweepDirection = oneOf(direction, ['cw', 'ccw'], `${name}.direction`);
+  const normalize = (value) => ((value % 360) + 360) % 360;
+  const startNorm = normalize(start);
+  const endNorm = normalize(end);
+  let sweep = sweepDirection === 'cw'
+    ? normalize(endNorm - startNorm)
+    : normalize(startNorm - endNorm);
+  if (sweep <= EPSILON || sweep >= 360 - EPSILON) {
+    throw new RangeError(`${name}: arc sweep обязан быть в (0,360)`);
+  }
+  const anglePoint = (angle) => {
+    const radians = angle * Math.PI / 180;
+    return canonicalPoint({
+      x: c.x + Math.cos(radians) * r,
+      y: c.y + Math.sin(radians) * r,
+    });
+  };
+  const from = anglePoint(startNorm);
+  const to = anglePoint(endNorm);
+  const contains = (angle) => {
+    const delta = sweepDirection === 'cw'
+      ? normalize(angle - startNorm)
+      : normalize(startNorm - angle);
+    return delta <= sweep + EPSILON;
+  };
+  const extrema = [from, to];
+  for (const angle of [0, 90, 180, 270]) {
+    if (contains(angle)) extrema.push(anglePoint(angle));
+  }
+  const bounds = primitiveBoundsInCanvas({
+    minX: Math.min(...extrema.map(({ x }) => x)),
+    minY: Math.min(...extrema.map(({ y }) => y)),
+    maxX: Math.max(...extrema.map(({ x }) => x)),
+    maxY: Math.max(...extrema.map(({ y }) => y)),
+  }, name);
+  return {
+    d: `M${from.x} ${from.y}A${canonicalNumber(r)} ${canonicalNumber(r)} 0 ${sweep > 180 ? 1 : 0} ${sweepDirection === 'cw' ? 1 : 0} ${to.x} ${to.y}`,
+    bounds,
+    topologySignature: 'MA',
+  };
+}
+
+function canonicalCapsule({ from, to, radius }, name) {
+  const a = point(from, `${name}.from`);
+  const b = point(to, `${name}.to`);
+  const r = interval(radius, Number.EPSILON, 0.5, `${name}.radius`);
+  const distance = pointDistance(a, b);
+  if (distance <= EPSILON) throw new RangeError(`${name}: capsule endpoints различимы`);
+  const nx = -(b.y - a.y) / distance;
+  const ny = (b.x - a.x) / distance;
+  const p1 = canonicalPoint({ x: a.x + nx * r, y: a.y + ny * r });
+  const p2 = canonicalPoint({ x: b.x + nx * r, y: b.y + ny * r });
+  const p3 = canonicalPoint({ x: b.x - nx * r, y: b.y - ny * r });
+  const p4 = canonicalPoint({ x: a.x - nx * r, y: a.y - ny * r });
+  const cr = canonicalNumber(r);
+  const bounds = primitiveBoundsInCanvas({
+    minX: Math.min(a.x, b.x) - r,
+    minY: Math.min(a.y, b.y) - r,
+    maxX: Math.max(a.x, b.x) + r,
+    maxY: Math.max(a.y, b.y) + r,
+  }, name);
+  return {
+    d: `M${p1.x} ${p1.y}L${p2.x} ${p2.y}A${cr} ${cr} 0 0 0 ${p3.x} ${p3.y}L${p4.x} ${p4.y}A${cr} ${cr} 0 0 0 ${p1.x} ${p1.y}Z`,
+    bounds,
+    topologySignature: 'MLALAZ',
+  };
+}
+
+function canonicalRect({ center, width, height, cornerRadius = 0 }, name) {
+  const c = point(center, `${name}.center`);
+  const w = interval(width, Number.EPSILON, 1, `${name}.width`);
+  const h = interval(height, Number.EPSILON, 1, `${name}.height`);
+  const r = interval(cornerRadius, 0, Math.min(w, h) / 2, `${name}.cornerRadius`);
+  const left = canonicalNumber(c.x - w / 2);
+  const right = canonicalNumber(c.x + w / 2);
+  const top = canonicalNumber(c.y - h / 2);
+  const bottom = canonicalNumber(c.y + h / 2);
+  const bounds = primitiveBoundsInCanvas({ minX: left, minY: top, maxX: right, maxY: bottom }, name);
+  if (r <= EPSILON) {
+    return {
+      d: `M${left} ${top}H${right}V${bottom}H${left}Z`,
+      bounds,
+      topologySignature: 'MLLLZ',
+    };
+  }
+  const cr = canonicalNumber(r);
+  const x1 = canonicalNumber(left + r);
+  const x2 = canonicalNumber(right - r);
+  const y1 = canonicalNumber(top + r);
+  const y2 = canonicalNumber(bottom - r);
+  return {
+    d: `M${x1} ${top}H${x2}A${cr} ${cr} 0 0 1 ${right} ${y1}V${y2}A${cr} ${cr} 0 0 1 ${x2} ${bottom}H${x1}A${cr} ${cr} 0 0 1 ${left} ${y2}V${y1}A${cr} ${cr} 0 0 1 ${x1} ${top}Z`,
+    bounds,
+    topologySignature: 'MLALALALAZ',
+  };
+}
+
+/**
+ * Канонический владелец базовых конструктивных примитивов DesignSpec.
+ * Возвращает геометрию существующего recipe IR; authoring-слой не строит path сам.
+ */
+export function buildConstructivePrimitive(input) {
+  const root = closedRecord(input, 'constructivePrimitive', ['kind', 'center', 'radius', 'rx', 'ry', 'rotation', 'from', 'to', 'startAngle', 'endAngle', 'direction', 'width', 'height', 'cornerRadius']);
+  const kind = oneOf(root.kind, ['circle', 'ellipse', 'line', 'arc', 'capsule', 'rect'], 'constructivePrimitive.kind');
+  let built;
+  if (kind === 'circle') {
+    closedRecord(input, 'constructivePrimitive.circle', ['kind', 'center', 'radius']);
+    const center = point(root.center, 'constructivePrimitive.circle.center');
+    const radius = interval(root.radius, Number.EPSILON, 0.5, 'constructivePrimitive.circle.radius');
+    const ellipse = canonicalEllipse(center.x, center.y, radius, radius, 0);
+    built = { d: ellipse.d, bounds: primitiveBoundsInCanvas(ellipse.bounds, 'constructivePrimitive.circle'), topologySignature: 'MAAZ' };
+  } else if (kind === 'ellipse') {
+    closedRecord(input, 'constructivePrimitive.ellipse', ['kind', 'center', 'rx', 'ry', 'rotation']);
+    const center = point(root.center, 'constructivePrimitive.ellipse.center');
+    const rx = interval(root.rx, Number.EPSILON, 0.5, 'constructivePrimitive.ellipse.rx');
+    const ry = interval(root.ry, Number.EPSILON, 0.5, 'constructivePrimitive.ellipse.ry');
+    const rotation = interval(root.rotation ?? 0, -180, 180, 'constructivePrimitive.ellipse.rotation');
+    const ellipse = canonicalEllipse(center.x, center.y, rx, ry, rotation);
+    built = { d: ellipse.d, bounds: primitiveBoundsInCanvas(ellipse.bounds, 'constructivePrimitive.ellipse'), topologySignature: 'MAAZ' };
+  } else if (kind === 'line') {
+    closedRecord(input, 'constructivePrimitive.line', ['kind', 'from', 'to']);
+    const line = canonicalPolyline([
+      point(root.from, 'constructivePrimitive.line.from'),
+      point(root.to, 'constructivePrimitive.line.to'),
+    ], 'constructivePrimitive.line');
+    built = { d: line.d, bounds: primitiveBoundsInCanvas(line.bounds, 'constructivePrimitive.line'), topologySignature: 'ML' };
+  } else if (kind === 'arc') {
+    closedRecord(input, 'constructivePrimitive.arc', ['kind', 'center', 'radius', 'startAngle', 'endAngle', 'direction']);
+    built = canonicalArc(root, 'constructivePrimitive.arc');
+  } else if (kind === 'capsule') {
+    closedRecord(input, 'constructivePrimitive.capsule', ['kind', 'from', 'to', 'radius']);
+    built = canonicalCapsule(root, 'constructivePrimitive.capsule');
+  } else {
+    closedRecord(input, 'constructivePrimitive.rect', ['kind', 'center', 'width', 'height', 'cornerRadius']);
+    built = canonicalRect(root, 'constructivePrimitive.rect');
+  }
+  return deepFreeze({
+    kind,
+    geometry: pathGeometry(built.d),
+    bbox: built.bounds,
+    topologySignature: built.topologySignature,
+  });
 }
 
 function serializedInkBounds(geometry, strokeWidth = 0) {
