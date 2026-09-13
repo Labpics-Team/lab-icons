@@ -46,6 +46,7 @@
     "dist/ir/recipes.js"
   ],
   "scripts": {
+    "baseline:freeze": "node scripts/freeze-baseline.mjs",
     "import:figma": "node scripts/import-figma.mjs",
     "validate:proposal": "node scripts/validate-icon-proposal.mjs",
     "build": "pnpm build:static && pnpm build:catalog && pnpm build:ir",
