@@ -13,18 +13,21 @@ import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import {
-  assertOutputOutsideSource,
   buildBaselineSnapshot,
-  buildToolIdentity,
   canonicalDigest,
+  compareBaselineSnapshot,
   parseVerifyObservations,
-  verifyBaselineSnapshot,
 } from '../scripts/lib/baseline-snapshot.js';
+import {
+  assertOutputOutsideSource,
+  buildToolIdentity,
+  loadBaselineSourceEvidence,
+} from '../scripts/lib/baseline-freeze.js';
 
 const root = join(import.meta.dirname, '..');
 const sourceFence = {
   headSha: '73835162207a790831a831fb962fee29270ec3e1',
-  treeSha: 'fixture-tree',
+  treeSha: '4'.repeat(40),
   package: {
     name: '@labpics/icons',
     version: '0.3.0',
@@ -36,7 +39,8 @@ const sourceFence = {
 const toolIdentity = {
   schema: 'labpics.icons-baseline-tool/1',
   entrySha256: 'd'.repeat(64),
-  librarySha256: 'e'.repeat(64),
+  snapshotLibrarySha256: 'e'.repeat(64),
+  freezeAdapterSha256: '3'.repeat(64),
   corpusContractSha256: '1'.repeat(64),
   packageJsonSha256: '2'.repeat(64),
 };
@@ -73,6 +77,7 @@ function toolFixtureRoot() {
   for (const path of [
     'scripts/freeze-baseline.mjs',
     'scripts/lib/baseline-snapshot.js',
+    'scripts/lib/baseline-freeze.js',
     'scripts/lib/corpus-contract.js',
     'package.json',
   ]) {
@@ -83,7 +88,7 @@ function toolFixtureRoot() {
 
 function snapshot(sourceRoot = root, overrides = {}) {
   return buildBaselineSnapshot({
-    sourceRoot,
+    sourceEvidence: loadBaselineSourceEvidence(sourceRoot),
     sourceFence,
     toolIdentity,
     verifyReceipt,
@@ -91,7 +96,7 @@ function snapshot(sourceRoot = root, overrides = {}) {
   });
 }
 
-describe('BASELINE-08 public full-corpus snapshot', () => {
+describe('BASELINE-08: публичный снимок полного корпуса', () => {
   it('замыкает exact 238×2 corpus и честно классифицирует текущее model/axis debt', () => {
     const result = snapshot();
 
@@ -114,6 +119,19 @@ describe('BASELINE-08 public full-corpus snapshot', () => {
     writeFileSync(path, `${JSON.stringify(catalog, null, 2)}\n`);
 
     expect(() => snapshot(fixture)).toThrow(/238 families/);
+  });
+
+  it('не выдаёт receipt без полного source/artifact fingerprint evidence', () => {
+    const sourceEvidence = loadBaselineSourceEvidence(root);
+    const family = sourceEvidence.catalog.icons[Object.keys(sourceEvidence.catalog.icons)[0]];
+    delete family.source.outline.parts[0].sourceFingerprint;
+
+    expect(() => buildBaselineSnapshot({
+      sourceEvidence,
+      sourceFence,
+      toolIdentity,
+      verifyReceipt,
+    })).toThrow(/invalid source part evidence/);
   });
 
   it('отвергает debt keys с лишними сегментами для каждого registry', () => {
@@ -141,9 +159,9 @@ describe('BASELINE-08 public full-corpus snapshot', () => {
     const sourcePath = join(fixture, frozen.variants[0].sourceFile);
     writeFileSync(sourcePath, `${readFileSync(sourcePath, 'utf8')}\n<!-- deliberate mutation -->\n`);
 
-    expect(() => verifyBaselineSnapshot({
+    expect(() => compareBaselineSnapshot({
       expected: frozen,
-      sourceRoot: fixture,
+      sourceEvidence: loadBaselineSourceEvidence(fixture),
       sourceFence,
       toolIdentity,
       verifyReceipt,
@@ -151,11 +169,11 @@ describe('BASELINE-08 public full-corpus snapshot', () => {
 
     const toolFixture = fixtureRoot();
     const toolFrozen = snapshot(toolFixture);
-    expect(() => verifyBaselineSnapshot({
+    expect(() => compareBaselineSnapshot({
       expected: toolFrozen,
-      sourceRoot: toolFixture,
+      sourceEvidence: loadBaselineSourceEvidence(toolFixture),
       sourceFence,
-      toolIdentity: { ...toolIdentity, librarySha256: '0'.repeat(64) },
+      toolIdentity: { ...toolIdentity, snapshotLibrarySha256: '0'.repeat(64) },
       verifyReceipt,
     })).toThrow(/snapshot drift/);
   });
@@ -164,7 +182,8 @@ describe('BASELINE-08 public full-corpus snapshot', () => {
     const fixture = toolFixtureRoot();
     const mutations = [
       ['scripts/freeze-baseline.mjs', 'entrySha256'],
-      ['scripts/lib/baseline-snapshot.js', 'librarySha256'],
+      ['scripts/lib/baseline-snapshot.js', 'snapshotLibrarySha256'],
+      ['scripts/lib/baseline-freeze.js', 'freezeAdapterSha256'],
       ['scripts/lib/corpus-contract.js', 'corpusContractSha256'],
       ['package.json', 'packageJsonSha256'],
     ];
