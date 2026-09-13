@@ -139,6 +139,26 @@ describe('BASELINE-08: публичный снимок полного корпу
     })).toThrow(/invalid source part evidence/);
   });
 
+  it('замыкает набор input digests: лишний и отсутствующий baseline-вход недопустимы', () => {
+    const extraEvidence = loadBaselineSourceEvidence(root);
+    extraEvidence.inputDigests['semantics/unregistered.json'] = '0'.repeat(64);
+    expect(() => buildBaselineSnapshot({
+      sourceEvidence: extraEvidence,
+      sourceFence,
+      toolIdentity,
+      verifyReceipt,
+    })).toThrow(/inputDigests.*baseline inputs/);
+
+    const missingEvidence = loadBaselineSourceEvidence(root);
+    delete missingEvidence.inputDigests['semantics/grid.json'];
+    expect(() => buildBaselineSnapshot({
+      sourceEvidence: missingEvidence,
+      sourceFence,
+      toolIdentity,
+      verifyReceipt,
+    })).toThrow(/inputDigests.*baseline inputs/);
+  });
+
   it('отвергает debt keys с лишними сегментами для каждого registry', () => {
     const catalog = JSON.parse(readFileSync(join(root, 'semantics', 'catalog.json'), 'utf8').replace(/^\uFEFF+/, ''));
     const key = `${Object.keys(catalog.icons)[0]}/outline`;

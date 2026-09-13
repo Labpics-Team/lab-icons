@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 
 import {
+  BASELINE_INPUT_PATHS,
   EXPECTED_ICON_NAMES,
   EXPECTED_SOURCE_VARIANTS,
 } from './corpus-contract.js';
@@ -49,6 +50,17 @@ function assertDigestMap(value, label) {
     if (key.length === 0 || !SHA256.test(digest ?? '')) {
       throw new Error(`baseline-snapshot: ${label} contains invalid digest for ${key}`);
     }
+  }
+}
+
+function assertExactKeySet(value, expected, label) {
+  const actualKeys = Object.keys(value).sort(asciiCompare);
+  const expectedKeys = [...expected].sort(asciiCompare);
+  if (
+    actualKeys.length !== expectedKeys.length
+    || actualKeys.some((key, index) => key !== expectedKeys[index])
+  ) {
+    throw new Error(`baseline-snapshot: ${label} must match baseline inputs exactly`);
   }
 }
 
@@ -146,6 +158,7 @@ function validateSourceEvidence(sourceEvidence) {
   assertObject(sourceEvidence.modelQuality, 'sourceEvidence.modelQuality');
   assertObject(sourceEvidence.axisQuality, 'sourceEvidence.axisQuality');
   assertDigestMap(sourceEvidence.inputDigests, 'sourceEvidence.inputDigests');
+  assertExactKeySet(sourceEvidence.inputDigests, BASELINE_INPUT_PATHS, 'sourceEvidence.inputDigests');
   assertObject(sourceEvidence.sourceFileDigests, 'sourceEvidence.sourceFileDigests');
 }
 

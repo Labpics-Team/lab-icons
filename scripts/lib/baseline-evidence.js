@@ -2,16 +2,9 @@ import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-export const BASELINE_INPUT_PATHS = Object.freeze([
-  'semantics/catalog.json',
-  'semantics/anatomy.json',
-  'semantics/anatomy.runtime.json',
-  'semantics/anatomy.candidates.json',
-  'semantics/candidate-variants.json',
-  'semantics/model-quality.json',
-  'semantics/axis-quality.json',
-  'semantics/grid.json',
-]);
+import { BASELINE_INPUT_PATHS } from './corpus-contract.js';
+
+export { BASELINE_INPUT_PATHS } from './corpus-contract.js';
 
 function sha256(bytes) {
   return createHash('sha256').update(bytes).digest('hex');
