@@ -59,7 +59,7 @@ const PRIMITIVE_KINDS = ['circle', 'ellipse', 'line', 'arc', 'capsule', 'rect'] 
 const ANCHOR_KINDS = ['canvas', 'midpoint', 'polar', 'project'] as const;
 const COMPOSITION_KINDS = ['layers', 'compound', 'mask-subtract'] as const;
 const DECORATOR_KINDS = ['overlay', 'knockout', 'enclosure'] as const;
-const NEGATIVE_SPACE_KINDS = ['exterior-margin', 'aperture', 'gap', 'knockout'] as const;
+const NEGATIVE_SPACE_KINDS = ['exterior-margin', 'gap'] as const;
 const NEGATIVE_SPACE_MEASUREMENTS = [
   'ink-bounds-to-canvas', 'axis-aligned-group-bounds-separation',
 ] as const;
@@ -557,6 +557,7 @@ function assertConstraintUniqueness(constraints: readonly DesignNegativeSpace[])
 function assertReferences(spec: Omit<DesignSpec, 'version'>): void {
   const anchorIds = new Set(spec.anchors.map(({ id }) => id));
   const partIds = new Set(spec.parts.map(({ id }) => id));
+  const partsById = new Map(spec.parts.map((part) => [part.id, part]));
   for (const part of spec.parts) {
     for (const anchorId of geometryAnchorReferences(part.geometry)) {
       if (!anchorIds.has(anchorId)) {
@@ -588,6 +589,46 @@ function assertReferences(spec: Omit<DesignSpec, 'version'>): void {
   for (const decorator of spec.decorators) {
     requirePart(decorator.partId, `decorators.${decorator.id}.partId`);
     for (const id of decorator.targetPartIds) requirePart(id, `decorators.${decorator.id}.targetPartIds`);
+    if (decorator.targetPartIds.includes(decorator.partId)) {
+      fail(
+        'CONTRADICTORY_CONSTRAINT',
+        `decorators.${decorator.id}`,
+        'decorator не может одновременно быть собственной целью',
+      );
+    }
+    if (partsById.get(decorator.partId)?.role !== 'decorator') {
+      fail(
+        'CONTRADICTORY_CONSTRAINT',
+        `decorators.${decorator.id}.partId`,
+        'decorator part обязан иметь semantic role=decorator',
+      );
+    }
+    if (spec.composition.kind === 'mask-subtract') {
+      const base = new Set(spec.composition.basePartIds);
+      const subtract = new Set(spec.composition.subtractPartIds);
+      const partIsSubtract = subtract.has(decorator.partId);
+      if (decorator.kind === 'knockout' ? !partIsSubtract : !base.has(decorator.partId)) {
+        fail(
+          'CONTRADICTORY_CONSTRAINT',
+          `decorators.${decorator.id}`,
+          `${decorator.kind} противоречит mask-subtract classification`,
+        );
+      }
+      const invalidTargets = decorator.targetPartIds.filter((id) => !base.has(id));
+      if (invalidTargets.length > 0) {
+        fail(
+          'CONTRADICTORY_CONSTRAINT',
+          `decorators.${decorator.id}.targetPartIds`,
+          `decorator target обязан быть положительной base-частью: ${invalidTargets.join(',')}`,
+        );
+      }
+    } else if (decorator.kind === 'knockout') {
+      fail(
+        'CONTRADICTORY_CONSTRAINT',
+        `decorators.${decorator.id}`,
+        'knockout требует явной mask-subtract composition',
+      );
+    }
   }
   for (const constraint of spec.negativeSpace) {
     for (const id of constraint.participants) requirePart(id, `negativeSpace.${constraint.id}.participants`);
