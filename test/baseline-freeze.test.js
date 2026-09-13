@@ -23,7 +23,6 @@ import {
   loadBaselineSourceEvidence,
   parseFreezeArgs,
   publishImmutableReceipt,
-  resolveSafeOutputTarget,
   verifyFrozenBaselineIdentity,
 } from '../scripts/lib/baseline-freeze.js';
 import { canonicalDigest } from '../scripts/lib/baseline-snapshot.js';
@@ -143,23 +142,32 @@ describe('BASELINE-08: effect-граница freeze', () => {
   it('публикует receipt атомарно и не перезаписывает существующий target', () => {
     const targetRoot = mkdtempSync(join(tmpdir(), 'lab-icons-receipt-'));
     tempRoots.push(targetRoot);
-    const output = join(targetRoot, 'baseline.json');
+    const source = join(targetRoot, 'source');
+    const outputDir = join(targetRoot, 'output');
+    mkdirSync(source);
+    mkdirSync(outputDir);
+    const output = join(outputDir, 'baseline.json');
 
-    publishImmutableReceipt({ output, contents: '{"ok":true}\n', stageId: () => 'first' });
+    publishImmutableReceipt({ output, sourceRoot: source, contents: '{"ok":true}\n', stageId: () => 'first' });
     expect(readFileSync(output, 'utf8')).toBe('{"ok":true}\n');
     expect(() => publishImmutableReceipt({
       output,
+      sourceRoot: source,
       contents: '{"ok":false}\n',
       stageId: () => 'second',
     })).toThrow();
     expect(readFileSync(output, 'utf8')).toBe('{"ok":true}\n');
-    expect(readdirSync(targetRoot).filter((name) => name.endsWith('.tmp'))).toEqual([]);
+    expect(readdirSync(outputDir).filter((name) => name.endsWith('.tmp'))).toEqual([]);
   });
 
   it('не делает частичный target видимым при ошибке commit-перехода', () => {
     const targetRoot = mkdtempSync(join(tmpdir(), 'lab-icons-receipt-fault-'));
     tempRoots.push(targetRoot);
-    const output = join(targetRoot, 'baseline.json');
+    const source = join(targetRoot, 'source');
+    const outputDir = join(targetRoot, 'output');
+    mkdirSync(source);
+    mkdirSync(outputDir);
+    const output = join(outputDir, 'baseline.json');
     const faultingFs = {
       closeSync,
       fsyncSync,
@@ -175,15 +183,16 @@ describe('BASELINE-08: effect-граница freeze', () => {
 
     expect(() => publishImmutableReceipt({
       output,
+      sourceRoot: source,
       contents: '{"complete":true}\n',
       fs: faultingFs,
       stageId: () => 'fault',
     })).toThrow(/injected commit failure/);
     expect(existsSync(output)).toBe(false);
-    expect(readdirSync(targetRoot)).toEqual([]);
+    expect(readdirSync(outputDir)).toEqual([]);
   });
 
-  it('фиксирует канонический parent до публикации и не следует за retargeted symlink/junction', () => {
+  it('канонизирует alias внутри самой publish-операции', () => {
     const targetRoot = mkdtempSync(join(tmpdir(), 'lab-icons-receipt-race-'));
     tempRoots.push(targetRoot);
     const source = join(targetRoot, 'source');
@@ -193,16 +202,64 @@ describe('BASELINE-08: effect-граница freeze', () => {
     mkdirSync(safe);
     symlinkSync(safe, alias, process.platform === 'win32' ? 'junction' : 'dir');
 
-    const target = resolveSafeOutputTarget({
+    const target = publishImmutableReceipt({
       sourceRoot: source,
       output: join(alias, 'baseline.json'),
+      contents: '{"safe":true}\n',
+      stageId: () => 'alias',
     });
-    rmSync(alias, { recursive: true, force: true });
-    symlinkSync(source, alias, process.platform === 'win32' ? 'junction' : 'dir');
-    publishImmutableReceipt({ output: target, contents: '{"safe":true}\n', stageId: () => 'race' });
 
+    expect(target).toBe(join(safe, 'baseline.json'));
     expect(readFileSync(join(safe, 'baseline.json'), 'utf8')).toBe('{"safe":true}\n');
     expect(existsSync(join(source, 'baseline.json'))).toBe(false);
+  });
+
+  it('не публикует receipt при замене канонического parent до staging или commit', () => {
+    const targetRoot = mkdtempSync(join(tmpdir(), 'lab-icons-receipt-parent-race-'));
+    tempRoots.push(targetRoot);
+    const source = join(targetRoot, 'source');
+    mkdirSync(source);
+    const directoryKind = process.platform === 'win32' ? 'junction' : 'dir';
+
+    for (const phase of ['open', 'link']) {
+      const safe = join(targetRoot, `safe-${phase}`);
+      mkdirSync(safe);
+      let swapped = false;
+      const racingFs = {
+        closeSync,
+        fsyncSync,
+        linkSync(from, to) {
+          if (phase === 'link' && !swapped) {
+            swapped = true;
+            rmSync(safe, { recursive: true, force: true });
+            symlinkSync(source, safe, directoryKind);
+          }
+          return linkSync(from, to);
+        },
+        mkdirSync,
+        openSync(path, flags, mode) {
+          if (phase === 'open' && !swapped) {
+            swapped = true;
+            rmSync(safe, { recursive: true, force: true });
+            symlinkSync(source, safe, directoryKind);
+          }
+          return openSync(path, flags, mode);
+        },
+        readFileSync,
+        rmSync,
+        writeFileSync,
+      };
+
+      expect(() => publishImmutableReceipt({
+        output: join(safe, 'baseline.json'),
+        sourceRoot: source,
+        contents: 'race-complete\n',
+        fs: racingFs,
+        stageId: () => `parent-race-${phase}`,
+      })).toThrow();
+      expect(existsSync(join(source, 'baseline.json')), phase).toBe(false);
+      expect(readdirSync(source).filter((name) => name.includes('parent-race')), phase).toEqual([]);
+    }
   });
 
   it('freeze orchestration связывает source, verify, tool identity и атомарную публикацию', () => {
