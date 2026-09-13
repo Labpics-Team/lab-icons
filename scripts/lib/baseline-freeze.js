@@ -143,19 +143,33 @@ export function assertOutputOutsideSource({ output, sourceRoot }) {
   }
 }
 
-function defaultPnpmRunner({ root, args, env }) {
+export const BASELINE_PNPM_TIMEOUT_MS = 15 * 60 * 1000;
+
+export function createPnpmRunner({ spawn = spawnSync, timeoutMs = BASELINE_PNPM_TIMEOUT_MS } = {}) {
+  return ({ root, args, env }) => {
   const options = {
     cwd: root,
     env,
     encoding: 'utf8',
     maxBuffer: 128 * 1024 * 1024,
+    timeout: timeoutMs,
+    killSignal: 'SIGTERM',
     windowsHide: true,
   };
   if (process.platform === 'win32') {
     const shell = process.env.ComSpec || 'cmd.exe';
-    return spawnSync(shell, ['/d', '/s', '/c', ['pnpm', ...args].join(' ')], options);
+      return spawn(shell, ['/d', '/s', '/c', ['pnpm', ...args].join(' ')], options);
   }
-  return spawnSync('pnpm', args, options);
+    return spawn('pnpm', args, options);
+  };
+}
+
+const defaultPnpmRunner = createPnpmRunner();
+
+function processFailure(result) {
+  if (result?.signal) return `signal ${result.signal}`;
+  if (result?.error) return result.error.code ? `spawn-error ${result.error.code}` : 'spawn-error';
+  return `exit ${result?.status ?? 'unknown'}`;
 }
 
 export function captureVerifyReceipt({
@@ -171,18 +185,18 @@ export function captureVerifyReceipt({
   }
   const env = { ...process.env, CI: 'true' };
   const install = runner({ root, args: ['install', '--frozen-lockfile'], env });
-  if (install.error || install.status !== 0) {
-    throw new Error(`baseline-snapshot: pnpm install failed (${install.status ?? 'spawn-error'})`);
+  if (install.error || install.signal || install.status !== 0) {
+    throw new Error(`baseline-snapshot: pnpm install failed (${processFailure(install)})`);
   }
   const verify = runner({ root, args: ['verify'], env });
   const output = stripBaselineAnsi(`${verify.stdout ?? ''}\n${verify.stderr ?? ''}`);
-  if (verify.error || verify.status !== 0) {
-    throw new Error(`baseline-snapshot: pnpm verify failed (${verify.status ?? 'spawn-error'})`);
+  if (verify.error || verify.signal || verify.status !== 0) {
+    throw new Error(`baseline-snapshot: pnpm verify failed (${processFailure(verify)})`);
   }
   const observations = parseVerifyObservations(output);
   const pnpm = runner({ root, args: ['--version'], env });
-  if (pnpm.error || pnpm.status !== 0 || !String(pnpm.stdout ?? '').trim()) {
-    throw new Error('baseline-snapshot: cannot identify pnpm toolchain');
+  if (pnpm.error || pnpm.signal || pnpm.status !== 0 || !String(pnpm.stdout ?? '').trim()) {
+    throw new Error(`baseline-snapshot: cannot identify pnpm toolchain (${processFailure(pnpm)})`);
   }
   const after = inspectSourceFence(root);
   if (canonicalDigest(after) !== canonicalDigest(sourceFence)) {
@@ -267,6 +281,7 @@ export function publishImmutableReceipt({
   stageId = randomUUID,
 }) {
   const requested = resolve(output);
+  assertOutputOutsideSource({ output: requested, sourceRoot });
   fs.mkdirSync(dirname(requested), { recursive: true });
   const source = realpathSync(resolve(sourceRoot));
   const parent = realpathSync(dirname(requested));
