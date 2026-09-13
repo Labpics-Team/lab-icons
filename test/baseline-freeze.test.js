@@ -8,6 +8,7 @@ import {
   openSync,
   readFileSync,
   readdirSync,
+  realpathSync,
   rmSync,
   symlinkSync,
   writeFileSync,
@@ -19,6 +20,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import {
   captureVerifyReceipt,
+  createPnpmRunner,
   freezeBaseline,
   loadBaselineSourceEvidence,
   parseFreezeArgs,
@@ -65,6 +67,21 @@ function successfulRunner(calls) {
 }
 
 describe('BASELINE-08: effect-граница freeze', () => {
+  it('default pnpm runner ограничивает каждый процесс timeout и SIGTERM', () => {
+    const calls = [];
+    const runner = createPnpmRunner({
+      timeoutMs: 1234,
+      spawn(command, args, options) {
+        calls.push({ command, args, options });
+        return { status: 0, stdout: '11.13.1\n', stderr: '' };
+      },
+    });
+
+    runner({ root: '.', args: ['--version'], env: { CI: 'true' } });
+    expect(calls).toHaveLength(1);
+    expect(calls[0].options).toMatchObject({ timeout: 1234, killSignal: 'SIGTERM' });
+  });
+
   it('receipt получается только после install, verify, toolchain readback и двух source-fence проверок', () => {
     const calls = [];
     const inspections = [];
@@ -127,6 +144,16 @@ describe('BASELINE-08: effect-граница freeze', () => {
       ['verify'],
     ]);
 
+    expect(() => captureVerifyReceipt({
+      sourceRoot: '.',
+      sourceFence,
+      inspectSourceFence: () => sourceFence,
+      runner({ args }) {
+        if (args[0] === 'install') return { status: 0, stdout: '', stderr: '' };
+        return { status: null, signal: 'SIGTERM', stdout: '', stderr: '' };
+      },
+    })).toThrow(/pnpm verify failed \(signal SIGTERM\)/);
+
     let inspection = 0;
     expect(() => captureVerifyReceipt({
       sourceRoot: '.',
@@ -158,6 +185,22 @@ describe('BASELINE-08: effect-граница freeze', () => {
     })).toThrow();
     expect(readFileSync(output, 'utf8')).toBe('{"ok":true}\n');
     expect(readdirSync(outputDir).filter((name) => name.endsWith('.tmp'))).toEqual([]);
+  });
+
+  it('не создаёт каталог внутри frozen source до проверки output fence', () => {
+    const targetRoot = mkdtempSync(join(tmpdir(), 'lab-icons-receipt-fence-order-'));
+    tempRoots.push(targetRoot);
+    const source = join(targetRoot, 'source');
+    mkdirSync(source);
+    const nested = join(source, 'new', 'nested');
+
+    expect(() => publishImmutableReceipt({
+      output: join(nested, 'baseline.json'),
+      sourceRoot: source,
+      contents: '{}\n',
+      stageId: () => 'inside-source',
+    })).toThrow(/outside the frozen source/);
+    expect(existsSync(nested)).toBe(false);
   });
 
   it('не делает частичный target видимым при ошибке commit-перехода', () => {
@@ -209,7 +252,7 @@ describe('BASELINE-08: effect-граница freeze', () => {
       stageId: () => 'alias',
     });
 
-    expect(target).toBe(join(safe, 'baseline.json'));
+    expect(target).toBe(join(realpathSync(safe), 'baseline.json'));
     expect(readFileSync(join(safe, 'baseline.json'), 'utf8')).toBe('{"safe":true}\n');
     expect(existsSync(join(source, 'baseline.json'))).toBe(false);
   });
@@ -221,21 +264,23 @@ describe('BASELINE-08: effect-граница freeze', () => {
     mkdirSync(source);
     const directoryKind = process.platform === 'win32' ? 'junction' : 'dir';
 
-    for (const phase of ['open', 'link']) {
+    for (const phase of ['open', 'close']) {
       const safe = join(targetRoot, `safe-${phase}`);
       mkdirSync(safe);
       let swapped = false;
       const racingFs = {
-        closeSync,
-        fsyncSync,
-        linkSync(from, to) {
-          if (phase === 'link' && !swapped) {
+        closeSync(descriptor) {
+          closeSync(descriptor);
+          if (phase === 'close' && !swapped) {
             swapped = true;
+            const staging = readdirSync(safe).find((name) => name.includes('parent-race'));
+            if (staging) rmSync(join(safe, staging), { force: true });
             rmSync(safe, { recursive: true, force: true });
             symlinkSync(source, safe, directoryKind);
           }
-          return linkSync(from, to);
         },
+        fsyncSync,
+        linkSync,
         mkdirSync,
         openSync(path, flags, mode) {
           if (phase === 'open' && !swapped) {
@@ -256,7 +301,7 @@ describe('BASELINE-08: effect-граница freeze', () => {
         contents: 'race-complete\n',
         fs: racingFs,
         stageId: () => `parent-race-${phase}`,
-      })).toThrow();
+      })).toThrow('baseline-freeze: output must stay outside the frozen source checkout');
       expect(existsSync(join(source, 'baseline.json')), phase).toBe(false);
       expect(readdirSync(source).filter((name) => name.includes('parent-race')), phase).toEqual([]);
     }
