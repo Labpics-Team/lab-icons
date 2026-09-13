@@ -200,10 +200,12 @@ describe('DesignSpec v2', () => {
           {
             kind: 'aperture',
             measurementMethod: 'polyline-endpoint-distance-minus-stroke',
+            participants: ['head.start', 'head.end'],
           },
           {
             kind: 'exterior-margin',
             measurementMethod: 'ink-bounds-to-canvas',
+            participants: ['head', 'shaft', 'canvas'],
           },
         ],
       },

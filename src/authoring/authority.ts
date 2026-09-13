@@ -64,6 +64,7 @@ export interface RegisteredRecipeContract {
     negativeSpace: readonly Readonly<{
       kind: NegativeSpaceKind;
       measurementMethod: NegativeSpaceMeasurementMethod;
+      participants: readonly string[];
     }>[];
   }>;
 }
@@ -263,10 +264,12 @@ const recipeDefinitions = {
           {
             kind: 'aperture',
             measurementMethod: 'polyline-endpoint-distance-minus-stroke',
+            participants: ['head.start', 'head.end'],
           },
           {
             kind: 'exterior-margin',
             measurementMethod: 'ink-bounds-to-canvas',
+            participants: ['head', 'shaft', 'canvas'],
           },
         ],
       },

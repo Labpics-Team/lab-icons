@@ -1104,7 +1104,8 @@ function lowerRecipeDesignSpec(spec: RecipeDesignSpec): LoweredRecipeDesignSpec 
   const negativeSpaceIdentity = (constraint: {
     readonly kind: string;
     readonly measurementMethod: string;
-  }) => `${constraint.kind}|${constraint.measurementMethod}`;
+    readonly participants: readonly string[];
+  }) => `${constraint.kind}|${constraint.measurementMethod}|${[...constraint.participants].sort().join(',')}`;
   const actualNegativeSpace = built.negativeSpace.constraints.map(negativeSpaceIdentity).sort();
   const expectedNegativeSpace = definition.contract.outputs.negativeSpace
     .map(negativeSpaceIdentity)
