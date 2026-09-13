@@ -1,7 +1,4 @@
 import { createHash } from 'node:crypto';
-import { execFileSync, spawnSync } from 'node:child_process';
-import { existsSync, readFileSync, realpathSync } from 'node:fs';
-import { dirname, isAbsolute, relative, resolve, sep } from 'node:path';
 
 import {
   EXPECTED_ICON_NAMES,
@@ -10,7 +7,9 @@ import {
 
 const VARIANTS = Object.freeze(['outline', 'filled']);
 const SHA256 = /^[a-f0-9]{64}$/;
-const BASELINE_INPUTS = Object.freeze([
+const GIT_OBJECT_ID = /^(?:[a-f0-9]{40}|[a-f0-9]{64})$/;
+const FINGERPRINT = /^sha256:[a-f0-9]{64}$/;
+export const BASELINE_INPUTS = Object.freeze([
   'semantics/catalog.json',
   'semantics/anatomy.json',
   'semantics/anatomy.runtime.json',
@@ -44,22 +43,43 @@ export function canonicalDigest(value) {
   return sha256(Buffer.from(JSON.stringify(canonicalize(value))));
 }
 
-function readJson(path) {
-  return JSON.parse(readFileSync(path, 'utf8').replace(/^\uFEFF+/, ''));
-}
-
-function fileDigest(root, relativePath) {
-  return sha256(readFileSync(resolve(root, relativePath)));
-}
-
 function assertObject(value, label) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
     throw new TypeError(`baseline-snapshot: ${label} must be an object`);
   }
 }
 
+function assertDigestMap(value, requiredKeys, label) {
+  assertObject(value, label);
+  for (const key of requiredKeys) {
+    if (!SHA256.test(value[key] ?? '')) {
+      throw new Error(`baseline-snapshot: ${label} lacks digest for ${key}`);
+    }
+  }
+}
+
 function variantKey(familyId, variant) {
   return `${familyId}/${variant}`;
+}
+
+function validateSourceParts(parts, key) {
+  if (!Array.isArray(parts) || parts.length === 0) {
+    throw new Error(`baseline-snapshot: ${key} lacks source parts`);
+  }
+  const ids = new Set();
+  for (const [index, part] of parts.entries()) {
+    assertObject(part, `${key}.source.parts[${index}]`);
+    if (typeof part.id !== 'string' || part.id.length === 0 || ids.has(part.id)
+        || typeof part.role !== 'string' || part.role.length === 0
+        || !Number.isInteger(part.zIndex)
+        || !['evenodd', 'nonzero'].includes(part.fillRule)
+        || typeof part.topologySignature !== 'string' || part.topologySignature.length === 0
+        || !FINGERPRINT.test(part.sourceFingerprint ?? '')
+        || !FINGERPRINT.test(part.artifactFingerprint ?? '')) {
+      throw new Error(`baseline-snapshot: invalid source part evidence for ${key}`);
+    }
+    ids.add(part.id);
+  }
 }
 
 function parseDebtKey(key, knownVariants, label, expectedSegments) {
@@ -76,10 +96,27 @@ function validateToolIdentity(toolIdentity) {
   assertObject(toolIdentity, 'toolIdentity');
   if (toolIdentity.schema !== 'labpics.icons-baseline-tool/1'
       || !SHA256.test(toolIdentity.entrySha256 ?? '')
-      || !SHA256.test(toolIdentity.librarySha256 ?? '')
+      || !SHA256.test(toolIdentity.snapshotLibrarySha256 ?? '')
+      || !SHA256.test(toolIdentity.freezeAdapterSha256 ?? '')
       || !SHA256.test(toolIdentity.corpusContractSha256 ?? '')
       || !SHA256.test(toolIdentity.packageJsonSha256 ?? '')) {
     throw new Error('baseline-snapshot: invalid tool identity');
+  }
+}
+
+function validateSourceFence(sourceFence) {
+  assertObject(sourceFence, 'sourceFence');
+  assertObject(sourceFence.package, 'sourceFence.package');
+  if (!GIT_OBJECT_ID.test(sourceFence.headSha ?? '')
+      || !GIT_OBJECT_ID.test(sourceFence.treeSha ?? '')
+      || typeof sourceFence.package.name !== 'string'
+      || sourceFence.package.name.length === 0
+      || typeof sourceFence.package.version !== 'string'
+      || sourceFence.package.version.length === 0
+      || !SHA256.test(sourceFence.package.packageJsonSha256 ?? '')
+      || !SHA256.test(sourceFence.package.pnpmLockSha256 ?? '')
+      || !SHA256.test(sourceFence.package.releaseContractSha256 ?? '')) {
+    throw new Error('baseline-snapshot: invalid source fence');
   }
 }
 
@@ -92,39 +129,57 @@ function validateVerifyReceipt(verifyReceipt) {
     throw new Error('baseline-snapshot: invalid verify receipt');
   }
   assertObject(verifyReceipt.observations, 'verifyReceipt.observations');
+  assertObject(verifyReceipt.toolchain, 'verifyReceipt.toolchain');
   if (!Number.isInteger(verifyReceipt.observations.testFilesPassed)
       || verifyReceipt.observations.testFilesPassed <= 0
       || !Number.isInteger(verifyReceipt.observations.testsPassed)
       || verifyReceipt.observations.testsPassed <= 0
       || verifyReceipt.observations.packageArtifactWitness !== true
-      || !SHA256.test(verifyReceipt.observations.outputSha256 ?? '')) {
+      || !SHA256.test(verifyReceipt.observations.outputSha256 ?? '')
+      || typeof verifyReceipt.toolchain.node !== 'string'
+      || verifyReceipt.toolchain.node.length === 0
+      || typeof verifyReceipt.toolchain.pnpm !== 'string'
+      || verifyReceipt.toolchain.pnpm.length === 0) {
     throw new Error('baseline-snapshot: verify receipt lacks direct observations');
   }
 }
 
+function validateSourceEvidence(sourceEvidence) {
+  assertObject(sourceEvidence, 'sourceEvidence');
+  assertObject(sourceEvidence.catalog, 'sourceEvidence.catalog');
+  assertObject(sourceEvidence.candidateVariants, 'sourceEvidence.candidateVariants');
+  assertObject(sourceEvidence.modelQuality, 'sourceEvidence.modelQuality');
+  assertObject(sourceEvidence.axisQuality, 'sourceEvidence.axisQuality');
+  assertDigestMap(sourceEvidence.inputDigests, BASELINE_INPUTS, 'sourceEvidence.inputDigests');
+  assertObject(sourceEvidence.sourceFileDigests, 'sourceEvidence.sourceFileDigests');
+}
+
 /**
- * Builds a public pre-change snapshot. There is deliberately no train/holdout
- * allocation here: the current corpus is public and all 238 families are input
- * evidence for geometric systematization.
+ * Собирает публичный снимок состояния до преобразований. Retrospective train/holdout
+ * здесь намеренно отсутствует: весь публичный корпус является входным evidence.
  */
 export function buildBaselineSnapshot({
-  sourceRoot,
+  sourceEvidence,
   sourceFence,
   toolIdentity,
   verifyReceipt,
 }) {
-  const root = resolve(sourceRoot);
-  assertObject(sourceFence, 'sourceFence');
+  validateSourceFence(sourceFence);
   validateToolIdentity(toolIdentity);
   validateVerifyReceipt(verifyReceipt);
+  validateSourceEvidence(sourceEvidence);
   if (verifyReceipt.sourceFenceDigest !== canonicalDigest(sourceFence)) {
     throw new Error('baseline-snapshot: verify receipt is not bound to the source fence');
   }
 
-  const catalog = readJson(resolve(root, 'semantics/catalog.json'));
-  const candidateVariants = readJson(resolve(root, 'semantics/candidate-variants.json'));
-  const modelQuality = readJson(resolve(root, 'semantics/model-quality.json'));
-  const axisQuality = readJson(resolve(root, 'semantics/axis-quality.json'));
+  const {
+    catalog,
+    candidateVariants,
+    modelQuality,
+    axisQuality,
+    inputDigests,
+    sourceFileDigests,
+  } = sourceEvidence;
   assertObject(catalog.icons, 'catalog.icons');
   if (Object.keys(catalog.icons).length !== EXPECTED_ICON_NAMES) {
     throw new Error(`baseline-snapshot: expected ${EXPECTED_ICON_NAMES} families`);
@@ -154,9 +209,10 @@ export function buildBaselineSnapshot({
       if (typeof source.file !== 'string' || source.file.length === 0) {
         throw new Error(`baseline-snapshot: ${key} lacks source file`);
       }
-      if (!Array.isArray(source.parts) || source.parts.length === 0) {
-        throw new Error(`baseline-snapshot: ${key} lacks source parts`);
+      if (!SHA256.test(sourceFileDigests[source.file] ?? '')) {
+        throw new Error(`baseline-snapshot: ${key} lacks source file digest`);
       }
+      validateSourceParts(source.parts, key);
       const model = family.model?.variants?.[variant];
       let modelState;
       if (candidateSet.has(key)) {
@@ -178,7 +234,7 @@ export function buildBaselineSnapshot({
         familyId,
         variant,
         sourceFile: source.file,
-        sourceFileSha256: fileDigest(root, source.file),
+        sourceFileSha256: sourceFileDigests[source.file],
         sourceParts: source.parts.map((part) => ({
           id: part.id,
           role: part.role,
@@ -224,7 +280,7 @@ export function buildBaselineSnapshot({
     },
     axes: canonicalize(catalog.axes ?? {}),
     axisPolicy: canonicalize(axisQuality.policy ?? {}),
-    inputDigests: Object.fromEntries(BASELINE_INPUTS.map((path) => [path, fileDigest(root, path)])),
+    inputDigests: canonicalize(inputDigests),
     quarantine: canonicalize(quarantined),
     axisDebt: canonicalize(disabledAxes),
     variants: rows,
@@ -232,85 +288,12 @@ export function buildBaselineSnapshot({
   return { ...core, receiptDigest: canonicalDigest(core) };
 }
 
-export function verifyBaselineSnapshot({ expected, ...inputs }) {
+export function compareBaselineSnapshot({ expected, ...inputs }) {
   const actual = buildBaselineSnapshot(inputs);
   if (canonicalDigest(actual) !== canonicalDigest(expected)) {
     throw new Error('baseline-snapshot: snapshot drift');
   }
   return actual;
-}
-
-function git(root, args) {
-  return execFileSync('git', args, {
-    cwd: root,
-    encoding: 'utf8',
-    stdio: ['ignore', 'pipe', 'pipe'],
-  }).trim();
-}
-
-export function inspectExactSourceFence(sourceRoot) {
-  const root = resolve(sourceRoot);
-  const headSha = git(root, ['rev-parse', 'HEAD']);
-  const originMainSha = git(root, ['rev-parse', 'refs/remotes/origin/main']);
-  const dirty = git(root, ['status', '--porcelain=v1', '--untracked-files=all']);
-  if (headSha !== originMainSha || dirty.length > 0) {
-    throw new Error('baseline-snapshot: source must be clean exact origin/main');
-  }
-  const packageJson = readJson(resolve(root, 'package.json'));
-  return {
-    headSha,
-    treeSha: git(root, ['rev-parse', 'HEAD^{tree}']),
-    package: {
-      name: packageJson.name,
-      version: packageJson.version,
-      packageJsonSha256: fileDigest(root, 'package.json'),
-      pnpmLockSha256: fileDigest(root, 'pnpm-lock.yaml'),
-      releaseContractSha256: fileDigest(root, 'release/contract.json'),
-    },
-  };
-}
-
-export function buildToolIdentity(toolRoot) {
-  const root = resolve(toolRoot);
-  return {
-    schema: 'labpics.icons-baseline-tool/1',
-    entrySha256: fileDigest(root, 'scripts/freeze-baseline.mjs'),
-    librarySha256: fileDigest(root, 'scripts/lib/baseline-snapshot.js'),
-    corpusContractSha256: fileDigest(root, 'scripts/lib/corpus-contract.js'),
-    packageJsonSha256: fileDigest(root, 'package.json'),
-  };
-}
-
-function isPathInside(base, candidate) {
-  const pathFromBase = relative(base, candidate);
-  return pathFromBase === ''
-    || (!pathFromBase.startsWith(`..${sep}`)
-      && pathFromBase !== '..'
-      && !isAbsolute(pathFromBase));
-}
-
-function nearestExistingAncestor(path) {
-  let current = resolve(path);
-  while (!existsSync(current)) {
-    const parent = dirname(current);
-    if (parent === current) {
-      throw new Error(`baseline-freeze: cannot resolve output parent ${path}`);
-    }
-    current = parent;
-  }
-  return current;
-}
-
-export function assertOutputOutsideSource({ output, sourceRoot }) {
-  const source = realpathSync(resolve(sourceRoot));
-  const target = resolve(output);
-  const existingParent = nearestExistingAncestor(dirname(target));
-  const resolvedParent = realpathSync(existingParent);
-  const resolvedTarget = existsSync(target) ? realpathSync(target) : null;
-  if (isPathInside(source, resolvedParent)
-      || (resolvedTarget != null && isPathInside(source, resolvedTarget))) {
-    throw new Error('baseline-freeze: output must stay outside the frozen source checkout');
-  }
 }
 
 function stripAnsi(value) {
@@ -333,52 +316,6 @@ export function parseVerifyObservations(rawOutput) {
   };
 }
 
-function defaultPnpmRunner({ root, args, env }) {
-  const options = {
-    cwd: root,
-    env,
-    encoding: 'utf8',
-    maxBuffer: 128 * 1024 * 1024,
-    windowsHide: true,
-  };
-  if (process.platform === 'win32') {
-    const shell = process.env.ComSpec || 'cmd.exe';
-    return spawnSync(shell, ['/d', '/s', '/c', ['pnpm', ...args].join(' ')], options);
-  }
-  return spawnSync('pnpm', args, options);
-}
-
-export function captureVerifyReceipt({ sourceRoot, sourceFence, runner = defaultPnpmRunner }) {
-  const root = resolve(sourceRoot);
-  const before = inspectExactSourceFence(root);
-  if (canonicalDigest(before) !== canonicalDigest(sourceFence)) {
-    throw new Error('baseline-snapshot: source fence drifted before verify');
-  }
-  const env = { ...process.env, CI: 'true' };
-  const install = runner({ root, args: ['install', '--frozen-lockfile'], env });
-  if (install.error || install.status !== 0) {
-    throw new Error(`baseline-snapshot: pnpm install failed (${install.status ?? 'spawn-error'})`);
-  }
-  const verify = runner({ root, args: ['verify'], env });
-  const output = stripAnsi(`${verify.stdout ?? ''}\n${verify.stderr ?? ''}`);
-  if (verify.error || verify.status !== 0) {
-    throw new Error(`baseline-snapshot: pnpm verify failed (${verify.status ?? 'spawn-error'})`);
-  }
-  const observations = parseVerifyObservations(output);
-  const pnpm = runner({ root, args: ['--version'], env });
-  if (pnpm.error || pnpm.status !== 0 || !String(pnpm.stdout ?? '').trim()) {
-    throw new Error('baseline-snapshot: cannot identify pnpm toolchain');
-  }
-  const after = inspectExactSourceFence(root);
-  if (canonicalDigest(after) !== canonicalDigest(sourceFence)) {
-    throw new Error('baseline-snapshot: source fence drifted during verify');
-  }
-  return {
-    schema: 'labpics.icons-baseline-verify/1',
-    command: 'CI=true pnpm verify',
-    exitCode: 0,
-    sourceFenceDigest: canonicalDigest(sourceFence),
-    toolchain: { node: process.version, pnpm: stripAnsi(pnpm.stdout).trim() },
-    observations,
-  };
+export function stripBaselineAnsi(value) {
+  return stripAnsi(value);
 }
