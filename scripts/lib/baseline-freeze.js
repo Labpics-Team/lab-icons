@@ -15,12 +15,14 @@ import {
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 
 import {
-  BASELINE_INPUTS,
+  loadBaselineSourceEvidence,
+  parseVerifyObservations,
+  stripBaselineAnsi,
+} from './baseline-evidence.js';
+import {
   buildBaselineSnapshot,
   canonicalDigest,
   compareBaselineSnapshot,
-  parseVerifyObservations,
-  stripBaselineAnsi,
 } from './baseline-snapshot.js';
 
 const DEFAULT_RECEIPT_FS = Object.freeze({
@@ -44,29 +46,6 @@ function readJson(path) {
 
 function fileDigest(root, relativePath) {
   return sha256(readFileSync(resolve(root, relativePath)));
-}
-
-export function loadBaselineSourceEvidence(sourceRoot) {
-  const root = resolve(sourceRoot);
-  const catalog = readJson(resolve(root, 'semantics/catalog.json'));
-  const candidateVariants = readJson(resolve(root, 'semantics/candidate-variants.json'));
-  const modelQuality = readJson(resolve(root, 'semantics/model-quality.json'));
-  const axisQuality = readJson(resolve(root, 'semantics/axis-quality.json'));
-  const sourceFiles = new Set();
-  for (const family of Object.values(catalog.icons ?? {})) {
-    for (const variant of ['outline', 'filled']) {
-      const sourceFile = family?.source?.[variant]?.file;
-      if (typeof sourceFile === 'string' && sourceFile.length > 0) sourceFiles.add(sourceFile);
-    }
-  }
-  return {
-    catalog,
-    candidateVariants,
-    modelQuality,
-    axisQuality,
-    inputDigests: Object.fromEntries(BASELINE_INPUTS.map((path) => [path, fileDigest(root, path)])),
-    sourceFileDigests: Object.fromEntries([...sourceFiles].map((path) => [path, fileDigest(root, path)])),
-  };
 }
 
 function git(root, args) {
@@ -102,9 +81,11 @@ export function inspectExactSourceFence(sourceRoot) {
 export function buildToolIdentity(toolRoot) {
   const root = resolve(toolRoot);
   return {
-    schema: 'labpics.icons-baseline-tool/1',
+    schema: 'labpics.icons-baseline-tool/2',
     entrySha256: fileDigest(root, 'scripts/freeze-baseline.mjs'),
+    cliAdapterSha256: fileDigest(root, 'scripts/lib/baseline-cli.js'),
     snapshotLibrarySha256: fileDigest(root, 'scripts/lib/baseline-snapshot.js'),
+    evidenceAdapterSha256: fileDigest(root, 'scripts/lib/baseline-evidence.js'),
     freezeAdapterSha256: fileDigest(root, 'scripts/lib/baseline-freeze.js'),
     corpusContractSha256: fileDigest(root, 'scripts/lib/corpus-contract.js'),
     packageJsonSha256: fileDigest(root, 'package.json'),
@@ -147,19 +128,19 @@ export const BASELINE_PNPM_TIMEOUT_MS = 15 * 60 * 1000;
 
 export function createPnpmRunner({ spawn = spawnSync, timeoutMs = BASELINE_PNPM_TIMEOUT_MS } = {}) {
   return ({ root, args, env }) => {
-  const options = {
-    cwd: root,
-    env,
-    encoding: 'utf8',
-    maxBuffer: 128 * 1024 * 1024,
-    timeout: timeoutMs,
-    killSignal: 'SIGTERM',
-    windowsHide: true,
-  };
-  if (process.platform === 'win32') {
-    const shell = process.env.ComSpec || 'cmd.exe';
+    const options = {
+      cwd: root,
+      env,
+      encoding: 'utf8',
+      maxBuffer: 128 * 1024 * 1024,
+      timeout: timeoutMs,
+      killSignal: 'SIGTERM',
+      windowsHide: true,
+    };
+    if (process.platform === 'win32') {
+      const shell = process.env.ComSpec || 'cmd.exe';
       return spawn(shell, ['/d', '/s', '/c', ['pnpm', ...args].join(' ')], options);
-  }
+    }
     return spawn('pnpm', args, options);
   };
 }
@@ -203,9 +184,8 @@ export function captureVerifyReceipt({
     throw new Error('baseline-snapshot: source fence drifted during verify');
   }
   return {
-    schema: 'labpics.icons-baseline-verify/1',
-    command: 'CI=true pnpm verify',
-    exitCode: 0,
+    schema: 'labpics.icons-baseline-verify/2',
+    status: 'passed',
     sourceFenceDigest: canonicalDigest(sourceFence),
     toolchain: { node: process.version, pnpm: stripBaselineAnsi(pnpm.stdout).trim() },
     observations,

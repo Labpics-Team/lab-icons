@@ -16,12 +16,14 @@ import {
   buildBaselineSnapshot,
   canonicalDigest,
   compareBaselineSnapshot,
-  parseVerifyObservations,
 } from '../scripts/lib/baseline-snapshot.js';
+import {
+  loadBaselineSourceEvidence,
+  parseVerifyObservations,
+} from '../scripts/lib/baseline-evidence.js';
 import {
   assertOutputOutsideSource,
   buildToolIdentity,
-  loadBaselineSourceEvidence,
 } from '../scripts/lib/baseline-freeze.js';
 
 const root = join(import.meta.dirname, '..');
@@ -37,17 +39,18 @@ const sourceFence = {
   },
 };
 const toolIdentity = {
-  schema: 'labpics.icons-baseline-tool/1',
+  schema: 'labpics.icons-baseline-tool/2',
   entrySha256: 'd'.repeat(64),
+  cliAdapterSha256: '6'.repeat(64),
   snapshotLibrarySha256: 'e'.repeat(64),
+  evidenceAdapterSha256: '7'.repeat(64),
   freezeAdapterSha256: '3'.repeat(64),
   corpusContractSha256: '1'.repeat(64),
   packageJsonSha256: '2'.repeat(64),
 };
 const verifyReceipt = {
-  schema: 'labpics.icons-baseline-verify/1',
-  command: 'CI=true pnpm verify',
-  exitCode: 0,
+  schema: 'labpics.icons-baseline-verify/2',
+  status: 'passed',
   sourceFenceDigest: canonicalDigest(sourceFence),
   toolchain: { node: 'v24.15.0', pnpm: '11.13.1' },
   observations: {
@@ -76,6 +79,8 @@ function toolFixtureRoot() {
   mkdirSync(join(target, 'scripts', 'lib'), { recursive: true });
   for (const path of [
     'scripts/freeze-baseline.mjs',
+    'scripts/lib/baseline-cli.js',
+    'scripts/lib/baseline-evidence.js',
     'scripts/lib/baseline-snapshot.js',
     'scripts/lib/baseline-freeze.js',
     'scripts/lib/corpus-contract.js',
@@ -182,7 +187,9 @@ describe('BASELINE-08: публичный снимок полного корпу
     const fixture = toolFixtureRoot();
     const mutations = [
       ['scripts/freeze-baseline.mjs', 'entrySha256'],
+      ['scripts/lib/baseline-cli.js', 'cliAdapterSha256'],
       ['scripts/lib/baseline-snapshot.js', 'snapshotLibrarySha256'],
+      ['scripts/lib/baseline-evidence.js', 'evidenceAdapterSha256'],
       ['scripts/lib/baseline-freeze.js', 'freezeAdapterSha256'],
       ['scripts/lib/corpus-contract.js', 'corpusContractSha256'],
       ['package.json', 'packageJsonSha256'],
