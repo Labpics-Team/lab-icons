@@ -10,34 +10,47 @@ import { topologySignature } from '../src/core/anatomy-gen.js';
 
 function legalSpec() {
   return {
-    version: 1,
+    version: 2,
+    kind: 'constructive',
     anchors: [
       { id: 'center', kind: 'canvas', at: 'center' },
       { id: 'north', kind: 'canvas', at: 'north' },
       { id: 'east', kind: 'canvas', at: 'east' },
       { id: 'upper', kind: 'midpoint', between: ['center', 'north'] },
       { id: 'mid', kind: 'midpoint', between: ['center', 'east'] },
-      { id: 'polar', kind: 'polar', from: 'center', angle: 45, distance: 0.18 },
+      {
+        id: 'polar',
+        kind: 'polar',
+        from: 'center',
+        angle: { token: 'angle.45' },
+        distance: { token: 'operator.directional.head-length' },
+      },
       { id: 'projected', kind: 'project', xFrom: 'polar', yFrom: 'upper' },
     ],
     parts: [
       {
         id: 'circle',
         role: 'body',
-        geometry: { kind: 'circle', center: 'center', radius: 0.16 },
+        geometry: { kind: 'circle', center: 'center', radius: { token: 'operator.rays.body-radius' } },
         paint: { kind: 'fill' },
       },
       {
         id: 'ellipse',
         role: 'detail',
-        geometry: { kind: 'ellipse', center: 'mid', rx: 0.08, ry: 0.05, rotation: 30 },
-        paint: { kind: 'stroke', width: 0.02, linecap: 'round' },
+        geometry: {
+          kind: 'ellipse',
+          center: 'mid',
+          rx: { token: 'operator.note.head-radius-x' },
+          ry: { token: 'operator.note.head-radius-y' },
+          rotation: { token: 'angle.30' },
+        },
+        paint: { kind: 'stroke', width: { token: 'grid.stroke.base' }, linecap: 'round' },
       },
       {
         id: 'line',
         role: 'content',
         geometry: { kind: 'line', from: 'center', to: 'upper' },
-        paint: { kind: 'stroke', width: 0.02, linecap: 'round' },
+        paint: { kind: 'stroke', width: { token: 'grid.stroke.base' }, linecap: 'round' },
       },
       {
         id: 'arc',
@@ -45,17 +58,17 @@ function legalSpec() {
         geometry: {
           kind: 'arc',
           center: 'center',
-          radius: 0.22,
-          startAngle: 15,
-          endAngle: 165,
+          radius: { token: 'operator.directional.head-length' },
+          startAngle: { token: 'angle.zero' },
+          endAngle: { token: 'angle.90' },
           direction: 'cw',
         },
-        paint: { kind: 'stroke', width: 0.02, linecap: 'round' },
+        paint: { kind: 'stroke', width: { token: 'grid.stroke.base' }, linecap: 'round' },
       },
       {
         id: 'capsule',
         role: 'control',
-        geometry: { kind: 'capsule', from: 'center', to: 'polar', radius: 0.025 },
+        geometry: { kind: 'capsule', from: 'center', to: 'polar', radius: { token: 'grid.stroke.cap-radius' } },
         paint: { kind: 'fill' },
       },
       {
@@ -64,11 +77,11 @@ function legalSpec() {
         geometry: {
           kind: 'rect',
           center: 'center',
-          width: 0.6,
-          height: 0.5,
-          cornerRadius: 0.04,
+          width: { token: 'grid.keyline.square.size' },
+          height: { token: 'grid.keyline.square.size' },
+          cornerRadius: { token: 'grid.stroke.cap-radius' },
         },
-        paint: { kind: 'stroke', width: 0.02, linecap: 'round' },
+        paint: { kind: 'stroke', width: { token: 'grid.stroke.enclosure' }, linecap: 'round' },
       },
       {
         id: 'residual',
@@ -78,10 +91,10 @@ function legalSpec() {
           kind: 'residual',
           recipe: 'superellipse',
           center: 'projected',
-          rx: 0.055,
-          ry: 0.035,
-          exponent: 3.2,
-          rotation: 15,
+          rx: { token: 'operator.note.head-radius-x' },
+          ry: { token: 'operator.note.head-radius-y' },
+          exponent: { token: 'curve.superellipse.exponent-min' },
+          rotation: { token: 'angle.30' },
         },
         paint: { kind: 'fill' },
       },
@@ -98,14 +111,14 @@ function legalSpec() {
       {
         id: 'canvas-clearance',
         kind: 'exterior-margin',
-        minimum: 0.005,
+        minimum: { token: 'grid.margin' },
         participants: ['rect'],
         measurement: 'ink-bounds-to-canvas',
       },
       {
         id: 'body-gap',
         kind: 'gap',
-        minimum: 0,
+        minimum: { token: 'canvas.zero' },
         participants: ['circle', 'residual'],
         measurement: 'axis-aligned-group-bounds-separation',
       },
@@ -127,7 +140,7 @@ function expectCode(fn: () => unknown, code: DesignSpecError['code']) {
   expect((thrown as DesignSpecError).code).toBe(code);
 }
 
-describe('DesignSpec v1', () => {
+describe('DesignSpec v2', () => {
   it('test helper явно падает, если ожидаемая typed error не была выброшена', () => {
     let caught: unknown;
     try {
@@ -147,6 +160,7 @@ describe('DesignSpec v1', () => {
     expect(first).toEqual(second);
     expect(Object.isFrozen(first)).toBe(true);
     expect(first.kind).toBe('design-spec');
+    if (first.kind !== 'design-spec') throw new Error('expected constructive lowering');
     expect(first.parts.map(({ id }) => id)).toEqual([
       'circle', 'ellipse', 'line', 'arc', 'capsule', 'rect', 'residual',
     ]);
@@ -171,6 +185,29 @@ describe('DesignSpec v1', () => {
   });
 
   it('публикует bounded residual contract, а не caller-controlled bezier', () => {
+    expect(designSpecContract.schema).toBe('labpics.design-spec/2');
+    expect(designSpecContract.version).toBe(2);
+    expect(designSpecContract.scalarTokens['grid.stroke.base']).toMatchObject({
+      unit: 'normalized-canvas',
+      source: 'semantics/grid.json#ratios.strokeWidth.base',
+    });
+    expect(designSpecContract.recipeRegistry['directional-arrow']).toMatchObject({
+      version: 1,
+      outputs: {
+        partIds: ['head', 'shaft'],
+        anchorIds: ['arrow.tip'],
+        negativeSpace: [
+          {
+            kind: 'aperture',
+            measurementMethod: 'polyline-endpoint-distance-minus-stroke',
+          },
+          {
+            kind: 'exterior-margin',
+            measurementMethod: 'ink-bounds-to-canvas',
+          },
+        ],
+      },
+    });
     expect(designSpecContract.residualRecipes.superellipse).toEqual({
       continuity: 'C1',
       tangency: 'central-difference-hermite',
@@ -223,8 +260,12 @@ describe('DesignSpec v1', () => {
     expectCode(() => parseDesignSpec(unknown), 'UNKNOWN_FIELD');
 
     const version: any = legalSpec();
-    version.version = 2;
+    version.version = 3;
     expectCode(() => parseDesignSpec(version), 'UNSUPPORTED_VERSION');
+
+    const legacy: any = legalSpec();
+    legacy.version = 1;
+    expectCode(() => parseDesignSpec(legacy), 'UNSUPPORTED_VERSION');
   });
 
   it('отвергает anchor cycle и неизвестные ссылки до lowering', () => {
@@ -250,7 +291,6 @@ describe('DesignSpec v1', () => {
     contradictory.negativeSpace.push({
       ...contradictory.negativeSpace[1],
       id: 'body-gap-duplicate',
-      minimum: 0.02,
       participants: ['residual', 'circle'],
     });
     expectCode(() => parseDesignSpec(contradictory), 'CONTRADICTORY_CONSTRAINT');
@@ -295,19 +335,19 @@ describe('DesignSpec v1', () => {
     expectCode(() => parseDesignSpec(omitted), 'UNDERDEFINED_CONSTRAINT');
   });
 
-  it('residual curve не принимает control points и отказывает вне declared domain', () => {
+  it('residual curve не принимает control points и незарегистрированный residual recipe', () => {
     const controls: any = legalSpec();
     controls.parts.at(-1).geometry.controls = [{ x: 0.1, y: 0.2 }];
     expectCode(() => parseDesignSpec(controls), 'ARBITRARY_POINTS_FORBIDDEN');
 
     const unbounded: any = legalSpec();
-    unbounded.parts.at(-1).geometry.exponent = 80;
+    unbounded.parts.at(-1).geometry.recipe = 'caller-bezier';
     expectCode(() => parseDesignSpec(unbounded), 'UNBOUNDED_RESIDUAL');
   });
 
   it('hard negative-space failure и вырожденная геометрия остаются typed outcomes', () => {
     const clearance: any = legalSpec();
-    clearance.negativeSpace[0].minimum = 0.4;
+    clearance.negativeSpace[0].minimum = { token: 'grid.keyline.circle.radius' };
     expectCode(() => lowerDesignSpec(clearance), 'CONSTRAINT_VIOLATION');
 
     const degenerateArc: any = legalSpec();
@@ -320,9 +360,143 @@ describe('DesignSpec v1', () => {
     const overflow: any = legalSpec();
     overflow.negativeSpace = [];
     const rect = overflow.parts.find((part: any) => part.id === 'rect');
-    rect.geometry.width = 1;
-    rect.geometry.height = 1;
-    rect.paint.width = 0.1;
+    rect.geometry.width = { token: 'grid.keyline.wide.width' };
+    rect.geometry.height = { token: 'grid.keyline.tall.height' };
+    rect.paint.width = { token: 'grid.stroke.bold' };
     expectCode(() => lowerDesignSpec(overflow), 'CONSTRAINT_VIOLATION');
+  });
+});
+
+describe('DesignSpec authoring authority', () => {
+  it('не допускает свободный geometry scalar на author-facing границе', () => {
+    const mutations: readonly ((value: any) => void)[] = [
+      (value) => { value.anchors.find((anchor: any) => anchor.id === 'polar').angle = 45; },
+      (value) => { value.anchors.find((anchor: any) => anchor.id === 'polar').distance = 0.18; },
+      (value) => { value.parts.find((part: any) => part.id === 'circle').geometry.radius = 0.173; },
+      (value) => { value.parts.find((part: any) => part.id === 'ellipse').geometry.rx = 0.08; },
+      (value) => { value.parts.find((part: any) => part.id === 'ellipse').geometry.rotation = 30; },
+      (value) => { value.parts.find((part: any) => part.id === 'arc').geometry.startAngle = 15; },
+      (value) => { value.parts.find((part: any) => part.id === 'capsule').geometry.radius = 0.025; },
+      (value) => { value.parts.find((part: any) => part.id === 'rect').geometry.width = 0.6; },
+      (value) => { value.parts.find((part: any) => part.id === 'rect').geometry.cornerRadius = 0.04; },
+      (value) => { value.parts.find((part: any) => part.id === 'residual').geometry.exponent = 3.2; },
+      (value) => { value.parts.find((part: any) => part.id === 'ellipse').paint.width = 0.02; },
+      (value) => { value.negativeSpace[0].minimum = 0.005; },
+    ];
+    for (const mutate of mutations) {
+      const value: any = legalSpec();
+      mutate(value);
+      expectCode(() => parseDesignSpec(value), 'FREE_SCALAR_FORBIDDEN');
+    }
+  });
+
+  it('различает неизвестный registered recipe от версии схемы', () => {
+    const value = {
+      version: 2,
+      kind: 'recipe',
+      invocation: {
+        id: 'primary',
+        recipe: 'invented-shape',
+        recipeVersion: 1,
+        parameters: {},
+      },
+    };
+    expectCode(
+      () => parseDesignSpec(value),
+      'UNKNOWN_RECIPE' as DesignSpecError['code'],
+    );
+
+    const wrongVersion: any = JSON.parse(JSON.stringify(value));
+    wrongVersion.invocation.recipe = 'directional-arrow';
+    wrongVersion.invocation.recipeVersion = 2;
+    expectCode(() => parseDesignSpec(wrongVersion), 'UNSUPPORTED_RECIPE_VERSION');
+  });
+
+  it('отвергает unknown token, unit mismatch и opaque parameter map до lowering', () => {
+    const unknownToken: any = legalSpec();
+    unknownToken.parts[0].geometry.radius = { token: 'invented.radius' };
+    expectCode(() => parseDesignSpec(unknownToken), 'UNKNOWN_SCALAR_TOKEN');
+
+    const wrongUnit: any = legalSpec();
+    wrongUnit.parts[0].geometry.radius = { token: 'angle.45' };
+    expectCode(() => parseDesignSpec(wrongUnit), 'SCALAR_UNIT_MISMATCH');
+
+    const opaque = {
+      version: 2,
+      kind: 'recipe',
+      invocation: {
+        id: 'primary',
+        recipe: 'directional-arrow',
+        recipeVersion: 1,
+        parameters: { shaftLength: { value: 0.6 } },
+      },
+    };
+    expectCode(() => parseDesignSpec(opaque), 'OPAQUE_RECIPE_PARAMETER_FORBIDDEN');
+  });
+
+  it('recipe schema закрывает unknown parameter, raw fallback и domain violation', () => {
+    const unknownParameter: any = {
+      version: 2,
+      kind: 'recipe',
+      invocation: {
+        id: 'primary',
+        recipe: 'directional-arrow',
+        recipeVersion: 1,
+        parameters: { center: 0.5 },
+      },
+    };
+    expectCode(() => parseDesignSpec(unknownParameter), 'UNKNOWN_RECIPE_PARAMETER');
+
+    const rawFallback: any = JSON.parse(JSON.stringify(unknownParameter));
+    delete rawFallback.invocation.parameters.center;
+    rawFallback.invocation.raw = 'M0 0L1 1';
+    expectCode(() => parseDesignSpec(rawFallback), 'RAW_FALLBACK_FORBIDDEN');
+
+    const belowOpticalMinimum: any = JSON.parse(JSON.stringify(unknownParameter));
+    belowOpticalMinimum.invocation.parameters = { opsz: 16, weight: 0.001 };
+    expectCode(() => parseDesignSpec(belowOpticalMinimum), 'RECIPE_PARAMETER_OUT_OF_DOMAIN');
+  });
+
+  it('registered recipe принимает только named parameters и namespaces semantic output', () => {
+    const input = {
+      version: 2,
+      kind: 'recipe',
+      invocation: {
+        id: 'primary',
+        recipe: 'directional-arrow',
+        recipeVersion: 1,
+        parameters: {
+          orientation: 'forward',
+          shaftLength: 0.58,
+        },
+      },
+    } as const;
+    const parsed = parseDesignSpec(input);
+    expect(parsed.kind).toBe('recipe');
+    const lowered = lowerDesignSpec(parsed);
+    expect(lowered.kind).toBe('design-spec-recipe');
+    if (lowered.kind !== 'design-spec-recipe') throw new Error('expected recipe lowering');
+    expect(lowered.parts.map(({ id }) => id)).toEqual(['primary.head', 'primary.shaft']);
+    expect(Object.keys(lowered.anchors)).toEqual(['primary.arrow.tip']);
+    expect(lowered.joins?.[0]).toMatchObject({
+      id: 'primary.arrow.tip',
+      members: ['primary.head', 'primary.shaft'],
+    });
+    expect(lowered.negativeSpace.constraints.map(({ kind }) => kind)).toEqual([
+      'aperture', 'exterior-margin',
+    ]);
+    expect(lowered.negativeSpace.constraints.map(({ measurementMethod }) => measurementMethod)).toEqual([
+      'polyline-endpoint-distance-minus-stroke', 'ink-bounds-to-canvas',
+    ]);
+    expect(lowered.negativeSpace.constraints[0]?.participants).toEqual([
+      'primary.head.start', 'primary.head.end',
+    ]);
+    expect(lowered.negativeSpace.constraints.flatMap(({ participants }) => participants)).toContain('canvas');
+    expect(lowered.recipe).toEqual({
+      invocationId: 'primary',
+      id: 'directional-arrow',
+      version: 1,
+      parameters: { orientation: 'forward', shaftLength: 0.58 },
+    });
   });
 });
