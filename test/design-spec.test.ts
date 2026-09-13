@@ -72,7 +72,7 @@ function legalSpec() {
       },
       {
         id: 'residual',
-        role: 'detail',
+        role: 'decorator',
         morphGroup: 'status-shape',
         geometry: {
           kind: 'residual',
@@ -167,7 +167,7 @@ describe('DesignSpec v1', () => {
       },
     });
     expect(designSpecContract.negativeSpaceKinds).toEqual([
-      'exterior-margin', 'aperture', 'gap', 'knockout',
+      'exterior-margin', 'gap',
     ]);
     expect(designSpecContract.negativeSpaceMeasurements).toEqual([
       'ink-bounds-to-canvas', 'axis-aligned-group-bounds-separation',
@@ -239,6 +239,30 @@ describe('DesignSpec v1', () => {
       participants: ['residual', 'circle'],
     });
     expectCode(() => parseDesignSpec(contradictory), 'CONTRADICTORY_CONSTRAINT');
+
+    const falseAperture: any = legalSpec();
+    falseAperture.negativeSpace[0].kind = 'aperture';
+    expectCode(() => parseDesignSpec(falseAperture), 'INVALID_VALUE');
+  });
+
+  it('decorator semantics не могут противоречить composition', () => {
+    const falseKnockout: any = legalSpec();
+    falseKnockout.decorators[0] = {
+      id: 'false-knockout',
+      kind: 'knockout',
+      partId: 'residual',
+      targetPartIds: ['rect'],
+    };
+    expectCode(() => parseDesignSpec(falseKnockout), 'CONTRADICTORY_CONSTRAINT');
+
+    const falseOverlay: any = legalSpec();
+    falseOverlay.decorators[0] = {
+      id: 'false-overlay',
+      kind: 'overlay',
+      partId: 'circle',
+      targetPartIds: ['rect'],
+    };
+    expectCode(() => parseDesignSpec(falseOverlay), 'CONTRADICTORY_CONSTRAINT');
   });
 
   it('mask-subtract обязан классифицировать каждую часть ровно один раз', () => {
