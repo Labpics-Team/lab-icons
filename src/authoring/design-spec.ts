@@ -1085,18 +1085,11 @@ function namespaceRecipeId(invocationId: string, id: string): string {
   return id === 'canvas' ? id : `${invocationId}.${id}`;
 }
 
-function lowerRecipeDesignSpec(spec: RecipeDesignSpec): LoweredRecipeDesignSpec {
-  const definition = registeredRecipeDefinition(spec.invocation.recipe);
-  let built: RecipeResult;
-  try {
-    built = definition.build(spec.invocation.parameters);
-  } catch (error) {
-    fail(
-      'CONSTRAINT_VIOLATION',
-      'invocation.parameters',
-      `registered recipe ${spec.invocation.recipe} отверг комбинацию параметров: ${String(error)}`,
-    );
-  }
+export function assertRegisteredRecipeOutput(
+  recipe: RegisteredDesignRecipeId,
+  built: RecipeResult,
+): void {
+  const definition = registeredRecipeDefinition(recipe);
   const expectedParts = definition.contract.outputs.partIds;
   const actualParts = built.parts.map(({ id }) => id);
   const joins = built.joins ?? [];
@@ -1118,9 +1111,25 @@ function lowerRecipeDesignSpec(spec: RecipeDesignSpec): LoweredRecipeDesignSpec 
     fail(
       'RECIPE_OUTPUT_DRIFT',
       'invocation.recipe',
-      `runtime output ${spec.invocation.recipe}@${spec.invocation.recipeVersion} не совпадает с registered contract`,
+      `runtime output ${recipe}@${definition.contract.version} не совпадает с registered contract`,
     );
   }
+}
+
+function lowerRecipeDesignSpec(spec: RecipeDesignSpec): LoweredRecipeDesignSpec {
+  const definition = registeredRecipeDefinition(spec.invocation.recipe);
+  let built: RecipeResult;
+  try {
+    built = definition.build(spec.invocation.parameters);
+  } catch (error) {
+    fail(
+      'CONSTRAINT_VIOLATION',
+      'invocation.parameters',
+      `registered recipe ${spec.invocation.recipe} отверг комбинацию параметров: ${String(error)}`,
+    );
+  }
+  assertRegisteredRecipeOutput(spec.invocation.recipe, built);
+  const joins = built.joins ?? [];
   const prefix = spec.invocation.id;
   const parts = Object.freeze(built.parts.map((part) => deepFreeze({
     ...part,

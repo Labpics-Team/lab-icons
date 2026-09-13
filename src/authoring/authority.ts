@@ -111,9 +111,6 @@ interface OperatorTokenContract {
   }>;
 }
 
-const grid = gridJson as unknown as GridContract;
-const operatorTokens = glyphOperatorTokens as unknown as OperatorTokenContract;
-
 function deepFreeze<T>(value: T): T {
   if (value && typeof value === 'object' && !Object.isFrozen(value)) {
     Object.freeze(value);
@@ -122,13 +119,98 @@ function deepFreeze<T>(value: T): T {
   return value;
 }
 
+function finiteSourceNumber(value: unknown, source: string): number {
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
+    throw new Error(`${source}: ожидается конечное число`);
+  }
+  return value;
+}
+
+function gridSource(value: unknown): GridContract {
+  const source = (
+    value && typeof value === 'object' ? value : {}
+  ) as Partial<GridContract>;
+  const ratios = source.ratios;
+  const angles = ratios?.angleScale;
+  if (!Array.isArray(angles)) {
+    throw new Error('semantics/grid.json#ratios.angleScale: ожидается массив');
+  }
+  return deepFreeze({
+    ratios: {
+      margin: finiteSourceNumber(ratios?.margin, 'semantics/grid.json#ratios.margin'),
+      keylines: {
+        circle: finiteSourceNumber(ratios?.keylines?.circle, 'semantics/grid.json#ratios.keylines.circle'),
+        square: finiteSourceNumber(ratios?.keylines?.square, 'semantics/grid.json#ratios.keylines.square'),
+        wide: {
+          width: finiteSourceNumber(ratios?.keylines?.wide?.width, 'semantics/grid.json#ratios.keylines.wide.width'),
+          height: finiteSourceNumber(ratios?.keylines?.wide?.height, 'semantics/grid.json#ratios.keylines.wide.height'),
+        },
+        tall: {
+          width: finiteSourceNumber(ratios?.keylines?.tall?.width, 'semantics/grid.json#ratios.keylines.tall.width'),
+          height: finiteSourceNumber(ratios?.keylines?.tall?.height, 'semantics/grid.json#ratios.keylines.tall.height'),
+        },
+      },
+      strokeWidth: {
+        base: finiteSourceNumber(ratios?.strokeWidth?.base, 'semantics/grid.json#ratios.strokeWidth.base'),
+        bold: finiteSourceNumber(ratios?.strokeWidth?.bold, 'semantics/grid.json#ratios.strokeWidth.bold'),
+        enclosureRing: finiteSourceNumber(ratios?.strokeWidth?.enclosureRing, 'semantics/grid.json#ratios.strokeWidth.enclosureRing'),
+        capRadius: finiteSourceNumber(ratios?.strokeWidth?.capRadius, 'semantics/grid.json#ratios.strokeWidth.capRadius'),
+      },
+      angleScale: angles.map((angle, index) => finiteSourceNumber(
+        angle,
+        `semantics/grid.json#ratios.angleScale[${index}]`,
+      )),
+      clearanceMin: finiteSourceNumber(ratios?.clearanceMin, 'semantics/grid.json#ratios.clearanceMin'),
+    },
+  });
+}
+
+function operatorTokenSource(value: unknown): OperatorTokenContract {
+  const source = (
+    value && typeof value === 'object' ? value : {}
+  ) as Partial<OperatorTokenContract>;
+  return deepFreeze({
+    shared: {
+      weight: finiteSourceNumber(source?.shared?.weight, 'GLYPH_OPERATOR_TOKENS.shared.weight'),
+      margin: finiteSourceNumber(source?.shared?.margin, 'GLYPH_OPERATOR_TOKENS.shared.margin'),
+    },
+    directional: {
+      margin: finiteSourceNumber(source?.directional?.margin, 'GLYPH_OPERATOR_TOKENS.directional.margin'),
+      headLength: finiteSourceNumber(source?.directional?.headLength, 'GLYPH_OPERATOR_TOKENS.directional.headLength'),
+      headSpan: finiteSourceNumber(source?.directional?.headSpan, 'GLYPH_OPERATOR_TOKENS.directional.headSpan'),
+      shaftLength: finiteSourceNumber(source?.directional?.shaftLength, 'GLYPH_OPERATOR_TOKENS.directional.shaftLength'),
+    },
+    strike: {
+      angle: finiteSourceNumber(source?.strike?.angle, 'GLYPH_OPERATOR_TOKENS.strike.angle'),
+      overshoot: finiteSourceNumber(source?.strike?.overshoot, 'GLYPH_OPERATOR_TOKENS.strike.overshoot'),
+    },
+    rays: {
+      bodyRadius: finiteSourceNumber(source?.rays?.bodyRadius, 'GLYPH_OPERATOR_TOKENS.rays.bodyRadius'),
+    },
+    note: {
+      headRadiusX: finiteSourceNumber(source?.note?.headRadiusX, 'GLYPH_OPERATOR_TOKENS.note.headRadiusX'),
+      headRadiusY: finiteSourceNumber(source?.note?.headRadiusY, 'GLYPH_OPERATOR_TOKENS.note.headRadiusY'),
+      headAngle: finiteSourceNumber(source?.note?.headAngle, 'GLYPH_OPERATOR_TOKENS.note.headAngle'),
+      stemLength: finiteSourceNumber(source?.note?.stemLength, 'GLYPH_OPERATOR_TOKENS.note.stemLength'),
+    },
+  });
+}
+
+const grid = gridSource(gridJson);
+const operatorTokens = operatorTokenSource(glyphOperatorTokens);
+const opszRange = deepFreeze({
+  min: finiteSourceNumber(glyphOpszRange.min, 'GLYPH_OPSZ_RANGE.min'),
+  default: finiteSourceNumber(glyphOpszRange.default, 'GLYPH_OPSZ_RANGE.default'),
+  max: finiteSourceNumber(glyphOpszRange.max, 'GLYPH_OPSZ_RANGE.max'),
+});
+
 function token(
   value: number,
   unit: DesignScalarUnit,
   source: string,
   semanticEffect: string,
 ): DesignScalarTokenContract {
-  return { value, unit, source, semanticEffect };
+  return { value: finiteSourceNumber(value, source), unit, source, semanticEffect };
 }
 
 function gridAngle(value: number): DesignScalarTokenContract {
@@ -202,8 +284,8 @@ const directionalParameters = deepFreeze({
   opsz: {
     kind: 'number',
     unit: 'opsz-px',
-    domain: { min: glyphOpszRange.min, max: glyphOpszRange.max },
-    default: glyphOpszRange.default,
+    domain: { min: opszRange.min, max: opszRange.max },
+    default: opszRange.default,
     semanticEffect: 'Оптический размер, от которого выводятся raster minima.',
   },
   weight: {
@@ -243,7 +325,7 @@ const directionalParameters = deepFreeze({
   },
 } satisfies Record<string, RecipeParameterContract>);
 
-const recipeDefinitions = {
+const recipeDefinitions = deepFreeze({
   'directional-arrow': {
     contract: deepFreeze({
       version: 1,
@@ -276,7 +358,7 @@ const recipeDefinitions = {
     } satisfies RegisteredRecipeContract),
     build: buildDirectionalArrow as unknown as RegisteredRecipeBuilder,
   },
-} as const;
+} as const);
 
 export type RegisteredDesignRecipeId = keyof typeof recipeDefinitions;
 

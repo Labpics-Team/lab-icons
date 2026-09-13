@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import {
+  assertRegisteredRecipeOutput,
   DesignSpecError,
   designSpecContract,
   lowerDesignSpec,
   parseDesignSpec,
 } from '../src/authoring/design-spec.js';
+import { buildDirectionalArrow } from '../src/ir/recipes.js';
 // @ts-expect-error — JS geometry owner пока не публикует декларации типов.
 import { topologySignature } from '../src/core/anatomy-gen.js';
 
@@ -500,5 +502,41 @@ describe('DesignSpec authoring authority', () => {
       version: 1,
       parameters: { orientation: 'forward', shaftLength: 0.58 },
     });
+  });
+
+  it('registered recipe output drift кусается по структуре и semantic proof identity', () => {
+    const baseline = buildDirectionalArrow({ orientation: 'forward', shaftLength: 0.58 });
+    const mutations = [
+      {
+        ...baseline,
+        parts: baseline.parts.map((part, index) => index === 0 ? { ...part, id: 'invented-head' } : part),
+      },
+      {
+        ...baseline,
+        joins: baseline.joins?.map((join, index) => index === 0 ? { ...join, id: 'invented.tip' } : join),
+      },
+      {
+        ...baseline,
+        negativeSpace: {
+          constraints: baseline.negativeSpace.constraints.map((constraint, index) => index === 0
+            ? { ...constraint, measurementMethod: 'ink-bounds-to-canvas' as const }
+            : constraint),
+        },
+      },
+      {
+        ...baseline,
+        negativeSpace: {
+          constraints: baseline.negativeSpace.constraints.map((constraint, index) => index === 0
+            ? { ...constraint, participants: ['head.start', 'shaft'] }
+            : constraint),
+        },
+      },
+    ];
+    for (const mutation of mutations) {
+      expectCode(
+        () => assertRegisteredRecipeOutput('directional-arrow', mutation),
+        'RECIPE_OUTPUT_DRIFT',
+      );
+    }
   });
 });
