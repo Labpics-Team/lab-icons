@@ -114,16 +114,31 @@ function legalSpec() {
 }
 
 function expectCode(fn: () => unknown, code: DesignSpecError['code']) {
+  let thrown: unknown;
+  let didThrow = false;
   try {
     fn();
-    throw new Error(`ожидалась ошибка ${code}`);
   } catch (error) {
-    expect(error).toBeInstanceOf(DesignSpecError);
-    expect((error as DesignSpecError).code).toBe(code);
+    didThrow = true;
+    thrown = error;
   }
+  if (!didThrow) throw new Error(`ожидалась ошибка ${code}`);
+  expect(thrown).toBeInstanceOf(DesignSpecError);
+  expect((thrown as DesignSpecError).code).toBe(code);
 }
 
 describe('DesignSpec v1', () => {
+  it('test helper явно падает, если ожидаемая typed error не была выброшена', () => {
+    let caught: unknown;
+    try {
+      expectCode(() => undefined, 'INVALID_VALUE');
+    } catch (error) {
+      caught = error;
+    }
+    expect(caught).toBeInstanceOf(Error);
+    expect((caught as Error).message).toBe('ожидалась ошибка INVALID_VALUE');
+  });
+
   it('понимает закрытую конструктивную грамматику и детерминированно lowers в recipe IR', () => {
     const parsed = parseDesignSpec(legalSpec());
     const first = lowerDesignSpec(parsed);
@@ -243,6 +258,15 @@ describe('DesignSpec v1', () => {
     const falseAperture: any = legalSpec();
     falseAperture.negativeSpace[0].kind = 'aperture';
     expectCode(() => parseDesignSpec(falseAperture), 'INVALID_VALUE');
+
+    const exteriorMeasuredAsGap: any = legalSpec();
+    exteriorMeasuredAsGap.negativeSpace[0].measurement = 'axis-aligned-group-bounds-separation';
+    exteriorMeasuredAsGap.negativeSpace[0].participants = ['rect', 'ellipse'];
+    expectCode(() => parseDesignSpec(exteriorMeasuredAsGap), 'CONTRADICTORY_CONSTRAINT');
+
+    const gapMeasuredAsExterior: any = legalSpec();
+    gapMeasuredAsExterior.negativeSpace[1].measurement = 'ink-bounds-to-canvas';
+    expectCode(() => parseDesignSpec(gapMeasuredAsExterior), 'CONTRADICTORY_CONSTRAINT');
   });
 
   it('decorator semantics не могут противоречить composition', () => {
