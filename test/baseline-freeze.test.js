@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process';
 import {
   closeSync,
   existsSync,
@@ -22,11 +23,13 @@ import {
   captureVerifyReceipt,
   createPnpmRunner,
   freezeBaseline,
-  loadBaselineSourceEvidence,
+  inspectExactSourceFence,
   parseFreezeArgs,
   publishImmutableReceipt,
   verifyFrozenBaselineIdentity,
 } from '../scripts/lib/baseline-freeze.js';
+import { loadBaselineSourceEvidence } from '../scripts/lib/baseline-evidence.js';
+import { runFreezeBaselineCli } from '../scripts/lib/baseline-cli.js';
 import { canonicalDigest } from '../scripts/lib/baseline-snapshot.js';
 
 const root = join(import.meta.dirname, '..');
@@ -66,7 +69,54 @@ function successfulRunner(calls) {
   };
 }
 
+function runGit(cwd, args) {
+  return execFileSync('git', args, {
+    cwd,
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'pipe'],
+  }).trim();
+}
+
+function exactSourceFixture() {
+  const target = mkdtempSync(join(tmpdir(), 'lab-icons-exact-source-'));
+  tempRoots.push(target);
+  const remote = join(target, 'remote.git');
+  const source = join(target, 'source');
+  execFileSync('git', ['init', '--bare', remote], { stdio: 'ignore' });
+  execFileSync('git', ['init', '-b', 'main', source], { stdio: 'ignore' });
+  runGit(source, ['config', 'user.email', 'baseline-test@lab.pics']);
+  runGit(source, ['config', 'user.name', 'Baseline Test']);
+  mkdirSync(join(source, 'release'), { recursive: true });
+  writeFileSync(join(source, 'package.json'), '{"name":"@labpics/icons","version":"0.0.0"}\n');
+  writeFileSync(join(source, 'pnpm-lock.yaml'), 'lockfileVersion: 9.0\n');
+  writeFileSync(join(source, 'release', 'contract.json'), '{}\n');
+  runGit(source, ['add', '.']);
+  runGit(source, ['commit', '-m', 'fixture']);
+  runGit(source, ['remote', 'add', 'origin', remote]);
+  runGit(source, ['push', '-u', 'origin', 'main']);
+  return source;
+}
+
 describe('BASELINE-08: effect-граница freeze', () => {
+  it('real source fence требует clean exact origin/main и различает оба класса drift', () => {
+    const source = exactSourceFixture();
+    const clean = inspectExactSourceFence(source);
+    expect(clean.headSha).toBe(runGit(source, ['rev-parse', 'refs/remotes/origin/main']));
+
+    writeFileSync(join(source, 'package.json'), '{"name":"@labpics/icons","version":"0.0.1"}\n');
+    runGit(source, ['add', 'package.json']);
+    runGit(source, ['commit', '-m', 'diverge head']);
+    expect(() => inspectExactSourceFence(source)).toThrow(/clean exact origin\/main/);
+
+    runGit(source, ['reset', '--hard', 'origin/main']);
+    writeFileSync(join(source, 'package.json'), '{"name":"@labpics/icons","version":"dirty"}\n');
+    expect(() => inspectExactSourceFence(source)).toThrow(/clean exact origin\/main/);
+
+    runGit(source, ['checkout', '--', 'package.json']);
+    writeFileSync(join(source, 'untracked.txt'), 'untracked\n');
+    expect(() => inspectExactSourceFence(source)).toThrow(/clean exact origin\/main/);
+  });
+
   it('default pnpm runner ограничивает каждый процесс timeout и SIGTERM', () => {
     const calls = [];
     const runner = createPnpmRunner({
@@ -102,9 +152,8 @@ describe('BASELINE-08: effect-граница freeze', () => {
     ]);
     expect(inspections).toHaveLength(2);
     expect(receipt).toMatchObject({
-      schema: 'labpics.icons-baseline-verify/1',
-      command: 'CI=true pnpm verify',
-      exitCode: 0,
+      schema: 'labpics.icons-baseline-verify/2',
+      status: 'passed',
       sourceFenceDigest: canonicalDigest(sourceFence),
       toolchain: { pnpm: '11.13.1' },
       observations: {
@@ -353,9 +402,11 @@ describe('BASELINE-08: effect-граница freeze', () => {
     const toolOutput = join(targetRoot, 'tool-drift.json');
     let toolRead = 0;
     const stableToolIdentity = {
-      schema: 'labpics.icons-baseline-tool/1',
+      schema: 'labpics.icons-baseline-tool/2',
       entrySha256: '1'.repeat(64),
+      cliAdapterSha256: '6'.repeat(64),
       snapshotLibrarySha256: '2'.repeat(64),
+      evidenceAdapterSha256: '7'.repeat(64),
       freezeAdapterSha256: '3'.repeat(64),
       corpusContractSha256: '4'.repeat(64),
       packageJsonSha256: '5'.repeat(64),
@@ -424,6 +475,45 @@ describe('BASELINE-08: effect-граница freeze', () => {
     expect(parseFreezeArgs(['--source-root', '.', '--output', 'x.json'])).toEqual({
       sourceRoot: resolve('.'),
       output: resolve('x.json'),
+    });
+  });
+
+  it('CLI печатает identity summary фактического freeze result', () => {
+    const writes = [];
+    const expectedOutput = resolve('canonical-baseline.json');
+    const requestedOutput = resolve('requested-baseline.json');
+    const expected = {
+      output: expectedOutput,
+      requestedOutput,
+      sourceFence,
+      snapshot: {
+        corpus: { families: 238, variants: 476 },
+        modelStates: { accepted: 53, candidate: 91, sourceOnly: 332 },
+        debt: { quarantinedVariants: 10, disabledAxisEntries: 66 },
+        receiptDigest: 'f'.repeat(64),
+      },
+    };
+    const sourceRoot = resolve('source-root');
+    const output = resolve('output.json');
+    const summary = runFreezeBaselineCli({
+      argv: ['--source-root', sourceRoot, '--output', output],
+      toolRoot: root,
+      stdout: { write: (value) => writes.push(value) },
+      freeze(args) {
+        expect(args).toEqual({ sourceRoot, output, toolRoot: root });
+        return expected;
+      },
+    });
+
+    expect(JSON.parse(writes.join(''))).toEqual(summary);
+    expect(summary).toEqual({
+      output: expectedOutput,
+      requestedOutput,
+      sourceHeadSha: sourceFence.headSha,
+      corpus: expected.snapshot.corpus,
+      modelStates: expected.snapshot.modelStates,
+      debt: expected.snapshot.debt,
+      receiptDigest: expected.snapshot.receiptDigest,
     });
   });
 });

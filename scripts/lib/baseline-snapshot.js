@@ -9,16 +9,6 @@ const VARIANTS = Object.freeze(['outline', 'filled']);
 const SHA256 = /^[a-f0-9]{64}$/;
 const GIT_OBJECT_ID = /^(?:[a-f0-9]{40}|[a-f0-9]{64})$/;
 const FINGERPRINT = /^sha256:[a-f0-9]{64}$/;
-export const BASELINE_INPUTS = Object.freeze([
-  'semantics/catalog.json',
-  'semantics/anatomy.json',
-  'semantics/anatomy.runtime.json',
-  'semantics/anatomy.candidates.json',
-  'semantics/candidate-variants.json',
-  'semantics/model-quality.json',
-  'semantics/axis-quality.json',
-  'semantics/grid.json',
-]);
 
 function sha256(bytes) {
   return createHash('sha256').update(bytes).digest('hex');
@@ -49,11 +39,15 @@ function assertObject(value, label) {
   }
 }
 
-function assertDigestMap(value, requiredKeys, label) {
+function assertDigestMap(value, label) {
   assertObject(value, label);
-  for (const key of requiredKeys) {
-    if (!SHA256.test(value[key] ?? '')) {
-      throw new Error(`baseline-snapshot: ${label} lacks digest for ${key}`);
+  const entries = Object.entries(value);
+  if (entries.length === 0) {
+    throw new Error(`baseline-snapshot: ${label} must not be empty`);
+  }
+  for (const [key, digest] of entries) {
+    if (key.length === 0 || !SHA256.test(digest ?? '')) {
+      throw new Error(`baseline-snapshot: ${label} contains invalid digest for ${key}`);
     }
   }
 }
@@ -94,9 +88,11 @@ function parseDebtKey(key, knownVariants, label, expectedSegments) {
 
 function validateToolIdentity(toolIdentity) {
   assertObject(toolIdentity, 'toolIdentity');
-  if (toolIdentity.schema !== 'labpics.icons-baseline-tool/1'
+  if (toolIdentity.schema !== 'labpics.icons-baseline-tool/2'
       || !SHA256.test(toolIdentity.entrySha256 ?? '')
+      || !SHA256.test(toolIdentity.cliAdapterSha256 ?? '')
       || !SHA256.test(toolIdentity.snapshotLibrarySha256 ?? '')
+      || !SHA256.test(toolIdentity.evidenceAdapterSha256 ?? '')
       || !SHA256.test(toolIdentity.freezeAdapterSha256 ?? '')
       || !SHA256.test(toolIdentity.corpusContractSha256 ?? '')
       || !SHA256.test(toolIdentity.packageJsonSha256 ?? '')) {
@@ -122,9 +118,8 @@ function validateSourceFence(sourceFence) {
 
 function validateVerifyReceipt(verifyReceipt) {
   assertObject(verifyReceipt, 'verifyReceipt');
-  if (verifyReceipt.schema !== 'labpics.icons-baseline-verify/1'
-      || verifyReceipt.command !== 'CI=true pnpm verify'
-      || verifyReceipt.exitCode !== 0
+  if (verifyReceipt.schema !== 'labpics.icons-baseline-verify/2'
+      || verifyReceipt.status !== 'passed'
       || !SHA256.test(verifyReceipt.sourceFenceDigest ?? '')) {
     throw new Error('baseline-snapshot: invalid verify receipt');
   }
@@ -150,7 +145,7 @@ function validateSourceEvidence(sourceEvidence) {
   assertObject(sourceEvidence.candidateVariants, 'sourceEvidence.candidateVariants');
   assertObject(sourceEvidence.modelQuality, 'sourceEvidence.modelQuality');
   assertObject(sourceEvidence.axisQuality, 'sourceEvidence.axisQuality');
-  assertDigestMap(sourceEvidence.inputDigests, BASELINE_INPUTS, 'sourceEvidence.inputDigests');
+  assertDigestMap(sourceEvidence.inputDigests, 'sourceEvidence.inputDigests');
   assertObject(sourceEvidence.sourceFileDigests, 'sourceEvidence.sourceFileDigests');
 }
 
@@ -294,28 +289,4 @@ export function compareBaselineSnapshot({ expected, ...inputs }) {
     throw new Error('baseline-snapshot: snapshot drift');
   }
   return actual;
-}
-
-function stripAnsi(value) {
-  return String(value ?? '').replace(/\x1B\[[0-?]*[ -/]*[@-~]/g, '');
-}
-
-export function parseVerifyObservations(rawOutput) {
-  const output = stripAnsi(rawOutput);
-  const testFiles = /Test Files\s+(\d+) passed/.exec(output);
-  const tests = /\bTests\s+(\d+) passed/.exec(output);
-  const packageArtifactWitness = /check-package-artifact: OK\b/.test(output);
-  if (!testFiles || !tests || !packageArtifactWitness) {
-    throw new Error('baseline-snapshot: verify output lacks direct required witnesses');
-  }
-  return {
-    testFilesPassed: Number(testFiles[1]),
-    testsPassed: Number(tests[1]),
-    packageArtifactWitness,
-    outputSha256: sha256(Buffer.from(output)),
-  };
-}
-
-export function stripBaselineAnsi(value) {
-  return stripAnsi(value);
 }
