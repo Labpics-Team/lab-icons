@@ -143,20 +143,6 @@ export function assertOutputOutsideSource({ output, sourceRoot }) {
   }
 }
 
-export function resolveSafeOutputTarget({ output, sourceRoot }) {
-  const requested = resolve(output);
-  mkdirSync(dirname(requested), { recursive: true });
-  const source = realpathSync(resolve(sourceRoot));
-  const resolvedParent = realpathSync(dirname(requested));
-  const target = join(resolvedParent, basename(requested));
-  const resolvedTarget = existsSync(target) ? realpathSync(target) : null;
-  if (isPathInside(source, resolvedParent)
-      || (resolvedTarget != null && isPathInside(source, resolvedTarget))) {
-    throw new Error('baseline-freeze: output must stay outside the frozen source checkout');
-  }
-  return target;
-}
-
 function defaultPnpmRunner({ root, args, env }) {
   const options = {
     cwd: root,
@@ -256,9 +242,9 @@ export function freezeBaseline({
   if (canonicalDigest(finalToolIdentity) !== canonicalDigest(toolIdentity)) {
     throw new Error('baseline-freeze: tool identity drifted before receipt publication');
   }
-  const safeOutput = resolveSafeOutputTarget({ output, sourceRoot });
   const publishedOutput = publishImmutableReceipt({
-    output: safeOutput,
+    output,
+    sourceRoot,
     contents: `${JSON.stringify(snapshot, null, 2)}\n`,
   });
   return {
@@ -275,21 +261,37 @@ export function freezeBaseline({
  */
 export function publishImmutableReceipt({
   output,
+  sourceRoot,
   contents,
   fs = DEFAULT_RECEIPT_FS,
   stageId = randomUUID,
 }) {
-  const target = resolve(output);
-  const parent = dirname(target);
-  fs.mkdirSync(parent, { recursive: true });
+  const requested = resolve(output);
+  fs.mkdirSync(dirname(requested), { recursive: true });
+  const source = realpathSync(resolve(sourceRoot));
+  const parent = realpathSync(dirname(requested));
+  const target = join(parent, basename(requested));
+  const resolvedTarget = existsSync(target) ? realpathSync(target) : null;
+  if (isPathInside(source, parent)
+      || (resolvedTarget != null && isPathInside(source, resolvedTarget))) {
+    throw new Error('baseline-freeze: output must stay outside the frozen source checkout');
+  }
   const staging = join(parent, `.${basename(target)}.${process.pid}.${stageId()}.tmp`);
   let descriptor;
   try {
     descriptor = fs.openSync(staging, 'wx', 0o600);
+    const actualStaging = realpathSync(staging);
+    if (dirname(actualStaging) !== parent || isPathInside(source, actualStaging)) {
+      throw new Error('baseline-freeze: output must stay outside the frozen source checkout');
+    }
     fs.writeFileSync(descriptor, contents, { encoding: 'utf8' });
     fs.fsyncSync(descriptor);
     fs.closeSync(descriptor);
     descriptor = undefined;
+    const actualParent = realpathSync(dirname(staging));
+    if (actualParent !== parent || isPathInside(source, actualParent)) {
+      throw new Error('baseline-freeze: output must stay outside the frozen source checkout');
+    }
     fs.linkSync(staging, target);
     if (fs.readFileSync(target, 'utf8') !== contents) {
       throw new Error('baseline-freeze: receipt readback mismatch');
