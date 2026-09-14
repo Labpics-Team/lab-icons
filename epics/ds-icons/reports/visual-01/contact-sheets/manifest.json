@@ -1,0 +1,44 @@
+{
+  "sourceHead": "5d8c07031a62f63c9ad40489fe1f8dc99677157a",
+  "generatedAt": "2026-09-14T14:34:10.550Z",
+  "svgCount": 476,
+  "sizes": [
+    16,
+    20,
+    24,
+    32,
+    48
+  ],
+  "files": [
+    {
+      "path": "contact-sheet-16px.png",
+      "sha256": "0b8c4276285e7eec3a1b157afdc221dd1d9d8a40c4c43f69317ed0da6554dd69",
+      "size": 16,
+      "svgCount": 476
+    },
+    {
+      "path": "contact-sheet-20px.png",
+      "sha256": "d72e18a7e35ae18438c7d06653ff9dae30628291651900a2c58107c3cc146c2d",
+      "size": 20,
+      "svgCount": 476
+    },
+    {
+      "path": "contact-sheet-24px.png",
+      "sha256": "0cb56a06529943966c6cd5dba1868d1547cb7f38d729058317c9cb5baf67f5e2",
+      "size": 24,
+      "svgCount": 476
+    },
+    {
+      "path": "contact-sheet-32px.png",
+      "sha256": "0be6f99bc4bc7fa1ae3730a7aaf5b2e851810c9fb32620f15c0776e4a1b66aaf",
+      "size": 32,
+      "svgCount": 476
+    },
+    {
+      "path": "contact-sheet-48px.png",
+      "sha256": "63dbaed004d8ac3957050cdee67819447dbf669d64763eebd1fb44dccbcd8e97",
+      "size": 48,
+      "svgCount": 476
+    }
+  ]
+}
