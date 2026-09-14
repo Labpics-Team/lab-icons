@@ -1,0 +1,811 @@
+{
+  "schemaVersion": "1.0.0",
+  "generatedAt": null,
+  "summary": {
+    "goodCount": 25,
+    "badCount": 25,
+    "hostileCount": 10,
+    "totalRejectionCodes": 12
+  },
+  "goodExamples": [
+    {
+      "id": "good.alert-circle.outline",
+      "type": "good",
+      "icon": "alert-circle",
+      "variant": "outline",
+      "input": {
+        "glyphParts": 3,
+        "hasMotion": false,
+        "modelState": "accepted",
+        "compositionKind": "compound"
+      },
+      "expectedOutcome": "accepted",
+      "reason": "Valid glyph with matching model variant and declared parts"
+    },
+    {
+      "id": "good.aloof.outline",
+      "type": "good",
+      "icon": "aloof",
+      "variant": "outline",
+      "input": {
+        "glyphParts": 4,
+        "hasMotion": false,
+        "modelState": "accepted",
+        "compositionKind": "compound"
+      },
+      "expectedOutcome": "accepted",
+      "reason": "Valid glyph with matching model variant and declared parts"
+    },
+    {
+      "id": "good.aloof.filled",
+      "type": "good",
+      "icon": "aloof",
+      "variant": "filled",
+      "input": {
+        "glyphParts": 4,
+        "hasMotion": false,
+        "modelState": "accepted",
+        "compositionKind": "compound"
+      },
+      "expectedOutcome": "accepted",
+      "reason": "Valid glyph with matching model variant and declared parts"
+    },
+    {
+      "id": "good.apps.outline",
+      "type": "good",
+      "icon": "apps",
+      "variant": "outline",
+      "input": {
+        "glyphParts": 9,
+        "hasMotion": false,
+        "modelState": "candidate",
+        "compositionKind": "compound"
+      },
+      "expectedOutcome": "accepted",
+      "reason": "Valid glyph with matching model variant and declared parts"
+    },
+    {
+      "id": "good.apps.filled",
+      "type": "good",
+      "icon": "apps",
+      "variant": "filled",
+      "input": {
+        "glyphParts": 9,
+        "hasMotion": false,
+        "modelState": "accepted",
+        "compositionKind": "compound"
+      },
+      "expectedOutcome": "accepted",
+      "reason": "Valid glyph with matching model variant and declared parts"
+    },
+    {
+      "id": "good.arrow-back.outline",
+      "type": "good",
+      "icon": "arrow-back",
+      "variant": "outline",
+      "input": {
+        "glyphParts": 2,
+        "hasMotion": false,
+        "modelState": "candidate",
+        "compositionKind": "compound"
+      },
+      "expectedOutcome": "accepted",
+      "reason": "Valid glyph with matching model variant and declared parts"
+    },
+    {
+      "id": "good.arrow-back.filled",
+      "type": "good",
+      "icon": "arrow-back",
+      "variant": "filled",
+      "input": {
+        "glyphParts": 2,
+        "hasMotion": false,
+        "modelState": "candidate",
+        "compositionKind": "compound"
+      },
+      "expectedOutcome": "accepted",
+      "reason": "Valid glyph with matching model variant and declared parts"
+    },
+    {
+      "id": "good.arrow-back-circle.outline",
+      "type": "good",
+      "icon": "arrow-back-circle",
+      "variant": "outline",
+      "input": {
+        "glyphParts": 3,
+        "hasMotion": false,
+        "modelState": "candidate",
+        "compositionKind": "compound"
+      },
+      "expectedOutcome": "accepted",
+      "reason": "Valid glyph with matching model variant and declared parts"
+    },
+    {
+      "id": "good.arrow-down.outline",
+      "type": "good",
+      "icon": "arrow-down",
+      "variant": "outline",
+      "input": {
+        "glyphParts": 2,
+        "hasMotion": false,
+        "modelState": "candidate",
+        "compositionKind": "compound"
+      },
+      "expectedOutcome": "accepted",
+      "reason": "Valid glyph with matching model variant and declared parts"
+    },
+    {
+      "id": "good.arrow-down.filled",
+      "type": "good",
+      "icon": "arrow-down",
+      "variant": "filled",
+      "input": {
+        "glyphParts": 2,
+        "hasMotion": false,
+        "modelState": "candidate",
+        "compositionKind": "compound"
+      },
+      "expectedOutcome": "accepted",
+      "reason": "Valid glyph with matching model variant and declared parts"
+    },
+    {
+      "id": "good.arrow-down-circle.outline",
+      "type": "good",
+      "icon": "arrow-down-circle",
+      "variant": "outline",
+      "input": {
+        "glyphParts": 3,
+        "hasMotion": false,
+        "modelState": "candidate",
+        "compositionKind": "compound"
+      },
+      "expectedOutcome": "accepted",
+      "reason": "Valid glyph with matching model variant and declared parts"
+    },
+    {
+      "id": "good.arrow-forward.outline",
+      "type": "good",
+      "icon": "arrow-forward",
+      "variant": "outline",
+      "input": {
+        "glyphParts": 2,
+        "hasMotion": false,
+        "modelState": "candidate",
+        "compositionKind": "compound"
+      },
+      "expectedOutcome": "accepted",
+      "reason": "Valid glyph with matching model variant and declared parts"
+    },
+    {
+      "id": "good.arrow-forward.filled",
+      "type": "good",
+      "icon": "arrow-forward",
+      "variant": "filled",
+      "input": {
+        "glyphParts": 2,
+        "hasMotion": false,
+        "modelState": "candidate",
+        "compositionKind": "compound"
+      },
+      "expectedOutcome": "accepted",
+      "reason": "Valid glyph with matching model variant and declared parts"
+    },
+    {
+      "id": "good.arrow-forward-circle.outline",
+      "type": "good",
+      "icon": "arrow-forward-circle",
+      "variant": "outline",
+      "input": {
+        "glyphParts": 3,
+        "hasMotion": false,
+        "modelState": "candidate",
+        "compositionKind": "compound"
+      },
+      "expectedOutcome": "accepted",
+      "reason": "Valid glyph with matching model variant and declared parts"
+    },
+    {
+      "id": "good.arrow-redo.outline",
+      "type": "good",
+      "icon": "arrow-redo",
+      "variant": "outline",
+      "input": {
+        "glyphParts": 2,
+        "hasMotion": false,
+        "modelState": "candidate",
+        "compositionKind": "compound"
+      },
+      "expectedOutcome": "accepted",
+      "reason": "Valid glyph with matching model variant and declared parts"
+    },
+    {
+      "id": "good.arrow-redo.filled",
+      "type": "good",
+      "icon": "arrow-redo",
+      "variant": "filled",
+      "input": {
+        "glyphParts": 2,
+        "hasMotion": false,
+        "modelState": "candidate",
+        "compositionKind": "compound"
+      },
+      "expectedOutcome": "accepted",
+      "reason": "Valid glyph with matching model variant and declared parts"
+    },
+    {
+      "id": "good.arrow-undo.outline",
+      "type": "good",
+      "icon": "arrow-undo",
+      "variant": "outline",
+      "input": {
+        "glyphParts": 0,
+        "hasMotion": false,
+        "modelState": "candidate",
+        "compositionKind": "compound"
+      },
+      "expectedOutcome": "accepted",
+      "reason": "Valid glyph with matching model variant and declared parts"
+    },
+    {
+      "id": "good.arrow-undo.filled",
+      "type": "good",
+      "icon": "arrow-undo",
+      "variant": "filled",
+      "input": {
+        "glyphParts": 0,
+        "hasMotion": false,
+        "modelState": "candidate",
+        "compositionKind": "compound"
+      },
+      "expectedOutcome": "accepted",
+      "reason": "Valid glyph with matching model variant and declared parts"
+    },
+    {
+      "id": "good.arrow-up.outline",
+      "type": "good",
+      "icon": "arrow-up",
+      "variant": "outline",
+      "input": {
+        "glyphParts": 2,
+        "hasMotion": false,
+        "modelState": "candidate",
+        "compositionKind": "compound"
+      },
+      "expectedOutcome": "accepted",
+      "reason": "Valid glyph with matching model variant and declared parts"
+    },
+    {
+      "id": "good.arrow-up.filled",
+      "type": "good",
+      "icon": "arrow-up",
+      "variant": "filled",
+      "input": {
+        "glyphParts": 2,
+        "hasMotion": false,
+        "modelState": "candidate",
+        "compositionKind": "compound"
+      },
+      "expectedOutcome": "accepted",
+      "reason": "Valid glyph with matching model variant and declared parts"
+    },
+    {
+      "id": "good.arrow-up-circle.outline",
+      "type": "good",
+      "icon": "arrow-up-circle",
+      "variant": "outline",
+      "input": {
+        "glyphParts": 3,
+        "hasMotion": false,
+        "modelState": "candidate",
+        "compositionKind": "compound"
+      },
+      "expectedOutcome": "accepted",
+      "reason": "Valid glyph with matching model variant and declared parts"
+    },
+    {
+      "id": "good.ban.outline",
+      "type": "good",
+      "icon": "ban",
+      "variant": "outline",
+      "input": {
+        "glyphParts": 2,
+        "hasMotion": false,
+        "modelState": "candidate",
+        "compositionKind": "compound"
+      },
+      "expectedOutcome": "accepted",
+      "reason": "Valid glyph with matching model variant and declared parts"
+    },
+    {
+      "id": "good.bookmark.outline",
+      "type": "good",
+      "icon": "bookmark",
+      "variant": "outline",
+      "input": {
+        "glyphParts": 2,
+        "hasMotion": false,
+        "modelState": "candidate",
+        "compositionKind": "compound"
+      },
+      "expectedOutcome": "accepted",
+      "reason": "Valid glyph with matching model variant and declared parts"
+    },
+    {
+      "id": "good.bookmark.filled",
+      "type": "good",
+      "icon": "bookmark",
+      "variant": "filled",
+      "input": {
+        "glyphParts": 2,
+        "hasMotion": false,
+        "modelState": "candidate",
+        "compositionKind": "compound"
+      },
+      "expectedOutcome": "accepted",
+      "reason": "Valid glyph with matching model variant and declared parts"
+    },
+    {
+      "id": "good.bulb.outline",
+      "type": "good",
+      "icon": "bulb",
+      "variant": "outline",
+      "input": {
+        "glyphParts": 4,
+        "hasMotion": false,
+        "modelState": "candidate",
+        "compositionKind": "compound"
+      },
+      "expectedOutcome": "accepted",
+      "reason": "Valid glyph with matching model variant and declared parts"
+    }
+  ],
+  "badExamples": [
+    {
+      "id": "bad.malformed-path",
+      "type": "bad",
+      "input": {
+        "d": "M 0 0 L abc 10"
+      },
+      "rejectionCode": "MALFORMED_PATH_DATA",
+      "reason": "Non-numeric coordinate in path data"
+    },
+    {
+      "id": "bad.missing-viewbox",
+      "type": "bad",
+      "input": {
+        "svg": "<svg width=\"24\" height=\"24\"><path d=\"M0 0\"/></svg>"
+      },
+      "rejectionCode": "MISSING_VIEWBOX",
+      "reason": "SVG lacks viewBox attribute"
+    },
+    {
+      "id": "bad.invalid-fill-rule",
+      "type": "bad",
+      "input": {
+        "fillRule": "invalid-value"
+      },
+      "rejectionCode": "INVALID_FILL_RULE",
+      "reason": "fillRule must be nonzero or evenodd"
+    },
+    {
+      "id": "bad.topology-violation",
+      "type": "bad",
+      "input": {
+        "parts": [
+          {
+            "id": "a",
+            "d": "M0 0Z"
+          },
+          {
+            "id": "b",
+            "d": "M0 0Z"
+          }
+        ],
+        "composition": "subtract"
+      },
+      "rejectionCode": "TOPOLOGY_VIOLATION",
+      "reason": "Subtraction produces empty geometry"
+    },
+    {
+      "id": "bad.missing-part-id",
+      "type": "bad",
+      "input": {
+        "parts": [
+          {
+            "d": "M0 0L10 10"
+          }
+        ]
+      },
+      "rejectionCode": "MISSING_PART_ID",
+      "reason": "Part object lacks required id field"
+    },
+    {
+      "id": "bad.duplicate-part-id",
+      "type": "bad",
+      "input": {
+        "parts": [
+          {
+            "id": "x",
+            "d": "M0 0"
+          },
+          {
+            "id": "x",
+            "d": "M1 1"
+          }
+        ]
+      },
+      "rejectionCode": "DUPLICATE_PART_ID",
+      "reason": "Multiple parts share the same id"
+    },
+    {
+      "id": "bad.anchor-out-of-range",
+      "type": "bad",
+      "input": {
+        "anchor": [
+          1.5,
+          0.5
+        ]
+      },
+      "rejectionCode": "INVALID_ANCHOR_RANGE",
+      "reason": "Anchor coordinates must be in [0,1]"
+    },
+    {
+      "id": "bad.empty-glyph",
+      "type": "bad",
+      "input": {
+        "parts": []
+      },
+      "rejectionCode": "EMPTY_GLYPH",
+      "reason": "Glyph must contain at least one part"
+    },
+    {
+      "id": "bad.non-finite-coordinate",
+      "type": "bad",
+      "input": {
+        "d": "M NaN 0 L 10 Infinity"
+      },
+      "rejectionCode": "NON_FINITE_COORDINATE",
+      "reason": "Path contains NaN or Infinity"
+    },
+    {
+      "id": "bad.self-intersection",
+      "type": "bad",
+      "input": {
+        "d": "M0 0L10 10L0 10L10 0Z"
+      },
+      "rejectionCode": "SELF_INTERSECTION_DETECTED",
+      "reason": "Bowtie path self-intersects"
+    },
+    {
+      "id": "bad.missing-metadata",
+      "type": "bad",
+      "input": {
+        "name": ""
+      },
+      "rejectionCode": "MISSING_METADATA",
+      "reason": "Glyph name is empty or missing"
+    },
+    {
+      "id": "bad.invalid-variant",
+      "type": "bad",
+      "input": {
+        "variant": "gradient"
+      },
+      "rejectionCode": "INVALID_VARIANT_KIND",
+      "reason": "Variant must be outline or filled"
+    },
+    {
+      "id": "bad.negative-viewbox",
+      "type": "bad",
+      "input": {
+        "viewBox": [
+          0,
+          0,
+          -24,
+          24
+        ]
+      },
+      "rejectionCode": "MALFORMED_PATH_DATA",
+      "reason": "Negative viewBox dimensions"
+    },
+    {
+      "id": "bad.zero-area-path",
+      "type": "bad",
+      "input": {
+        "d": "M0 0L0 0L0 0Z"
+      },
+      "rejectionCode": "TOPOLOGY_VIOLATION",
+      "reason": "Degenerate zero-area path"
+    },
+    {
+      "id": "bad.unclosed-path",
+      "type": "bad",
+      "input": {
+        "d": "M0 0L10 10L20 0",
+        "closed": false
+      },
+      "rejectionCode": "TOPOLOGY_VIOLATION",
+      "reason": "Open path cannot form valid fill region"
+    },
+    {
+      "id": "bad.control-point-oob",
+      "type": "bad",
+      "input": {
+        "d": "M0 0C-100 -100 200 200 24 24"
+      },
+      "rejectionCode": "MALFORMED_PATH_DATA",
+      "reason": "Control points far outside canvas bounds"
+    },
+    {
+      "id": "bad.mixed-winding",
+      "type": "bad",
+      "input": {
+        "parts": [
+          {
+            "id": "a",
+            "d": "M0 0L10 0L10 10Z",
+            "fillRule": "nonzero"
+          },
+          {
+            "id": "b",
+            "d": "M0 0L10 10L0 10Z",
+            "fillRule": "evenodd"
+          }
+        ]
+      },
+      "rejectionCode": "INVALID_FILL_RULE",
+      "reason": "Inconsistent fill rules across parts"
+    },
+    {
+      "id": "bad.null-anchor",
+      "type": "bad",
+      "input": {
+        "anchor": null
+      },
+      "rejectionCode": "INVALID_ANCHOR_RANGE",
+      "reason": "Anchor must be [number, number] tuple"
+    },
+    {
+      "id": "bad.undefined-part",
+      "type": "bad",
+      "input": {
+        "parts": [
+          null
+        ]
+      },
+      "rejectionCode": "MISSING_PART_ID",
+      "reason": "Part entry is undefined or null"
+    },
+    {
+      "id": "bad.extremely-long-path",
+      "type": "bad",
+      "input": {
+        "d": "M0 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0L1 0"
+      },
+      "rejectionCode": "MALFORMED_PATH_DATA",
+      "reason": "Path exceeds maximum command count"
+    },
+    {
+      "id": "bad.special-chars-id",
+      "type": "bad",
+      "input": {
+        "parts": [
+          {
+            "id": "part<script>",
+            "d": "M0 0"
+          }
+        ]
+      },
+      "rejectionCode": "MISSING_PART_ID",
+      "reason": "Part id contains invalid characters"
+    },
+    {
+      "id": "bad.nan-anchor",
+      "type": "bad",
+      "input": {
+        "anchor": [
+          null,
+          0.5
+        ]
+      },
+      "rejectionCode": "INVALID_ANCHOR_RANGE",
+      "reason": "Anchor contains non-finite value"
+    },
+    {
+      "id": "bad.wrong-composition",
+      "type": "bad",
+      "input": {
+        "composition": {
+          "kind": "merge",
+          "parts": []
+        }
+      },
+      "rejectionCode": "TOPOLOGY_VIOLATION",
+      "reason": "Merge composition with empty parts list"
+    },
+    {
+      "id": "bad.mismatched-track-partid",
+      "type": "bad",
+      "input": {
+        "tracks": [
+          {
+            "partId": "nonexistent",
+            "kind": "rotate"
+          }
+        ]
+      },
+      "rejectionCode": "MISSING_PART_ID",
+      "reason": "Track references undeclared part"
+    },
+    {
+      "id": "bad.reduced-motion-missing",
+      "type": "bad",
+      "input": {
+        "gesture": {
+          "id": "test",
+          "tracks": [
+            {
+              "partId": "a",
+              "kind": "rotate",
+              "from": 0,
+              "to": 90,
+              "unit": "degrees",
+              "anchor": [
+                0.5,
+                0.5
+              ]
+            }
+          ]
+        }
+      },
+      "rejectionCode": "MISSING_METADATA",
+      "reason": "Gesture lacks required reducedMotion declaration"
+    }
+  ],
+  "hostileTests": [
+    {
+      "id": "hostile.path-injection",
+      "description": "Path data containing script-like content",
+      "input": {
+        "d": "M0 0 javascript:alert(1)"
+      },
+      "shouldReject": true,
+      "rejectionCode": "MALFORMED_PATH_DATA"
+    },
+    {
+      "id": "hostile.prototype-pollution",
+      "description": "__proto__ key in parts object",
+      "input": {
+        "parts": {}
+      },
+      "shouldReject": true,
+      "rejectionCode": "MISSING_PART_ID"
+    },
+    {
+      "id": "hostile.unicode-id",
+      "description": "Zero-width characters in part id",
+      "input": {
+        "parts": [
+          {
+            "id": "a​b",
+            "d": "M0 0"
+          }
+        ]
+      },
+      "shouldReject": true,
+      "rejectionCode": "MISSING_PART_ID"
+    },
+    {
+      "id": "hostile.float-precision",
+      "description": "Coordinates at float64 boundary",
+      "input": {
+        "d": "M0 0L1.7976931348623157e+308 0"
+      },
+      "shouldReject": true,
+      "rejectionCode": "NON_FINITE_COORDINATE"
+    },
+    {
+      "id": "hostile.deeply-nested",
+      "description": "Deeply nested composition structure",
+      "input": {
+        "composition": {
+          "kind": "merge",
+          "children": {
+            "composition": {
+              "kind": "subtract",
+              "children": {
+                "composition": {
+                  "kind": "merge"
+                }
+              }
+            }
+          }
+        }
+      },
+      "shouldReject": true,
+      "rejectionCode": "TOPOLOGY_VIOLATION"
+    },
+    {
+      "id": "hostile.empty-string-everywhere",
+      "description": "All string fields set to empty",
+      "input": {
+        "id": "",
+        "kind": "",
+        "partIds": [
+          ""
+        ],
+        "progress": ""
+      },
+      "shouldReject": true,
+      "rejectionCode": "MISSING_METADATA"
+    },
+    {
+      "id": "hostile.array-as-anchor",
+      "description": "Anchor as 3-element array instead of 2",
+      "input": {
+        "anchor": [
+          0.5,
+          0.5,
+          0.5
+        ]
+      },
+      "shouldReject": true,
+      "rejectionCode": "INVALID_ANCHOR_RANGE"
+    },
+    {
+      "id": "hostile.negative-progress",
+      "description": "Progress value below 0",
+      "input": {
+        "progress": -0.001
+      },
+      "shouldReject": true,
+      "rejectionCode": "MALFORMED_PATH_DATA"
+    },
+    {
+      "id": "hostile.circular-reference-attempt",
+      "description": "Object attempting circular structure via JSON",
+      "input": {
+        "self": "[Circular]"
+      },
+      "shouldReject": true,
+      "rejectionCode": "MISSING_METADATA"
+    },
+    {
+      "id": "hostile.extreme-unit-value",
+      "description": "Unit value with extreme magnitude",
+      "input": {
+        "from": 0,
+        "to": 1e+308,
+        "unit": "degrees"
+      },
+      "shouldReject": true,
+      "rejectionCode": "NON_FINITE_COORDINATE"
+    }
+  ],
+  "rejectionCodes": [
+    "MALFORMED_PATH_DATA",
+    "MISSING_VIEWBOX",
+    "INVALID_FILL_RULE",
+    "TOPOLOGY_VIOLATION",
+    "MISSING_PART_ID",
+    "DUPLICATE_PART_ID",
+    "INVALID_ANCHOR_RANGE",
+    "EMPTY_GLYPH",
+    "NON_FINITE_COORDINATE",
+    "SELF_INTERSECTION_DETECTED",
+    "MISSING_METADATA",
+    "INVALID_VARIANT_KIND"
+  ],
+  "metadata": {
+    "sourceFiles": [
+      "semantics/anatomy.json",
+      "semantics/catalog.json"
+    ],
+    "invariants": [
+      "INV-09",
+      "INV-12",
+      "INV-18"
+    ],
+    "note": "Good examples derived from live anatomy/catalog; bad/hostile are deterministic fixtures"
+  }
+}

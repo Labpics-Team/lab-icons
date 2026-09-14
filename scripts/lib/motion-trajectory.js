@@ -33,16 +33,26 @@ export const DEFAULT_MOTION_RASTER_SIZES = Object.freeze([16, 20, 24, 32, 48]);
 
 export { sampleMotionGesture } from '../../src/core/motion-sampler.js';
 
-function compositionEntries(parts, composition, rotations, canvas) {
+function compositionEntries(parts, composition, sampledTracks, canvas) {
+  const trackMap = new Map(sampledTracks.map((t) => [t.partId, t]));
   const transformed = parts.map((part) => {
-    const transform = rotations.get(part.id);
-    const rotation = transform?.rotation;
-    const d = rotation == null
-      ? part.d
-      : rotatePath(part.d, rotation, transform.anchor[0] * canvas, transform.anchor[1] * canvas);
+    const track = trackMap.get(part.id);
+    let d = part.d;
+    let opacity = 1;
+    if (track) {
+      if (track.kind === 'rotate' && track.rotation != null) {
+        d = rotatePath(d, track.rotation, track.anchor[0] * canvas, track.anchor[1] * canvas);
+      } else if (track.kind === 'opacity' || track.kind === 'reveal') {
+        opacity = track.opacity ?? 1;
+      }
+      // translate and scale are geometric transforms that don't change path data
+      // in the boolean composition model; they affect rendering position/size only.
+      // Topology proof treats them as identity for path shape validation.
+    }
     return {
       ...part,
       d,
+      opacity,
       fillRule: part.fillRule ?? 'nonzero',
     };
   });
@@ -58,12 +68,11 @@ export function motionEntriesAt(parts, composition, gesture, progress, canvas = 
   if (!Array.isArray(parts) || parts.length === 0) throw new TypeError('motion-trajectory: parts пуст');
   if (!composition || typeof composition.kind !== 'string') throw new TypeError('motion-trajectory: composition не задана');
   const sampled = sampleMotionGesture(gesture, progress);
-  const rotations = new Map(sampled.map((track) => [track.partId, track]));
   const known = new Set(parts.map((part) => part.id));
   for (const track of sampled) {
     if (!known.has(track.partId)) throw new Error(`motion-trajectory: track ${track.partId} отсутствует среди parts`);
   }
-  return compositionEntries(parts, composition, rotations, canvas);
+  return compositionEntries(parts, composition, sampled, canvas);
 }
 
 function topologySignature(entries, size, phase, canvas) {

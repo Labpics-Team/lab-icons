@@ -1,0 +1,171 @@
+{
+  "schemaVersion": 1,
+  "gestureId": "time.advance",
+  "icon": "time",
+  "variant": "outline",
+  "frameEvidence": {
+    "progressSamples": 9,
+    "topologyConsistent": true,
+    "entryCountPerFrame": 3,
+    "frames": [
+      {
+        "progress": 0,
+        "trackSamples": [
+          {
+            "partId": "hand-minute",
+            "kind": "rotate",
+            "rotation": 0
+          },
+          {
+            "partId": "hand-hour",
+            "kind": "rotate",
+            "rotation": 0
+          }
+        ],
+        "entryCount": 3
+      },
+      {
+        "progress": 0.125,
+        "trackSamples": [
+          {
+            "partId": "hand-minute",
+            "kind": "rotate",
+            "rotation": 45
+          },
+          {
+            "partId": "hand-hour",
+            "kind": "rotate",
+            "rotation": 3.75
+          }
+        ],
+        "entryCount": 3
+      },
+      {
+        "progress": 0.25,
+        "trackSamples": [
+          {
+            "partId": "hand-minute",
+            "kind": "rotate",
+            "rotation": 90
+          },
+          {
+            "partId": "hand-hour",
+            "kind": "rotate",
+            "rotation": 7.5
+          }
+        ],
+        "entryCount": 3
+      },
+      {
+        "progress": 0.375,
+        "trackSamples": [
+          {
+            "partId": "hand-minute",
+            "kind": "rotate",
+            "rotation": 135
+          },
+          {
+            "partId": "hand-hour",
+            "kind": "rotate",
+            "rotation": 11.25
+          }
+        ],
+        "entryCount": 3
+      },
+      {
+        "progress": 0.5,
+        "trackSamples": [
+          {
+            "partId": "hand-minute",
+            "kind": "rotate",
+            "rotation": 180
+          },
+          {
+            "partId": "hand-hour",
+            "kind": "rotate",
+            "rotation": 15
+          }
+        ],
+        "entryCount": 3
+      },
+      {
+        "progress": 0.625,
+        "trackSamples": [
+          {
+            "partId": "hand-minute",
+            "kind": "rotate",
+            "rotation": 225
+          },
+          {
+            "partId": "hand-hour",
+            "kind": "rotate",
+            "rotation": 18.75
+          }
+        ],
+        "entryCount": 3
+      },
+      {
+        "progress": 0.75,
+        "trackSamples": [
+          {
+            "partId": "hand-minute",
+            "kind": "rotate",
+            "rotation": 270
+          },
+          {
+            "partId": "hand-hour",
+            "kind": "rotate",
+            "rotation": 22.5
+          }
+        ],
+        "entryCount": 3
+      },
+      {
+        "progress": 0.875,
+        "trackSamples": [
+          {
+            "partId": "hand-minute",
+            "kind": "rotate",
+            "rotation": 315
+          },
+          {
+            "partId": "hand-hour",
+            "kind": "rotate",
+            "rotation": 26.25
+          }
+        ],
+        "entryCount": 3
+      },
+      {
+        "progress": 1,
+        "trackSamples": [
+          {
+            "partId": "hand-minute",
+            "kind": "rotate",
+            "rotation": 360
+          },
+          {
+            "partId": "hand-hour",
+            "kind": "rotate",
+            "rotation": 30
+          }
+        ],
+        "entryCount": 3
+      }
+    ]
+  },
+  "reducedMotionEvidence": {
+    "declared": "static",
+    "frameCount": 1
+  },
+  "costEvidence": {
+    "lottieMedianMs": 0.009,
+    "sfMedianMs": 0.006,
+    "lottieOutputBytes": 479,
+    "sfOutputBytes": 464,
+    "costRuns": 5
+  },
+  "determinismCheck": {
+    "note": "Two consecutive buildBenchmark() calls produce identical JSON (verified by test)"
+  }
+}

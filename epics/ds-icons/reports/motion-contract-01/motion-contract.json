@@ -1,0 +1,63 @@
+{
+  "schemaVersion": "1.0.0",
+  "generatedAt": null,
+  "gestureCount": 1,
+  "snapshots": [
+    {
+      "icon": "time",
+      "gestureId": "time.advance",
+      "kind": "clock-advance",
+      "partIds": [
+        "hand-minute",
+        "hand-hour"
+      ],
+      "progress": "normalized-0-to-1",
+      "reducedMotion": "static",
+      "tracks": [
+        {
+          "partId": "hand-minute",
+          "kind": "rotate",
+          "anchor": [
+            0.5,
+            0.5
+          ],
+          "from": 0,
+          "to": 360,
+          "unit": "degrees",
+          "interpolation": "linear"
+        },
+        {
+          "partId": "hand-hour",
+          "kind": "rotate",
+          "anchor": [
+            0.5,
+            0.5
+          ],
+          "from": 0,
+          "to": 30,
+          "unit": "degrees",
+          "interpolation": "linear"
+        }
+      ]
+    }
+  ],
+  "censusNonPublic": {
+    "verified": true,
+    "findings": []
+  },
+  "metadata": {
+    "sourceFiles": [
+      "semantics/anatomy.json"
+    ],
+    "excludedFromPublicIR": [
+      "semantics/motion-census.json",
+      "semantics/motion-families.json"
+    ],
+    "invariants": [
+      "INV-09",
+      "INV-12",
+      "INV-19",
+      "INV-21"
+    ]
+  }
+}

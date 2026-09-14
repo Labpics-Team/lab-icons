@@ -1,0 +1,316 @@
+{
+  "schemaVersion": 1,
+  "families": [
+    {
+      "id": "arrow-directional-emphasis",
+      "meaning": "подчёркивание направления",
+      "requiredTrackKinds": [
+        "translate"
+      ],
+      "icons": [
+        {
+          "icon": "arrow-back",
+          "status": "needs-declaration",
+          "requiredTrackKinds": [
+            "translate"
+          ]
+        },
+        {
+          "icon": "arrow-back-circle",
+          "status": "needs-declaration",
+          "requiredTrackKinds": [
+            "translate"
+          ]
+        },
+        {
+          "icon": "arrow-down",
+          "status": "needs-declaration",
+          "requiredTrackKinds": [
+            "translate"
+          ]
+        },
+        {
+          "icon": "arrow-down-circle",
+          "status": "needs-declaration",
+          "requiredTrackKinds": [
+            "translate"
+          ]
+        },
+        {
+          "icon": "arrow-forward",
+          "status": "needs-declaration",
+          "requiredTrackKinds": [
+            "translate"
+          ]
+        },
+        {
+          "icon": "arrow-forward-circle",
+          "status": "needs-declaration",
+          "requiredTrackKinds": [
+            "translate"
+          ]
+        },
+        {
+          "icon": "arrow-up",
+          "status": "needs-declaration",
+          "requiredTrackKinds": [
+            "translate"
+          ]
+        },
+        {
+          "icon": "arrow-up-circle",
+          "status": "needs-declaration",
+          "requiredTrackKinds": [
+            "translate"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "checkmark-confirm",
+      "meaning": "подтверждение",
+      "requiredTrackKinds": [
+        "reveal"
+      ],
+      "icons": [
+        {
+          "icon": "checkmark",
+          "status": "needs-declaration",
+          "requiredTrackKinds": [
+            "reveal"
+          ]
+        },
+        {
+          "icon": "checkmark-circle",
+          "status": "needs-declaration",
+          "requiredTrackKinds": [
+            "reveal"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "chevron-nudge",
+      "meaning": "направленный кивок",
+      "requiredTrackKinds": [
+        "translate"
+      ],
+      "icons": [
+        {
+          "icon": "chevron-back",
+          "status": "needs-declaration",
+          "requiredTrackKinds": [
+            "translate"
+          ]
+        },
+        {
+          "icon": "chevron-back-circle",
+          "status": "needs-declaration",
+          "requiredTrackKinds": [
+            "translate"
+          ]
+        },
+        {
+          "icon": "chevron-down",
+          "status": "needs-declaration",
+          "requiredTrackKinds": [
+            "translate"
+          ]
+        },
+        {
+          "icon": "chevron-down-circle",
+          "status": "needs-declaration",
+          "requiredTrackKinds": [
+            "translate"
+          ]
+        },
+        {
+          "icon": "chevron-forward",
+          "status": "needs-declaration",
+          "requiredTrackKinds": [
+            "translate"
+          ]
+        },
+        {
+          "icon": "chevron-forward-circle",
+          "status": "needs-declaration",
+          "requiredTrackKinds": [
+            "translate"
+          ]
+        },
+        {
+          "icon": "chevron-up",
+          "status": "needs-declaration",
+          "requiredTrackKinds": [
+            "translate"
+          ]
+        },
+        {
+          "icon": "chevron-up-circle",
+          "status": "needs-declaration",
+          "requiredTrackKinds": [
+            "translate"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "double-check-stagger",
+      "meaning": "двойное подтверждение",
+      "requiredTrackKinds": [
+        "reveal"
+      ],
+      "icons": [
+        {
+          "icon": "checkmarks",
+          "status": "needs-declaration",
+          "requiredTrackKinds": [
+            "reveal"
+          ]
+        },
+        {
+          "icon": "checkmarks-circle",
+          "status": "needs-declaration",
+          "requiredTrackKinds": [
+            "reveal"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ellipsis-typing",
+      "meaning": "ожидание ввода",
+      "requiredTrackKinds": [
+        "opacity",
+        "scale"
+      ],
+      "icons": [
+        {
+          "icon": "ellipsis-horizontal",
+          "status": "needs-declaration",
+          "requiredTrackKinds": [
+            "opacity",
+            "scale"
+          ]
+        },
+        {
+          "icon": "ellipsis-vertical",
+          "status": "needs-declaration",
+          "requiredTrackKinds": [
+            "opacity",
+            "scale"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "off-slash-draw",
+      "meaning": "прочерчивание выключения",
+      "requiredTrackKinds": [
+        "reveal"
+      ],
+      "icons": [
+        {
+          "icon": "cloud-off",
+          "status": "needs-declaration",
+          "requiredTrackKinds": [
+            "reveal"
+          ]
+        },
+        {
+          "icon": "heart-off",
+          "status": "needs-declaration",
+          "requiredTrackKinds": [
+            "reveal"
+          ]
+        },
+        {
+          "icon": "mic-off",
+          "status": "needs-declaration",
+          "requiredTrackKinds": [
+            "reveal"
+          ]
+        },
+        {
+          "icon": "video-camera-off",
+          "status": "needs-declaration",
+          "requiredTrackKinds": [
+            "reveal"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "plus-minus-actuate",
+      "meaning": "добавление или удаление",
+      "requiredTrackKinds": [
+        "opacity",
+        "scale"
+      ],
+      "icons": [
+        {
+          "icon": "minus",
+          "status": "needs-declaration",
+          "requiredTrackKinds": [
+            "opacity",
+            "scale"
+          ]
+        },
+        {
+          "icon": "minus-circle",
+          "status": "needs-declaration",
+          "requiredTrackKinds": [
+            "opacity",
+            "scale"
+          ]
+        },
+        {
+          "icon": "plus",
+          "status": "needs-declaration",
+          "requiredTrackKinds": [
+            "opacity",
+            "scale"
+          ]
+        },
+        {
+          "icon": "plus-circle",
+          "status": "needs-declaration",
+          "requiredTrackKinds": [
+            "opacity",
+            "scale"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "swap-exchange",
+      "meaning": "обмен направлениями",
+      "requiredTrackKinds": [
+        "translate"
+      ],
+      "icons": [
+        {
+          "icon": "swap-horizontal",
+          "status": "needs-declaration",
+          "requiredTrackKinds": [
+            "translate"
+          ]
+        },
+        {
+          "icon": "swap-vertical",
+          "status": "needs-declaration",
+          "requiredTrackKinds": [
+            "translate"
+          ]
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "totalIcons": 0,
+    "totalProofs": 0,
+    "passed": 0,
+    "skipped": 32,
+    "failed": 0
+  }
+}
