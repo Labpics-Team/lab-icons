@@ -35,11 +35,25 @@ export function validateMotionGesture(gesture) {
     if (!partIds.has(track.partId)) {
       throw new TypeError(`motion-sampler: track ${track.partId} не объявлен в gesture.partIds`);
     }
-    if (track.kind !== 'rotate' || track.unit !== 'degrees' || track.interpolation !== 'linear') {
-      throw new TypeError(`motion-sampler: неподдержанный track для ${track.partId}`);
+    const validKinds = ['rotate', 'translate', 'opacity', 'scale', 'reveal'];
+    if (!validKinds.includes(track.kind)) {
+      throw new TypeError(`motion-sampler: неподдержанный track.kind '${track.kind}' для ${track.partId}; допустимы [${validKinds.join(', ')}]`);
     }
-    if (!Array.isArray(track.anchor) || track.anchor.length !== 2 || track.anchor.some((value) => !Number.isFinite(value) || value < 0 || value > 1)) {
-      throw new TypeError(`motion-sampler: track ${track.partId} имеет невалидный anchor`);
+    if (track.kind === 'rotate') {
+      if (track.unit !== 'degrees' || track.interpolation !== 'linear') {
+        throw new TypeError(`motion-sampler: rotate track обязан использовать unit=degrees, interpolation=linear`);
+      }
+      if (!Array.isArray(track.anchor) || track.anchor.length !== 2 || track.anchor.some((value) => !Number.isFinite(value) || value < 0 || value > 1)) {
+        throw new TypeError(`motion-sampler: track ${track.partId} имеет невалидный anchor`);
+      }
+    }
+    if (track.kind === 'opacity' || track.kind === 'reveal') {
+      if (track.unit !== 'normalized') {
+        throw new TypeError(`motion-sampler: ${track.kind} track обязан использовать unit=normalized`);
+      }
+      if (track.from < 0 || track.from > 1 || track.to < 0 || track.to > 1) {
+        throw new RangeError(`motion-sampler: ${track.kind} track.from/to обязаны быть в [0,1]`);
+      }
     }
     if (![track.from, track.to].every(Number.isFinite)) {
       throw new TypeError(`motion-sampler: track ${track.partId} имеет нечисловые границы`);
@@ -51,11 +65,20 @@ export function validateMotionGesture(gesture) {
 export function sampleMotionGesture(gesture, progress) {
   validateMotionGesture(gesture);
   const t = finiteProgress(progress);
-  return Object.freeze(gesture.tracks.map((track) => Object.freeze({
-    partId: track.partId,
-    kind: track.kind,
-    anchor: Object.freeze([...track.anchor]),
-    rotation: track.from + (track.to - track.from) * t,
-  })));
+  return Object.freeze(gesture.tracks.map((track) => {
+    const value = track.from + (track.to - track.from) * t;
+    const sample = { partId: track.partId, kind: track.kind };
+    if (track.kind === 'rotate') {
+      sample.anchor = Object.freeze([...track.anchor]);
+      sample.rotation = value;
+    } else if (track.kind === 'opacity' || track.kind === 'reveal') {
+      sample.opacity = value;
+    } else if (track.kind === 'translate') {
+      sample.translation = value;
+    } else if (track.kind === 'scale') {
+      sample.scale = value;
+    }
+    return Object.freeze(sample);
+  }));
 }
 
