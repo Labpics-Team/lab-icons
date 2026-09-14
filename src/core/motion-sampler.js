@@ -23,6 +23,13 @@ export function validateMotionGesture(gesture) {
   if (!Array.isArray(gesture.tracks) || gesture.tracks.length === 0) {
     throw new TypeError('motion-sampler: gesture.tracks обязан быть непустым массивом');
   }
+  // INV-19: reduced-motion equivalent is mandatory at the sampler level
+  const validReducedMotion = ['static', 'fade-only', 'none'];
+  if (!gesture.reducedMotion || !validReducedMotion.includes(gesture.reducedMotion)) {
+    throw new TypeError(
+      `motion-sampler: gesture.reducedMotion обязан быть одним из [${validReducedMotion.join(', ')}], получено '${gesture.reducedMotion}'`
+    );
+  }
   const partIds = new Set(gesture.partIds);
   const trackIds = new Set();
   for (const track of gesture.tracks) {
