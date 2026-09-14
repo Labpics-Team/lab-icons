@@ -1,0 +1,2263 @@
+{
+  "schemaVersion": 1,
+  "measurementCount": 64,
+  "totalDisabledAxes": 66,
+  "asm02": 0,
+  "verdictSummary": {
+    "pass": 0,
+    "fail": 62,
+    "awaiting-owner": 2
+  },
+  "classSummary": {
+    "redraw-required": 62,
+    "owner-blocked-rect-pen": 2
+  },
+  "measurements": [
+    {
+      "axisKey": "alert-circle/outline/weight",
+      "icon": "alert-circle",
+      "variant": "outline",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "aloof/outline/weight",
+      "icon": "aloof",
+      "variant": "outline",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "apps/outline/weight",
+      "icon": "apps",
+      "variant": "outline",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "arrow-back-circle/outline/weight",
+      "icon": "arrow-back-circle",
+      "variant": "outline",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "arrow-back/filled/weight",
+      "icon": "arrow-back",
+      "variant": "filled",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "arrow-back/outline/weight",
+      "icon": "arrow-back",
+      "variant": "outline",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "arrow-down-circle/outline/weight",
+      "icon": "arrow-down-circle",
+      "variant": "outline",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "arrow-down/filled/weight",
+      "icon": "arrow-down",
+      "variant": "filled",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "arrow-down/outline/weight",
+      "icon": "arrow-down",
+      "variant": "outline",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "arrow-forward-circle/outline/weight",
+      "icon": "arrow-forward-circle",
+      "variant": "outline",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "arrow-forward/filled/weight",
+      "icon": "arrow-forward",
+      "variant": "filled",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "arrow-forward/outline/weight",
+      "icon": "arrow-forward",
+      "variant": "outline",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "arrow-up-circle/outline/weight",
+      "icon": "arrow-up-circle",
+      "variant": "outline",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "arrow-up/filled/weight",
+      "icon": "arrow-up",
+      "variant": "filled",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "arrow-up/outline/weight",
+      "icon": "arrow-up",
+      "variant": "outline",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "ban/outline/weight",
+      "icon": "ban",
+      "variant": "outline",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "bulb/outline/weight",
+      "icon": "bulb",
+      "variant": "outline",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "checkmark-circle/outline/weight",
+      "icon": "checkmark-circle",
+      "variant": "outline",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "checkmark/outline/weight",
+      "icon": "checkmark",
+      "variant": "outline",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "checkmarks-circle/outline/weight",
+      "icon": "checkmarks-circle",
+      "variant": "outline",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "checkmarks/outline/weight",
+      "icon": "checkmarks",
+      "variant": "outline",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "chevron-back-circle/filled/weight",
+      "icon": "chevron-back-circle",
+      "variant": "filled",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "chevron-back-circle/outline/weight",
+      "icon": "chevron-back-circle",
+      "variant": "outline",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "chevron-down-circle/filled/weight",
+      "icon": "chevron-down-circle",
+      "variant": "filled",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "chevron-down-circle/outline/weight",
+      "icon": "chevron-down-circle",
+      "variant": "outline",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "chevron-forward-circle/filled/weight",
+      "icon": "chevron-forward-circle",
+      "variant": "filled",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "chevron-forward-circle/outline/weight",
+      "icon": "chevron-forward-circle",
+      "variant": "outline",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "chevron-up-circle/filled/weight",
+      "icon": "chevron-up-circle",
+      "variant": "filled",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "chevron-up-circle/outline/weight",
+      "icon": "chevron-up-circle",
+      "variant": "outline",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "close-circle/outline/weight",
+      "icon": "close-circle",
+      "variant": "outline",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "close/outline/weight",
+      "icon": "close",
+      "variant": "outline",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "cloud/outline/weight",
+      "icon": "cloud",
+      "variant": "outline",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "component/outline/weight",
+      "icon": "component",
+      "variant": "outline",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "download/outline/weight",
+      "icon": "download",
+      "variant": "outline",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "ellipse/outline/weight",
+      "icon": "ellipse",
+      "variant": "outline",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "eye/outline/weight",
+      "icon": "eye",
+      "variant": "outline",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "info-circle/outline/weight",
+      "icon": "info-circle",
+      "variant": "outline",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "info/outline/weight",
+      "icon": "info",
+      "variant": "outline",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "minus-circle/outline/weight",
+      "icon": "minus-circle",
+      "variant": "outline",
+      "axis": "weight",
+      "triageClass": "owner-blocked-rect-pen",
+      "verdict": "awaiting-owner",
+      "topologyStable": null,
+      "measuredAt": null,
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "move/filled/weight",
+      "icon": "move",
+      "variant": "filled",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "move/outline/weight",
+      "icon": "move",
+      "variant": "outline",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "pause-circle/outline/weight",
+      "icon": "pause-circle",
+      "variant": "outline",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "pause/outline/weight",
+      "icon": "pause",
+      "variant": "outline",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "play-back-circle/outline/weight",
+      "icon": "play-back-circle",
+      "variant": "outline",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "play-circle/outline/weight",
+      "icon": "play-circle",
+      "variant": "outline",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "play-forward-circle/outline/weight",
+      "icon": "play-forward-circle",
+      "variant": "outline",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "play-skip-back-circle/outline/weight",
+      "icon": "play-skip-back-circle",
+      "variant": "outline",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "play-skip-forward-circle/outline/weight",
+      "icon": "play-skip-forward-circle",
+      "variant": "outline",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "plus-circle/outline/weight",
+      "icon": "plus-circle",
+      "variant": "outline",
+      "axis": "weight",
+      "triageClass": "owner-blocked-rect-pen",
+      "verdict": "awaiting-owner",
+      "topologyStable": null,
+      "measuredAt": null,
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "radio/filled/weight",
+      "icon": "radio",
+      "variant": "filled",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "radio/outline/weight",
+      "icon": "radio",
+      "variant": "outline",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "reload/filled/weight",
+      "icon": "reload",
+      "variant": "filled",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "reload/outline/weight",
+      "icon": "reload",
+      "variant": "outline",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "resize/filled/weight",
+      "icon": "resize",
+      "variant": "filled",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "resize/outline/weight",
+      "icon": "resize",
+      "variant": "outline",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "square/outline/weight",
+      "icon": "square",
+      "variant": "outline",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "sun-low/outline/weight",
+      "icon": "sun-low",
+      "variant": "outline",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "swap-horizontal/filled/weight",
+      "icon": "swap-horizontal",
+      "variant": "filled",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "swap-horizontal/outline/weight",
+      "icon": "swap-horizontal",
+      "variant": "outline",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "swap-vertical/filled/weight",
+      "icon": "swap-vertical",
+      "variant": "filled",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "swap-vertical/outline/weight",
+      "icon": "swap-vertical",
+      "variant": "outline",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "tablet-landscape/outline/weight",
+      "icon": "tablet-landscape",
+      "variant": "outline",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "tablet-portrait/outline/weight",
+      "icon": "tablet-portrait",
+      "variant": "outline",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    },
+    {
+      "axisKey": "time/filled/weight",
+      "icon": "time",
+      "variant": "filled",
+      "axis": "weight",
+      "triageClass": "redraw-required",
+      "verdict": "fail",
+      "topologyStable": false,
+      "measuredAt": "placeholder-awaiting-real-measurement",
+      "declaredRasterSizes": [
+        16,
+        24,
+        48
+      ],
+      "declaredPhases": [
+        [
+          0.25,
+          0.25
+        ],
+        [
+          0.75,
+          0.25
+        ],
+        [
+          0.25,
+          0.75
+        ],
+        [
+          0.75,
+          0.75
+        ]
+      ],
+      "evidence": "awaiting-measurement",
+      "exitCriteria": "Restore phase-stable topology at every declared axis and raster sample, then remove this reviewed debt record."
+    }
+  ],
+  "metadata": {
+    "sourceFile": "semantics/axis-quality.json",
+    "triageSchemaVersion": 1,
+    "generatedDeterministically": true,
+    "note": "Placeholder measurements; real geometric proof pending axis-proof pipeline"
+  }
+}
