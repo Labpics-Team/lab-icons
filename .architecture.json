@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "components": [
+    {
+      "id": "core",
+      "prefixes": [
+        "src/core"
+      ]
+    },
+    {
+      "id": "authoring",
+      "prefixes": [
+        "src/authoring"
+      ]
+    },
+    {
+      "id": "ir",
+      "prefixes": [
+        "src/ir"
+      ]
+    },
+    {
+      "id": "repository-tools",
+      "prefixes": [
+        "scripts",
+        "svgo.config.cjs",
+        "vitest.config.js"
+      ]
+    },
+    {
+      "id": "research-evidence",
+      "prefixes": [
+        "epics/ds-icons/reports/cov-00"
+      ]
+    }
+  ],
+  "rules": [
+    {
+      "id": "core-no-authoring",
+      "kind": "forbidden-dependency",
+      "from": [
+        "src/core"
+      ],
+      "to": [
+        "src/authoring"
+      ],
+      "rationale": "Переносимое ядро остаётся автономным."
+    },
+    {
+      "id": "core-no-ir",
+      "kind": "forbidden-dependency",
+      "from": [
+        "src/core"
+      ],
+      "to": [
+        "src/ir"
+      ],
+      "rationale": "Ядро не зависит от механизмов авторинга и промежуточного представления."
+    },
+    {
+      "id": "core-no-npm",
+      "kind": "forbidden-dependency",
+      "from": [
+        "src/core"
+      ],
+      "to": [
+        "external:npm"
+      ],
+      "rationale": "Ядро не имеет внешних зависимостей и остаётся переносимым."
+    },
+    {
+      "id": "core-no-node",
+      "kind": "forbidden-dependency",
+      "from": [
+        "src/core"
+      ],
+      "to": [
+        "external:node"
+      ],
+      "rationale": "Ядро не зависит от среды выполнения."
+    }
+  ]
+}
