@@ -1,0 +1,55 @@
+{
+  "version": "3.0",
+  "symbolName": "time.advance",
+  "canvasSize": {
+    "width": 24,
+    "height": 24
+  },
+  "reducedMotionEquivalent": "static",
+  "layers": [
+    {
+      "name": "hand-minute",
+      "type": "rotation",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "animation": {
+        "type": "linear",
+        "duration": 1,
+        "keyframes": [
+          {
+            "time": 0,
+            "value": 0
+          },
+          {
+            "time": 1,
+            "value": 360
+          }
+        ]
+      }
+    },
+    {
+      "name": "hand-hour",
+      "type": "rotation",
+      "anchor": {
+        "x": 0.5,
+        "y": 0.5
+      },
+      "animation": {
+        "type": "linear",
+        "duration": 1,
+        "keyframes": [
+          {
+            "time": 0,
+            "value": 0
+          },
+          {
+            "time": 1,
+            "value": 30
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -92,7 +92,8 @@
     "check:ring-canon": "node scripts/check-ring-canon.js",
     "check:census": "node scripts/census/build-census.mjs && node scripts/check-census-fresh.js",
     "build:motion-census": "node scripts/build-motion-census.mjs",
-    "check:motion-census": "node scripts/check-motion-census.mjs"
+    "check:motion-census": "node scripts/check-motion-census.mjs",
+    "visual:contact-sheets": "node scripts/build-contact-sheets.mjs"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "0.18.5",
@@ -101,6 +102,7 @@
     "marked": "9.1.6",
     "publint": "0.3.21",
     "rollup": "4.62.2",
+    "sharp": "^0.35.4",
     "svgo": "4.1.0",
     "typescript": "7.0.2",
     "vite": "8.1.4",

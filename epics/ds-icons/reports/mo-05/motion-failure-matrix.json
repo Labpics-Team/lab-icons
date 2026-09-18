@@ -1,0 +1,330 @@
+{
+  "schemaVersion": 1,
+  "validFailureCodes": [
+    "PROVEN",
+    "PARTIAL",
+    "NO_GESTURE",
+    "SCHEMA_INVALID",
+    "BUILD_FAILED",
+    "TRAJECTORY_FAIL",
+    "EXCLUDED",
+    "MISSING_GLYPH_OR_MODEL"
+  ],
+  "families": [
+    {
+      "id": "arrow-directional-emphasis",
+      "meaning": "подчёркивание направления",
+      "requiredTrackKinds": [
+        "translate"
+      ],
+      "icons": [
+        {
+          "icon": "arrow-back",
+          "code": "NO_GESTURE",
+          "requiredTrackKinds": [
+            "translate"
+          ]
+        },
+        {
+          "icon": "arrow-back-circle",
+          "code": "NO_GESTURE",
+          "requiredTrackKinds": [
+            "translate"
+          ]
+        },
+        {
+          "icon": "arrow-down",
+          "code": "NO_GESTURE",
+          "requiredTrackKinds": [
+            "translate"
+          ]
+        },
+        {
+          "icon": "arrow-down-circle",
+          "code": "NO_GESTURE",
+          "requiredTrackKinds": [
+            "translate"
+          ]
+        },
+        {
+          "icon": "arrow-forward",
+          "code": "NO_GESTURE",
+          "requiredTrackKinds": [
+            "translate"
+          ]
+        },
+        {
+          "icon": "arrow-forward-circle",
+          "code": "NO_GESTURE",
+          "requiredTrackKinds": [
+            "translate"
+          ]
+        },
+        {
+          "icon": "arrow-up",
+          "code": "NO_GESTURE",
+          "requiredTrackKinds": [
+            "translate"
+          ]
+        },
+        {
+          "icon": "arrow-up-circle",
+          "code": "NO_GESTURE",
+          "requiredTrackKinds": [
+            "translate"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "checkmark-confirm",
+      "meaning": "подтверждение",
+      "requiredTrackKinds": [
+        "reveal"
+      ],
+      "icons": [
+        {
+          "icon": "checkmark",
+          "code": "NO_GESTURE",
+          "requiredTrackKinds": [
+            "reveal"
+          ]
+        },
+        {
+          "icon": "checkmark-circle",
+          "code": "NO_GESTURE",
+          "requiredTrackKinds": [
+            "reveal"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "chevron-nudge",
+      "meaning": "направленный кивок",
+      "requiredTrackKinds": [
+        "translate"
+      ],
+      "icons": [
+        {
+          "icon": "chevron-back",
+          "code": "NO_GESTURE",
+          "requiredTrackKinds": [
+            "translate"
+          ]
+        },
+        {
+          "icon": "chevron-back-circle",
+          "code": "NO_GESTURE",
+          "requiredTrackKinds": [
+            "translate"
+          ]
+        },
+        {
+          "icon": "chevron-down",
+          "code": "NO_GESTURE",
+          "requiredTrackKinds": [
+            "translate"
+          ]
+        },
+        {
+          "icon": "chevron-down-circle",
+          "code": "NO_GESTURE",
+          "requiredTrackKinds": [
+            "translate"
+          ]
+        },
+        {
+          "icon": "chevron-forward",
+          "code": "NO_GESTURE",
+          "requiredTrackKinds": [
+            "translate"
+          ]
+        },
+        {
+          "icon": "chevron-forward-circle",
+          "code": "NO_GESTURE",
+          "requiredTrackKinds": [
+            "translate"
+          ]
+        },
+        {
+          "icon": "chevron-up",
+          "code": "NO_GESTURE",
+          "requiredTrackKinds": [
+            "translate"
+          ]
+        },
+        {
+          "icon": "chevron-up-circle",
+          "code": "NO_GESTURE",
+          "requiredTrackKinds": [
+            "translate"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "double-check-stagger",
+      "meaning": "двойное подтверждение",
+      "requiredTrackKinds": [
+        "reveal"
+      ],
+      "icons": [
+        {
+          "icon": "checkmarks",
+          "code": "NO_GESTURE",
+          "requiredTrackKinds": [
+            "reveal"
+          ]
+        },
+        {
+          "icon": "checkmarks-circle",
+          "code": "NO_GESTURE",
+          "requiredTrackKinds": [
+            "reveal"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ellipsis-typing",
+      "meaning": "ожидание ввода",
+      "requiredTrackKinds": [
+        "opacity",
+        "scale"
+      ],
+      "icons": [
+        {
+          "icon": "ellipsis-horizontal",
+          "code": "NO_GESTURE",
+          "requiredTrackKinds": [
+            "opacity",
+            "scale"
+          ]
+        },
+        {
+          "icon": "ellipsis-vertical",
+          "code": "NO_GESTURE",
+          "requiredTrackKinds": [
+            "opacity",
+            "scale"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "off-slash-draw",
+      "meaning": "прочерчивание выключения",
+      "requiredTrackKinds": [
+        "reveal"
+      ],
+      "icons": [
+        {
+          "icon": "cloud-off",
+          "code": "NO_GESTURE",
+          "requiredTrackKinds": [
+            "reveal"
+          ]
+        },
+        {
+          "icon": "heart-off",
+          "code": "NO_GESTURE",
+          "requiredTrackKinds": [
+            "reveal"
+          ]
+        },
+        {
+          "icon": "mic-off",
+          "code": "NO_GESTURE",
+          "requiredTrackKinds": [
+            "reveal"
+          ]
+        },
+        {
+          "icon": "video-camera-off",
+          "code": "NO_GESTURE",
+          "requiredTrackKinds": [
+            "reveal"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "plus-minus-actuate",
+      "meaning": "добавление или удаление",
+      "requiredTrackKinds": [
+        "opacity",
+        "scale"
+      ],
+      "icons": [
+        {
+          "icon": "minus",
+          "code": "NO_GESTURE",
+          "requiredTrackKinds": [
+            "opacity",
+            "scale"
+          ]
+        },
+        {
+          "icon": "minus-circle",
+          "code": "NO_GESTURE",
+          "requiredTrackKinds": [
+            "opacity",
+            "scale"
+          ]
+        },
+        {
+          "icon": "plus",
+          "code": "NO_GESTURE",
+          "requiredTrackKinds": [
+            "opacity",
+            "scale"
+          ]
+        },
+        {
+          "icon": "plus-circle",
+          "code": "NO_GESTURE",
+          "requiredTrackKinds": [
+            "opacity",
+            "scale"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "swap-exchange",
+      "meaning": "обмен направлениями",
+      "requiredTrackKinds": [
+        "translate"
+      ],
+      "icons": [
+        {
+          "icon": "swap-horizontal",
+          "code": "NO_GESTURE",
+          "requiredTrackKinds": [
+            "translate"
+          ]
+        },
+        {
+          "icon": "swap-vertical",
+          "code": "NO_GESTURE",
+          "requiredTrackKinds": [
+            "translate"
+          ]
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "totalIcons": 32,
+    "proven": 0,
+    "partial": 0,
+    "noGesture": 32,
+    "schemaInvalid": 0,
+    "buildFailed": 0,
+    "trajectoryFail": 0,
+    "excluded": 0,
+    "missing": 0
+  }
+}

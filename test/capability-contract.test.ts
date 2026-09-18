@@ -62,9 +62,10 @@ describe('capability and design contract', () => {
         kind: 'clock-advance',
         partIds: ['hand-minute', 'hand-hour'],
         progress: 'normalized-0-to-1',
+        reducedMotion: 'static',
         tracks: [
-          { partId: 'hand-minute', from: 0, to: 360, unit: 'degrees', interpolation: 'linear' },
-          { partId: 'hand-hour', from: 0, to: 30, unit: 'degrees', interpolation: 'linear' },
+          { partId: 'hand-minute', from: 0, to: 360, unit: 'degrees', interpolation: 'linear', anchor: [0.5, 0.5] },
+          { partId: 'hand-hour', from: 0, to: 30, unit: 'degrees', interpolation: 'linear', anchor: [0.5, 0.5] },
         ],
       }],
       adapters: { lottie: 'not-exported', sfSymbols: 'not-exported' },

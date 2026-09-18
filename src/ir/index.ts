@@ -195,12 +195,12 @@ export type MotionCapabilityState =
 
 export interface MotionGestureTrackContract {
   readonly partId: string;
-  readonly kind: 'rotate';
-  readonly anchor: readonly [number, number];
+  readonly kind: 'rotate' | 'translate' | 'opacity' | 'scale' | 'reveal';
+  readonly anchor?: readonly [number, number];
   readonly from: number;
   readonly to: number;
-  readonly unit: 'degrees';
-  readonly interpolation: 'linear';
+  readonly unit: 'degrees' | 'px' | 'percent' | 'normalized' | 'factor';
+  readonly interpolation: 'linear' | 'ease-in' | 'ease-out' | 'ease-in-out';
 }
 
 export interface MotionGestureContract {
@@ -209,14 +209,18 @@ export interface MotionGestureContract {
   readonly partIds: readonly string[];
   readonly meaning: string;
   readonly progress: 'normalized-0-to-1';
+  readonly reducedMotion?: 'static' | 'fade-only' | 'none';
   readonly tracks: readonly MotionGestureTrackContract[];
 }
 
 export interface MotionGestureSample {
   readonly partId: string;
-  readonly kind: 'rotate';
-  readonly anchor: readonly [number, number];
-  readonly rotation: number;
+  readonly kind: 'rotate' | 'translate' | 'opacity' | 'scale' | 'reveal';
+  readonly anchor?: readonly [number, number];
+  readonly rotation?: number;
+  readonly opacity?: number;
+  readonly translation?: number;
+  readonly scale?: number;
 }
 
 export interface MotionTrackContract {
@@ -932,6 +936,7 @@ function motionCapabilities(icon: IconId, variant: IconVariant, model?: ModelVar
       partIds: Object.freeze([...gesture.partIds]),
       meaning: gesture.meaning,
       progress: gesture.progress,
+      reducedMotion: ((gesture as Readonly<{ reducedMotion?: 'static' | 'fade-only' | 'none' }>).reducedMotion),
       tracks: Object.freeze(gesture.tracks.map((track) => Object.freeze({
         partId: track.partId,
         kind: track.kind,
@@ -943,13 +948,14 @@ function motionCapabilities(icon: IconId, variant: IconVariant, model?: ModelVar
       }))),
     }));
 
+  const typedGestures = gestures as unknown as readonly MotionGestureContract[];
   return Object.freeze({
     state: gestures.length > 0 ? 'gesture-ready' : tracks.length > 0 ? 'anchored-parts' : 'semantic-parts',
     partIds,
     tracks: Object.freeze(tracks),
-    gestures: Object.freeze(gestures),
+    gestures: Object.freeze(typedGestures),
     adapters: motionAdapters,
-  });
+  }) as MotionCapabilities;
 }
 
 export function glyphCapabilities(
