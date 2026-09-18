@@ -44,7 +44,7 @@
       "to": [
         "src/authoring"
       ],
-      "rationale": "Portable core stays self-contained."
+      "rationale": "Переносимое ядро остаётся автономным."
     },
     {
       "id": "core-no-ir",
@@ -55,7 +55,7 @@
       "to": [
         "src/ir"
       ],
-      "rationale": "Core must not depend on authoring/intermediate-representation mechanisms."
+      "rationale": "Ядро не зависит от механизмов авторинга и промежуточного представления."
     },
     {
       "id": "core-no-npm",
@@ -66,7 +66,7 @@
       "to": [
         "external:npm"
       ],
-      "rationale": "Core is dependency-free and portable."
+      "rationale": "Ядро не имеет внешних зависимостей и остаётся переносимым."
     },
     {
       "id": "core-no-node",
@@ -77,7 +77,7 @@
       "to": [
         "external:node"
       ],
-      "rationale": "Core is environment-independent."
+      "rationale": "Ядро не зависит от среды выполнения."
     }
   ]
 }
