@@ -59,12 +59,35 @@ function assertBiteStep(step, spec) {
   expect(witness).toBeGreaterThan(statusCheck);
 }
 
+function assertArchitectureWorkflow(workflow) {
+  expect(workflow).toBeDefined();
+  expect(workflow.on).toEqual({ pull_request: null, merge_group: null, push: { branches: ['main'] } });
+  expect(workflow.permissions).toEqual({ contents: 'read' });
+  expect(workflow.defaults).toBeUndefined();
+  expect(Object.keys(workflow.jobs)).toEqual(['observe']);
+  const observe = workflow.jobs.observe;
+  expect(observe.name).toBe('architecture evidence (vendored)');
+  expect(observe['runs-on']).toBe('ubuntu-latest');
+  expect(observe['timeout-minutes']).toBe(25);
+  expect(observe['continue-on-error']).toBeUndefined();
+  const names = observe.steps.map((step) => step.name);
+  expect(names).toEqual([
+    'Checkout full Git evidence',
+    'Select Node.js runtime',
+    'Install canonical pinned native parser',
+    'Verify vendored observer before running it',
+    'Observe and enforce product architecture',
+  ]);
+  expect(observe.steps.at(-1).run).toContain('semantic-admission.mjs');
+}
+
 function assertNativeGraph(files) {
   const workflows = new Map([...files].map(([name, source]) => [name, parse(source)]));
   const candidates = [...workflows]
     .filter(([, workflow]) => events(workflow.on).some((event) => candidateEvents.has(event)))
     .map(([name]) => name).sort();
-  expect(candidates).toEqual(['ci.yml']);
+  expect(candidates).toEqual(['architecture-observer-vendor.yml', 'ci.yml']);
+  assertArchitectureWorkflow(workflows.get('architecture-observer-vendor.yml'));
   expect(files.has('ci-gate.yml')).toBe(false);
   const workflow = workflows.get('ci.yml');
   expect(workflow.on).toEqual({ push: { branches: ['main'] }, pull_request: null, merge_group: null });
@@ -160,6 +183,21 @@ describe('нативный итог CI', () => {
     const workflow = parse(files.get('ci.yml'));
     mutate(workflow);
     files.set('ci.yml', stringify(workflow));
+    expect(() => assertNativeGraph(files)).toThrow();
+  });
+
+  it.each([
+    ['write permission', (w) => { w.permissions = { contents: 'write' }; }],
+    ['hosted runner drift', (w) => { w.jobs.observe['runs-on'] = 'windows-latest'; }],
+    ['semantic enforcement removed', (w) => {
+      w.jobs.observe.steps.at(-1).run = w.jobs.observe.steps.at(-1).run.replace(/.*semantic-admission\.mjs.*\n?/g, '');
+    }],
+  ])('отвергает изменение architecture auxiliary: %s', (_, mutate) => {
+    const files = sources();
+    assertNativeGraph(files);
+    const workflow = parse(files.get('architecture-observer-vendor.yml'));
+    mutate(workflow);
+    files.set('architecture-observer-vendor.yml', stringify(workflow));
     expect(() => assertNativeGraph(files)).toThrow();
   });
 
