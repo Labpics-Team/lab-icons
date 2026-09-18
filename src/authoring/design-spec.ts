@@ -1,4 +1,5 @@
 import {
+  opticalLimits,
   type NegativeSpaceConstraint,
   type NormalizedPoint,
   type RecipeFillPaint,
@@ -6,6 +7,16 @@ import {
   type RecipeResult,
   type RecipeStrokePaint,
 } from '../ir/recipes.js';
+import {
+  designRecipeRegistryContract,
+  designResidualRecipeContract,
+  designScalarTokens,
+  registeredRecipeDefinition,
+  type DesignScalarTokenId,
+  type DesignScalarUnit,
+  type RecipeParameterContract,
+  type RegisteredDesignRecipeId,
+} from './authority.js';
 // @ts-ignore — существующий zero-IO geometry owner пока JS-only.
 import { _canonicalPoint, _negativeSpaceConstraint, buildConstructivePrimitive } from '../core/glyph-operators.js';
 // @ts-expect-error — существующий zero-IO geometry owner пока JS-only.
@@ -26,6 +37,16 @@ export type DesignSpecErrorCode =
   | 'UNDERDEFINED_CONSTRAINT'
   | 'CONTRADICTORY_CONSTRAINT'
   | 'UNBOUNDED_RESIDUAL'
+  | 'FREE_SCALAR_FORBIDDEN'
+  | 'UNKNOWN_SCALAR_TOKEN'
+  | 'SCALAR_UNIT_MISMATCH'
+  | 'UNKNOWN_RECIPE'
+  | 'UNSUPPORTED_RECIPE_VERSION'
+  | 'UNKNOWN_RECIPE_PARAMETER'
+  | 'OPAQUE_RECIPE_PARAMETER_FORBIDDEN'
+  | 'RECIPE_PARAMETER_OUT_OF_DOMAIN'
+  | 'RECIPE_OUTPUT_DRIFT'
+  | 'RAW_FALLBACK_FORBIDDEN'
   | 'CONSTRAINT_VIOLATION';
 
 export class DesignSpecError extends Error {
@@ -73,8 +94,8 @@ function deepFreeze<T>(value: T): T {
 }
 
 export const designSpecContract = deepFreeze({
-  schema: 'labpics.design-spec/1',
-  version: 1,
+  schema: 'labpics.design-spec/2',
+  version: 2,
   canvas: {
     unit: 'normalized-canvas',
     paintedInkContainment: 'required',
@@ -87,24 +108,16 @@ export const designSpecContract = deepFreeze({
   decoratorKinds: DECORATOR_KINDS,
   negativeSpaceKinds: NEGATIVE_SPACE_KINDS,
   negativeSpaceMeasurements: NEGATIVE_SPACE_MEASUREMENTS,
-  residualRecipes: {
-    superellipse: {
-      continuity: 'C1',
-      tangency: 'central-difference-hermite',
-      domain: {
-        rx: { minExclusive: 0, max: 0.5 },
-        ry: { minExclusive: 0, max: 0.5 },
-        exponent: { min: 2, max: 8 },
-        rotation: { min: -180, max: 180 },
-      },
-    },
-  },
+  scalarTokens: designScalarTokens,
+  recipeRegistry: designRecipeRegistryContract,
+  residualRecipes: designResidualRecipeContract,
   forbidden: {
     rawPath: ['d', 'path', 'svg', 'pathData'],
     arbitraryPoints: ['points', 'controls', 'controlPoints', 'beziers'],
     anonymousTransforms: [
       'transform', 'transforms', 'offset', 'offsets', 'dx', 'dy', 'translate', 'scale', 'matrix',
     ],
+    rawFallback: ['raw', 'fallback', 'rawGeometry', 'rawRecipe'],
   },
 });
 
@@ -113,24 +126,26 @@ type PartRole = (typeof PART_ROLES)[number];
 type DesignNegativeSpaceKind = (typeof NEGATIVE_SPACE_KINDS)[number];
 type DesignNegativeSpaceMeasurement = (typeof NEGATIVE_SPACE_MEASUREMENTS)[number];
 
+export type DesignScalarRef = Readonly<{ token: DesignScalarTokenId }>;
+
 export type DesignAnchor =
   | Readonly<{ id: string; kind: 'canvas'; at: CanvasAnchorName }>
   | Readonly<{ id: string; kind: 'midpoint'; between: readonly [string, string] }>
-  | Readonly<{ id: string; kind: 'polar'; from: string; angle: number; distance: number }>
+  | Readonly<{ id: string; kind: 'polar'; from: string; angle: DesignScalarRef; distance: DesignScalarRef }>
   | Readonly<{ id: string; kind: 'project'; xFrom: string; yFrom: string }>;
 
 export type DesignGeometry =
-  | Readonly<{ kind: 'circle'; center: string; radius: number }>
-  | Readonly<{ kind: 'ellipse'; center: string; rx: number; ry: number; rotation: number }>
+  | Readonly<{ kind: 'circle'; center: string; radius: DesignScalarRef }>
+  | Readonly<{ kind: 'ellipse'; center: string; rx: DesignScalarRef; ry: DesignScalarRef; rotation: DesignScalarRef }>
   | Readonly<{ kind: 'line'; from: string; to: string }>
-  | Readonly<{ kind: 'arc'; center: string; radius: number; startAngle: number; endAngle: number; direction: 'cw' | 'ccw' }>
-  | Readonly<{ kind: 'capsule'; from: string; to: string; radius: number }>
-  | Readonly<{ kind: 'rect'; center: string; width: number; height: number; cornerRadius: number }>
-  | Readonly<{ kind: 'residual'; recipe: 'superellipse'; center: string; rx: number; ry: number; exponent: number; rotation: number }>;
+  | Readonly<{ kind: 'arc'; center: string; radius: DesignScalarRef; startAngle: DesignScalarRef; endAngle: DesignScalarRef; direction: 'cw' | 'ccw' }>
+  | Readonly<{ kind: 'capsule'; from: string; to: string; radius: DesignScalarRef }>
+  | Readonly<{ kind: 'rect'; center: string; width: DesignScalarRef; height: DesignScalarRef; cornerRadius: DesignScalarRef }>
+  | Readonly<{ kind: 'residual'; recipe: 'superellipse'; center: string; rx: DesignScalarRef; ry: DesignScalarRef; exponent: DesignScalarRef; rotation: DesignScalarRef }>;
 
 export type DesignPaint =
   | Readonly<{ kind: 'fill' }>
-  | Readonly<{ kind: 'stroke'; width: number; linecap: 'round' | 'butt' }>;
+  | Readonly<{ kind: 'stroke'; width: DesignScalarRef; linecap: 'round' | 'butt' }>;
 
 export interface DesignPart {
   readonly id: string;
@@ -155,13 +170,14 @@ export interface DesignDecorator {
 export interface DesignNegativeSpace {
   readonly id: string;
   readonly kind: DesignNegativeSpaceKind;
-  readonly minimum: number;
+  readonly minimum: DesignScalarRef;
   readonly participants: readonly string[];
   readonly measurement: DesignNegativeSpaceMeasurement;
 }
 
-export interface DesignSpec {
-  readonly version: 1;
+export interface ConstructiveDesignSpec {
+  readonly version: 2;
+  readonly kind: 'constructive';
   readonly anchors: readonly DesignAnchor[];
   readonly parts: readonly DesignPart[];
   readonly composition: DesignComposition;
@@ -169,14 +185,43 @@ export interface DesignSpec {
   readonly negativeSpace: readonly DesignNegativeSpace[];
 }
 
-export interface LoweredDesignSpec extends RecipeResult {
+export interface DesignRecipeInvocation {
+  readonly id: string;
+  readonly recipe: RegisteredDesignRecipeId;
+  readonly recipeVersion: number;
+  readonly parameters: Readonly<Record<string, number | string | boolean>>;
+}
+
+export interface RecipeDesignSpec {
+  readonly version: 2;
+  readonly kind: 'recipe';
+  readonly invocation: DesignRecipeInvocation;
+}
+
+export type DesignSpec = ConstructiveDesignSpec | RecipeDesignSpec;
+
+export interface LoweredConstructiveDesignSpec extends RecipeResult {
   readonly kind: 'design-spec';
   readonly parts: readonly LoweredDesignPart[];
   readonly composition: DesignComposition;
   readonly decorators: readonly DesignDecorator[];
   readonly anchors: Readonly<Record<string, NormalizedPoint>>;
-  readonly specVersion: 1;
+  readonly specVersion: 2;
 }
+
+export interface LoweredRecipeDesignSpec extends RecipeResult {
+  readonly kind: 'design-spec-recipe';
+  readonly anchors: Readonly<Record<string, NormalizedPoint>>;
+  readonly recipe: Readonly<{
+    invocationId: string;
+    id: RegisteredDesignRecipeId;
+    version: number;
+    parameters: Readonly<Record<string, number | string | boolean>>;
+  }>;
+  readonly specVersion: 2;
+}
+
+export type LoweredDesignSpec = LoweredConstructiveDesignSpec | LoweredRecipeDesignSpec;
 
 export interface LoweredDesignPart extends RecipePart {
   readonly morphGroup: string | null;
@@ -203,6 +248,9 @@ function classifyUnknownField(key: string, at: string): never {
   if ((designSpecContract.forbidden.anonymousTransforms as readonly string[]).includes(key)) {
     fail('ANONYMOUS_TRANSFORM_FORBIDDEN', at, `поле ${key} передаёт anonymous transform/offset`);
   }
+  if ((designSpecContract.forbidden.rawFallback as readonly string[]).includes(key)) {
+    fail('RAW_FALLBACK_FORBIDDEN', at, `поле ${key} создаёт необъявленный geometry fallback`);
+  }
   fail('UNKNOWN_FIELD', at, `неизвестное поле ${key}`);
 }
 
@@ -223,18 +271,48 @@ function exact(
   return source;
 }
 
-function finite(value: unknown, at: string, min: number, max: number): number {
-  if (typeof value !== 'number' || !Number.isFinite(value)) {
-    fail('INVALID_VALUE', at, 'ожидается конечное число');
+function parseScalarRef(
+  value: unknown,
+  at: string,
+  unit: DesignScalarUnit,
+  min: number,
+  max: number,
+  exclusiveMin = false,
+): DesignScalarRef {
+  if (typeof value === 'number') {
+    fail(
+      'FREE_SCALAR_FORBIDDEN',
+      at,
+      'свободный numeric literal запрещён; используйте registered scalar token или named recipe parameter',
+    );
   }
-  if (value < min || value > max) fail('INVALID_VALUE', at, `значение вне ${min}..${max}`);
-  return value;
+  const source = exact(value, at, ['token']);
+  if (typeof source.token !== 'string') {
+    fail('UNKNOWN_SCALAR_TOKEN', `${at}.token`, 'ожидается id registered scalar token');
+  }
+  const token = designScalarTokens[source.token as DesignScalarTokenId];
+  if (!token) {
+    fail('UNKNOWN_SCALAR_TOKEN', `${at}.token`, `неизвестный scalar token ${source.token}`);
+  }
+  if (token.unit !== unit) {
+    fail(
+      'SCALAR_UNIT_MISMATCH',
+      `${at}.token`,
+      `token ${source.token} имеет unit=${token.unit}, требуется ${unit}`,
+    );
+  }
+  if (token.value < min || token.value > max || (exclusiveMin && token.value === min)) {
+    fail(
+      'INVALID_VALUE',
+      `${at}.token`,
+      `token ${source.token}=${token.value} вне ${exclusiveMin ? '(' : '['}${min},${max}]`,
+    );
+  }
+  return Object.freeze({ token: source.token as DesignScalarTokenId });
 }
 
-function positive(value: unknown, at: string, max: number): number {
-  const parsed = finite(value, at, 0, max);
-  if (parsed <= 0) fail('INVALID_VALUE', at, 'значение должно быть > 0');
-  return parsed;
+function scalarValue(value: DesignScalarRef): number {
+  return designScalarTokens[value.token].value;
 }
 
 function stableId(value: unknown, at: string): string {
@@ -285,8 +363,8 @@ function parseAnchor(value: unknown, index: number): DesignAnchor {
       id,
       kind,
       from: stableId(source.from, `${at}.from`),
-      angle: finite(source.angle, `${at}.angle`, -360, 360),
-      distance: positive(source.distance, `${at}.distance`, 1),
+      angle: parseScalarRef(source.angle, `${at}.angle`, 'degrees', -360, 360),
+      distance: parseScalarRef(source.distance, `${at}.distance`, 'normalized-canvas', 0, 1, true),
     };
   }
   const source = exact(value, at, ['id', 'kind', 'xFrom', 'yFrom']);
@@ -341,7 +419,7 @@ function parseGeometry(value: unknown, at: string): DesignGeometry {
     return {
       kind,
       center: stableId(source.center, `${at}.center`),
-      radius: positive(source.radius, `${at}.radius`, 0.5),
+      radius: parseScalarRef(source.radius, `${at}.radius`, 'normalized-canvas', 0, 0.5, true),
     };
   }
   if (kind === 'ellipse') {
@@ -349,9 +427,15 @@ function parseGeometry(value: unknown, at: string): DesignGeometry {
     return {
       kind,
       center: stableId(source.center, `${at}.center`),
-      rx: positive(source.rx, `${at}.rx`, 0.5),
-      ry: positive(source.ry, `${at}.ry`, 0.5),
-      rotation: finite(source.rotation ?? 0, `${at}.rotation`, -180, 180),
+      rx: parseScalarRef(source.rx, `${at}.rx`, 'normalized-canvas', 0, 0.5, true),
+      ry: parseScalarRef(source.ry, `${at}.ry`, 'normalized-canvas', 0, 0.5, true),
+      rotation: parseScalarRef(
+        source.rotation ?? { token: 'angle.zero' },
+        `${at}.rotation`,
+        'degrees',
+        -180,
+        180,
+      ),
     };
   }
   if (kind === 'line') {
@@ -369,9 +453,9 @@ function parseGeometry(value: unknown, at: string): DesignGeometry {
     return {
       kind,
       center: stableId(source.center, `${at}.center`),
-      radius: positive(source.radius, `${at}.radius`, 0.5),
-      startAngle: finite(source.startAngle, `${at}.startAngle`, -360, 360),
-      endAngle: finite(source.endAngle, `${at}.endAngle`, -360, 360),
+      radius: parseScalarRef(source.radius, `${at}.radius`, 'normalized-canvas', 0, 0.5, true),
+      startAngle: parseScalarRef(source.startAngle, `${at}.startAngle`, 'degrees', -360, 360),
+      endAngle: parseScalarRef(source.endAngle, `${at}.endAngle`, 'degrees', -360, 360),
       direction: oneOf(source.direction, ['cw', 'ccw'] as const, `${at}.direction`),
     };
   }
@@ -389,23 +473,25 @@ function parseGeometryTail(
       kind,
       from: stableId(source.from, `${at}.from`),
       to: stableId(source.to, `${at}.to`),
-      radius: positive(source.radius, `${at}.radius`, 0.5),
+      radius: parseScalarRef(source.radius, `${at}.radius`, 'normalized-canvas', 0, 0.5, true),
     };
   }
   if (kind === 'rect') {
     const source = exact(value, at, ['kind', 'center', 'width', 'height'], ['cornerRadius']);
-    const width = positive(source.width, `${at}.width`, 1);
-    const height = positive(source.height, `${at}.height`, 1);
+    const width = parseScalarRef(source.width, `${at}.width`, 'normalized-canvas', 0, 1, true);
+    const height = parseScalarRef(source.height, `${at}.height`, 'normalized-canvas', 0, 1, true);
+    const maxCorner = Math.min(scalarValue(width), scalarValue(height)) / 2;
     return {
       kind,
       center: stableId(source.center, `${at}.center`),
       width,
       height,
-      cornerRadius: finite(
-        source.cornerRadius ?? 0,
+      cornerRadius: parseScalarRef(
+        source.cornerRadius ?? { token: 'canvas.zero' },
         `${at}.cornerRadius`,
+        'normalized-canvas',
         0,
-        Math.min(width, height) / 2,
+        maxCorner,
       ),
     };
   }
@@ -420,23 +506,20 @@ function parseGeometryTail(
     fail('UNBOUNDED_RESIDUAL', `${at}.recipe`, 'residual recipe не зарегистрирован');
   }
   const domain = designSpecContract.residualRecipes.superellipse.domain;
-  const bounded = (raw: unknown, name: string, min: number, max: number, exclusiveMin = false) => {
-    if (typeof raw !== 'number' || !Number.isFinite(raw)) {
-      fail('UNBOUNDED_RESIDUAL', name, 'residual parameter обязан быть конечным числом');
-    }
-    if (raw < min || raw > max || (exclusiveMin && raw === min)) {
-      fail('UNBOUNDED_RESIDUAL', name, `residual parameter вне ${exclusiveMin ? '(' : '['}${min},${max}]`);
-    }
-    return raw;
-  };
   return {
     kind,
     recipe: 'superellipse',
     center: stableId(source.center, `${at}.center`),
-    rx: bounded(source.rx, `${at}.rx`, 0, domain.rx.max, true),
-    ry: bounded(source.ry, `${at}.ry`, 0, domain.ry.max, true),
-    exponent: bounded(source.exponent, `${at}.exponent`, domain.exponent.min, domain.exponent.max),
-    rotation: bounded(source.rotation ?? 0, `${at}.rotation`, domain.rotation.min, domain.rotation.max),
+    rx: parseScalarRef(source.rx, `${at}.rx`, 'normalized-canvas', 0, domain.rx.max, true),
+    ry: parseScalarRef(source.ry, `${at}.ry`, 'normalized-canvas', 0, domain.ry.max, true),
+    exponent: parseScalarRef(source.exponent, `${at}.exponent`, 'ratio', domain.exponent.min, domain.exponent.max),
+    rotation: parseScalarRef(
+      source.rotation ?? { token: 'angle.zero' },
+      `${at}.rotation`,
+      'degrees',
+      domain.rotation.min,
+      domain.rotation.max,
+    ),
   };
 }
 
@@ -450,7 +533,7 @@ function parsePaint(value: unknown, at: string): DesignPaint {
   const source = exact(value, at, ['kind', 'width'], ['linecap']);
   return {
     kind,
-    width: positive(source.width, `${at}.width`, 0.5),
+    width: parseScalarRef(source.width, `${at}.width`, 'normalized-canvas', 0, 0.5, true),
     linecap: oneOf(source.linecap ?? 'round', ['round', 'butt'] as const, `${at}.linecap`),
   };
 }
@@ -535,7 +618,7 @@ function parseNegativeSpace(value: unknown, index: number): DesignNegativeSpace 
   return {
     id: stableId(source.id, `${at}.id`),
     kind,
-    minimum: finite(source.minimum, `${at}.minimum`, 0, 0.5),
+    minimum: parseScalarRef(source.minimum, `${at}.minimum`, 'normalized-canvas', 0, 0.5),
     participants,
     measurement,
   };
@@ -565,7 +648,7 @@ function assertConstraintUniqueness(constraints: readonly DesignNegativeSpace[])
   }
 }
 
-function assertReferences(spec: Omit<DesignSpec, 'version'>): void {
+function assertReferences(spec: Omit<ConstructiveDesignSpec, 'version' | 'kind'>): void {
   const anchorIds = new Set(spec.anchors.map(({ id }) => id));
   const partIds = new Set(spec.parts.map(({ id }) => id));
   const partsById = new Map(spec.parts.map((part) => [part.id, part]));
@@ -646,11 +729,120 @@ function assertReferences(spec: Omit<DesignSpec, 'version'>): void {
   }
 }
 
-export function parseDesignSpec(value: unknown): DesignSpec {
-  const root = exact(value, 'root', [
-    'version', 'anchors', 'parts', 'composition', 'decorators', 'negativeSpace',
+function parseRecipeParameter(
+  value: unknown,
+  contract: RecipeParameterContract,
+  at: string,
+): number | string | boolean {
+  if (value !== null && typeof value === 'object') {
+    fail(
+      'OPAQUE_RECIPE_PARAMETER_FORBIDDEN',
+      at,
+      'recipe parameter обязан быть скаляром/enum/bool, вложенная geometry map запрещена',
+    );
+  }
+  if (contract.kind === 'enum') {
+    if (typeof value !== 'string' || !contract.values.includes(value)) {
+      fail('RECIPE_PARAMETER_OUT_OF_DOMAIN', at, `ожидается ${contract.values.join('|')}`);
+    }
+    return value;
+  }
+  if (contract.kind === 'boolean') {
+    if (typeof value !== 'boolean') fail('RECIPE_PARAMETER_OUT_OF_DOMAIN', at, 'ожидается boolean');
+    return value;
+  }
+  if (typeof value !== 'number' || !Number.isFinite(value)) {
+    fail('RECIPE_PARAMETER_OUT_OF_DOMAIN', at, 'ожидается конечное число');
+  }
+  const { domain } = contract;
+  if (
+    (domain.min !== undefined && value < domain.min)
+    || (domain.minExclusive !== undefined && value <= domain.minExclusive)
+    || (domain.max !== undefined && value > domain.max)
+    || (domain.integer === true && !Number.isInteger(value))
+  ) {
+    fail('RECIPE_PARAMETER_OUT_OF_DOMAIN', at, 'значение вне declared recipe domain');
+  }
+  return value;
+}
+
+function parseRecipeInvocation(value: unknown): DesignRecipeInvocation {
+  const source = exact(value, 'invocation', [
+    'id', 'recipe', 'recipeVersion', 'parameters',
   ]);
-  if (root.version !== 1) fail('UNSUPPORTED_VERSION', 'version', 'поддерживается только version=1');
+  const id = stableId(source.id, 'invocation.id');
+  if (typeof source.recipe !== 'string' || !Object.hasOwn(designRecipeRegistryContract, source.recipe)) {
+    fail('UNKNOWN_RECIPE', 'invocation.recipe', `неизвестный registered recipe ${String(source.recipe)}`);
+  }
+  const recipe = source.recipe as RegisteredDesignRecipeId;
+  const definition = registeredRecipeDefinition(recipe);
+  if (source.recipeVersion !== definition.contract.version) {
+    fail(
+      'UNSUPPORTED_RECIPE_VERSION',
+      'invocation.recipeVersion',
+      `${recipe} поддерживает version=${definition.contract.version}`,
+    );
+  }
+  const rawParameters = record(source.parameters, 'invocation.parameters');
+  const allowed: Readonly<Record<string, RecipeParameterContract>> = definition.contract.parameters;
+  for (const key of Object.keys(rawParameters)) {
+    if (!Object.hasOwn(allowed, key)) {
+      fail('UNKNOWN_RECIPE_PARAMETER', `invocation.parameters.${key}`, `recipe ${recipe} не объявляет параметр ${key}`);
+    }
+  }
+  const parameters: Record<string, number | string | boolean> = {};
+  for (const [key, raw] of Object.entries(rawParameters)) {
+    parameters[key] = parseRecipeParameter(
+      raw,
+      allowed[key]!,
+      `invocation.parameters.${key}`,
+    );
+  }
+  const opszContract = allowed.opsz;
+  const opsz = typeof parameters.opsz === 'number'
+    ? parameters.opsz
+    : opszContract?.kind === 'number' && typeof opszContract.default === 'number'
+      ? opszContract.default
+      : undefined;
+  if (opsz !== undefined) {
+    const limits = opticalLimits({ opsz });
+    for (const [key, parameterContract] of Object.entries(allowed)) {
+      if (parameterContract.kind !== 'number' || !parameterContract.domain.opticalMinimum) continue;
+      const supplied = parameters[key];
+      if (typeof supplied !== 'number') continue;
+      const minimum = limits[parameterContract.domain.opticalMinimum];
+      if (supplied < minimum) {
+        fail(
+          'RECIPE_PARAMETER_OUT_OF_DOMAIN',
+          `invocation.parameters.${key}`,
+          `${key}=${supplied} ниже ${parameterContract.domain.opticalMinimum}=${minimum} при opsz=${opsz}`,
+        );
+      }
+    }
+  }
+  return deepFreeze({
+    id,
+    recipe,
+    recipeVersion: definition.contract.version,
+    parameters,
+  });
+}
+
+export function parseDesignSpec(value: unknown): DesignSpec {
+  const base = record(value, 'root');
+  if (base.version !== 2) fail('UNSUPPORTED_VERSION', 'version', 'поддерживается только version=2');
+  const kind = oneOf(base.kind, ['constructive', 'recipe'] as const, 'root.kind');
+  if (kind === 'recipe') {
+    const root = exact(value, 'root', ['version', 'kind', 'invocation']);
+    return deepFreeze({
+      version: 2,
+      kind,
+      invocation: parseRecipeInvocation(root.invocation),
+    });
+  }
+  const root = exact(value, 'root', [
+    'version', 'kind', 'anchors', 'parts', 'composition', 'decorators', 'negativeSpace',
+  ]);
   if (!Array.isArray(root.anchors) || root.anchors.length === 0) {
     fail('INVALID_VALUE', 'anchors', 'нужен непустой массив');
   }
@@ -673,7 +865,7 @@ export function parseDesignSpec(value: unknown): DesignSpec {
   const parsed = { anchors, parts, composition, decorators, negativeSpace };
   assertReferences(parsed);
   assertConstraintUniqueness(negativeSpace);
-  return deepFreeze({ version: 1, ...parsed });
+  return deepFreeze({ version: 2, kind, ...parsed });
 }
 
 function resolveAnchors(anchors: readonly DesignAnchor[]): Readonly<Record<string, NormalizedPoint>> {
@@ -693,10 +885,12 @@ function resolveAnchors(anchors: readonly DesignAnchor[]): Readonly<Record<strin
       point = { x: (first.x + second.x) / 2, y: (first.y + second.y) / 2 };
     } else if (anchor.kind === 'polar') {
       const origin = resolveAnchor(anchor.from);
-      const radians = anchor.angle * Math.PI / 180;
+      const angle = scalarValue(anchor.angle);
+      const distance = scalarValue(anchor.distance);
+      const radians = angle * Math.PI / 180;
       point = {
-        x: origin.x + Math.cos(radians) * anchor.distance,
-        y: origin.y + Math.sin(radians) * anchor.distance,
+        x: origin.x + Math.cos(radians) * distance,
+        y: origin.y + Math.sin(radians) * distance,
       };
     } else {
       point = { x: resolveAnchor(anchor.xFrom).x, y: resolveAnchor(anchor.yFrom).y };
@@ -729,10 +923,10 @@ function lowerGeometry(
     const d = genSuperellipse(
       center.x,
       center.y,
-      geometry.rx,
-      geometry.ry,
-      geometry.exponent,
-      geometry.rotation,
+      scalarValue(geometry.rx),
+      scalarValue(geometry.ry),
+      scalarValue(geometry.exponent),
+      scalarValue(geometry.rotation),
       false,
     );
     return {
@@ -742,14 +936,54 @@ function lowerGeometry(
       topologySignature: computeTopologySignature(d) as string,
     };
   }
-  if (geometry.kind === 'line' || geometry.kind === 'capsule') {
+  if (geometry.kind === 'line') {
     return buildConstructivePrimitive({
       ...geometry,
       from: anchor(geometry.from),
       to: anchor(geometry.to),
     });
   }
-  return buildConstructivePrimitive({ ...geometry, center: anchor(geometry.center) });
+  if (geometry.kind === 'capsule') {
+    return buildConstructivePrimitive({
+      kind: geometry.kind,
+      from: anchor(geometry.from),
+      to: anchor(geometry.to),
+      radius: scalarValue(geometry.radius),
+    });
+  }
+  if (geometry.kind === 'circle') {
+    return buildConstructivePrimitive({
+      kind: geometry.kind,
+      center: anchor(geometry.center),
+      radius: scalarValue(geometry.radius),
+    });
+  }
+  if (geometry.kind === 'ellipse') {
+    return buildConstructivePrimitive({
+      kind: geometry.kind,
+      center: anchor(geometry.center),
+      rx: scalarValue(geometry.rx),
+      ry: scalarValue(geometry.ry),
+      rotation: scalarValue(geometry.rotation),
+    });
+  }
+  if (geometry.kind === 'arc') {
+    return buildConstructivePrimitive({
+      kind: geometry.kind,
+      center: anchor(geometry.center),
+      radius: scalarValue(geometry.radius),
+      startAngle: scalarValue(geometry.startAngle),
+      endAngle: scalarValue(geometry.endAngle),
+      direction: geometry.direction,
+    });
+  }
+  return buildConstructivePrimitive({
+    kind: geometry.kind,
+    center: anchor(geometry.center),
+    width: scalarValue(geometry.width),
+    height: scalarValue(geometry.height),
+    cornerRadius: scalarValue(geometry.cornerRadius),
+  });
 }
 
 function lowerPaint(paint: DesignPaint): RecipeFillPaint | RecipeStrokePaint {
@@ -758,7 +992,7 @@ function lowerPaint(paint: DesignPaint): RecipeFillPaint | RecipeStrokePaint {
     kind: 'stroke',
     fill: 'none',
     stroke: 'currentColor',
-    strokeWidth: paint.width,
+    strokeWidth: scalarValue(paint.width),
     linecap: paint.linecap,
     linejoin: 'round',
   });
@@ -835,7 +1069,7 @@ function lowerNegativeSpace(
       : [...constraint.participants];
     return deepFreeze(_negativeSpaceConstraint({
       kind: constraint.kind,
-      requiredMinimum: constraint.minimum,
+      requiredMinimum: scalarValue(constraint.minimum),
       measured,
       measurementMethod: constraint.measurement,
       participants: proofParticipants,
@@ -847,8 +1081,104 @@ function lowerNegativeSpace(
   }
 }
 
+function namespaceRecipeId(invocationId: string, id: string): string {
+  return id === 'canvas' ? id : `${invocationId}.${id}`;
+}
+
+export function assertRegisteredRecipeOutput(
+  recipe: RegisteredDesignRecipeId,
+  built: RecipeResult,
+): void {
+  const definition = registeredRecipeDefinition(recipe);
+  const expectedParts = definition.contract.outputs.partIds;
+  const actualParts = built.parts.map(({ id }) => id);
+  const joins = built.joins ?? [];
+  const actualAnchors = joins.map(({ id }) => id);
+  const negativeSpaceIdentity = (constraint: {
+    readonly kind: string;
+    readonly measurementMethod: string;
+    readonly participants: readonly string[];
+  }) => `${constraint.kind}|${constraint.measurementMethod}|${[...constraint.participants].sort().join(',')}`;
+  const actualNegativeSpace = built.negativeSpace.constraints.map(negativeSpaceIdentity).sort();
+  const expectedNegativeSpace = definition.contract.outputs.negativeSpace
+    .map(negativeSpaceIdentity)
+    .sort();
+  if (
+    JSON.stringify(actualParts) !== JSON.stringify(expectedParts)
+    || JSON.stringify(actualAnchors) !== JSON.stringify(definition.contract.outputs.anchorIds)
+    || JSON.stringify(actualNegativeSpace) !== JSON.stringify(expectedNegativeSpace)
+  ) {
+    fail(
+      'RECIPE_OUTPUT_DRIFT',
+      'invocation.recipe',
+      `runtime output ${recipe}@${definition.contract.version} не совпадает с registered contract`,
+    );
+  }
+}
+
+function lowerRecipeDesignSpec(spec: RecipeDesignSpec): LoweredRecipeDesignSpec {
+  const definition = registeredRecipeDefinition(spec.invocation.recipe);
+  let built: RecipeResult;
+  try {
+    built = definition.build(spec.invocation.parameters);
+  } catch (error) {
+    fail(
+      'CONSTRAINT_VIOLATION',
+      'invocation.parameters',
+      `registered recipe ${spec.invocation.recipe} отверг комбинацию параметров: ${String(error)}`,
+    );
+  }
+  assertRegisteredRecipeOutput(spec.invocation.recipe, built);
+  const joins = built.joins ?? [];
+  const prefix = spec.invocation.id;
+  const parts = Object.freeze(built.parts.map((part) => deepFreeze({
+    ...part,
+    id: namespaceRecipeId(prefix, part.id),
+    ...(part.weld ? {
+      weld: {
+        ...part.weld,
+        to: namespaceRecipeId(prefix, part.weld.to),
+      },
+    } : {}),
+  })));
+  const negativeSpace = deepFreeze({
+    constraints: built.negativeSpace.constraints.map((constraint) => ({
+      ...constraint,
+      participants: constraint.participants.map((id) => namespaceRecipeId(prefix, id)),
+    })),
+  });
+  const namespacedJoins = Object.freeze(joins.map((join) => deepFreeze({
+    ...join,
+    id: namespaceRecipeId(prefix, join.id),
+    members: join.members.map((id) => namespaceRecipeId(prefix, id)),
+  })));
+  const anchors = deepFreeze(Object.fromEntries(
+    namespacedJoins.map(({ id, at }) => [id, { ...at }]),
+  ) as Record<string, NormalizedPoint>);
+  return deepFreeze({
+    kind: 'design-spec-recipe',
+    canvas: { ...built.canvas },
+    parts,
+    negativeSpace,
+    ...(built.metrics ? { metrics: built.metrics } : {}),
+    joins: namespacedJoins,
+    topologyKey: built.topologyKey
+      ? `${prefix}:${built.topologyKey}`
+      : `${prefix}:${parts.map(({ id, topologySignature }) => `${id}:${topologySignature}`).join('|')}`,
+    anchors,
+    recipe: {
+      invocationId: prefix,
+      id: spec.invocation.recipe,
+      version: spec.invocation.recipeVersion,
+      parameters: spec.invocation.parameters,
+    },
+    specVersion: 2,
+  });
+}
+
 export function lowerDesignSpec(value: unknown): LoweredDesignSpec {
   const spec = parseDesignSpec(value);
+  if (spec.kind === 'recipe') return lowerRecipeDesignSpec(spec);
   const anchors = resolveAnchors(spec.anchors);
   const parts = spec.parts.map((part): LoweredDesignPart => {
     let lowered: ReturnType<typeof lowerGeometry>;
@@ -886,6 +1216,6 @@ export function lowerDesignSpec(value: unknown): LoweredDesignSpec {
     composition: spec.composition,
     decorators: spec.decorators,
     anchors,
-    specVersion: 1,
+    specVersion: 2,
   });
 }
