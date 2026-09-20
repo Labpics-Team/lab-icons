@@ -64,8 +64,23 @@ function assertNativeGraph(files) {
   const candidates = [...workflows]
     .filter(([, workflow]) => events(workflow.on).some((event) => candidateEvents.has(event)))
     .map(([name]) => name).sort();
-  expect(candidates).toEqual(['ci.yml']);
+  expect(candidates).toEqual(['ci.yml', 'code-admission-public.yml']);
   expect(files.has('ci-gate.yml')).toBe(false);
+  const admission = workflows.get('code-admission-public.yml');
+  expect(admission.on).toEqual({ pull_request: null, merge_group: null });
+  expect(admission.permissions).toEqual({ contents: 'read' });
+  expect(Object.keys(admission.jobs)).toEqual(['admission']);
+  expect(admission.jobs.admission.name).toBe('code-admission-public');
+  expect(admission.jobs.admission['runs-on']).toBe('ubuntu-24.04');
+  expect(admission.jobs.admission.if).toBeUndefined();
+  expect(admission.jobs.admission['continue-on-error']).toBeUndefined();
+  expect(admission.jobs.admission.steps.filter((step) => step.uses).map((step) => step.uses)).toEqual([
+    'actions/checkout@11d5960a326750d5838078e36cf38b85af677262',
+    'actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020',
+    'actions/checkout@11d5960a326750d5838078e36cf38b85af677262',
+    './.github/vendor/labpics-code-admission/.github/actions/code-admission',
+  ]);
+  expect(admission.jobs.admission.steps.some((step) => step.name === 'Verify carrier provenance')).toBe(true);
   const workflow = workflows.get('ci.yml');
   expect(workflow.on).toEqual({ push: { branches: ['main'] }, pull_request: null, merge_group: null });
   expect(workflow.permissions).toEqual({ contents: 'read' });
