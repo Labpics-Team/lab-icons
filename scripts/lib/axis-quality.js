@@ -229,8 +229,12 @@ function geometryForAxisProof(entry, variant, grid, axes, lib, fillRule) {
   };
 }
 
-function topologySample(entries, grid, rasterSize) {
-  return topologyAcrossPhases(
+function topologySample(entries, grid, rasterSize, cache) {
+  // This cache belongs to one proof invocation. Every axis value is still
+  // generated and checked; only byte-identical geometry reuses its raster.
+  const key = JSON.stringify([grid.canvas.width, grid.canvas.height, rasterSize, entries]);
+  if (cache.has(key)) return cache.get(key);
+  const { stable, signatures } = topologyAcrossPhases(
     entries,
     {
       width: grid.canvas.width,
@@ -241,9 +245,13 @@ function topologySample(entries, grid, rasterSize) {
       phases: DEFAULT_RASTER_PHASES,
     },
   );
+  const result = { stable, signatures };
+  if (cache.size >= 256) cache.delete(cache.keys().next().value);
+  cache.set(key, result);
+  return result;
 }
 
-function firstAxisFinding(entry, variant, axis, contract, grid, lib, fillRule) {
+function firstAxisFinding(entry, variant, axis, contract, grid, lib, fillRule, cache) {
   const axisCombinations = axis === 'opsz' || entry.opticalSize
     ? combinedAxisSamples(axis, contract, grid)
     : axisSamples(contract).map((value) => ({ [axis]: value }));
@@ -268,7 +276,7 @@ function firstAxisFinding(entry, variant, axis, contract, grid, lib, fillRule) {
       if (!baselineForCombination) continue;
       const baselineRaster = new Map();
       for (const rasterSize of rasterSizes()) {
-        const sample = topologySample(baselineForCombination.entries, grid, rasterSize);
+        const sample = topologySample(baselineForCombination.entries, grid, rasterSize, cache);
         if (!sample.stable) {
           return {
             kind: 'default-phase-unstable',
@@ -304,7 +312,7 @@ function firstAxisFinding(entry, variant, axis, contract, grid, lib, fillRule) {
       };
     }
     for (const rasterSize of rasterSizes()) {
-      const sample = topologySample(geometry.entries, grid, rasterSize);
+      const sample = topologySample(geometry.entries, grid, rasterSize, cache);
       const baselineSignature = baselineRaster.get(rasterSize);
       if (!sample.stable || sample.signatures.some((signature) => signature !== baselineSignature)) {
         return {
@@ -336,6 +344,7 @@ export function proveVariantAxes(entry, variant, grid, lib, fillRule) {
   if (!baseline) return [];
   const contracts = axisContracts(grid);
   const results = [];
+  const cache = new Map();
   for (const axis of AXIS_NAMES) {
     const contract = contracts[axis];
     const samples = axisSamples(contract);
@@ -353,6 +362,7 @@ export function proveVariantAxes(entry, variant, grid, lib, fillRule) {
         grid,
         lib,
         fillRule,
+        cache,
       ),
     });
   }
