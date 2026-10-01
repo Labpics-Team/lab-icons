@@ -234,6 +234,51 @@ export function labelMaskFeatures(mask, cols, rows, { eightConnected = true } = 
   return { labels, features };
 }
 
+// Для площадей не нужны метки клеток, центроиды и границы компонент.
+// Объединяем горизонтальные полосы: 4-связность требует общей колонки,
+// 8-связность допускает сдвиг на одну колонку.
+function componentAreas(mask, cols, rows, ink, eightConnected, excludeFrame) {
+  const parents = [], sizes = [], frames = [];
+  let previous = [];
+  const root = (id) => {
+    while (parents[id] !== id) {
+      parents[id] = parents[parents[id]];
+      id = parents[id];
+    }
+    return id;
+  };
+  for (let row = 0; row < rows; row++) {
+    const current = [];
+    let previousIndex = 0;
+    for (let col = 0; col < cols;) {
+      if (Boolean(mask[row * cols + col]) !== ink) { col++; continue; }
+      const start = col;
+      while (col < cols && Boolean(mask[row * cols + col]) === ink) col++;
+      const end = col - 1;
+      const id = parents.length;
+      parents.push(id);
+      sizes.push(end - start + 1);
+      frames.push(row === 0 || row === rows - 1 || start === 0 || end === cols - 1);
+      const margin = eightConnected ? 1 : 0;
+      while (previousIndex < previous.length && previous[previousIndex].end < start - margin) previousIndex++;
+      for (let index = previousIndex; index < previous.length && previous[index].start <= end + margin; index++) {
+        const left = root(id), right = root(previous[index].id);
+        if (left === right) continue;
+        parents[right] = left;
+        sizes[left] += sizes[right];
+        frames[left] ||= frames[right];
+      }
+      current.push({ start, end, id });
+    }
+    previous = current;
+  }
+  const areas = [];
+  for (let id = 0; id < parents.length; id++) {
+    if (parents[id] === id && (!excludeFrame || !frames[id])) areas.push(sizes[id]);
+  }
+  return areas;
+}
+
 /**
  * Цифровая топология: чернила 8-связны, негатив 4-связен. Двойственная
  * связность не позволяет диагональному касанию одновременно соединять оба слоя.
@@ -243,13 +288,10 @@ export function topologyOfMask({ mask, cols, rows, step }) {
     throw new Error('ink-raster: mask не согласован с cols×rows');
   }
   const cellArea = step * step;
-  const components = labelMaskFeatures(mask, cols, rows, { eightConnected: true })
-    .features.map((feature) => feature.cells * cellArea);
-  const negative = new Uint8Array(mask.length);
-  for (let i = 0; i < mask.length; i++) negative[i] = mask[i] ? 0 : 1;
-  const holes = labelMaskFeatures(negative, cols, rows, { eightConnected: false })
-    .features.filter((feature) => !feature.touchesFrame)
-    .map((feature) => feature.cells * cellArea);
+  const components = componentAreas(mask, cols, rows, true, true, false)
+    .map((cells) => cells * cellArea);
+  const holes = componentAreas(mask, cols, rows, false, false, true)
+    .map((cells) => cells * cellArea);
   return {
     components: components.sort((a, b) => b - a),
     holes: holes.sort((a, b) => b - a),

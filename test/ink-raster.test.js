@@ -183,3 +183,20 @@ describe('path-aware ink raster', () => {
     expect(new Set(report.signatures)).toEqual(new Set(['1:0', '2:0']));
   });
 });
+
+describe('площади топологии совпадают с эталоном по меткам клеток', () => {
+  it('сохраняет компоненты и отверстия для всех бинарных масок 4×4', async () => {
+    const { labelMaskFeatures, topologyOfMask } = await import('../scripts/lib/ink-raster.js');
+    for (let bits = 0; bits < 65536; bits++) {
+      const mask = Uint8Array.from({ length: 16 }, (_, i) => (bits >>> i) & 1);
+      const negative = mask.map(cell => cell ? 0 : 1);
+      const components = labelMaskFeatures(mask, 4, 4, { eightConnected: true })
+        .features.map(feature => feature.cells * 0.25).sort((a, b) => b - a);
+      const holes = labelMaskFeatures(negative, 4, 4, { eightConnected: false })
+        .features.filter(feature => !feature.touchesFrame)
+        .map(feature => feature.cells * 0.25).sort((a, b) => b - a);
+      expect(topologyOfMask({ mask, cols: 4, rows: 4, step: 0.5 }), `mask ${bits}`)
+        .toEqual({ components, holes });
+    }
+  }, 30000);
+});

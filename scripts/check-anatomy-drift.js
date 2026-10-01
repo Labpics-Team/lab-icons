@@ -24,26 +24,37 @@ import thresholds from '../semantics/quality-thresholds.json' with { type: 'json
 const GENERATED_FLOOR = thresholds.generated.driftIoUFloor;
 const HAND_FLOOR = thresholds.transcript.fitIoUFloor;
 
-function inkAt(polys, x, y) {
-  let hits = 0;
+// Пересечения луча зависят от y: считаем их один раз на строку.
+// Сохраняем накопление координат сложением и строгое сравнение x на границе.
+function rowCrossings(polys, y) {
+  const crossings = [];
   for (const poly of polys) {
     for (let i = 0; i < poly.length; i++) {
       const [x1, y1] = poly[i];
       const [x2, y2] = poly[(i + 1) % poly.length];
-      if (y1 > y !== y2 > y && x < x1 + ((y - y1) / (y2 - y1)) * (x2 - x1)) hits++;
+      if (y1 > y !== y2 > y) {
+        const x = x1 + ((y - y1) / (y2 - y1)) * (x2 - x1);
+        // NaN не удовлетворял исходному сравнению x < crossing.
+        if (!Number.isNaN(x)) crossings.push(x);
+      }
     }
   }
-  return hits % 2 === 1;
+  return crossings.sort((a, b) => a - b);
 }
 
 export function inkIoU(dA, dB, cw, step = 0.12) {
   const A = samplePolylines(dA, 24).filter((p) => p.length > 2);
   const B = samplePolylines(dB, 24).filter((p) => p.length > 2);
   let both = 0, onlyA = 0, onlyB = 0;
-  for (let x = step / 2; x < cw; x += step) {
-    for (let y = step / 2; y < cw; y += step) {
-      const a = inkAt(A, x, y);
-      const b = inkAt(B, x, y);
+  for (let y = step / 2; y < cw; y += step) {
+    const crossingsA = rowCrossings(A, y);
+    const crossingsB = rowCrossings(B, y);
+    let indexA = 0, indexB = 0;
+    for (let x = step / 2; x < cw; x += step) {
+      while (indexA < crossingsA.length && crossingsA[indexA] <= x) indexA++;
+      while (indexB < crossingsB.length && crossingsB[indexB] <= x) indexB++;
+      const a = (crossingsA.length - indexA) % 2 === 1;
+      const b = (crossingsB.length - indexB) % 2 === 1;
       if (a && b) both++;
       else if (a) onlyA++;
       else if (b) onlyB++;
