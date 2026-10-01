@@ -230,8 +230,8 @@ function geometryForAxisProof(entry, variant, grid, axes, lib, fillRule) {
 }
 
 function topologySample(entries, grid, rasterSize, cache) {
-  // This cache belongs to one proof invocation. Every axis value is still
-  // generated and checked; only byte-identical geometry reuses its raster.
+  // Кэш живёт в одном вызове проверки. Все значения оси вычисляются
+  // и проверяются; повторный растр допустим только для одинаковой геометрии.
   const key = JSON.stringify([grid.canvas.width, grid.canvas.height, rasterSize, entries]);
   if (cache.has(key)) return cache.get(key);
   const { stable, signatures } = topologyAcrossPhases(

@@ -234,9 +234,9 @@ export function labelMaskFeatures(mask, cols, rows, { eightConnected = true } = 
   return { labels, features };
 }
 
-// Area-only topology does not need per-cell labels, centroids or bounding
-// boxes. Join horizontal runs instead; a run touches the preceding row at
-// the same column (4-connectivity) or one column away (8-connectivity).
+// Для площадей не нужны метки клеток, центроиды и границы компонент.
+// Объединяем горизонтальные полосы: 4-связность требует общей колонки,
+// 8-связность допускает сдвиг на одну колонку.
 function componentAreas(mask, cols, rows, ink, eightConnected, excludeFrame) {
   const parents = [], sizes = [], frames = [];
   let previous = [];

@@ -24,9 +24,8 @@ import thresholds from '../semantics/quality-thresholds.json' with { type: 'json
 const GENERATED_FLOOR = thresholds.generated.driftIoUFloor;
 const HAND_FLOOR = thresholds.transcript.fitIoUFloor;
 
-// The ray predicate is unchanged; its intersections depend on y, not x.
-// Compute them once per scanline instead of once per pixel. Keep the original
-// repeated-addition sample coordinates and strict x comparison at boundaries.
+// Пересечения луча зависят от y: считаем их один раз на строку.
+// Сохраняем накопление координат сложением и строгое сравнение x на границе.
 function rowCrossings(polys, y) {
   const crossings = [];
   for (const poly of polys) {
@@ -35,7 +34,7 @@ function rowCrossings(polys, y) {
       const [x2, y2] = poly[(i + 1) % poly.length];
       if (y1 > y !== y2 > y) {
         const x = x1 + ((y - y1) / (y2 - y1)) * (x2 - x1);
-        // NaN never satisfied the old x < crossing predicate.
+        // NaN не удовлетворял исходному сравнению x < crossing.
         if (!Number.isNaN(x)) crossings.push(x);
       }
     }

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { inkIoU } from '../scripts/check-anatomy-drift.js';
 import { samplePolylines } from '../scripts/lib/curve-sampling.js';
 
-// Independent point-by-point oracle retained from the original implementation.
+// Независимый поточечный эталон из исходной реализации.
 function referenceIoU(dA, dB, cw, step) {
   const A = samplePolylines(dA, 24).filter(p => p.length > 2);
   const B = samplePolylines(dB, 24).filter(p => p.length > 2);
@@ -31,20 +31,20 @@ function referenceIoU(dA, dB, cw, step) {
 
 const paths = [
   'M0 0H6V6H0Z',
-  'M0.06 0.06H5.94V5.94H0.06Z', // sample centres on boundaries
-  'M1 1H5V5H1Z M2 2H4V4H2Z', // counter
-  'M1 1H5V5H1Z M1 1H5V5H1Z', // coincident crossings cancel under evenodd
-  'M0 0L6 6L0 6L6 0Z', // self intersection
+  'M0.06 0.06H5.94V5.94H0.06Z', // центры проб на границах
+  'M1 1H5V5H1Z M2 2H4V4H2Z', // отверстие
+  'M1 1H5V5H1Z M1 1H5V5H1Z', // совпавшие контуры взаимно исключаются under evenodd
+  'M0 0L6 6L0 6L6 0Z', // самопересечение
   'M1 3C1 0 5 0 5 3C5 6 1 6 1 3Z',
   'M1 3A2 2 0 1 1 5 3A2 2 0 1 1 1 3Z',
-  'M-4 -4H-2V-2H-4Z', // entirely outside the canvas
-  'M0 0L1 1', // no polygon
-  'M1 1L3 1L5 1Z', // horizontal degenerate polygon
+  'M-4 -4H-2V-2H-4Z', // весь контур вне холста
+  'M0 0L1 1', // без полигона
+  'M1 1L3 1L5 1Z', // вырожденный горизонтальный полигон
 ];
 
-describe('scanline IoU preserves every sampled pixel', () => {
+describe('IoU по строкам сохраняет каждую пробу', () => {
   for (const step of [0.12, 0.5, 0.7]) {
-    it(`equals the point oracle for every ordered pair at step ${step}`, () => {
+    it(`совпадает с поточечным эталоном для всех пар при шаге ${step}`, () => {
       for (const a of paths) {
         for (const b of paths) {
           expect(inkIoU(a, b, 6, step), `${a} / ${b}`).toBe(referenceIoU(a, b, 6, step));

@@ -184,8 +184,8 @@ describe('path-aware ink raster', () => {
   });
 });
 
-describe('area-only topology matches the cell-label oracle', () => {
-  it('preserves components and holes for every 4×4 binary mask', async () => {
+describe('площади топологии совпадают с эталоном по меткам клеток', () => {
+  it('сохраняет компоненты и отверстия для всех бинарных масок 4×4', async () => {
     const { labelMaskFeatures, topologyOfMask } = await import('../scripts/lib/ink-raster.js');
     for (let bits = 0; bits < 65536; bits++) {
       const mask = Uint8Array.from({ length: 16 }, (_, i) => (bits >>> i) & 1);
