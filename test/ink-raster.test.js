@@ -4,6 +4,8 @@ import {
   rasterizePathEntries,
   topologyAcrossPhases,
   topologyOfSvg,
+  topologyOfMask,
+  significantTopology,
 } from '../scripts/lib/ink-raster.js';
 
 const svg = (body, width = 24, height = 24) =>
@@ -182,6 +184,46 @@ describe('path-aware ink raster', () => {
     expect(report.stable).toBe(false);
     expect(new Set(report.signatures)).toEqual(new Set(['1:0', '2:0']));
   });
+  it('matches independent phase rasters for curves, fill rules and subtractors', () => {
+    const entries = [
+      { d: 'M2 2C2 0 14 0 14 2V14H2Z', fillRule: 'evenodd' },
+      { d: 'M5 5H11V11H5Z M6 6H10V10H6Z', fillRule: 'nonzero', operation: 'subtract' },
+      { d: 'M14.2 2H18V14H14.2Z', fillRule: 'nonzero' },
+    ];
+    const phases = [[0.25, 0.25], [0.75, 0.25], [0.25, 0.75], [0.75, 0.75]];
+    const options = { width: 20, height: 16, step: 0.5, stepsPerSeg: 32 };
+    const minFeatureArea = 0.5;
+    const expected = phases.map(([phaseX, phaseY]) => {
+      const result = topologyOfMask(rasterizePathEntries(entries, { ...options, phaseX, phaseY }));
+      return {
+        phase: [phaseX, phaseY],
+        topology: result,
+        significant: significantTopology(result, minFeatureArea),
+      };
+    });
+    const actual = topologyAcrossPhases(entries, { ...options, phases, minFeatureArea });
+
+    expect(actual.samples).toEqual(expected);
+    expect(actual.signatures).toEqual(expected.map(({ significant }) =>
+      `${significant.components}:${significant.holes}`));
+  });
+
+  it('observes edits between reports and preserves empty-phase behavior', () => {
+    const entries = [{ d: 'M2 2H8V8H2Z' }];
+    const options = { width: 16, height: 10, step: 0.5 };
+    const before = topologyAcrossPhases(entries, options);
+    entries.push({ d: 'M10 2H14V8H10Z' });
+    const after = topologyAcrossPhases(entries, options);
+
+    expect(new Set(before.signatures)).toEqual(new Set(['1:0']));
+    expect(new Set(after.signatures)).toEqual(new Set(['2:0']));
+    expect(topologyAcrossPhases([], { phases: [], step: -1 })).toEqual({
+      stable: true,
+      signatures: [],
+      samples: [],
+    });
+  });
+
 });
 
 describe('площади топологии совпадают с эталоном по меткам клеток', () => {

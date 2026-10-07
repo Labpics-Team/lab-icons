@@ -101,7 +101,25 @@ function paintIntervals(mask, row, cols, step, phaseX, intervals) {
  * @param {Array<{d:string, fillRule?:'evenodd'|'nonzero', operation?:'union'|'subtract'}>} entries
  * @returns {{mask:Uint8Array, cols:number, rows:number, step:number, phase:[number,number]}}
  */
-export function rasterizePathEntries(
+export function rasterizePathEntries(entries, options = {}) {
+  return rasterizeWithSampler(entries, options, samplePathEntries);
+}
+
+function samplePathEntries(entries, stepsPerSeg) {
+  return entries.map((entry, index) => {
+    if (!entry || typeof entry.d !== 'string' || entry.d.trim() === '') {
+      throw new Error(`ink-raster: path ${index} не несёт d`);
+    }
+    const fillRule = entry.fillRule === 'evenodd' ? 'evenodd' : 'nonzero';
+    return {
+      fillRule,
+      operation: entry.operation === 'subtract' ? 'subtract' : 'union',
+      polys: samplePolylines(entry.d, stepsPerSeg).filter((poly) => poly.length > 2),
+    };
+  });
+}
+
+function rasterizeWithSampler(
   entries,
   {
     width = 24,
@@ -111,6 +129,7 @@ export function rasterizePathEntries(
     phaseY = 0.5,
     stepsPerSeg = 24,
   } = {},
+  sample,
 ) {
   assertRasterOptions({ width, height, step, phaseX, phaseY });
   if (!Number.isInteger(stepsPerSeg) || stepsPerSeg < 1) {
@@ -123,17 +142,7 @@ export function rasterizePathEntries(
   const cols = Math.ceil(width / step);
   const rows = Math.ceil(height / step);
   const mask = new Uint8Array(cols * rows);
-  const sampled = entries.map((entry, index) => {
-    if (!entry || typeof entry.d !== 'string' || entry.d.trim() === '') {
-      throw new Error(`ink-raster: path ${index} не несёт d`);
-    }
-    const fillRule = entry.fillRule === 'evenodd' ? 'evenodd' : 'nonzero';
-    return {
-      fillRule,
-      operation: entry.operation === 'subtract' ? 'subtract' : 'union',
-      polys: samplePolylines(entry.d, stepsPerSeg).filter((poly) => poly.length > 2),
-    };
-  });
+  const sampled = sample(entries, stepsPerSeg);
 
   const unionRow = new Uint8Array(cols);
   const subtractRow = new Uint8Array(cols);
@@ -321,8 +330,19 @@ export function topologyAcrossPhases(
   entries,
   { phases = DEFAULT_RASTER_PHASES, minFeatureArea = 0, ...rasterOptions } = {},
 ) {
+  // Curves belong to one geometry, while every phase still gets its own full
+  // raster. Keep preparation local to this report so later calls see edits.
+  let sampled;
+  let sampledStepsPerSeg;
+  const prepare = (paths, stepsPerSeg) => {
+    if (sampled === undefined || sampledStepsPerSeg !== stepsPerSeg) {
+      sampled = samplePathEntries(paths, stepsPerSeg);
+      sampledStepsPerSeg = stepsPerSeg;
+    }
+    return sampled;
+  };
   const samples = phases.map(([phaseX, phaseY]) => {
-    const raster = rasterizePathEntries(entries, { ...rasterOptions, phaseX, phaseY });
+    const raster = rasterizeWithSampler(entries, { ...rasterOptions, phaseX, phaseY }, prepare);
     const topology = topologyOfMask(raster);
     return { phase: [phaseX, phaseY], topology, significant: significantTopology(topology, minFeatureArea) };
   });
