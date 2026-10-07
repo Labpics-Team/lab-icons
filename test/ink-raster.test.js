@@ -1,4 +1,6 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+import * as curveSampling from '../scripts/lib/curve-sampling.js';
+import * as pathData from '../src/core/path-data.js';
 import { renderedPathEntries } from '../src/core/icon-geometry.js';
 import {
   rasterizePathEntries,
@@ -184,7 +186,70 @@ describe('path-aware ink raster', () => {
     expect(report.stable).toBe(false);
     expect(new Set(report.signatures)).toEqual(new Set(['1:0', '2:0']));
   });
-  it('matches independent phase rasters for curves, fill rules and subtractors', () => {
+
+  it('готовит каждый путь один раз для четырёх фаз и заново в следующем отчёте', () => {
+    const entries = [
+      { d: 'M2 2C2 0 14 0 14 2V14H2Z', fillRule: 'evenodd' },
+      { d: 'M5 5H11V11H5Z M6 6H10V10H6Z', fillRule: 'nonzero', operation: 'subtract' },
+      { d: 'M14.2 2H18V14H14.2Z', fillRule: 'nonzero' },
+    ];
+    const phases = [[0.25, 0.25], [0.75, 0.25], [0.25, 0.75], [0.75, 0.75]];
+    const options = { width: 20, height: 16, step: 0.5, stepsPerSeg: 32 };
+    let sampler;
+    let parser;
+    try {
+      // Наблюдаем настоящие выборку и парсер; обе функции сохраняют вычисления.
+      sampler = vi.spyOn(curveSampling, 'samplePolylines');
+      parser = vi.spyOn(pathData, 'parsePathData');
+      const preparedOnce = (stepsPerSeg) => {
+        expect(sampler.mock.calls).toHaveLength(entries.length);
+        expect(sampler.mock.calls).toEqual(expect.arrayContaining(
+          entries.map(({ d }) => [d, stepsPerSeg]),
+        ));
+        expect(parser.mock.calls).toHaveLength(entries.length);
+        expect(parser.mock.calls).toEqual(expect.arrayContaining(entries.map(({ d }) => [d])));
+      };
+      const clearCalls = () => {
+        sampler.mockClear();
+        parser.mockClear();
+      };
+
+      // Один исходный растр доказывает, что наблюдатели действительно подключены.
+      rasterizePathEntries(entries, { ...options, phaseX: 0.25, phaseY: 0.25 });
+      preparedOnce(32);
+      clearCalls();
+
+      const first = topologyAcrossPhases(entries, { ...options, phases });
+      preparedOnce(32);
+      expect(first.samples.map(({ phase }) => phase)).toEqual(phases);
+      clearCalls();
+
+      entries[0].d = 'M2 2C2 1 12 1 12 2V14H2Z';
+      entries.push({ d: 'M16 4H19V12H16Z', fillRule: 'nonzero' });
+      const after = topologyAcrossPhases(entries, { ...options, phases });
+      preparedOnce(32);
+      expect(after.samples.map(({ phase }) => phase)).toEqual(phases);
+      clearCalls();
+
+      const denser = topologyAcrossPhases(entries, { ...options, phases, stepsPerSeg: 64 });
+      preparedOnce(64);
+      expect(denser.samples.map(({ phase }) => phase)).toEqual(phases);
+      clearCalls();
+
+      expect(topologyAcrossPhases([], { phases: [], step: -1 })).toEqual({
+        stable: true,
+        signatures: [],
+        samples: [],
+      });
+      expect(sampler.mock.calls).toHaveLength(0);
+      expect(parser.mock.calls).toHaveLength(0);
+    } finally {
+      parser?.mockRestore();
+      sampler?.mockRestore();
+    }
+  });
+
+  it('сохраняет отдельные фазовые растры для кривых, правил заливки и вычитания', () => {
     const entries = [
       { d: 'M2 2C2 0 14 0 14 2V14H2Z', fillRule: 'evenodd' },
       { d: 'M5 5H11V11H5Z M6 6H10V10H6Z', fillRule: 'nonzero', operation: 'subtract' },
@@ -208,7 +273,7 @@ describe('path-aware ink raster', () => {
       `${significant.components}:${significant.holes}`));
   });
 
-  it('observes edits between reports and preserves empty-phase behavior', () => {
+  it('видит правки между отчётами и сохраняет поведение пустого списка фаз', () => {
     const entries = [{ d: 'M2 2H8V8H2Z' }];
     const options = { width: 16, height: 10, step: 0.5 };
     const before = topologyAcrossPhases(entries, options);

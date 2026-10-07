@@ -330,8 +330,8 @@ export function topologyAcrossPhases(
   entries,
   { phases = DEFAULT_RASTER_PHASES, minFeatureArea = 0, ...rasterOptions } = {},
 ) {
-  // Curves belong to one geometry, while every phase still gets its own full
-  // raster. Keep preparation local to this report so later calls see edits.
+  // Кривые одной геометрии готовим один раз; каждая фаза получает полный растр.
+  // Подготовка живёт в этом отчёте: следующий вызов видит правки входных путей.
   let sampled;
   let sampledStepsPerSeg;
   const prepare = (paths, stepsPerSeg) => {
