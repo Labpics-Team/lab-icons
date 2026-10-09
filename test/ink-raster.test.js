@@ -325,7 +325,7 @@ describe('изменение геометрии внутри прежнего м
     // Ожидания заданы геометрией, без вызова парсера, растеризатора или классификатора.
     const report = (areas, gaps) => ({
       stable: true,
-      signatures: phases.map(() => `:`),
+      signatures: phases.map(() => areas.length + ':' + gaps.length),
       samples: phases.map(phase => ({
         phase,
         topology: { components: areas, holes: gaps },
