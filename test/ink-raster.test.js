@@ -307,3 +307,38 @@ describe('площади топологии совпадают с эталоно
     }
   }, 30000);
 });
+
+
+describe('изменение геометрии внутри прежнего массива', () => {
+  it.each([
+    { field: 'd', index: 0, value: 'M1 1H6V7H1Z', components: [30, 4], holes: [] },
+    { field: 'fillRule', index: 0, value: 'evenodd', components: [32, 4], holes: [4] },
+    { field: 'operation', index: 1, value: 'subtract', components: [36], holes: [] },
+  ])('пересчитывает $field без изменения длины и плотности', ({ field, index, value, components, holes }) => {
+    const entries = [
+      { d: 'M1 1H7V7H1Z M3 3H5V5H3Z', fillRule: 'nonzero', operation: 'union' },
+      { d: 'M8 1H10V3H8Z', fillRule: 'nonzero', operation: 'union' },
+    ];
+    const phases = [[0.25, 0.25], [0.75, 0.25], [0.25, 0.75], [0.75, 0.75]];
+    const options = { width: 12, height: 8, step: 0.5, stepsPerSeg: 24, phases };
+    // Целочисленные прямоугольники имеют точные площади во всех выбранных фазах.
+    // Ожидания заданы геометрией, без вызова парсера, растеризатора или классификатора.
+    const report = (areas, gaps) => ({
+      stable: true,
+      signatures: phases.map(() => areas.length + ':' + gaps.length),
+      samples: phases.map(phase => ({
+        phase,
+        topology: { components: areas, holes: gaps },
+        significant: { components: areas.length, holes: gaps.length },
+      })),
+    });
+    const before = topologyAcrossPhases(entries, options);
+    expect(before).toEqual(report([36, 4], []));
+
+    entries[index][field] = value;
+    expect(entries).toHaveLength(2);
+    const after = topologyAcrossPhases(entries, options);
+    expect(after).toEqual(report(components, holes));
+    expect(after.samples).not.toEqual(before.samples);
+  });
+});
