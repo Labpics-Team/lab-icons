@@ -22,7 +22,7 @@ function runExample(source) {
   });
 }
 
-describe('первый сценарий из README', () => {
+describe('Примеры README', () => {
   it('исполняет каждый опубликованный JS-блок через публичный пакет после сборки', () => {
     const examples = javascriptExamples(readFileSync(new URL('../README.md', import.meta.url), 'utf8'));
     for (const example of examples) {
@@ -33,7 +33,7 @@ describe('первый сценарий из README', () => {
     }
   });
 
-  it('отвергает отсутствующий экспорт, а не только проверяет синтаксис примера', () => {
+  it('сообщает об отсутствующем экспорте при исполнении примера', () => {
     const good = runExample("import { accessibilityOutline } from '@labpics/icons'; console.log(accessibilityOutline);");
     expect(good.error).toBeUndefined();
     expect(good.status, good.stderr).toBe(0);
@@ -43,7 +43,7 @@ describe('первый сценарий из README', () => {
     expect(bad.stderr).toContain('__missingDocumentationExport__');
   });
 
-  it('не даёт успеха при удалённом или сломанном блоке и не исполняет shell', () => {
+  it('отклоняет пустые JS-примеры и пропускает shell-блоки', () => {
     for (const source of ['', '```js\n', '```js\n```', '```sh\necho hello\n```']) {
       expect(() => javascriptExamples(source)).toThrow();
     }
@@ -52,7 +52,7 @@ describe('первый сценарий из README', () => {
   });
 });
 
-it('пример предложения проходит настоящий parser, но не подменяет визуальную приёмку', () => {
+it('проверяет предложение из документации по схеме и каталогу', () => {
   const { jsonExamples } = parseDocumentation(readFileSync(new URL('../docs/agent-workflow.md', import.meta.url), 'utf8'));
   expect(jsonExamples.length).toBeGreaterThan(0);
   const catalog = JSON.parse(readFileSync(new URL('../semantics/catalog.json', import.meta.url), 'utf8'));

@@ -1,30 +1,12 @@
-import { cpSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { mkdirSync, readFileSync, readdirSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { describe, expect, it } from 'vitest';
-import { ROOT, auditRepo, documentationFiles, documentationLinkErrors, writePackageReference } from '../scripts/check-docs-drift.js';
+import { describe, expect } from 'vitest';
+import { it } from './fixtures/documentation.js';
+import { auditRepo, documentationFiles, documentationLinkErrors, writePackageReference } from '../scripts/check-docs-drift.js';
 
-function fixture(run) {
-  const parent = mkdtempSync(join(tmpdir(), 'icons-doc-boundary-'));
-  const root = join(parent, 'repo');
-  const outside = join(parent, 'outside');
-  try {
-    mkdirSync(join(root, 'docs'), { recursive: true });
-    mkdirSync(join(root, 'release'));
-    mkdirSync(outside);
-    for (const file of ['package.json', 'release/contract.json', 'docs/package.md']) {
-      cpSync(join(ROOT, file), join(root, file));
-    }
-    writeFileSync(join(root, 'README.md'), '# Пакет\n');
-    writeFileSync(join(outside, 'package.md'), 'Не изменять\n');
-    expect(auditRepo(root).errors).toEqual([]);
-    run(root, outside);
-  } finally { rmSync(parent, { recursive: true, force: true }); }
-}
-
-describe('единая файловая граница чтения и записи документации', () => {
+describe('Границы файлов документации', () => {
   for (const path of ['docs', 'docs/nested', 'docs/package.md', 'README.md']) {
-    it(`отвергает ссылку ${path} до чтения и записи`, () => fixture((root, outside) => {
+    it(`отвергает ссылку ${path} до чтения и записи`, ({ root, outside }) => {
       rmSync(join(root, path), { recursive: true, force: true });
       // Junction доступен на Windows без права создания file-symlink.
       symlinkSync(outside, join(root, path), process.platform === 'win32' ? 'junction' : 'dir');
@@ -33,10 +15,10 @@ describe('единая файловая граница чтения и запи�
         expect(readdirSync(outside)).toEqual(['package.md']);
         expect(readFileSync(join(outside, 'package.md'), 'utf8')).toBe('Не изменять\n');
       }
-    }));
+    });
   }
 
-  it('проверяет real path Markdown-ссылок и изображений, а не только лексический путь', () => fixture((root, outside) => {
+  it('отклоняет ссылки и изображения за пределами рабочей копии', ({ root, outside }) => {
     writeFileSync(join(outside, 'target.md'), '# Внешний файл\n');
     writeFileSync(join(outside, 'pixel.png'), 'not an image');
     symlinkSync(outside, join(root, 'escape'), process.platform === 'win32' ? 'junction' : 'dir');
@@ -50,25 +32,25 @@ describe('единая файловая граница чтения и запи�
     const auditErrors = auditRepo(root).errors;
     expect(auditErrors.some((error) => error.includes('escape/target.md'))).toBe(true);
     expect(auditErrors.some((error) => error.includes('escape/pixel.png'))).toBe(true);
-  }));
+  });
 
-  it('разрешает symlink-цель, если её real path остаётся внутри checkout', () => fixture((root) => {
+  it('разрешает символическую ссылку внутри рабочей копии', ({ root }) => {
     mkdirSync(join(root, 'assets'));
     writeFileSync(join(root, 'assets', 'inside.md'), '# Внутри\n');
     symlinkSync(join(root, 'assets'), join(root, 'inside-link'), process.platform === 'win32' ? 'junction' : 'dir');
     expect(documentationLinkErrors(root, 'README.md', '[внутри](inside-link/inside.md)')).toEqual([]);
-  }));
+  });
 
-  it('не принимает обычный файл вместо каталога docs', () => fixture((root, outside) => {
+  it('отклоняет обычный файл вместо каталога документации', ({ root, outside }) => {
     rmSync(join(root, 'docs'), { recursive: true });
     writeFileSync(join(root, 'docs'), 'не каталог');
     for (const operation of [documentationFiles, auditRepo, writePackageReference]) {
       expect(() => operation(root)).toThrow(/каталог/);
     }
     expect(readFileSync(join(outside, 'package.md'), 'utf8')).toBe('Не изменять\n');
-  }));
+  });
 
-  it('после отказа нормальный каталог снова допускает генерацию', () => fixture((root, outside) => {
+  it('возобновляет генерацию после восстановления каталога', ({ root, outside }) => {
     rmSync(join(root, 'docs'), { recursive: true });
     symlinkSync(outside, join(root, 'docs'), process.platform === 'win32' ? 'junction' : 'dir');
     expect(() => writePackageReference(root)).toThrow(/symlink|каталог/);
@@ -77,5 +59,5 @@ describe('единая файловая граница чтения и запи�
     writePackageReference(root);
     expect(auditRepo(root).errors).toEqual([]);
     expect(readFileSync(join(outside, 'package.md'), 'utf8')).toBe('Не изменять\n');
-  }));
+  });
 });
