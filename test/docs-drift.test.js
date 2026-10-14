@@ -1,7 +1,8 @@
-import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, unlinkSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { mkdirSync, readFileSync, unlinkSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { writeFile } from 'node:fs/promises';
+import { describe, expect } from 'vitest';
+import { it } from './fixtures/documentation.js';
 import { ROOT, auditRepo, documentationLinkErrors, distributionClaimErrors, findInkHexClaims, writePackageReference } from '../scripts/check-docs-drift.js';
 import { packageReferenceErrors, renderPackageReference } from '../scripts/lib/docs-reference.js';
 
@@ -9,23 +10,8 @@ const pkg = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'));
 const contract = JSON.parse(readFileSync(join(ROOT, 'release/contract.json'), 'utf8'));
 const reference = readFileSync(join(ROOT, 'docs/package.md'), 'utf8').replace(/\r\n/g, '\n');
 
-function fixture(run) {
-  const root = mkdtempSync(join(tmpdir(), 'lab-icons-docs-'));
-  try {
-    mkdirSync(join(root, 'docs'));
-    mkdirSync(join(root, 'release'));
-    for (const path of ['package.json', 'release/contract.json', 'docs/package.md']) {
-      cpSync(join(ROOT, path), join(root, path));
-    }
-    writeFileSync(join(root, 'README.md'), '# Проверяемый пакет\n');
-    return run(root);
-  } finally {
-    rmSync(root, { recursive: true, force: true });
-  }
-}
-
-describe('справка поставки из единственного контракта', () => {
-  it('проверяет весь документ, а не присутствие правильного числа', () => {
+describe('Справка поставки', () => {
+  it('отклоняет неполную или вручную дополненную справку', () => {
     expect(packageReferenceErrors(reference, pkg, contract)).toEqual([]);
     expect(packageReferenceErrors(reference + '\nВсего семь файлов.\n', pkg, contract)).toHaveLength(1);
     expect(packageReferenceErrors('', pkg, contract)).toHaveLength(1);
@@ -42,7 +28,7 @@ describe('справка поставки из единственного кон
     expect(files).toEqual(contract.files);
   });
 
-  it('изменение источника инвалидирует прежнюю проекцию', () => {
+  it('отклоняет прежнюю справку после изменения контракта', () => {
     const next = structuredClone(contract);
     next.exports['./ir'].import = './dist/ir/replacement.js';
     expect(packageReferenceErrors(reference, pkg, next)).toHaveLength(1);
@@ -51,33 +37,33 @@ describe('справка поставки из единственного кон
     expect(packageReferenceErrors(reference, { ...pkg, engines: { ...pkg.engines, node: '>=99' } }, contract)).toHaveLength(1);
   });
 
-  it('повтор генерации детерминирован; CRLF checkout не является дрейфом', () => {
+  it('сохраняет результат генерации при повторе и переводах строк CRLF', () => {
     expect(renderPackageReference(pkg, contract)).toBe(renderPackageReference(pkg, contract));
     expect(packageReferenceErrors(reference.replace(/\n/g, '\r\n'), pkg, contract)).toEqual([]);
   });
 });
 
-describe('проверяемая граница утверждений', () => {
-  it('сохраняет защиту npm channel, включая переносы и Markdown', () => {
+describe('Согласованность документации', () => {
+  it('отклоняет неверный канал установки с учётом Markdown', () => {
     for (const text of ['private: true', 'Пакет не **публикуется**\nв `npm`', 'Ставится только как git-зависимость', 'Нужен GH_PAT', 'Нужен **GH_PAT**', 'Пакет _не публикуется_ в `npm`']) {
       expect(distributionClaimErrors(text).length).toBeGreaterThan(0);
     }
     expect(distributionClaimErrors('Основной канал — npm. Публикацию конкретной версии проверяют отдельно.')).toEqual([]);
   });
 
-  it('фиксированные чернила не подменяют currentColor', () => {
+  it('отклоняет фиксированный цвет вместо currentColor', () => {
     expect(findInkHexClaims('Моно-чернила #101012')).toHaveLength(1);
     expect(findInkHexClaims('чернила наследуют currentColor')).toEqual([]);
   });
 
-  it('обходит вложенные документы и называет конкретный файл', () => fixture((root) => {
+  it('обходит вложенные документы и называет конкретный файл', ({ root }) => {
     expect(auditRepo(root).errors).toEqual([]);
     mkdirSync(join(root, 'docs/reference/deep'), { recursive: true });
     writeFileSync(join(root, 'docs/reference/deep/install.md'), 'Пакет не публикуется в npm.');
     expect(auditRepo(root).errors.some((error) => error.includes('install.md'))).toBe(true);
-  }));
+  });
 
-  it('сессионные handoffs не становятся вечной инструкцией после merge', () => fixture((root) => {
+  it('отклоняет сессионные записи в действующей документации', ({ root }) => {
     expect(auditRepo(root).errors).toEqual([]);
     writeFileSync(join(root, 'WAVE7-HANDOFF.md'), 'Статус: выполнено');
     expect(auditRepo(root).errors.some((error) => error.includes('WAVE7-HANDOFF.md'))).toBe(true);
@@ -85,25 +71,25 @@ describe('проверяемая граница утверждений', () => {
     mkdirSync(join(root, 'handoffs'));
     writeFileSync(join(root, 'handoffs/WAVE7-HANDOFF.md'), 'Статус: выполнено');
     expect(auditRepo(root).errors.some((error) => error.includes('handoffs/'))).toBe(true);
-  }));
+  });
 
-  it('отсутствующая справка не даёт пустого успеха', () => fixture((root) => {
+  it('сообщает об отсутствующей справке', ({ root }) => {
     unlinkSync(join(root, 'docs/package.md'));
     expect(auditRepo(root).errors).toContain('отсутствует docs/package.md');
-  }));
+  });
 
-  it('некорректный источник не исправляется правкой справки', () => fixture((root) => {
+  it('отказывает в генерации при некорректном контракте', ({ root }) => {
     const broken = { ...contract, files: [] };
     writeFileSync(join(root, 'release/contract.json'), JSON.stringify(broken));
     expect(auditRepo(root).errors.length).toBeGreaterThan(0);
     expect(() => writePackageReference(root)).toThrow();
     expect(readFileSync(join(root, 'docs/package.md'), 'utf8').replace(/\r\n/g, '\n')).toBe(reference);
-  }));
+  });
 
-  it('явная регенерация меняет только производный документ', () => fixture((root) => {
+  it('обновляет справку с сохранением исходного контракта', async ({ root }) => {
     const beforePackage = readFileSync(join(root, 'package.json'), 'utf8');
     const beforeContract = readFileSync(join(root, 'release/contract.json'), 'utf8');
-    writeFileSync(join(root, 'docs/package.md'), 'испорченная проекция');
+    await writeFile(join(root, 'docs/package.md'), 'испорченная проекция');
     expect(auditRepo(root).errors.length).toBeGreaterThan(0);
     writePackageReference(root);
     expect(auditRepo(root).errors).toEqual([]);
@@ -111,14 +97,14 @@ describe('проверяемая граница утверждений', () => {
     expect(readFileSync(join(root, 'release/contract.json'), 'utf8')).toBe(beforeContract);
     writePackageReference(root);
     expect(readFileSync(join(root, 'docs/package.md'), 'utf8').replace(/\r\n/g, '\n')).toBe(reference.replace(/\r\n/g, '\n'));
-  }));
+  });
 });
 
-it('актуальный checkout проходит заявленные проверки документации', () => {
+it('проверяет документацию текущей рабочей копии', () => {
   expect(auditRepo(ROOT).errors).toEqual([]);
 });
 
-it('проверяет файловые ссылки из Markdown, а не случайный текст в code blocks', () => fixture((root) => {
+it('проверяет Markdown-ссылки с учётом блоков кода и кодирования', ({ root }) => {
   writeFileSync(join(root, 'docs/имя с пробелом.md'), '# Цель');
   const valid = '[цель][ref]\n\n[ref]: %D0%B8%D0%BC%D1%8F%20%D1%81%20%D0%BF%D1%80%D0%BE%D0%B1%D0%B5%D0%BB%D0%BE%D0%BC.md#заголовок\n\n![image](package.md)\n\n```md\n[не ссылка](absent.md)\n```';
   expect(documentationLinkErrors(root, 'docs/test.md', valid)).toEqual([]);
@@ -130,4 +116,4 @@ it('проверяет файловые ссылки из Markdown, а не сл
   expect(documentationLinkErrors(root, 'docs/test.md', '[внешняя](https://example.invalid/path) [anchor](#here)')).toEqual([]);
   writeFileSync(join(root, 'NAMING.md'), '[отсутствует](docs/missing.md)');
   expect(auditRepo(root).errors.some((error) => error.includes('NAMING.md'))).toBe(true);
-}));
+});
