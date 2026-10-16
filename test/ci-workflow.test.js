@@ -40,18 +40,24 @@ const securityCommand = [
   'scan --scanners vuln,misconfig --severity UNKNOWN,HIGH,CRITICAL --include-dev-deps "${accepted[@]}"',
   '# Исправление вышло — принятая раньше уязвимость снова блокирует.',
   'scan --scanners vuln --severity UNKNOWN,HIGH,CRITICAL --include-dev-deps --ignore-unfixed --ignorefile /dev/null',
-  'scan --scanners secret "${accepted[@]}"',
+  '# Секрет в тестах, примерах и документации — такая же утечка: встроенные исключения trivy для них сняты.',
+  "printf 'disable-allow-rules:\\n  - tests\\n  - examples\\n  - markdown\\n' > \"$dir/secret.yaml\"",
+  'scan --scanners secret --secret-config "$dir/secret.yaml" "${accepted[@]}"',
   '',
 ].join('\n');
-// Модель trivy с флагами шага: находка из FINDINGS («сканер:id:fixed|unfixed|-») роняет проход
+// Модель trivy с флагами шага: находка из FINDINGS («сканер:id:состояние») роняет проход
 // с --exit-code, если её сканер включён, --ignore-unfixed её не отсеял и её id нет в --ignorefile.
+// Состояние уязвимости — fixed или unfixed. Состояние секрета — встроенное исключение trivy
+// (tests, examples, markdown), которое скрывает секрет, пока настройка секретов его не снимет, или «-».
+// Как и trivy, без --secret-config модель читает trivy-secret.yaml из дерева; allow-rules в ней скрывают секрет.
 // На проходе с номером CRASH_CALL сканер падает сам, как при сбое сети или базы.
 const fakeTrivy = `#!/usr/bin/env bash
-scanners= ignorefile= unfixed=0 code=0
+scanners= ignorefile= unfixed=0 code=0 secrets=trivy-secret.yaml
 while [ $# -gt 0 ]; do
   case "$1" in
     --scanners) scanners=$2; shift 2 ;;
     --ignorefile) ignorefile=$2; shift 2 ;;
+    --secret-config) secrets=$2; shift 2 ;;
     --exit-code) code=$2; shift 2 ;;
     --ignore-unfixed) unfixed=1; shift ;;
     *) shift ;;
@@ -63,6 +69,10 @@ for finding in $FINDINGS; do
   IFS=: read -r scanner id state <<< "$finding"
   [[ ",$scanners," == *",$scanner,"* ]] || continue
   [[ $unfixed == 1 && $state == unfixed ]] && continue
+  if [[ $scanner == secret ]]; then
+    grep -q '^allow-rules:' "$secrets" 2>/dev/null && continue
+    [[ $state == - ]] || grep -qxF -- "  - $state" "$secrets" 2>/dev/null || continue
+  fi
   grep -qxF -- "  - id: $id" "$ignorefile" && continue
   exit "$code"
 done
@@ -74,7 +84,7 @@ const stubs = {
   sha256sum: '#!/usr/bin/env bash\ncat > /dev/null\n',
 };
 
-function runSecurityStep({ findings = [], accepted, crash = 0, realChecksum = false }) {
+function runSecurityStep({ findings = [], accepted, candidate = {}, crash = 0, realChecksum = false }) {
   const step = parse(sources().get('ci.yml')).jobs.security.steps
     .find((entry) => entry.name === 'Scan dependencies, configuration and secrets');
   const root = mkdtempSync(join(tmpdir(), 'lab-icons-security-'));
@@ -87,6 +97,7 @@ function runSecurityStep({ findings = [], accepted, crash = 0, realChecksum = fa
     if (accepted) {
       writeFileSync(join(tree, '.trivyignore.yaml'), accepted.map((id) => `  - id: ${id}\n`).join(''));
     }
+    for (const [name, body] of Object.entries(candidate)) writeFileSync(join(tree, name), body);
     const calls = join(root, 'calls');
     const result = spawnSync('bash', ['--noprofile', '--norc', '-e', '-c', step.run], {
       cwd: tree,
@@ -273,6 +284,10 @@ describe('нативный итог CI', () => {
       const step = w.jobs.security.steps[1];
       step.run = step.run.replace('--scanners vuln,misconfig', '--scanners misconfig');
     }],
+    ['security без настройки секретов', (w) => {
+      const step = w.jobs.security.steps[1];
+      step.run = step.run.replace(' --secret-config "$dir/secret.yaml"', '');
+    }],
     ['пустой успех', (w) => { w.jobs.required.steps[0].run = 'true\n'; }],
     ['пропуск shell итога', (w) => { w.jobs.required.steps[0].if = false; }],
     ['игнорирование shell итога', (w) => { w.jobs.required.steps[0]['continue-on-error'] = true; }],
@@ -346,9 +361,17 @@ describe.runIf(process.platform === 'linux')('шаг security исполняет
     ['ошибка конфигурации блокирует', ['misconfig:KSV-1:-'], undefined, false],
     ['ошибка конфигурации проходит по записи', ['misconfig:KSV-1:-'], ['KSV-1'], true],
     ['секрет блокирует', ['secret:aws-access-key-id:-'], undefined, false],
-    ['тестовый секрет проходит по записи', ['secret:aws-access-key-id:-'], ['aws-access-key-id'], true],
+    ['секрет в тестах блокирует', ['secret:aws-access-key-id:tests'], undefined, false],
+    ['секрет в примерах блокирует', ['secret:aws-access-key-id:examples'], undefined, false],
+    ['секрет в документации блокирует', ['secret:aws-access-key-id:markdown'], undefined, false],
+    ['тестовый секрет проходит по записи', ['secret:aws-access-key-id:tests'], ['aws-access-key-id'], true],
   ])('%s', (_, findings, accepted, passed) => {
     expect(runSecurityStep({ findings, accepted }).passed).toBe(passed);
+  });
+
+  it('настройка секретов из дерева кандидата не скрывает секрет', () => {
+    const candidate = { 'trivy-secret.yaml': 'allow-rules:\n  - id: everything\n    path: .*\n' };
+    expect(runSecurityStep({ findings: ['secret:aws-access-key-id:-'], candidate }).passed).toBe(false);
   });
 
   it.each([1, 2, 3])('сбой сканера на проходе %i роняет шаг и останавливает его', (crash) => {
