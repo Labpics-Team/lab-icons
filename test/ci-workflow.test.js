@@ -36,7 +36,8 @@ const securityCommand = [
   'tar -xzf "$dir/trivy.tgz" -C "$dir" trivy',
   'accepted=(--ignorefile /dev/null)',
   '[ -f .trivyignore.yaml ] && accepted=(--ignorefile .trivyignore.yaml)',
-  'scan() { "$dir/trivy" fs --cache-dir "$dir/cache" --exit-code 1 --no-progress "$@" .; }',
+  '# Настройки сканера задаёт шаг: trivy.yaml из проверяемого дерева их не меняет.',
+  'scan() { "$dir/trivy" fs --config /dev/null --cache-dir "$dir/cache" --exit-code 1 --no-progress "$@" .; }',
   'scan --scanners vuln,misconfig --severity UNKNOWN,HIGH,CRITICAL --include-dev-deps "${accepted[@]}"',
   '# Исправление вышло — принятая раньше уязвимость снова блокирует.',
   'scan --scanners vuln --severity UNKNOWN,HIGH,CRITICAL --include-dev-deps --ignore-unfixed --ignorefile /dev/null',
@@ -49,13 +50,15 @@ const securityCommand = [
 // fixed или unfixed, у остальных «-». Находка роняет проход с --exit-code, если её сканер включён,
 // --ignore-unfixed её не отсеял и в --ignorefile нет записи её раздела с её id, у которой нет paths
 // или среди paths есть её файл. Секрет в тестах, примерах и документации скрывают встроенные исключения
-// trivy (tests, examples, markdown), пока настройка секретов их не снимет. Как и trivy, без --secret-config
-// модель читает trivy-secret.yaml из дерева; allow-rules в ней скрывают секрет.
+// trivy (tests, examples, markdown), пока настройка секретов их не снимет. Как и trivy, без --config
+// модель читает trivy.yaml из дерева, и его skip-files скрывают находку; без --secret-config она читает
+// trivy-secret.yaml из дерева, и его allow-rules скрывают секрет.
 // На проходе с номером CRASH_CALL сканер падает сам, как при сбое сети или базы.
 const fakeTrivy = `#!/usr/bin/env bash
-scanners= ignorefile= unfixed=0 code=0 secrets=trivy-secret.yaml
+scanners= ignorefile= unfixed=0 code=0 config=trivy.yaml secrets=trivy-secret.yaml
 while [ $# -gt 0 ]; do
   case "$1" in
+    --config) config=$2; shift 2 ;;
     --scanners) scanners=$2; shift 2 ;;
     --ignorefile) ignorefile=$2; shift 2 ;;
     --secret-config) secrets=$2; shift 2 ;;
@@ -81,6 +84,7 @@ for finding in $FINDINGS; do
   IFS=: read -r scanner id state path <<< "$finding"
   [[ ",$scanners," == *",$scanner,"* ]] || continue
   [[ $unfixed == 1 && $state == unfixed ]] && continue
+  grep -qxF -- "    - $path" "$config" 2>/dev/null && continue
   case $scanner in vuln) section=vulnerabilities ;; misconfig) section=misconfigurations ;; *) section=secrets ;; esac
   if [[ $section == secrets ]]; then
     grep -q '^allow-rules:' "$secrets" 2>/dev/null && continue
@@ -314,6 +318,10 @@ describe('нативный итог CI', () => {
       const step = w.jobs.security.steps[1];
       step.run = step.run.replace(' --secret-config "$dir/secret.yaml"', '');
     }],
+    ['security без своих настроек сканера', (w) => {
+      const step = w.jobs.security.steps[1];
+      step.run = step.run.replace(' --config /dev/null', '');
+    }],
     ['пустой успех', (w) => { w.jobs.required.steps[0].run = 'true\n'; }],
     ['пропуск shell итога', (w) => { w.jobs.required.steps[0].if = false; }],
     ['игнорирование shell итога', (w) => { w.jobs.required.steps[0]['continue-on-error'] = true; }],
@@ -404,6 +412,12 @@ describe.runIf(process.platform === 'linux')('шаг security исполняет
 
   it('настройка секретов из дерева кандидата не скрывает секрет', () => {
     const candidate = { 'trivy-secret.yaml': 'allow-rules:\n  - id: everything\n    path: .*\n' };
+    expect(runSecurityStep({ findings: [leak], candidate }).passed).toBe(false);
+  });
+
+  it('настройки сканера из дерева кандидата не скрывают находки', () => {
+    const candidate = { 'trivy.yaml': 'scan:\n  skip-files:\n    - pnpm-lock.yaml\n    - src/settings.js\n' };
+    expect(runSecurityStep({ findings: [fixed], candidate }).passed).toBe(false);
     expect(runSecurityStep({ findings: [leak], candidate }).passed).toBe(false);
   });
 
