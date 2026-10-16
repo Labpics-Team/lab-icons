@@ -26,6 +26,8 @@ const gateCommand = `set -euo pipefail
 // Шаг сканирования одинаков во всех репозиториях; меняются только runner, имя job и место в итоге.
 const securityCommand = [
   'set -euo pipefail',
+  '# trivy читает переменные TRIVY_* как флаги: охват проверки задаёт только этот шаг.',
+  'unset "${!TRIVY_@}"',
   'version=0.74.0',
   'sum=2ae6fe3ee734b7fdf11335663e18c75ea12dccc76062f09f164a3b0f8be4371a',
   'dir="$RUNNER_TEMP/trivy"',
@@ -51,8 +53,9 @@ const securityCommand = [
 // --ignore-unfixed её не отсеял и в --ignorefile нет записи её раздела с её id, у которой нет paths
 // или среди paths есть её файл. Секрет в тестах, примерах и документации скрывают встроенные исключения
 // trivy (tests, examples, markdown), пока настройка секретов их не снимет. Как и trivy, без --config
-// модель читает trivy.yaml из дерева, и его skip-files скрывают находку; без --secret-config она читает
-// trivy-secret.yaml из дерева, и его allow-rules скрывают секрет.
+// модель читает trivy.yaml из дерева, и его skip-files скрывают находку, а TRIVY_SKIP_FILES из окружения
+// скрывает находку и с ним; без --secret-config модель читает trivy-secret.yaml из дерева, и его
+// allow-rules скрывают секрет.
 // На проходе с номером CRASH_CALL сканер падает сам, как при сбое сети или базы.
 const fakeTrivy = `#!/usr/bin/env bash
 scanners= ignorefile= unfixed=0 code=0 config=trivy.yaml secrets=trivy-secret.yaml
@@ -85,6 +88,7 @@ for finding in $FINDINGS; do
   [[ ",$scanners," == *",$scanner,"* ]] || continue
   [[ $unfixed == 1 && $state == unfixed ]] && continue
   grep -qxF -- "    - $path" "$config" 2>/dev/null && continue
+  [[ ",$TRIVY_SKIP_FILES," == *",$path,"* ]] && continue
   case $scanner in vuln) section=vulnerabilities ;; misconfig) section=misconfigurations ;; *) section=secrets ;; esac
   if [[ $section == secrets ]]; then
     grep -q '^allow-rules:' "$secrets" 2>/dev/null && continue
@@ -116,7 +120,7 @@ const stubs = {
   sha256sum: '#!/usr/bin/env bash\ncat > /dev/null\n',
 };
 
-function runSecurityStep({ findings = [], accepted, candidate = {}, crash = 0, realChecksum = false }) {
+function runSecurityStep({ findings = [], accepted, candidate = {}, env = {}, crash = 0, realChecksum = false }) {
   const step = parse(sources().get('ci.yml')).jobs.security.steps
     .find((entry) => entry.name === 'Scan dependencies, configuration and secrets');
   const root = mkdtempSync(join(tmpdir(), 'lab-icons-security-'));
@@ -133,6 +137,7 @@ function runSecurityStep({ findings = [], accepted, candidate = {}, crash = 0, r
       cwd: tree,
       env: {
         ...process.env,
+        ...env,
         PATH: `${bin}:${process.env.PATH}`,
         RUNNER_TEMP: temp,
         FINDINGS: findings.join(' '),
@@ -322,6 +327,10 @@ describe('нативный итог CI', () => {
       const step = w.jobs.security.steps[1];
       step.run = step.run.replace(' --config /dev/null', '');
     }],
+    ['security оставляет переменные TRIVY_*', (w) => {
+      const step = w.jobs.security.steps[1];
+      step.run = step.run.replace('unset "${!TRIVY_@}"\n', '');
+    }],
     ['пустой успех', (w) => { w.jobs.required.steps[0].run = 'true\n'; }],
     ['пропуск shell итога', (w) => { w.jobs.required.steps[0].if = false; }],
     ['игнорирование shell итога', (w) => { w.jobs.required.steps[0]['continue-on-error'] = true; }],
@@ -419,6 +428,12 @@ describe.runIf(process.platform === 'linux')('шаг security исполняет
     const candidate = { 'trivy.yaml': 'scan:\n  skip-files:\n    - pnpm-lock.yaml\n    - src/settings.js\n' };
     expect(runSecurityStep({ findings: [fixed], candidate }).passed).toBe(false);
     expect(runSecurityStep({ findings: [leak], candidate }).passed).toBe(false);
+  });
+
+  it('переменные TRIVY_* окружения не скрывают находки', () => {
+    const env = { TRIVY_SKIP_FILES: 'pnpm-lock.yaml,src/settings.js' };
+    expect(runSecurityStep({ findings: [fixed], env }).passed).toBe(false);
+    expect(runSecurityStep({ findings: [leak], env }).passed).toBe(false);
   });
 
   it.each([1, 2, 3])('сбой сканера на проходе %i роняет шаг и останавливает его', (crash) => {
