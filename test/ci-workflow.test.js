@@ -45,6 +45,7 @@ const securityCommand = [
 ].join('\n');
 // Модель trivy с флагами шага: находка из FINDINGS («сканер:id:fixed|unfixed|-») роняет проход
 // с --exit-code, если её сканер включён, --ignore-unfixed её не отсеял и её id нет в --ignorefile.
+// На проходе с номером CRASH_CALL сканер падает сам, как при сбое сети или базы.
 const fakeTrivy = `#!/usr/bin/env bash
 scanners= ignorefile= unfixed=0 code=0
 while [ $# -gt 0 ]; do
@@ -57,6 +58,7 @@ while [ $# -gt 0 ]; do
   esac
 done
 printf '%s %s %s\\n' "$scanners" "$ignorefile" "$unfixed" >> "$SCAN_CALLS"
+(( $(wc -l < "$SCAN_CALLS") == \${CRASH_CALL:-0} )) && exit 2
 for finding in $FINDINGS; do
   IFS=: read -r scanner id state <<< "$finding"
   [[ ",$scanners," == *",$scanner,"* ]] || continue
@@ -64,6 +66,7 @@ for finding in $FINDINGS; do
   grep -qxF -- "  - id: $id" "$ignorefile" && continue
   exit "$code"
 done
+exit 0
 `;
 const stubs = {
   curl: '#!/usr/bin/env bash\nwhile [ $# -gt 0 ]; do [ "$1" = -o ] && out=$2; shift; done\nprintf archive > "$out"\n',
@@ -71,7 +74,7 @@ const stubs = {
   sha256sum: '#!/usr/bin/env bash\ncat > /dev/null\n',
 };
 
-function runSecurityStep({ findings = [], accepted, realChecksum = false }) {
+function runSecurityStep({ findings = [], accepted, crash = 0, realChecksum = false }) {
   const step = parse(sources().get('ci.yml')).jobs.security.steps
     .find((entry) => entry.name === 'Scan dependencies, configuration and secrets');
   const root = mkdtempSync(join(tmpdir(), 'lab-icons-security-'));
@@ -87,7 +90,14 @@ function runSecurityStep({ findings = [], accepted, realChecksum = false }) {
     const calls = join(root, 'calls');
     const result = spawnSync('bash', ['--noprofile', '--norc', '-e', '-c', step.run], {
       cwd: tree,
-      env: { ...process.env, PATH: `${bin}:${process.env.PATH}`, RUNNER_TEMP: temp, FINDINGS: findings.join(' '), SCAN_CALLS: calls },
+      env: {
+        ...process.env,
+        PATH: `${bin}:${process.env.PATH}`,
+        RUNNER_TEMP: temp,
+        FINDINGS: findings.join(' '),
+        CRASH_CALL: String(crash),
+        SCAN_CALLS: calls,
+      },
       encoding: 'utf8',
       timeout: 60_000,
     });
@@ -339,6 +349,12 @@ describe.runIf(process.platform === 'linux')('шаг security исполняет
     ['тестовый секрет проходит по записи', ['secret:aws-access-key-id:-'], ['aws-access-key-id'], true],
   ])('%s', (_, findings, accepted, passed) => {
     expect(runSecurityStep({ findings, accepted }).passed).toBe(passed);
+  });
+
+  it.each([1, 2, 3])('сбой сканера на проходе %i роняет шаг и останавливает его', (crash) => {
+    const result = runSecurityStep({ crash });
+    expect(result.passed).toBe(false);
+    expect(result.calls).toHaveLength(crash);
   });
 
   it('архив, не совпавший с закреплённой суммой, не запускается', () => {
