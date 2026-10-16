@@ -43,9 +43,10 @@ const securityCommand = [
   'scan --scanners vuln,misconfig --severity UNKNOWN,HIGH,CRITICAL --include-dev-deps "${accepted[@]}"',
   '# Исправление вышло — принятая раньше уязвимость снова блокирует.',
   'scan --scanners vuln --severity UNKNOWN,HIGH,CRITICAL --include-dev-deps --ignore-unfixed --ignorefile /dev/null',
-  '# Секрет в тестах, примерах и документации — такая же утечка: встроенные исключения trivy для них сняты.',
+  '# Секрет в тестах, примерах и документации — такая же утечка: встроенные исключения trivy для них сняты,',
+  '# а записи .trivyignore.yaml к секретам не применяются.',
   "printf 'disable-allow-rules:\\n  - tests\\n  - examples\\n  - markdown\\n' > \"$dir/secret.yaml\"",
-  'scan --scanners secret --secret-config "$dir/secret.yaml" "${accepted[@]}"',
+  'scan --scanners secret --secret-config "$dir/secret.yaml" --ignorefile /dev/null',
   '',
 ].join('\n');
 // Модель trivy с флагами шага. Находка из FINDINGS — «сканер:id:состояние:файл», состояние уязвимости —
@@ -323,6 +324,10 @@ describe('нативный итог CI', () => {
       const step = w.jobs.security.steps[1];
       step.run = step.run.replace(' --secret-config "$dir/secret.yaml"', '');
     }],
+    ['security принимает секреты по записям', (w) => {
+      const step = w.jobs.security.steps[1];
+      step.run = step.run.replace('"$dir/secret.yaml" --ignorefile /dev/null', '"$dir/secret.yaml" "${accepted[@]}"');
+    }],
     ['security без своих настроек сканера', (w) => {
       const step = w.jobs.security.steps[1];
       step.run = step.run.replace(' --config /dev/null', '');
@@ -382,7 +387,7 @@ describe('нативный итог CI', () => {
 
 // Шаг security исполняется только на Linux runner, поэтому и его поведение проверяется на Linux.
 describe.runIf(process.platform === 'linux')('шаг security исполняет политику принятия', () => {
-  it('исправленные уязвимости проверяются без записей о принятии', () => {
+  it('исправленные уязвимости и секреты проверяются без записей о принятии', () => {
     expect(runSecurityStep({}).calls).toEqual([
       'vuln,misconfig /dev/null 0',
       'vuln /dev/null 1',
@@ -391,7 +396,7 @@ describe.runIf(process.platform === 'linux')('шаг security исполняет
     expect(runSecurityStep({ accepted: {} }).calls).toEqual([
       'vuln,misconfig .trivyignore.yaml 0',
       'vuln /dev/null 1',
-      'secret .trivyignore.yaml 0',
+      'secret /dev/null 0',
     ]);
   });
 
@@ -412,9 +417,9 @@ describe.runIf(process.platform === 'linux')('шаг security исполняет
     ['секрет в тестах блокирует', [sample], undefined, false],
     ['секрет в примерах блокирует', ['secret:aws-access-key-id:-:examples/demo.js'], undefined, false],
     ['секрет в документации блокирует', ['secret:aws-access-key-id:-:docs/guide.md'], undefined, false],
-    ['тестовый секрет проходит по записи с его файлом', [sample], { secrets: [['aws-access-key-id', 'test/fixture.txt']] }, true],
-    ['секрет того же типа в другом файле блокирует', [sample, leak], { secrets: [['aws-access-key-id', 'test/fixture.txt']] }, false],
-    ['запись другого раздела находку не принимает', [leak], { vulnerabilities: [['aws-access-key-id']] }, false],
+    ['запись secrets не принимает секрет даже в его файле', [sample], { secrets: [['aws-access-key-id', 'test/fixture.txt']] }, false],
+    ['запись secrets без paths не принимает секрет', [leak], { secrets: [['aws-access-key-id']] }, false],
+    ['запись другого раздела находку не принимает', [misconfig], { vulnerabilities: [['KSV-1']] }, false],
   ])('%s', (_, findings, accepted, passed) => {
     expect(runSecurityStep({ findings, accepted }).passed).toBe(passed);
   });
