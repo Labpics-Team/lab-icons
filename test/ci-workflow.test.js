@@ -20,7 +20,28 @@ const matrix = [
   { os: 'macos-latest', node: '24' },
 ];
 const gateCommand = `set -euo pipefail
-[[ "$MATRIX_RESULT" == 'success' ]]`;
+[[ "$MATRIX_RESULT" == 'success' ]]
+[[ "$SECURITY_RESULT" == 'success' ]]`;
+// Шаг сканирования одинаков во всех репозиториях; меняются только runner, имя job и место в итоге.
+const securityCommand = [
+  'set -euo pipefail',
+  'version=0.74.0',
+  'sum=2ae6fe3ee734b7fdf11335663e18c75ea12dccc76062f09f164a3b0f8be4371a',
+  'dir="$RUNNER_TEMP/trivy"',
+  'mkdir -p "$dir"',
+  'curl -fsSL --retry 3 --retry-all-errors -o "$dir/trivy.tgz" \\',
+  '  "https://github.com/aquasecurity/trivy/releases/download/v$version/trivy_${version}_Linux-64bit.tar.gz"',
+  'echo "$sum  $dir/trivy.tgz" | sha256sum -c -',
+  'tar -xzf "$dir/trivy.tgz" -C "$dir" trivy',
+  'accepted=(--ignorefile /dev/null)',
+  '[ -f .trivyignore.yaml ] && accepted=(--ignorefile .trivyignore.yaml)',
+  'scan() { "$dir/trivy" fs --cache-dir "$dir/cache" --exit-code 1 --no-progress "$@" .; }',
+  'scan --scanners vuln,misconfig --severity UNKNOWN,HIGH,CRITICAL --include-dev-deps "${accepted[@]}"',
+  '# Исправление вышло — принятая раньше уязвимость снова блокирует.',
+  'scan --scanners vuln --severity UNKNOWN,HIGH,CRITICAL --include-dev-deps --ignore-unfixed --ignorefile /dev/null',
+  'scan --scanners secret "${accepted[@]}"',
+  '',
+].join('\n');
 const biteSpecs = [
   {
     name: 'Parity guard bites on extra icon',
@@ -70,7 +91,7 @@ function assertNativeGraph(files) {
   expect(workflow.on).toEqual({ push: { branches: ['main'] }, pull_request: null, merge_group: null });
   expect(workflow.permissions).toEqual({ contents: 'read' });
   expect(workflow.defaults).toBeUndefined();
-  expect(Object.keys(workflow.jobs).sort()).toEqual(['required', 'verify']);
+  expect(Object.keys(workflow.jobs).sort()).toEqual(['required', 'security', 'verify']);
   const verify = workflow.jobs.verify;
   expect(verify['runs-on']).toBe('${{ matrix.os }}');
   expect(verify.if).toBeUndefined();
@@ -89,9 +110,23 @@ function assertNativeGraph(files) {
   for (const spec of biteSpecs) {
     assertBiteStep(verify.steps.find((step) => step.name === spec.name), spec);
   }
+  // Свежий checkout без установки зависимостей и без сохранённого токена.
+  expect(workflow.jobs.security).toEqual({
+    name: 'Security',
+    'runs-on': 'ubuntu-latest',
+    'timeout-minutes': 15,
+    steps: [
+      {
+        name: 'Checkout',
+        uses: verify.steps.find((step) => step.name === 'Checkout').uses,
+        with: { 'persist-credentials': false },
+      },
+      { name: 'Scan dependencies, configuration and secrets', run: securityCommand },
+    ],
+  });
   const gate = workflow.jobs.required;
   expect(gate.name).toBe('CI');
-  expect(gate.needs).toBe('verify');
+  expect(gate.needs).toEqual(['verify', 'security']);
   expect(gate.if).toBe('${{ always() }}');
   expect(gate['runs-on']).toBe('ubuntu-latest');
   expect(gate.permissions).toEqual({});
@@ -99,8 +134,11 @@ function assertNativeGraph(files) {
   expect(gate.defaults).toBeUndefined();
   expect(gate.steps).toHaveLength(1);
   expect(gate.steps[0]).toEqual({
-    name: 'Require the entire verification matrix',
-    env: { MATRIX_RESULT: '${{ needs.verify.result }}' },
+    name: 'Require the entire verification matrix and the security scan',
+    env: {
+      MATRIX_RESULT: '${{ needs.verify.result }}',
+      SECURITY_RESULT: '${{ needs.security.result }}',
+    },
     shell: 'bash',
     run: `${gateCommand}\n`,
   });
@@ -150,6 +188,22 @@ describe('нативный итог CI', () => {
       step.run = step.run.replace(`${biteSpecs[1].witness}\n`, '');
     }],
     ['фальшивый результат', (w) => { w.jobs.required.steps[0].env.MATRIX_RESULT = 'success'; }],
+    ['security вне итога', (w) => { w.jobs.required.needs = 'verify'; }],
+    ['фальшивый результат security', (w) => { w.jobs.required.steps[0].env.SECURITY_RESULT = 'success'; }],
+    ['пропуск security job', (w) => { w.jobs.security.if = false; }],
+    ['игнорирование security job', (w) => { w.jobs.security['continue-on-error'] = true; }],
+    ['security сохраняет токен', (w) => { w.jobs.security.steps[0].with['persist-credentials'] = true; }],
+    ['security ставит зависимости', (w) => {
+      w.jobs.security.steps.splice(1, 0, { run: 'pnpm install --frozen-lockfile' });
+    }],
+    ['security без прохода по исправленным', (w) => {
+      const step = w.jobs.security.steps[1];
+      step.run = step.run.replace(/^scan --scanners vuln --.*--ignore-unfixed.*\n/m, '');
+    }],
+    ['security без порога выхода', (w) => {
+      const step = w.jobs.security.steps[1];
+      step.run = step.run.replace(' --exit-code 1', '');
+    }],
     ['пустой успех', (w) => { w.jobs.required.steps[0].run = 'true\n'; }],
     ['пропуск shell итога', (w) => { w.jobs.required.steps[0].if = false; }],
     ['игнорирование shell итога', (w) => { w.jobs.required.steps[0]['continue-on-error'] = true; }],
@@ -175,19 +229,24 @@ describe('нативный итог CI', () => {
   it('исполняет shell итога и принимает только реальный success', () => {
     const workflow = parse(sources().get('ci.yml'));
     const gate = workflow.jobs.required.steps[0];
-    expect(gate.env).toEqual({ MATRIX_RESULT: '${{ needs.verify.result }}' });
+    expect(gate.env).toEqual({
+      MATRIX_RESULT: '${{ needs.verify.result }}',
+      SECURITY_RESULT: '${{ needs.security.result }}',
+    });
     expect(gate.shell).toBe('bash');
     const bash = process.platform === 'win32'
       ? join(process.env.ProgramFiles ?? 'C:\\Program Files', 'Git/bin/bash.exe') : 'bash';
-    for (const result of ['success', 'failure', 'cancelled', 'skipped', 'neutral', 'pending', '', undefined]) {
-      const env = { ...process.env };
-      delete env.MATRIX_RESULT;
-      if (result !== undefined) env.MATRIX_RESULT = result;
-      const actual = spawnSync(bash, ['--noprofile', '--norc', '-e', '-o', 'pipefail', '-c', gate.run], {
-        env, encoding: 'utf8', timeout: 5000,
-      });
-      expect(actual.error).toBeUndefined();
-      expect(actual.status === 0, `результат ${JSON.stringify(result)}: ${actual.stderr}`).toBe(result === 'success');
+    for (const key of ['MATRIX_RESULT', 'SECURITY_RESULT']) {
+      for (const result of ['success', 'failure', 'cancelled', 'skipped', 'neutral', 'pending', '', undefined]) {
+        const env = { ...process.env, MATRIX_RESULT: 'success', SECURITY_RESULT: 'success' };
+        delete env[key];
+        if (result !== undefined) env[key] = result;
+        const actual = spawnSync(bash, ['--noprofile', '--norc', '-e', '-o', 'pipefail', '-c', gate.run], {
+          env, encoding: 'utf8', timeout: 5000,
+        });
+        expect(actual.error).toBeUndefined();
+        expect(actual.status === 0, `${key}=${JSON.stringify(result)}: ${actual.stderr}`).toBe(result === 'success');
+      }
     }
   });
 });
