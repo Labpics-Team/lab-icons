@@ -1,5 +1,6 @@
 import { spawnSync } from 'node:child_process';
-import { readFileSync, readdirSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
@@ -19,9 +20,9 @@ const matrix = [
   { os: 'windows-latest', node: '24' },
   { os: 'macos-latest', node: '24' },
 ];
+// Одно условие: bash 3.2 на macOS не прерывает скрипт по set -e на упавшем [[ ]] в середине.
 const gateCommand = `set -euo pipefail
-[[ "$MATRIX_RESULT" == 'success' ]]
-[[ "$SECURITY_RESULT" == 'success' ]]`;
+[[ "$MATRIX_RESULT" == 'success' && "$SECURITY_RESULT" == 'success' ]]`;
 // Шаг сканирования одинаков во всех репозиториях; меняются только runner, имя job и место в итоге.
 const securityCommand = [
   'set -euo pipefail',
@@ -42,6 +43,60 @@ const securityCommand = [
   'scan --scanners secret "${accepted[@]}"',
   '',
 ].join('\n');
+// Модель trivy с флагами шага: находка из FINDINGS («сканер:id:fixed|unfixed|-») роняет проход
+// с --exit-code, если её сканер включён, --ignore-unfixed её не отсеял и её id нет в --ignorefile.
+const fakeTrivy = `#!/usr/bin/env bash
+scanners= ignorefile= unfixed=0 code=0
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --scanners) scanners=$2; shift 2 ;;
+    --ignorefile) ignorefile=$2; shift 2 ;;
+    --exit-code) code=$2; shift 2 ;;
+    --ignore-unfixed) unfixed=1; shift ;;
+    *) shift ;;
+  esac
+done
+printf '%s %s %s\\n' "$scanners" "$ignorefile" "$unfixed" >> "$SCAN_CALLS"
+for finding in $FINDINGS; do
+  IFS=: read -r scanner id state <<< "$finding"
+  [[ ",$scanners," == *",$scanner,"* ]] || continue
+  [[ $unfixed == 1 && $state == unfixed ]] && continue
+  grep -qxF -- "  - id: $id" "$ignorefile" && continue
+  exit "$code"
+done
+`;
+const stubs = {
+  curl: '#!/usr/bin/env bash\nwhile [ $# -gt 0 ]; do [ "$1" = -o ] && out=$2; shift; done\nprintf archive > "$out"\n',
+  tar: `#!/usr/bin/env bash\nwhile [ $# -gt 0 ]; do [ "$1" = -C ] && dir=$2; shift; done\ncat > "$dir/trivy" <<'EOF'\n${fakeTrivy}EOF\nchmod +x "$dir/trivy"\n`,
+  sha256sum: '#!/usr/bin/env bash\ncat > /dev/null\n',
+};
+
+function runSecurityStep({ findings = [], accepted, realChecksum = false }) {
+  const step = parse(sources().get('ci.yml')).jobs.security.steps
+    .find((entry) => entry.name === 'Scan dependencies, configuration and secrets');
+  const root = mkdtempSync(join(tmpdir(), 'lab-icons-security-'));
+  try {
+    const [bin, tree, temp] = ['bin', 'tree', 'temp'].map((name) => join(root, name));
+    for (const path of [bin, tree, temp]) mkdirSync(path);
+    for (const [name, body] of Object.entries(stubs)) {
+      if (name !== 'sha256sum' || !realChecksum) writeFileSync(join(bin, name), body, { mode: 0o755 });
+    }
+    if (accepted) {
+      writeFileSync(join(tree, '.trivyignore.yaml'), accepted.map((id) => `  - id: ${id}\n`).join(''));
+    }
+    const calls = join(root, 'calls');
+    const result = spawnSync('bash', ['--noprofile', '--norc', '-e', '-c', step.run], {
+      cwd: tree,
+      env: { ...process.env, PATH: `${bin}:${process.env.PATH}`, RUNNER_TEMP: temp, FINDINGS: findings.join(' '), SCAN_CALLS: calls },
+      encoding: 'utf8',
+      timeout: 60_000,
+    });
+    expect(result.error).toBeUndefined();
+    return { passed: result.status === 0, calls: existsSync(calls) ? readFileSync(calls, 'utf8').trim().split('\n') : [] };
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+}
 const biteSpecs = [
   {
     name: 'Parity guard bites on extra icon',
@@ -204,6 +259,10 @@ describe('нативный итог CI', () => {
       const step = w.jobs.security.steps[1];
       step.run = step.run.replace(' --exit-code 1', '');
     }],
+    ['security без сканера уязвимостей', (w) => {
+      const step = w.jobs.security.steps[1];
+      step.run = step.run.replace('--scanners vuln,misconfig', '--scanners misconfig');
+    }],
     ['пустой успех', (w) => { w.jobs.required.steps[0].run = 'true\n'; }],
     ['пропуск shell итога', (w) => { w.jobs.required.steps[0].if = false; }],
     ['игнорирование shell итога', (w) => { w.jobs.required.steps[0]['continue-on-error'] = true; }],
@@ -213,6 +272,8 @@ describe('нативный итог CI', () => {
     assertNativeGraph(files);
     const workflow = parse(files.get('ci.yml'));
     mutate(workflow);
+    // Мутация, которая ничего не поменяла, ничего и не доказывает.
+    expect(workflow).not.toEqual(parse(files.get('ci.yml')));
     files.set('ci.yml', stringify(workflow));
     expect(() => assertNativeGraph(files)).toThrow();
   });
@@ -242,11 +303,45 @@ describe('нативный итог CI', () => {
         delete env[key];
         if (result !== undefined) env[key] = result;
         const actual = spawnSync(bash, ['--noprofile', '--norc', '-e', '-o', 'pipefail', '-c', gate.run], {
-          env, encoding: 'utf8', timeout: 5000,
+          env, encoding: 'utf8', timeout: 60_000,
         });
         expect(actual.error).toBeUndefined();
         expect(actual.status === 0, `${key}=${JSON.stringify(result)}: ${actual.stderr}`).toBe(result === 'success');
       }
     }
+  });
+});
+
+// Шаг security исполняется только на Linux runner, поэтому и его поведение проверяется на Linux.
+describe.runIf(process.platform === 'linux')('шаг security исполняет политику принятия', () => {
+  it('исправленные уязвимости проверяются без записей о принятии', () => {
+    expect(runSecurityStep({}).calls).toEqual([
+      'vuln,misconfig /dev/null 0',
+      'vuln /dev/null 1',
+      'secret /dev/null 0',
+    ]);
+    expect(runSecurityStep({ accepted: [] }).calls).toEqual([
+      'vuln,misconfig .trivyignore.yaml 0',
+      'vuln /dev/null 1',
+      'secret .trivyignore.yaml 0',
+    ]);
+  });
+
+  it.each([
+    ['чистое дерево проходит', [], undefined, true],
+    ['уязвимость с исправлением блокирует', ['vuln:CVE-1:fixed'], undefined, false],
+    ['уязвимость с исправлением блокирует и после записи о принятии', ['vuln:CVE-1:fixed'], ['CVE-1'], false],
+    ['уязвимость без исправления блокирует', ['vuln:CVE-2:unfixed'], undefined, false],
+    ['уязвимость без исправления проходит по записи', ['vuln:CVE-2:unfixed'], ['CVE-2'], true],
+    ['ошибка конфигурации блокирует', ['misconfig:KSV-1:-'], undefined, false],
+    ['ошибка конфигурации проходит по записи', ['misconfig:KSV-1:-'], ['KSV-1'], true],
+    ['секрет блокирует', ['secret:aws-access-key-id:-'], undefined, false],
+    ['тестовый секрет проходит по записи', ['secret:aws-access-key-id:-'], ['aws-access-key-id'], true],
+  ])('%s', (_, findings, accepted, passed) => {
+    expect(runSecurityStep({ findings, accepted }).passed).toBe(passed);
+  });
+
+  it('архив, не совпавший с закреплённой суммой, не запускается', () => {
+    expect(runSecurityStep({ realChecksum: true })).toEqual({ passed: false, calls: [] });
   });
 });
