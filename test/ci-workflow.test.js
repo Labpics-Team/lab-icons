@@ -45,11 +45,12 @@ const securityCommand = [
   'scan --scanners secret --secret-config "$dir/secret.yaml" "${accepted[@]}"',
   '',
 ].join('\n');
-// Модель trivy с флагами шага: находка из FINDINGS («сканер:id:состояние») роняет проход
-// с --exit-code, если её сканер включён, --ignore-unfixed её не отсеял и её id нет в --ignorefile.
-// Состояние уязвимости — fixed или unfixed. Состояние секрета — встроенное исключение trivy
-// (tests, examples, markdown), которое скрывает секрет, пока настройка секретов его не снимет, или «-».
-// Как и trivy, без --secret-config модель читает trivy-secret.yaml из дерева; allow-rules в ней скрывают секрет.
+// Модель trivy с флагами шага. Находка из FINDINGS — «сканер:id:состояние:файл», состояние уязвимости —
+// fixed или unfixed, у остальных «-». Находка роняет проход с --exit-code, если её сканер включён,
+// --ignore-unfixed её не отсеял и в --ignorefile нет записи её раздела с её id, у которой нет paths
+// или среди paths есть её файл. Секрет в тестах, примерах и документации скрывают встроенные исключения
+// trivy (tests, examples, markdown), пока настройка секретов их не снимет. Как и trivy, без --secret-config
+// модель читает trivy-secret.yaml из дерева; allow-rules в ней скрывают секрет.
 // На проходе с номером CRASH_CALL сканер падает сам, как при сбое сети или базы.
 const fakeTrivy = `#!/usr/bin/env bash
 scanners= ignorefile= unfixed=0 code=0 secrets=trivy-secret.yaml
@@ -65,19 +66,46 @@ while [ $# -gt 0 ]; do
 done
 printf '%s %s %s\\n' "$scanners" "$ignorefile" "$unfixed" >> "$SCAN_CALLS"
 (( $(wc -l < "$SCAN_CALLS") == \${CRASH_CALL:-0} )) && exit 2
+# Записи о принятии — строки «раздел id файл»; файл «*» у записи без paths.
+records=$(awk -v any='*' '
+  function flush() { if (id) { if (!n) print section, id, any; for (i = 1; i <= n; i++) print section, id, paths[i] } id = 0; n = 0 }
+  /^[a-z]+:$/ { flush(); section = substr($0, 1, length($0) - 1); next }
+  /^  - id: / { flush(); id = $3; key = 0; next }
+  /^    paths:/ { key = 1; next }
+  /^    [a-z]+:/ { key = 0; next }
+  /^      - / { if (key) paths[++n] = $2; next }
+  END { flush() }
+' "$ignorefile")
+tests='(^test|/test|-test|_test|\\.test)'
 for finding in $FINDINGS; do
-  IFS=: read -r scanner id state <<< "$finding"
+  IFS=: read -r scanner id state path <<< "$finding"
   [[ ",$scanners," == *",$scanner,"* ]] || continue
   [[ $unfixed == 1 && $state == unfixed ]] && continue
-  if [[ $scanner == secret ]]; then
+  case $scanner in vuln) section=vulnerabilities ;; misconfig) section=misconfigurations ;; *) section=secrets ;; esac
+  if [[ $section == secrets ]]; then
     grep -q '^allow-rules:' "$secrets" 2>/dev/null && continue
-    [[ $state == - ]] || grep -qxF -- "  - $state" "$secrets" 2>/dev/null || continue
+    hidden=
+    [[ $path =~ $tests ]] && ! grep -qxF -- '  - tests' "$secrets" 2>/dev/null && hidden=1
+    [[ $path == *example* ]] && ! grep -qxF -- '  - examples' "$secrets" 2>/dev/null && hidden=1
+    [[ $path == *.md ]] && ! grep -qxF -- '  - markdown' "$secrets" 2>/dev/null && hidden=1
+    [[ -n $hidden ]] && continue
   fi
-  grep -qxF -- "  - id: $id" "$ignorefile" && continue
+  grep -qxF -e "$section $id *" -e "$section $id $path" <<< "$records" && continue
   exit "$code"
 done
 exit 0
 `;
+// .trivyignore.yaml в формате trivy: раздел, записи с id, необязательными paths и statement.
+function trivyignore(accepted) {
+  return Object.entries(accepted).flatMap(([section, records]) => [
+    `${section}:`,
+    ...records.flatMap(([id, ...paths]) => [
+      `  - id: ${id}`,
+      ...(paths.length ? ['    paths:', ...paths.map((path) => `      - ${path}`)] : []),
+      '    statement: синтетический образец теста',
+    ]),
+  ]).map((line) => `${line}\n`).join('');
+}
 const stubs = {
   curl: '#!/usr/bin/env bash\nwhile [ $# -gt 0 ]; do [ "$1" = -o ] && out=$2; shift; done\nprintf archive > "$out"\n',
   tar: `#!/usr/bin/env bash\nwhile [ $# -gt 0 ]; do [ "$1" = -C ] && dir=$2; shift; done\ncat > "$dir/trivy" <<'EOF'\n${fakeTrivy}EOF\nchmod +x "$dir/trivy"\n`,
@@ -94,9 +122,7 @@ function runSecurityStep({ findings = [], accepted, candidate = {}, crash = 0, r
     for (const [name, body] of Object.entries(stubs)) {
       if (name !== 'sha256sum' || !realChecksum) writeFileSync(join(bin, name), body, { mode: 0o755 });
     }
-    if (accepted) {
-      writeFileSync(join(tree, '.trivyignore.yaml'), accepted.map((id) => `  - id: ${id}\n`).join(''));
-    }
+    if (accepted) writeFileSync(join(tree, '.trivyignore.yaml'), trivyignore(accepted));
     for (const [name, body] of Object.entries(candidate)) writeFileSync(join(tree, name), body);
     const calls = join(root, 'calls');
     const result = spawnSync('bash', ['--noprofile', '--norc', '-e', '-c', step.run], {
@@ -345,33 +371,40 @@ describe.runIf(process.platform === 'linux')('шаг security исполняет
       'vuln /dev/null 1',
       'secret /dev/null 0',
     ]);
-    expect(runSecurityStep({ accepted: [] }).calls).toEqual([
+    expect(runSecurityStep({ accepted: {} }).calls).toEqual([
       'vuln,misconfig .trivyignore.yaml 0',
       'vuln /dev/null 1',
       'secret .trivyignore.yaml 0',
     ]);
   });
 
+  const fixed = 'vuln:CVE-1:fixed:pnpm-lock.yaml';
+  const unfixed = 'vuln:CVE-2:unfixed:pnpm-lock.yaml';
+  const misconfig = 'misconfig:KSV-1:-:Dockerfile';
+  const sample = 'secret:aws-access-key-id:-:test/fixture.txt';
+  const leak = 'secret:aws-access-key-id:-:src/settings.js';
   it.each([
     ['чистое дерево проходит', [], undefined, true],
-    ['уязвимость с исправлением блокирует', ['vuln:CVE-1:fixed'], undefined, false],
-    ['уязвимость с исправлением блокирует и после записи о принятии', ['vuln:CVE-1:fixed'], ['CVE-1'], false],
-    ['уязвимость без исправления блокирует', ['vuln:CVE-2:unfixed'], undefined, false],
-    ['уязвимость без исправления проходит по записи', ['vuln:CVE-2:unfixed'], ['CVE-2'], true],
-    ['ошибка конфигурации блокирует', ['misconfig:KSV-1:-'], undefined, false],
-    ['ошибка конфигурации проходит по записи', ['misconfig:KSV-1:-'], ['KSV-1'], true],
-    ['секрет блокирует', ['secret:aws-access-key-id:-'], undefined, false],
-    ['секрет в тестах блокирует', ['secret:aws-access-key-id:tests'], undefined, false],
-    ['секрет в примерах блокирует', ['secret:aws-access-key-id:examples'], undefined, false],
-    ['секрет в документации блокирует', ['secret:aws-access-key-id:markdown'], undefined, false],
-    ['тестовый секрет проходит по записи', ['secret:aws-access-key-id:tests'], ['aws-access-key-id'], true],
+    ['уязвимость с исправлением блокирует', [fixed], undefined, false],
+    ['уязвимость с исправлением блокирует и после записи о принятии', [fixed], { vulnerabilities: [['CVE-1']] }, false],
+    ['уязвимость без исправления блокирует', [unfixed], undefined, false],
+    ['уязвимость без исправления проходит по записи', [unfixed], { vulnerabilities: [['CVE-2']] }, true],
+    ['ошибка конфигурации блокирует', [misconfig], undefined, false],
+    ['ошибка конфигурации проходит по записи', [misconfig], { misconfigurations: [['KSV-1']] }, true],
+    ['секрет блокирует', [leak], undefined, false],
+    ['секрет в тестах блокирует', [sample], undefined, false],
+    ['секрет в примерах блокирует', ['secret:aws-access-key-id:-:examples/demo.js'], undefined, false],
+    ['секрет в документации блокирует', ['secret:aws-access-key-id:-:docs/guide.md'], undefined, false],
+    ['тестовый секрет проходит по записи с его файлом', [sample], { secrets: [['aws-access-key-id', 'test/fixture.txt']] }, true],
+    ['секрет того же типа в другом файле блокирует', [sample, leak], { secrets: [['aws-access-key-id', 'test/fixture.txt']] }, false],
+    ['запись другого раздела находку не принимает', [leak], { vulnerabilities: [['aws-access-key-id']] }, false],
   ])('%s', (_, findings, accepted, passed) => {
     expect(runSecurityStep({ findings, accepted }).passed).toBe(passed);
   });
 
   it('настройка секретов из дерева кандидата не скрывает секрет', () => {
     const candidate = { 'trivy-secret.yaml': 'allow-rules:\n  - id: everything\n    path: .*\n' };
-    expect(runSecurityStep({ findings: ['secret:aws-access-key-id:-'], candidate }).passed).toBe(false);
+    expect(runSecurityStep({ findings: [leak], candidate }).passed).toBe(false);
   });
 
   it.each([1, 2, 3])('сбой сканера на проходе %i роняет шаг и останавливает его', (crash) => {
