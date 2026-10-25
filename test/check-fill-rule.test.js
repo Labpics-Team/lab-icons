@@ -9,7 +9,7 @@ import { readFileSync, readdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
-import { eoNzDisagree, fillRuleBlobBug } from '../scripts/lib/seeing-gates.js';
+import { eoNzDisagree, fillRuleBlobBug } from '../scripts/lib/fill-rule-analysis.js';
 import { findBlobBugs } from '../scripts/check-fill-rule.js';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
