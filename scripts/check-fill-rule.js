@@ -19,7 +19,7 @@
 import { readFileSync, readdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { fillRuleBlobBug } from './lib/seeing-gates.js';
+import { fillRuleBlobBug } from './lib/fill-rule-analysis.js';
 
 /** @returns {{outlineFails:{name:string,pct:number}[], filledWarns:{name:string,pct:number}[]}} */
 export function findBlobBugs(files) {
