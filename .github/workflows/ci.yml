@@ -108,16 +108,16 @@ jobs:
   # Уязвимости зависимостей, ошибки конфигурации и секреты в дереве кандидата.
   # Исключение — только запись в .trivyignore.yaml; уязвимость с исправлением блокирует всегда.
   security:
-    name: Security
+    name: Безопасность
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - name: Checkout
+      - name: Получение исходников
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
 
-      - name: Scan dependencies, configuration and secrets
+      - name: Проверка зависимостей, конфигурации и секретов
         run: |
           set -euo pipefail
           # trivy читает переменные TRIVY_* как флаги: охват проверки задаёт только этот шаг.
@@ -152,7 +152,7 @@ jobs:
     timeout-minutes: 2
     permissions: {}
     steps:
-      - name: Require the entire verification matrix and the security scan
+      - name: Проверка итогов матрицы и безопасности
         env:
           MATRIX_RESULT: ${{ needs.verify.result }}
           SECURITY_RESULT: ${{ needs.security.result }}

@@ -122,7 +122,7 @@ const stubs = {
 
 function runSecurityStep({ findings = [], accepted, candidate = {}, env = {}, crash = 0, realChecksum = false }) {
   const step = parse(sources().get('ci.yml')).jobs.security.steps
-    .find((entry) => entry.name === 'Scan dependencies, configuration and secrets');
+    .find((entry) => entry.name === 'Проверка зависимостей, конфигурации и секретов');
   const root = mkdtempSync(join(tmpdir(), 'lab-icons-security-'));
   try {
     const [bin, tree, temp] = ['bin', 'tree', 'temp'].map((name) => join(root, name));
@@ -223,16 +223,16 @@ function assertNativeGraph(files) {
   }
   // Свежий checkout без установки зависимостей и без сохранённого токена.
   expect(workflow.jobs.security).toEqual({
-    name: 'Security',
+    name: 'Безопасность',
     'runs-on': 'ubuntu-latest',
     'timeout-minutes': 15,
     steps: [
       {
-        name: 'Checkout',
+        name: 'Получение исходников',
         uses: verify.steps.find((step) => step.name === 'Checkout').uses,
         with: { 'persist-credentials': false },
       },
-      { name: 'Scan dependencies, configuration and secrets', run: securityCommand },
+      { name: 'Проверка зависимостей, конфигурации и секретов', run: securityCommand },
     ],
   });
   const gate = workflow.jobs.required;
@@ -245,7 +245,7 @@ function assertNativeGraph(files) {
   expect(gate.defaults).toBeUndefined();
   expect(gate.steps).toHaveLength(1);
   expect(gate.steps[0]).toEqual({
-    name: 'Require the entire verification matrix and the security scan',
+    name: 'Проверка итогов матрицы и безопасности',
     env: {
       MATRIX_RESULT: '${{ needs.verify.result }}',
       SECURITY_RESULT: '${{ needs.security.result }}',
@@ -410,8 +410,12 @@ describe.runIf(process.platform === 'linux')('шаг security исполняет
     ['уязвимость с исправлением блокирует и после записи о принятии', [fixed], { vulnerabilities: [['CVE-1']] }, false],
     ['уязвимость без исправления блокирует', [unfixed], undefined, false],
     ['уязвимость без исправления проходит по записи', [unfixed], { vulnerabilities: [['CVE-2']] }, true],
+    ['уязвимость без исправления проходит по записи своего файла', [unfixed], { vulnerabilities: [['CVE-2', 'pnpm-lock.yaml']] }, true],
+    ['уязвимость того же ID в другом файле блокирует', ['vuln:CVE-2:unfixed:packages/other/pnpm-lock.yaml'], { vulnerabilities: [['CVE-2', 'pnpm-lock.yaml']] }, false],
     ['ошибка конфигурации блокирует', [misconfig], undefined, false],
     ['ошибка конфигурации проходит по записи', [misconfig], { misconfigurations: [['KSV-1']] }, true],
+    ['ошибка конфигурации проходит по записи своего файла', [misconfig], { misconfigurations: [['KSV-1', 'Dockerfile']] }, true],
+    ['ошибка конфигурации того же ID в другом файле блокирует', ['misconfig:KSV-1:-:deploy/Dockerfile'], { misconfigurations: [['KSV-1', 'Dockerfile']] }, false],
     ['секрет блокирует', [leak], undefined, false],
     ['секрет в тестах блокирует', [sample], undefined, false],
     ['секрет в примерах блокирует', ['secret:aws-access-key-id:-:examples/demo.js'], undefined, false],
