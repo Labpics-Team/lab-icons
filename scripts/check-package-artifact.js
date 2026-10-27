@@ -396,6 +396,17 @@ export function checkPackageArtifact({
       return { errors: [`pnpm pack обязан создать один tarball; найдено ${tarballs.length}`], files: [] };
     }
     const tarball = join(packDir, tarballs[0]);
+    // Анализ типов проверяет тот же clean-source tarball, что и consumer.
+    // Повторный attw --pack запускал бы prepack и всю сборку ещё раз.
+    const typeReport = runPnpm(
+      [
+        'exec', 'attw', tarball,
+        '--profile', 'esm-only', '--format', 'table', '--no-emoji', '--no-color',
+      ],
+      { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] },
+      commandOptions,
+    );
+    process.stdout.write(typeReport);
     const tarballSpecifier = localTarballSpecifier(consumer, tarball);
 
     writeFileSync(
@@ -715,6 +726,6 @@ if (isMain) {
   }
   console.log(
     `check-package-artifact: OK — установленный tarball чист; ${files.length} файлов, ` +
-      `ESM/types, ${EXPECTED_SOURCE_VARIANTS} source fingerprints, root-attributes/coordinate/clip/viewport/fill-rule bites работают`,
+      `ESM/types/attw, ${EXPECTED_SOURCE_VARIANTS} source fingerprints, root-attributes/coordinate/clip/viewport/fill-rule bites работают`,
   );
 }

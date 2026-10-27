@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process';
 import {
   existsSync,
   lstatSync,
@@ -8,9 +9,10 @@ import {
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { dirname, join, win32 } from 'node:path';
-import { afterEach, describe, expect, it } from 'vitest';
+import { dirname, join, resolve, win32 } from 'node:path';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
+  checkPackageArtifact,
   createCleanPackSource,
   localTarballSpecifier,
   mutateExportWithEscapedFillRule,
@@ -22,6 +24,8 @@ import {
   shouldCopyCleanPackPath,
   validateInstalledPackage,
 } from '../scripts/check-package-artifact.js';
+
+vi.mock('node:child_process', () => ({ execFileSync: vi.fn() }));
 
 const roots = [];
 const CONTRACT = JSON.parse(readFileSync(new URL('../release/contract.json', import.meta.url), 'utf8'));
@@ -71,10 +75,99 @@ function validPackage() {
 }
 
 afterEach(() => {
+  vi.mocked(execFileSync).mockReset();
   for (const root of roots.splice(0)) rmSync(root, { recursive: true, force: true });
 });
 
 describe('check-package-artifact', () => {
+
+  it.each([
+    ['linux', 'accepted'],
+    ['linux', 'rejected'],
+    ['win32', 'accepted'],
+    ['win32', 'rejected'],
+  ])('проверяет именно packed tarball и сохраняет отказ attw (%s, %s)', (platform, verdict) => {
+    const fixture = mkdtempSync(join(tmpdir(), 'lab-icons-type-gate-'));
+    roots.push(fixture);
+    write(
+      fixture,
+      'package.json',
+      readFileSync(new URL('../package.json', import.meta.url), 'utf8'),
+    );
+    write(fixture, 'release/contract.json', JSON.stringify(CONTRACT));
+    mkdirSync(join(fixture, 'node_modules'));
+
+    const calls = [];
+    let tarball;
+    let installedTarball;
+    const typeFailure = Object.assign(new Error('attw rejected fixture types'), {
+      status: 17,
+      stdout: Buffer.from('fixture type diagnostic'),
+      stderr: Buffer.from('fixture analyzer failure'),
+    });
+    vi.mocked(execFileSync).mockImplementation((command, args, options) => {
+      const argv = platform === 'win32' ? args.slice(4) : args;
+      calls.push({ command, args: [...args], argv: [...argv], cwd: options.cwd });
+      if (argv[0] === 'pack') {
+        const packDir = argv[argv.indexOf('--pack-destination') + 1];
+        tarball = join(packDir, 'actual artifact~1.tgz');
+        writeFileSync(tarball, 'only archive emitted by this pack');
+        return '';
+      }
+      if (argv[0] === 'exec' && argv[1] === 'attw') {
+        if (
+          argv[2] !== tarball ||
+          readFileSync(argv[2], 'utf8') !== 'only archive emitted by this pack'
+        ) {
+          throw new Error('analyzer received a different artifact');
+        }
+        if (verdict === 'rejected') throw typeFailure;
+        return 'fixture types accepted\n';
+      }
+      if (argv[0] === 'install') {
+        const manifest = JSON.parse(readFileSync(join(options.cwd, 'package.json'), 'utf8'));
+        const specifier = manifest.dependencies['@labpics/icons'];
+        installedTarball = resolve(options.cwd, specifier.slice('file:'.length));
+        // Дошли до следующей границы; реальные install/import проверяет CI smoke.
+        throw new Error('consumer boundary reached');
+      }
+      throw new Error('unexpected package command');
+    });
+
+    const result = checkPackageArtifact({
+      root: fixture,
+      platform,
+      pnpmCommand: platform === 'win32' ? 'pnpm.cmd' : 'pnpm',
+      comspec: 'fixture-cmd.exe',
+    });
+    expect(tarball).toBeDefined();
+    expect(calls.map(({ argv }) => argv[0])).toEqual(
+      verdict === 'accepted' ? ['pack', 'exec', 'install'] : ['pack', 'exec'],
+    );
+    expect(calls[1].argv).toEqual([
+      'exec', 'attw', tarball,
+      '--profile', 'esm-only', '--format', 'table', '--no-emoji', '--no-color',
+    ]);
+    expect(calls[1].cwd).toBe(fixture);
+    if (platform === 'win32') {
+      expect(calls[1].command).toBe('fixture-cmd.exe');
+      expect(calls[1].args.slice(0, 4)).toEqual(['/d', '/s', '/c', 'pnpm.cmd']);
+    } else {
+      expect(calls[1].command).toBe('pnpm');
+    }
+    expect(result.files).toEqual([]);
+    expect(result.errors).toHaveLength(1);
+    if (verdict === 'accepted') {
+      expect(installedTarball).toBe(tarball);
+      expect(result.errors[0]).toContain('consumer boundary reached');
+    } else {
+      expect(installedTarball).toBeUndefined();
+      expect(result.errors[0]).toContain('attw rejected fixture types');
+      expect(result.errors[0]).toContain('fixture type diagnostic');
+      expect(result.errors[0]).toContain('fixture analyzer failure');
+    }
+    expect(existsSync(dirname(dirname(tarball)))).toBe(false);
+  });
   it('строит pack из source-only копии и не переносит грязный dist', () => {
     const fixture = mkdtempSync(join(tmpdir(), 'lab-icons-clean-pack-fixture-'));
     roots.push(fixture);
