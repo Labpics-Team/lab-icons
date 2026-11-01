@@ -52,11 +52,11 @@ export function createCompiledStateGroup(input: CompiledStateGroup) {
       return refuse('STATE_UNSUPPORTED', `Состояние не объявлено для ${data.group}.`);
     }
     if (!record(request) || Object.keys(request).some(key => !allowed.includes(key))) {
-      return refuse('INVALID_REQUEST', 'Нужен объект только с поддержанными параметрами.');
+      return refuse('INVALID_REQUEST', 'Нужен объект с известными параметрами.');
     }
     const variant = request.variant === undefined ? data.variant : request.variant;
     if (typeof variant !== 'string' || !['outline', 'filled'].includes(variant)) {
-      return refuse('INVALID_REQUEST', 'Начертание обязано быть outline или filled.');
+      return refuse('INVALID_REQUEST', 'Начертание: outline или filled.');
     }
     if (variant !== data.variant) {
       return refuse('VARIANT_UNSUPPORTED', `Для ${data.group}/${String(variant)} равенство оболочек не доказано.`);
@@ -91,7 +91,7 @@ export function createCompiledStateGroup(input: CompiledStateGroup) {
     }
     if (typeof parameters.duration !== 'number' || !Number.isFinite(parameters.duration) || parameters.duration < 0 ||
         (parameters.reducedMotion !== undefined && typeof parameters.reducedMotion !== 'boolean')) {
-      return refuse('INVALID_REQUEST', 'Нужны конечная длительность ≥0 и boolean reducedMotion.');
+      return refuse('INVALID_REQUEST', 'Конечная длительность ≥0; reducedMotion boolean.');
     }
     const duration = parameters.reducedMotion ? 0 : parameters.duration;
     return freezeTree({ ok: true, effect: {
