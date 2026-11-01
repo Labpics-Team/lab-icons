@@ -106,6 +106,14 @@ describe('Согласованность документации', () => {
     }
   });
 
+  it('не выдаёт текущий счётчик за исторический по русским и английским маркерам', () => {
+    for (const marker of ['теперь', 'ныне', 'в настоящее время', 'на настоящее время', 'currently']) {
+      expect(manualCorpusCountErrors(`На baseline 03a4ca3 ${marker} 999 icons.`), marker).toHaveLength(1);
+    }
+    expect(manualCorpusCountErrors('На baseline 03a4ca3: 476 SVG соответствует настоящей авторской форме.')).toEqual([]);
+    expect(manualCorpusCountErrors('На baseline 03a4ca3: 476 SVG с currentColor.')).toEqual([]);
+  });
+
   it('отклоняет неверный канал установки с учётом Markdown', () => {
     for (const text of ['private: true', 'Пакет не **публикуется**\nв `npm`', 'Ставится только как git-зависимость', 'Нужен GH_PAT', 'Нужен **GH_PAT**', 'Пакет _не публикуется_ в `npm`']) {
       expect(distributionClaimErrors(text).length).toBeGreaterThan(0);

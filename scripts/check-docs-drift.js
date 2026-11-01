@@ -89,7 +89,7 @@ export function manualCorpusCountErrors(source) {
   }
   function historical(sentence) {
     // Датированное «в текущем пакете» всё ещё проецирует текущую поставку.
-    if (/(?:текущ[\p{L}]*|сейчас|сегодня|\bcurrent\b|\btoday\b|\bnow\b)/iu.test(sentence)) return false;
+    if (/(?:текущ[\p{L}]*|сейчас|сегодня|теперь|ныне|настоящ[\p{L}]*\s+врем[\p{L}]*|\bcurrent(?:ly)?\b|\btoday\b|\bnow\b)/iu.test(sentence)) return false;
     return /(?:на|as of)\s+\d{4}-\d{2}-\d{2}(?=$|[^\d])|(?:baseline commit|на baseline)\s+[a-f\d]{7,40}(?=$|[^a-f\d])/iu.test(sentence);
   }
   return [...new Set(sentences.flatMap(sentence => historical(sentence) ? [] :
