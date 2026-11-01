@@ -177,6 +177,39 @@ const svg = renderGlyphSvg(recordedGlyph({ icon: 'time', variant: 'filled' }), {
 до 64 букв, цифр, `-` или `_`. Renderer сохраняет `data-part` и переименовывает ресурсы.
 При отсутствии ресурсов он возвращает готовую SVG-строку.
 
+## Изменить уровень громкости
+
+`volume-high` в обоих начертаниях и `volume-middle/filled` имеют состояние
+`*.level`. Волны включаются от ближней к дальней; динамик сохраняет форму
+и положение. Это прозрачность авторских слоёв, а не рисование контура или
+переход к отдельному мастеру `volume-low`.
+
+```js
+import { glyph, glyphCapabilities } from '@labpics/icons/symbols/volume-high';
+import { compileSymbolEffect } from '@labpics/icons/motion';
+
+const caps = glyphCapabilities();
+const gesture = caps.motion.gestures.find(item => item.id === 'volume-high.level');
+const result = compileSymbolEffect(glyph(), caps, 'volume-high.level', {
+  duration: 180,
+  from: gesture?.restProgress ?? 0,
+  to: 0.5,
+});
+if (!result.ok) throw new Error(result.reason.code);
+const effect = result.effect;
+```
+
+`restProgress` описывает неподвижный master: у этой шкалы он равен `1`.
+После первого изменения передавайте принятый уровень в `from`; исполнитель
+подхватывает текущую видимую позу. Стадии `effect` передаются публичному `sequence`
+по примеру выше. `from` по умолчанию сохраняет прежнее значение `0`; metadata
+не меняет существующий контракт запроса.
+
+`volume-middle/outline` пока отказывает этому состоянию: внешняя волна состоит
+из раздельных путей, для которых нужна проверенная групповая прозрачность.
+Прозрачность отдельных путей не выдаётся за её эквивалент. Подробнее —
+[наблюдения и границы среза](evidence/author-signal-20261101.md).
+
 ## Добавить и проверить символ
 
 Авторский snapshot проходит [общий приём мастеров](agent-workflow.md).
