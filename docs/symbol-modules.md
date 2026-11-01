@@ -111,23 +111,33 @@ if (!result.ok) throw new Error(result.reason.message);
 ```js
 import { glyph, glyphCapabilities } from '@labpics/icons/symbols/chatbubble-ellipses';
 import { compileSymbolEffect } from '@labpics/icons/motion';
+import { renderGlyphSvg } from '@labpics/icons/ir/render';
 import { sequence } from '@labpics/motion';
 
-const result = compileSymbolEffect(glyph(), glyphCapabilities(), 'chatbubble-ellipses.activity', {
-  duration: 900, from: 0.3, to: 1,
-});
-if (!result.ok) throw new Error(result.reason.message);
-if (result.effect.version !== 2) throw new Error('Нужен opacity-эффект');
+const host = document.createElement('span');
+host.innerHTML = renderGlyphSvg(glyph(), { instanceId: 'typing' });
+host.querySelector('svg').setAttribute('aria-hidden', 'true');
+document.body.append(host);
+const svg = host.querySelector('svg');
 const byPart = new Map([...svg.querySelectorAll('[data-part]')].map(part => [part.dataset.part, part]));
-const next = sequence(result.effect.stages.map(stage => [
-  byPart.get(stage.partId), { opacity: stage.to },
-  { at: stage.at, duration: stage.duration, ease: result.effect.options.easing },
-]), { reducedMotion: result.effect.options.duration === 0 ? 'always' : 'user' });
-previous?.stop();
+let previous;
+function setMotion(gesture, from, to) {
+  const result = compileSymbolEffect(glyph(), glyphCapabilities(), gesture, { duration: 900, from, to });
+  if (!result.ok) throw new Error(result.reason.message);
+  if (result.effect.version !== 2) throw new Error('Нужен opacity-эффект');
+  if (result.effect.targets.some(target => !byPart.has(target.partId))) throw new Error('Потеряна часть символа');
+  const next = sequence(result.effect.stages.map(stage => [
+    byPart.get(stage.partId), { opacity: stage.to },
+    { at: stage.at, duration: stage.duration, ease: result.effect.options.easing },
+  ]), { reducedMotion: result.effect.options.duration === 0 ? 'always' : 'user' });
+  previous?.stop();
+  previous = next;
+  return next;
+}
+setMotion('chatbubble-ellipses.activity', 0.3, 1);
 ```
 
-`svg` — смонтированный `renderGlyphSvg(glyph())`; перед исполнением проверьте наличие
-всех `targets.partId`. `at` и `duration` заданы в миллисекундах. Первый скалярный
+`at` и `duration` заданы в миллисекундах. Первый скалярный
 этап подхватывает текущую позу Lab Motion; остальные продолжают объявленную шкалу.
 Новый effect принимается до освобождения прежнего control. Обратные `from/to`
 компилируют путь к более ранней фазе; это новое намерение, а не вызов отсутствующего
