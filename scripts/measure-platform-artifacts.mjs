@@ -75,15 +75,20 @@ for (const [file, limits] of Object.entries(artifacts)) {
 }
 const scenarios = {};
 const consumerMeasurements = {};
+// Ограничения принадлежат exact entry независимо от имени сценария.
+// Несколько прежних aliases сохраняют оба наиболее строгих потолка.
+const previousConsumerLimits = new Map();
+for (const { entry, maxBytes, maxGzipBytes } of Object.values(oldConsumers.scenarios)) {
+  const previous = previousConsumerLimits.get(entry);
+  previousConsumerLimits.set(entry, {
+    maxBytes: Math.min(previous?.maxBytes ?? maxBytes, maxBytes),
+    maxGzipBytes: Math.min(previous?.maxGzipBytes ?? maxGzipBytes, maxGzipBytes),
+  });
+}
 for (const [name, entry] of Object.entries(entries)) {
   const measured = await bundleScenario(entry, { includeBrotli: true });
   consumerMeasurements[name] = measured;
-  // Потолок относится к exact consumer entry: прежний glyph-one был полным IR.
-  // Его бюджет переходит в full-ir-opt-in, а новый symbol import начинает свой.
-  const previousScenario = oldConsumers.scenarios[name];
-  const legacyIrScenario = name === 'full-ir-opt-in' ? oldConsumers.scenarios['glyph-one'] : undefined;
-  const old = previousScenario?.entry === entry ? previousScenario
-    : legacyIrScenario?.entry === entry ? legacyIrScenario : undefined;
+  const old = previousConsumerLimits.get(entry);
   scenarios[name] = {
     entry, baselineBytes: measured.bytes, baselineGzipBytes: measured.gzipBytes,
     maxBytes: old?.maxBytes ?? measured.bytes,

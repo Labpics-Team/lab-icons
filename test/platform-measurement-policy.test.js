@@ -11,6 +11,8 @@ const file = 'dist/ir/recipes.js';
 const twin = 'dist/ir/retained.js';
 const original = '// scripts/lib/kernel.js\nexport const value = 1;\n';
 const legacyGlyphEntry = "import { glyph } from '@labpics/icons/ir';\nconsole.log(glyph({ icon: 'alert' }));\n";
+const symbolGlyphEntry = "import { glyph } from '@labpics/icons/symbols/alert';\nconsole.log(glyph());\n";
+const authoredTimeEntry = "import { glyph } from '@labpics/icons/symbols/time';\nconsole.log(glyph());\n";
 
 afterEach(() => {
   for (const root of roots.splice(0)) rmSync(root, { recursive: true, force: true });
@@ -64,6 +66,28 @@ function run(root, args = []) {
   return spawnSync(process.execPath, [join(root, 'scripts/measure-platform-artifacts.mjs'), '--output', join(root, 'report.json'), ...args], {
     cwd: root, encoding: 'utf8', windowsHide: true,
   });
+}
+
+function measureConsumer(root, entry, bytes, gzipBytes) {
+  const oracle = join(root, 'scripts/check-consumer-size.js');
+  writeFileSync(oracle, readFileSync(oracle, 'utf8').replace(
+    'export async function bundleScenario()',
+    'export async function bundleScenario(entry)',
+  ).replace(
+    "return { bytes: 10, gzipBytes: 11, modules: ['dist/fixture.js'] };",
+    `return { bytes: entry === ${JSON.stringify(entry)} ? ${bytes} : 10, gzipBytes: entry === ${JSON.stringify(entry)} ? ${gzipBytes} : 11, modules: ['dist/fixture.js'] };`,
+  ));
+}
+
+function swapConsumerNames(root) {
+  const program = join(root, 'scripts/measure-platform-artifacts.mjs');
+  const source = readFileSync(program, 'utf8');
+  const glyphEntry = `'glyph-one': ${JSON.stringify(symbolGlyphEntry)}`;
+  const timeEntry = `'authored-time': ${JSON.stringify(authoredTimeEntry)}`;
+  expect(source).toContain(glyphEntry);
+  expect(source).toContain(timeEntry);
+  writeFileSync(program, source.replace(glyphEntry, `'glyph-one': ${JSON.stringify(authoredTimeEntry)}`)
+    .replace(timeEntry, `'authored-time': ${JSON.stringify(symbolGlyphEntry)}`));
 }
 
 describe('platform measurement admission policy', () => {
@@ -155,6 +179,72 @@ describe('platform measurement admission policy', () => {
     expect(result.status).not.toBe(0);
     expect(result.stderr).toMatch(new RegExp(`${name}.*previous consumer entry`));
     expect(readFileSync(policyPath).equals(before)).toBe(true);
+  });
+
+  it('перестановка имён сохраняет потолки соответствующих exact entries', () => {
+    const { root } = fixture();
+    const initial = run(root, ['--update']);
+    expect(initial.status, initial.stderr).toBe(0);
+    const policyPath = join(root, 'release/consumer-size-ratchet.json');
+    const policy = JSON.parse(readFileSync(policyPath));
+    policy.scenarios['authored-time'].maxBytes = 20;
+    policy.scenarios['authored-time'].maxGzipBytes = 21;
+    writeFileSync(policyPath, JSON.stringify(policy));
+    swapConsumerNames(root);
+    const result = run(root, ['--update']);
+    expect(result.status, result.stderr).toBe(0);
+    const next = JSON.parse(readFileSync(policyPath)).scenarios;
+    expect(next['authored-time'].entry).toBe(symbolGlyphEntry);
+    expect(next['authored-time'].maxBytes).toBe(10);
+    expect(next['authored-time'].maxGzipBytes).toBe(11);
+    expect(next['glyph-one'].entry).toBe(authoredTimeEntry);
+    expect(next['glyph-one'].maxBytes).toBe(20);
+    expect(next['glyph-one'].maxGzipBytes).toBe(21);
+  });
+
+  it('переклассификация сохранённого entry не ратифицирует его рост', () => {
+    const { root } = fixture();
+    const initial = run(root, ['--update']);
+    expect(initial.status, initial.stderr).toBe(0);
+    const policyPath = join(root, 'release/consumer-size-ratchet.json');
+    const before = readFileSync(policyPath);
+    swapConsumerNames(root);
+    measureConsumer(root, symbolGlyphEntry, 50, 51);
+    const result = run(root, ['--update']);
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toMatch(/authored-time.*consumer budget/);
+    expect(readFileSync(policyPath).equals(before)).toBe(true);
+  });
+
+  it.each([
+    [10, 11, true],
+    [21, 11, false],
+    [10, 22, false],
+  ])('дубликаты entry сохраняют независимые минимумы raw/gzip: %s/%s', (bytes, gzipBytes, accepted) => {
+    const { root } = fixture();
+    const policyPath = join(root, 'release/consumer-size-ratchet.json');
+    const policy = JSON.parse(readFileSync(policyPath));
+    policy.scenarios['full-ir-opt-in'] = policy.scenarios['glyph-one'];
+    policy.scenarios['glyph-one'] = {
+      entry: symbolGlyphEntry, baselineBytes: 10, baselineGzipBytes: 11, maxBytes: 20, maxGzipBytes: 80,
+    };
+    policy.scenarios['authored-time'] = {
+      entry: symbolGlyphEntry, baselineBytes: 10, baselineGzipBytes: 11, maxBytes: 80, maxGzipBytes: 21,
+    };
+    writeFileSync(policyPath, JSON.stringify(policy));
+    const before = readFileSync(policyPath);
+    measureConsumer(root, symbolGlyphEntry, bytes, gzipBytes);
+    const result = run(root, ['--update']);
+    if (accepted) {
+      expect(result.status, result.stderr).toBe(0);
+      const next = JSON.parse(readFileSync(policyPath)).scenarios['glyph-one'];
+      expect(next.maxBytes).toBe(20);
+      expect(next.maxGzipBytes).toBe(21);
+    } else {
+      expect(result.status).not.toBe(0);
+      expect(result.stderr).toMatch(/glyph-one.*consumer budget/);
+      expect(readFileSync(policyPath).equals(before)).toBe(true);
+    }
   });
 
   it('не удаляет ранее установленный consumer budget при добавлении сценариев', () => {
