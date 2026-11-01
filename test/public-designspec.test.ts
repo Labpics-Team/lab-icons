@@ -195,4 +195,33 @@ describe('публичный DesignSpec → GlyphIR → SVG', () => {
     const outside = { ...beacon(), negativeSpace: [], decorators: [], parts: [{ ...beacon().parts[0]!, geometry: { kind: 'circle', center: 'center', radius: 0.49 } }] };
     expectRefusal(() => compileDesignSpec(outside, { icon: 'beacon' }), 'CONSTRAINT_VIOLATION');
   });
+
+  it.each(['anchors', 'parts', 'decorators', 'negativeSpace'] as const)('refuses sparse %s через DesignSpecError', collection => {
+    const bad = { ...beacon(), [collection]: new Array(1) };
+    expectRefusal(() => compileDesignSpec(bad, { icon: 'beacon' }), 'INVALID_VALUE', `${collection}[0]`);
+    expect(compileDesignSpec(beacon(), { icon: 'beacon' }).svg).toContain('<svg');
+  });
+
+  it('refuses скрытый payload массива и sparse nested reference list', () => {
+    const withPayload = { ...beacon(), anchors: Object.assign([...beacon().anchors], { svg: '<svg/>' }) };
+    expectRefusal(() => compileDesignSpec(withPayload, { icon: 'beacon' }), 'RAW_PATH_FORBIDDEN', 'anchors');
+    const sparseTargets = { ...beacon(), decorators: [{ ...beacon().decorators[0]!, targetPartIds: new Array(1) }] };
+    expectRefusal(() => compileDesignSpec(sparseTargets, { icon: 'beacon' }), 'INVALID_VALUE');
+  });
+
+  it.each([
+    [{ kind: 'ellipse', center: 'center', rx: 0.2, ry: 0.1, rotation: null }, { kind: 'ellipse', center: 'center', rx: 0.2, ry: 0.1 }, 'INVALID_VALUE'],
+    [{ kind: 'rect', center: 'center', width: 0.4, height: 0.3, cornerRadius: null }, { kind: 'rect', center: 'center', width: 0.4, height: 0.3 }, 'INVALID_VALUE'],
+    [{ kind: 'residual', recipe: 'superellipse', center: 'center', rx: 0.2, ry: 0.1, exponent: 3, rotation: null }, { kind: 'residual', recipe: 'superellipse', center: 'center', rx: 0.2, ry: 0.1, exponent: 3 }, 'UNBOUNDED_RESIDUAL'],
+  ] as const)('null не обозначает default geometry: %j', (invalid, healthy, code) => {
+    const spec = (geometry: unknown) => ({ ...beacon(), decorators: [], negativeSpace: [], parts: [{ id: 'body', role: 'body', geometry, paint: { kind: 'fill' } }] });
+    expectRefusal(() => compileDesignSpec(spec(invalid), { icon: 'beacon' }), code);
+    expect(compileDesignSpec(spec(healthy), { icon: 'beacon' }).svg).toContain('<svg');
+  });
+
+  it('null linecap получает typed refusal; отсутствие поля сохраняет round default', () => {
+    const spec = { ...beacon(), decorators: [], negativeSpace: [], parts: [{ ...beacon().parts[0]!, paint: { kind: 'stroke', width: 0.055, linecap: null } }] };
+    expectRefusal(() => compileDesignSpec(spec, { icon: 'beacon' }), 'INVALID_VALUE');
+    expect(compileDesignSpec(beacon(), { icon: 'beacon' }).parts[0]?.paint).toMatchObject({ linecap: 'round' });
+  });
 });

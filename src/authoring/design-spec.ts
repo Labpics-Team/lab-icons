@@ -273,10 +273,26 @@ function oneOf<T extends string>(value: unknown, allowed: readonly T[], at: stri
 }
 
 function idList(value: unknown, at: string, minimum = 1): string[] {
-  if (!Array.isArray(value) || value.length < minimum) fail('INVALID_VALUE', at, `нужно минимум ${minimum} id`);
-  const ids = value.map((item, index) => stableId(item, `${at}[${index}]`));
+  const ids = denseList(value, at, minimum).map((item, index) => stableId(item, `${at}[${index}]`));
   if (new Set(ids).size !== ids.length) fail('INVALID_VALUE', at, 'дубликаты id запрещены');
   return ids;
+}
+
+function denseList(value: unknown, at: string, minimum = 0): unknown[] {
+  if (!Array.isArray(value) || value.length < minimum) {
+    fail('INVALID_VALUE', at, `нужен массив минимум из ${minimum} элементов`);
+  }
+  for (const key of Reflect.ownKeys(value)) {
+    if (key === 'length') continue;
+    const index = typeof key === 'string' ? Number(key) : NaN;
+    if (!Number.isInteger(index) || index < 0 || index >= value.length || String(index) !== key) {
+      classifyUnknownField(String(key), at);
+    }
+  }
+  for (let index = 0; index < value.length; index++) {
+    if (!Object.hasOwn(value, index)) fail('INVALID_VALUE', `${at}[${index}]`, 'разреженный массив запрещён');
+  }
+  return value;
 }
 
 function parseAnchor(value: unknown, index: number): DesignAnchor {
@@ -290,15 +306,16 @@ function parseAnchor(value: unknown, index: number): DesignAnchor {
   }
   if (kind === 'midpoint') {
     const source = exact(value, at, ['id', 'kind', 'between']);
-    if (!Array.isArray(source.between) || source.between.length !== 2) {
+    const between = denseList(source.between, `${at}.between`, 2);
+    if (between.length !== 2) {
       fail('INVALID_VALUE', `${at}.between`, 'нужны ровно два named anchors');
     }
     return {
       id,
       kind,
       between: [
-        stableId(source.between[0], `${at}.between[0]`),
-        stableId(source.between[1], `${at}.between[1]`),
+        stableId(between[0], `${at}.between[0]`),
+        stableId(between[1], `${at}.between[1]`),
       ],
     };
   }
@@ -374,7 +391,7 @@ function parseGeometry(value: unknown, at: string): DesignGeometry {
       center: stableId(source.center, `${at}.center`),
       rx: positive(source.rx, `${at}.rx`, 0.5),
       ry: positive(source.ry, `${at}.ry`, 0.5),
-      rotation: finite(source.rotation ?? 0, `${at}.rotation`, -180, 180),
+      rotation: finite(source.rotation === undefined ? 0 : source.rotation, `${at}.rotation`, -180, 180),
     };
   }
   if (kind === 'line') {
@@ -425,7 +442,7 @@ function parseGeometryTail(
       width,
       height,
       cornerRadius: finite(
-        source.cornerRadius ?? 0,
+        source.cornerRadius === undefined ? 0 : source.cornerRadius,
         `${at}.cornerRadius`,
         0,
         Math.min(width, height) / 2,
@@ -459,7 +476,7 @@ function parseGeometryTail(
     rx: bounded(source.rx, `${at}.rx`, 0, domain.rx.max, true),
     ry: bounded(source.ry, `${at}.ry`, 0, domain.ry.max, true),
     exponent: bounded(source.exponent, `${at}.exponent`, domain.exponent.min, domain.exponent.max),
-    rotation: bounded(source.rotation ?? 0, `${at}.rotation`, domain.rotation.min, domain.rotation.max),
+    rotation: bounded(source.rotation === undefined ? 0 : source.rotation, `${at}.rotation`, domain.rotation.min, domain.rotation.max),
   };
 }
 
@@ -474,7 +491,7 @@ function parsePaint(value: unknown, at: string): DesignPaint {
   return {
     kind,
     width: positive(source.width, `${at}.width`, 0.5),
-    linecap: oneOf(source.linecap ?? 'round', ['round', 'butt'] as const, `${at}.linecap`),
+    linecap: oneOf(source.linecap === undefined ? 'round' : source.linecap, ['round', 'butt'] as const, `${at}.linecap`),
   };
 }
 
@@ -674,20 +691,11 @@ export function parseDesignSpec(value: unknown): DesignSpec {
     'version', 'anchors', 'parts', 'composition', 'decorators', 'negativeSpace',
   ]);
   if (root.version !== 1) fail('UNSUPPORTED_VERSION', 'version', 'поддерживается только version=1');
-  if (!Array.isArray(root.anchors) || root.anchors.length === 0) {
-    fail('INVALID_VALUE', 'anchors', 'нужен непустой массив');
-  }
-  if (!Array.isArray(root.parts) || root.parts.length === 0) {
-    fail('INVALID_VALUE', 'parts', 'нужен непустой массив');
-  }
-  if (!Array.isArray(root.decorators)) fail('INVALID_VALUE', 'decorators', 'ожидается массив');
-  if (!Array.isArray(root.negativeSpace)) fail('INVALID_VALUE', 'negativeSpace', 'ожидается массив');
-
-  const anchors = root.anchors.map(parseAnchor);
-  const parts = root.parts.map(parsePart);
+  const anchors = denseList(root.anchors, 'anchors', 1).map(parseAnchor);
+  const parts = denseList(root.parts, 'parts', 1).map(parsePart);
   const composition = parseComposition(root.composition);
-  const decorators = root.decorators.map(parseDecorator);
-  const negativeSpace = root.negativeSpace.map(parseNegativeSpace);
+  const decorators = denseList(root.decorators, 'decorators').map(parseDecorator);
+  const negativeSpace = denseList(root.negativeSpace, 'negativeSpace').map(parseNegativeSpace);
   assertUniqueIds(anchors, 'anchors');
   assertUniqueIds(parts, 'parts');
   assertUniqueIds(decorators, 'decorators');

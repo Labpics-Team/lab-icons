@@ -123,7 +123,7 @@ Paint: `{ kind: 'fill' }` либо
 
 Gap измеряет расстояние axis-aligned bounds, а не точное расстояние контуров.
 Совпадающие или пересекающиеся bounds дают 0. Повторное ограничение для тех же
-participants и измерения отклоняется. Успешный результат хранит minimum,
+participants и измерения отклоняется. Успешный результат хранит requiredMinimum,
 measured, measurementMethod и participants; при нарушении результата нет.
 
 ## Ошибки
