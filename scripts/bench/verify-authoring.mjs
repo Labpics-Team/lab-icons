@@ -9,6 +9,51 @@ import { assertRemoteBenchmark } from './measurement.js';
 
 const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
 
+/** Независимые circle measurements из входа tutorial, без чтения compiled d. */
+export function tutorialCircleExpectations(spec) {
+  const anchors = new Map();
+  for (const anchor of spec.anchors) {
+    if (anchor.kind === 'canvas' && anchor.at === 'center') anchors.set(anchor.id, { x: 0.5, y: 0.5 });
+    else if (anchor.kind === 'polar' && anchors.has(anchor.from)) {
+      const base = anchors.get(anchor.from), angle = anchor.angle * Math.PI / 180;
+      anchors.set(anchor.id, { x: base.x + Math.cos(angle) * anchor.distance, y: base.y + Math.sin(angle) * anchor.distance });
+    } else throw new Error('authoring tutorial oracle: неподдержанный якорь');
+  }
+  return spec.parts.map(part => {
+    assert.equal(part.geometry.kind, 'circle', 'authoring tutorial oracle: нужен круговой пример');
+    const center = anchors.get(part.geometry.center);
+    assert(center, 'authoring tutorial oracle: неизвестный центр');
+    return { id: part.id, center, radius: part.geometry.radius, paint: part.paint };
+  });
+}
+
+/** SVG shape API даёт другое наблюдение, чем metadata из compiler. */
+export function assertAuthoringRender(observed, expected) {
+  const near = (actual, wanted, tolerance, label) => {
+    assert(Number.isFinite(actual) && Math.abs(actual - wanted) <= tolerance, `${label}: ${actual} != ${wanted}`);
+  };
+  for (const row of observed) {
+    assert.equal(row.width, row.size); assert.equal(row.height, row.size);
+    assert.equal(row.viewBox, '0 0 1 1'); assert(row.staticMatches);
+    assert.deepEqual(row.parts, expected.map(part => part.id));
+    assert.equal(row.paths.length, expected.length);
+    for (const [index, path] of row.paths.entries()) {
+      const part = expected[index], radius = part.radius;
+      assert(path.d.trim() && path.length > 0, `${part.id}: пустой контур`);
+      near(path.length, 2 * Math.PI * radius, radius * 0.01, `${part.id}: длина окружности`);
+      near(path.bounds.x, part.center.x - radius, 0.0002, `${part.id}: x`);
+      near(path.bounds.y, part.center.y - radius, 0.0002, `${part.id}: y`);
+      near(path.bounds.width, radius * 2, 0.0002, `${part.id}: ширина`);
+      near(path.bounds.height, radius * 2, 0.0002, `${part.id}: высота`);
+      assert.equal(path.opacity, 1); assert.equal(path.visibility, 'visible'); assert.notEqual(path.display, 'none');
+      if (part.paint.kind === 'stroke') {
+        assert.equal(path.fill, 'none'); assert.notEqual(path.stroke, 'none');
+        near(path.strokeWidth, part.paint.width, 0.00001, `${part.id}: штрих`);
+      } else assert.notEqual(path.fill, 'none');
+    }
+  }
+}
+
 /** Исполняется первый самостоятельный пример из публичного tutorial. */
 export function authoringTutorialExample(document) {
   const code = document.match(/```ts\r?\n([\s\S]*?)\r?\n```/)?.[1];
@@ -78,7 +123,7 @@ for (const [index, part] of glyph.parts.entries()) {
 const renderings = [16,24,48].map(size => ({ size, svg: renderGlyphSvg(
   compileDesignSpec(beacon, { icon: 'focus-beacon', size }), { instanceId: 'docs-' + size }),
 }));
-writeFileSync(process.argv[2], JSON.stringify({ glyph, renderings, refusals: 3 }));
+writeFileSync(process.argv[2], JSON.stringify({ glyph, spec: beacon, renderings, refusals: 3 }));
 `;
   writeFileSync(source, program);
   const executable = join(prepared.consumer, 'authoring-tutorial.mjs');
@@ -90,6 +135,7 @@ writeFileSync(process.argv[2], JSON.stringify({ glyph, renderings, refusals: 3 }
   const material = join(output, 'authoring-material.json');
   execFileSync(process.execPath, [executable, material], { cwd: prepared.consumer, stdio: 'inherit', windowsHide: true });
   const result = JSON.parse(readFileSync(material, 'utf8'));
+  const expected = tutorialCircleExpectations(result.spec);
   const exportedSvg = result.renderings.find(row => row.size === 24).svg;
 
   const staticSource = join(prepared.consumer, 'authoring-static.mjs');
@@ -115,14 +161,17 @@ writeFileSync(process.argv[2], JSON.stringify({ glyph, renderings, refusals: 3 }
         const bounds = element.getBoundingClientRect();
         return { size, width: bounds.width, height: bounds.height,
           parts: [...element.querySelectorAll('[data-part]')].map(part => part.dataset.part),
+          paths: [...element.querySelectorAll('path')].map(path => {
+            const bounds = path.getBBox(), style = getComputedStyle(path);
+            return { d: path.getAttribute('d'), length: path.getTotalLength(),
+              bounds: { x: bounds.x, y: bounds.y, width: bounds.width, height: bounds.height },
+              fill: style.fill, stroke: style.stroke, strokeWidth: parseFloat(style.strokeWidth),
+              opacity: parseFloat(style.opacity), visibility: style.visibility, display: style.display };
+          }),
           viewBox: element.getAttribute('viewBox'), staticMatches: svg === renderings.find(row => row.size === 24).svg };
       });
     }, result.renderings);
-    for (const row of observed) {
-      assert.equal(row.width, row.size); assert.equal(row.height, row.size);
-      assert.equal(row.viewBox, '0 0 1 1'); assert(row.staticMatches);
-      assert.deepEqual(row.parts, result.glyph.parts.map(part => part.id));
-    }
+    assertAuthoringRender(observed, expected);
     assert.equal(await page.getByRole('img', { name: 'Фокус активен' }).count(), 3);
     await page.screenshot({ path: join(output, 'authoring-consumer.png') });
     const report = { sourceSha: prepared.revision, tarballSha256: prepared.tarballSha256,
