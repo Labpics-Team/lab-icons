@@ -1850,6 +1850,20 @@
   "./motion": [
     "compileSymbolEffect"
   ],
+  "./states/playback-circle": [
+    "compileStateEffect",
+    "exportStateTransition",
+    "render",
+    "renderStateSvg",
+    "stateCapabilities"
+  ],
+  "./states/status-circle": [
+    "compileStateEffect",
+    "exportStateTransition",
+    "render",
+    "renderStateSvg",
+    "stateCapabilities"
+  ],
   "./symbols/accessibility": [
     "filled",
     "glyph",
