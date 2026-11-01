@@ -41,9 +41,11 @@ function expectedOpacity(declaration, id, gesture, progress) {
   return a[1] + (b[1] - a[1]) * (progress - a[0]) / (b[0] - a[0]);
 }
 export function referenceLottieTiming(request) {
-  const duration = request.gesture && !request.reducedMotion ? request.duration ?? 1000 : 0;
-  return { terminalFrame: duration * (request.frameRate ?? 60) / 1000,
-    from: request.gesture ? request.from ?? 0 : 0, to: request.gesture ? request.to ?? 1 : 0 };
+  const from = request.gesture ? request.from ?? 0 : 0, to = request.gesture ? request.to ?? 1 : 0;
+  const duration = request.gesture && !request.reducedMotion && from !== to ? request.duration ?? 1000 : 0;
+  // Oracle считает кадры по длительности одного кадра из request.
+  // Producer metadata и его промежуточные вычисления сюда не переносятся.
+  return { terminalFrame: Math.round(duration / (1000 / (request.frameRate ?? 60))), from, to };
 }
 function rawSource(testCase) {
   const source = new DOMParser().parseFromString(testCase.rawSvg, 'image/svg+xml');

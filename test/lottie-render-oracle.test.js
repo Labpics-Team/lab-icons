@@ -17,6 +17,12 @@ describe('независимый raw author oracle Lottie', () => {
     expect(referenceLottieTiming({ gesture: 'reload.cycle', from: 0.17, to: 0.73, duration: 1000 })).toEqual({ from: 0.17, to: 0.73, terminalFrame: 60 });
     expect(referenceLottieTiming({ gesture: 'reload.cycle', from: 1, to: 0.3, reducedMotion: true })).toEqual({ from: 1, to: 0.3, terminalFrame: 0 });
     expect(referenceLottieTiming({})).toEqual({ from: 0, to: 0, terminalFrame: 0 });
+    for (const frameRate of [24, 30, 60, 120]) {
+      expect(referenceLottieTiming({ gesture: 'reload.cycle', duration: 1000 / frameRate, frameRate }))
+        .toEqual({ from: 0, to: 1, terminalFrame: 1 });
+    }
+    expect(referenceLottieTiming({ gesture: 'reload.cycle', from: 0.37, to: 0.37, duration: 1000 }))
+      .toEqual({ from: 0.37, to: 0.37, terminalFrame: 0 });
   });
   it('принимает одинаковые nonempty pixels и отвергает blank producer', () => {
     const source = new Uint8ClampedArray([18, 52, 86, 255]);
