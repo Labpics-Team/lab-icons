@@ -218,7 +218,7 @@ function notificationRing(icon, variant, declaration, parts, source) {
   const amplitude = width * NOTIFICATION_RING_WIDTH_RATIO;
   const gesture = {
     id: `${icon}.ring`, kind: 'cycle',
-    meaning: 'Входящий звон: затухающий цикл язычка; корпус и метка неподвижны.',
+    meaning: 'Входящее уведомление: один затухающий горизонтальный цикл язычка; корпус и badge остаются неподвижными.',
     partIds: [clapper.id], progress: 'normalized-0-to-1', restProgress: 0,
     tracks: [{ partId: clapper.id, kind: 'translate', axis: 'x', unit: 'viewBox', interpolation: 'linear',
       stops: [0, 1, -1, 0.5, -0.5, 0].map((factor, index) => ({ at: index / 5, value: amplitude * factor })) }],
