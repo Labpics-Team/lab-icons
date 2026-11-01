@@ -42,7 +42,7 @@ export function distributionClaimErrors(text) {
  * стандартные cardinal number words, их падежные формы для обычных count claims
  * и масштабные слова. Мы не пытаемся решить NLP-задачу; вместо этого запрещаем
  * поддерживаемые точные количественные конструкции рядом с защищаемой единицей.
- * Исторический счётчик требует даты или baseline SHA в том же предложении.
+ * Исторический счётчик требует даты или baseline SHA в том же утверждении.
  * Каталог документа не освобождает текущие утверждения от проверки.
  */
 export function manualCorpusCountErrors(source) {
@@ -83,16 +83,22 @@ export function manualCorpusCountErrors(source) {
     new RegExp(`(?:^|[^\\p{L}\\p{N}_])(${number}\\s+${unit})(?=$|[^\\p{L}\\p{N}_])`, 'giu'),
     new RegExp(`(?:^|[^\\p{L}\\p{N}_])(${unit}\\s*[:=]\\s*${number})(?=$|[^\\p{L}\\p{N}_])`, 'giu'),
   ];
+  const currentMarker = /(?:текущ[\p{L}]*|сейчас|сегодня|теперь|ныне|настоящ[\p{L}]*\s+врем[\p{L}]*|\bcurrent(?:ly)?\b|\btoday\b|\bnow\b)/iu;
+  // Противопоставленная фраза получает собственный anchor. Однородное
+  // перечисление count claims продолжает датированное утверждение.
+  const countStart = `${number}\\s+${unit}(?=$|[^\\p{L}\\p{N}_])`;
+  const clauseSeparator = new RegExp(`,\\s*(?=(?:(?:а|но|but|whereas)\\s+(?!${countStart})|(?:(?:в|на|in|at)\\s+)?${currentMarker.source}))`, 'iu');
+  const clauses = sentences.flatMap(sentence => sentence.split(clauseSeparator));
   function nodeIdentifier(match, text) {
     return /:\s*\d+$/.test(match[1]) &&
       /^:\d+(?=$|[^\p{L}\p{N}_:])/u.test(text.slice(match.index + match[0].length));
   }
   function historical(sentence) {
     // Датированное «в текущем пакете» всё ещё проецирует текущую поставку.
-    if (/(?:текущ[\p{L}]*|сейчас|сегодня|теперь|ныне|настоящ[\p{L}]*\s+врем[\p{L}]*|\bcurrent(?:ly)?\b|\btoday\b|\bnow\b)/iu.test(sentence)) return false;
+    if (currentMarker.test(sentence)) return false;
     return /(?:на|as of)\s+\d{4}-\d{2}-\d{2}(?=$|[^\d])|(?:baseline commit|на baseline)\s+[a-f\d]{7,40}(?=$|[^a-f\d])/iu.test(sentence);
   }
-  return [...new Set(sentences.flatMap(sentence => historical(sentence) ? [] :
+  return [...new Set(clauses.flatMap(sentence => historical(sentence) ? [] :
     patterns.flatMap(pattern => [...sentence.matchAll(pattern)]
       .filter(match => !nodeIdentifier(match, sentence)).map(match => match[1]))))]
     .map((claim) => `ручной счётчик «${claim}»: используйте ссылку на контракт или генерируемую справку`);
