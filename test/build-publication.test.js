@@ -11,7 +11,7 @@ import { buildIr } from '../scripts/build-ir.mjs';
 vi.mock('esbuild', async importOriginal => ({ ...await importOriginal(), build: vi.fn() }));
 
 const roots = [];
-const TARGET_FILES = { ir: 'index', symbols: 'example', motion: 'index' };
+const TARGET_FILES = { ir: 'index', symbols: 'example', motion: 'index', lottie: 'example' };
 const STATIC_FILES = {
   'index.js': 'export const staticIcon = "preserved";\n',
   'index.d.ts': 'export declare const staticIcon: "preserved";\n',
@@ -26,8 +26,9 @@ function write(root, path, value) {
   fs.writeFileSync(join(root, path), value);
 }
 
-function writeTargets(staging, epoch = 'new') {
+function writeTargets(staging, epoch = 'new', { includeLottie = true } = {}) {
   for (const [target, file] of Object.entries(TARGET_FILES)) {
+    if (target === 'lottie' && !includeLottie) continue;
     write(staging, `${target}/${file}.js`, `export const epoch = "${epoch}";\n`);
     write(staging, `${target}/${file}.d.ts`, `export declare const epoch: "${epoch}";\n`);
   }
@@ -72,7 +73,7 @@ afterEach(() => {
   }
 });
 
-describe('публикация единой эпохи IR/symbols/motion', () => {
+describe('публикация единой эпохи IR/symbols/motion/Lottie', () => {
   it.each(['exit', 'kill'])('после настоящего process crash %s следующий build убирает только abandoned staging', async mode => {
     const { root, output } = fixture();
     const script = `
@@ -96,9 +97,9 @@ describe('публикация единой эпохи IR/symbols/motion', () =>
     } else expect(crashed.signal, crashed.stderr).toBe('SIGKILL');
     expect(crashed.stderr).toBe('');
     expect(fs.readdirSync(root).filter(name => name.startsWith('.dist-ir-build-'))).toHaveLength(1);
-    expect(epochs(output)).toEqual(['old', 'old', 'old']);
+    expect(epochs(output)).toEqual(['old', 'old', 'old', 'old']);
     await expect(buildIr({ root, compileTargets: ({ staging }) => writeTargets(staging) })).resolves.toBe(1);
-    expect(epochs(output)).toEqual(['new', 'new', 'new']);
+    expect(epochs(output)).toEqual(['new', 'new', 'new', 'new']);
     expectStatic(output);
     expectNoTransactionFiles(root);
   });
@@ -130,7 +131,7 @@ describe('публикация единой эпохи IR/symbols/motion', () =>
       clearTimeout(timer);
       await expect(buildIr({ root, compileTargets: ({ staging }) => writeTargets(staging) })).resolves.toBe(1);
       expect(fs.readFileSync(join(message.staging, 'ir/index.js'), 'utf8')).toBe('live operation');
-      expect(epochs(output)).toEqual(['new', 'new', 'new']);
+      expect(epochs(output)).toEqual(['new', 'new', 'new', 'new']);
       expectStatic(output);
       expect(child.kill('SIGKILL')).toBe(true);
       await closed;
@@ -184,17 +185,19 @@ describe('публикация единой эпохи IR/symbols/motion', () =>
   it('заменяет все targets вместе, сохраняя static/catalog bytes и исключая прежние staging/backup', async () => {
     const { root, output } = fixture();
     write(output, 'symbols/stale.js', 'stale target');
+    write(output, 'lottie/stale.js', 'stale Lottie target');
     write(output, '.ir-previous/leaked.js', 'previous target');
     write(output, '.ir-platform-build-old/leaked.js', 'unfinished staging');
     const moves = [];
     await expect(buildIr({ root, compileTargets: ({ staging }) => writeTargets(staging),
       transactionFs: { ...fs, renameSync(from, to) { moves.push([from, to]); fs.renameSync(from, to); } } })).resolves.toBe(1);
-    expect(epochs(output)).toEqual(['new', 'new', 'new']);
+    expect(epochs(output)).toEqual(['new', 'new', 'new', 'new']);
     expectStatic(output);
     expect(moves).toHaveLength(2);
     expect(moves[0][0]).toBe(output);
     expect(moves[1][1]).toBe(output);
     expect(fs.existsSync(join(output, 'symbols/stale.js'))).toBe(false);
+    expect(fs.existsSync(join(output, 'lottie/stale.js'))).toBe(false);
     expect(fs.readdirSync(output).filter(name => name.startsWith('.'))).toEqual([]);
     expectNoTransactionFiles(root);
   });
@@ -205,34 +208,38 @@ describe('публикация единой эпохи IR/symbols/motion', () =>
       write(staging, 'ir/index.js', 'export const epoch = "new";');
       throw new Error('target preparation failed');
     } })).rejects.toThrow('target preparation failed');
-    expect(epochs(output)).toEqual(['old', 'old', 'old']);
+    expect(epochs(output)).toEqual(['old', 'old', 'old', 'old']);
     expectStatic(output);
     expectNoTransactionFiles(root);
   });
 
-  it('при отказе bundle ждёт остальных writers до cleanup, не оставляя поздний staging', async () => {
+  it.each(['ir/index.js', 'ir/lottie-runtime.js'])('при отказе bundle %s ждёт остальных writers до cleanup, не оставляя поздний staging', async rejectedTarget => {
     const { root, output } = fixture();
     write(root, 'scripts/build-anatomy-projection.mjs', 'export {};');
     let started = 0;
     let finished = 0;
+    const completed = [];
     const pending = [];
     vi.mocked(build).mockImplementation(({ outfile }) => {
-      const first = started++ === 0;
-      const operation = first
-        ? Promise.reject(new Error('first bundle refused')).finally(() => { finished++; })
+      const target = `${basename(dirname(outfile))}/${basename(outfile)}`;
+      started++;
+      const operation = target === rejectedTarget
+        ? Promise.reject(new Error(`bundle ${rejectedTarget} refused`)).finally(() => { finished++; completed.push(target); })
         : new Promise(resolveWrite => setTimeout(() => {
           write(dirname(outfile), basename(outfile), 'export {};');
           finished++;
+          completed.push(target);
           resolveWrite();
-        }, 25));
+        }, target === 'ir/lottie-runtime.js' ? 50 : 25));
       pending.push(operation);
       return operation;
     });
     try {
-      await expect(buildIr({ root })).rejects.toThrow('first bundle refused');
-      expect(started).toBe(8);
-      expect(finished).toBe(8);
-      expect(epochs(output)).toEqual(['old', 'old', 'old']);
+      await expect(buildIr({ root })).rejects.toThrow(`bundle ${rejectedTarget} refused`);
+      expect(started).toBe(9);
+      expect(finished).toBe(9);
+      expect(completed).toContain('ir/lottie-runtime.js');
+      expect(epochs(output)).toEqual(['old', 'old', 'old', 'old']);
       expectStatic(output);
       expectNoTransactionFiles(root);
     } finally {
@@ -241,16 +248,25 @@ describe('публикация единой эпохи IR/symbols/motion', () =>
     }
   });
 
+  it('отказ компилятора Lottie не оставляет старый target среди новых symbol modules', async () => {
+    const { root, output } = fixture();
+    await expect(buildIr({ root, compileTargets: ({ staging }) => writeTargets(staging, 'new', { includeLottie: false }) }))
+      .rejects.toThrow(/output surface drift.*missing=dist\/lottie\/example\.d\.ts,dist\/lottie\/example\.js/);
+    expect(epochs(output)).toEqual(['old', 'old', 'old', 'old']);
+    expectStatic(output);
+    expectNoTransactionFiles(root);
+  });
+
   it('не публикует неполную file surface или незамкнутые imports', async () => {
     for (const sabotage of ['missing', 'extra', 'import']) {
       const { root, output } = fixture();
       await expect(buildIr({ root, compileTargets({ staging }) {
         writeTargets(staging);
-        if (sabotage === 'missing') fs.rmSync(join(staging, 'motion/index.d.ts'));
-        if (sabotage === 'extra') write(staging, 'symbols/unlisted.js', 'export const extra = true;');
-        if (sabotage === 'import') write(staging, 'ir/index.js', 'export { value } from "./missing.js";');
+        if (sabotage === 'missing') fs.rmSync(join(staging, 'lottie/example.d.ts'));
+        if (sabotage === 'extra') write(staging, 'lottie/unlisted.js', 'export const extra = true;');
+        if (sabotage === 'import') write(staging, 'lottie/example.js', 'export { value } from "./missing.js";');
       } })).rejects.toThrow(/output surface drift|dependency closure/);
-      expect(epochs(output)).toEqual(['old', 'old', 'old']);
+      expect(epochs(output)).toEqual(['old', 'old', 'old', 'old']);
       expectStatic(output);
       expectNoTransactionFiles(root);
     }
@@ -264,7 +280,7 @@ describe('публикация единой эпохи IR/symbols/motion', () =>
         if (++calls === 2) throw new Error('install rename failed');
         fs.renameSync(from, to);
       } } })).rejects.toThrow('install rename failed');
-    expect(epochs(output)).toEqual(['old', 'old', 'old']);
+    expect(epochs(output)).toEqual(['old', 'old', 'old', 'old']);
     expectStatic(output);
     expectNoTransactionFiles(root);
   });
@@ -279,11 +295,11 @@ describe('публикация единой эпохи IR/symbols/motion', () =>
       } } })).rejects.toThrow('process stopped after rename');
     expect(fs.existsSync(backup)).toBe(true);
     if (stoppedAfter === 1) expect(fs.existsSync(output)).toBe(false);
-    else expect(epochs(output)).toEqual(['new', 'new', 'new']);
+    else expect(epochs(output)).toEqual(['new', 'new', 'new', 'new']);
     // Recovery выполняется до нового compiler, даже когда тот ещё не смог
     // подготовить следующую версию: persisted epoch уже однозначна.
     await expect(buildIr({ root, compileTargets() { throw new Error('next compile stopped'); } })).rejects.toThrow('next compile stopped');
-    expect(epochs(output)).toEqual(Array(3).fill(stoppedAfter === 1 ? 'old' : 'new'));
+    expect(epochs(output)).toEqual(Array(4).fill(stoppedAfter === 1 ? 'old' : 'new'));
     expectStatic(output);
     expectNoTransactionFiles(root);
   });
@@ -296,7 +312,7 @@ describe('публикация единой эпохи IR/symbols/motion', () =>
     let compilations = 0;
     await expect(buildIr({ root, compileTargets() { compilations++; } })).rejects.toThrow('symbolic link');
     expect(compilations).toBe(0);
-    expect(epochs(output)).toEqual(['old', 'old', 'old']);
+    expect(epochs(output)).toEqual(['old', 'old', 'old', 'old']);
     expect(fs.readFileSync(join(linked, 'value'), 'utf8')).toBe('outside dist');
     expectNoTransactionFiles(root);
   });
