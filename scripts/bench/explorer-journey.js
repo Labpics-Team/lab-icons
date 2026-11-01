@@ -426,6 +426,83 @@ export async function runExplorerJourney() {
       check(`circle/${variant}/nudge-not-inferred`, q('play').disabled && q('gesture').value === '');
     }
 
+    await choose('question-circle', 'outline');
+    const stateModule = await import(new URL('./package/states/status-circle.js', location.href).href);
+    const stateCaps = stateModule.stateCapabilities();
+    const stateStage = q('symbol-stage');
+    const enclosure = stateStage.querySelector(`[data-part="${stateCaps.enclosurePartId}"]`);
+    const enclosureData = enclosure?.getAttribute('d');
+    const groups = stateCaps.states.map(member => stateStage.querySelector(`[data-state="${member.id}"]`));
+    const opacityValues = () => groups.map(group => Number(getComputedStyle(group).opacity));
+    const stableNodes = () => groups.every((group, index) => group === stateStage.querySelector(`[data-state="${stateCaps.states[index].id}"]`)) &&
+      enclosure === stateStage.querySelector(`[data-part="${stateCaps.enclosurePartId}"]`) && enclosure.getAttribute('d') === enclosureData;
+    const targetButton = target => q('state-choices').querySelector(`[data-state-target="${target}"]`);
+    const endpoint = target => opacityValues().every((value, index) => Math.abs(value - (stateCaps.states[index].id === target ? 1 : 0)) < 0.000001);
+    check('replacement-six-groups-one-enclosure', groups.length === 6 && groups.every(group => group?.tagName.toLowerCase() === 'g') &&
+      stateStage.querySelectorAll(`[data-part="${stateCaps.enclosurePartId}"]`).length === 1 && !q('state-group-controls').hidden);
+    check('replacement-initial-author-state', endpoint('question') && q('gesture').value === 'enclosure.replace');
+    for (const member of stateCaps.states) {
+      const row = data.rows.find(row => row.name === member.icon && row.variant === 'outline');
+      const original = await originalFetch(row.views.original).then(response => response.text());
+      const template = document.createElement('template');
+      template.innerHTML = original;
+      const authorPaths = paths(template.content.querySelector('svg'));
+      const group = groups[stateCaps.states.indexOf(member)];
+      check(`replacement/${member.id}/exact-author-content`, JSON.stringify(paths(group)) === JSON.stringify(authorPaths.slice(0, -1)) &&
+        JSON.stringify({ d: enclosureData, fillRule: enclosure.getAttribute('fill-rule') ?? 'nonzero' }) === JSON.stringify(authorPaths.at(-1)));
+      const button = targetButton(member.id), rect = button.getBoundingClientRect();
+      check(`replacement/${member.id}/accessible-choice`, rect.width >= 44 && rect.height >= 44 &&
+        Boolean(button.getAttribute('aria-label')) && button.querySelector('svg').getAttribute('aria-hidden') === 'true');
+      setReduced(true);
+      button.click();
+      await wait(() => endpoint(member.id) && q('symbol-name').textContent === member.icon, `replacement ${member.id}`);
+      check(`replacement/${member.id}/terminal-and-nodes`, endpoint(member.id) && stableNodes() && button.getAttribute('aria-pressed') === 'true');
+    }
+    targetButton('question').click();
+    await wait(() => endpoint('question'), 'replacement rest');
+    setReduced(false);
+    targetButton('confirmation').click();
+    const confirmationIndex = stateCaps.states.findIndex(member => member.id === 'confirmation');
+    await wait(() => opacityValues()[confirmationIndex] > 0.1 && opacityValues()[confirmationIndex] < 0.9, 'replacement visible mixed pose');
+    q('pause').click();
+    await frame();
+    const frozen = opacityValues();
+    await frame();
+    check('replacement-pause-freezes-groups', frozen.every((value, index) => Math.abs(value - opacityValues()[index]) < 0.000001) && stableNodes());
+    targetButton('attention').click();
+    q('pause').click();
+    await wait(() => targetButton('attention').getAttribute('aria-pressed') === 'true' && q('pause').textContent === 'Продолжить', 'replacement paused successor');
+    check('replacement-newer-state-retains-visible-pose', frozen.every((value, index) => Math.abs(value - opacityValues()[index]) < 0.01) && stableNodes(), { before: frozen, after: opacityValues() });
+    q('reverse').click();
+    q('pause').click();
+    await wait(() => targetButton('confirmation').getAttribute('aria-pressed') === 'true' && q('pause').textContent === 'Продолжить', 'replacement reverse pickup');
+    check('replacement-reverse-retains-visible-pose', frozen.every((value, index) => Math.abs(value - opacityValues()[index]) < 0.01) && stableNodes());
+    setReduced(true);
+    await wait(() => endpoint('confirmation') && q('pause').disabled, 'replacement reduced endpoint');
+    check('replacement-reduced-terminal', endpoint('confirmation') && stableNodes());
+    q('export-format').value = 'svg';
+    q('export').click();
+    const stateSvg = downloads.at(-1);
+    const stateSvgText = await stateSvg.blob.text();
+    const canonicalState = stateModule.render('confirmation');
+    check('replacement-current-canonical-svg-export', stateSvg.filename === 'status-circle-confirmation-outline.svg' &&
+      canonicalState.ok && stateSvgText === canonicalState.svg);
+    q('export-format').value = 'effect';
+    q('export').click();
+    const stateEffect = JSON.parse(await downloads.at(-1).blob.text());
+    check('replacement-public-effect-export', stateEffect.contract === 'labpics.symbol-state-effect/1' &&
+      stateEffect.targetState === 'confirmation' && stateEffect.stages.length === 6 &&
+      stateEffect.unchangedPartIds.join(' ') === stateCaps.enclosurePartId);
+    for (const format of ['lottie', 'sf-symbols']) {
+      const before = downloads.length;
+      q('export-format').value = format;
+      q('export').click();
+      check(`replacement/${format}/honest-refusal`, downloads.length === before && q('export-status').textContent.startsWith('FORMAT_UNSUPPORTED:'));
+    }
+    await choose('question-circle', 'filled');
+    check('replacement-filled-unavailable', q('state-group-controls').hidden &&
+      ![...q('gesture').options].some(option => option.value === 'enclosure.replace'));
+
     await choose('time', 'outline');
     check('latest-clock-motion-refuses', q('play').disabled && q('gesture').value === '');
     await choose('reload', 'outline');
@@ -492,5 +569,43 @@ export async function verifyLazyPause({ page, origin }) {
   } finally {
     release();
     await page.unroute('**/motion-execution.js');
+  }
+}
+
+/** Старый state-module может завершиться после нового выбора; он не владеет inspector. */
+export async function verifyLazyStateSelection({ page, origin }) {
+  let release, signalRequested, timeout;
+  const held = new Promise(resolve => { release = resolve; });
+  const requested = new Promise(resolve => { signalRequested = resolve; });
+  await page.route('**/package/states/status-circle.js', async route => {
+    signalRequested();
+    await held;
+    await route.continue();
+  });
+  try {
+    await page.goto(origin, { waitUntil: 'load' });
+    await page.locator('#symbol-inspector[aria-busy="false"]').waitFor();
+    await page.locator('#symbol-search').fill('question-circle');
+    await page.locator('[data-symbol="question-circle"]').click();
+    await Promise.race([requested, new Promise((_, reject) => { timeout = setTimeout(() => reject(new Error('state module was not requested')), 4000); })]);
+    clearTimeout(timeout);
+    await page.locator('#symbol-search').fill('reload');
+    await page.locator('[data-symbol="reload"]').click();
+    await page.locator('#symbol-inspector[aria-busy="false"]').waitFor();
+    const before = await page.locator('#symbol-stage').innerHTML();
+    release();
+    await page.evaluate(async () => {
+      await import('/package/states/status-circle.js');
+      for (let index = 0; index < 2; index++) await new Promise(resolve => requestAnimationFrame(resolve));
+    });
+    const preserved = await page.locator('#symbol-name').textContent() === 'reload' &&
+      await page.locator('#symbol-stage').innerHTML() === before &&
+      await page.locator('#state-group-controls').isHidden();
+    if (!preserved) throw new Error('late state module replaced the newer selection');
+    return { pass: true, requested: true, preservedSelection: 'reload', preservedDom: true };
+  } finally {
+    clearTimeout(timeout);
+    release();
+    await page.unroute('**/package/states/status-circle.js');
   }
 }

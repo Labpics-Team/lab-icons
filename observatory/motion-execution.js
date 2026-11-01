@@ -5,6 +5,19 @@ export function executeSymbolEffect(root, effect, { initialize = false } = {}) {
   const viewport = root instanceof SVGElement ? root : root.querySelector('svg');
   if (!viewport) throw new Error('Композиция не содержит SVG viewport.');
   const byPart = new Map([...root.querySelectorAll('[data-part]')].map((element) => [element.dataset.part, element]));
+  if (effect.contract === 'labpics.symbol-state-effect/1') {
+    if (effect.version !== 1 || effect.kind !== 'enclosure-replacement' ||
+        !effect.stages.length || effect.stages.some(stage => stage.property !== 'opacity' ||
+          !byPart.has(stage.partId) || byPart.get(stage.partId).tagName?.toLowerCase() !== 'g') ||
+        effect.unchangedPartIds.some(id => !byPart.has(id)) ||
+        effect.stages.some(stage => effect.unchangedPartIds.includes(stage.partId))) {
+      throw new Error('Замена требует отдельных групп и неподвижной оболочки.');
+    }
+    return [sequence(effect.stages.map(stage => [
+      byPart.get(stage.partId), { opacity: stage.to },
+      { at: stage.at, duration: stage.duration, ease: effect.options.easing },
+    ]), { reducedMotion: effect.options.duration === 0 ? 'always' : 'user' })];
+  }
   if (effect.targets.some((target) => !byPart.has(target.partId))) throw new Error('Композиция не содержит цель объявленного жеста.');
   if (effect.version === 3 && (effect.targets.some(target => !['x', 'y'].includes(target.property) || target.unit !== 'viewBox') ||
       effect.stages.some(stage => !['x', 'y'].includes(stage.property) || stage.unit !== 'viewBox' ||

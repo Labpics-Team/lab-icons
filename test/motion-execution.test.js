@@ -71,3 +71,56 @@ describe('публичное исполнение semantic translation', () => {
     expect(sequence.mock.calls[1][0]).toEqual([[svg.parts[0], { opacity: 0.35 }, { at: 0, duration: 0, ease: 'linear' }]]);
   });
 });
+
+describe('публичное исполнение смены знака в общей оболочке', () => {
+  const replacement = () => ({
+    contract: 'labpics.symbol-state-effect/1', version: 1, kind: 'enclosure-replacement',
+    stages: ['question', 'confirmation', 'attention'].map((state, index) => ({
+      partId: `state-${state}`, property: 'opacity', to: index === 2 ? 1 : 0, at: 0, duration: 900,
+    })),
+    unchangedPartIds: ['status-enclosure'], options: { duration: 900, easing: 'linear', fill: 'both' },
+  });
+  const viewport = () => {
+    const svg = new SvgViewport();
+    svg.parts = [
+      ...['question', 'confirmation', 'attention'].map((state, index) => ({
+        tagName: 'g', dataset: { part: `state-${state}` }, style: { opacity: index === 0 ? '0.3' : '0.7' },
+      })),
+      { tagName: 'path', dataset: { part: 'status-enclosure' }, style: {}, d: 'exact-author-enclosure' },
+    ];
+    return svg;
+  };
+
+  it('передаёт целые группы скалярными целями без сброса текущей смешанной позы', () => {
+    const svg = viewport(), before = svg.parts.map(part => ({ ...part.style }));
+    const controls = executeSymbolEffect(svg, replacement());
+    expect(sequence).toHaveBeenCalledWith([
+      [svg.parts[0], { opacity: 0 }, { at: 0, duration: 900, ease: 'linear' }],
+      [svg.parts[1], { opacity: 0 }, { at: 0, duration: 900, ease: 'linear' }],
+      [svg.parts[2], { opacity: 1 }, { at: 0, duration: 900, ease: 'linear' }],
+    ], { reducedMotion: 'user' });
+    expect(controls).toEqual([sequence.mock.results[0].value]);
+    expect(svg.parts.map(part => part.style)).toEqual(before);
+    expect(svg.parts[3].d).toBe('exact-author-enclosure');
+    expect(animate).not.toHaveBeenCalled();
+  });
+
+  it.each(['path-opacity', 'enclosure-animation', 'missing-group'])('отвергает %s до исполнения', witness => {
+    const svg = viewport(), effect = replacement();
+    if (witness === 'path-opacity') svg.parts[0].tagName = 'path';
+    if (witness === 'enclosure-animation') effect.unchangedPartIds = ['state-question'];
+    if (witness === 'missing-group') effect.stages[0].partId = 'state-not-mounted';
+    expect(() => executeSymbolEffect(svg, effect)).toThrow(/отдельных групп/);
+    expect(sequence).not.toHaveBeenCalled();
+    expect(animate).not.toHaveBeenCalled();
+  });
+
+  it('нулевую длительность передаёт публичному reduced-motion исполнителю', () => {
+    const svg = viewport(), effect = replacement();
+    effect.options.duration = 0;
+    effect.stages = effect.stages.map(stage => ({ ...stage, duration: 0 }));
+    executeSymbolEffect(svg, effect);
+    expect(sequence.mock.calls[0][1]).toEqual({ reducedMotion: 'always' });
+    expect(sequence.mock.calls[0][0].every(([, properties]) => typeof properties.opacity === 'number')).toBe(true);
+  });
+});

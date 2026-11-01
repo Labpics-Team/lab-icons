@@ -5,6 +5,16 @@ import { authorPathEntries } from '../../src/core/icon-geometry.js';
 import { loadAuthorBaseline } from './author-baseline.js';
 import { authoringTutorialMaterial } from './authoring-tutorial.js';
 
+/** Browser получает имена и членство из semantic spec; shape internals остаются у пакета. */
+export function stateExplorerGroups(spec) {
+  return Object.entries(spec.groups).map(([group, entry]) => ({
+    group,
+    members: Object.entries(entry.states).map(([state, member]) => ({
+      state, icon: member.icon, variant: member.variant,
+    })),
+  }));
+}
+
 /** Observatory использует уже проверенные изображения и production package. */
 export function writeSymbolExplorer({ repo, outDir, report, visuals, canvas, iconSvg, comparisonVisual, packageDir = join(repo, 'dist') }) {
   mkdirSync(outDir, { recursive: true });
@@ -32,8 +42,10 @@ export function writeSymbolExplorer({ repo, outDir, report, visuals, canvas, ico
   });
   const contract = JSON.parse(readFileSync(join(repo, 'release', 'contract.json'), 'utf8'));
   const baseline = loadAuthorBaseline(repo);
+  const stateGroups = stateExplorerGroups(JSON.parse(readFileSync(join(repo, 'semantics/author-state-groups.json'), 'utf8')));
   const browserFiles = ['dist/ir/request.js', 'dist/ir/symbol-runtime.js', 'dist/ir/render.js', 'dist/motion/index.js', 'dist/ir/lottie-runtime.js', 'dist/authoring/index.js',
-    ...Object.keys(baseline.icons).flatMap(name => [`dist/symbols/${name}.js`, `dist/lottie/${name}.js`])];
+    ...Object.keys(baseline.icons).flatMap(name => [`dist/symbols/${name}.js`, `dist/lottie/${name}.js`]),
+    'dist/ir/state-runtime.js', ...stateGroups.map(({ group }) => `dist/states/${group}.js`)];
   for (const relative of browserFiles) {
     if (!contract.files.includes(relative)) throw new Error(`symbol explorer: ${relative} не принадлежит package contract`);
     const target = join(outDir, 'package', relative.slice('dist/'.length));
@@ -74,7 +86,7 @@ export function writeSymbolExplorer({ repo, outDir, report, visuals, canvas, ico
       metrics: null,
     };
   }));
-  const data = { version: 2, source: baseline.source, executionIdentity, summary: { glyphs: Object.keys(baseline.icons).length, variants: rows.length }, rows };
+  const data = { version: 2, source: baseline.source, executionIdentity, stateGroups, summary: { glyphs: Object.keys(baseline.icons).length, variants: rows.length }, rows };
   writeFileSync(join(outDir, 'explorer.json'), `${JSON.stringify(data)}\n`);
   return join(outDir, 'index.html');
 }
