@@ -67,7 +67,7 @@ UI берёт последнюю pending-цель. Проверки idle+reduced
 file/node/version доступны в «Основа и версия».
 
 [Рендер typing с неподвижной оболочкой](author-triad-20261101.png) снят при
-viewport 1440×960. Core targeted suite: 95 tests / 6 files и typecheck прошли.
+viewport 1440×960. Core targeted suite: 95 tests / 6 test files и typecheck прошли.
 Два изолированных core review прошли; локальный full build/pack/benchmark не
 выполнялся. Browser evidence относится к source preview, installed chain остаётся
 за удалённым self-hosted lane.

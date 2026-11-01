@@ -38,7 +38,8 @@ export function distributionClaimErrors(text) {
  * стандартные cardinal number words, их падежные формы для обычных count claims
  * и масштабные слова. Мы не пытаемся решить NLP-задачу; вместо этого запрещаем
  * поддерживаемые точные количественные конструкции рядом с защищаемой единицей.
- * Исторические эксперименты не входят в текущую пользовательскую справку.
+ * Исторический счётчик требует даты или baseline SHA в том же предложении.
+ * Каталог документа не освобождает текущие утверждения от проверки.
  */
 export function manualCorpusCountErrors(source) {
   const text = normalizeDistributionText(source);
@@ -76,9 +77,17 @@ export function manualCorpusCountErrors(source) {
   const unit = `(?:икон(?:ка|ки|ок|ку)|имён|имени|имен|${svgUnit}|глиф(?:а|ов)?|(?:именованных\\s+)?(?:ESM[- ]?)?экспорт(?:а|ов)?|(?:release[- ]?)?файл(?:а|ов)?|icons?|glyphs?|exports?|files?)`;
   const patterns = [
     new RegExp(`(?:^|[^\\p{L}\\p{N}_])(${number}\\s+${unit})(?=$|[^\\p{L}\\p{N}_])`, 'giu'),
-    new RegExp(`(?:^|[^\\p{L}\\p{N}_])(${unit}\\s*[:=]\\s*${number})(?=$|[^\\p{L}\\p{N}_])`, 'giu'),
+    new RegExp(`(?:^|[^\\p{L}\\p{N}_])(${unit}\\s*[:=]\\s*${number})(?=$|[^\\p{L}\\p{N}_:])`, 'giu'),
   ];
-  return [...new Set(patterns.flatMap((pattern) => [...text.matchAll(pattern)].map((match) => match[1])))]
+  function historical(match) {
+    const start = Math.max(...['. ', '! ', '? '].map(separator => text.lastIndexOf(separator, match.index))) + 1;
+    const ends = ['. ', '! ', '? '].map(separator => text.indexOf(separator, match.index + match[0].length)).filter(index => index >= 0);
+    const sentence = text.slice(start, ends.length ? Math.min(...ends) : text.length);
+    // Датированное «в текущем пакете» всё ещё проецирует текущую поставку.
+    if (/(?:текущ|сейчас|сегодня|current|today|\bnow\b)/iu.test(sentence)) return false;
+    return /(?:на|as of)\s+\d{4}-\d{2}-\d{2}(?=$|[^\d])|(?:baseline commit|на baseline)\s+[a-f\d]{7,40}(?=$|[^a-f\d])/iu.test(sentence);
+  }
+  return [...new Set(patterns.flatMap((pattern) => [...text.matchAll(pattern)].filter(match => !historical(match)).map((match) => match[1])))]
     .map((claim) => `ручной счётчик «${claim}»: используйте ссылку на контракт или генерируемую справку`);
 }
 
@@ -174,9 +183,7 @@ export function auditRepo(root = ROOT) {
     const source = readFileSync(join(root, file), 'utf8');
     errors.push(...documentationLinkErrors(root, file, source));
     const normalizedPath = file.replaceAll('\\', '/');
-    // Снимки и эксперименты содержат датированные измерения и node IDs;
-    // они не проецируют текущий размер пакета в пользовательскую справку.
-    if (normalizedPath !== 'docs/package.md' && !/^docs\/(?:evidence|research)\//.test(normalizedPath)) {
+    if (normalizedPath !== 'docs/package.md') {
       errors.push(...manualCorpusCountErrors(source).map((error) => `${file}: ${error}`));
     }
     for (const error of distributionClaimErrors(source)) {

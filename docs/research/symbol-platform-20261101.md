@@ -111,4 +111,4 @@ compositor-only claim поэтому не делается.
 
 ## Ограничения исследования
 
-Primary Apple HIG/annotation страницам clean-text fetch вернул только оболочку. Конкретные Draw/annotation/enclosure assertions выше взяты из полного официального WWDC25 transcript и current SF Symbols overview. Полный Figma export/optical verdict, runtime performance и target fidelity остаются исполнимыми обязательствами; эти источники не подменяют их.
+Primary Apple HIG/annotation страницам clean-text fetch вернул только оболочку. Конкретные Draw/annotation/enclosure assertions выше взяты из полного официального WWDC25 transcript и current SF Symbols overview. Полный экспорт закреплённой Figma-версии сохранён в [авторской основе](../evidence/figma-20261101.md). Полная оптическая приёмка, runtime performance и target fidelity остаются открытыми; внешние источники не подменяют их проверку.

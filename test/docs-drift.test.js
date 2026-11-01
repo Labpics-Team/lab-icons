@@ -55,13 +55,28 @@ describe('Согласованность документации', () => {
     mkdirSync(join(root, 'docs/evidence'), { recursive: true });
     mkdirSync(join(root, 'docs/research'), { recursive: true });
     writeFileSync(join(root, 'docs/evidence/snapshot.md'), 'На 2026-11-01: 660 SVG. Страница Icons: 4045:632.');
-    writeFileSync(join(root, 'docs/research/comparison.md'), 'Baseline commit abc: 476 SVG.');
+    writeFileSync(join(root, 'docs/research/comparison.md'), 'Baseline commit 03a4ca3: 476 SVG.');
     expect(auditRepo(root).errors).toEqual([]);
+    for (const file of ['docs/evidence/current.md', 'docs/research/current.md']) {
+      for (const claim of ['В текущем пакете 999 иконок.', 'На 2026-11-01: в текущем пакете 999 иконок.', 'На 2026-11-01: 476 SVG. В пакете 999 icons.', 'Baseline commit abc: 999 icons.']) {
+        writeFileSync(join(root, file), claim);
+        expect(auditRepo(root).errors.some(error => error.replaceAll('\\', '/').includes(file) && error.includes('ручной счётчик'))).toBe(true);
+      }
+      unlinkSync(join(root, file));
+    }
     writeFileSync(join(root, 'docs/guide.md'), 'В пакете 660 SVG.');
     expect(auditRepo(root).errors.some(error => error.replaceAll('\\', '/').includes('docs/guide.md') && error.includes('ручной счётчик'))).toBe(true);
     unlinkSync(join(root, 'docs/guide.md'));
     writeFileSync(join(root, 'docs/evidence/snapshot.md'), 'Нужен GH_PAT.');
     expect(auditRepo(root).errors.some(error => error.replaceAll('\\', '/').includes('docs/evidence/snapshot.md') && error.includes('каналу поставки'))).toBe(true);
+  });
+
+  it('сохраняет полный node ID и не маскирует соседний счётчик', () => {
+    expect(manualCorpusCountErrors('Icons: 4045:632; Lab icons: 6431:3712.')).toEqual([]);
+    expect(manualCorpusCountErrors('Icons: 4045:632; icons: 999.')).toHaveLength(1);
+    expect(manualCorpusCountErrors('95 tests / 6 test files.')).toEqual([]);
+    expect(manualCorpusCountErrors('На baseline 03a4ca3 сохранены 238 имён.')).toEqual([]);
+    expect(manualCorpusCountErrors('На baseline 03a4ca3 сохранены 238 имён. Теперь 999 icons.')).toHaveLength(1);
   });
 
   it('отклоняет неверный канал установки с учётом Markdown', () => {
