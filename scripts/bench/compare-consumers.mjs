@@ -13,11 +13,13 @@ import { chromium } from 'playwright';
 import { localTarballSpecifier, pnpmInvocation } from '../check-package-artifact.js';
 import { assertRemoteBenchmark, summarize } from './measurement.js';
 import { analyzeConsumerReport } from './report-analysis.js';
-import { validateAuthorObservation, validateRetainedPair } from './author-oracle.js';
+import { observeAuthorGlyph, validateAuthorObservation, validateRetainedPair } from './author-oracle.js';
 import { verifyExplorer } from './verify-explorer.mjs';
 import { verifyLottieConsumer } from './verify-lottie.mjs';
 import { verifyAuthoringConsumer } from './verify-authoring.mjs';
 import { bundleMeasurements, inspectStaticRuntime, staticAdapterSource } from './static-consumer.js';
+import { inspectLoadingGraphs, loadingAdapterSource, validateLoadingIdentity, verifiedLoadingIcons, withIndependentBrowser } from './loading-consumer.js';
+import { contractEntrypoints } from '../lib/export-surface.js';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const BASELINE = '03a4ca3ac1bf7978f9e8f554106c132a69668afb';
@@ -106,6 +108,61 @@ async function makeStaticPair(prepared, variant, outdir) {
   }
   return pair;
 }
+
+async function makeLoadingPair(prepared, authorConsumer, outdir) {
+  const publicIcons = Object.keys(contractEntrypoints(prepared.source)).filter(name => name.startsWith('./symbols/')).map(name => name.slice('./symbols/'.length));
+  const icons = verifiedLoadingIcons(authorConsumer, publicIcons);
+  const icon = 'alert', author = authorConsumer.icons[icon]?.outline;
+  const installed = JSON.parse(readFileSync(join(prepared.packageRoot, 'package.json'), 'utf8'));
+  if (!author || installed.exports?.['./symbols/*']?.import !== './dist/symbols/*.js') throw new Error('loading control: installed public symbol contract отсутствует');
+  const pair = { id: 'matched-loading-alert', lane: 'same-artifact-loading', icon, variant: 'outline',
+    source: authorConsumer.source, manifestSha256: authorConsumer.manifestSha256, artifact: prepared.tarballSha256,
+    expectedFamilies: icons.length, importedIcons: icons, author,
+    comparison: 'same installed author GlyphIR/SVG/provenance; ordinary eager public registry versus direct public icon import',
+    bundles: [], server: [], browser: [] };
+  const packets = [];
+  for (const label of ['eager-registry', 'direct-icon']) {
+    const entry = join(prepared.consumer, `loading-${label}.mjs`);
+    writeFileSync(entry, loadingAdapterSource(icons, icon, label));
+    const adapter = await import(pathToFileURL(entry).href);
+    const glyph = adapter.glyph();
+    validateAuthorObservation(observeAuthorGlyph(glyph, adapter.outline), author);
+    if (adapter.create() !== glyph.svg) throw new Error('loading control: create() изменяет выбранный author SVG');
+    packets.push({ glyph, staticSvg: adapter.outline });
+    const file = join(outdir, `candidate-loading-${label}.js`);
+    const started = performance.now();
+    const result = await build({ entryPoints: [entry], outfile: file, bundle: true, format: 'esm', platform: 'browser',
+      target: 'es2022', minify: true, metafile: true, logLevel: 'silent' });
+    pair.bundles.push({ label, entry, file, bundleCompileMs: performance.now() - started,
+      ...bundleMeasurements(readFileSync(file), result.metafile) });
+  }
+  Object.assign(pair, validateLoadingIdentity(...packets));
+  pair.control = inspectLoadingGraphs(pair.bundles, icons, icon);
+  return pair;
+}
+
+function measureLoadingServer(pair, prepared, temp, output, report) {
+  const labels = ['eager-registry', 'direct-icon'];
+  for (const count of COUNTS) {
+    const observations = Object.fromEntries(labels.map(label => [label, []]));
+    const rows = labels.map(label => ({ label, count, observations: observations[label] }));
+    pair.server.push(...rows);
+    for (let repeat = 0; repeat < report.protocol.serverRepetitions; repeat++) {
+      for (const label of repeat % 2 ? [...labels].reverse() : labels) {
+        const input = join(temp, 'loading-request.json');
+        writeFileSync(input, JSON.stringify({ kind: 'glyph', icon: pair.icon, variant: pair.variant, count,
+          sliced: true, inspectAuthor: true, modulePath: pair.bundles.find(bundle => bundle.label === label).entry }));
+        const sample = JSON.parse(command(process.execPath, ['--expose-gc', join(ROOT, 'scripts/bench/probe.mjs'), input], prepared.consumer));
+        validateAuthorObservation(sample, pair.author);
+        validateRetainedPair({ svgSha256: pair.svgSha256, completedBytes: pair.completedBytes * count, completed: count }, sample);
+        observations[label].push(sample);
+      }
+    }
+    observations['eager-registry'].forEach((sample, index) => validateRetainedPair(sample, observations['direct-icon'][index]));
+    for (const row of rows) row.summary = aggregate(row.observations, ['importMs', 'firstSvgMs', 'svgGenerationMs', 'warmImportMs', 'cleanupMs', 'lifecycleMs', 'heapAfterGeneration', 'heapRetained', 'rss']);
+    writeFileSync(join(output, 'consumer-comparison.json'), JSON.stringify(report, null, 2));
+  }
+}
 async function makeMotionBundle(prepared, outdir) {
   const entry = join(prepared.consumer, 'motion.mjs');
   writeFileSync(entry, `import { glyph as recordedGlyph, glyphCapabilities as recordedCapabilities } from '@labpics/icons/ir';\nimport { renderGlyphSvg } from '@labpics/icons/ir/render';\nimport { compileSymbolEffect } from '@labpics/icons/motion';\nimport { animate } from '@labpics/motion';\nimport { measureMotion } from ${JSON.stringify(join(ROOT, 'scripts/bench/browser-scene.js'))};\nconst glyph = request => recordedGlyph({icon:'time', ...request});\nconst glyphCapabilities = variant => recordedCapabilities('time', variant);\nconst executeLabMotion = (root, effect) => effect.targets.map(target => { const element = root.querySelector('[data-part="' + target.partId + '"]'); Object.assign(element.style, target.style); return animate(element, { rotate: target.rotation.to }, { duration: effect.options.duration, ease: effect.options.easing, reducedMotion: effect.options.duration === 0 ? 'always' : 'user' }); });\nexport const run = (count, executor) => measureMotion({glyph, glyphCapabilities, renderGlyphSvg, compileSymbolEffect, executeLabMotion}, count, executor);\n`);
@@ -186,6 +243,19 @@ try {
     paintDeadlineMs: 30_000, interpretation: 'context/module cold; no GPU presentation claim or statistical acceptance',
     sources: ['https://w3c.github.io/paint-timing/', 'https://developer.mozilla.org/en-US/docs/Web/API/PerformancePaintTiming', 'https://playwright.dev/docs/browser-contexts'] };
   report.protocol.bundleScope = 'static/glyph adapters: harness outside bundle and cold interval; recorded motion: one harness inside its legacy measurement bundle';
+  report.protocol.loadingControl = { version: 1, selectedIcon: 'alert', variant: 'outline',
+    sourceSha256: sha256(readFileSync(join(ROOT, 'scripts/bench/loading-consumer.js'))),
+    artifact: 'one clean installed candidate tarball', imports: 'all verified public author glyph modules versus selected public glyph module',
+    bundler: 'same ordinary minified esbuild configuration; no global retention or disabled tree shaking',
+    nodeIsolation: 'each sample is a fresh Node process importing the unbundled adapter',
+    browserIsolation: 'each sample launches and closes an independent Chromium process/profile; fresh context/document; HTTP cache disabled; OS cache shared',
+    browserLaunch: 'outside the import-to-useful-render timer', serverRepetitions: report.protocol.serverRepetitions,
+    browserRepetitions: report.protocol.browserRepetitions, counts: COUNTS, cpuSlowdowns: [1, 4],
+    inference: 'descriptive raw observations/mean/spread only; no p95 confidence, BENCH-01 PASS or historical speedup',
+    falsifier: 'if actual retained graph does not contain all verified glyph modules versus one, loading attribution remains INCOMPLETE',
+    sources: ['https://v8.dev/blog/code-caching-for-devs', 'https://kar.kent.ac.uk/33611/45/p63-kaliber.pdf',
+      'https://raw.githubusercontent.com/evanw/esbuild/v0.28.1/lib/shared/types.ts', 'https://www.itl.nist.gov/div898/handbook/pri/section3/pri33.htm'] };
+  writeFileSync(join(output, 'consumer-comparison.json'), JSON.stringify(report, null, 2));
   report.protocol.analysis = { version: 1, method: 'exact-binomial-order-statistics/bonferroni-ratio-v1',
     methodSha256: sha256(readFileSync(join(ROOT, 'scripts/bench/adjudication.js'))),
     reportAnalysisSha256: sha256(readFileSync(join(ROOT, 'scripts/bench/report-analysis.js'))),
@@ -194,6 +264,8 @@ try {
     samplingQualified: false, calibration: 'not executed by this descriptive protocol; BENCH-01 remains INCOMPLETE' };
   report.staticPairs = [];
   for (const variant of ['outline', 'filled']) report.staticPairs.push(await makeStaticPair(prepared[1], variant, outdir));
+  report.loadingPairs = [await makeLoadingPair(prepared[1], authorConsumer, outdir)];
+  measureLoadingServer(report.loadingPairs[0], prepared[1], temp, output, report);
   for (const testCase of CASES) {
     const result = { ...testCase, bundles: [], server: [], browser: [] };
     const selected = testCase.candidateOnly ? [prepared[1]] : prepared;
@@ -243,6 +315,28 @@ try {
   browser = await chromium.launch({ headless: true });
   report.environment.chromium = browser.version();
   report.explorer = await verifyExplorer({ browser, source: prepared[1].source, output });
+  for (const pair of report.loadingPairs) {
+    const labels = ['eager-registry', 'direct-icon'];
+    for (const slowdown of report.protocol.loadingControl.cpuSlowdowns) for (const count of COUNTS) {
+      const observations = Object.fromEntries(labels.map(label => [label, []]));
+      const rows = labels.map(label => ({ label, count, slowdown, observations: observations[label] }));
+      pair.browser.push(...rows);
+      for (let repeat = 0; repeat < report.protocol.loadingControl.browserRepetitions; repeat++) {
+        for (const label of repeat % 2 ? [...labels].reverse() : labels) {
+          const sample = await withIndependentBrowser(chromium, async isolated => {
+            if (isolated.version() !== report.environment.chromium) throw new Error('loading control: Chromium version изменилась между samples');
+            const bundle = pair.bundles.find(bundle => bundle.label === label);
+            return browserMeasurement(isolated, origin, basename(bundle.file), count, slowdown);
+          });
+          validateRetainedPair({ svgSha256: pair.svgSha256, completedBytes: pair.completedBytes * count, completed: count }, sample);
+          observations[label].push({ ...sample, repeat, isolation: 'independent-browser-launch' });
+        }
+      }
+      observations['eager-registry'].forEach((sample, index) => validateRetainedPair(sample, observations['direct-icon'][index]));
+      for (const row of rows) row.summary = aggregate(row.observations, ['coldImportMs', 'coldImportToUsefulRenderMs', 'warmImportMs', 'firstCreateMs', 'createDomMs', 'mountLayoutMs', 'firstPaintOpportunityMs', 'cleanupMs', 'lifecycleMs', 'domElements']);
+      writeFileSync(join(output, 'consumer-comparison.json'), JSON.stringify(report, null, 2));
+    }
+  }
   for (const pair of report.staticPairs) {
     for (const slowdown of [1, 4]) {
       const observations = { imported: [], literal: [] };

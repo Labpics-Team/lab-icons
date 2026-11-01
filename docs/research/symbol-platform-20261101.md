@@ -76,6 +76,33 @@ Source Lab Motion `fab88e626c12a4028126e64df3c0e7d1391495cb` объявляет 
 
 Benchmark ещё не выполнен в этом исследовании. Claim заказчика ~798 KB raw/~121 KB gzip проверяется against exact baseline/head. Protocol включает 1/100/10000 symbols, raw/gzip/brotli, cold/warm import/compile/render, DOM/memory, transition latency/frame/interruptions и cleanup; повторы и разброс сохраняются. Heavy work выполняется на штатной self-hosted ёмкости, не на рабочей машине.
 
+Дополнительный matched loading контроль устраняет geometry confound между старым
+полным IR и текущим Figma master. Обе стороны получают один установленный HEAD
+tarball и точно тот же `alert` GlyphIR/SVG/provenance: eager registry публичных
+glyph-модулей из проверенного manifest против direct symbol import. Штатный esbuild
+не ограничивается: его фактический `outputs.inputs.bytesInOutput` должен показать
+все авторские symbol modules против одного. Если registry удалён, результат
+остаётся отрицательным/`INCOMPLETE`; такой output не доказывает full-catalog cost.
+Существующий imported SVG против literal сохраняет отдельный простой static
+контроль. Новый механизм runtime или новая consumer архитектура для измерения
+не нужны; общий compiler glyph-пути остаётся видимым в обоих graphs.
+
+[V8 code caching](https://v8.dev/blog/code-caching-for-devs), обновлено 2020-06-16,
+различает in-memory Isolate cache и browser disk cache. Поэтому fresh context
+недостаточен как доказательство независимого cold import: loading observations
+используют отдельные Chromium process/profile с отключённым HTTP cache, запуском
+вне cold span и сохранённым shared OS cache caveat. Это процессная изоляция,
+а не измерение machine cold или слабого физического устройства.
+[Kalibera/Jones, ISMM 2013](https://kar.kent.ac.uk/33611/45/p63-kaliber.pdf) выделяет
+уровни variation между builds, executions и iterations; семь Node processes и
+три browser launches заранее закреплены как descriptive observations, без
+confidence или p95 выводов. [NIST](https://www.itl.nist.gov/div898/handbook/pri/section3/pri33.htm)
+рассматривает randomized/block designs; чередование сторон здесь ограничивает
+order confound, но не выдаётся за randomized experiment.
+[Типы esbuild 0.28.1](https://raw.githubusercontent.com/evanw/esbuild/v0.28.1/lib/shared/types.ts)
+закрепляют отличие parsed `inputs.bytes` от retained `bytesInOutput`.
+Actual runner observations этого среза ещё не получены.
+
 [Организационный testing contract](https://github.com/Labpics-Team/.github/blob/main/docs/testing.md) сохраняет полный применимый набор и exact-version results; skipped/cancelled/timeout не являются PASS. Executor принадлежит [ARC](https://github.com/Labpics-Team/labpics-infra/blob/main/services/github-runners/arc/README.md). Linux не выдаётся за native Windows/macOS. [Delivery contract](https://github.com/Labpics-Team/.github/blob/main/docs/delivery.md) отделяет проверенный source, artifact и работающую версию; отсутствие Zuul merge reporter не назначает ему доставку.
 
 ## Скалярная шкала loading и typing

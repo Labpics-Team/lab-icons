@@ -24,7 +24,7 @@ caret-forward имеет только candidate измерение. Geometry и 
 speedup. В отчёте сохранены обе идентичности и структурная сложность SVG.
 
 Для 1, 100 и 10000 символов сохраняются семь независимых Node процессов и три
-browser context. Порядок baseline/candidate чередуется. Сырые повторы,
+browser context в исторических областях. Порядок baseline/candidate чередуется. Сырые повторы,
 среднее, sample standard deviation и standard error доступны в JSON; плохие
 наблюдения не отбрасываются. Ошибка сохраняет частичный отчёт и красный job.
 
@@ -35,6 +35,27 @@ button, имя, декоративный SVG и его размеры совпа
 SVG hash и `bytesInOutput` для retained inputs. Parsed inputs не считаются
 доказательством shipped runtime. Recorded motion сохраняет собственный единичный
 measurement harness внутри своего bundle; static byte budget к нему не применяется.
+
+Matched loading сравнивает `alert` из **одного installed candidate tarball**:
+обычный eager registry всех публичных `glyph` imports и прямой symbol import.
+Имена берутся из полного проверенного author manifest и сверяются с release
+surface; текущая основа содержит 330 семейств. Весь выбранный GlyphIR, SVG и
+Figma provenance совпадают; independent author oracle проверяет обе стороны.
+Оба adapter используют один `create()`, общий DOM/a11y harness и те же размеры.
+Raw/gzip/brotli и `bytesInOutput` сохраняются для обеих сторон. Общий IR compiler
+в glyph modules допустим и остаётся видимым в graph; число retained symbol
+modules должно быть 330 против одного. Обычный esbuild вправе удалить registry:
+тогда `control.status: INCOMPLETE`, `EAGER_REGISTRY_NOT_RETAINED` сохраняет
+отрицательный результат и исключает вывод о стоимости полного каталога.
+Retention не принуждается globals, ослаблением tree shaking или особой сборкой.
+
+Loading protocol и hash helper сохраняются до observations: семь свежих Node
+процессов и три **независимых Chromium launch** для каждой стороны, count и CPU
+slowdown. Browser launch/close находится вне cold span. Fresh profile/context,
+отключённый HTTP cache и новый process уменьшают зависимость code cache; OS cache
+остаётся общим. Порядок сторон чередуется. Это descriptive repeats с raw/mean/
+spread; `QUALIFIED` подтверждает форму graph, без p95 confidence, исторического
+speedup или BENCH-01 PASS.
 
 Node измеряет cold/warm import, создание SVG, GC, полный жизненный цикл,
 heap и RSS. Он не притворяется браузерным рендерером. Chromium отдельно
@@ -48,7 +69,9 @@ DOM и mount до native `first-contentful-paint.startTime` пустого до�
 Warm import следует после полезного результата. Milestones и отдельные
 paint/presentation fields сохраняются без утверждения о времени фактического
 показа GPU. HTTP cache выключен, но browser process и OS cache общие: это
-context/module cold, а не machine cold или доказанная независимость всех samples.
+context/module cold в исторических/static областях, а не machine cold или
+доказанная независимость всех samples. Matched loading запускает отдельный
+browser process/profile для каждого observation.
 
 `report.analysis` разделяет наблюдённые byte budgets и conditional quantile
 inference. Source hashes метода и анализа, decimal targets и uncertainty scope
@@ -102,6 +125,10 @@ delivery gate. Linux-результат не закрывает native пров�
 - [Chromium CPU throttling](https://chromedevtools.github.io/devtools-protocol/tot/Emulation/#method-setCPUThrottlingRate): slowdown factor, 1 без замедления.
 - [Chromium Performance](https://chromedevtools.github.io/devtools-protocol/tot/Performance/): текущие runtime metrics, duration domain `timeTicks`.
 - [Playwright CDP session](https://playwright.dev/docs/api/class-browsercontext#browser-context-new-cdp-session): только Chromium; независимые context.
+- [V8 code caching](https://v8.dev/blog/code-caching-for-devs), обновление 2020-06-16: Isolate cache и disk cache имеют разные области; новый context не доказывает process-cold import.
+- [Kalibera/Jones, ISMM 2013](https://kar.kent.ac.uk/33611/45/p63-kaliber.pdf): variation между executions и iterations различается; число повторов само по себе не даёт confidence claim.
+- [esbuild 0.28.1 Metafile](https://raw.githubusercontent.com/evanw/esbuild/v0.28.1/lib/shared/types.ts): `inputs.bytes` и `outputs.inputs.bytesInOutput` описывают разные графы.
+- [NIST, выбор experimental design](https://www.itl.nist.gov/div898/handbook/pri/section3/pri33.htm): randomized/block designs и ограниченный run budget; чередование здесь не заявляется рандомизацией.
 - [W3C Paint Timing](https://w3c.github.io/paint-timing/): FCP включает отрисованные SVG descendants; timestamp не заменяет proof GPU presentation.
 - [MDN PerformancePaintTiming](https://developer.mozilla.org/en-US/docs/Web/API/PerformancePaintTiming): native paint observations и support boundary.
 - [Lehmann and Paromau, quantile uncertainty](https://doi.org/10.1016/j.mlwa.2026.101033): order-statistic/binomial confidence и ограничения малого sample.
