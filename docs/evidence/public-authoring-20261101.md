@@ -36,8 +36,9 @@ SHA-256 нормализованной спецификации и состоя�
 
 ![Создание символа, широкий viewport](authoring-playground-wide-20261101.png)
 
-[Узкий viewport 390×640](authoring-playground-narrow-20261101.png) проверен
-клавиатурой и с reduced motion. Оба изображения относятся к source freeze
+[Узкий viewport 390×844](authoring-playground-narrow-20261101.png) снят с
+`fullPage: true`. Отдельный keyboard feedback path проверен при 390×640 и с
+reduced motion. Оба изображения относятся к source freeze
 `0405dd4`, Chromium `156.0.8078.4`. Это actual authoring page с ограниченным
 bundle публичных исходников; каталог использует ранее построенные Observatory
 assets. Полная сборка и установленный пакет здесь не проверялись.
