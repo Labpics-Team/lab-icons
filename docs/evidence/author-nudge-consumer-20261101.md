@@ -50,3 +50,19 @@ Immutable executor из `fc2f1e163a8d04819aa98cbd9ed14975a8b892f1` прошёл 
 локально не выполнялись. Удалённый clean-consumer lane исполняет этот же
 journey после штатной упаковки. Полная независимая оптическая приёмка 660
 мастеров остаётся открытой.
+
+## Контракт упакованного адаптера
+
+Проверка обнаружила отдельный RED: сборка объявляла готовый Lottie target,
+а source oracle ожидал `not-exported`. Теперь package-проверки явно передают
+исходный SVG и layered composition. Oracle проверяет закрытые fill-контуры и
+представимость команд самостоятельно, без импорта Lottie compiler; source
+fixtures по-прежнему ожидают `not-exported`.
+
+На двух настоящих arrow-forward вариантах bounded контроль повторил
+capability-проекцию сборки и сравнил весь motion contract. Unsupported arc,
+open fill, stroke и compound сохранили отказ; вырожденные A сохранили точную
+line/no-op поддержку. Две оси отдельных gestures сохранили разные aggregate
+IDs `translate.x.direction-body` и `translate.y.direction-body`.
+Затронутые oracle/caller tests прошли: 48 тестов в трёх файлах. Упаковка и
+установка полного пакета в этом контроле не выполнялись.

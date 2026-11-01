@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { optimize } from 'svgo';
-import { sourcePathEntries } from '../../src/core/icon-geometry.js';
+import { authorPathEntries, sourcePathEntries } from '../../src/core/icon-geometry.js';
+import { parsePathData } from '../../src/core/path-data.js';
 
 export const sha256 = value => createHash('sha256').update(value).digest('hex');
 export function stableJSON(value) {
@@ -68,20 +69,68 @@ export function validateAuthorObservation(observation, expected) {
   }
 }
 
-/** Движение ожидается из проверенной декларации, не из capabilities потребителя. */
-export function expectedAuthorMotion(contract) {
-  const gestures = contract.anatomy ? contract.gestures : [];
+/** Проверяет представимость raw source, не строя Lottie contours или target. */
+function sourceSupportsLottie(svg, compositionKind, parts) {
+  if (compositionKind !== 'layers' || !parts.length || new Set(parts.map(part => part.id)).size !== parts.length) return false;
+  try {
+    const entries = authorPathEntries(svg);
+    if (entries.length !== parts.length) return false;
+    return entries.every((entry, index) => {
+      if (entry.fillRule !== parts[index].fillRule) return false;
+      const segments = parsePathData(entry.d);
+      if (!segments.length || segments.some(segment => Object.values(segment).some(value => typeof value === 'number' && !Number.isFinite(value)))) return false;
+      let open = false, start, cursor;
+      for (const segment of segments) {
+        if (segment.cmd === 'M') {
+          if (open) return false;
+          open = true; start = cursor = [segment.x, segment.y];
+        } else if (segment.cmd === 'Z') {
+          if (!open) return false;
+          open = false; cursor = start;
+        } else {
+          if (!open) return false;
+          const end = [segment.x, segment.y];
+          if (segment.cmd === 'A') {
+            if (segment.rx !== 0 && segment.ry !== 0 && (cursor[0] !== end[0] || cursor[1] !== end[1])) return false;
+          } else if (segment.cmd === 'C' || segment.cmd === 'Q') {
+            // Относительные tangents должны оставаться конечными в Number.
+            const controls = segment.cmd === 'C' ? [[segment.x1, segment.y1], [segment.x2, segment.y2]] : [
+              cursor.map((value, axis) => value + ([segment.x1, segment.y1][axis] - value) * 2 / 3),
+              end.map((value, axis) => value + ([segment.x1, segment.y1][axis] - value) * 2 / 3),
+            ];
+            if (controls.some((control, position) => control.some((value, axis) =>
+              !Number.isFinite(value) || !Number.isFinite(value - (position === 0 ? cursor : end)[axis])))) return false;
+          } else if (segment.cmd !== 'L') return false;
+          cursor = end;
+        }
+      }
+      return !open;
+    });
+  } catch { return false; }
+}
+
+/** Source fixture и shipped package различаются только явно заданным target-контекстом. */
+export function expectedAuthorMotion(contract, context = { kind: 'source' }) {
+  if (!context || !['source', 'package'].includes(context.kind) ||
+      Object.keys(context).some(key => !(context.kind === 'source' ? ['kind'] : ['kind', 'svg', 'compositionKind']).includes(key)) ||
+      (context.kind === 'package' && (typeof context.svg !== 'string' || typeof context.compositionKind !== 'string'))) {
+    throw new TypeError('benchmark oracle: нужен явный source/package контекст с raw SVG и composition для package');
+  }
+  const ready = Boolean(contract.anatomy && contract.gestures?.length);
+  const gestures = ready ? contract.gestures : [];
+  const lottie = context.kind === 'package' && ready && sourceSupportsLottie(context.svg, context.compositionKind, contract.parts)
+    ? 'lottie-web-svg-5.13' : 'not-exported';
   return {
-    state: contract.anatomy ? 'gesture-ready' : 'source-only',
-    partIds: contract.anatomy ? contract.parts.map(part => part.id) : [],
+    state: ready ? 'gesture-ready' : 'source-only',
+    partIds: ready ? contract.parts.map(part => part.id) : [],
     tracks: [...new Map(gestures.flatMap(gesture => gesture.tracks.map(track => {
-      const id = `${track.kind}.${track.partId}`;
+      const id = track.kind === 'translate' ? `${track.kind}.${track.axis}.${track.partId}` : `${track.kind}.${track.partId}`;
       return [id, { id, kind: track.kind, partIds: [track.partId],
         ...(track.kind === 'rotate' ? { anchor: track.anchor }
           : track.kind === 'translate' ? { axis: track.axis, unit: track.unit } : {}) }];
     }))).values()],
     gestures,
-    adapters: { lottie: 'not-exported', sfSymbols: 'not-exported' },
+    adapters: { lottie, sfSymbols: 'not-exported' },
   };
 }
 
@@ -112,14 +161,14 @@ export function expectedAuthorEffect(gesture, duration = 360) {
   return { version: opacity ? 2 : 3, targets, stages };
 }
 
-export function validateAuthorAdmission(glyph, caps, record, contract) {
+export function validateAuthorAdmission(glyph, caps, record, contract, context = { kind: 'source' }) {
   const anatomy = contract.anatomy ?? null;
   if (caps.icon !== glyph.icon || caps.variant !== glyph.variant || caps.modelState !== null ||
       caps.supportedAxes.length || Object.keys(caps.axes).length ||
       stableJSON(caps.author) !== stableJSON(record.author) ||
       stableJSON(caps.anatomy ?? null) !== stableJSON(anatomy) ||
       stableJSON(glyph.provenance.anatomy ?? null) !== stableJSON(anatomy) ||
-      stableJSON(caps.motion) !== stableJSON(expectedAuthorMotion(contract))) {
+      stableJSON(caps.motion) !== stableJSON(expectedAuthorMotion(contract, context))) {
     throw new Error('benchmark oracle: неподтверждённые current capabilities или anatomy');
   }
   if (glyph.parts.length !== contract.parts.length || glyph.parts.some((part, index) => {

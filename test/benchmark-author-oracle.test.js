@@ -54,7 +54,7 @@ describe('benchmark author oracle и сохранённый output', () => {
     expect(packed.parts).toHaveLength(1);
     expect(packed.parts[0]).toMatchObject({ id: 'cycle-body', identity: 'declared', role: 'control', anchor: [0.5, 0.5], anchorSource: 'declared', d: original.paths[0].d, sourceFingerprint: baseline.icons[icon][variant].sourceContract.parts[0].sourceFingerprint });
     expect(packed.anatomy).toEqual(expected.anatomy);
-    expect(packed.motion).toEqual(caps.motion);
+    expect(packed.motion).toEqual({ ...caps.motion, adapters: { ...caps.motion.adapters, lottie: 'lottie-web-svg-5.13' } });
     expect(glyph.parts[0].provenance.identity).toBe('declared');
     expect(caps).toMatchObject({ modelState: null, supportedAxes: [], axes: {}, anatomy: expected.anatomy, motion: { state: 'gesture-ready', partIds: ['cycle-body'], gestures: [{ id: `${icon}.cycle` }] } });
     expect(compileSymbolEffect(glyph, caps, `${icon}.cycle`, { duration: 360 })).toMatchObject({ ok: true, effect: { targets: [{ partId: 'cycle-body', keyframes: [{ offset: 0, transform: 'rotate(0deg)' }, { offset: 1, transform: 'rotate(360deg)' }] }] } });

@@ -39,7 +39,7 @@ try {
       validateAuthorObservation({ ...observed, icon: glyph.icon, variant: glyph.variant, sourceFile: glyph.provenance.file, compositionKind: glyph.composition.kind, author: glyph.provenance.author, anatomy: glyph.provenance.anatomy ?? null, staticArtifactSha256: sha256(module[variant]), parts: compactParts(glyph) }, expected);
       const caps = module.glyphCapabilities(variant);
       if (caps.icon !== icon || caps.variant !== variant) throw new Error(`${icon}/${variant}: capabilities другого symbol`);
-      validateAuthorAdmission(glyph, caps, record, contract);
+      validateAuthorAdmission(glyph, caps, record, contract, { kind: 'package', svg: record.normalizedSvg, compositionKind: 'layers' });
       if (module.glyph({ variant, modelMode: 'source-only' }) !== glyph) throw new Error(`${icon}/${variant}: source-only не сохраняет immutable default`);
       const refusals = [];
       for (const query of [{ variant, axes: { weight: 1.1 } }, { variant, modelMode: 'allow-candidate' }]) {

@@ -57,7 +57,8 @@ export function authorPackageExpectations(baseline, annotations) {
       const sourcePaths = [...record.normalizedSvg.matchAll(/<path\b[^>]*\bd="([^"]+)"/g)].map(match => match[1]);
       return [variant, {
         master: record.master, author: record.author, svg: record.artifactSvg,
-        anatomy: contract.anatomy ?? null, motion: expectedAuthorMotion(contract),
+        anatomy: contract.anatomy ?? null,
+        motion: expectedAuthorMotion(contract, { kind: 'package', svg: record.normalizedSvg, compositionKind: 'layers' }),
         effects: Object.fromEntries((contract.gestures ?? []).map(gesture => [gesture.id, expectedAuthorEffect(gesture)])),
         parts: contract.parts.map(({ id, role, identity, fillRule, zIndex, sourceFingerprint, artifactFingerprint, anchor }, index) => ({
           id, fillRule, zIndex, sourceFingerprint, artifactFingerprint, d: sourcePaths[index], role, identity,
