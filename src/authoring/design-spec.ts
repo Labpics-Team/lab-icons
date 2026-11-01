@@ -141,6 +141,8 @@ export interface DesignPart {
   readonly role: PartRole;
   readonly geometry: DesignGeometry;
   readonly paint: DesignPaint;
+  /** Именованный pivot части в normalized canvas; ссылка на DesignAnchor. */
+  readonly anchor?: string;
   readonly morphGroup?: string;
 }
 
@@ -183,6 +185,7 @@ export interface LoweredDesignSpec extends RecipeResult {
 }
 
 export interface LoweredDesignPart extends RecipePart {
+  readonly anchor?: string;
   readonly morphGroup: string | null;
 }
 
@@ -502,7 +505,7 @@ function geometryAnchorReferences(geometry: DesignGeometry): readonly string[] {
 
 function parsePart(value: unknown, index: number): DesignPart {
   const at = `parts[${index}]`;
-  const source = exact(value, at, ['id', 'role', 'geometry', 'paint'], ['morphGroup']);
+  const source = exact(value, at, ['id', 'role', 'geometry', 'paint'], ['morphGroup', 'anchor']);
   const geometry = parseGeometry(source.geometry, `${at}.geometry`);
   const paint = parsePaint(source.paint, `${at}.paint`);
   if ((geometry.kind === 'line' || geometry.kind === 'arc') && paint.kind !== 'stroke') {
@@ -513,6 +516,7 @@ function parsePart(value: unknown, index: number): DesignPart {
     role: oneOf(source.role, PART_ROLES, `${at}.role`),
     geometry,
     paint,
+    ...(source.anchor === undefined ? {} : { anchor: stableId(source.anchor, `${at}.anchor`) }),
   };
   if (source.morphGroup !== undefined) {
     return { ...parsed, morphGroup: stableId(source.morphGroup, `${at}.morphGroup`) };
@@ -610,6 +614,9 @@ function assertReferences(spec: Omit<DesignSpec, 'version'>): void {
   const partIds = new Set(spec.parts.map(({ id }) => id));
   const partsById = new Map(spec.parts.map((part) => [part.id, part]));
   for (const part of spec.parts) {
+    if (part.anchor !== undefined && !anchorIds.has(part.anchor)) {
+      fail('UNKNOWN_REFERENCE', `parts.${part.id}.anchor`, `неизвестный anchor ${part.anchor}`);
+    }
     for (const anchorId of geometryAnchorReferences(part.geometry)) {
       if (!anchorIds.has(anchorId)) {
         fail('UNKNOWN_REFERENCE', `parts.${part.id}.geometry`, `неизвестный anchor ${anchorId}`);
@@ -915,6 +922,7 @@ export function lowerDesignSpec(value: unknown): LoweredDesignSpec {
       bbox,
       topologySignature: lowered.topologySignature,
       morphGroup: part.morphGroup ?? null,
+      ...(part.anchor === undefined ? {} : { anchor: part.anchor }),
     });
   });
   const byId = new Map(parts.map((part) => [part.id, part]));
@@ -964,7 +972,8 @@ export function compileDesignSpec<TIcon extends string>(
   const lowered = lowerDesignSpec(spec);
   const specSha256 = `sha256:${sha256Hex(canonicalSpecJson(spec))}` as const;
   const parts: readonly GlyphPart[] = Object.freeze(lowered.parts.map((part, zIndex): GlyphPart => {
-    const bbox = pathBBox(part.geometry.d) as RecipePart['bbox'];
+    const declaredAnchor = part.anchor === undefined ? undefined : lowered.anchors[part.anchor]!;
+    const bbox = declaredAnchor ? undefined : pathBBox(part.geometry.d) as RecipePart['bbox'];
     return deepFreeze({
       id: part.id,
       role: spec.parts[zIndex]!.role,
@@ -972,8 +981,10 @@ export function compileDesignSpec<TIcon extends string>(
       d: part.geometry.d,
       fillRule: lowered.composition.kind === 'compound' ? null : 'nonzero',
       paint: part.paint,
-      anchor: [(bbox.minX + bbox.maxX) / 2, (bbox.minY + bbox.maxY) / 2] as const,
-      anchorSource: 'geometry-bbox-center',
+      anchor: declaredAnchor
+        ? [declaredAnchor.x, declaredAnchor.y] as const
+        : [(bbox!.minX + bbox!.maxX) / 2, (bbox!.minY + bbox!.maxY) / 2] as const,
+      anchorSource: declaredAnchor ? 'declared' : 'geometry-bbox-center',
       topologySignature: part.topologySignature,
       morphGroup: part.morphGroup,
       provenance: { kind: 'recipe', identity: 'declared', recipe: 'design-spec/1' },

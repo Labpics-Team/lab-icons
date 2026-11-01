@@ -34,9 +34,11 @@ compileDesignSpec(spec: unknown, options: {
 `designSpec` сохраняет тот же digest, разрешённые `anchors`, исходные
 `decorators`, проверенные `negativeSpace.constraints` и `topologyKey`.
 Результат глубоко заморожен. У каждой части сохраняются id, role, zIndex,
-контур, paint, topologySignature и morphGroup. Её `anchor` — центр bounding box
-реального контура, `anchorSource: 'geometry-bbox-center'`; авторские именованные
-якоря доступны отдельно в `designSpec.anchors`.
+контур, paint, topologySignature и morphGroup. Необязательный `part.anchor`
+связывает часть с именованным якорем: GlyphIR получает его координаты и
+`anchorSource: 'declared'`. Без этой ссылки сохраняется центр bounding box
+реального контура и `anchorSource: 'geometry-bbox-center'`. Все именованные
+якоря доступны в `designSpec.anchors`; lowering сохраняет ссылку части.
 
 ## Корневой объект
 
@@ -69,9 +71,17 @@ compileDesignSpec(spec: unknown, options: {
 
 ## Части
 
-Часть содержит `id`, `role`, `geometry`, `paint`, необязательный `morphGroup`.
+Часть содержит `id`, `role`, `geometry`, `paint`, необязательные `anchor`
+и `morphGroup`.
 Роли: `body`, `content`, `ink`, `counter`, `container`, `control`, `detail`,
 `decorator`. Role сообщает смысл; вычитание определяется composition.
+
+`anchor` — id существующего DesignAnchor, определяющий семантический pivot
+в normalized canvas. Числовой массив и объект координат не принимаются;
+неизвестная ссылка получает `UNKNOWN_REFERENCE`. Он может отличаться от
+центра фигуры: у руки это основание, у неполной дуги — центр окружности.
+Ссылка не меняет контур, paint, z-order или topology и сама не объявляет
+поддержанный gesture. Размер SVG и выбор начертания не меняют pivot.
 
 | `geometry.kind` | Поля | Ограничения |
 |---|---|---|
