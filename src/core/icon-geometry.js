@@ -27,6 +27,9 @@ function attributeValue(tag, name) {
  * Нормализация: m→M + явная l перед неявным относительным хвостом.
  */
 function normalizeHead(d) {
+  // Все callers, включая удаляемый viewport clip, обязаны проверить исходный
+  // язык до lowering. Нормализация не исправляет невалидный авторский ввод.
+  parsePathData(d);
   // СТРОГОЕ SVG-число: один знак, максимум одна точка, опц. экспонента —
   // жадный [\d.]+ склеивал «7.57.62.5» в одно «число» и ломал radio.
   const num = String.raw`[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?`;
@@ -389,9 +392,6 @@ function pathEntriesFromRenderedContent(renderedContent) {
   for (const tag of renderedContent.match(PATH_TAG_RE) ?? []) {
     const d = attributeValue(tag, 'd');
     if (!d) continue;
-    // Начальное относительное moveto нормализуется только после проверки
-    // исходной грамматики: lowering не исправляет недопустимый авторский ввод.
-    parsePathData(d);
     entries.push({ index, d: normalizeHead(d), fillRule: ownFillRule(tag) });
     index++;
   }

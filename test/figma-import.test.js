@@ -10,6 +10,10 @@ const simpleFigmaSvg = ({ rootFill = 'none', pathFill = '#101012', body } = {}) 
   '</svg>';
 
 describe('Figma intake — каноническая граница source SVG', () => {
+  it.each(['m,0 0H24V24H0Z', 'm0,,0H24V24H0Z'])('не исправляет грамматику viewport clip при lowering %s', (d) => {
+    expect(() => normalizeFigmaSvg(simpleFigmaSvg({ rootFill: '#101012', body: `<g clip-path="url(#clip)"><path d="M2 2H22V22H2Z"/></g><defs><clipPath id="clip"><path d="${d}"/></clipPath></defs>` }))).toThrow();
+  });
+
   it.each(['m,2 2H22V22H2Z', 'm2,,2H22V22H2Z'])('проверяет исходный path до нормализации начального moveto %s', (d) => {
     expect(() => normalizeFigmaSvg(simpleFigmaSvg({ body: `<path d="${d}" fill="#101012"/>` }))).toThrow();
   });
