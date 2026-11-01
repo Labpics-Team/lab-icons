@@ -70,11 +70,16 @@ function run(root, args = []) {
 
 function measureConsumer(root, entry, bytes, gzipBytes) {
   const oracle = join(root, 'scripts/check-consumer-size.js');
-  writeFileSync(oracle, readFileSync(oracle, 'utf8').replace(
-    'export async function bundleScenario()',
+  const source = readFileSync(oracle, 'utf8');
+  const signature = 'export async function bundleScenario()';
+  const result = "return { bytes: 10, gzipBytes: 11, modules: ['dist/fixture.js'] };";
+  expect(source).toContain(signature);
+  expect(source).toContain(result);
+  writeFileSync(oracle, source.replace(
+    signature,
     'export async function bundleScenario(entry)',
   ).replace(
-    "return { bytes: 10, gzipBytes: 11, modules: ['dist/fixture.js'] };",
+    result,
     `return { bytes: entry === ${JSON.stringify(entry)} ? ${bytes} : 10, gzipBytes: entry === ${JSON.stringify(entry)} ? ${gzipBytes} : 11, modules: ['dist/fixture.js'] };`,
   ));
 }
@@ -91,6 +96,18 @@ function swapConsumerNames(root) {
 }
 
 describe('platform measurement admission policy', () => {
+  it.each([
+    ['signature', 'export async function bundleScenario()', 'export async function bundleScenario(input)'],
+    ['return', "return { bytes: 10, gzipBytes: 11, modules: ['dist/fixture.js'] };", "return { bytes: 10.0, gzipBytes: 11, modules: ['dist/fixture.js'] };"],
+  ])('отказывает подмене consumer при дрейфе %s и сохраняет fixture', (_, before, after) => {
+    const { root } = fixture();
+    const oracle = join(root, 'scripts/check-consumer-size.js');
+    const changed = readFileSync(oracle, 'utf8').replace(before, after);
+    writeFileSync(oracle, changed);
+    expect(() => measureConsumer(root, symbolGlyphEntry, 10, 11)).toThrow();
+    expect(readFileSync(oracle, 'utf8')).toBe(changed);
+  });
+
   it('сохраняет прежние запреты, equality и оба потолка при factual update', () => {
     const { root, policy } = fixture();
     const result = run(root, ['--update']);
