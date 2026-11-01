@@ -16,6 +16,7 @@ import { assertRemoteBenchmark, summarize } from './measurement.js';
 import { validateAuthorObservation, validateRetainedPair } from './author-oracle.js';
 import { verifyExplorer } from './verify-explorer.mjs';
 import { verifyLottieConsumer } from './verify-lottie.mjs';
+import { verifyAuthoringConsumer } from './verify-authoring.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const BASELINE = '03a4ca3ac1bf7978f9e8f554106c132a69668afb';
@@ -219,6 +220,7 @@ try {
     writeFileSync(join(output, 'consumer-comparison.json'), JSON.stringify(report, null, 2));
   }
   report.lottie = await verifyLottieConsumer({ browser, prepared: prepared[1], origin, outdir, output });
+  report.authoring = await verifyAuthoringConsumer({ browser, prepared: prepared[1], origin, outdir, output });
   writeFileSync(join(output, 'consumer-comparison.json'), JSON.stringify(report, null, 2));
   // Instrumentation читает уже собранные candidate artifacts; не меняет ratchet в CI.
   command(process.execPath, [join(prepared[1].source, 'scripts/measure-platform-artifacts.mjs'), '--output', join(output, 'platform-artifacts.json')], prepared[1].source);

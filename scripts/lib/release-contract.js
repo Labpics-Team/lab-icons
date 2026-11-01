@@ -15,7 +15,7 @@ const ROOT_KEYS = [
 ];
 const PRIMARY_KEYS = ['access', 'install', 'kind'];
 const FALLBACK_KEYS = ['immutable', 'kind', 'specifier'];
-const EXPORT_KEYS = ['.', './ir', './ir/candidates', './ir/recipes', './ir/render', './motion', './symbols/*', './lottie/*'];
+const EXPORT_KEYS = ['.', './ir', './ir/candidates', './ir/recipes', './ir/render', './authoring', './motion', './symbols/*', './lottie/*'];
 const EXPORT_CONDITIONS = Object.freeze({
   '.': ['types', 'import'],
   './ir': ['types', 'import'],
@@ -23,6 +23,7 @@ const EXPORT_CONDITIONS = Object.freeze({
   './ir/candidates': ['types', 'import'],
   './ir/recipes': ['types', 'import'],
   './ir/render': ['types', 'import'],
+  './authoring': ['types', 'import'],
   './motion': ['types', 'import'],
   './symbols/*': ['types', 'import'],
   './lottie/*': ['types', 'import'],
@@ -85,8 +86,8 @@ export function validateReleaseContract(contract) {
   const errors = [];
   if (!isRecord(contract)) return ['release/contract.json обязан быть объектом'];
   validateExactKeys(contract, ROOT_KEYS, 'release contract', errors);
-  if (contract.version !== 5) {
-    errors.push(`release contract version обязан быть 5; найдено ${String(contract.version)}`);
+  if (contract.version !== 6) {
+    errors.push(`release contract version обязан быть 6; найдено ${String(contract.version)}`);
   }
   if (contract.packageName !== '@labpics/icons') {
     errors.push(`release packageName изменён: ${String(contract.packageName)}`);

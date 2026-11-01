@@ -18,7 +18,7 @@ import { compileAuthorAnatomy } from './lib/author-anatomy.js';
 import { compileLottieGeometry, renderLottieSymbolModule, lottieSymbolDeclaration } from './lib/lottie-geometry.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const TARGETS = ['ir', 'symbols', 'motion', 'lottie'];
+const TARGETS = ['ir', 'symbols', 'motion', 'lottie', 'authoring'];
 const REQUIRED_DECLARATIONS = ['author-catalog.generated.d.ts', 'author-source.d.ts', 'candidates.d.ts', 'catalog.generated.d.ts', 'compiler.d.ts', 'index.d.ts', 'recipes.d.ts', 'render.d.ts', 'request.d.ts'];
 const read = (root, file) => JSON.parse(readFileSync(join(root, file), 'utf8'));
 
@@ -100,6 +100,7 @@ async function compileIrTargets({ root, staging }) {
       bundle(root, staging, 'src/ir/symbol-runtime.ts', 'ir/symbol-runtime.js', ['./request.js']),
       bundle(root, staging, 'src/ir/recipes.ts', 'ir/recipes.js'),
       bundle(root, staging, 'src/ir/render.ts', 'ir/render.js'),
+      bundle(root, staging, 'src/authoring/index.ts', 'authoring/index.js'),
       bundle(root, staging, 'src/ir/candidates.ts', 'ir/candidates.js', ['./index.js']),
       bundle(root, staging, 'src/motion/index.ts', 'motion/index.js'),
       bundle(root, staging, 'src/lottie/runtime.ts', 'ir/lottie-runtime.js', ['../motion/index.js']),
@@ -112,6 +113,8 @@ async function compileIrTargets({ root, staging }) {
     for (const file of REQUIRED_DECLARATIONS) copyFileSync(join(declarations, 'ir', file), join(staging, 'ir', file));
     copyFileSync(join(declarations, 'motion/index.d.ts'), join(staging, 'motion/index.d.ts'));
     copyFileSync(join(declarations, 'lottie/types.d.ts'), join(staging, 'ir/lottie-types.d.ts'));
+    copyFileSync(join(declarations, 'authoring/index.d.ts'), join(staging, 'authoring/index.d.ts'));
+    copyFileSync(join(declarations, 'authoring/design-spec.d.ts'), join(staging, 'authoring/design-spec.d.ts'));
 
     const catalog = read(root, 'semantics/catalog.json');
     const grid = read(root, 'semantics/grid.json');

@@ -36,6 +36,10 @@
       "types": "./dist/ir/render.d.ts",
       "import": "./dist/ir/render.js"
     },
+    "./authoring": {
+      "types": "./dist/authoring/index.d.ts",
+      "import": "./dist/authoring/index.js"
+    },
     "./motion": {
       "types": "./dist/motion/index.d.ts",
       "import": "./dist/motion/index.js"
@@ -51,6 +55,9 @@
   },
   "sideEffects": false,
   "files": [
+    "dist/authoring/design-spec.d.ts",
+    "dist/authoring/index.d.ts",
+    "dist/authoring/index.js",
     "dist/index.d.ts",
     "dist/index.js",
     "dist/ir/author-catalog.generated.d.ts",

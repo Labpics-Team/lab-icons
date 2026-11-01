@@ -39,6 +39,8 @@ const DECLARATIONS = Object.freeze({
   'dist/ir/compiler.d.ts': "import type { GlyphModelErrorCode } from './request.js';\nexport interface GlyphIR { readonly code: GlyphModelErrorCode }\n",
   'dist/ir/request.d.ts': "export type GlyphModelErrorCode = 'CANDIDATES_REQUIRED';\n",
   'dist/ir/render.d.ts': "import type { GlyphIR } from './compiler.js';\nexport declare function renderGlyphSvg(glyph: GlyphIR): string;\n",
+  'dist/authoring/index.d.ts': "export { compileDesignSpec } from './design-spec.js';\n",
+  'dist/authoring/design-spec.d.ts': "import type { GlyphIR } from '../ir/compiler.js';\nexport declare function compileDesignSpec(spec: unknown): GlyphIR;\n",
   'dist/motion/index.d.ts': "import type { GlyphIR } from '../ir/index.js';\nexport declare function compileSymbolEffect(glyph: GlyphIR): unknown;\n",
   'dist/symbols/fixture.d.ts': "import type { AuthorSourceGlyph } from '../ir/author-source.js';\nexport declare function glyph(): AuthorSourceGlyph;\n",
   'dist/lottie/fixture.d.ts': "import type { LottieExportResult } from '../ir/lottie-types.js';\nexport declare function exportLottie(): LottieExportResult;\n",

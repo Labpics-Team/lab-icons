@@ -112,3 +112,33 @@ compositor-only claim поэтому не делается.
 ## Ограничения исследования
 
 Primary Apple HIG/annotation страницам clean-text fetch вернул только оболочку. Конкретные Draw/annotation/enclosure assertions выше взяты из полного официального WWDC25 transcript и current SF Symbols overview. Полный экспорт закреплённой Figma-версии сохранён в [авторской основе](../evidence/figma-20261101.md). Полная оптическая приёмка, runtime performance и target fidelity остаются открытыми; внешние источники не подменяют их проверку.
+
+## Публичная авторская грамматика
+
+Проверено 2026-11-01T08:21:50Z по [Node packages](https://nodejs.org/api/packages.html#package-entry-points)
+и [TypeScript module resolution](https://www.typescriptlang.org/docs/handbook/modules/reference.html#node16-nodenext).
+Оба первичных документа получены HTTP 200. Firecrawl отказал из-за отсутствия
+credits; прямое чтение официальных страниц не потребовало новой зависимости.
+
+Node рекомендует `exports` для явной публичной границы. Необъявленный subpath
+отвергается; абсолютный путь в `node_modules` не является сильной изоляцией.
+TypeScript NodeNext следует условиям `exports`, включая `types` и выбранное
+`import`/`require`. Поэтому private declaration может поставляться как замкнутая
+зависимость публичного типа без отдельного public export. Это контракт обычной
+резолюции пакета, а не защита исходника от намеренного чтения.
+
+Выбран один opt-in `@labpics/icons/authoring`: существующая DesignSpec → lowering
+→ общий SVG assembler. Альтернатива с произвольными SVG paths обходила бы
+грамматику и constraints; второй renderer размножал бы winding/composition
+решения; authoring в root увеличивал бы цену каждого статического потребителя.
+Самостоятельный authoring-пакет добавил бы согласование версий типов и геометрии,
+для которого сейчас нет отдельного жизненного цикла. Готовый SVG потребляется
+без этого entrypoint. Возможная причина пересмотра — измеренный независимый
+author-tool lifecycle или несовместимая целевая платформа.
+
+Проверка source compilation не удостоверяет package declarations. Штатный
+remote consumer исполняет первый пример из публичного tutorial через installed
+tarball, проверяет strict NodeNext positive/negative types, точные runtime
+отказы и экспортированный SVG. До выполнения этого consumer соответствующая
+приёмка остаётся открытой. Вновь построенный знак имеет `candidate` provenance
+и не заменяет принятую авторскую основу Figma.

@@ -43,6 +43,7 @@ pnpm add @labpics/icons
 | `@labpics/icons/ir/recipes` | `./dist/ir/recipes.js` | `./dist/ir/recipes.d.ts` |
 | `@labpics/icons/ir/candidates` | `./dist/ir/candidates.js` | `./dist/ir/candidates.d.ts` |
 | `@labpics/icons/ir/render` | `./dist/ir/render.js` | `./dist/ir/render.d.ts` |
+| `@labpics/icons/authoring` | `./dist/authoring/index.js` | `./dist/authoring/index.d.ts` |
 | `@labpics/icons/motion` | `./dist/motion/index.js` | `./dist/motion/index.d.ts` |
 | `@labpics/icons/symbols/*` | `./dist/symbols/*.js` | `./dist/symbols/*.d.ts` |
 | `@labpics/icons/lottie/*` | `./dist/lottie/*.js` | `./dist/lottie/*.d.ts` |
@@ -52,6 +53,9 @@ pnpm add @labpics/icons
 Список ниже не включает автоматически добавляемые npm метаданные.
 Полный упакованный артефакт проверяет `pnpm check:package-artifact`.
 
+- `dist/authoring/design-spec.d.ts`
+- `dist/authoring/index.d.ts`
+- `dist/authoring/index.js`
 - `dist/index.d.ts`
 - `dist/index.js`
 - `dist/ir/author-catalog.generated.d.ts`
@@ -1397,6 +1401,7 @@ pnpm add @labpics/icons
 
 ## Транзитивные декларации типов
 
+- `dist/authoring/design-spec.d.ts`
 - `dist/ir/author-catalog.generated.d.ts`
 - `dist/ir/author-source.d.ts`
 - `dist/ir/catalog.generated.d.ts`

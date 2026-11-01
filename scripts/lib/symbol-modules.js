@@ -12,6 +12,7 @@ export function symbolReleaseProjection(base, iconIds) {
     './ir/recipes': base.exports['./ir/recipes'],
     './ir/candidates': base.exports['./ir/candidates'],
     './ir/render': { types: './dist/ir/render.d.ts', import: './dist/ir/render.js' },
+    './authoring': { types: './dist/authoring/index.d.ts', import: './dist/authoring/index.js' },
     './motion': { types: './dist/motion/index.d.ts', import: './dist/motion/index.js' },
     './symbols/*': { types: './dist/symbols/*.d.ts', import: './dist/symbols/*.js' },
     './lottie/*': { types: './dist/lottie/*.d.ts', import: './dist/lottie/*.js' },
@@ -20,10 +21,10 @@ export function symbolReleaseProjection(base, iconIds) {
     key.includes('*')
       ? ids.flatMap(id => Object.values(conditions).map(target => target.replace('*', id).slice(2)))
       : Object.values(conditions).map(target => target.slice(2)));
-  const typeDependencies = ['dist/ir/author-catalog.generated.d.ts', 'dist/ir/author-source.d.ts', 'dist/ir/catalog.generated.d.ts', 'dist/ir/compiler.d.ts', 'dist/ir/request.d.ts', 'dist/ir/lottie-types.d.ts'].sort();
+  const typeDependencies = ['dist/authoring/design-spec.d.ts', 'dist/ir/author-catalog.generated.d.ts', 'dist/ir/author-source.d.ts', 'dist/ir/catalog.generated.d.ts', 'dist/ir/compiler.d.ts', 'dist/ir/request.d.ts', 'dist/ir/lottie-types.d.ts'].sort();
   const runtimeDependencies = ['dist/ir/compiler.js', 'dist/ir/request.js', 'dist/ir/symbol-runtime.js', 'dist/ir/lottie-runtime.js'].sort();
   return {
-    version: 5,
+    version: 6,
     packageName: base.packageName,
     primary: base.primary,
     fallback: base.fallback,

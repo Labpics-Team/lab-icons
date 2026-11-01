@@ -1,5 +1,5 @@
 {
- "version": 5,
+ "version": 6,
  "packageName": "@labpics/icons",
  "primary": {
   "kind": "npm",
@@ -12,6 +12,9 @@
   "immutable": true
  },
  "files": [
+  "dist/authoring/design-spec.d.ts",
+  "dist/authoring/index.d.ts",
+  "dist/authoring/index.js",
   "dist/index.d.ts",
   "dist/index.js",
   "dist/ir/author-catalog.generated.d.ts",
@@ -1356,6 +1359,7 @@
   "dist/symbols/waveform.js"
  ],
  "typeDependencies": [
+  "dist/authoring/design-spec.d.ts",
   "dist/ir/author-catalog.generated.d.ts",
   "dist/ir/author-source.d.ts",
   "dist/ir/catalog.generated.d.ts",
@@ -1389,6 +1393,10 @@
   "./ir/render": {
    "types": "./dist/ir/render.d.ts",
    "import": "./dist/ir/render.js"
+  },
+  "./authoring": {
+   "types": "./dist/authoring/index.d.ts",
+   "import": "./dist/authoring/index.js"
   },
   "./motion": {
    "types": "./dist/motion/index.d.ts",

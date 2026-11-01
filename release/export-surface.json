@@ -477,6 +477,14 @@
     "warningFilled",
     "warningOutline"
   ],
+  "./authoring": [
+    "DesignSpecError",
+    "compileDesignSpec",
+    "designSpecContract",
+    "lowerDesignSpec",
+    "parseDesignSpec",
+    "renderGlyphSvg"
+  ],
   "./ir": [
     "GlyphModelError",
     "axisContracts",
