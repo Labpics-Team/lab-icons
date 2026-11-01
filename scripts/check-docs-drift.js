@@ -77,17 +77,21 @@ export function manualCorpusCountErrors(source) {
   const unit = `(?:икон(?:ка|ки|ок|ку)|имён|имени|имен|${svgUnit}|глиф(?:а|ов)?|(?:именованных\\s+)?(?:ESM[- ]?)?экспорт(?:а|ов)?|(?:release[- ]?)?файл(?:а|ов)?|icons?|glyphs?|exports?|files?)`;
   const patterns = [
     new RegExp(`(?:^|[^\\p{L}\\p{N}_])(${number}\\s+${unit})(?=$|[^\\p{L}\\p{N}_])`, 'giu'),
-    new RegExp(`(?:^|[^\\p{L}\\p{N}_])(${unit}\\s*[:=]\\s*${number})(?=$|[^\\p{L}\\p{N}_:])`, 'giu'),
+    new RegExp(`(?:^|[^\\p{L}\\p{N}_])(${unit}\\s*[:=]\\s*${number})(?=$|[^\\p{L}\\p{N}_])`, 'giu'),
   ];
+  function nodeIdentifier(match) {
+    return /:\s*\d+$/.test(match[1]) &&
+      /^:\d+(?=$|[^\p{L}\p{N}_:])/u.test(text.slice(match.index + match[0].length));
+  }
   function historical(match) {
     const start = Math.max(...['. ', '! ', '? '].map(separator => text.lastIndexOf(separator, match.index))) + 1;
     const ends = ['. ', '! ', '? '].map(separator => text.indexOf(separator, match.index + match[0].length)).filter(index => index >= 0);
     const sentence = text.slice(start, ends.length ? Math.min(...ends) : text.length);
     // Датированное «в текущем пакете» всё ещё проецирует текущую поставку.
-    if (/(?:текущ|сейчас|сегодня|current|today|\bnow\b)/iu.test(sentence)) return false;
+    if (/(?:текущ[\p{L}]*|сейчас|сегодня|\bcurrent\b|\btoday\b|\bnow\b)/iu.test(sentence)) return false;
     return /(?:на|as of)\s+\d{4}-\d{2}-\d{2}(?=$|[^\d])|(?:baseline commit|на baseline)\s+[a-f\d]{7,40}(?=$|[^a-f\d])/iu.test(sentence);
   }
-  return [...new Set(patterns.flatMap((pattern) => [...text.matchAll(pattern)].filter(match => !historical(match)).map((match) => match[1])))]
+  return [...new Set(patterns.flatMap((pattern) => [...text.matchAll(pattern)].filter(match => !nodeIdentifier(match) && !historical(match)).map((match) => match[1])))]
     .map((claim) => `ручной счётчик «${claim}»: используйте ссылку на контракт или генерируемую справку`);
 }
 

@@ -74,8 +74,12 @@ describe('Согласованность документации', () => {
   it('сохраняет полный node ID и не маскирует соседний счётчик', () => {
     expect(manualCorpusCountErrors('Icons: 4045:632; Lab icons: 6431:3712.')).toEqual([]);
     expect(manualCorpusCountErrors('Icons: 4045:632; icons: 999.')).toHaveLength(1);
+    expect(manualCorpusCountErrors('Icons: 4045:632; icons: 999:')).toHaveLength(1);
+    expect(manualCorpusCountErrors('Icons: 4045:632:')).toHaveLength(1);
     expect(manualCorpusCountErrors('95 tests / 6 test files.')).toEqual([]);
     expect(manualCorpusCountErrors('На baseline 03a4ca3 сохранены 238 имён.')).toEqual([]);
+    expect(manualCorpusCountErrors('На 2026-11-01 экспортированы 660 SVG с fill=currentColor.')).toEqual([]);
+    expect(manualCorpusCountErrors('Baseline commit 03a4ca3: 476 SVG с currentColor.')).toEqual([]);
     expect(manualCorpusCountErrors('На baseline 03a4ca3 сохранены 238 имён. Теперь 999 icons.')).toHaveLength(1);
   });
 
