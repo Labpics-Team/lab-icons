@@ -355,6 +355,18 @@ describe('enclosure.replace: необъявленный общий рисуно�
     expect(() => compile(source, input)).toThrow(expect.objectContaining({ code: 'SHARED_PART_UNDECLARED' }));
   });
 
+  it.each(['first', 'middle'])('%s prefix: relative alias без точного ключа получает TOPOLOGY_UNSUPPORTED', position => {
+    const { source, input } = witness(position, ['aloof', 'sad']);
+    repin(source, input, 'aloof', svg => svg.replace(`d="${square}"`, 'd="M10 5h1v1h-1Z"'), 'expression-face');
+    expect(() => compile(source, input)).toThrow(expect.objectContaining({ code: 'TOPOLOGY_UNSUPPORTED' }));
+  });
+
+  it('уникальный relative prefix также требует установленного exact key', () => {
+    const { source, input } = witness('first', []);
+    repin(source, input, 'aloof', svg => svg.replace(`d="${unique[0]}"`, 'd="M4 5h1v1h-1Z"'), 'expression-face');
+    expect(() => compile(source, input)).toThrow(expect.objectContaining({ code: 'TOPOLOGY_UNSUPPORTED' }));
+  });
+
   it('настоящая decimal разница ниже точности Number не становится общей частью', () => {
     const { source, input } = witness('first', ['aloof', 'sad']);
     repin(source, input, 'sad', svg => svg.replace(`d="${square}"`, 'd="M10.00000000000000000000001 5L11 5L11 6L10 6Z"'), 'expression-face');

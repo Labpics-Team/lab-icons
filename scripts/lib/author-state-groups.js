@@ -188,9 +188,12 @@ export function compileAuthorStateGroups(baseline, document, { compiler, assembl
         const current = fillPart(part);
         const { d, ...paint } = current;
         const key = exactClosedFillPathKey(d, current.fillRule);
+        if (key === null) {
+          refuse('TOPOLOGY_UNSUPPORTED', `${name}.${state}: prefix ${part.id} вне поддержанного точного closed fill-языка`);
+        }
         // Индекс охватывает все позиции и пары states; число проверок не растёт
         // квадратично с числом независимых prefix parts. Допуск решает sameFillPart.
-        const identity = stableJSON({ ...paint, geometry: key === null ? { literal: d } : { exact: key } });
+        const identity = stableJSON({ ...paint, geometry: { exact: key } });
         const previous = prefixArtwork.get(identity);
         if (previous && previous.state !== state && sameFillPart(current, previous.part)) {
           refuse('SHARED_PART_UNDECLARED', `${name}.${state}: общий рисунок prefix с ${previous.state} требует объявленной shared anatomy`);
