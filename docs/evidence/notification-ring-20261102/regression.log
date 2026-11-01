@@ -1,8 +1,0 @@
-
- RUN  v4.1.12 E:/AgentWork/lab-icons-notification-ring-20261102
-
-
- Test Files  4 passed (4)
-      Tests  81 passed (81)
-   Start at  00:43:28
-   Duration  3.63s (transform 359ms, setup 0ms, import 1.88s, tests 400ms, environment 0ms)
