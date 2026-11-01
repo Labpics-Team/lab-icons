@@ -71,6 +71,72 @@ export function authorPackageExpectations(baseline, annotations) {
   ]));
 }
 
+/** Оба type consumers получают весь semantic census, а не один выбранный модуль. */
+function stateTypeConsumerSource(expected, { dynamicImport = false } = {}) {
+  const entries = Object.entries(expected).sort(([left], [right]) => left.localeCompare(right));
+  const allStates = [...new Set(entries.flatMap(([, group]) => group.states.map(state => state.id)))];
+  return entries.map(([name, group], index) => {
+    const module = `stateGroup${index}`;
+    const stateType = `State${index}`;
+    const path = JSON.stringify(`@labpics/icons/states/${name}`);
+    const states = group.states.map(state => state.id);
+    const state = JSON.stringify(group.defaultState);
+    const foreign = allStates.find(id => !states.includes(id));
+    return [
+      dynamicImport ? `const ${module} = await import(${path});` : `import * as ${module} from ${path};`,
+      `type ${stateType} = import(${path}).State;`,
+      `const defaultState${index}: ${stateType} = ${state};`,
+      `const defaultSvg${index} = ${module}.render();`,
+      `const defaultMount${index} = ${module}.renderStateSvg();`,
+      `const declaredStates${index}: readonly ${stateType}[] = ${JSON.stringify(states)};`,
+      `const exactState${index}: ${states.map(id => JSON.stringify(id)).join(' | ')} = ${module}.stateCapabilities().states[0].id;`,
+      `for (const state of declaredStates${index}) {`,
+      `  const svg = ${module}.render(state);`,
+      `  const mounted = ${module}.renderStateSvg(state);`,
+      `  const effect = ${module}.compileStateEffect(state, { duration: 300, reducedMotion: true });`,
+      `  const exported = ${module}.exportStateTransition(state, { duration: 300, format: 'web-effect' });`,
+      `  if (svg.ok) { const markup: string = svg.svg; void markup; }`,
+      `  if (effect.ok) { const property: 'opacity' = effect.effect.stages[0].property; void property; }`,
+      `  void [mounted, exported];`,
+      `}`,
+      // Filled — допустимый запрос с typed runtime refusal, не ошибка типов.
+      `const filled${index} = ${module}.render(defaultState${index}, { variant: 'filled' });`,
+      `if (!filled${index}.ok) { const code: string = filled${index}.reason.code; void code; }`,
+      `// @ts-expect-error неизвестный semantic state не входит в точный union`,
+      `const invalidState${index}: ${stateType} = '__unsupported_state__';`,
+      `// @ts-expect-error unknown state не принимается публичным render`,
+      `${module}.render('__unsupported_state__');`,
+      ...(states.includes('error') ? [] : [
+        `// @ts-expect-error application error не назначается знаком без явного declaration`,
+        `${module}.render('error');`,
+      ]),
+      `// @ts-expect-error state request не принимает private path coordinates`,
+      `${module}.render(defaultState${index}, { d: 'M0 0' });`,
+      `// @ts-expect-error null не подменяет optional render request`,
+      `${module}.renderStateSvg(defaultState${index}, null);`,
+      `// @ts-expect-error variant имеет конечный публичный domain`,
+      `${module}.render(defaultState${index}, { variant: 'weight' });`,
+      `// @ts-expect-error takeover получает current opacity от executor, from не объявлен`,
+      `${module}.compileStateEffect(defaultState${index}, { duration: 300, from: ${state} });`,
+      `// @ts-expect-error effect duration принимает число`,
+      `${module}.compileStateEffect(defaultState${index}, { duration: '300' });`,
+      `// @ts-expect-error effect request не принимает null`,
+      `${module}.compileStateEffect(defaultState${index}, null);`,
+      `// @ts-expect-error неизвестный format не входит в публичный export request`,
+      `${module}.exportStateTransition(defaultState${index}, { duration: 300, format: '__unsupported_format__' });`,
+      ...(foreign === undefined ? [] : [
+        `// @ts-expect-error знак другой semantic group не расширяет State`,
+        `const foreignState${index}: ${stateType} = ${JSON.stringify(foreign)};`,
+        `// @ts-expect-error render не принимает знак другой semantic group`,
+        `${module}.render(${JSON.stringify(foreign)});`,
+        `void foreignState${index};`,
+      ]),
+      `void [defaultState${index}, defaultSvg${index}, defaultMount${index}, exactState${index}, invalidState${index}, filled${index}];`,
+      '',
+    ].join('\n');
+  }).join('\n');
+}
+
 const CLEAN_PACK_EXCLUDES = new Set([
   '.git',
   '.treeshake-tmp',
@@ -557,7 +623,6 @@ export function checkPackageArtifact({
         `import { glyph as activityGlyph, glyphCapabilities as activityCapabilities } from '@labpics/icons/symbols/ellipsis-horizontal';\n` +
         `import { compileSymbolEffect, type SymbolEffectResult, type SymbolOpacityStage } from '@labpics/icons/motion';\n` +
         `import { renderGlyphSvg } from '@labpics/icons/ir/render';\n` +
-        `import { render as renderStatus, renderStateSvg, compileStateEffect, type State } from '@labpics/icons/states/status-circle';\n` +
         `const svg: string = accessibilityOutline;\n` +
         `const name: IconName = 'accessibilityOutline';\n` +
         `const icon: IconId = 'reload';\n` +
@@ -585,19 +650,8 @@ export function checkPackageArtifact({
         `glyph({ icon: 'align-bottom' });\n` +
         `// @ts-expect-error символ уже связан с icon; private coordinates не принимаются\n` +
         `symbolGlyph({ icon: 'alert' });\n` +
-        `const status: State = 'confirmation';\n` +
-        `const statusSvg = renderStatus(status);\n` +
-        `const statusMount = renderStateSvg('question');\n` +
-        `const statusEffect = compileStateEffect(status, { duration: 300, reducedMotion: true });\n` +
-        `if (statusSvg.ok) { const markup: string = statusSvg.svg; void markup; }\n` +
-        `if (statusEffect.ok) { const property: 'opacity' = statusEffect.effect.stages[0].property; void property; }\n` +
-        `// @ts-expect-error application error не является автоматически объявленным знаком\n` +
-        `renderStatus('error');\n` +
-        `// @ts-expect-error состояние не принимает private path coordinates\n` +
-        `renderStatus(status, { d: 'M0 0' });\n` +
-        `// @ts-expect-error takeover получает текущую opacity от executor, from не объявлен\n` +
-        `compileStateEffect(status, { duration: 300, from: 'question' });\n` +
-        `void [svg, name, icon, ir, calendar, recipe, contract, sliced, effect, mounted, addedName, authorVersion, addedEffect, addedMounted, activity, statusSvg, statusMount];\n`,
+        `void [svg, name, icon, ir, calendar, recipe, contract, sliced, effect, mounted, addedName, authorVersion, addedEffect, addedMounted, activity];\n` +
+        stateTypeConsumerSource(stateExpected),
       'utf8',
     );
     writeFileSync(
@@ -637,13 +691,8 @@ export function checkPackageArtifact({
         `const symbol: GlyphIR = symbolGlyph();\n` +
         `const added: GlyphIR<string> = addedGlyph();\n` +
         `const addedName: 'align-bottom' = addedGlyph().icon;\n` +
-        `const statusModule = await import('@labpics/icons/states/status-circle');\n` +
-        `const statusEffect = statusModule.compileStateEffect('confirmation', { duration: 300 });\n` +
-        `const statusName: 'confirmation' | 'dismissal' | 'question' | 'attention' | 'increase' | 'decrease' = statusModule.stateCapabilities().states[0].id;\n` +
-        `// @ts-expect-error неизвестный semantic state не принимается публичным NodeNext entrypoint\n` +
-        `statusModule.render('error');\n` +
-        `void [statusEffect, statusName];\n` +
-        `void [accessibilityOutline, ir, buildDirectionalArrow, symbol, added, addedName];\n`,
+        `void [accessibilityOutline, ir, buildDirectionalArrow, symbol, added, addedName];\n` +
+        stateTypeConsumerSource(stateExpected, { dynamicImport: true }),
       'utf8',
     );
     writeFileSync(
