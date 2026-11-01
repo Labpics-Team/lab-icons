@@ -15,7 +15,8 @@ const selected = { ...manifest, counts: { families: 2, variants: 4 }, icons: {
   reload: manifest.icons.reload, refresh: manifest.icons.refresh,
 } };
 const baseline = loadAuthorBaseline(root, { manifest: selected });
-const annotations = compileAuthorAnatomy(baseline, read('semantics/author-anatomy.json'));
+const allAnnotations = read('semantics/author-anatomy.json');
+const annotations = compileAuthorAnatomy(baseline, { ...allAnnotations, icons: { reload: allAnnotations.icons.reload, refresh: allAnnotations.icons.refresh } });
 const sources = Object.fromEntries(Object.entries(baseline.icons).map(([icon, variants]) => [icon,
   Object.fromEntries(Object.entries(variants).map(([variant, item]) => [variant, {
     ...item, sourceContract: annotations[`${icon}/${variant}`],

@@ -1,5 +1,5 @@
-import type { GlyphCapabilities, GlyphIR } from '../ir/compiler.js';
-import { validateMotionGesture } from '../core/motion-sampler.js';
+import type { GlyphCapabilities, GlyphIR, MotionGestureOpacityTrackContract } from '../ir/compiler.js';
+import { sampleOpacityTrack, validateMotionGesture } from '../core/motion-sampler.js';
 
 export type SymbolEffectRefusalCode =
   | 'INVALID_REQUEST'
@@ -41,12 +41,57 @@ export interface SymbolEffect {
   readonly options: Readonly<{ duration: number; easing: 'linear'; fill: 'both' }>;
 }
 
+export interface SymbolOpacityStage {
+  readonly partId: string;
+  readonly property: 'opacity';
+  /** Скалярная цель; первый этап подхватывает фактическую позу исполнителя. */
+  readonly to: number;
+  /** Миллисекунды относительно начала этого эффекта. */
+  readonly at: number;
+  readonly duration: number;
+}
+
+/** Стадии передаются публичному sequence; библиотека не владеет его часами. */
+export interface SymbolSequenceEffect {
+  readonly version: 2;
+  readonly icon: string;
+  readonly variant: GlyphIR['variant'];
+  readonly gesture: string;
+  readonly from: number;
+  readonly to: number;
+  readonly targets: readonly Readonly<{ partId: string; property: 'opacity'; from: number; to: number }>[];
+  readonly stages: readonly SymbolOpacityStage[];
+  readonly unchangedPartIds: readonly string[];
+  readonly viewport: Readonly<{ overflow: 'visible' }>;
+  readonly options: Readonly<{ duration: number; easing: 'linear'; fill: 'both' }>;
+}
+
 export type SymbolEffectResult =
-  | Readonly<{ ok: true; effect: SymbolEffect }>
+  | Readonly<{ ok: true; effect: SymbolEffect | SymbolSequenceEffect }>
   | Readonly<{ ok: false; reason: Readonly<{ code: SymbolEffectRefusalCode; message: string }> }>;
 
 function refuse(code: SymbolEffectRefusalCode, message: string): SymbolEffectResult {
   return Object.freeze({ ok: false, reason: Object.freeze({ code, message }) });
+}
+
+function opacityStages(track: MotionGestureOpacityTrackContract, from: number, to: number, duration: number): readonly SymbolOpacityStage[] {
+  if (duration === 0) return [Object.freeze({ partId: track.partId, property: 'opacity',
+    to: sampleOpacityTrack(track, to), at: 0, duration: 0 })];
+  const forward = to > from;
+  const stops = track.stops.filter(stop => forward ? stop.at > from && stop.at < to : stop.at < from && stop.at > to);
+  if (!forward) stops.reverse();
+  const points = [from, ...stops.map(stop => stop.at), to];
+  const stages: SymbolOpacityStage[] = [];
+  let at = 0;
+  for (let index = 1; index < points.length; index++) {
+    const progress = points[index]!;
+    const end = index === points.length - 1 ? duration : Math.abs((progress - from) / (to - from)) * duration;
+    stages.push(Object.freeze({ partId: track.partId, property: 'opacity',
+      to: sampleOpacityTrack(track, progress), at, duration: end - at }));
+    // Следующий этап начинается в том же IEEE-754 end, который отдаётся executor.
+    at += end - at;
+  }
+  return stages;
 }
 
 /**
@@ -107,10 +152,33 @@ export function compileSymbolEffect(
     return refuse('COMPOSITION_NOT_ADDRESSABLE', 'Композиция не сохраняет отдельные цели объявленного жеста.');
   }
   if (gesture.tracks.some(track => {
+    if (track.kind !== 'rotate') return false;
     const part = glyph.parts.find(part => part.id === track.partId);
     return !part || part.anchorSource !== 'declared' || part.anchor.some((value, index) => value !== track.anchor[index]);
   })) {
     return refuse('CAPABILITY_MISMATCH', 'Якоря возможностей не относятся к этой версии анатомии.');
+  }
+  if (gesture.tracks.every(track => track.kind === 'opacity')) {
+    if (glyph.composition.kind !== 'layers') {
+      return refuse('COMPOSITION_NOT_ADDRESSABLE', 'Opacity-стадии требуют независимых layers авторской композиции.');
+    }
+    const duration = request.reducedMotion || from === to ? 0 : request.duration;
+    const tracks = gesture.tracks as readonly MotionGestureOpacityTrackContract[];
+    const animated = new Set(tracks.map(track => track.partId));
+    const stages = tracks.flatMap(track => opacityStages(track, from, to, duration))
+      .sort((a, b) => a.at - b.at || (a.partId < b.partId ? -1 : a.partId > b.partId ? 1 : 0));
+    return Object.freeze({ ok: true, effect: Object.freeze({
+      version: 2, icon: glyph.icon, variant: glyph.variant, gesture: gesture.id, from, to,
+      targets: Object.freeze(tracks.map(track => Object.freeze({ partId: track.partId, property: 'opacity' as const,
+        from: sampleOpacityTrack(track, from), to: sampleOpacityTrack(track, to) }))),
+      stages: Object.freeze(stages),
+      unchangedPartIds: Object.freeze(glyph.parts.filter(part => !animated.has(part.id)).map(part => part.id)),
+      viewport: Object.freeze({ overflow: 'visible' as const }),
+      options: Object.freeze({ duration, easing: 'linear' as const, fill: 'both' as const }),
+    }) });
+  }
+  if (!gesture.tracks.every(track => track.kind === 'rotate')) {
+    return refuse('INVALID_GESTURE', 'Один эффект обязан использовать одну поддержанную систему каналов.');
   }
   const animatedPartIds = new Set(gesture.tracks.map((track) => track.partId));
   const targets = gesture.tracks.map((track): SymbolEffectTarget => Object.freeze({

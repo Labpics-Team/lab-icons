@@ -20,7 +20,8 @@ describe('объявленный эффект time.advance', () => {
   it.each(['outline', 'filled'] as const)('сохраняет циферблат и независимые законы стрелок: %s', (variant) => {
     const result = compileSymbolEffect(glyph({ icon: 'time', variant }), capabilities('time', variant), 'time.advance', { duration: 800 });
     expect(result.ok).toBe(true);
-    if (!result.ok) return;
+    expect(result).toMatchObject({ ok: true, effect: { version: 1 } });
+    if (!result.ok || result.effect.version !== 1) return;
     expect(result.effect.unchangedPartIds).toEqual(['dial']);
     expect(result.effect.targets.map((target) => [target.partId, target.keyframes[1].transform])).toEqual([
       ['hand-minute', 'rotate(360deg)'], ['hand-hour', 'rotate(30deg)'],
@@ -31,7 +32,8 @@ describe('объявленный эффект time.advance', () => {
   it('разворачивает движение из видимого промежуточного состояния', () => {
     const result = compileSymbolEffect(glyph({ icon: 'time' }), capabilities('time'), 'time.advance', { duration: 800, from: 0.4, to: 0 });
     expect(result.ok).toBe(true);
-    if (!result.ok) return;
+    expect(result).toMatchObject({ ok: true, effect: { version: 1 } });
+    if (!result.ok || result.effect.version !== 1) return;
     expect(result.effect.targets[0]?.keyframes).toEqual([
       { offset: 0, transform: 'rotate(144deg)' }, { offset: 1, transform: 'rotate(0deg)' },
     ]);
@@ -41,7 +43,8 @@ describe('объявленный эффект time.advance', () => {
   it('reduced motion сохраняет конечное состояние без длительности', () => {
     const result = compileSymbolEffect(glyph({ icon: 'time' }), capabilities('time'), 'time.advance', { duration: 800, reducedMotion: true });
     expect(result.ok).toBe(true);
-    if (!result.ok) return;
+    expect(result).toMatchObject({ ok: true, effect: { version: 1 } });
+    if (!result.ok || result.effect.version !== 1) return;
     expect(result.effect.options.duration).toBe(0);
     expect(result.effect.targets[1]?.keyframes[1].transform).toBe('rotate(30deg)');
   });
@@ -65,7 +68,8 @@ describe('объявленный эффект time.advance', () => {
   it('выдаёт неизменяемые данные без ссылок на изменяемые массивы capabilities', () => {
     const result = compileSymbolEffect(glyph({ icon: 'time' }), capabilities('time'), 'time.advance', { duration: 800 });
     expect(result.ok).toBe(true);
-    if (!result.ok) return;
+    expect(result).toMatchObject({ ok: true, effect: { version: 1 } });
+    if (!result.ok || result.effect.version !== 1) return;
     expect(Object.isFrozen(result.effect)).toBe(true);
     expect(Object.isFrozen(result.effect.targets[0]?.keyframes[0])).toBe(true);
     expect(Object.isFrozen(result.effect.unchangedPartIds)).toBe(true);

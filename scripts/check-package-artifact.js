@@ -44,7 +44,7 @@ import {
 } from './lib/corpus-contract.js';
 import { loadAuthorBaseline } from './lib/author-baseline.js';
 import { compileAuthorAnatomy } from './lib/author-anatomy.js';
-import { expectedAuthorEffectTargets, expectedAuthorMotion } from './bench/author-oracle.js';
+import { expectedAuthorEffect, expectedAuthorMotion } from './bench/author-oracle.js';
 
 export const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -58,11 +58,11 @@ export function authorPackageExpectations(baseline, annotations) {
       return [variant, {
         master: record.master, author: record.author, svg: record.artifactSvg,
         anatomy: contract.anatomy ?? null, motion: expectedAuthorMotion(contract),
-        effects: Object.fromEntries((contract.gestures ?? []).map(gesture => [gesture.id, expectedAuthorEffectTargets(gesture)])),
+        effects: Object.fromEntries((contract.gestures ?? []).map(gesture => [gesture.id, expectedAuthorEffect(gesture)])),
         parts: contract.parts.map(({ id, role, identity, fillRule, zIndex, sourceFingerprint, artifactFingerprint, anchor }, index) => ({
           id, fillRule, zIndex, sourceFingerprint, artifactFingerprint, d: sourcePaths[index], role, identity,
-          anchorSource: contract.anatomy ? 'declared' : 'geometry-bbox-center',
-          ...(contract.anatomy && { anchor }),
+          anchorSource: contract.anatomy && anchor ? 'declared' : 'geometry-bbox-center',
+          ...(contract.anatomy && anchor && { anchor }),
         })),
       }];
     })),
@@ -501,7 +501,7 @@ export function checkPackageArtifact({
         `    if (symbol.glyph({ variant, modelMode: 'source-only' }) !== current || current.icon !== icon || current.variant !== variant || current.composition.kind !== 'layers') throw new Error('current source/default differs: ' + icon + '/' + variant);\n` +
         `    if (JSON.stringify(current.viewBox) !== '[0,0,24,24]' || !/<svg\\b[^>]*\\bfill="currentColor"/.test(current.svg) || current.parts.some(part => part.paint.kind !== 'fill' || part.paint.fill !== 'currentColor')) throw new Error('current viewport/paint differs: ' + icon + '/' + variant);\n` +
         `    if (current.provenance.kind !== 'source' || current.provenance.file !== expected.master || JSON.stringify(current.provenance.author) !== JSON.stringify(expected.author) || JSON.stringify(current.provenance.anatomy ?? null) !== JSON.stringify(expected.anatomy)) throw new Error('current author provenance differs: ' + icon + '/' + variant);\n` +
-        `    const actualParts = current.parts.map(part => ({ id: part.id, fillRule: part.fillRule, zIndex: part.zIndex, sourceFingerprint: part.provenance.sourceFingerprint, artifactFingerprint: part.provenance.artifactFingerprint, d: part.d, role: part.role, identity: part.provenance.identity, anchorSource: part.anchorSource, ...(expected.anatomy && { anchor: part.anchor }) }));\n` +
+        `    const actualParts = current.parts.map((part, index) => ({ id: part.id, fillRule: part.fillRule, zIndex: part.zIndex, sourceFingerprint: part.provenance.sourceFingerprint, artifactFingerprint: part.provenance.artifactFingerprint, d: part.d, role: part.role, identity: part.provenance.identity, anchorSource: part.anchorSource, ...(expected.parts[index].anchor && { anchor: part.anchor }) }));\n` +
         `    if (JSON.stringify(actualParts) !== JSON.stringify(expected.parts) || current.parts.some(part => part.provenance.kind !== 'source' || part.morphGroup !== null)) throw new Error('current source path/fill/z-order differs: ' + icon + '/' + variant);\n` +
         `    const renderedD = [...current.svg.matchAll(/<path\\b[^>]*\\bd="([^"]+)"/g)].map(match => match[1]);\n` +
         `    const renderedRules = [...current.svg.matchAll(/<path\\b[^>]*\\bfill-rule="([^"]+)"/g)].map(match => match[1]);\n` +
@@ -513,9 +513,9 @@ export function checkPackageArtifact({
         `    if (capabilities.icon !== icon || capabilities.variant !== variant || capabilities.modelState !== null || capabilities.supportedAxes.length || Object.keys(capabilities.axes).length || JSON.stringify(capabilities.motion) !== JSON.stringify(expected.motion) || JSON.stringify(capabilities.anatomy ?? null) !== JSON.stringify(expected.anatomy) || JSON.stringify(capabilities.author) !== JSON.stringify(expected.author)) throw new Error('current source inherited stale admission: ' + icon + '/' + variant);\n` +
         `    const foreignMotion = compileSymbolEffect(current, capabilities, 'time.advance', { duration: 360 });\n` +
         `    if (foreignMotion.ok || foreignMotion.reason.code !== (expected.anatomy ? 'GESTURE_UNSUPPORTED' : 'SEMANTIC_MOTION_UNAVAILABLE')) throw new Error('current motion did not refuse precisely: ' + icon + '/' + variant);\n` +
-        `    for (const [gesture, targets] of Object.entries(expected.effects)) {\n` +
+        `    for (const [gesture, expectedEffect] of Object.entries(expected.effects)) {\n` +
         `      const effect = compileSymbolEffect(current, capabilities, gesture, { duration: 360 });\n` +
-        `      if (!effect.ok || JSON.stringify(effect.effect.targets) !== JSON.stringify(targets)) throw new Error('current declared motion differs: ' + icon + '/' + variant);\n` +
+        `      if (!effect.ok || effect.effect.version !== expectedEffect.version || JSON.stringify(effect.effect.targets) !== JSON.stringify(expectedEffect.targets) || JSON.stringify(effect.effect.stages) !== JSON.stringify(expectedEffect.stages)) throw new Error('current declared motion differs: ' + icon + '/' + variant);\n` +
         `    }\n` +
         `    for (const request of [{ variant, axes: { weight: 1 } }, { variant, axes: { opsz: 24 } }, { variant, axes: { corner: 1 } }, { variant, modelMode: 'allow-candidate' }]) {\n` +
         `      let refused = false;\n` +
@@ -549,7 +549,8 @@ export function checkPackageArtifact({
         `import { buildDirectionalArrow, type RecipeResult } from '@labpics/icons/ir/recipes';\n` +
         `import { glyph as symbolGlyph, glyphCapabilities as symbolCapabilities } from '@labpics/icons/symbols/time';\n` +
         `import { glyph as addedGlyph, glyphCapabilities as addedCapabilities } from '@labpics/icons/symbols/align-bottom';\n` +
-        `import { compileSymbolEffect, type SymbolEffectResult } from '@labpics/icons/motion';\n` +
+        `import { glyph as activityGlyph, glyphCapabilities as activityCapabilities } from '@labpics/icons/symbols/ellipsis-horizontal';\n` +
+        `import { compileSymbolEffect, type SymbolEffectResult, type SymbolOpacityStage } from '@labpics/icons/motion';\n` +
         `import { renderGlyphSvg } from '@labpics/icons/ir/render';\n` +
         `const svg: string = accessibilityOutline;\n` +
         `const name: IconName = 'accessibilityOutline';\n` +
@@ -566,11 +567,19 @@ export function checkPackageArtifact({
         `const authorVersion: string = added.provenance.author.version;\n` +
         `const addedEffect: SymbolEffectResult = compileSymbolEffect(added, addedCapabilities(), 'time.advance', { duration: 200 });\n` +
         `const addedMounted: string = renderGlyphSvg(added, { instanceId: 'added' });\n` +
+        `const activity = compileSymbolEffect(activityGlyph(), activityCapabilities(), 'ellipsis-horizontal.activity', { duration: 900 });\n` +
+        `if (activity.ok && activity.effect.version === 2) {\n` +
+        `  const stages: readonly SymbolOpacityStage[] = activity.effect.stages;\n` +
+        `  const property: 'opacity' = stages[0].property;\n` +
+        `  // @ts-expect-error opacity не объявляет rotate канал\n` +
+        `  const rotation = activity.effect.targets[0].rotation;\n` +
+        `  void [stages, property, rotation];\n` +
+        `}\n` +
         `// @ts-expect-error записанный IR сохраняет собственный census\n` +
         `glyph({ icon: 'align-bottom' });\n` +
         `// @ts-expect-error символ уже связан с icon; private coordinates не принимаются\n` +
         `symbolGlyph({ icon: 'alert' });\n` +
-        `void [svg, name, icon, ir, calendar, recipe, contract, sliced, effect, mounted, addedName, authorVersion, addedEffect, addedMounted];\n`,
+        `void [svg, name, icon, ir, calendar, recipe, contract, sliced, effect, mounted, addedName, authorVersion, addedEffect, addedMounted, activity];\n`,
       'utf8',
     );
     writeFileSync(

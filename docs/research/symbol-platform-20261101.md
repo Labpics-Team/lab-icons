@@ -78,6 +78,37 @@ Benchmark ещё не выполнен в этом исследовании. Cla
 
 [Организационный testing contract](https://github.com/Labpics-Team/.github/blob/main/docs/testing.md) сохраняет полный применимый набор и exact-version results; skipped/cancelled/timeout не являются PASS. Executor принадлежит [ARC](https://github.com/Labpics-Team/labpics-infra/blob/main/services/github-runners/arc/README.md). Linux не выдаётся за native Windows/macOS. [Delivery contract](https://github.com/Labpics-Team/.github/blob/main/docs/delivery.md) отделяет проверенный source, artifact и работающую версию; отсутствие Zuul merge reporter не назначает ему доставку.
 
+## Скалярная шкала loading и typing
+
+В источниках `ellipsis-horizontal` обе формы содержат три самостоятельных пути.
+У Outline `chatbubble-ellipses` paths 0–2 — точки, path 3 — оболочка. У Filled
+того же семейства один evenodd path совмещает четыре контура; слепое разбиение
+изменило бы смысл countershape. Вертикальное троеточие имеет ту же триаду путей,
+но используется как меню. Геометрическая похожесть не назначает activity.
+
+Закон `activity.triad` сохраняет `d` и z-order. В нормализованном цикле точки
+сначала снижают opacity с 1 до 0.35 к фазе 1/12, затем по очереди достигают 1
+на фазах 2/12, 5/12, 8/12 и возвращаются к полной непрозрачности к фазе 1.
+Loading и typing потребляют одну шкалу; координатных исключений у иконок нет.
+Opacity не требует фиктивного якоря. Idle выражается отдельным semantic state
+той же анатомии и восстанавливает все точки до opacity 1.
+
+[Runtime опубликованной версии 0.5.0](https://github.com/Labpics-Team/lab-motion/blob/68825562824353bca377e00a3107895796229ff4/src/motion/runtime.ts)
+и [публичные типы](https://github.com/Labpics-Team/lab-motion/blob/68825562824353bca377e00a3107895796229ff4/src/motion/types.ts)
+подтверждают `sequence` с миллисекундами `at/duration`. Первый scalar использует
+текущую Surface pose, дальнейшие этапы — финал предыдущего. Массив значений
+записывает явное начало синхронно и может вызвать скачок при interruption;
+`null` как placeholder отвергается. Выбран scalar-stage эффект v2, который
+потребитель передаёт штатному sequence. Lab Icons не добавляет scheduler.
+
+`from/to` обрезают и при необходимости разворачивают semantic phase interval.
+Начало нового sequence подхватывает текущую непрозрачность; reduced motion
+материализует terminal targets. Это C0 pickup текущей позы, без обещания C1 или
+точного обращения playhead. Публичный root Playback 0.5.0 не имеет `reverse()`.
+Native `./waapi` остаётся альтернативой, но добавил бы собственный lifecycle и
+reduced-motion handling. Multipoint root sequence использует scheduler;
+compositor-only claim поэтому не делается.
+
 ## Ограничения исследования
 
 Primary Apple HIG/annotation страницам clean-text fetch вернул только оболочку. Конкретные Draw/annotation/enclosure assertions выше взяты из полного официального WWDC25 transcript и current SF Symbols overview. Полный Figma export/optical verdict, runtime performance и target fidelity остаются исполнимыми обязательствами; эти источники не подменяют их.

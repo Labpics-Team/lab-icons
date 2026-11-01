@@ -8,7 +8,8 @@ import { authorPathEntries } from '../src/core/icon-geometry.js';
 const root = fileURLToPath(new URL('..', import.meta.url));
 const read = relative => JSON.parse(readFileSync(new URL(relative, new URL('../', import.meta.url)), 'utf8'));
 const captured = read('semantics/figma-baseline.json');
-const document = read('semantics/author-anatomy.json');
+const allAnnotations = read('semantics/author-anatomy.json');
+const document = { ...allAnnotations, icons: { reload: allAnnotations.icons.reload, refresh: allAnnotations.icons.refresh } };
 const manifest = { ...captured, counts: { families: 3, variants: 6 },
   icons: Object.fromEntries(['reload', 'refresh', 'time'].map(icon => [icon, captured.icons[icon]])) };
 const baseline = loadAuthorBaseline(root, { manifest });

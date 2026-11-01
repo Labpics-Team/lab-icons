@@ -26,7 +26,9 @@ describe('benchmark author oracle и сохранённый output', () => {
     const read = path => JSON.parse(readFileSync(new URL(path, rootPath), 'utf8'));
     const captured = read('semantics/figma-baseline.json');
     const baseline = loadAuthorBaseline(fileURLToPath(rootPath), { manifest: { ...captured, counts: { families: 2, variants: 4 }, icons: { reload: captured.icons.reload, refresh: captured.icons.refresh } } });
-    const contracts = compileAuthorAnatomy(baseline, read('semantics/author-anatomy.json'));
+    const allAnnotations = read('semantics/author-anatomy.json');
+    const annotations = { ...allAnnotations, icons: { reload: allAnnotations.icons.reload, refresh: allAnnotations.icons.refresh } };
+    const contracts = compileAuthorAnatomy(baseline, annotations);
     const [icon, variant] = id.split('/');
     const sources = Object.fromEntries(Object.entries(baseline.icons[icon]).map(([name, record]) => [name, { ...record, sourceContract: contracts[`${icon}/${name}`] }]));
     const compiler = createGlyphCompiler({ catalog: { canvas: { viewBox: [0, 0, 24, 24] }, axes: read('semantics/catalog.json').axes, icons: { [icon]: { model: null, source: { outline: sources.outline.sourceContract, filled: sources.filled.sourceContract } } } }, anatomy: { version: 1, glyphs: {} }, grid: read('semantics/grid.json'), staticIcons: Object.fromEntries(Object.entries(sources).map(([name, record]) => [`${icon}${name === 'outline' ? 'Outline' : 'Filled'}`, record.artifactSvg])) });
@@ -48,7 +50,7 @@ describe('benchmark author oracle и сохранённый output', () => {
     expect(() => validateAuthorAdmission({ ...glyph, parts: glyph.parts.map(part => ({ ...part, provenance: { ...part.provenance, identity: 'source-derived' } })) }, caps, record, record.sourceContract)).toThrow(/identity/);
     expect(() => validateAuthorAdmission({ ...glyph, parts: glyph.parts.map(part => ({ ...part, anchor: [0.6, 0.5] })) }, caps, record, record.sourceContract)).toThrow(/anchor/);
     expect(() => validateAuthorAdmission(glyph, { ...caps, motion: { ...caps.motion, gestures: [] } }, record, record.sourceContract)).toThrow(/capabilities/);
-    const packed = authorPackageExpectations(baseline, read('semantics/author-anatomy.json'))[icon][variant];
+    const packed = authorPackageExpectations(baseline, annotations)[icon][variant];
     expect(packed.parts).toHaveLength(1);
     expect(packed.parts[0]).toMatchObject({ id: 'cycle-body', identity: 'declared', role: 'control', anchor: [0.5, 0.5], anchorSource: 'declared', d: original.paths[0].d, sourceFingerprint: baseline.icons[icon][variant].sourceContract.parts[0].sourceFingerprint });
     expect(packed.anatomy).toEqual(expected.anatomy);

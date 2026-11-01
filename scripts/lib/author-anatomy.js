@@ -67,6 +67,51 @@ function clockwiseCycle(icon, variant, declaration, parts) {
   return [gesture];
 }
 
+/** Loading и typing используют одни и те же три отдельные точки. Меню не
+ * наследует их смысл только из совпадения геометрии. Оболочка не анимируется. */
+function activityTriad(icon, variant, declaration, parts) {
+  fields(declaration, ['law', 'purpose', 'partIds'], `${icon}/${variant}.gesture`);
+  if (!['loading', 'typing'].includes(declaration.purpose)) {
+    refuse('LAW_SEMANTICS_UNSUPPORTED', `${icon}/${variant}: activity.triad требует явно объявленный loading или typing`);
+  }
+  if (!Array.isArray(declaration.partIds) || declaration.partIds.length !== 3 ||
+      new Set(declaration.partIds).size !== 3 || declaration.partIds.some(id => {
+        const part = parts.find(part => part.id === id);
+        return !part || part.role !== 'content' || part.topologySignature.includes('|') ||
+          !part.topologySignature.endsWith('Z');
+      }) || parts.some(part => !declaration.partIds.includes(part.id) && part.role !== 'container')) {
+    refuse('LAW_TOPOLOGY_UNSUPPORTED', `${icon}/${variant}: activity.triad требует три адресуемых замкнутых content части и неподвижные container части`);
+  }
+  const muted = 0.35;
+  const tracks = declaration.partIds.map((partId, index) => ({
+    partId, kind: 'opacity', unit: 'fraction', interpolation: 'linear',
+    stops: [
+      { at: 0, value: 1 }, { at: 1 / 12, value: muted },
+      ...(index === 0 ? [] : [{ at: (1 + index * 3) / 12, value: muted }]),
+      { at: (2 + index * 3) / 12, value: 1 },
+      { at: (4 + index * 3) / 12, value: muted },
+      ...(index === 2 ? [] : [{ at: 10 / 12, value: muted }]),
+      { at: 1, value: 1 },
+    ],
+  }));
+  const gestures = [
+    { id: `${icon}.activity`, kind: 'cycle',
+      meaning: declaration.purpose === 'loading' ? 'Один упорядоченный цикл загрузки; точки сохраняют авторскую форму.' : 'Один упорядоченный цикл набора сообщения; оболочка остаётся неподвижной.',
+      partIds: [...declaration.partIds], progress: 'normalized-0-to-1', tracks },
+    { id: `${icon}.idle`, kind: 'state', meaning: 'Восстановить неподвижные авторские точки с полной непрозрачностью.',
+      partIds: [...declaration.partIds], progress: 'normalized-0-to-1',
+      tracks: tracks.map(track => ({ ...track, stops: [{ at: 0, value: 1 }, { at: 1, value: 1 }] })) },
+  ];
+  for (const gesture of gestures) validateMotionGesture(gesture);
+  return gestures;
+}
+
+function compileLaw(icon, variant, declaration, parts) {
+  if (declaration?.law === 'cycle.clockwise') return clockwiseCycle(icon, variant, declaration, parts);
+  if (declaration?.law === 'activity.triad') return activityTriad(icon, variant, declaration, parts);
+  refuse('LAW_UNSUPPORTED', `${icon}/${variant}: закон ${declaration?.law} не объявлен`);
+}
+
 /**
  * Смысл задаётся явно, а geometry остаётся у проверенного master. Индексы
  * адресуют только этот закреплённый экспорт; наружу выходят стабильные part.id.
@@ -110,14 +155,15 @@ export function compileAuthorAnatomy(baseline, document) {
       const ids = new Set();
       const byIndex = new Map();
       for (const part of declaration.parts) {
-        fields(part, ['pathIndex', 'id', 'role', 'anchor', 'anchorMeaning'], `${label}.part`);
+        const anchored = part?.role === 'control';
+        fields(part, anchored ? ['pathIndex', 'id', 'role', 'anchor', 'anchorMeaning'] : ['pathIndex', 'id', 'role'], `${label}.part`);
         if (!Number.isSafeInteger(part.pathIndex) || part.pathIndex < 0 ||
             part.pathIndex >= source.sourceContract.parts.length || byIndex.has(part.pathIndex) ||
             typeof part.id !== 'string' || !NAME.test(part.id) || ids.has(part.id) ||
-            part.role !== 'control' || part.anchorMeaning !== 'canvas-center' ||
+            !['control', 'content', 'container'].includes(part.role) || anchored && (part.anchorMeaning !== 'canvas-center' ||
             !Array.isArray(part.anchor) || part.anchor.length !== 2 ||
             part.anchor.some(value => !Number.isFinite(value) || value < 0 || value > 1) ||
-            part.anchor[0] !== 0.5 || part.anchor[1] !== 0.5) {
+            part.anchor[0] !== 0.5 || part.anchor[1] !== 0.5)) {
           refuse('PARTS_INVALID', `${label}: невалидные index/id/role или явно объявленный canvas-center anchor`);
         }
         ids.add(part.id);
@@ -127,9 +173,9 @@ export function compileAuthorAnatomy(baseline, document) {
         const annotation = byIndex.get(index);
         if (!annotation || part.zIndex !== index) refuse('PARTS_INVALID', `${label}: нарушено покрытие или z-order`);
         return { ...part, id: annotation.id, identity: 'declared', role: annotation.role,
-          anchor: [...annotation.anchor], anchorSource: 'declared' };
+          ...(annotation.anchor && { anchor: [...annotation.anchor], anchorSource: 'declared' }) };
       });
-      const gestures = clockwiseCycle(icon, variant, declaration.gesture, parts);
+      const gestures = compileLaw(icon, variant, declaration.gesture, parts);
       const annotationSha256 = createHash('sha256').update(stableJSON({
         schemaVersion: document.schemaVersion, source: document.source, icon, variant,
         declaration, gestures,

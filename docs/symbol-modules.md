@@ -100,6 +100,40 @@ if (!result.ok) throw new Error(result.reason.message);
 Публичный Lab Motion исполняет числовой канал `rotate`; пример связки находится
 в [Observatory consumer](../observatory/motion-execution.js).
 
+У эффекта версия 1 содержит вращение; версия 2 содержит скалярные opacity-стадии.
+Перед чтением полей канала проверьте `effect.version`.
+`ellipsis-horizontal` в обоих начертаниях и `chatbubble-ellipses` в Outline
+поддерживают `<имя>.activity` и `<имя>.idle`. Один закон `activity.triad`
+выделяет три точных авторских пути. При typing оболочка `bubble` остаётся
+неподвижной; Filled chatbubble с единым evenodd-контуром пока отказывает.
+Вертикальное троеточие сохраняет смысл меню и автоматически loading не получает.
+
+```js
+import { glyph, glyphCapabilities } from '@labpics/icons/symbols/chatbubble-ellipses';
+import { compileSymbolEffect } from '@labpics/icons/motion';
+import { sequence } from '@labpics/motion';
+
+const result = compileSymbolEffect(glyph(), glyphCapabilities(), 'chatbubble-ellipses.activity', {
+  duration: 900, from: 0.3, to: 1,
+});
+if (!result.ok) throw new Error(result.reason.message);
+if (result.effect.version !== 2) throw new Error('Нужен opacity-эффект');
+const byPart = new Map([...svg.querySelectorAll('[data-part]')].map(part => [part.dataset.part, part]));
+const next = sequence(result.effect.stages.map(stage => [
+  byPart.get(stage.partId), { opacity: stage.to },
+  { at: stage.at, duration: stage.duration, ease: result.effect.options.easing },
+]), { reducedMotion: result.effect.options.duration === 0 ? 'always' : 'user' });
+previous?.stop();
+```
+
+`svg` — смонтированный `renderGlyphSvg(glyph())`; перед исполнением проверьте наличие
+всех `targets.partId`. `at` и `duration` заданы в миллисекундах. Первый скалярный
+этап подхватывает текущую позу Lab Motion; остальные продолжают объявленную шкалу.
+Новый effect принимается до освобождения прежнего control. Обратные `from/to`
+компилируют путь к более ранней фазе; это новое намерение, а не вызов отсутствующего
+`reverse()` в root API 0.5.0. Idle восстанавливает opacity 1, reduced motion сразу
+принимает конечную позу, повтор завершённого activity создаёт новую occurrence.
+
 Принятый `time.advance` доступен у записанной модели:
 
 ```js

@@ -5,7 +5,7 @@ import { pathToFileURL } from 'node:url';
 import { loadAuthorBaseline } from '../lib/author-baseline.js';
 import { compileAuthorAnatomy } from '../lib/author-anatomy.js';
 import { assertRemoteBenchmark } from './measurement.js';
-import { expectedAuthorEffectTargets, inspectAuthorSvg, sha256, stableJSON, validateAuthorAdmission, validateAuthorObservation } from './author-oracle.js';
+import { expectedAuthorEffect, inspectAuthorSvg, sha256, stableJSON, validateAuthorAdmission, validateAuthorObservation } from './author-oracle.js';
 
 assertRemoteBenchmark();
 const request = JSON.parse(readFileSync(process.argv[2], 'utf8'));
@@ -53,8 +53,10 @@ try {
       if (motion.ok || motion.reason.code !== motionRefusal) throw new Error(`${icon}/${variant}: чужой motion не получил точный отказ`);
       for (const gesture of contract.gestures ?? []) {
         const result = compileSymbolEffect(glyph, caps, gesture.id, { duration: 360 });
-        const targets = expectedAuthorEffectTargets(gesture);
-        if (!result.ok || stableJSON(result.effect.targets) !== stableJSON(targets)) throw new Error(`${icon}/${variant}: объявленный motion не сохраняет цели, anchor или траекторию`);
+        const expectedEffect = expectedAuthorEffect(gesture);
+        if (!result.ok || result.effect.version !== expectedEffect.version ||
+            stableJSON(result.effect.targets) !== stableJSON(expectedEffect.targets) ||
+            stableJSON(result.effect.stages) !== stableJSON(expectedEffect.stages)) throw new Error(`${icon}/${variant}: объявленный motion не сохраняет цели, anchor или траекторию`);
       }
       report.icons[icon][variant] = { ...expected, svgSha256: observed.svgSha256, complexity: observed.complexity, refusals, motionRefusal: motion.reason.code };
       report.completed++;

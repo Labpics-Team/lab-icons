@@ -74,21 +74,37 @@ export function expectedAuthorMotion(contract) {
   return {
     state: contract.anatomy ? 'gesture-ready' : 'source-only',
     partIds: contract.anatomy ? contract.parts.map(part => part.id) : [],
-    tracks: gestures.flatMap(gesture => gesture.tracks.map(track => ({
-      id: `rotate.${track.partId}`, kind: 'rotate', partIds: [track.partId], anchor: track.anchor,
-    }))),
+    tracks: [...new Map(gestures.flatMap(gesture => gesture.tracks.map(track => {
+      const id = `${track.kind}.${track.partId}`;
+      return [id, { id, kind: track.kind, partIds: [track.partId],
+        ...(track.kind === 'rotate' ? { anchor: track.anchor } : {}) }];
+    }))).values()],
     gestures,
     adapters: { lottie: 'not-exported', sfSymbols: 'not-exported' },
   };
 }
 
 export function expectedAuthorEffectTargets(gesture) {
-  return gesture.tracks.map(track => ({
+  return gesture.tracks.map(track => track.kind === 'opacity' ? {
+    partId: track.partId, property: 'opacity', from: track.stops[0].value, to: track.stops.at(-1).value,
+  } : {
     partId: track.partId,
     rotation: { from: track.from, to: track.to, unit: 'degrees' },
     style: { transformBox: 'view-box', transformOrigin: `${track.anchor[0] * 100}% ${track.anchor[1] * 100}%` },
     keyframes: [{ offset: 0, transform: `rotate(${track.from}deg)` }, { offset: 1, transform: `rotate(${track.to}deg)` }],
-  }));
+  });
+}
+
+/** Независимая full-timeline projection от декларации, без импорта motion compiler. */
+export function expectedAuthorEffect(gesture, duration = 360) {
+  const opacity = gesture.tracks.every(track => track.kind === 'opacity');
+  const targets = expectedAuthorEffectTargets(gesture);
+  if (!opacity) return { version: 1, targets };
+  const stages = gesture.tracks.flatMap(track => track.stops.slice(1).map((stop, index) => {
+    const at = track.stops[index].at * duration;
+    return { partId: track.partId, property: 'opacity', to: stop.value, at, duration: stop.at * duration - at };
+  })).sort((a, b) => a.at - b.at || (a.partId < b.partId ? -1 : a.partId > b.partId ? 1 : 0));
+  return { version: 2, targets, stages };
 }
 
 export function validateAuthorAdmission(glyph, caps, record, contract) {
@@ -105,7 +121,8 @@ export function validateAuthorAdmission(glyph, caps, record, contract) {
     const expected = contract.parts[index];
     return part.provenance.kind !== 'source' || part.provenance.identity !== expected.identity ||
       part.morphGroup !== null || part.role !== expected.role ||
-      (anatomy && (part.anchorSource !== 'declared' || stableJSON(part.anchor) !== stableJSON(expected.anchor)));
+      (anatomy && expected.anchor ? part.anchorSource !== 'declared' || stableJSON(part.anchor) !== stableJSON(expected.anchor)
+        : part.anchorSource !== 'geometry-bbox-center');
   })) throw new Error('benchmark oracle: source identity или declared anchor не соответствует anatomy');
 }
 

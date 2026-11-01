@@ -195,7 +195,7 @@ export type MotionCapabilityState =
   | 'anchored-parts'
   | 'gesture-ready';
 
-export interface MotionGestureTrackContract {
+export interface MotionGestureRotationTrackContract {
   readonly partId: string;
   readonly kind: 'rotate';
   readonly anchor: readonly [number, number];
@@ -204,6 +204,16 @@ export interface MotionGestureTrackContract {
   readonly unit: 'degrees';
   readonly interpolation: 'linear';
 }
+
+export interface MotionGestureOpacityTrackContract {
+  readonly partId: string;
+  readonly kind: 'opacity';
+  readonly unit: 'fraction';
+  readonly interpolation: 'linear';
+  readonly stops: readonly Readonly<{ at: number; value: number }>[];
+}
+
+export type MotionGestureTrackContract = MotionGestureRotationTrackContract | MotionGestureOpacityTrackContract;
 
 export interface MotionGestureContract {
   readonly id: string;
@@ -214,19 +224,25 @@ export interface MotionGestureContract {
   readonly tracks: readonly MotionGestureTrackContract[];
 }
 
-export interface MotionGestureSample {
+export interface MotionGestureRotationSample {
   readonly partId: string;
   readonly kind: 'rotate';
   readonly anchor: readonly [number, number];
   readonly rotation: number;
 }
 
-export interface MotionTrackContract {
+export type MotionGestureSample = MotionGestureRotationSample |
+  Readonly<{ partId: string; kind: 'opacity'; opacity: number }>;
+
+export interface MotionRotationTrackContract {
   readonly id: string;
   readonly kind: 'rotate';
   readonly partIds: readonly string[];
   readonly anchor: readonly [number, number];
 }
+
+export type MotionTrackContract = MotionRotationTrackContract |
+  Readonly<{ id: string; kind: 'opacity'; partIds: readonly string[] }>;
 
 export interface MotionCapabilities {
   readonly state: MotionCapabilityState;
@@ -825,16 +841,21 @@ export function createGlyphCompiler({ catalog: catalogJson, anatomy: anatomyJson
           ...gesture,
           partIds: Object.freeze([...gesture.partIds]),
           tracks: Object.freeze(gesture.tracks.map(track => Object.freeze({
-            ...track, anchor: Object.freeze([...track.anchor] as [number, number]),
+            ...track,
+            ...(track.kind === 'rotate' ? { anchor: Object.freeze([...track.anchor] as [number, number]) }
+              : { stops: Object.freeze(track.stops.map(stop => Object.freeze({ ...stop }))) }),
           }))),
         }));
         return Object.freeze({
           state: 'gesture-ready',
           partIds: Object.freeze(source.parts.map(part => part.id)),
-          tracks: Object.freeze(gestures.flatMap(gesture => gesture.tracks.map(track => Object.freeze({
-            id: `rotate.${track.partId}`, kind: 'rotate' as const,
-            partIds: Object.freeze([track.partId]), anchor: track.anchor,
-          })))),
+          tracks: Object.freeze([...new Map(gestures.flatMap(gesture => gesture.tracks.map(track => {
+            const id = `${track.kind}.${track.partId}`;
+            const capability: MotionTrackContract = Object.freeze(track.kind === 'rotate' ? {
+              id, kind: 'rotate', partIds: Object.freeze([track.partId]), anchor: track.anchor,
+            } : { id, kind: 'opacity', partIds: Object.freeze([track.partId]) });
+            return [id, capability] as const;
+          }))).values()]),
           gestures: Object.freeze(gestures),
           adapters: motionAdapters,
         });
