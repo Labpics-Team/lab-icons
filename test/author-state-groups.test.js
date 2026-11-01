@@ -297,6 +297,71 @@ describe.each(groupNames)('%s: точные author masters и единая об�
   });
 });
 
+describe('enclosure.replace: необъявленный общий рисунок во всём prefix', () => {
+  const square = 'M10 5L11 5L11 6L10 6Z';
+  const reversed = 'M11 5L10 5L10 6L11 6Z';
+  const unique = ['M4 5L5 5L5 6L4 6Z', 'M6 5L7 5L7 6L6 6Z', 'M14 5L15 5L15 6L14 6Z'];
+
+  function witness(position, repeated, spelling = 'literal') {
+    const source = structuredClone(baseline), input = structuredClone(document);
+    const groupSpec = input.groups['expression-face'];
+    for (const [index, state] of ['aloof', 'sad', 'smile'].entries()) {
+      const placement = position === 'mixed' ? state === 'aloof' ? 'first' : 'middle' : position;
+      const common = repeated.includes(state) ? spelling === 'exact' && state === 'sad' ? reversed : square : unique[index];
+      const commonTag = `<path d="${common}" fill="#101012"/>`;
+      const lastTag = `<path d="${unique[index]}" fill="#101012"/>`;
+      groupSpec.states[state].contentPartIds = placement === 'first'
+        ? [`${state}-extra`, `${state}-mouth`] : [`${state}-mouth`, `${state}-extra`, `${state}-tail`];
+      repin(source, input, state, svg => {
+        let path = 0;
+        return svg.replace(/<path\b[^>]*>/g, tag => path++ === 0
+          ? placement === 'first' ? commonTag + tag : tag + commonTag + lastTag : tag);
+      }, 'expression-face');
+    }
+    return { source, input };
+  }
+
+  it.each(['first', 'middle'].flatMap(position => ['all', 'subset'].flatMap(scope =>
+    ['literal', 'exact'].map(spelling => [position, scope, spelling]))))
+  ('%s prefix: общий рисунок %s states, %s spelling требует SHARED_PART_UNDECLARED', (position, scope, spelling) => {
+    const { source, input } = witness(position, scope === 'all' ? ['aloof', 'sad', 'smile'] : ['aloof', 'sad'], spelling);
+    const prefix = Object.values(input.groups['expression-face'].states).map(member =>
+      rawPaths(source.icons[member.icon].outline.rawSvg).slice(0, member.contentPartIds.length));
+    if (scope === 'subset') {
+      // Независимый fixture oracle сравнивает четыре вершины прямых квадратов.
+      // Всеобщая intersection пуста даже при другом start/reversal у sad.
+      const vertexSets = prefix.map(parts => parts.filter(part => /^M[\d .]+(?:L[\d .]+){3}Z$/.test(part.d)).map(part => {
+        const values = part.d.match(/\d+(?:\.\d+)?/g);
+        return [0, 2, 4, 6].map(index => values.slice(index, index + 2).join(',')).sort().join(';');
+      }));
+      expect(vertexSets[0].filter(vertices => vertexSets.every(sets => sets.includes(vertices)))).toHaveLength(0);
+    }
+    expect(() => compile(source, input)).toThrow(expect.objectContaining({ code: 'SHARED_PART_UNDECLARED' }));
+  });
+
+  it.each(['literal', 'exact'])('один рисунок на разных prefix indices, %s spelling, требует отказа', spelling => {
+    const { source, input } = witness('mixed', ['aloof', 'sad'], spelling);
+    expect(() => compile(source, input)).toThrow(expect.objectContaining({ code: 'SHARED_PART_UNDECLARED' }));
+  });
+
+  it('настоящая decimal разница ниже точности Number не становится общей частью', () => {
+    const { source, input } = witness('first', ['aloof', 'sad']);
+    repin(source, input, 'sad', svg => svg.replace(`d="${square}"`, 'd="M10.00000000000000000000001 5L11 5L11 6L10 6Z"'), 'expression-face');
+    expect(() => compile(source, input)).not.toThrow();
+  });
+
+  it('различные prefix parts и authored повтор внутри одной группы сохраняют static путь', () => {
+    const { source, input } = witness('middle', []);
+    const compiled = createCompiledStateGroup(compile(source, input)['expression-face']);
+    for (const state of ['aloof', 'sad', 'smile']) {
+      expect(rawPaths(compiled.render(state).svg)).toEqual(rawPaths(source.icons[state].outline.rawSvg));
+    }
+    // В aloof extra/tail совпадают внутри одной opacity-группы: это raw multiplicity.
+    const paths = rawPaths(source.icons.aloof.outline.rawSvg);
+    expect(paths[1]).toEqual(paths[2]);
+  });
+});
+
 describe('expression-face: общие глаза не входят в изменяемую opacity группу', () => {
   const name = 'expression-face';
   const faceSpec = document.groups[name];

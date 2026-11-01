@@ -99,8 +99,7 @@ export function compileAuthorStateGroups(baseline, document, { compiler, assembl
     let enclosureIdentity;
     let frame;
     let variant;
-    let prefixBoundary;
-    let prefixBoundaryDiffers = false;
+    const prefixArtwork = new Map();
     const staticSharedByState = new Map();
     for (const state of stateNames) {
       const member = group.states[state];
@@ -185,17 +184,22 @@ export function compileAuthorStateGroups(baseline, document, { compiler, assembl
       }
       const content = glyph.parts.slice(0, member.contentPartIds.length)
         .map((part, index) => ({ ...part, id: member.contentPartIds[index], role: 'content' }));
-      const boundary = content.at(-1);
-      const boundaryIdentity = fillPart(boundary);
-      if (prefixBoundary === undefined) prefixBoundary = boundaryIdentity;
-      else if (!sameFillPart(boundaryIdentity, prefixBoundary)) prefixBoundaryDiffers = true;
+      for (const part of content) {
+        const current = fillPart(part);
+        const { d, ...paint } = current;
+        const key = exactClosedFillPathKey(d, current.fillRule);
+        // Индекс охватывает все позиции и пары states; число проверок не растёт
+        // квадратично с числом независимых prefix parts. Допуск решает sameFillPart.
+        const identity = stableJSON({ ...paint, geometry: key === null ? { literal: d } : { exact: key } });
+        const previous = prefixArtwork.get(identity);
+        if (previous && previous.state !== state && sameFillPart(current, previous.part)) {
+          refuse('SHARED_PART_UNDECLARED', `${name}.${state}: общий рисунок prefix с ${previous.state} требует объявленной shared anatomy`);
+        }
+        // Authored multiplicity внутри одной opacity-группы сохраняется.
+        if (!previous) prefixArtwork.set(identity, { state, part: current });
+      }
       states.push({ id: state, partId: groupPartId, icon: member.icon,
         contentSvg: assembleGlyphLayers(content), contentPartIds: [...member.contentPartIds], author: { ...source.author } });
-    }
-    // Равная последняя часть prefix — ещё один безопасный shared suffix layer.
-    // Не оставляем её в opacity-группах: source-over затемнил бы общий рисунок.
-    if (!prefixBoundaryDiffers) {
-      refuse('SHARED_PART_UNDECLARED', `${name}: общая последняя часть prefix требует объявленной shared anatomy`);
     }
     for (const state of states) {
       const staticSharedSvg = staticSharedByState.get(state.id);
