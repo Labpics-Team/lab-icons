@@ -25,6 +25,7 @@ import {
   validateInstalledPackage,
 } from '../scripts/check-package-artifact.js';
 import { symbolReleaseProjection } from '../scripts/lib/symbol-modules.js';
+import { lottieSymbolDeclaration, renderLottieSymbolModule } from '../scripts/lib/lottie-geometry.js';
 
 vi.mock('node:child_process', () => ({ execFileSync: vi.fn() }));
 
@@ -76,7 +77,7 @@ function validPackage() {
   write(root, 'dist/ir/candidates.js', 'export const registerCandidates = () => {};\n');
   write(root, 'dist/ir/candidates.d.ts', 'export declare function registerCandidates(): void;\n');
   write(root, 'dist/ir/compiler.js', 'import "./request.js"; export const fixture = 1;\n');
-  write(root, 'dist/ir/compiler.d.ts', "import type { GlyphModelErrorCode } from './request.js';\nexport interface GlyphIR { readonly code: GlyphModelErrorCode }\n");
+  write(root, 'dist/ir/compiler.d.ts', "import type { GlyphModelErrorCode } from './request.js';\nexport type IconVariant = 'outline' | 'filled';\nexport interface GlyphIR { readonly code: GlyphModelErrorCode }\n");
   write(root, 'dist/ir/request.js', 'export const fixture = 1;\n');
   write(root, 'dist/ir/request.d.ts', "export type GlyphModelErrorCode = 'CANDIDATES_REQUIRED';\n");
   write(root, 'dist/ir/symbol-runtime.js', 'import "./request.js"; export const fixture = 1;\n');
@@ -84,8 +85,13 @@ function validPackage() {
   write(root, 'dist/ir/render.d.ts', "import type { GlyphIR } from './compiler.js';\nexport declare function renderGlyphSvg(glyph: GlyphIR): string;\n");
   write(root, 'dist/motion/index.js', 'export const fixture = 1;\n');
   write(root, 'dist/motion/index.d.ts', 'export declare const fixture: number;\n');
-  write(root, 'dist/symbols/fixture.js', 'import "../ir/symbol-runtime.js"; export const fixture = 1;\n');
+  write(root, 'dist/ir/lottie-runtime.js', 'import "../motion/index.js"; export const createLottieSymbol = () => ({});\n');
+  write(root, 'dist/ir/lottie-types.d.ts', readFileSync(new URL('../src/lottie/types.ts', import.meta.url), 'utf8'));
+  write(root, 'dist/symbols/fixture.js', 'import "../ir/symbol-runtime.js"; export const glyph = () => ({}); export const glyphCapabilities = () => ({});\n');
   write(root, 'dist/symbols/fixture.d.ts', "import type { AuthorSourceGlyph } from '../ir/author-source.js';\nexport declare function glyph(): AuthorSourceGlyph;\n");
+  const unavailableTarget = { ok: false, reason: { code: 'PATH_INVALID', message: 'fixture' } };
+  write(root, 'dist/lottie/fixture.js', renderLottieSymbolModule('fixture', { outline: unavailableTarget, filled: unavailableTarget }));
+  write(root, 'dist/lottie/fixture.d.ts', lottieSymbolDeclaration());
   return root;
 }
 
