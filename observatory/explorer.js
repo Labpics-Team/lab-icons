@@ -18,6 +18,11 @@ function displayStyle() {
 const $ = (selector) => document.querySelector(selector);
 const ui = Object.fromEntries(['symbol-search', 'variant', 'symbol-grid', 'more-symbols', 'empty-search', 'corpus-count', 'visible-count', 'symbol-inspector', 'symbol-name', 'model-status', 'symbol-stage', 'size-samples', 'source-status', 'axis-controls', 'axis-status', 'parts', 'gesture', 'play', 'reverse', 'pause', 'progress', 'reduce-motion', 'motion-status', 'consumer-import', 'export-format', 'export', 'export-status'].map((id) => [id, $(`#${id}`)]));
 const reducedPreference = matchMedia('(prefers-reduced-motion: reduce)');
+const loadStatus = document.querySelector('#load-status');
+function loadMessage(message = '') {
+  loadStatus.textContent = message;
+  loadStatus.hidden = !message;
+}
 const state = { data: null, name: 'time', variant: 'outline', view: 'original', viewLoading: false, limit: 48, revision: 0, viewRevision: 0, motionRevision: 0, pendingMotion: null, loaded: false, legacy: false, modelModule: null, abort: null, module: null, capabilities: null, glyph: null, axes: {}, original: '', effect: null, animations: [], frame: null, playhead: null };
 
 function progress() {
@@ -143,11 +148,13 @@ async function renderView(view = state.view) {
   const row = selectedRow();
   if (!viewAvailable(view, row)) {
     ui['source-status'].textContent = view === 'generated' ? 'Для прежней основы нет принятой модели. Кандидат доступен только для сравнения.' : 'Для этого варианта нет изображения сравнения.';
+    loadMessage(ui['source-status'].textContent);
     return;
   }
   const viewRevision = ++state.viewRevision;
   stop();
   state.viewLoading = true;
+  loadMessage();
   inspectorBusy(true);
   updateMotionControls();
   try {
@@ -205,6 +212,7 @@ async function renderView(view = state.view) {
     updateViewControls();
     updateMotionControls();
     ui['source-status'].textContent = error.message;
+    loadMessage(error.message);
   }
 }
 
@@ -272,6 +280,7 @@ async function select(name, { reveal = false } = {}) {
   ui['symbol-name'].textContent = name;
   ui['symbol-stage'].setAttribute('aria-label', `Символ ${name}: ${state.variant === 'filled' ? 'заливка' : 'контурное начертание'}`);
   ui['export-status'].textContent = '';
+  loadMessage();
   ui.progress.value = '0';
   clearInspector('Загрузка…');
   inspectorBusy(true);
@@ -306,6 +315,7 @@ async function select(name, { reveal = false } = {}) {
     inspectorBusy(false);
     ui['symbol-stage'].textContent = 'Не удалось загрузить символ.';
     ui['source-status'].textContent = error.message;
+    loadMessage(error.message);
   }
 }
 
@@ -318,7 +328,7 @@ async function advance(to, { repeatCycle = false } = {}) {
   const revision = state.revision;
   const viewRevision = state.viewRevision;
   const motionRevision = ++state.motionRevision;
-  const pending = { paused: false };
+  const pending = { paused: false, to };
   state.pendingMotion = pending;
   updateMotionControls();
   // Новый полный оборот — отдельное намерение пользователя. Ретаргет
@@ -367,6 +377,7 @@ displaySize.addEventListener('input', displayStyle);
 displayColor.addEventListener('input', displayStyle);
 ui.variant.addEventListener('change', () => select(state.name));
 ui['more-symbols'].addEventListener('click', () => { state.limit += 48; grid(); });
+ui.gesture.addEventListener('change', updateMotionControls);
 for (const button of document.querySelectorAll('[data-view]')) button.addEventListener('click', () => renderView(button.dataset.view));
 ui.play.addEventListener('click', () => advance(1, { repeatCycle: true }));
 ui.reverse.addEventListener('click', () => advance(0));
@@ -408,8 +419,12 @@ ui.progress.addEventListener('input', async () => {
   }
 });
 ui['reduce-motion'].checked = reducedPreference.matches;
-ui['reduce-motion'].addEventListener('change', () => { if (state.effect && ui['reduce-motion'].checked) advance(state.effect.to); });
-reducedPreference.addEventListener('change', () => { ui['reduce-motion'].checked = reducedPreference.matches; if (state.effect && reducedPreference.matches) advance(state.effect.to); });
+function reduceCurrentMotion() {
+  const target = state.pendingMotion?.to ?? state.effect?.to;
+  if (target !== undefined) advance(target);
+}
+ui['reduce-motion'].addEventListener('change', () => { if (ui['reduce-motion'].checked) reduceCurrentMotion(); });
+reducedPreference.addEventListener('change', () => { ui['reduce-motion'].checked = reducedPreference.matches; if (reducedPreference.matches) reduceCurrentMotion(); });
 ui.export.addEventListener('click', () => {
   if (!state.loaded || state.viewLoading) return;
   const format = ui['export-format'].value;
@@ -444,4 +459,5 @@ try {
   ui['symbol-grid'].textContent = `Библиотека недоступна: ${error.message}`;
   ui['symbol-stage'].textContent = 'Библиотека недоступна.';
   ui['source-status'].textContent = error.message;
+  loadMessage(error.message);
 }

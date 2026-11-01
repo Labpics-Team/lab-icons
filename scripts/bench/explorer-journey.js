@@ -176,6 +176,7 @@ export async function runExplorerJourney() {
     await choose('refresh', 'outline');
     check('failed-selection-clears-old-projection', q('consumer-import').textContent === '' &&
       q('size-samples').children.length === 0 && q('parts').children.length === 0 && q('export').disabled);
+    check('failed-selection-visible-status', !q('load-status').hidden && q('load-status').textContent.includes('controlled selection failure'));
     window.fetch = originalFetch;
     await choose('reload', 'outline');
     window.fetch = (url, ...args) => String(url).includes('originals/refresh/outline.svg')
@@ -189,6 +190,7 @@ export async function runExplorerJourney() {
     for (let index = 0; index < 3; index++) await frame();
     check('late-failure-keeps-new-selection', q('symbol-name').textContent === 'reload' &&
       q('consumer-import').textContent.includes('/symbols/reload') && q('source-status').textContent === status && !q('play').disabled);
+    check('late-failure-keeps-new-visible-status', q('load-status').hidden);
     window.fetch = originalFetch;
 
     const { glyph, glyphCapabilities } = await import('./package/symbols/reload.js');
@@ -213,6 +215,52 @@ export async function runExplorerJourney() {
     controls.forEach(control => control.stop());
     fixture.remove();
     check('fixture-cleanup', !document.body.contains(fixture));
+
+    for (const [name, variant] of [['ellipsis-horizontal', 'outline'], ['ellipsis-horizontal', 'filled'], ['chatbubble-ellipses', 'outline']]) {
+      await choose(name, variant);
+      const row = data.rows.find(item => item.name === name && item.variant === variant);
+      const masterResponse = await originalFetch(row.views.master);
+      const master = new DOMParser().parseFromString(await masterResponse.text(), 'image/svg+xml').documentElement;
+      const stage = q('symbol-stage');
+      check(`${name}/${variant}/triad-authored-paths`, JSON.stringify(paths(stage.querySelector('svg'))) === JSON.stringify(paths(master)));
+      const parts = [...stage.querySelectorAll('[data-part]')];
+      const dots = parts.filter(part => part.dataset.role === 'content');
+      const shell = parts.find(part => part.dataset.role === 'container');
+      const shellBefore = shell?.outerHTML;
+      check(`${name}/${variant}/triad-stable-ids`, dots.map(part => part.dataset.part).join(',') === 'dot-leading,dot-middle,dot-trailing');
+      const symbol = await import(`./package/symbols/${name}.js`);
+      const glyph = symbol.glyph({ variant });
+      const caps = symbol.glyphCapabilities(variant);
+      const activity = compileSymbolEffect(glyph, caps, `${name}.activity`, { duration: 900, from: 0.6, to: 0 });
+      check(`${name}/${variant}/triad-public-effect`, activity.ok && activity.effect.version === 2 && activity.effect.stages.every(item => item.property === 'opacity' && item.at >= 0 && item.duration >= 0));
+      setReduced(false);
+      await setProgress(0);
+      q('play').click();
+      await wait(() => Number(q('progress').value) > 0.12 && Number(q('progress').value) < 0.7, 'triad active phase');
+      q('pause').click();
+      const opacity = () => dots.map(dot => Number(getComputedStyle(dot).opacity));
+      const before = opacity();
+      for (let count = 0; count < 8; count++) await frame();
+      check(`${name}/${variant}/triad-pause`, before.every((value, index) => value === opacity()[index]));
+      check(`${name}/${variant}/triad-semantic-emphasis`, before.some(value => value < 0.8) && new Set(before).size > 1);
+      q('reverse').click();
+      await Promise.resolve();
+      await Promise.resolve();
+      const after = opacity();
+      check(`${name}/${variant}/triad-reverse-admission`, before.every((value, index) => Math.abs(value - after[index]) < 0.000001), { before, after });
+      if (shell) check(`${name}/${variant}/unchanged-enclosure`, shell.outerHTML === shellBefore);
+      q('gesture').value = `${name}.idle`;
+      q('gesture').dispatchEvent(new Event('change', { bubbles: true }));
+      q('play').click();
+      setReduced(true);
+      await wait(() => Number(q('progress').value) === 1 && opacity().every(value => value === 1), 'idle terminal');
+      check(`${name}/${variant}/idle-restores-master`, opacity().every(value => value === 1) && (!shell || shell.outerHTML === shellBefore));
+      check(`${name}/${variant}/triad-paths-unchanged-after-motion`, JSON.stringify(paths(stage.querySelector('svg'))) === JSON.stringify(paths(master)));
+    }
+    await choose('chatbubble-ellipses', 'filled');
+    check('filled-typing-compound-refuses', q('play').disabled && q('gesture').value === '');
+    await choose('ellipsis-vertical', 'outline');
+    check('vertical-menu-does-not-inherit-loading', q('play').disabled && q('gesture').value === '');
 
     await choose('time', 'outline');
     check('latest-clock-motion-refuses', q('play').disabled && q('gesture').value === '');

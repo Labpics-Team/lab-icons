@@ -6,3 +6,5 @@
 .symbol-stage .difference-original{color:var(--red)}.symbol-stage .difference-candidate{color:var(--blue)}
 @media(min-width:721px){body{height:100svh;overflow:hidden}.workspace{height:calc(100svh - 64px);min-height:0}.library{overflow:auto}.inspector{position:static;height:100%;max-height:none;align-self:stretch}}
 .display-controls{display:flex;align-items:center;gap:12px;margin:14px 0 8px;font-size:10px;color:var(--muted)}.display-controls label{display:flex;align-items:center;gap:8px}.display-controls label:first-child{flex-wrap:wrap;flex:1}.display-controls input[type=range]{width:80px;flex:1;accent-color:var(--accent)}.display-controls input[type=color]{width:32px;height:28px;padding:2px;border:1px solid var(--line);background:transparent;border-radius:6px}.display-controls output{font-variant-numeric:tabular-nums}
+.selection-heading>div{min-width:0}.selection-heading h2{overflow-wrap:anywhere}.inspector-section .source-status{margin-bottom:0}
+.status{white-space:nowrap;flex-shrink:0}.load-status{font-size:12px;color:var(--red);margin:12px 0}

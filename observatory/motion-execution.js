@@ -1,4 +1,4 @@
-import { animate } from '@labpics/motion';
+import { animate, sequence } from '@labpics/motion';
 
 /** Consumer передаёт значения публичному исполнителю; clock и поза принадлежат ему. */
 export function executeSymbolEffect(root, effect, { initialize = false } = {}) {
@@ -9,6 +9,14 @@ export function executeSymbolEffect(root, effect, { initialize = false } = {}) {
   const controls = [];
   try {
     Object.assign(viewport.style, effect.viewport);
+    if (effect.version === 2) {
+      controls.push(sequence(effect.stages.map(stage => [
+        byPart.get(stage.partId), { opacity: stage.to },
+        { at: stage.at, duration: stage.duration, ease: effect.options.easing },
+      ]), { reducedMotion: effect.options.duration === 0 ? 'always' : 'user' }));
+      return controls;
+    }
+    if (effect.version !== 1) throw new Error('Версия эффекта не поддержана исполнителем.');
     for (const target of effect.targets) {
       const element = byPart.get(target.partId);
       Object.assign(element.style, target.style);

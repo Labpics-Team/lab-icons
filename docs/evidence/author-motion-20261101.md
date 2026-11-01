@@ -13,7 +13,7 @@
 проекция оставалась source-only. Упаковка всего проекта локально не выполнялась.
 
 - Windows, Chrome `156.0.0.0`; публичный `@labpics/motion@0.5.0`.
-- `runExplorerJourney()` прошёл **77 из 77** проверок: независимые master paths,
+- `runExplorerJourney()` прошёл **106 из 106** проверок: независимые master paths,
   receipts, controls, SVG/effect export, отказы Lottie/SF, клавиатурный focus,
   ошибки текущей и устаревшей загрузки, независимые Filled instances и cleanup.
 - Пауза фиксирует позу и индикатор. На границе reverse admission:
@@ -44,3 +44,30 @@ Packed runtime/type consumer проверяется отдельно этим ж
 На момент записи self-hosted jobs находятся в очереди. Полный build, packed
 consumer, performance comparison и merge этого среза **ещё не подтверждены**.
 Функциональный preview не задаёт чисел производительности или publication claim.
+
+## Loading и typing
+
+Core `e05b25a0901c8fbfd7e6f5240974dca94a9b597d` добавляет один закон
+`activity.triad` для трёх вариантов: `ellipsis-horizontal/outline`,
+`ellipsis-horizontal/filled`, `chatbubble-ellipses/outline`. Последний сохраняет
+неподвижную авторскую оболочку. Аннотации всех семи motion-вариантов проверены
+отдельно от конструктивного и axis admission.
+
+V2 effect содержит scalar opacity stages в миллисекундах. Consumer передаёт их
+публичному `sequence` Lab Motion; последний владеет часами и текущей позой.
+Движение не изменяет `d`, fill-rule или порядок. Paused→reverse admission сохранил
+точные opacity трёх частей во всех трёх browser cases; idle вернул opacity `1`.
+Filled chatbubble с одним compound path и вертикальное меню остаются без жеста.
+
+Короткая materialization расширена до четырёх семейств / восьми вариантов,
+остальная source-only preview проекция сохранена. Journey обнаружил RED: reduced
+motion после нового ожидающего idle использовал старую reverse-цель. Исправленный
+UI берёт последнюю pending-цель. Проверки idle+reduced и видимых ошибок загрузки
+входят в 106 checks. Управление движением расположено рядом с preview; точные
+file/node/version доступны в «Основа и версия».
+
+[Рендер typing с неподвижной оболочкой](author-triad-20261101.png) снят при
+viewport 1440×960. Core targeted suite: 95 tests / 6 files и typecheck прошли.
+Два изолированных core review прошли; локальный full build/pack/benchmark не
+выполнялся. Browser evidence относится к source preview, installed chain остаётся
+за удалённым self-hosted lane.
