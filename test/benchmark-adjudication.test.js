@@ -38,6 +38,10 @@ describe('confidence admission benchmark', () => {
   it('calibration сохраняет точную границу5% без floating subtraction refusal', () => {
     expect(calibrateNoRegression(copies(10), copies(10.5))).toMatchObject({ verdict: 'PASS', tolerance: 0.05 });
     expect(calibrateNoRegression(copies(10), copies(10.5001)).verdict).toBe('INCOMPLETE');
+    // binary64 значение1.05 строго больше точного21/20; clipping не скрывает его.
+    expect(calibrateNoRegression(copies(1), copies(1.05)).verdict).toBe('INCOMPLETE');
+    expect(assessCount(8500000000000019, 8925000000000020, 1.05).verdict).toBe('FAIL');
+    expect(() => calibrateNoRegression(copies(10), copies(10), { confidence: 0.9 })).toThrow(/policy/);
   });
   it('zero counts остаются zero; ниже resolution speedup не заявляется', () => {
     expect(assessCount(0, 0)).toMatchObject({ verdict: 'PASS', ratio: null });
@@ -64,13 +68,19 @@ describe('confidence admission benchmark', () => {
     const unit = Number.MIN_VALUE;
     const subnormal = assessQuantile(copies(2), copies(5 * unit), 2 * unit);
     expect(subnormal).toMatchObject({ verdict: 'FAIL', lower: unit, upper: 3 * unit, lowerWithinBudget: false });
-    // 3/10 строго больше binary64 значения0.3; округлённый quotient равен ему.
+    // Budget0.3 означает десятичные3/10; границы округляются наружу.
     const normal = assessQuantile(copies(10), copies(3), 0.3);
-    expect(normal).toMatchObject({ verdict: 'FAIL', lowerWithinBudget: false });
+    expect(normal).toMatchObject({ verdict: 'PASS', upperWithinBudget: true });
     expect(normal.lower).toBeLessThan(0.3);
     expect(normal.upper).toBeGreaterThan(0.3);
     // Ratio3/10 также строго меньше следующего binary64 budget.
     expect(assessQuantile(copies(10), copies(3), 0.30000000000000004).verdict).toBe('PASS');
+    expect(assessQuantile(copies(10), copies(3), 0.29999999999999993).verdict).toBe('FAIL');
+  });
+  it('generic confidence не получает лишний rank из округлённой tail sum', () => {
+    const sample = Array.from({ length: 47 }, (_, index) => index + 1);
+    expect(quantileInterval(sample, 0.5, 0.960013943173948)).toMatchObject({ lowerRank: 16, upperRank: 32 });
+    expect(quantileInterval(sample, 0.5, 0.9600139431739478)).toMatchObject({ lowerRank: 17, upperRank: 31 });
   });
   it('order и scale не меняют ratio или admission', () => {
     const baseline = Array.from({ length: 96 }, (_, index) => 100 + index / 1000);
