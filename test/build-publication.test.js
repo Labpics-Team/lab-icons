@@ -11,7 +11,7 @@ import { buildIr } from '../scripts/build-ir.mjs';
 vi.mock('esbuild', async importOriginal => ({ ...await importOriginal(), build: vi.fn() }));
 
 const roots = [];
-const TARGET_FILES = { ir: 'index', symbols: 'example', motion: 'index', lottie: 'example' };
+const TARGET_FILES = { ir: 'index', symbols: 'example', motion: 'index', lottie: 'example', authoring: 'index' };
 const STATIC_FILES = {
   'index.js': 'export const staticIcon = "preserved";\n',
   'index.d.ts': 'export declare const staticIcon: "preserved";\n',
@@ -97,9 +97,9 @@ describe('публикация единой эпохи IR/symbols/motion/Lottie'
     } else expect(crashed.signal, crashed.stderr).toBe('SIGKILL');
     expect(crashed.stderr).toBe('');
     expect(fs.readdirSync(root).filter(name => name.startsWith('.dist-ir-build-'))).toHaveLength(1);
-    expect(epochs(output)).toEqual(['old', 'old', 'old', 'old']);
+    expect(epochs(output)).toEqual(Object.keys(TARGET_FILES).map(() => 'old'));
     await expect(buildIr({ root, compileTargets: ({ staging }) => writeTargets(staging) })).resolves.toBe(1);
-    expect(epochs(output)).toEqual(['new', 'new', 'new', 'new']);
+    expect(epochs(output)).toEqual(Object.keys(TARGET_FILES).map(() => 'new'));
     expectStatic(output);
     expectNoTransactionFiles(root);
   });
@@ -131,7 +131,7 @@ describe('публикация единой эпохи IR/symbols/motion/Lottie'
       clearTimeout(timer);
       await expect(buildIr({ root, compileTargets: ({ staging }) => writeTargets(staging) })).resolves.toBe(1);
       expect(fs.readFileSync(join(message.staging, 'ir/index.js'), 'utf8')).toBe('live operation');
-      expect(epochs(output)).toEqual(['new', 'new', 'new', 'new']);
+      expect(epochs(output)).toEqual(Object.keys(TARGET_FILES).map(() => 'new'));
       expectStatic(output);
       expect(child.kill('SIGKILL')).toBe(true);
       await closed;
@@ -191,7 +191,7 @@ describe('публикация единой эпохи IR/symbols/motion/Lottie'
     const moves = [];
     await expect(buildIr({ root, compileTargets: ({ staging }) => writeTargets(staging),
       transactionFs: { ...fs, renameSync(from, to) { moves.push([from, to]); fs.renameSync(from, to); } } })).resolves.toBe(1);
-    expect(epochs(output)).toEqual(['new', 'new', 'new', 'new']);
+    expect(epochs(output)).toEqual(Object.keys(TARGET_FILES).map(() => 'new'));
     expectStatic(output);
     expect(moves).toHaveLength(2);
     expect(moves[0][0]).toBe(output);
@@ -208,7 +208,7 @@ describe('публикация единой эпохи IR/symbols/motion/Lottie'
       write(staging, 'ir/index.js', 'export const epoch = "new";');
       throw new Error('target preparation failed');
     } })).rejects.toThrow('target preparation failed');
-    expect(epochs(output)).toEqual(['old', 'old', 'old', 'old']);
+    expect(epochs(output)).toEqual(Object.keys(TARGET_FILES).map(() => 'old'));
     expectStatic(output);
     expectNoTransactionFiles(root);
   });
@@ -240,7 +240,7 @@ describe('публикация единой эпохи IR/symbols/motion/Lottie'
       expect(finished).toBe(started);
       expect(completed).toContain('authoring/index.js');
       expect(completed).toContain('ir/lottie-runtime.js');
-      expect(epochs(output)).toEqual(['old', 'old', 'old', 'old']);
+      expect(epochs(output)).toEqual(Object.keys(TARGET_FILES).map(() => 'old'));
       expectStatic(output);
       expectNoTransactionFiles(root);
     } finally {
@@ -253,7 +253,7 @@ describe('публикация единой эпохи IR/symbols/motion/Lottie'
     const { root, output } = fixture();
     await expect(buildIr({ root, compileTargets: ({ staging }) => writeTargets(staging, 'new', { includeLottie: false }) }))
       .rejects.toThrow(/output surface drift.*missing=dist\/lottie\/example\.d\.ts,dist\/lottie\/example\.js/);
-    expect(epochs(output)).toEqual(['old', 'old', 'old', 'old']);
+    expect(epochs(output)).toEqual(Object.keys(TARGET_FILES).map(() => 'old'));
     expectStatic(output);
     expectNoTransactionFiles(root);
   });
@@ -267,7 +267,7 @@ describe('публикация единой эпохи IR/symbols/motion/Lottie'
         if (sabotage === 'extra') write(staging, 'lottie/unlisted.js', 'export const extra = true;');
         if (sabotage === 'import') write(staging, 'lottie/example.js', 'export { value } from "./missing.js";');
       } })).rejects.toThrow(/output surface drift|dependency closure/);
-      expect(epochs(output)).toEqual(['old', 'old', 'old', 'old']);
+      expect(epochs(output)).toEqual(Object.keys(TARGET_FILES).map(() => 'old'));
       expectStatic(output);
       expectNoTransactionFiles(root);
     }
@@ -281,7 +281,7 @@ describe('публикация единой эпохи IR/symbols/motion/Lottie'
         if (++calls === 2) throw new Error('install rename failed');
         fs.renameSync(from, to);
       } } })).rejects.toThrow('install rename failed');
-    expect(epochs(output)).toEqual(['old', 'old', 'old', 'old']);
+    expect(epochs(output)).toEqual(Object.keys(TARGET_FILES).map(() => 'old'));
     expectStatic(output);
     expectNoTransactionFiles(root);
   });
@@ -296,11 +296,11 @@ describe('публикация единой эпохи IR/symbols/motion/Lottie'
       } } })).rejects.toThrow('process stopped after rename');
     expect(fs.existsSync(backup)).toBe(true);
     if (stoppedAfter === 1) expect(fs.existsSync(output)).toBe(false);
-    else expect(epochs(output)).toEqual(['new', 'new', 'new', 'new']);
+    else expect(epochs(output)).toEqual(Object.keys(TARGET_FILES).map(() => 'new'));
     // Recovery выполняется до нового compiler, даже когда тот ещё не смог
     // подготовить следующую версию: persisted epoch уже однозначна.
     await expect(buildIr({ root, compileTargets() { throw new Error('next compile stopped'); } })).rejects.toThrow('next compile stopped');
-    expect(epochs(output)).toEqual(Array(4).fill(stoppedAfter === 1 ? 'old' : 'new'));
+    expect(epochs(output)).toEqual(Array(Object.keys(TARGET_FILES).length).fill(stoppedAfter === 1 ? 'old' : 'new'));
     expectStatic(output);
     expectNoTransactionFiles(root);
   });
@@ -313,7 +313,7 @@ describe('публикация единой эпохи IR/symbols/motion/Lottie'
     let compilations = 0;
     await expect(buildIr({ root, compileTargets() { compilations++; } })).rejects.toThrow('symbolic link');
     expect(compilations).toBe(0);
-    expect(epochs(output)).toEqual(['old', 'old', 'old', 'old']);
+    expect(epochs(output)).toEqual(Object.keys(TARGET_FILES).map(() => 'old'));
     expect(fs.readFileSync(join(linked, 'value'), 'utf8')).toBe('outside dist');
     expectNoTransactionFiles(root);
   });
