@@ -78,7 +78,8 @@ const consumerMeasurements = {};
 for (const [name, entry] of Object.entries(entries)) {
   const measured = await bundleScenario(entry, { includeBrotli: true });
   consumerMeasurements[name] = measured;
-  const old = name === 'full-ir-opt-in' ? oldConsumers.scenarios['glyph-one'] : oldConsumers.scenarios[name];
+  const old = oldConsumers.scenarios[name] ??
+    (name === 'full-ir-opt-in' ? oldConsumers.scenarios['glyph-one'] : undefined);
   scenarios[name] = {
     entry, baselineBytes: measured.bytes, baselineGzipBytes: measured.gzipBytes,
     maxBytes: old?.maxBytes ?? measured.bytes,

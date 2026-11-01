@@ -118,4 +118,25 @@ describe('platform measurement admission policy', () => {
     expect(result.stderr).toMatch(/previous-extra.*previous consumer scenario/);
     expect(readFileSync(policyPath).equals(before)).toBe(true);
   });
+  it.each([20, 5])('собственный full-ir потолок %s имеет приоритет после первой миграции', ceiling => {
+    const { root } = fixture();
+    const policyPath = join(root, 'release/consumer-size-ratchet.json');
+    const policy = JSON.parse(readFileSync(policyPath));
+    policy.scenarios['full-ir-opt-in'] = {
+      ...policy.scenarios['glyph-one'], maxBytes: ceiling, maxGzipBytes: ceiling + 1,
+    };
+    writeFileSync(policyPath, JSON.stringify(policy));
+    const before = readFileSync(policyPath);
+    const result = run(root, ['--update']);
+    if (ceiling < 10) {
+      expect(result.status).not.toBe(0);
+      expect(result.stderr).toMatch(/full-ir-opt-in.*consumer budget/);
+      expect(readFileSync(policyPath).equals(before)).toBe(true);
+    } else {
+      expect(result.status, result.stderr).toBe(0);
+      const next = JSON.parse(readFileSync(policyPath)).scenarios['full-ir-opt-in'];
+      expect(next.maxBytes).toBe(ceiling);
+      expect(next.maxGzipBytes).toBe(ceiling + 1);
+    }
+  });
 });
