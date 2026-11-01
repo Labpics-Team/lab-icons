@@ -1,0 +1,35 @@
+﻿
+ RUN  v4.1.12 E:/AgentWork/lab-icons-notification-ring-20261102
+
+ ❯ test/author-notification-ring.test.js (24 tests | 1 failed | 23 skipped) 7ms
+     × принимает ровно четыре сохранённых авторских аннотации 6ms
+vitest.cmd :
+строка:2 знак:98
++ ... | Out-Null; & 'E:\AgentWork\lab-icons-platform-20261101\node_modules\ ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/author-notification-ring.test.js > notification.ring: явное входящее уведомление без выдуманного шарнира >
+принимает ровно четыре сохранённых авторских аннотации
+AuthorAnatomyError: author-anatomy: notifications/outline: закон notification.ring не объявлен
+ ❯ refuse scripts/lib/author-anatomy.js:22:9
+     20|
+     21| function refuse(code, message) {
+     22|   throw new AuthorAnatomyError(code, message);
+       |         ^
+     23| }
+     24|
+ ❯ compileLaw scripts/lib/author-anatomy.js:205:3
+ ❯ compileAuthorAnatomy scripts/lib/author-anatomy.js:271:24
+ ❯ test/author-notification-ring.test.js:99:24
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 23 skipped (24)
+   Start at  00:36:34
+   Duration  628ms (transform 215ms, setup 0ms, import 474ms, tests 7ms, environment 0ms)

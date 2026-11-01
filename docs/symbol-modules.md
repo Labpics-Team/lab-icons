@@ -183,6 +183,36 @@ if (result.effect.version !== 3) throw new Error('Нужен эффект пер
 тот же effect. [Source evidence](evidence/author-nudge-20261101.md) содержит
 границы проверки и открытые delivery gates.
 
+### Показать входящее уведомление
+
+`notifications` и `notifications-unread` в обоих начертаниях поддерживают
+`<имя>.ring`. Аннотация `notification.ring` явно задаёт смысл
+`incoming-notification` и движущуюся часть `notification-clapper`. Корпус
+колокольчика и badge сохраняют положение, контуры и порядок слоёв.
+
+```js
+import { glyph, glyphCapabilities } from '@labpics/icons/symbols/notifications-unread';
+import { compileSymbolEffect } from '@labpics/icons/motion';
+
+const result = compileSymbolEffect(glyph(), glyphCapabilities(), 'notifications-unread.ring', {
+  duration: 1000, from: 0, to: 1,
+});
+if (!result.ok) throw new Error(result.reason.message);
+if (result.effect.version !== 3) throw new Error('Нужен эффект переноса');
+```
+
+Шесть поз `0 → +A → −A → +A/2 → −A/2 → 0` расположены через равные
+пятые прогресса. Общая амплитуда `A` равна четверти геометрической ширины
+язычка в исходном viewBox; промежутки линейные, `restProgress: 0`.
+Сдвиг использует существующие `x`-стадии Lab Motion и правила хранения фазы
+из примера направления выше. Отдельный шарнир для этого движения не объявлен.
+
+`notifications-off` сохраняет `source-only`: похожая геометрия не объявляет
+событие. Смыслы `muted` и `disabled` получают `LAW_SEMANTICS_UNSUPPORTED`
+при компиляции анатомии. [Lottie](lottie.md) экспортирует ту же шкалу;
+[source-проверка](evidence/author-motion-20261101.md#входящее-уведомление)
+фиксирует точные границы среза и оставшуюся приёмку.
+
 ### Сохранённая модель часов
 
 Принятый `time.advance` доступен у записанной модели:

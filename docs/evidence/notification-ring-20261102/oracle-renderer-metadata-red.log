@@ -1,0 +1,104 @@
+
+ RUN  v4.1.12 E:/AgentWork/lab-icons-notification-ring-20261102
+
+ ❯ test/author-notification-ring.test.js (24 tests | 4 failed) 149ms
+     × notifications/outline сохраняет raw master, z-order и четверть ширины clapper 20ms
+     × notifications/filled сохраняет raw master, z-order и четверть ширины clapper 12ms
+     × notifications-unread/outline сохраняет raw master, z-order и четверть ширины clapper 12ms
+     × notifications-unread/filled сохраняет raw master, z-order и четверть ширины clapper 15ms
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 20 passed (24)
+   Start at  00:38:25
+   Duration  742ms (transform 209ms, setup 0ms, import 463ms, tests 149ms, environment 0ms)
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/author-notification-ring.test.js > notification.ring: явное входящее уведомление без выдуманного шарнира > notifications/outline сохраняет raw master, z-order и четверть ширины clapper
+AssertionError: expected [ 0.49998931688914144, …(1) ] to deeply equal undefined
+
+- Expected:
+undefined
+
++ Received:
+[
+  0.49998931688914144,
+  0.8801270833333333,
+]
+
+ ❯ test/author-notification-ring.test.js:117:28
+    115|     const clapper = glyph.parts.find(part => part.id === 'notification…
+    116|     const amplitude = rawClapperWidth(raw[clapper.zIndex].d) / 4;
+    117|     expect(clapper.anchor).toEqual(baseline.icons[name][variant].sourc…
+       |                            ^
+    118|     const gesture = caps.motion.gestures[0];
+    119|     expect(gesture).toMatchObject({ id: `${name}.ring`, kind: 'cycle',…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  test/author-notification-ring.test.js > notification.ring: явное входящее уведомление без выдуманного шарнира > notifications/filled сохраняет raw master, z-order и четверть ширины clapper
+AssertionError: expected [ 0.4999363076653991, 0.88315625 ] to deeply equal undefined
+
+- Expected:
+undefined
+
++ Received:
+[
+  0.4999363076653991,
+  0.88315625,
+]
+
+ ❯ test/author-notification-ring.test.js:117:28
+    115|     const clapper = glyph.parts.find(part => part.id === 'notification…
+    116|     const amplitude = rawClapperWidth(raw[clapper.zIndex].d) / 4;
+    117|     expect(clapper.anchor).toEqual(baseline.icons[name][variant].sourc…
+       |                            ^
+    118|     const gesture = caps.motion.gestures[0];
+    119|     expect(gesture).toMatchObject({ id: `${name}.ring`, kind: 'cycle',…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  test/author-notification-ring.test.js > notification.ring: явное входящее уведомление без выдуманного шарнира > notifications-unread/outline сохраняет raw master, z-order и четверть ширины clapper
+AssertionError: expected [ 0.4999864016802289, …(1) ] to deeply equal undefined
+
+- Expected:
+undefined
+
++ Received:
+[
+  0.4999864016802289,
+  0.8801270833333333,
+]
+
+ ❯ test/author-notification-ring.test.js:117:28
+    115|     const clapper = glyph.parts.find(part => part.id === 'notification…
+    116|     const amplitude = rawClapperWidth(raw[clapper.zIndex].d) / 4;
+    117|     expect(clapper.anchor).toEqual(baseline.icons[name][variant].sourc…
+       |                            ^
+    118|     const gesture = caps.motion.gestures[0];
+    119|     expect(gesture).toMatchObject({ id: `${name}.ring`, kind: 'cycle',…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  test/author-notification-ring.test.js > notification.ring: явное входящее уведомление без выдуманного шарнира > notifications-unread/filled сохраняет raw master, z-order и четверть ширины clapper
+AssertionError: expected [ 0.4998974135216008, 0.88315625 ] to deeply equal undefined
+
+- Expected:
+undefined
+
++ Received:
+[
+  0.4998974135216008,
+  0.88315625,
+]
+
+ ❯ test/author-notification-ring.test.js:117:28
+    115|     const clapper = glyph.parts.find(part => part.id === 'notification…
+    116|     const amplitude = rawClapperWidth(raw[clapper.zIndex].d) / 4;
+    117|     expect(clapper.anchor).toEqual(baseline.icons[name][variant].sourc…
+       |                            ^
+    118|     const gesture = caps.motion.gestures[0];
+    119|     expect(gesture).toMatchObject({ id: `${name}.ring`, kind: 'cycle',…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯

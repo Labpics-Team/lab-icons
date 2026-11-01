@@ -33,6 +33,16 @@ const animationData = result.animation;
 position keyframes в этих же единицах; авторские контуры остаются прежними.
 Варианты с кругом требуют отдельной анатомии и этот жест не объявляют.
 
+`notifications.ring` и `notifications-unread.ring` доступны в Outline и
+Filled для входящего уведомления. Position keyframes двигают только
+`notification-clapper` по шкале `0 → +A → −A → +A/2 → −A/2 → 0`
+с равными пятыми прогресса; `A` — четверть ширины язычка в исходном viewBox.
+Корпус и badge остаются статическими layers; контуры и порядок сохранены.
+Обратный и частичный interval используют эту же шкалу, reduced motion
+сохраняет конечную позу. У `notifications-off` этот жест не объявлен.
+Для ring проверены source JSON и effect; player-приёмка остаётся открытой
+в [evidence среза](evidence/author-motion-20261101.md#входящее-уведомление).
+
 Target profile — `lottie-web-svg-5.13`: квалификация относится к SVG renderer
 `lottie-web` 5.13.0. Canvas, native players и dotLottie ещё требуют собственных
 проверок. `color` — RGB `#rrggbb`; Lottie JSON не наследует CSS `currentColor`.

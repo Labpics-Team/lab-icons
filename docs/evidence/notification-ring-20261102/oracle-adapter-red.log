@@ -1,0 +1,84 @@
+
+ RUN  v4.1.12 E:/AgentWork/lab-icons-notification-ring-20261102
+
+ ❯ test/author-notification-ring.test.js (24 tests | 12 failed) 152ms
+     × notifications/outline сохраняет raw master, z-order и четверть ширины clapper 25ms
+     × notifications/filled сохраняет raw master, z-order и четверть ширины clapper 16ms
+     × notifications-unread/outline сохраняет raw master, z-order и четверть ширины clapper 13ms
+     × notifications-unread/filled сохраняет raw master, z-order и четверть ширины clapper 8ms
+     × notifications/outline сохраняет фазы reverse, неподвижные части и reduced terminal 8ms
+     × notifications/filled сохраняет фазы reverse, неподвижные части и reduced terminal 7ms
+     × notifications-unread/outline сохраняет фазы reverse, неподвижные части и reduced terminal 8ms
+     × notifications-unread/filled сохраняет фазы reverse, неподвижные части и reduced terminal 8ms
+     × notifications/outline экспортирует точные статические curves и тот же цикл в Lottie 7ms
+     × notifications/filled экспортирует точные статические curves и тот же цикл в Lottie 7ms
+     × notifications-unread/outline экспортирует точные статические curves и тот же цикл в Lottie 8ms
+     × notifications-unread/filled экспортирует точные статические curves и тот же цикл в Lottie 8ms
+
+ Test Files  1 failed (1)
+      Tests  12 failed | 12 passed (24)
+   Start at  00:37:08
+   Duration  787ms (transform 204ms, setup 0ms, import 472ms, tests 152ms, environment 0ms)
+
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 12 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/author-notification-ring.test.js > notification.ring: явное входящее уведомление без выдуманного шарнира > notifications/outline сохраняет raw master, z-order и четверть ширины clapper
+ FAIL  test/author-notification-ring.test.js > notification.ring: явное входящее уведомление без выдуманного шарнира > notifications/filled сохраняет raw master, z-order и четверть ширины clapper
+ FAIL  test/author-notification-ring.test.js > notification.ring: явное входящее уведомление без выдуманного шарнира > notifications-unread/outline сохраняет raw master, z-order и четверть ширины clapper
+ FAIL  test/author-notification-ring.test.js > notification.ring: явное входящее уведомление без выдуманного шарнира > notifications-unread/filled сохраняет raw master, z-order и четверть ширины clapper
+AssertionError: expected 'MCCCCCCHZ' to be 'MCCCCCCLZ' // Object.is equality
+
+Expected: "MCCCCCCLZ"
+Received: "MCCCCCCHZ"
+
+ ❯ rawClapperWidth test/author-notification-ring.test.js:47:39
+     45| // без production parser/bbox, normalized SVG или скомпилированных tra…
+     46| function rawClapperWidth(d) {
+     47|   expect(d.replace(/[^A-Za-z]/g, '')).toBe('MCCCCCCLZ');
+       |                                       ^
+     48|   const values = d.match(/[-+]?(?:\d*\.\d+|\d+)(?:e[-+]?\d+)?/gi).map(…
+     49|   expect(values).toHaveLength(40);
+ ❯ test/author-notification-ring.test.js:115:23
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/12]⎯
+
+ FAIL  test/author-notification-ring.test.js > notification.ring: явное входящее уведомление без выдуманного шарнира > notifications/outline сохраняет фазы reverse, неподвижные части и reduced terminal
+ FAIL  test/author-notification-ring.test.js > notification.ring: явное входящее уведомление без выдуманного шарнира > notifications/filled сохраняет фазы reverse, неподвижные части и reduced terminal
+ FAIL  test/author-notification-ring.test.js > notification.ring: явное входящее уведомление без выдуманного шарнира > notifications-unread/outline сохраняет фазы reverse, неподвижные части и reduced terminal
+ FAIL  test/author-notification-ring.test.js > notification.ring: явное входящее уведомление без выдуманного шарнира > notifications-unread/filled сохраняет фазы reverse, неподвижные части и reduced terminal
+AssertionError: expected 'MCCCCCCHZ' to be 'MCCCCCCLZ' // Object.is equality
+
+Expected: "MCCCCCCLZ"
+Received: "MCCCCCCHZ"
+
+ ❯ rawClapperWidth test/author-notification-ring.test.js:47:39
+     45| // без production parser/bbox, normalized SVG или скомпилированных tra…
+     46| function rawClapperWidth(d) {
+     47|   expect(d.replace(/[^A-Za-z]/g, '')).toBe('MCCCCCCLZ');
+       |                                       ^
+     48|   const values = d.match(/[-+]?(?:\d*\.\d+|\d+)(?:e[-+]?\d+)?/gi).map(…
+     49|   expect(values).toHaveLength(40);
+ ❯ test/author-notification-ring.test.js:136:23
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/12]⎯
+
+ FAIL  test/author-notification-ring.test.js > notification.ring: явное входящее уведомление без выдуманного шарнира > notifications/outline экспортирует точные статические curves и тот же цикл в Lottie
+ FAIL  test/author-notification-ring.test.js > notification.ring: явное входящее уведомление без выдуманного шарнира > notifications/filled экспортирует точные статические curves и тот же цикл в Lottie
+ FAIL  test/author-notification-ring.test.js > notification.ring: явное входящее уведомление без выдуманного шарнира > notifications-unread/outline экспортирует точные статические curves и тот же цикл в Lottie
+ FAIL  test/author-notification-ring.test.js > notification.ring: явное входящее уведомление без выдуманного шарнира > notifications-unread/filled экспортирует точные статические curves и тот же цикл в Lottie
+AssertionError: expected 'MCCCCCCHZ' to be 'MCCCCCCLZ' // Object.is equality
+
+Expected: "MCCCCCCLZ"
+Received: "MCCCCCCHZ"
+
+ ❯ rawClapperWidth test/author-notification-ring.test.js:47:39
+     45| // без production parser/bbox, normalized SVG или скомпилированных tra…
+     46| function rawClapperWidth(d) {
+     47|   expect(d.replace(/[^A-Za-z]/g, '')).toBe('MCCCCCCLZ');
+       |                                       ^
+     48|   const values = d.match(/[-+]?(?:\d*\.\d+|\d+)(?:e[-+]?\d+)?/gi).map(…
+     49|   expect(values).toHaveLength(40);
+ ❯ test/author-notification-ring.test.js:165:23
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/12]⎯

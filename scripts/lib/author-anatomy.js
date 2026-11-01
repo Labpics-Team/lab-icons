@@ -196,12 +196,44 @@ function confirmationPresence(icon, variant, declaration, parts) {
   return [gesture];
 }
 
+/** Входящее уведомление двигает только явно объявленный clapper. Шарнир в
+ * masters не задан: сдвиг не добавляет pivot и сохраняет bell/badge. Доля
+ * ширины clapper — общая калибровка закона, а не координатная правка иконки. */
+const NOTIFICATION_RING_WIDTH_RATIO = 1 / 4;
+function notificationRing(icon, variant, declaration, parts, source) {
+  fields(declaration, ['law', 'purpose', 'partId'], `${icon}/${variant}.gesture`);
+  if (declaration.purpose !== 'incoming-notification') {
+    refuse('LAW_SEMANTICS_UNSUPPORTED', `${icon}/${variant}: notification.ring требует явно объявленное incoming-notification`);
+  }
+  const clapper = parts.find(part => part.id === declaration.partId);
+  if (!clapper || clapper.role !== 'content' || clapper.fillRule !== 'nonzero' ||
+      clapper.topologySignature.includes('|') || !clapper.topologySignature.endsWith('Z') ||
+      parts.length < 2 || parts.some(part => part.id !== clapper.id && part.role !== 'container')) {
+    refuse('LAW_TOPOLOGY_UNSUPPORTED', `${icon}/${variant}: notification.ring требует один отдельный закрытый content clapper и неподвижные container части`);
+  }
+  const width = iconGeometry(source.artifactSvg).paths[clapper.zIndex]?.width;
+  if (!Number.isFinite(width) || width <= 0) {
+    refuse('LAW_TOPOLOGY_UNSUPPORTED', `${icon}/${variant}: clapper обязан иметь конечную положительную ширину`);
+  }
+  const amplitude = width * NOTIFICATION_RING_WIDTH_RATIO;
+  const gesture = {
+    id: `${icon}.ring`, kind: 'cycle',
+    meaning: 'Входящее уведомление: один затухающий горизонтальный цикл язычка; корпус и badge остаются неподвижными.',
+    partIds: [clapper.id], progress: 'normalized-0-to-1', restProgress: 0,
+    tracks: [{ partId: clapper.id, kind: 'translate', axis: 'x', unit: 'viewBox', interpolation: 'linear',
+      stops: [0, 1, -1, 0.5, -0.5, 0].map((factor, index) => ({ at: index / 5, value: amplitude * factor })) }],
+  };
+  validateMotionGesture(gesture);
+  return [gesture];
+}
+
 function compileLaw(icon, variant, declaration, parts, source) {
   if (declaration?.law === 'cycle.clockwise') return clockwiseCycle(icon, variant, declaration, parts);
   if (declaration?.law === 'activity.triad') return activityTriad(icon, variant, declaration, parts);
   if (declaration?.law === 'signal.levels') return signalLevels(icon, variant, declaration, parts);
   if (declaration?.law === 'confirmation.presence') return confirmationPresence(icon, variant, declaration, parts);
   if (declaration?.law === 'direction.nudge') return directionNudge(icon, variant, declaration, parts, source);
+  if (declaration?.law === 'notification.ring') return notificationRing(icon, variant, declaration, parts, source);
   refuse('LAW_UNSUPPORTED', `${icon}/${variant}: закон ${declaration?.law} не объявлен`);
 }
 

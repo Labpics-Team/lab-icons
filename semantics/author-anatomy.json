@@ -748,6 +748,114 @@
           "partId": "confirmation-mark"
         }
       }
+    },
+    "notifications": {
+      "outline": {
+        "masterSha256": "37966a60642c9e7641dcc34a3142c1f6307c5259662dce70d26a3864b36026e4",
+        "pathFingerprintSha256": "94ab10f011d61faa578d1aa4d7bcbca67fc5f1654b819bb4aa6dd5e1b7d623e5",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "notification-bell",
+            "role": "container"
+          },
+          {
+            "pathIndex": 1,
+            "id": "notification-clapper",
+            "role": "content"
+          }
+        ],
+        "gesture": {
+          "law": "notification.ring",
+          "purpose": "incoming-notification",
+          "partId": "notification-clapper"
+        }
+      },
+      "filled": {
+        "masterSha256": "10ec8dd6c76cc062e2f6844567a8639d354d3914f3d511eaf6d5628aeea5c588",
+        "pathFingerprintSha256": "28d3067272b9d8b7a57e89f3740af856d4760fbc7b2e32843e99b704f5788464",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "notification-clapper",
+            "role": "content"
+          },
+          {
+            "pathIndex": 1,
+            "id": "notification-bell",
+            "role": "container"
+          }
+        ],
+        "gesture": {
+          "law": "notification.ring",
+          "purpose": "incoming-notification",
+          "partId": "notification-clapper"
+        }
+      }
+    },
+    "notifications-unread": {
+      "outline": {
+        "masterSha256": "12d4d947a9c00ca13dec85021ebc09fef4ba4ea8d7878a90582c9a5d9d69f55a",
+        "pathFingerprintSha256": "eec5ca53ccea7df5e0ed4ef2549097355b8f6b2c10a86a297cf2ae7129351719",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "notification-bell-fragment-1",
+            "role": "container"
+          },
+          {
+            "pathIndex": 1,
+            "id": "notification-bell-fragment-2",
+            "role": "container"
+          },
+          {
+            "pathIndex": 2,
+            "id": "notification-bell-fragment-3",
+            "role": "container"
+          },
+          {
+            "pathIndex": 3,
+            "id": "notification-clapper",
+            "role": "content"
+          },
+          {
+            "pathIndex": 4,
+            "id": "notification-badge",
+            "role": "container"
+          }
+        ],
+        "gesture": {
+          "law": "notification.ring",
+          "purpose": "incoming-notification",
+          "partId": "notification-clapper"
+        }
+      },
+      "filled": {
+        "masterSha256": "c54574437cf7579985e678a0b9e464bf32a84be8ae278d521d11ef3ee3f0713f",
+        "pathFingerprintSha256": "1764e5f0087a387ea3b4618cfdbcf22bd1469f68dec2c09ec34b0c02e2f8d724",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "notification-clapper",
+            "role": "content"
+          },
+          {
+            "pathIndex": 1,
+            "id": "notification-bell",
+            "role": "container"
+          },
+          {
+            "pathIndex": 2,
+            "id": "notification-badge",
+            "role": "container"
+          }
+        ],
+        "gesture": {
+          "law": "notification.ring",
+          "purpose": "incoming-notification",
+          "partId": "notification-clapper"
+        }
+      }
     }
   }
 }

@@ -1,0 +1,275 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-11-01T21:45:31.037Z",
+  "baseCommit": "a85395dfec55e2e5a8884ace35681e1b172fd424",
+  "source": {
+    "kind": "figma",
+    "name": "🧪Lab UI (v2.1)",
+    "fileKey": "LuaiBd4anRi4DMZayKAnY2",
+    "version": "2416636003859748575",
+    "lastModified": "2026-11-01T01:18:02Z",
+    "pageId": "4045:632",
+    "frames": {
+      "outline": "8513:1000",
+      "filled": "6397:2241"
+    },
+    "capturedAt": "2026-11-01T02:22:39.173Z",
+    "geometrySnapshotSha256": "622f0ccb116c0dad940b6d11b590ca78952ee460c42cad69f8c3d0cc8353c967"
+  },
+  "manifestSha256": "c1b585d916023c898405521c0e26c4241e5d72379e5300c92f2dc3e54b871ceb",
+  "corpusCounts": {
+    "families": 330,
+    "variants": 660
+  },
+  "selectedCounts": {
+    "families": 3,
+    "variants": 6,
+    "annotatedVariants": 4
+  },
+  "rawMasterDigestsMatch": true,
+  "masters": [
+    {
+      "name": "notifications",
+      "variant": "outline",
+      "nodeId": "6431:3728",
+      "master": "masters/figma/2416636003859748575/Outline/notifications.svg",
+      "masterSha256": "37966a60642c9e7641dcc34a3142c1f6307c5259662dce70d26a3864b36026e4",
+      "pathFingerprintSha256": "94ab10f011d61faa578d1aa4d7bcbca67fc5f1654b819bb4aa6dd5e1b7d623e5",
+      "pathCount": 2,
+      "paths": [
+        {
+          "fillRule": "evenodd",
+          "rawTopology": "MCCCCVCCCLCCCCCHCCCCCLCCCVCCCCZMCCCVCCCLLLLCCCCLCHCLCCCLLCCCVCCCCCZ"
+        },
+        {
+          "fillRule": "nonzero",
+          "rawTopology": "MCCCCCCHZ"
+        }
+      ],
+      "annotation": {
+        "law": "notification.ring",
+        "purpose": "incoming-notification",
+        "partId": "notification-clapper"
+      },
+      "partIds": [
+        "notification-bell",
+        "notification-clapper"
+      ]
+    },
+    {
+      "name": "notifications",
+      "variant": "filled",
+      "nodeId": "6413:221",
+      "master": "masters/figma/2416636003859748575/Filled/notifications.svg",
+      "masterSha256": "10ec8dd6c76cc062e2f6844567a8639d354d3914f3d511eaf6d5628aeea5c588",
+      "pathFingerprintSha256": "28d3067272b9d8b7a57e89f3740af856d4760fbc7b2e32843e99b704f5788464",
+      "pathCount": 2,
+      "paths": [
+        {
+          "fillRule": "nonzero",
+          "rawTopology": "MCCCCCCHZ"
+        },
+        {
+          "fillRule": "nonzero",
+          "rawTopology": "MCCCCVCCCLCCCCCHCCCCCLCCCVCCCCZ"
+        }
+      ],
+      "annotation": {
+        "law": "notification.ring",
+        "purpose": "incoming-notification",
+        "partId": "notification-clapper"
+      },
+      "partIds": [
+        "notification-clapper",
+        "notification-bell"
+      ]
+    },
+    {
+      "name": "notifications-unread",
+      "variant": "outline",
+      "nodeId": "6431:3812",
+      "master": "masters/figma/2416636003859748575/Outline/notifications-unread.svg",
+      "masterSha256": "12d4d947a9c00ca13dec85021ebc09fef4ba4ea8d7878a90582c9a5d9d69f55a",
+      "pathFingerprintSha256": "eec5ca53ccea7df5e0ed4ef2549097355b8f6b2c10a86a297cf2ae7129351719",
+      "pathCount": 5,
+      "paths": [
+        {
+          "fillRule": "nonzero",
+          "rawTopology": "MCCCCCCCCCCCVCCCLLLLCCCCLCVCCCCCCCLCCCCVCCCCZ"
+        },
+        {
+          "fillRule": "nonzero",
+          "rawTopology": "MLVLVZ"
+        },
+        {
+          "fillRule": "nonzero",
+          "rawTopology": "MCVCCCCCLCCCCCVCLCCCLLCCCVCZ"
+        },
+        {
+          "fillRule": "nonzero",
+          "rawTopology": "MCCCCCCHZ"
+        },
+        {
+          "fillRule": "nonzero",
+          "rawTopology": "MCCCCZ"
+        }
+      ],
+      "annotation": {
+        "law": "notification.ring",
+        "purpose": "incoming-notification",
+        "partId": "notification-clapper"
+      },
+      "partIds": [
+        "notification-bell-fragment-1",
+        "notification-bell-fragment-2",
+        "notification-bell-fragment-3",
+        "notification-clapper",
+        "notification-badge"
+      ]
+    },
+    {
+      "name": "notifications-unread",
+      "variant": "filled",
+      "nodeId": "6413:287",
+      "master": "masters/figma/2416636003859748575/Filled/notifications-unread.svg",
+      "masterSha256": "c54574437cf7579985e678a0b9e464bf32a84be8ae278d521d11ef3ee3f0713f",
+      "pathFingerprintSha256": "1764e5f0087a387ea3b4618cfdbcf22bd1469f68dec2c09ec34b0c02e2f8d724",
+      "pathCount": 3,
+      "paths": [
+        {
+          "fillRule": "nonzero",
+          "rawTopology": "MCCCCCCHZ"
+        },
+        {
+          "fillRule": "nonzero",
+          "rawTopology": "MCCCCCCVCCCLCCCCCHCCCCCLCCCVCCCCZ"
+        },
+        {
+          "fillRule": "nonzero",
+          "rawTopology": "MCCCCZ"
+        }
+      ],
+      "annotation": {
+        "law": "notification.ring",
+        "purpose": "incoming-notification",
+        "partId": "notification-clapper"
+      },
+      "partIds": [
+        "notification-clapper",
+        "notification-bell",
+        "notification-badge"
+      ]
+    },
+    {
+      "name": "notifications-off",
+      "variant": "outline",
+      "nodeId": "6431:3961",
+      "master": "masters/figma/2416636003859748575/Outline/notifications-off.svg",
+      "masterSha256": "06d396b702366a86b5bb1408107822a3da8a1b3251580e2f06479228d878801f",
+      "pathFingerprintSha256": "b66822481f6a3989cd3249f4c02e4b9cfe5f7771d4947c3ebf6af0bf7efb1e65",
+      "pathCount": 4,
+      "paths": [
+        {
+          "fillRule": "nonzero",
+          "rawTopology": "MCCCLCCCCCHLHCLCCCLLCCCVLLVZ"
+        },
+        {
+          "fillRule": "nonzero",
+          "rawTopology": "MCCCCCLLLCCCCCCCCVCCCLCCCCCLCCCCCVCCCCCCCZ"
+        },
+        {
+          "fillRule": "nonzero",
+          "rawTopology": "MCCCCCCHZ"
+        },
+        {
+          "fillRule": "nonzero",
+          "rawTopology": "MCCLLLCCLLLZ"
+        }
+      ],
+      "annotation": null,
+      "partIds": null
+    },
+    {
+      "name": "notifications-off",
+      "variant": "filled",
+      "nodeId": "6413:219",
+      "master": "masters/figma/2416636003859748575/Filled/notifications-off.svg",
+      "masterSha256": "5b773b216c00e019767d702d99b071598e5d5417a7aa6280f56689ee6b1e9472",
+      "pathFingerprintSha256": "364a7de96214ea4434fee146c42c593eeaeccdf96a2cf87ca88e098074672c27",
+      "pathCount": 4,
+      "paths": [
+        {
+          "fillRule": "nonzero",
+          "rawTopology": "MCCCCCCHZ"
+        },
+        {
+          "fillRule": "nonzero",
+          "rawTopology": "MCCLLCCLLLZ"
+        },
+        {
+          "fillRule": "nonzero",
+          "rawTopology": "MCCCLCCCCCHLVZ"
+        },
+        {
+          "fillRule": "nonzero",
+          "rawTopology": "MCCCLCCCCLCCCVCCCCZ"
+        }
+      ],
+      "annotation": null,
+      "partIds": null
+    }
+  ],
+  "sourceSnapshotSha256": {
+    "scripts/lib/author-anatomy.js": "0d8e824fb588e2fbb7851b1d1237d409242b3f95c9bdde97d55b43457950d559",
+    "semantics/author-anatomy.json": "74f13c37c3cb2f39846e7ab4a2557a030c7ce0227dea542ac9e1e1401440ac18",
+    "test/author-notification-ring.test.js": "504ddb4e31599657b5780d0d52c834b53ef0d3f29ef35a2a017cd18cf77723d3"
+  },
+  "environment": {
+    "node": "v24.15.0",
+    "platform": "win32",
+    "architecture": "x64",
+    "vitest": "4.1.12",
+    "dependencyMode": "Worktree-owned package junctions point to sibling checkout installed packages."
+  },
+  "checks": {
+    "targeted": {
+      "files": 1,
+      "passed": 26,
+      "log": "green.log"
+    },
+    "neighboring": {
+      "files": 4,
+      "passed": 81,
+      "log": "regression.log"
+    },
+    "topologySensitivity": {
+      "mutations": 2,
+      "detected": 2,
+      "log": "topology-sensitivity.log"
+    },
+    "notRun": [
+      "full build",
+      "browser",
+      "Lottie player",
+      "installed consumer",
+      "performance comparison",
+      "full optical acceptance"
+    ],
+    "documentation": {
+      "full": "FAIL",
+      "baselineFindings": 4,
+      "changedPages": "PASS",
+      "log": "docs-drift.log"
+    },
+    "repoContract": "PASS",
+    "syntax": "PASS",
+    "diffWhitespace": "PASS"
+  },
+  "sourceSnapshotBasis": "Exact working-tree bytes; core.autocrlf=true normalizes Git blobs to LF.",
+  "sourceTextLfSha256": {
+    "scripts/lib/author-anatomy.js": "0d8e824fb588e2fbb7851b1d1237d409242b3f95c9bdde97d55b43457950d559",
+    "semantics/author-anatomy.json": "74f13c37c3cb2f39846e7ab4a2557a030c7ce0227dea542ac9e1e1401440ac18",
+    "test/author-notification-ring.test.js": "504ddb4e31599657b5780d0d52c834b53ef0d3f29ef35a2a017cd18cf77723d3"
+  },
+  "logNormalization": "Only trailing whitespace and extra terminal blank lines removed; all test and finding text preserved."
+}
