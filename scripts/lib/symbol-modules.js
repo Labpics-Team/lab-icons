@@ -24,7 +24,7 @@ export function symbolReleaseProjection(base, iconIds, stateGroupIds = []) {
     key.includes('*')
       ? (key === './states/*' ? groups : ids).flatMap(id => Object.values(conditions).map(target => target.replace('*', id).slice(2)))
       : Object.values(conditions).map(target => target.slice(2)));
-  const typeDependencies = ['dist/authoring/design-spec.d.ts', 'dist/ir/author-catalog.generated.d.ts', 'dist/ir/author-source.d.ts', 'dist/ir/catalog.generated.d.ts', 'dist/ir/compiler.d.ts', 'dist/ir/request.d.ts', 'dist/ir/lottie-types.d.ts'].sort();
+  const typeDependencies = ['dist/authoring/design-spec.d.ts', 'dist/ir/author-catalog.generated.d.ts', 'dist/ir/author-provenance.d.ts', 'dist/ir/author-source.d.ts', 'dist/ir/catalog.generated.d.ts', 'dist/ir/compiler.d.ts', 'dist/ir/request.d.ts', 'dist/ir/lottie-types.d.ts'].sort();
   const runtimeDependencies = ['dist/ir/compiler.js', 'dist/ir/request.js', 'dist/ir/symbol-runtime.js', 'dist/ir/lottie-runtime.js'].sort();
   if (groups.length) {
     typeDependencies.push('dist/ir/state-types.d.ts');

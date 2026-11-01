@@ -30,7 +30,8 @@ const DECLARATIONS = Object.freeze({
   'dist/index.d.ts': 'export declare const accessibilityOutline: string;\n',
   'dist/ir/catalog.generated.d.ts': "export type CatalogIconId = 'fixture';\n",
   'dist/ir/author-catalog.generated.d.ts': "export type AuthorIconId = 'fixture';\n",
-  'dist/ir/author-source.d.ts': "import type { AuthorIconId } from './author-catalog.generated.js';\nimport type { GlyphIR } from './compiler.js';\nexport type AuthorSourceGlyph = GlyphIR & { readonly icon: AuthorIconId };\n",
+  'dist/ir/author-provenance.d.ts': "export interface AuthorSourceProvenance { readonly kind: 'figma' }\n",
+  'dist/ir/author-source.d.ts': "import type { AuthorIconId } from './author-catalog.generated.js';\nimport type { GlyphIR } from './compiler.js';\nexport type { AuthorSourceProvenance } from './author-provenance.js';\nexport type AuthorSourceGlyph = GlyphIR & { readonly icon: AuthorIconId };\n",
   'dist/ir/index.d.ts':
     `import type { CatalogIconId } from './catalog.generated.js';\n` +
     `export type { RecipeResult } from './recipes.js';\n` +

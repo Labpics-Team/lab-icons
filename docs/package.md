@@ -60,6 +60,7 @@ pnpm add @labpics/icons
 - `dist/index.d.ts`
 - `dist/index.js`
 - `dist/ir/author-catalog.generated.d.ts`
+- `dist/ir/author-provenance.d.ts`
 - `dist/ir/author-source.d.ts`
 - `dist/ir/candidates.d.ts`
 - `dist/ir/candidates.js`
@@ -1408,6 +1409,7 @@ pnpm add @labpics/icons
 
 - `dist/authoring/design-spec.d.ts`
 - `dist/ir/author-catalog.generated.d.ts`
+- `dist/ir/author-provenance.d.ts`
 - `dist/ir/author-source.d.ts`
 - `dist/ir/catalog.generated.d.ts`
 - `dist/ir/compiler.d.ts`

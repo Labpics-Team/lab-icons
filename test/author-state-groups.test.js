@@ -1,12 +1,13 @@
 import { createHash } from 'node:crypto';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import { join, posix } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { loadAuthorBaseline } from '../scripts/lib/author-baseline.js';
 import { compileAuthorStateGroups, authorStateGroupNames, renderStateGroupModule, stateGroupDeclaration } from '../scripts/lib/author-state-groups.js';
 import { buildSourceVariantContractFromSvg } from '../scripts/lib/icon-catalog.js';
 import { symbolExportName, symbolReleaseProjection } from '../scripts/lib/symbol-modules.js';
-import { validateReleaseContract, expandReleaseExports } from '../scripts/lib/release-contract.js';
+import { validateReleaseContract, expandReleaseExports, declarationModuleSpecifiers } from '../scripts/lib/release-contract.js';
 import { normalizeFigmaSvg } from '../scripts/lib/figma-import.js';
 import { authorPathEntries } from '../src/core/icon-geometry.js';
 import { createGlyphCompiler } from '../src/ir/compiler.js';
@@ -225,6 +226,27 @@ describe('enclosure.replace: точные author masters и единая обо�
     expect(declaration).not.toContain('createCompiledStateGroup');
     const noOutputs = { ...projection, files: projection.files.filter(file => !file.startsWith('dist/states/')) };
     expect(validateReleaseContract(noOutputs).join('\n')).toContain('states wildcard не имеет точных group outputs');
+  });
+
+  it('state types зависят только от primitive provenance leaf, без geometry/catalog/authoring', () => {
+    const publicDeclaration = declarationModuleSpecifiers(stateGroupDeclaration(document, 'status-circle'));
+    expect(publicDeclaration.errors).toEqual([]);
+    expect(publicDeclaration.specifiers).toEqual(['../ir/state-types.js']);
+    const seen = new Set(), queue = ['src/states/types.ts'];
+    while (queue.length) {
+      const file = queue.shift();
+      if (seen.has(file)) continue;
+      seen.add(file);
+      const parsed = declarationModuleSpecifiers(readFileSync(join(root, file), 'utf8'));
+      expect(parsed.errors).toEqual([]);
+      for (const specifier of parsed.specifiers) {
+        expect(specifier.startsWith('.')).toBe(true);
+        const target = posix.normalize(posix.join(posix.dirname(file), specifier)).replace(/\.js$/, '.ts');
+        expect(existsSync(join(root, target))).toBe(true);
+        queue.push(target);
+      }
+    }
+    expect([...seen].sort()).toEqual(['src/ir/author-provenance.ts', 'src/states/types.ts']);
   });
 
   it('тот же installed-consumer oracle различает geometry/stage/group-opacity подмены', () => {

@@ -27,7 +27,7 @@ import {
 import { sha256Hex } from './sha256.js';
 import { assembleGlyphSvg as assembleSvg } from './svg-assembly.js';
 import { GlyphModelError, parseSymbolOptions, parseSymbolVariant as parseVariant } from './request.js';
-import type { AuthorAnatomyReceipt, AuthorSourceProvenance } from './author-source.js';
+import type { AuthorAnatomyReceipt, AuthorSourceProvenance } from './author-provenance.js';
 export { GlyphModelError } from './request.js';
 export type { GlyphModelErrorCode } from './request.js';
 

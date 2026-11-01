@@ -71,7 +71,8 @@ function validPackage() {
   );
   write(root, 'dist/ir/catalog.generated.d.ts', "export type CatalogIconId = 'fixture';\n");
   write(root, 'dist/ir/author-catalog.generated.d.ts', "export type AuthorIconId = 'fixture';\n");
-  write(root, 'dist/ir/author-source.d.ts', "import type { AuthorIconId } from './author-catalog.generated.js';\nimport type { GlyphIR } from './compiler.js';\nexport type AuthorSourceGlyph = GlyphIR & { readonly icon: AuthorIconId };\n");
+  write(root, 'dist/ir/author-provenance.d.ts', "export interface AuthorSourceProvenance { readonly kind: 'figma' }\n");
+  write(root, 'dist/ir/author-source.d.ts', "import type { AuthorIconId } from './author-catalog.generated.js';\nimport type { GlyphIR } from './compiler.js';\nexport type { AuthorSourceProvenance } from './author-provenance.js';\nexport type AuthorSourceGlyph = GlyphIR & { readonly icon: AuthorIconId };\n");
   write(root, 'dist/ir/recipes.js', 'export const buildDirectionalArrow = () => ({});\n');
   write(root, 'dist/ir/recipes.d.ts', 'export declare function buildDirectionalArrow(): unknown;\n');
   write(root, 'dist/ir/candidates.js', 'export const registerCandidates = () => {};\n');

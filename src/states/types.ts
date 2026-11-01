@@ -1,4 +1,4 @@
-import type { AuthorSourceProvenance } from '../ir/author-source.js';
+import type { AuthorSourceProvenance } from '../ir/author-provenance.js';
 
 export type StateRefusalCode =
   | 'INVALID_REQUEST'
