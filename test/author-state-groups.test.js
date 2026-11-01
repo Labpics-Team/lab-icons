@@ -20,7 +20,9 @@ const read = file => JSON.parse(readFileSync(new URL(file, new URL('..', import.
 const document = read('semantics/author-state-groups.json');
 const spec = document.groups['status-circle'];
 const manifest = read('semantics/figma-baseline.json');
-const names = Object.values(spec.states).map(state => state.icon);
+const groupNames = Object.keys(document.groups).sort();
+const names = [...new Set([...Object.values(document.groups).flatMap(group =>
+  Object.values(group.states).map(state => state.icon)), 'stop-circle'])];
 const baseline = loadAuthorBaseline(root, { manifest: { ...manifest,
   counts: { families: names.length, variants: names.length * 2 },
   icons: Object.fromEntries(names.map(name => [name, manifest.icons[name]])),
@@ -43,7 +45,8 @@ function compilerFor(source) {
 const compiler = compilerFor(baseline);
 const compile = (source = baseline, input = document, owner = compilerFor(source)) =>
   compileAuthorStateGroups(source, input, { compiler: owner, assembleGlyphLayers, assembleGlyphFrame });
-const payload = compile()['status-circle'];
+const payloads = compile();
+const payload = payloads['status-circle'];
 const group = createCompiledStateGroup(payload);
 const stateNames = Object.keys(spec.states).sort();
 
@@ -52,8 +55,8 @@ const rawPaths = svg => [...svg.matchAll(/<path\b[^>]*>/g)].map(([tag]) => ({
   d: /\bd="([^"]+)"/.exec(tag)[1], fillRule: /\bfill-rule="([^"]+)"/.exec(tag)?.[1] ?? 'nonzero',
 }));
 
-function repin(source, input, state, mutate) {
-  const declaration = input.groups['status-circle'].states[state];
+function repin(source, input, state, mutate, name = 'status-circle') {
+  const declaration = input.groups[name].states[state];
   const member = source.icons[declaration.icon][declaration.variant];
   member.rawSvg = mutate(member.rawSvg);
   member.normalizedSvg = normalizeFigmaSvg(member.rawSvg);
@@ -65,7 +68,11 @@ function repin(source, input, state, mutate) {
     sourceSvg: member.normalizedSvg, artifactSvg: member.artifactSvg });
 }
 
-describe('enclosure.replace: точные author masters и единая оболочка', () => {
+describe.each(groupNames)('%s: точные author masters и единая оболочка', name => {
+  const spec = document.groups[name];
+  const group = createCompiledStateGroup(payloads[name]);
+  const stateNames = Object.keys(spec.states).sort();
+
   it.each(stateNames)('%s static SVG сохраняет каждый d, rule и порядок оригинала', state => {
     const rendered = group.render(state);
     expect(rendered.ok).toBe(true);
@@ -77,12 +84,12 @@ describe('enclosure.replace: точные author masters и единая обо�
     expect(group.stateCapabilities().states.find(member => member.id === state).author).toEqual(baseline.icons[icon][variant].author);
   });
 
-  it('mount SVG содержит шесть целых групп и только одну неподвижную оболочку', () => {
-    const mounted = group.renderStateSvg('question').svg;
+  it('mount SVG содержит все целые группы и только одну неподвижную оболочку', () => {
+    const mounted = group.renderStateSvg(spec.defaultState).svg;
     const groups = [...mounted.matchAll(/<g\b[^>]*data-state="([^"]+)"[^>]*opacity="([01])">([\s\S]*?)<\/g>/g)];
     expect(groups).toHaveLength(stateNames.length);
-    expect(groups.filter(match => match[2] === '1').map(match => match[1])).toEqual(['question']);
-    expect(mounted.match(/data-part="status-enclosure"/g)).toHaveLength(1);
+    expect(groups.filter(match => match[2] === '1').map(match => match[1])).toEqual([spec.defaultState]);
+    expect(mounted.split(`data-part="${spec.enclosurePartId}"`)).toHaveLength(2);
     for (const [, state, , body] of groups) {
       const { icon, variant, contentPartIds } = spec.states[state];
       expect(rawPaths(body)).toEqual(rawPaths(baseline.icons[icon][variant].rawSvg).slice(0, -1));
@@ -91,7 +98,7 @@ describe('enclosure.replace: точные author masters и единая обо�
     }
     expect(sha256(rawPaths(mounted).at(-1).d)).toBe('e968e80eacbedc69a95420ccbfb386db9a4a6b5c77f728e206eb1e970308c5c9');
     expect(group.renderStateSvg().svg).toBe(mounted);
-    expect(group.render().svg).toBe(group.render('question').svg);
+    expect(group.render().svg).toBe(group.render(spec.defaultState).svg);
   });
 
   it('каждая смена и обратное намерение адресуют существующие группы без initial opacity/from', () => {
@@ -99,7 +106,7 @@ describe('enclosure.replace: точные author masters и единая обо�
       const result = group.compileStateEffect(state, { duration: 450 });
       expect(result).toMatchObject({ ok: true, effect: {
         contract: 'labpics.symbol-state-effect/1', version: 1, kind: 'enclosure-replacement', targetState: state,
-        unchangedPartIds: ['status-enclosure'], options: { duration: 450, easing: 'linear', fill: 'both' },
+        unchangedPartIds: [spec.enclosurePartId], options: { duration: 450, easing: 'linear', fill: 'both' },
       } });
       expect(result.effect.stages).toEqual(stateNames.map(id => ({
         partId: `state-${id}`, property: 'opacity', to: id === state ? 1 : 0, at: 0, duration: 450,
@@ -115,6 +122,57 @@ describe('enclosure.replace: точные author masters и единая обо�
     }
     expect(group.stateCapabilities().morph).toBe('unavailable');
     expect(group.stateCapabilities()).toBe(group.stateCapabilities());
+  });
+
+  it('installed raw oracle принимает группу и сохраняет точные отказы', () => {
+    const expected = statePackageExpectations(baseline, document)[name];
+    expect(() => verifyInstalledStateGroup(group, expected)).not.toThrow();
+    expect(group.render(spec.defaultState, { variant: 'filled' })).toMatchObject({
+      ok: false, reason: { code: 'VARIANT_UNSUPPORTED' },
+    });
+    expect(group.compileStateEffect('not-declared', { duration: 300 })).toMatchObject({
+      ok: false, reason: { code: 'STATE_UNSUPPORTED' },
+    });
+    for (const format of ['lottie', 'dotlottie', 'sf-symbols']) {
+      expect(group.exportStateTransition(spec.defaultState, { format, duration: 300 })).toMatchObject({
+        ok: false, reason: { code: 'FORMAT_UNSUPPORTED' },
+      });
+    }
+  });
+});
+
+describe('enclosure.replace: adversarial admission и compatibility', () => {
+  it.each([
+    [0, 'TOPOLOGY_UNSUPPORTED'],
+    [1, 'ENCLOSURE_MISMATCH'],
+  ])('stop-circle с корректным master и index %s не подменяет общий последний enclosure', (index, code) => {
+    const source = baseline.icons['stop-circle'].outline;
+    const invalid = structuredClone(document);
+    invalid.groups['playback-circle'].states.stop = {
+      icon: 'stop-circle', variant: 'outline', masterSha256: source.author.masterSha256,
+      pathFingerprintSha256: source.author.pathFingerprintSha256,
+      enclosurePathIndex: index, contentPartIds: ['stop-mark'],
+    };
+    expect(() => compile(baseline, invalid)).toThrow(expect.objectContaining({ code }));
+  });
+
+  it('удалённая pause bar с новым корректным receipt не проходит полное part покрытие', () => {
+    const source = structuredClone(baseline), input = structuredClone(document);
+    expect(rawPaths(source.icons['pause-circle'].outline.rawSvg)).toHaveLength(3);
+    repin(source, input, 'pause', svg => svg.replace(/<path\b[^>]*\/>/, ''), 'playback-circle');
+    expect(rawPaths(source.icons['pause-circle'].outline.rawSvg)).toHaveLength(2);
+    expect(() => compile(source, input)).toThrow(expect.objectContaining({ code: 'TOPOLOGY_UNSUPPORTED' }));
+  });
+
+  it('состояния разных предметных групп не превращаются в общий enum', () => {
+    const playback = createCompiledStateGroup(payloads['playback-circle']);
+    for (const state of ['confirmation', 'stop']) {
+      expect(playback.render(state)).toMatchObject({ ok: false, reason: { code: 'STATE_UNSUPPORTED' } });
+      expect(playback.compileStateEffect(state, { duration: 300 })).toMatchObject({
+        ok: false, reason: { code: 'STATE_UNSUPPORTED' },
+      });
+    }
+    expect(group.render('play')).toMatchObject({ ok: false, reason: { code: 'STATE_UNSUPPORTED' } });
   });
 
   it.each(['lottie', 'dotlottie', 'sf-symbols'])('%s transition получает честный отказ', format => {
@@ -207,11 +265,11 @@ describe('enclosure.replace: точные author masters и единая обо�
   });
 
   it('public projection растёт от spec и хранит runtime вне wildcard', () => {
-    expect(authorStateGroupNames(document)).toEqual(['status-circle']);
+    expect(authorStateGroupNames(document)).toEqual(groupNames);
     const projection = symbolReleaseProjection(read('release/contract.json'), ['fixture'], authorStateGroupNames(document));
     expect(validateReleaseContract(projection)).toEqual([]);
-    expect(expandReleaseExports(projection)['./states/status-circle']).toEqual({
-      types: './dist/states/status-circle.d.ts', import: './dist/states/status-circle.js',
+    for (const name of groupNames) expect(expandReleaseExports(projection)[`./states/${name}`]).toEqual({
+      types: `./dist/states/${name}.d.ts`, import: `./dist/states/${name}.js`,
     });
     expect(projection.runtimeDependencies).toContain('dist/ir/state-runtime.js');
     expect(projection.files).not.toContain('dist/states/runtime.js');

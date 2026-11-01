@@ -27,7 +27,8 @@ function loadMessage(message = '') {
 const state = { data: null, name: 'time', variant: 'outline', view: 'original', viewLoading: false, limit: 48, revision: 0, viewRevision: 0, motionRevision: 0, pendingMotion: null, loaded: false, legacy: false, modelModule: null, abort: null, module: null, capabilities: null, glyph: null, axes: {}, original: '', effect: null, animations: [], frame: null, playhead: null, replacement: null };
 const REPLACEMENT_GESTURE = 'enclosure.replace';
 const stateLabels = Object.freeze({ confirmation: 'Подтверждение', dismissal: 'Закрыть',
-  question: 'Вопрос', attention: 'Внимание', increase: 'Добавить', decrease: 'Убрать' });
+  question: 'Вопрос', attention: 'Внимание', increase: 'Добавить', decrease: 'Убрать',
+  play: 'Воспроизвести', pause: 'Приостановить' });
 const stateLabel = id => stateLabels[id] ?? id;
 const replacementMode = () => Boolean(state.replacement && ui.gesture.value === REPLACEMENT_GESTURE &&
   state.view === 'original' && !state.legacy);

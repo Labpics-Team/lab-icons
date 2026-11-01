@@ -5,6 +5,34 @@
     "version": "2416636003859748575"
   },
   "groups": {
+    "playback-circle": {
+      "law": "enclosure.replace",
+      "defaultState": "play",
+      "enclosurePartId": "playback-enclosure",
+      "states": {
+        "play": {
+          "icon": "play-circle",
+          "variant": "outline",
+          "masterSha256": "3e6fc6409cd6a828e171ea134289919e32615b416e8478c3208c3926fa36ffbd",
+          "pathFingerprintSha256": "bcc7c9845a74d2241809ec0ccc12b257310fc0615b71aca9ebc50423b098f3ee",
+          "enclosurePathIndex": 1,
+          "contentPartIds": [
+            "play-mark"
+          ]
+        },
+        "pause": {
+          "icon": "pause-circle",
+          "variant": "outline",
+          "masterSha256": "e25e6c6e4f5f2e7d6b797de7deb0f07462297bb939e3b9ed2a286da7b52af054",
+          "pathFingerprintSha256": "9cd5ce68d2d6f5fbda1c9a6ebfdf7d7a1be49df1d9e49bc5c5464a9ff3b151d7",
+          "enclosurePathIndex": 2,
+          "contentPartIds": [
+            "pause-first-bar",
+            "pause-second-bar"
+          ]
+        }
+      }
+    },
     "status-circle": {
       "law": "enclosure.replace",
       "defaultState": "question",
