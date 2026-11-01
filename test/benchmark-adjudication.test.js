@@ -82,6 +82,17 @@ describe('confidence admission benchmark', () => {
     expect(quantileInterval(sample, 0.5, 0.960013943173948)).toMatchObject({ lowerRank: 16, upperRank: 32 });
     expect(quantileInterval(sample, 0.5, 0.9600139431739478)).toMatchObject({ lowerRank: 17, upperRank: 31 });
   });
+  it('rounded display не отвергает допустимую confidence ниже1', () => {
+    const result = quantileRatio([1, 2], [1, 2], { confidence: 0.9999999999999999 });
+    expect(result).toMatchObject({ upper: null, reason: 'INSUFFICIENT_TAIL_OR_ZERO_BASELINE' });
+    expect(result.baseline.confidenceFraction).toEqual({ numerator: '19999999999999999', denominator: '20000000000000000' });
+    expect(result.baseline).not.toHaveProperty('confidence');
+  });
+  it('nearest rank использует ту же точную probability, что confidence bounds', () => {
+    const sample = Array.from({ length: 100 }, (_, index) => index + 1);
+    expect(quantileInterval(sample, 0.07).estimate).toBe(7);
+    expect(quantileInterval(sample, 0.07000000000000002).estimate).toBe(8);
+  });
   it('order и scale не меняют ratio или admission', () => {
     const baseline = Array.from({ length: 96 }, (_, index) => 100 + index / 1000);
     const candidate = baseline.map(value => value * 0.5);

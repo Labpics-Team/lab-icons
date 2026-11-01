@@ -58,10 +58,10 @@ function binomialMass(n, p) {
   return { mass, denominator: p.denominator ** BigInt(n) };
 }
 
-function interval(sorted, quantile, confidence, confidenceFraction) {
+function interval(sorted, quantile, confidenceFraction) {
   probability(quantile, 'quantile');
-  probability(confidence, 'confidence');
-  const { mass, denominator } = binomialMass(sorted.length, decimal(quantile));
+  const quantileFraction = decimal(quantile);
+  const { mass, denominator } = binomialMass(sorted.length, quantileFraction);
   const tailNumerator = confidenceFraction.denominator - confidenceFraction.numerator;
   const tailDenominator = 2n * confidenceFraction.denominator;
   const admitted = value => value * tailDenominator <= tailNumerator * denominator;
@@ -78,9 +78,9 @@ function interval(sorted, quantile, confidence, confidenceFraction) {
     else break;
   }
   return {
-    count: sorted.length, quantile, confidence,
+    count: sorted.length, quantile,
     confidenceFraction: { numerator: String(confidenceFraction.numerator), denominator: String(confidenceFraction.denominator) },
-    estimate: sorted[Math.ceil(sorted.length * quantile) - 1],
+    estimate: sorted[Number((BigInt(sorted.length) * quantileFraction.numerator + quantileFraction.denominator - 1n) / quantileFraction.denominator) - 1],
     lowerRank, upperRank,
     // Неотрицательный domain даёт 0; отсутствие верхней границы сохраняется явно.
     lower: lowerRank ? sorted[lowerRank - 1] : 0,
@@ -90,18 +90,17 @@ function interval(sorted, quantile, confidence, confidenceFraction) {
 
 export function quantileInterval(values, quantile, confidence = 0.95) {
   probability(confidence, 'confidence');
-  return interval(observations(values), quantile, confidence, decimal(confidence));
+  return interval(observations(values), quantile, decimal(confidence));
 }
 
 /** Union bound двух marginal intervals даёт совместную confidence границу ratio. */
 export function quantileRatio(baseline, candidate, { quantile = 0.5, confidence = 0.95, resolution = 0 } = {}) {
   probability(confidence, 'confidence');
   if (!Number.isFinite(resolution) || resolution < 0) throw new TypeError('benchmark: неверное разрешение clock');
-  const marginalConfidence = 1 - (1 - confidence) / 2;
   const requested = decimal(confidence);
   const marginalFraction = { numerator: requested.numerator + requested.denominator, denominator: 2n * requested.denominator };
-  const base = interval(observations(baseline), quantile, marginalConfidence, marginalFraction);
-  const head = interval(observations(candidate), quantile, marginalConfidence, marginalFraction);
+  const base = interval(observations(baseline), quantile, marginalFraction);
+  const head = interval(observations(candidate), quantile, marginalFraction);
   let arithmeticUnresolved = false;
   const divide = (numerator, denominator, direction = 0) => {
     if (numerator === null || denominator === null || denominator === 0) return null;
