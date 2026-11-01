@@ -234,18 +234,15 @@
   "checks": {
     "targeted": {
       "files": 1,
-      "passed": 26,
-      "log": "green.log"
+      "passed": 26
     },
     "neighboring": {
       "files": 4,
-      "passed": 81,
-      "log": "regression.log"
+      "passed": 81
     },
     "topologySensitivity": {
       "mutations": 2,
-      "detected": 2,
-      "log": "topology-sensitivity.log"
+      "detected": 2
     },
     "notRun": [
       "full build",
@@ -258,8 +255,7 @@
     "documentation": {
       "full": "FAIL",
       "baselineFindings": 4,
-      "changedPages": "PASS",
-      "log": "docs-drift.log"
+      "changedPages": "PASS"
     },
     "repoContract": "PASS",
     "syntax": "PASS",
@@ -270,6 +266,5 @@
     "scripts/lib/author-anatomy.js": "0d8e824fb588e2fbb7851b1d1237d409242b3f95c9bdde97d55b43457950d559",
     "semantics/author-anatomy.json": "74f13c37c3cb2f39846e7ab4a2557a030c7ce0227dea542ac9e1e1401440ac18",
     "test/author-notification-ring.test.js": "504ddb4e31599657b5780d0d52c834b53ef0d3f29ef35a2a017cd18cf77723d3"
-  },
-  "logNormalization": "Only trailing whitespace and extra terminal blank lines removed; all test and finding text preserved."
+  }
 }
