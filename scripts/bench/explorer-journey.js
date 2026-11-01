@@ -1,0 +1,234 @@
+/** Проверка настоящего consumer UI; в продукт и статический пакет не входит. */
+export async function runExplorerJourney() {
+  const checks = [];
+  const authority = [];
+  const controls = [];
+  const fixtures = [];
+  const q = id => document.querySelector(`#${id}`);
+  const frame = () => new Promise(resolve => requestAnimationFrame(resolve));
+  const check = (id, passed, detail) => {
+    const item = { id, pass: Boolean(passed), ...(detail !== undefined && { detail }) };
+    checks.push(item);
+    if (!item.pass) throw new Error(`explorer journey: ${id}`);
+  };
+  const wait = async (condition, label, timeout = 4000) => {
+    const deadline = performance.now() + timeout;
+    while (!condition()) {
+      if (performance.now() >= deadline) throw new Error(`explorer journey: ${label}: timeout`);
+      await frame();
+    }
+  };
+  const settle = name => wait(() => q('symbol-inspector')?.getAttribute('aria-busy') === 'false' &&
+    (!name || q('symbol-name').textContent === name), `selection ${name ?? 'initial'}`);
+  const choose = async (name, variant = q('variant').value, { pending = false } = {}) => {
+    if (q('variant').value !== variant) {
+      q('variant').value = variant;
+      q('variant').dispatchEvent(new Event('change', { bubbles: true }));
+      await settle();
+    }
+    q('symbol-search').value = name;
+    q('symbol-search').dispatchEvent(new Event('input', { bubbles: true }));
+    const tile = [...q('symbol-grid').querySelectorAll('button')].find(button => button.dataset.symbol === name);
+    if (!tile) throw new Error(`explorer journey: missing tile ${name}`);
+    tile.focus();
+    tile.click();
+    if (!pending) await settle(name);
+  };
+  const setProgress = async value => {
+    q('progress').value = String(value);
+    q('progress').dispatchEvent(new Event('input', { bubbles: true }));
+    await frame();
+    await frame();
+  };
+  const setReduced = value => {
+    if (q('reduce-motion').checked !== value) q('reduce-motion').click();
+  };
+  const paths = svg => [...svg.querySelectorAll('path')].map(path => ({
+    d: path.getAttribute('d'), fillRule: path.getAttribute('fill-rule') ?? svg.getAttribute('fill-rule') ?? 'nonzero',
+  }));
+  const angle = element => {
+    const matrix = new DOMMatrix(getComputedStyle(element).transform);
+    return Math.atan2(matrix.b, matrix.a) * 180 / Math.PI;
+  };
+  const angleDistance = (from, to) => Math.abs(((to - from + 540) % 360) - 180);
+  const originalFetch = window.fetch;
+  const originalCreateUrl = URL.createObjectURL;
+  const originalAnchorClick = HTMLAnchorElement.prototype.click;
+  const downloads = [];
+  const blobs = new Map();
+  let deferredReject;
+  let failed = false;
+  try {
+    await settle();
+    const response = await originalFetch('explorer.json');
+    if (!response.ok) throw new Error(`explorer journey: manifest HTTP ${response.status}`);
+    const data = await response.json();
+    check('current-author-source', data.source?.kind === 'figma' && Boolean(data.source.version));
+    check('complete-explorer-census', data.summary.variants === data.summary.glyphs * 2 && data.rows.length === data.summary.variants);
+
+    URL.createObjectURL = function(blob) {
+      const url = originalCreateUrl.call(this, blob);
+      blobs.set(url, blob);
+      return url;
+    };
+    HTMLAnchorElement.prototype.click = function() {
+      if (blobs.has(this.href)) downloads.push({ filename: this.download, blob: blobs.get(this.href) });
+      else originalAnchorClick.call(this);
+    };
+
+    for (const name of ['reload', 'refresh']) for (const variant of ['outline', 'filled']) {
+      await choose(name, variant);
+      const row = data.rows.find(item => item.name === name && item.variant === variant);
+      const masterResponse = await originalFetch(row.views.master);
+      if (!masterResponse.ok) throw new Error(`explorer journey: master HTTP ${masterResponse.status}`);
+      const master = new DOMParser().parseFromString(await masterResponse.text(), 'image/svg+xml').documentElement;
+      const stage = q('symbol-stage').querySelector('svg');
+      check(`${name}/${variant}/author-paths`, JSON.stringify(paths(stage)) === JSON.stringify(paths(master)));
+      check(`${name}/${variant}/semantic-part`, stage.querySelectorAll('[data-part="cycle-body"]').length === 1);
+      check(`${name}/${variant}/keyboard-focus`, document.activeElement?.dataset.symbol === name);
+      check(`${name}/${variant}/accessible-preview`, q('symbol-stage').getAttribute('role') === 'img' && q('symbol-stage').getAttribute('aria-label').includes(name));
+      check(`${name}/${variant}/source-motion-controls`, !q('play').disabled && q('gesture').value === `${name}.cycle`);
+      check(`${name}/${variant}/no-unproved-axes`, q('axis-controls').children.length === 0);
+
+      const beforeDisplay = JSON.stringify(paths(stage));
+      q('display-size').value = '24';
+      q('display-size').dispatchEvent(new Event('input', { bubbles: true }));
+      q('display-color').value = '#7042a8';
+      q('display-color').dispatchEvent(new Event('input', { bubbles: true }));
+      check(`${name}/${variant}/display-preserves-paths`, JSON.stringify(paths(stage)) === beforeDisplay && stage.style.width === '24px' && getComputedStyle(stage).color === 'rgb(112, 66, 168)');
+      check(`${name}/${variant}/small-size-samples`, [...q('size-samples').querySelectorAll('svg')].map(svg => svg.style.width).join(',') === '16px,24px,48px');
+
+      const module = await import(`./package/symbols/${name}.js`);
+      const { compileSymbolEffect } = await import('./package/motion/index.js');
+      const glyph = module.glyph({ variant });
+      const caps = module.glyphCapabilities(variant);
+      const effect = compileSymbolEffect(glyph, caps, `${name}.cycle`, { duration: 900, from: 0.25, to: 0 });
+      check(`${name}/${variant}/public-source-admission`, effect.ok && glyph.provenance.kind === 'source' && caps.modelState === null && glyph.provenance.anatomy.annotationSha256 === caps.anatomy.annotationSha256);
+      check(`${name}/${variant}/declared-reverse`, effect.ok && effect.effect.targets[0].rotation.from === 90 && effect.effect.targets[0].rotation.to === 0);
+      const unsupported = compileSymbolEffect(glyph, caps, 'time.advance', { duration: 10 });
+      check(`${name}/${variant}/foreign-gesture-refusal`, !unsupported.ok && unsupported.reason.code === 'GESTURE_UNSUPPORTED');
+      authority.push({ name, variant, author: glyph.provenance.author, anatomy: glyph.provenance.anatomy });
+
+      q('export-format').value = 'svg';
+      q('export').click();
+      const svgDownload = downloads.at(-1);
+      check(`${name}/${variant}/svg-export-basis`, svgDownload?.filename === `${name}-${variant}.svg` &&
+        JSON.stringify(paths(new DOMParser().parseFromString(await svgDownload.blob.text(), 'image/svg+xml').documentElement)) === JSON.stringify(paths(master)));
+      q('export-format').value = 'effect';
+      q('export').click();
+      const effectDownload = downloads.at(-1);
+      const exportedEffect = JSON.parse(await effectDownload.blob.text());
+      check(`${name}/${variant}/effect-export`, effectDownload.filename === `${name}-${variant}.effect.json` && exportedEffect.icon === name && exportedEffect.variant === variant && exportedEffect.targets[0].partId === 'cycle-body');
+      for (const format of ['lottie', 'sf-symbols']) {
+        const before = downloads.length;
+        q('export-format').value = format;
+        q('export').click();
+        check(`${name}/${variant}/${format}-refusal`, downloads.length === before && q('export-status').textContent.includes('нет проверенного адаптера'));
+      }
+    }
+
+    await choose('reload', 'outline');
+    q('display-size').value = '112';
+    q('display-size').dispatchEvent(new Event('input', { bubbles: true }));
+    setReduced(false);
+    await setProgress(0);
+    q('play').click();
+    await wait(() => Number(q('progress').value) > 0.1 && Number(q('progress').value) < 0.7, 'in-flight progress');
+    q('pause').click();
+    const paused = Number(q('progress').value);
+    const part = q('symbol-stage').querySelector('[data-part]');
+    const pausedAngle = angle(part);
+    for (let index = 0; index < 8; index++) await frame();
+    check('pause-freezes-progress', Math.abs(Number(q('progress').value) - paused) < 0.000001);
+    check('pause-freezes-visible-pose', angleDistance(pausedAngle, angle(part)) < 0.01);
+    q('pause').click();
+    await wait(() => Number(q('progress').value) > paused, 'resume progress');
+    q('pause').click();
+    const beforeReverse = angle(part);
+    q('reverse').click();
+    // Уже загруженный executor принимает successor в microtask, до следующего кадра.
+    await Promise.resolve();
+    await Promise.resolve();
+    const afterReverse = angle(part);
+    check('reverse-successor-admitted', q('pause').textContent === 'Пауза');
+    // Фиксированный FPS не требуется: сравниваются позы на границе admission.
+    check('reverse-retains-visible-pose', angleDistance(beforeReverse, afterReverse) < 0.1, { beforeReverse, afterReverse });
+    setReduced(true);
+    await wait(() => Number(q('progress').value) === 0, 'reduced reverse terminal');
+    check('reduced-motion-terminal', angleDistance(0, angle(part)) < 0.01);
+    await setProgress(1);
+    setReduced(false);
+    q('play').click();
+    await wait(() => Number(q('progress').value) > 0.01 && Number(q('progress').value) < 0.5, 'repeat occurrence');
+    check('completed-cycle-repeats', angleDistance(0, angle(part)) > 1);
+    setReduced(true);
+    await wait(() => Number(q('progress').value) === 1, 'reduced forward terminal');
+
+    window.fetch = (url, ...args) => String(url).includes('originals/refresh/outline.svg')
+      ? Promise.reject(new Error('controlled selection failure')) : originalFetch(url, ...args);
+    await choose('refresh', 'outline');
+    check('failed-selection-clears-old-projection', q('consumer-import').textContent === '' &&
+      q('size-samples').children.length === 0 && q('parts').children.length === 0 && q('export').disabled);
+    window.fetch = originalFetch;
+    await choose('reload', 'outline');
+    window.fetch = (url, ...args) => String(url).includes('originals/refresh/outline.svg')
+      ? new Promise((resolve, reject) => { deferredReject = reject; }) : originalFetch(url, ...args);
+    await choose('refresh', 'outline', { pending: true });
+    await wait(() => typeof deferredReject === 'function', 'controlled pending fetch');
+    await choose('reload', 'outline');
+    const status = q('source-status').textContent;
+    deferredReject(new Error('controlled late selection failure'));
+    deferredReject = null;
+    for (let index = 0; index < 3; index++) await frame();
+    check('late-failure-keeps-new-selection', q('symbol-name').textContent === 'reload' &&
+      q('consumer-import').textContent.includes('/symbols/reload') && q('source-status').textContent === status && !q('play').disabled);
+    window.fetch = originalFetch;
+
+    const { glyph, glyphCapabilities } = await import('./package/symbols/reload.js');
+    const { compileSymbolEffect } = await import('./package/motion/index.js');
+    const { renderGlyphSvg } = await import('./package/ir/render.js');
+    const { executeSymbolEffect } = await import('./motion-execution.js');
+    const fixture = document.createElement('div');
+    fixture.setAttribute('aria-hidden', 'true');
+    fixture.style.cssText = 'position:absolute;left:0;top:0;pointer-events:none';
+    fixture.innerHTML = renderGlyphSvg(glyph({ variant: 'filled' }), { instanceId: 'journey-left' }) +
+      renderGlyphSvg(glyph({ variant: 'filled' }), { instanceId: 'journey-right' });
+    fixtures.push(fixture);
+    document.body.append(fixture);
+    const [left, right] = fixture.querySelectorAll('svg');
+    const rightBefore = right.outerHTML;
+    const effect = compileSymbolEffect(glyph({ variant: 'filled' }), glyphCapabilities('filled'), 'reload.cycle', { duration: 900, to: 0.5 });
+    check('filled-instance-effect-admitted', effect.ok);
+    controls.push(...executeSymbolEffect(left, effect.effect, { initialize: true }));
+    await wait(() => angleDistance(0, angle(left.querySelector('[data-part]'))) > 2, 'independent instance progress');
+    check('filled-instances-independent', right.outerHTML === rightBefore && getComputedStyle(right.querySelector('[data-part]')).transform === 'none');
+    check('rotation-envelope-visible', left.style.overflow === 'visible');
+    controls.forEach(control => control.stop());
+    fixture.remove();
+    check('fixture-cleanup', !document.body.contains(fixture));
+
+    await choose('time', 'outline');
+    check('latest-clock-motion-refuses', q('play').disabled && q('gesture').value === '');
+    await choose('reload', 'outline');
+    setReduced(true);
+    await setProgress(0);
+    q('export-format').value = 'svg';
+    q('display-color').value = '#19191e';
+    q('display-color').dispatchEvent(new Event('input', { bubbles: true }));
+    return { version: 1, scope: 'source Observatory consumer journey; bounded controls, no performance claim',
+      source: data.source, counts: data.summary, executionIdentity: data.executionIdentity, authority, checks,
+      userAgent: navigator.userAgent, downloadsChecked: downloads.length };
+  } catch (error) {
+    failed = true;
+    error.journey = { version: 1, checks, authority, failure: error.message };
+    throw error;
+  } finally {
+    window.fetch = originalFetch;
+    URL.createObjectURL = originalCreateUrl;
+    HTMLAnchorElement.prototype.click = originalAnchorClick;
+    if (deferredReject) deferredReject(new Error('journey cleanup'));
+    for (const control of controls) control.stop();
+    for (const fixture of fixtures) fixture.remove();
+    if (failed && q('pause')?.textContent === 'Пауза' && !q('pause').disabled) q('pause').click();
+  }
+}

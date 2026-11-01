@@ -14,6 +14,7 @@ import { chromium } from 'playwright';
 import { localTarballSpecifier, pnpmInvocation } from '../check-package-artifact.js';
 import { assertRemoteBenchmark, summarize } from './measurement.js';
 import { validateAuthorObservation, validateRetainedPair } from './author-oracle.js';
+import { verifyExplorer } from './verify-explorer.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const BASELINE = '03a4ca3ac1bf7978f9e8f554106c132a69668afb';
@@ -188,6 +189,7 @@ try {
   const origin = `http://127.0.0.1:${server.address().port}`;
   browser = await chromium.launch({ headless: true });
   report.environment.chromium = browser.version();
+  report.explorer = await verifyExplorer({ browser, source: prepared[1].source, output });
   for (const result of report.cases) {
     const labels = result.candidateOnly ? ['candidate'] : ['baseline', 'candidate'];
     for (const slowdown of [1, 4]) for (const count of COUNTS) {
