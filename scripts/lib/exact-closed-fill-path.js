@@ -57,12 +57,13 @@ function closedContours(d) {
         start = current = edges = command = undefined;
         continue;
       }
-      if (!['M', 'L', 'C'].includes(next) || (next === 'M' ? start !== undefined : start === undefined)) return null;
+      if (!['M', 'L', 'H', 'V', 'C'].includes(next) || (next === 'M' ? start !== undefined : start === undefined)) return null;
       command = next;
     } else if (!command) return null;
 
     const values = [];
-    for (let index = 0; index < (command === 'C' ? 6 : 2); index++) {
+    const scalar = command === 'H' || command === 'V';
+    for (let index = 0; index < (command === 'C' ? 6 : scalar ? 1 : 2); index++) {
       const value = number(index === 0 && cursor > beforeSpace);
       if (value === null) return null;
       values.push(value);
@@ -73,7 +74,10 @@ function closedContours(d) {
       // Последующие пары абсолютного M — абсолютные L по SVG grammar.
       command = 'L';
     } else {
-      edges.push([command, ...current, ...values]);
+      // Absolute H/V сохраняют текущий y/x; арифметики нет.
+      if (command === 'H') values.push(current[1]);
+      if (command === 'V') values.unshift(current[0]);
+      edges.push([scalar ? 'L' : command, ...current, ...values]);
       current = values.slice(-2);
     }
   }
@@ -114,7 +118,7 @@ function contourKeys({ start, edges }) {
 }
 
 /**
- * Частный build-only достаточный признак: absolute M/L/C/Z, closed fill-only.
+ * Частный build-only достаточный признак: absolute M/L/H/V/C/Z, closed fill-only.
  * null означает «не доказано». Paint/rule/frame/IDs проверяет вызывающий владелец.
  * Контуры переставляются с сохранением количества и multiplicity всех рёбер.
  */

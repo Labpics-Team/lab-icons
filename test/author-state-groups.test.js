@@ -180,7 +180,7 @@ describe('exact shared contours: настоящий build/runtime путь бе�
     expect(() => verifyInstalledStateGroup(compiled, statePackageExpectations(source, input)['expression-face'])).not.toThrow();
   });
 
-  it('неподдержанный H/V fallback сохраняет тип отказа; literal H/V остаётся допустимым', () => {
+  it('absolute H/V и L сохраняют authored static suffix; relative alias остаётся unproved', () => {
     const source = structuredClone(baseline), input = directionDocument();
     const replaceRing = d => svg => {
       let index = 0;
@@ -188,9 +188,14 @@ describe('exact shared contours: настоящий build/runtime путь бе�
     };
     repin(source, input, 'back', replaceRing('M0 0L10 0L10 10L0 10Z'), 'direction-witness');
     repin(source, input, 'down', replaceRing('M0 0H10V10H0Z'), 'direction-witness');
-    expect(() => compile(source, input)).toThrow(expect.objectContaining({ code: 'ENCLOSURE_MISMATCH' }));
+    const compiled = createCompiledStateGroup(compile(source, input)['direction-witness']);
+    expect(() => verifyInstalledStateGroup(compiled, statePackageExpectations(source, input)['direction-witness'])).not.toThrow();
+    expect(rawPaths(compiled.render('back').svg).at(-1).d).toBe('M0 0L10 0L10 10L0 10Z');
+    expect(rawPaths(compiled.render('down').svg).at(-1).d).toBe('M0 0H10V10H0Z');
     repin(source, input, 'back', replaceRing('M0 0H10V10H0Z'), 'direction-witness');
     expect(() => compile(source, input)).not.toThrow();
+    repin(source, input, 'down', replaceRing('M0 0h10v10h-10Z'), 'direction-witness');
+    expect(() => compile(source, input)).toThrow(expect.objectContaining({ code: 'ENCLOSURE_MISMATCH' }));
   });
 
   it.each(['back', 'down', 'forward', 'up'])('Filled %s compound не разбивается для admission', direction => {
@@ -341,6 +346,12 @@ describe('enclosure.replace: необъявленный общий рисуно�
 
   it.each(['literal', 'exact'])('один рисунок на разных prefix indices, %s spelling, требует отказа', spelling => {
     const { source, input } = witness('mixed', ['aloof', 'sad'], spelling);
+    expect(() => compile(source, input)).toThrow(expect.objectContaining({ code: 'SHARED_PART_UNDECLARED' }));
+  });
+
+  it.each(['first', 'middle'])('%s prefix: H/V и L alias у двух из трёх states требует отказа', position => {
+    const { source, input } = witness(position, ['aloof', 'sad']);
+    repin(source, input, 'aloof', svg => svg.replace(`d="${square}"`, 'd="M10 5H11V6H10Z"'), 'expression-face');
     expect(() => compile(source, input)).toThrow(expect.objectContaining({ code: 'SHARED_PART_UNDECLARED' }));
   });
 

@@ -43,7 +43,11 @@ Source-срез 2026-11-02 расширяет проверку только у b
 `(P0,C1,C2,P1)` с `(P1,C2,C1,P0)` и сохраняет каждую десятичную координату.
 
 После прежнего literal сравнения частный ключ поддерживает абсолютные
-`M/L/C/Z`, включая повторные наборы аргументов. Числа представляются значащими
+`M/L/H/V/C/Z`, включая повторные наборы аргументов. Абсолютные
+[H/V](https://www.w3.org/TR/SVG2/paths.html#PathDataLinetoCommands)
+задают L-рёбра с сохранением текущего y/x; координаты только копируются.
+Этот authored alias также учитывается при проверке повторов prefix.
+Числа представляются значащими
 десятичными цифрами и целой степенью десяти; округления, epsilon и `Number`
 для координат нет. Ключ сохраняет тип, количество и multiplicity рёбер,
 границы и число контуров. [SVG 2 closepath](https://www.w3.org/TR/SVG2/paths.html#PathDataClosePathCommand)
@@ -58,7 +62,7 @@ Source-срез 2026-11-02 расширяет проверку только у b
 `M0 0L10 0L10 10L0 10Z M2 2L8 2L8 8L2 8Z` даёт winding 2 в центре;
 разворот только внутреннего квадрата даёт winding 0 и отверстие.
 Paint, fill-rule, рамка, размеры, порядок path, semantic IDs и роли
-проверяются отдельно. Arcs, shorthand и relative commands дают «не доказано»
+проверяются отдельно. Arcs, `Q/S/T` и relative commands дают «не доказано»
 и прежний тип отказа; literal-identical пути сохраняют прежний допуск.
 
 Бесплатный [picosvg svg_reuse.py, commit 933657f](https://github.com/googlefonts/picosvg/blob/933657f783b48e533952ffd3f5cfb8085b8388a5/src/picosvg/svg_reuse.py)

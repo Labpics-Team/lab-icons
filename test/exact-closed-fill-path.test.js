@@ -27,6 +27,16 @@ describe('build-only exact closed fill key', () => {
       .toBe(key('M0 0L1e1000000000000000000000000 0L0 1Z', 'nonzero'));
   });
 
+  it.each(['evenodd', 'nonzero'])('%s: absolute H/V точно переиспользуют текущий x/y как L endpoints', rule => {
+    expect(key('M0 0H10V10H0Z', rule)).toBe(key(outer, rule));
+    expect(key('M10 0V10H0V0Z', rule)).toBe(key(outer, rule));
+    expect(key('M0 0V10H10V0Z', rule)).toBe(key(outerReverse, rule));
+    expect(key('M0 0H1 2V3,4H0Z', rule)).toBe(key('M0 0L1 0L2 0L2 3L2 4L0 4Z', rule));
+    expect(key('M0 0H0H10V10H0Z', rule)).not.toBe(key(outer, rule));
+    expect(key('M0 0H10.00000000000000000000001V10H0Z', rule)).not.toBe(key(outer, rule));
+    expect(key('M-1.20 2e-20H3e+1V4.000Z', rule)).toBe(key('M-1.2 .00000000000000000002L30 .00000000000000000002L30 4Z', rule));
+  });
+
   it.each([
     ['9007199254740992', '9007199254740993'],
     ['1', '1.00000000000000000000000000001'],
@@ -83,7 +93,7 @@ describe('build-only exact closed fill key', () => {
     '', 'M0 0', 'L0 0Z', 'M0 0L1Z', 'M0 0C1 2 3 4 5Z',
     'M0 0M1 1Z', 'M0 0ZL1 1Z', 'M0 0ZZ', 'M0 0,',
     'M,0 0Z', 'M0,,0Z', 'M0 0L1 1,Z', 'M0 0L1e 1Z', 'M0 0LNaN 1Z',
-    'm0 0l1 1z', 'M0 0L1 1z', 'M0 0H1V1Z',
+    'm0 0l1 1z', 'M0 0L1 1z', 'M0 0h1v1Z', 'M0 0HZ', 'M0 0VZ', 'M0 0H1,V1Z',
     'M0 0Q1 1 2 2Z', 'M0 0C1 1 2 2 3 3S4 4 5 5Z',
     'M0 0A1 1 0 0 0 1 1Z', 'M0 0L1 1Z transform="scale(2)"',
   ])('неподдержанный/незамкнутый/malformed d %j даёт unproved', d => {
