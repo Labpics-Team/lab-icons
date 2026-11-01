@@ -106,9 +106,47 @@ function activityTriad(icon, variant, declaration, parts) {
   return gestures;
 }
 
+/** Полосы явно упорядочены от speaker наружу; одна полоса — один закрытый contour. */
+function signalLevels(icon, variant, declaration, parts) {
+  fields(declaration, ['law', 'purpose', 'containerPartId', 'partIds'], `${icon}/${variant}.gesture`);
+  if (declaration.purpose !== 'volume') {
+    refuse('LAW_SEMANTICS_UNSUPPORTED', `${icon}/${variant}: signal.levels требует явно объявленный volume`);
+  }
+  if (Array.isArray(declaration.partIds) && declaration.partIds.some(Array.isArray)) {
+    refuse('LAW_COMPOSITION_UNSUPPORTED', `${icon}/${variant}: flat parts не обеспечивают group opacity многоконтурной полосы`);
+  }
+  const container = parts.find(part => part.id === declaration.containerPartId);
+  if (!container || container.role !== 'container' ||
+      !Array.isArray(declaration.partIds) || !declaration.partIds.length ||
+      new Set(declaration.partIds).size !== declaration.partIds.length ||
+      parts.length !== declaration.partIds.length + 1 || declaration.partIds.some(id => {
+        const part = parts.find(part => part.id === id);
+        return !part || part.role !== 'content' || part.topologySignature.includes('|') ||
+          !part.topologySignature.endsWith('Z');
+      })) {
+    refuse('LAW_TOPOLOGY_UNSUPPORTED', `${icon}/${variant}: signal.levels требует независимые закрытые content полосы и один неподвижный container`);
+  }
+  const count = declaration.partIds.length;
+  const gesture = {
+    id: `${icon}.level`, kind: 'state',
+    meaning: 'Уровень громкости: ближние полосы становятся видимыми раньше дальних; speaker сохраняется.',
+    partIds: [...declaration.partIds], progress: 'normalized-0-to-1', restProgress: 1,
+    tracks: declaration.partIds.map((partId, index) => {
+      const start = index / count, end = (index + 1) / count;
+      return { partId, kind: 'opacity', unit: 'fraction', interpolation: 'linear',
+        stops: [{ at: 0, value: 0 }, ...(start > 0 ? [{ at: start, value: 0 }] : []),
+          { at: end, value: 1 }, ...(end < 1 ? [{ at: 1, value: 1 }] : [])],
+      };
+    }),
+  };
+  validateMotionGesture(gesture);
+  return [gesture];
+}
+
 function compileLaw(icon, variant, declaration, parts) {
   if (declaration?.law === 'cycle.clockwise') return clockwiseCycle(icon, variant, declaration, parts);
   if (declaration?.law === 'activity.triad') return activityTriad(icon, variant, declaration, parts);
+  if (declaration?.law === 'signal.levels') return signalLevels(icon, variant, declaration, parts);
   refuse('LAW_UNSUPPORTED', `${icon}/${variant}: закон ${declaration?.law} не объявлен`);
 }
 

@@ -187,6 +187,112 @@
           ]
         }
       }
+    },
+    "volume-high": {
+      "outline": {
+        "masterSha256": "085d3719de5e12a876dee1d8ad7c94da95be05e8dfe83359380da4b74d2b6311",
+        "pathFingerprintSha256": "60d830045d8c95bfa9b1ffdbc73c6cfd423e06aba3d3b039b5fc48d627789b11",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "wave-far",
+            "role": "content"
+          },
+          {
+            "pathIndex": 1,
+            "id": "wave-middle",
+            "role": "content"
+          },
+          {
+            "pathIndex": 2,
+            "id": "speaker",
+            "role": "container"
+          },
+          {
+            "pathIndex": 3,
+            "id": "wave-near",
+            "role": "content"
+          }
+        ],
+        "gesture": {
+          "law": "signal.levels",
+          "purpose": "volume",
+          "containerPartId": "speaker",
+          "partIds": [
+            "wave-near",
+            "wave-middle",
+            "wave-far"
+          ]
+        }
+      },
+      "filled": {
+        "masterSha256": "150e20c8e3d00910f58c6f6606476329aa1ebe0ae81c5ec48afffdaaea4496b6",
+        "pathFingerprintSha256": "305237029d5568f999b790ad15344a4f1b431591a0d442e6c972a7d27cc3b6d0",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "wave-far",
+            "role": "content"
+          },
+          {
+            "pathIndex": 1,
+            "id": "wave-middle",
+            "role": "content"
+          },
+          {
+            "pathIndex": 2,
+            "id": "speaker",
+            "role": "container"
+          },
+          {
+            "pathIndex": 3,
+            "id": "wave-near",
+            "role": "content"
+          }
+        ],
+        "gesture": {
+          "law": "signal.levels",
+          "purpose": "volume",
+          "containerPartId": "speaker",
+          "partIds": [
+            "wave-near",
+            "wave-middle",
+            "wave-far"
+          ]
+        }
+      }
+    },
+    "volume-middle": {
+      "filled": {
+        "masterSha256": "af1ec2b4d4ee813aaae5808022d860f6559e84d1e092114939ec2088b884ed5e",
+        "pathFingerprintSha256": "629b2ecb94b89701558cccdb68812cceaa26903cc1f9b1db65fa6b3a783d4047",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "wave-far",
+            "role": "content"
+          },
+          {
+            "pathIndex": 1,
+            "id": "speaker",
+            "role": "container"
+          },
+          {
+            "pathIndex": 2,
+            "id": "wave-near",
+            "role": "content"
+          }
+        ],
+        "gesture": {
+          "law": "signal.levels",
+          "purpose": "volume",
+          "containerPartId": "speaker",
+          "partIds": [
+            "wave-near",
+            "wave-far"
+          ]
+        }
+      }
     }
   }
 }
