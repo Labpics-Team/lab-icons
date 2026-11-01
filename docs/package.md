@@ -742,6 +742,8 @@ pnpm add @labpics/icons
 - `dist/lottie/waveform.js`
 - `dist/motion/index.d.ts`
 - `dist/motion/index.js`
+- `dist/states/expression-face.d.ts`
+- `dist/states/expression-face.js`
 - `dist/states/playback-circle.d.ts`
 - `dist/states/playback-circle.js`
 - `dist/states/status-circle.d.ts`
