@@ -37,7 +37,8 @@ const DECLARATIONS = Object.freeze({
     `export type { RecipeResult } from './recipes.js';\n` +
     `export type { GlyphIR } from './compiler.js';\n` +
     'export declare const iconIds: readonly CatalogIconId[];\n',
-  'dist/ir/compiler.d.ts': "import type { GlyphModelErrorCode } from './request.js';\nexport interface GlyphIR { readonly code: GlyphModelErrorCode }\n",
+  'dist/ir/compiler.d.ts': "import type { GlyphModelErrorCode } from './request.js';\nimport type { AuthorVariationProvenance } from './authored-variation.js';\nexport interface GlyphIR { readonly code: GlyphModelErrorCode; readonly variation?: AuthorVariationProvenance }\n",
+  'dist/ir/authored-variation.d.ts': "export interface AuthorVariationProvenance { readonly kind: 'authored-variation' }\n",
   'dist/ir/request.d.ts': "export type GlyphModelErrorCode = 'CANDIDATES_REQUIRED';\n",
   'dist/ir/render.d.ts': "import type { GlyphIR } from './compiler.js';\nexport declare function renderGlyphSvg(glyph: GlyphIR): string;\n",
   'dist/authoring/index.d.ts': "export { compileDesignSpec } from './design-spec.js';\n",

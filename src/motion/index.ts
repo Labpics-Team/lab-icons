@@ -153,9 +153,14 @@ export function compileSymbolEffect(
   }
   const modelReady = glyph.provenance.kind === 'model' && glyph.provenance.state === 'accepted' &&
     capabilities.modelState === 'accepted';
-  const anatomy = glyph.provenance.kind === 'source' ? glyph.provenance.anatomy : undefined;
-  const author = glyph.provenance.kind === 'source' ? glyph.provenance.author : undefined;
-  const sourceReady = capabilities.modelState === null && anatomy?.version === 1 && capabilities.anatomy?.version === 1 &&
+  const authorBacked = glyph.provenance.kind === 'source' || glyph.provenance.kind === 'authored-variation';
+  const anatomy = authorBacked ? glyph.provenance.anatomy : undefined;
+  const author = authorBacked ? glyph.provenance.author : undefined;
+  const variationReady = glyph.provenance.kind !== 'authored-variation' ||
+    glyph.provenance.variation.version === 1 && glyph.provenance.variation.law === 'dots.affine' &&
+    capabilities.variation?.law === 'dots.affine' &&
+    glyph.provenance.variation.geometrySha256 === capabilities.variation.geometrySha256;
+  const sourceReady = variationReady && capabilities.modelState === null && anatomy?.version === 1 && capabilities.anatomy?.version === 1 &&
     /^[a-f0-9]{64}$/.test(anatomy.annotationSha256) &&
     anatomy.annotationSha256 === capabilities.anatomy?.annotationSha256 &&
     anatomy.masterSha256 === capabilities.anatomy?.masterSha256 &&
@@ -167,12 +172,19 @@ export function compileSymbolEffect(
     author?.masterSha256 === capabilities.author?.masterSha256 &&
     author?.normalizedSha256 === capabilities.author?.normalizedSha256 &&
     author?.pathFingerprintSha256 === capabilities.author?.pathFingerprintSha256 &&
-    glyph.parts.every(part => part.provenance.kind === 'source' && part.provenance.identity === 'declared');
+    glyph.parts.every(part => part.provenance.identity === 'declared' &&
+      (part.provenance.kind === 'source' || glyph.provenance.kind === 'authored-variation' &&
+       part.provenance.kind === 'authored-variation' && part.provenance.source.kind === 'source' &&
+       part.provenance.source.identity === 'declared' &&
+       part.provenance.variation.geometrySha256 === glyph.provenance.variation.geometrySha256));
   if ((!modelReady && !sourceReady) || capabilities.motion.state !== 'gesture-ready') {
     return refuse('SEMANTIC_MOTION_UNAVAILABLE', 'Для этого варианта нет принятого семантического жеста.');
   }
   const gesture = capabilities.motion.gestures.find((entry) => entry.id === gestureId);
   if (!gesture) return refuse('GESTURE_UNSUPPORTED', `Жест ${gestureId} не объявлен для этого варианта.`);
+  if (glyph.provenance.kind === 'authored-variation' && !gesture.tracks.every(track => track.kind === 'opacity')) {
+    return refuse('SEMANTIC_MOTION_UNAVAILABLE', 'Авторская вариация сохраняет только независимые opacity-жесты частей.');
+  }
   try {
     validateMotionGesture(gesture);
   } catch {

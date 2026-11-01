@@ -74,6 +74,13 @@ fill scopes. Записанные модели, оси и candidate-регист
 через полный `@labpics/icons/ir`, а прежние именованные SVG — через корневой импорт.
 Оба пути сохраняют свой записанный baseline.
 
+У двух многоточий есть отдельная [авторская геометрическая вариация](authored-variation.md):
+`dotScale` и `spacingScale` меняют три положительные authored части внутри
+связанной области grid margin/gap. Она не добавляет model axes. Horizontal
+сохраняет существующие opacity-жесты; vertical объявляет только семантические
+части, без loading-жеста. Nondefault имеет собственную provenance; Lottie для
+изменённой геометрии явно отказывает.
+
 ## Получить семантический эффект
 
 `compileSymbolEffect` принимает GlyphIR и capabilities без каталога или parser.

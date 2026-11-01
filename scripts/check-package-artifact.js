@@ -59,6 +59,7 @@ export function authorPackageExpectations(baseline, annotations) {
       return [variant, {
         master: record.master, author: record.author, svg: record.artifactSvg,
         anatomy: contract.anatomy ?? null,
+        variation: contract.variation ? { geometrySha256: contract.variation.geometrySha256, domain: contract.variation.domain } : null,
         motion: expectedAuthorMotion(contract, { kind: 'package', svg: record.normalizedSvg, compositionKind: 'layers' }),
         effects: Object.fromEntries((contract.gestures ?? []).map(gesture => [gesture.id, expectedAuthorEffect(gesture)])),
         parts: contract.parts.map(({ id, role, identity, fillRule, zIndex, sourceFingerprint, artifactFingerprint, anchor }, index) => ({
@@ -582,7 +583,22 @@ export function checkPackageArtifact({
         `    const capabilities = symbol.glyphCapabilities(variant);\n` +
         `    if (capabilities.icon !== icon || capabilities.variant !== variant || capabilities.modelState !== null || capabilities.supportedAxes.length || Object.keys(capabilities.axes).length || JSON.stringify(capabilities.motion) !== JSON.stringify(expected.motion) || JSON.stringify(capabilities.anatomy ?? null) !== JSON.stringify(expected.anatomy) || JSON.stringify(capabilities.author) !== JSON.stringify(expected.author)) throw new Error('current source inherited stale admission: ' + icon + '/' + variant);\n` +
         `    const foreignMotion = compileSymbolEffect(current, capabilities, 'time.advance', { duration: 360 });\n` +
-        `    if (foreignMotion.ok || foreignMotion.reason.code !== (expected.anatomy ? 'GESTURE_UNSUPPORTED' : 'SEMANTIC_MOTION_UNAVAILABLE')) throw new Error('current motion did not refuse precisely: ' + icon + '/' + variant);\n` +
+        `    if (foreignMotion.ok || foreignMotion.reason.code !== (expected.motion.state === 'gesture-ready' ? 'GESTURE_UNSUPPORTED' : 'SEMANTIC_MOTION_UNAVAILABLE')) throw new Error('current motion did not refuse precisely: ' + icon + '/' + variant);\n` +
+        `    if (expected.variation) {\n` +
+        `      if (capabilities.variation?.geometrySha256 !== expected.variation.geometrySha256 || JSON.stringify(capabilities.variation.domain) !== JSON.stringify(expected.variation.domain)) throw new Error('current authored variation policy differs: ' + icon + '/' + variant);\n` +
+        `      if (symbol.glyph({ variant, variation: { dotScale: 1, spacingScale: 1 } }) !== current) throw new Error('authored variation identity roundtripped');\n` +
+        `      const varied = symbol.glyph({ variant, variation: { dotScale: 1.1, spacingScale: 0.9 } });\n` +
+        `      if (varied.provenance.kind !== 'authored-variation' || varied.d === current.d || varied.svg === current.svg || varied.provenance.variation.geometrySha256 !== expected.variation.geometrySha256 || JSON.stringify(varied.provenance.author) !== JSON.stringify(expected.author)) throw new Error('authored variation not materialized: ' + icon + '/' + variant);\n` +
+        `      if (JSON.stringify(varied.parts.map(part => [part.id, part.fillRule, part.topologySignature])) !== JSON.stringify(current.parts.map(part => [part.id, part.fillRule, part.topologySignature])) || varied.parts.some((part, index) => part.d === current.parts[index].d || !varied.svg.includes('d="' + part.d + '"'))) throw new Error('authored variation lost parts/SVG: ' + icon + '/' + variant);\n` +
+        `      for (const [gesture] of Object.entries(expected.effects)) if (!compileSymbolEffect(varied, capabilities, gesture, { duration: 360 }).ok) throw new Error('authored variation lost opacity gesture');\n` +
+        `      let outside = false; try { symbol.glyph({ variant, variation: { dotScale: 3, spacingScale: 0.5 } }); } catch (error) { outside = error.code === 'VARIATION_OUTSIDE_DOMAIN'; }\n` +
+        `      if (!outside) throw new Error('authored variation admitted overlapping controls');\n` +
+        `      const lottie = await import('@labpics/icons/lottie/' + icon); const refusedTarget = lottie.exportLottie({ variant, variation: { dotScale: 1.1 } });\n` +
+        `      if (refusedTarget.ok || refusedTarget.reason.code !== 'VARIATION_UNSUPPORTED') throw new Error('Lottie silently exported default geometry for variation');\n` +
+        `    } else {\n` +
+        `      let unsupported = false; try { symbol.glyph({ variant, variation: { dotScale: 1.1 } }); } catch (error) { unsupported = error.code === 'AUTHOR_VARIATION_UNSUPPORTED'; }\n` +
+        `      if (!unsupported) throw new Error('undeclared authored geometry variation accepted: ' + icon + '/' + variant);\n` +
+        `    }\n` +
         `    for (const [gesture, expectedEffect] of Object.entries(expected.effects)) {\n` +
         `      const effect = compileSymbolEffect(current, capabilities, gesture, { duration: 360 });\n` +
         `      if (!effect.ok || effect.effect.version !== expectedEffect.version || JSON.stringify(effect.effect.targets) !== JSON.stringify(expectedEffect.targets) || JSON.stringify(effect.effect.stages) !== JSON.stringify(expectedEffect.stages)) throw new Error('current declared motion differs: ' + icon + '/' + variant);\n` +
@@ -621,8 +637,20 @@ export function checkPackageArtifact({
         `import { glyph as symbolGlyph, glyphCapabilities as symbolCapabilities } from '@labpics/icons/symbols/time';\n` +
         `import { glyph as addedGlyph, glyphCapabilities as addedCapabilities } from '@labpics/icons/symbols/align-bottom';\n` +
         `import { glyph as activityGlyph, glyphCapabilities as activityCapabilities } from '@labpics/icons/symbols/ellipsis-horizontal';\n` +
+        `import { glyph as verticalGlyph } from '@labpics/icons/symbols/ellipsis-vertical';\n` +
+        `import { glyph as ellipseGlyph } from '@labpics/icons/symbols/ellipse';\n` +
+        `import { exportLottie as exportActivityLottie } from '@labpics/icons/lottie/ellipsis-horizontal';\n` +
         `import { compileSymbolEffect, type SymbolEffectResult, type SymbolOpacityStage } from '@labpics/icons/motion';\n` +
         `import { renderGlyphSvg } from '@labpics/icons/ir/render';\n` +
+        `const varied: GlyphIR = activityGlyph({ variation: { dotScale: 1.1, spacingScale: 0.9 } });\n` +
+        `const verticalVaried: GlyphIR = verticalGlyph({ variant: 'filled', variation: { spacingScale: 1.1 } });\n` +
+        `const authoredDomain: 'convex-linear' = activityCapabilities().variation.domain.kind;\n` +
+        `// @ts-expect-error: геометрия ellipse не получает triad variation по сходству.\n` +
+        `ellipseGlyph({ variation: { dotScale: 1.1 } });\n` +
+        `// @ts-expect-error: runtime не принимает controls или raw path.\n` +
+        `activityGlyph({ variation: { d: 'M0 0Z' } });\n` +
+        `// @ts-expect-error: target с авторскими contours не объявляет variation export.\n` +
+        `exportActivityLottie({ variation: { dotScale: 1.1 } });\n` +
         `const svg: string = accessibilityOutline;\n` +
         `const name: IconName = 'accessibilityOutline';\n` +
         `const icon: IconId = 'reload';\n` +

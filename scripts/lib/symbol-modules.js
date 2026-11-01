@@ -1,9 +1,12 @@
 const SYMBOL_NAME = /^[a-z][a-z0-9-]*$/;
 
 /** Единственная release-проекция каталога; wildcard раскрывается в точные файлы. */
-export function symbolReleaseProjection(base, iconIds, stateGroupIds = []) {
+export function symbolReleaseProjection(base, iconIds, stateGroupIds = [], variationIconIds = []) {
   const ids = [...iconIds].sort();
   const groups = [...stateGroupIds].sort();
+  if (new Set(variationIconIds).size !== variationIconIds.length || variationIconIds.some(id => !ids.includes(id))) {
+    throw new TypeError('symbol module projection: variation должна принадлежать авторскому каталогу');
+  }
   if (new Set(ids).size !== ids.length || ids.some(id => !SYMBOL_NAME.test(id)) ||
       new Set(groups).size !== groups.length || groups.some(id => !SYMBOL_NAME.test(id))) {
     throw new TypeError('symbol module projection: невалидные или повторные имена');
@@ -24,14 +27,15 @@ export function symbolReleaseProjection(base, iconIds, stateGroupIds = []) {
     key.includes('*')
       ? (key === './states/*' ? groups : ids).flatMap(id => Object.values(conditions).map(target => target.replace('*', id).slice(2)))
       : Object.values(conditions).map(target => target.slice(2)));
-  const typeDependencies = ['dist/authoring/design-spec.d.ts', 'dist/ir/author-catalog.generated.d.ts', 'dist/ir/author-provenance.d.ts', 'dist/ir/author-source.d.ts', 'dist/ir/catalog.generated.d.ts', 'dist/ir/compiler.d.ts', 'dist/ir/request.d.ts', 'dist/ir/lottie-types.d.ts'].sort();
+  const typeDependencies = ['dist/authoring/design-spec.d.ts', 'dist/ir/author-catalog.generated.d.ts', 'dist/ir/author-provenance.d.ts', 'dist/ir/author-source.d.ts', 'dist/ir/authored-variation.d.ts', 'dist/ir/catalog.generated.d.ts', 'dist/ir/compiler.d.ts', 'dist/ir/request.d.ts', 'dist/ir/lottie-types.d.ts'].sort();
   const runtimeDependencies = ['dist/ir/compiler.js', 'dist/ir/request.js', 'dist/ir/symbol-runtime.js', 'dist/ir/lottie-runtime.js'].sort();
+  if (variationIconIds.length) runtimeDependencies.push('dist/ir/variation-runtime.js');
   if (groups.length) {
     typeDependencies.push('dist/ir/state-types.d.ts');
     runtimeDependencies.push('dist/ir/state-runtime.js');
     typeDependencies.sort();
-    runtimeDependencies.sort();
   }
+  runtimeDependencies.sort();
   return {
     version: 7,
     packageName: base.packageName,
@@ -58,7 +62,7 @@ function renderJSONRecord(value, references) {
 }
 
 /** Компактный символ собирается тем же compiler, которым проверяется общий IR. */
-export function renderSymbolModule({ icon, source, capabilities, staticSvg }) {
+export function renderSymbolModule({ icon, source, capabilities, staticSvg, variation }) {
   if (!SYMBOL_NAME.test(icon)) throw new TypeError('symbol module: невалидное имя');
   const json = value => JSON.stringify(value);
   const record = value => value !== null && typeof value === 'object' && !Array.isArray(value);
@@ -84,28 +88,32 @@ export function renderSymbolModule({ icon, source, capabilities, staticSvg }) {
   }
   const lines = [
     '/** GENERATED: проверенные текущие авторские masters одного символа. */',
-    "import { createCompiledGlyph, createCompiledCapabilities } from '../ir/symbol-runtime.js';",
+    variation ? "import { createCompiledCapabilities } from '../ir/symbol-runtime.js';" :
+      "import { createCompiledGlyph, createCompiledCapabilities } from '../ir/symbol-runtime.js';",
+    ...(variation ? ["import { createCompiledVariationGlyph } from '../ir/variation-runtime.js';"] : []),
     `export const outline = ${json(staticSvg.outline)};`,
     `export const filled = ${json(staticSvg.filled)};`,
     ...shared,
     `const outlineSource = ${sources.outline};`,
     `const filledSource = ${sources.filled};`,
-    `export const glyph = /* @__PURE__ */ createCompiledGlyph(${json(icon)}, { outline: outlineSource, filled: filledSource });`,
+    `export const glyph = /* @__PURE__ */ ${variation ? 'createCompiledVariationGlyph' : 'createCompiledGlyph'}(${json(icon)}, { outline: outlineSource, filled: filledSource }${variation ? `, ${json(variation)}` : ''});`,
     `export const glyphCapabilities = /* @__PURE__ */ createCompiledCapabilities(${renderJSONRecord(capabilities, capabilityReferences)});`,
     '',
   ];
   return lines.join('\n');
 }
 
-export function symbolModuleDeclaration(icon) {
+export function symbolModuleDeclaration(icon, variation = false) {
   if (!SYMBOL_NAME.test(icon)) throw new TypeError('symbol declaration: невалидное имя');
   return [
     "import type { AuthorSourceGlyph, AuthorSourceCapabilities, AuthorSymbolGlyphRequest } from '../ir/author-source.js';",
+    ...(variation ? ["import type { AuthorVariationGlyph, AuthorVariationCapabilities, AuthorVariationGlyphRequest } from '../ir/authored-variation.js';"] : []),
     "import type { IconVariant } from '../ir/compiler.js';",
     'export declare const outline: string;',
     'export declare const filled: string;',
     `export declare function glyph(request?: AuthorSymbolGlyphRequest): AuthorSourceGlyph<'${icon}'>;`,
-    `export declare function glyphCapabilities(variant?: IconVariant): AuthorSourceCapabilities<'${icon}'>;`,
+    ...(variation ? [`export declare function glyph(request: AuthorVariationGlyphRequest): AuthorVariationGlyph<'${icon}'>;`] : []),
+    `export declare function glyphCapabilities(variant?: IconVariant): ${variation ? 'AuthorVariationCapabilities' : 'AuthorSourceCapabilities'}<'${icon}'>;`,
     '',
   ].join('\n');
 }

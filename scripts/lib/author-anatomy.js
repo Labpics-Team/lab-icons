@@ -1,6 +1,8 @@
 import { createHash } from 'node:crypto';
 import { iconGeometry } from '../../src/core/icon-geometry.js';
 import { validateMotionGesture } from '../../src/core/motion-sampler.js';
+import { compileAuthorVariation } from './author-variation.js';
+import defaultGrid from '../../semantics/grid.json' with { type: 'json' };
 
 const NAME = /^[a-z][a-z0-9-]*$/;
 const HASH = /^[a-f0-9]{64}$/;
@@ -242,7 +244,7 @@ function compileLaw(icon, variant, declaration, parts, source) {
  * адресуют только этот закреплённый экспорт; наружу выходят стабильные part.id.
  * Весь документ проверяется до выдачи проекции, без частичного admission.
  */
-export function compileAuthorAnatomy(baseline, document) {
+export function compileAuthorAnatomy(baseline, document, grid = defaultGrid) {
   fields(document, ['schemaVersion', 'source', 'icons'], 'document');
   fields(document.source, ['fileKey', 'version'], 'source');
   if (document.schemaVersion !== 1 || !record(document.icons)) {
@@ -266,7 +268,8 @@ export function compileAuthorAnatomy(baseline, document) {
     for (const variant of VARIANTS.filter(item => Object.hasOwn(variants, item))) {
       const declaration = variants[variant];
       const label = `${icon}/${variant}`;
-      fields(declaration, ['masterSha256', 'pathFingerprintSha256', 'parts', 'gesture'], label);
+      fields(declaration, ['masterSha256', 'pathFingerprintSha256', 'parts', 'gesture',
+        ...(Object.hasOwn(declaration, 'variation') ? ['variation'] : [])], label);
       const source = baseline.icons[icon][variant];
       if (!HASH.test(declaration.masterSha256) || !HASH.test(declaration.pathFingerprintSha256) ||
           declaration.masterSha256 !== source.author.masterSha256 ||
@@ -300,10 +303,17 @@ export function compileAuthorAnatomy(baseline, document) {
         return { ...part, id: annotation.id, identity: 'declared', role: annotation.role,
           ...(annotation.anchor && { anchor: [...annotation.anchor], anchorSource: 'declared' }) };
       });
-      const gestures = compileLaw(icon, variant, declaration.gesture, parts, source);
+      // Без жеста разрешена только явно объявленная геометрия dots.affine.
+      // Отсутствующий или неизвестный motion law не превращается в admission.
+      const variation = declaration.variation
+        ? compileAuthorVariation(source, parts, declaration.variation, grid) : undefined;
+      if (declaration.gesture === null && !variation) {
+        refuse('LAW_UNSUPPORTED', `${label}: static parts требуют явного геометрического закона и grid policy`);
+      }
+      const gestures = declaration.gesture === null ? [] : compileLaw(icon, variant, declaration.gesture, parts, source);
       const annotationSha256 = createHash('sha256').update(stableJSON({
         schemaVersion: document.schemaVersion, source: document.source, icon, variant,
-        declaration, gestures,
+        declaration, gestures, ...(variation && { variation }),
       })).digest('hex');
       output[label] = {
         ...source.sourceContract,
@@ -311,6 +321,7 @@ export function compileAuthorAnatomy(baseline, document) {
         anatomy: { version: 1, annotationSha256, masterSha256: declaration.masterSha256,
           pathFingerprintSha256: declaration.pathFingerprintSha256 },
         gestures,
+        ...(variation && { variation }),
       };
     }
   }

@@ -132,8 +132,8 @@ export function expectedAuthorMotion(contract, context = { kind: 'source' }) {
   const lottie = context.kind === 'package' && ready && sourceSupportsLottie(context.svg, context.compositionKind, contract.parts)
     ? 'lottie-web-svg-5.13' : 'not-exported';
   return {
-    state: ready ? 'gesture-ready' : 'source-only',
-    partIds: ready ? contract.parts.map(part => part.id) : [],
+    state: ready ? 'gesture-ready' : contract.anatomy ? 'semantic-parts' : 'source-only',
+    partIds: contract.anatomy ? contract.parts.map(part => part.id) : [],
     tracks: [...new Map(gestures.flatMap(gesture => gesture.tracks.map(track => {
       const id = track.kind === 'translate' ? `${track.kind}.${track.axis}.${track.partId}` : `${track.kind}.${track.partId}`;
       return [id, { id, kind: track.kind, partIds: [track.partId],

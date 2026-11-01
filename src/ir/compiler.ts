@@ -28,6 +28,7 @@ import { sha256Hex } from './sha256.js';
 import { assembleGlyphSvg as assembleSvg } from './svg-assembly.js';
 import { GlyphModelError, parseSymbolOptions, parseSymbolVariant as parseVariant } from './request.js';
 import type { AuthorAnatomyReceipt, AuthorSourceProvenance } from './author-provenance.js';
+import type { AuthorVariationCapability, AuthorVariationPartProvenance, AuthorVariationProvenance } from './authored-variation.js';
 export { GlyphModelError } from './request.js';
 export type { GlyphModelErrorCode } from './request.js';
 
@@ -86,7 +87,7 @@ export interface RecipePartProvenance {
   readonly sourceDependency?: IconId;
 }
 
-export type PartProvenance = SourcePartProvenance | ModelPartProvenance | RecipePartProvenance;
+export type PartProvenance = SourcePartProvenance | ModelPartProvenance | RecipePartProvenance | AuthorVariationPartProvenance;
 
 export interface GlyphPart {
   readonly id: string;
@@ -140,7 +141,7 @@ export interface DesignSpecGlyphProvenance {
   readonly state: 'candidate';
 }
 
-export type GlyphProvenance = SourceGlyphProvenance | ModelGlyphProvenance | RecipeGlyphProvenance | DesignSpecGlyphProvenance;
+export type GlyphProvenance = SourceGlyphProvenance | ModelGlyphProvenance | RecipeGlyphProvenance | DesignSpecGlyphProvenance | AuthorVariationProvenance;
 
 export interface GlyphIR<TIcon extends string = IconId> {
   readonly icon: TIcon;
@@ -186,6 +187,7 @@ export interface GlyphCapabilities<TIcon extends string = IconId> {
   readonly motion: MotionCapabilities;
   readonly author?: AuthorSourceProvenance;
   readonly anatomy?: AuthorAnatomyReceipt;
+  readonly variation?: AuthorVariationCapability;
 }
 
 export interface AxisContract {
@@ -788,6 +790,11 @@ export function createGlyphCompiler({ catalog: catalogJson, anatomy: anatomyJson
           gestures: Object.freeze(gestures),
           adapters: motionAdapters,
         });
+      }
+      if (source.anatomy && Array.isArray(source.gestures) && source.gestures.length === 0 &&
+          source.parts.every(part => part.identity === 'declared')) {
+        return Object.freeze({ state: 'semantic-parts', partIds: Object.freeze(source.parts.map(part => part.id)),
+          tracks: Object.freeze([]), gestures: Object.freeze([]), adapters: motionAdapters });
       }
       return Object.freeze({
         state: 'source-only',

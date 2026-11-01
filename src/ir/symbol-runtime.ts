@@ -22,6 +22,10 @@ export function createCompiledGlyph<TIcon extends string = IconId>(
     // Отсутствующий запрос — самый частый статический путь: без разбора,
     // geometry generation, хеширования и новых объектов на каждый render.
     if (request === undefined) return source.outline;
+    if (request && typeof request === 'object' && Object.hasOwn(request, 'variation')) {
+      throw new GlyphModelError('AUTHOR_VARIATION_UNSUPPORTED',
+        `@labpics/icons/symbols: ${icon}: авторская геометрическая вариация не объявлена`);
+    }
     const parsed = parseSymbolOptions(request);
     if (Object.keys(parsed.axes).length || parsed.modelMode === 'allow-candidate') {
       throw new GlyphModelError('AUTHOR_PARITY_REQUIRED',

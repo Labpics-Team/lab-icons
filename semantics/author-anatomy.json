@@ -118,6 +118,10 @@
             "dot-middle",
             "dot-trailing"
           ]
+        },
+        "variation": {
+          "law": "dots.affine",
+          "axis": "x"
         }
       },
       "filled": {
@@ -148,6 +152,10 @@
             "dot-middle",
             "dot-trailing"
           ]
+        },
+        "variation": {
+          "law": "dots.affine",
+          "axis": "x"
         }
       }
     },
@@ -854,6 +862,60 @@
           "law": "notification.ring",
           "purpose": "incoming-notification",
           "partId": "notification-clapper"
+        }
+      }
+    },
+    "ellipsis-vertical": {
+      "outline": {
+        "masterSha256": "c488b01da737ddf19adf1336b05a14c0c246d69d3456aea7e1c9dfe25e3ef9ed",
+        "pathFingerprintSha256": "79be5246b307c58af54f6cef91ee98a81c55e4ece84187b4d46268a7dd4200fb",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "dot-leading",
+            "role": "content"
+          },
+          {
+            "pathIndex": 1,
+            "id": "dot-middle",
+            "role": "content"
+          },
+          {
+            "pathIndex": 2,
+            "id": "dot-trailing",
+            "role": "content"
+          }
+        ],
+        "gesture": null,
+        "variation": {
+          "law": "dots.affine",
+          "axis": "y"
+        }
+      },
+      "filled": {
+        "masterSha256": "a80a27a7e4d942c07bcd2f8788d88020ab67559113fde5083c10ab7461ba98ba",
+        "pathFingerprintSha256": "fbb1d6c9b723255c4774cb04c73af98436c30204b95f05ca7bd9feb82a384b32",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "dot-leading",
+            "role": "content"
+          },
+          {
+            "pathIndex": 1,
+            "id": "dot-middle",
+            "role": "content"
+          },
+          {
+            "pathIndex": 2,
+            "id": "dot-trailing",
+            "role": "content"
+          }
+        ],
+        "gesture": null,
+        "variation": {
+          "law": "dots.affine",
+          "axis": "y"
         }
       }
     }

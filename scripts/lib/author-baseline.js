@@ -148,7 +148,7 @@ export function authorSymbolPayload(icon, variantSources, compiler) {
         (annotated
           ? expectedAnatomy.masterSha256 !== item.author.masterSha256 ||
             expectedAnatomy.pathFingerprintSha256 !== item.author.pathFingerprintSha256 ||
-            capability.motion.state !== 'gesture-ready' ||
+            capability.motion.state !== (item.sourceContract.gestures.length ? 'gesture-ready' : 'semantic-parts') ||
             stableJSON(capability.motion.partIds) !== stableJSON(item.sourceContract.parts.map(part => part.id)) ||
             stableJSON(capability.motion.gestures) !== stableJSON(item.sourceContract.gestures)
           : capability.motion.state !== 'source-only' || capability.motion.partIds.length ||

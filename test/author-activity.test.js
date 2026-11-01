@@ -116,7 +116,7 @@ describe('activity.triad: exact author anatomy, finite scalar stages', () => {
   it('vertical-menu geometry and compound Filled bubble do not acquire loading by resemblance', () => {
     for (const [icon, variant] of [['ellipsis-vertical', 'outline'], ['ellipsis-vertical', 'filled'], ['chatbubble-ellipses', 'filled']]) {
       const module = symbol(icon);
-      expect(module.glyphCapabilities(variant).motion.state).toBe('source-only');
+      expect(module.glyphCapabilities(variant).motion.state).toBe(icon === 'ellipsis-vertical' ? 'semantic-parts' : 'source-only');
       expect(compileSymbolEffect(module.glyph({ variant }), module.glyphCapabilities(variant), `${icon}.activity`, { duration: 900 }))
         .toMatchObject({ ok: false, reason: { code: 'SEMANTIC_MOTION_UNAVAILABLE' } });
     }

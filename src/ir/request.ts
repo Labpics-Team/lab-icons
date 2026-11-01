@@ -1,7 +1,7 @@
 import type { AxisContract, AxisName, IconVariant, ModelMode } from './compiler.js';
 import { AXIS_NAMES } from './catalog.generated.js';
 
-export type GlyphModelErrorCode = 'CANDIDATES_REQUIRED' | 'AUTHOR_PARITY_REQUIRED';
+export type GlyphModelErrorCode = 'CANDIDATES_REQUIRED' | 'AUTHOR_PARITY_REQUIRED' | 'AUTHOR_VARIATION_UNSUPPORTED';
 
 /** Потребитель проверяет code; сообщение не является машинным контрактом. */
 export class GlyphModelError extends Error {

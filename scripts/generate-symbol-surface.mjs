@@ -10,7 +10,10 @@ const read = path => JSON.parse(readFileSync(join(root, path), 'utf8'));
 const author = read('semantics/figma-baseline.json');
 const names = authorIconNames(author);
 const groups = authorStateGroupNames(read('semantics/author-state-groups.json'));
-const contract = symbolReleaseProjection(read('release/contract.json'), names, groups);
+const variationNames = Object.entries(read('semantics/author-anatomy.json').icons)
+  .filter(([, variants]) => Object.values(variants).some(declaration => declaration.variation))
+  .map(([icon]) => icon);
+const contract = symbolReleaseProjection(read('release/contract.json'), names, groups, variationNames);
 writeFileSync(join(root, 'src/ir/author-catalog.generated.ts'), renderAuthorTypeProjection(author));
 writeFileSync(join(root, 'release/contract.json'), `${JSON.stringify(contract, null, 1)}\n`);
 const pkg = read('package.json');

@@ -50,6 +50,9 @@ export function createLottieSymbol(source: SymbolSource, variants: Record<IconVa
     }).map(gesture => gesture.id) };
   }
   function exportLottie(request: LottieExportRequest = {}): LottieExportResult {
+    if (request && typeof request === 'object' && Object.hasOwn(request, 'variation')) {
+      return refuse('VARIATION_UNSUPPORTED', 'Lottie target содержит авторский master; изменённая геометрия требует отдельного lowering.');
+    }
     if (!request || typeof request !== 'object' || Array.isArray(request) ||
         Object.keys(request).some(key => !['variant', 'gesture', 'duration', 'from', 'to', 'reducedMotion', 'color', 'frameRate'].includes(key))) {
       return refuse('INVALID_REQUEST', 'Неизвестные параметры Lottie export.');

@@ -78,7 +78,8 @@ function validPackage() {
   write(root, 'dist/ir/candidates.js', 'export const registerCandidates = () => {};\n');
   write(root, 'dist/ir/candidates.d.ts', 'export declare function registerCandidates(): void;\n');
   write(root, 'dist/ir/compiler.js', 'import "./request.js"; export const fixture = 1;\n');
-  write(root, 'dist/ir/compiler.d.ts', "import type { GlyphModelErrorCode } from './request.js';\nexport type IconVariant = 'outline' | 'filled';\nexport interface GlyphIR { readonly code: GlyphModelErrorCode }\n");
+  write(root, 'dist/ir/compiler.d.ts', "import type { GlyphModelErrorCode } from './request.js';\nimport type { AuthorVariationProvenance } from './authored-variation.js';\nexport type IconVariant = 'outline' | 'filled';\nexport interface GlyphIR { readonly code: GlyphModelErrorCode; readonly variation?: AuthorVariationProvenance }\n");
+  write(root, 'dist/ir/authored-variation.d.ts', "export interface AuthorVariationProvenance { readonly kind: 'authored-variation' }\n");
   write(root, 'dist/ir/request.js', 'export const fixture = 1;\n');
   write(root, 'dist/ir/request.d.ts', "export type GlyphModelErrorCode = 'CANDIDATES_REQUIRED';\n");
   write(root, 'dist/ir/symbol-runtime.js', 'import "./request.js"; export const fixture = 1;\n');
