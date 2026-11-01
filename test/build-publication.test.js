@@ -236,8 +236,9 @@ describe('публикация единой эпохи IR/symbols/motion/Lottie'
     });
     try {
       await expect(buildIr({ root })).rejects.toThrow(`bundle ${rejectedTarget} refused`);
-      expect(started).toBe(9);
-      expect(finished).toBe(9);
+      expect(started).toBe(10);
+      expect(finished).toBe(started);
+      expect(completed).toContain('authoring/index.js');
       expect(completed).toContain('ir/lottie-runtime.js');
       expect(epochs(output)).toEqual(['old', 'old', 'old', 'old']);
       expectStatic(output);
