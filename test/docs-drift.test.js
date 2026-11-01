@@ -114,6 +114,31 @@ describe('Согласованность документации', () => {
     expect(manualCorpusCountErrors('На baseline 03a4ca3: 476 SVG с currentColor.')).toEqual([]);
   });
 
+  it('связывает исторический anchor с его утверждениями, сохраняя датированные перечисления', () => {
+    for (const source of [
+      'На baseline 03a4ca3 было 476 SVG, а пакет содержит 999 icons.',
+      'На baseline 03a4ca3 было 476 SVG, но пакет содержит 999 icons.',
+      'As of 2026-11-01 there were 476 SVG, but the package contains 999 icons.',
+      'As of 2026-11-01 there were 476 SVG, whereas the package contains 999 icons.',
+      'Baseline commit 03a4ca3: 476 SVG, теперь 999 icons.',
+      'Baseline commit 03a4ca3: 476 SVG, в настоящее время 999 icons.',
+      'Baseline commit 03a4ca3: 476 SVG, currently 999 icons.',
+    ]) {
+      const errors = manualCorpusCountErrors(source);
+      expect(errors, source).toHaveLength(1);
+      expect(errors[0], source).toContain('999 icons');
+    }
+    for (const source of [
+      'На baseline 03a4ca3 было 238 имён и 476 SVG.',
+      'На baseline 03a4ca3 было 238 имён, 476 SVG.',
+      'На baseline 03a4ca3 было 476 SVG, а 238 имён.',
+      'На baseline 03a4ca3 было 476 SVG, а двести тридцать восемь имён.',
+      'As of 2026-11-01 there were 476 SVG, but two hundred and thirty-eight icons.',
+      'На baseline 03a4ca3 было 476 SVG, а на 2026-11-01 было 660 SVG.',
+      'As of 2026-11-01 there were 476 SVG, whereas baseline commit 03a4ca3 had 238 icons.',
+    ]) expect(manualCorpusCountErrors(source), source).toEqual([]);
+  });
+
   it('отклоняет неверный канал установки с учётом Markdown', () => {
     for (const text of ['private: true', 'Пакет не **публикуется**\nв `npm`', 'Ставится только как git-зависимость', 'Нужен GH_PAT', 'Нужен **GH_PAT**', 'Пакет _не публикуется_ в `npm`']) {
       expect(distributionClaimErrors(text).length).toBeGreaterThan(0);
