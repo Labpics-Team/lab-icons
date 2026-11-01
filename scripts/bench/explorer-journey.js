@@ -499,6 +499,66 @@ export async function runExplorerJourney() {
       q('export').click();
       check(`replacement/${format}/honest-refusal`, downloads.length === before && q('export-status').textContent.startsWith('FORMAT_UNSUPPORTED:'));
     }
+    await choose('checkmark-circle', 'outline');
+    const baseRow = data.rows.find(row => row.name === 'checkmark-circle' && row.variant === 'outline');
+    const baseModule = await import('./package/symbols/checkmark-circle.js');
+    const baseGlyph = baseModule.glyph({ variant: 'outline' });
+    const baseOriginal = await originalFetch(baseRow.views.original).then(response => response.text());
+    const basePaths = paths(new DOMParser().parseFromString(baseOriginal, 'image/svg+xml').documentElement);
+    targetButton('question').click();
+    await wait(() => q('symbol-name').textContent === 'question-circle' && targetButton('question').getAttribute('aria-pressed') === 'true', 'replacement different subject');
+    const questionMember = stateCaps.states.find(member => member.id === 'question');
+    const questionParts = [...questionMember.contentPartIds, stateCaps.enclosurePartId];
+    for (const view of ['overlay', 'difference', 'generated']) {
+      const viewButton = document.querySelector(`[data-view="${view}"]`);
+      check(`replacement-exit/${view}/available`, !viewButton.disabled);
+      viewButton.click();
+      await wait(() => q('symbol-stage').dataset.view === view && q('symbol-inspector').getAttribute('aria-busy') === 'false', `replacement exit ${view}`);
+      const aria = q('symbol-stage').getAttribute('aria-label');
+      check(`replacement-exit/${view}/subject-metadata`, q('symbol-name').textContent === 'checkmark-circle' &&
+        aria.includes('checkmark-circle') && !aria.includes('question-circle') &&
+        q('model-status').textContent !== 'Авторские состояния' && q('source-status').textContent.includes(baseRow.original.nodeId));
+      check(`replacement-exit/${view}/mode-controls`, q('state-group-controls').hidden && !q('gesture-progress-control').hidden &&
+        q('state-choice-label').textContent === '' &&
+        [...document.querySelectorAll('[data-view]')].every(button => button.getAttribute('aria-pressed') === String(button.dataset.view === view)));
+      const projectedParts = [...q('parts').children];
+      let expectedExport = baseOriginal;
+      if (view === 'generated') {
+        const model = await import('./recorded-model.js');
+        const modelGlyph = model.glyph({ icon: 'checkmark-circle', variant: 'outline' });
+        expectedExport = modelGlyph.svg;
+        check('replacement-exit/generated/model-metadata', q('model-status').textContent === 'Прежняя модель' && aria.includes('Прежняя модель') &&
+          q('consumer-import').textContent.includes("from '@labpics/icons/ir'") &&
+          q('source-status').textContent.includes('паритет с новой авторской основой не принят') &&
+          JSON.stringify(projectedParts.map(part => part.title)) === JSON.stringify(modelGlyph.parts.map(part => part.id)) &&
+          ![...q('gesture').options].some(option => option.value === 'enclosure.replace'));
+      } else {
+        const comparison = await originalFetch(baseRow.views[view]).then(response => response.text());
+        const expected = new DOMParser().parseFromString(comparison, 'image/svg+xml').documentElement;
+        check(`replacement-exit/${view}/comparison-subject`, JSON.stringify(paths(q('symbol-stage').querySelector('svg'))) === JSON.stringify(paths(expected)) &&
+          q('model-status').textContent.includes('с прежней моделью') && aria.includes('с прежней моделью') &&
+          q('consumer-import').textContent.includes('/symbols/checkmark-circle') && !q('consumer-import').textContent.includes('/states/') &&
+          JSON.stringify(projectedParts.map(part => part.title)) === JSON.stringify(baseGlyph.parts.map(part => part.id)) &&
+          q('source-status').textContent.includes('Части и образцы размеров относятся к текущему авторскому мастеру') &&
+          [...q('size-samples').querySelectorAll('svg')].every(svg => JSON.stringify(paths(svg)) === JSON.stringify(basePaths)) &&
+          q('play').disabled && q('gesture').disabled);
+      }
+      q('export-format').value = 'svg';
+      q('export').click();
+      const exported = downloads.at(-1);
+      check(`replacement-exit/${view}/export-subject`, exported.filename === `checkmark-circle-outline${view === 'generated' ? '-recorded-model' : ''}.svg` &&
+        await exported.blob.text() === expectedExport);
+      document.querySelector('[data-view="original"]').click();
+      await settle('question-circle');
+      check(`replacement-return/${view}/state-metadata`, q('model-status').textContent === 'Авторские состояния' &&
+        q('symbol-stage').getAttribute('aria-label').includes('question-circle') &&
+        q('source-status').textContent.includes(questionMember.author.nodeId) &&
+        q('consumer-import').textContent.includes('/states/status-circle') &&
+        JSON.stringify([...q('parts').children].map(part => part.title)) === JSON.stringify(questionParts) &&
+        !q('state-group-controls').hidden && q('gesture-progress-control').hidden && !q('gesture').disabled &&
+        q('gesture').value === 'enclosure.replace' && targetButton('question').getAttribute('aria-pressed') === 'true' &&
+        Number(getComputedStyle(q('symbol-stage').querySelector('[data-state="question"]')).opacity) === 1);
+    }
     await choose('question-circle', 'filled');
     check('replacement-filled-unavailable', q('state-group-controls').hidden &&
       ![...q('gesture').options].some(option => option.value === 'enclosure.replace'));

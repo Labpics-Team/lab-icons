@@ -48,32 +48,41 @@ function stateSamples(svg) {
   }));
 }
 
-function replacementPresentation() {
+function inspectorPresentation() {
   const active = replacementMode();
-  ui['state-group-controls'].hidden = !active;
-  ui['gesture-progress-control'].hidden = active;
-  if (!active) return;
-  const member = replacementMember(), group = state.replacement;
-  ui['symbol-name'].textContent = member.icon;
-  ui['model-status'].textContent = 'Авторские состояния';
-  ui['symbol-stage'].setAttribute('aria-label', `Символ ${member.icon}: ${stateLabel(member.id)}`);
-  ui['state-choice-label'].textContent = stateLabel(member.id);
+  const group = active ? state.replacement : null;
+  const member = active ? replacementMember() : null;
+  const row = selectedRow(), caps = state.capabilities;
+  const comparison = ['overlay', 'difference'].includes(state.view);
+  const name = member?.icon ?? state.name;
+  const variant = state.variant === 'filled' ? 'заливка' : 'контурное начертание';
+  const viewLabel = state.legacy ? 'Прежняя модель' : comparison ? `${state.view === 'overlay' ? 'Наложение' : 'Разница'} с прежней моделью` : '';
+  ui['symbol-name'].textContent = name;
+  ui['model-status'].textContent = active ? 'Авторские состояния' : viewLabel || (caps.modelState === 'accepted' ? 'Модель принята' : caps.modelState === 'candidate' ? 'Модель на проверке' : 'Авторский SVG');
+  ui['symbol-stage'].setAttribute('aria-label', active ? `Символ ${name}: ${stateLabel(member.id)}` : `Символ ${name}: ${variant}${viewLabel ? `. ${viewLabel}` : ''}`);
+  ui['state-choice-label'].textContent = active ? stateLabel(member.id) : '';
   for (const button of ui['state-choices'].querySelectorAll('button')) {
-    button.setAttribute('aria-pressed', String(button.dataset.stateTarget === member.id));
-    button.disabled = !state.loaded || state.viewLoading;
+    button.setAttribute('aria-pressed', String(active && button.dataset.stateTarget === member.id));
   }
-  const author = member.author;
-  ui['source-status'].textContent = `Lab UI v2.1. Версия ${author.version}. Узел ${author.nodeId}. Авторский знак; общая оболочка сохраняется при замене.`;
-  ui['consumer-import'].textContent = `import { renderStateSvg, compileStateEffect } from\n  '@labpics/icons/states/${group.capabilities.group}';`;
-  ui.parts.replaceChildren(...[...member.contentPartIds, group.capabilities.enclosurePartId].map(id => {
+  const author = member?.author ?? row.original;
+  ui['source-status'].textContent = `Lab UI v2.1. Версия ${author.version}. Узел ${author.nodeId}. ` +
+    (active ? 'Авторский знак; общая оболочка сохраняется при замене.' : state.legacy ? 'Прежняя модель: паритет с новой авторской основой не принят.' : comparison ? `Красным — текущая основа, синим — прежняя ${row.model?.catalogState === 'accepted' ? 'модель' : 'модель на проверке'} при исходных параметрах. Части и образцы размеров относятся к текущему авторскому мастеру. Паритет не принят.` : 'Текущий авторский мастер. Возможности относятся к его закреплённой версии.');
+  ui['consumer-import'].textContent = active ? `import { renderStateSvg, compileStateEffect } from\n  '@labpics/icons/states/${group.capabilities.group}';` : state.legacy ? `import { glyph } from '@labpics/icons/ir';\n// Прежняя основа; текущий master: ./symbols/${state.name}` : `import { glyph } from\n  '@labpics/icons/symbols/${state.name}';`;
+  const parts = active ? [...member.contentPartIds, group.capabilities.enclosurePartId].map(id => ({ id, role: id === group.capabilities.enclosurePartId ? 'container' : 'content' })) : state.glyph.parts;
+  ui.parts.replaceChildren(...parts.map(part => {
     const item = document.createElement('li');
-    item.textContent = `${id} — ${id === group.capabilities.enclosurePartId ? 'container' : 'content'}`;
+    item.textContent = part.role === 'unclassified' ? `Авторский контур ${part.zIndex + 1}; семантика пока не принята.` : `${comparison ? 'Авторский ' : ''}${part.id} — ${part.role}`;
+    item.title = part.id;
     return item;
   }));
-  const result = group.module.render(member.id, { variant: state.variant });
-  if (!result.ok) throw new Error(`${result.reason.code}: ${result.reason.message}`);
-  stateSamples(result.svg);
-  displayStyle();
+  if (active) {
+    const result = group.module.render(member.id, { variant: state.variant });
+    if (!result.ok) throw new Error(`${result.reason.code}: ${result.reason.message}`);
+    stateSamples(result.svg);
+  } else {
+    const productionSvg = state.legacy || motionAdmission(state.glyph, caps, caps.motion.gestures[0]?.id)?.ok;
+    stateSamples(size => productionSvg ? renderGlyphSvg(state.glyph, { instanceId: `sample-${state.revision}-${state.viewRevision}-${size}` }) : state.original);
+  }
 }
 
 function replacementChoices() {
@@ -289,11 +298,7 @@ async function renderView(view = state.view) {
     for (const image of ui['symbol-stage'].querySelectorAll('svg')) image.setAttribute('aria-hidden', 'true');
     // Значение неподвижного мастера задаёт семантика, а не имя иконки.
     ui.progress.value = String(motionAdmission()?.ok ? selectedGesture()?.restProgress ?? 0 : 0);
-    ui['source-status'].textContent = `Lab UI v2.1. Версия ${row.original.version}. Узел ${row.original.nodeId}. ` +
-      (legacy ? 'Прежняя модель: паритет с новой авторской основой не принят.' : ['overlay', 'difference'].includes(view) ? `Красным — текущая основа, синим — прежняя ${row.model?.catalogState === 'accepted' ? 'модель' : 'модель на проверке'} при исходных параметрах. Паритет не принят.` : 'Текущий авторский мастер. Возможности относятся к его закреплённой версии.');
-    ui['symbol-name'].textContent = state.name;
-    if (!replacementMode()) stateSamples(size => productionSvg ? renderGlyphSvg(glyph, { instanceId: `sample-${revision}-${viewRevision}-${size}` }) : state.original);
-    replacementPresentation();
+    inspectorPresentation();
     updateViewControls();
     inspectorBusy(false);
     updateMotionControls();
@@ -311,7 +316,6 @@ async function renderView(view = state.view) {
 
 function controls() {
   const caps = state.capabilities;
-  ui['model-status'].textContent = state.legacy ? 'Прежняя модель' : caps.modelState === 'accepted' ? 'Модель принята' : caps.modelState === 'candidate' ? 'Модель на проверке' : 'Авторский SVG';
   ui['axis-controls'].replaceChildren(...caps.supportedAxes.map((name) => {
     const contract = caps.axes[name];
     const label = document.createElement('label');
@@ -340,19 +344,12 @@ function controls() {
     return label;
   }));
   ui['axis-status'].textContent = caps.supportedAxes.length ? '' : 'Для этого варианта оси пока не приняты.';
-  ui.parts.replaceChildren(...state.glyph.parts.map((part) => {
-    const item = document.createElement('li');
-    item.textContent = part.role === 'unclassified' ? `Авторский контур ${part.zIndex + 1}; семантика пока не принята.` : `${part.id} — ${part.role}`;
-    item.title = part.id;
-    return item;
-  }));
   const selectedGesture = ui.gesture.value;
   ui.gesture.replaceChildren(...(state.replacement && !state.legacy ? [new Option('Смена знака', REPLACEMENT_GESTURE)] : []),
     ...caps.motion.gestures.map((gesture) => new Option(gesture.id, gesture.id)));
   if (!ui.gesture.options.length) ui.gesture.add(new Option('Нет принятого жеста', ''));
   else if ([...ui.gesture.options].some(option => option.value === selectedGesture)) ui.gesture.value = selectedGesture;
   replacementChoices();
-  ui['consumer-import'].textContent = state.legacy ? `import { glyph } from '@labpics/icons/ir';\n// Прежняя основа; текущий master: ./symbols/${state.name}` : `import { glyph } from\n  '@labpics/icons/symbols/${state.name}';`;
 }
 
 async function select(name, { reveal = false } = {}) {
@@ -457,7 +454,8 @@ async function replaceState(target) {
     state.animations = controls;
     state.pendingMotion = null;
     if (pending.paused) for (const control of controls) control.pause();
-    replacementPresentation();
+    inspectorPresentation();
+    displayStyle();
     updateMotionControls();
     Promise.all(controls.map(control => control.finished)).then(results => {
       if (motionRevision !== state.motionRevision || results.some(result => result.status !== 'finished')) return;
