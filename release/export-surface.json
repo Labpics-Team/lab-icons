@@ -1850,6 +1850,13 @@
   "./motion": [
     "compileSymbolEffect"
   ],
+  "./states/expression-face": [
+    "compileStateEffect",
+    "exportStateTransition",
+    "render",
+    "renderStateSvg",
+    "stateCapabilities"
+  ],
   "./states/playback-circle": [
     "compileStateEffect",
     "exportStateTransition",

@@ -1,10 +1,58 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "source": {
     "fileKey": "LuaiBd4anRi4DMZayKAnY2",
     "version": "2416636003859748575"
   },
   "groups": {
+    "expression-face": {
+      "law": "enclosure.replace",
+      "defaultState": "aloof",
+      "enclosurePartId": "face-enclosure",
+      "sharedParts": [
+        {
+          "id": "face-left-eye",
+          "role": "content"
+        },
+        {
+          "id": "face-right-eye",
+          "role": "content"
+        },
+        {
+          "id": "face-enclosure",
+          "role": "container"
+        }
+      ],
+      "states": {
+        "aloof": {
+          "icon": "aloof",
+          "variant": "outline",
+          "masterSha256": "df2d9ece2246c61af4df7426e6cff3cced5127ce5b6c11fc4f16cb34a527bf37",
+          "pathFingerprintSha256": "36f483f1841546d8b3e5de5a7f19a8a4d69c58451dda509c2194c148d8058146",
+          "contentPartIds": [
+            "aloof-mouth"
+          ]
+        },
+        "sad": {
+          "icon": "sad",
+          "variant": "outline",
+          "masterSha256": "22fd0474e67c0283f2f55e42e2f355d9e9adc25c506193522e95ba7e7519def2",
+          "pathFingerprintSha256": "a81b2dba124441de42a563a24024a05c95520f04a54f0b6d7d670a4d3264e585",
+          "contentPartIds": [
+            "sad-mouth"
+          ]
+        },
+        "smile": {
+          "icon": "smile",
+          "variant": "outline",
+          "masterSha256": "659c4a9a04c83420d61a233959c9b9ba2557426e30ab363146c9286ff997f2b9",
+          "pathFingerprintSha256": "37fca1640f3b0296cac6d440475916c3c5b7d972ee8ae351b1529c90d0a6c528",
+          "contentPartIds": [
+            "smile-mouth"
+          ]
+        }
+      }
+    },
     "playback-circle": {
       "law": "enclosure.replace",
       "defaultState": "play",
@@ -15,7 +63,6 @@
           "variant": "outline",
           "masterSha256": "3e6fc6409cd6a828e171ea134289919e32615b416e8478c3208c3926fa36ffbd",
           "pathFingerprintSha256": "bcc7c9845a74d2241809ec0ccc12b257310fc0615b71aca9ebc50423b098f3ee",
-          "enclosurePathIndex": 1,
           "contentPartIds": [
             "play-mark"
           ]
@@ -25,13 +72,18 @@
           "variant": "outline",
           "masterSha256": "e25e6c6e4f5f2e7d6b797de7deb0f07462297bb939e3b9ed2a286da7b52af054",
           "pathFingerprintSha256": "9cd5ce68d2d6f5fbda1c9a6ebfdf7d7a1be49df1d9e49bc5c5464a9ff3b151d7",
-          "enclosurePathIndex": 2,
           "contentPartIds": [
             "pause-first-bar",
             "pause-second-bar"
           ]
         }
-      }
+      },
+      "sharedParts": [
+        {
+          "id": "playback-enclosure",
+          "role": "container"
+        }
+      ]
     },
     "status-circle": {
       "law": "enclosure.replace",
@@ -43,7 +95,6 @@
           "variant": "outline",
           "masterSha256": "e186493576bcc419ca7038013395ee021c547d91dc1b069b3ea67b24278c63c4",
           "pathFingerprintSha256": "6afbf3a4ba0379b7dcd801901c34db3cff004da17c947f35cd8ea7000ba73527",
-          "enclosurePathIndex": 1,
           "contentPartIds": [
             "confirmation-mark"
           ]
@@ -53,7 +104,6 @@
           "variant": "outline",
           "masterSha256": "3aa89b46e44c8d65f0ac60847d3dd1a7883d26cc58e6b2d686240ddd69276cdb",
           "pathFingerprintSha256": "b232d89c62b9aac9da78b1cbe0ad35e7210bc910f61f1e09c1c8a1cdf0cd7d3f",
-          "enclosurePathIndex": 1,
           "contentPartIds": [
             "dismissal-mark"
           ]
@@ -63,10 +113,9 @@
           "variant": "outline",
           "masterSha256": "a3fc2394714dbf91ac9fea7e92611a2348566309a5858bfd2d919b2fa9c92c7f",
           "pathFingerprintSha256": "9b02e0ecfc6bbc7aa003c9edf01cb60c81e82095b872176b6ad383b995f5ed4f",
-          "enclosurePathIndex": 2,
           "contentPartIds": [
-          "question-dot",
-          "question-stem"
+            "question-dot",
+            "question-stem"
           ]
         },
         "attention": {
@@ -74,10 +123,9 @@
           "variant": "outline",
           "masterSha256": "bd832c1a7812efcd0f2a065acf3afcff0ea7aeab397e8df4bf44115d9df7db6d",
           "pathFingerprintSha256": "6ed22c2281ff78106a9b54ff058433f8594fdc9080f5bead686a87530f1e84a6",
-          "enclosurePathIndex": 2,
           "contentPartIds": [
-          "attention-dot",
-          "attention-stem"
+            "attention-dot",
+            "attention-stem"
           ]
         },
         "increase": {
@@ -85,7 +133,6 @@
           "variant": "outline",
           "masterSha256": "1187b32d965b0d97f97dae969f8d62c9e573757b9588341d41368657bd6dde54",
           "pathFingerprintSha256": "052020c37b091e1697ce6f7bcae632fdcc5a220150a0ffcbaee5e2ad9a9360c2",
-          "enclosurePathIndex": 1,
           "contentPartIds": [
             "increase-mark"
           ]
@@ -95,12 +142,17 @@
           "variant": "outline",
           "masterSha256": "07be6c7e5b87e9f4ba0facd8fb3b31dbfaba03cb9a3bb9b0f6f552d16b4aaf85",
           "pathFingerprintSha256": "29cc46dcf51cd5525021420d1f8428086bf7ba0a697527fdc1a8e4035813e508",
-          "enclosurePathIndex": 1,
           "contentPartIds": [
             "decrease-mark"
           ]
         }
-      }
+      },
+      "sharedParts": [
+        {
+          "id": "status-enclosure",
+          "role": "container"
+        }
+      ]
     }
   }
 }

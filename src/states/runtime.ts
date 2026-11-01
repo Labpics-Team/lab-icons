@@ -4,12 +4,13 @@ import type {
 } from './types.js';
 
 interface CompiledStateGroup {
-  readonly schemaVersion: 1;
+  readonly schemaVersion: 2;
   readonly group: string;
   readonly variant: 'outline' | 'filled';
   readonly defaultState: string;
   readonly frame: readonly [string, string];
-  readonly enclosureSvg: string;
+  readonly sharedSvg: string;
+  readonly sharedPartIds: readonly string[];
   readonly enclosurePartId: string;
   readonly states: readonly (StateGroupCapabilities['states'][number] & Readonly<{ contentSvg: string }>)[];
   readonly proof: StateGroupCapabilities['proof'];
@@ -38,6 +39,7 @@ export function createCompiledStateGroup(input: CompiledStateGroup) {
   const capabilities = freezeTree<StateGroupCapabilities>({
     group: data.group, variant: data.variant, defaultState: data.defaultState,
     transition: 'enclosure-replacement', morph: 'unavailable', enclosurePartId: data.enclosurePartId,
+    sharedPartIds: data.sharedPartIds,
     states: data.states.map(({ contentSvg: _, ...state }) => state),
     formats: { static: ['svg'], transition: ['web-effect'] }, proof: data.proof,
   });
@@ -63,7 +65,7 @@ export function createCompiledStateGroup(input: CompiledStateGroup) {
     const invalid = validate(state, request, ['variant']);
     if (invalid) return invalid;
     const content = byState.get(state)!;
-    return Object.freeze({ ok: true, svg: data.frame[0] + content.contentSvg + data.enclosureSvg + data.frame[1] });
+    return Object.freeze({ ok: true, svg: data.frame[0] + content.contentSvg + data.sharedSvg + data.frame[1] });
   }
 
   function renderStateSvg(state = data.defaultState, request: StateRenderRequest = {}): StateSvgResult {
@@ -72,7 +74,7 @@ export function createCompiledStateGroup(input: CompiledStateGroup) {
     const groups = data.states.map(member =>
       `<g data-part="${member.partId}" data-role="state" data-state="${member.id}" opacity="${member.id === state ? 1 : 0}">` +
       member.contentSvg + '</g>').join('');
-    return Object.freeze({ ok: true, svg: data.frame[0] + groups + data.enclosureSvg + data.frame[1] });
+    return Object.freeze({ ok: true, svg: data.frame[0] + groups + data.sharedSvg + data.frame[1] });
   }
 
   function effect(state: string, request: unknown, exported: boolean): StateEffectResult {
@@ -92,11 +94,11 @@ export function createCompiledStateGroup(input: CompiledStateGroup) {
     return freezeTree({ ok: true, effect: {
       contract: 'labpics.symbol-state-effect/1', version: 1, kind: 'enclosure-replacement',
       group: data.group, variant: data.variant, targetState: state,
-      // Все группы остаются mounted. Следующий sequence подхватывает их видимую
-      // opacity, включая смесь после прерывания; from и сброс позы не задаются.
+      // Все группы остаются mounted. Consumer связывает первый interval с видимой
+      // opacity, включая смесь после прерывания; effect не задаёт from или сброс.
       stages: data.states.map(member => ({ partId: member.partId, property: 'opacity',
         to: member.id === state ? 1 : 0, at: 0, duration })),
-      unchangedPartIds: [data.enclosurePartId],
+      unchangedPartIds: data.sharedPartIds,
       options: { duration, easing: 'linear', fill: 'both' },
     } });
   }

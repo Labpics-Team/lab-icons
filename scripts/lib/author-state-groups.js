@@ -35,7 +35,7 @@ function freezeTree(value) {
 export function authorStateGroupNames(document) {
   fields(document, ['schemaVersion', 'source', 'groups'], 'document');
   fields(document.source, ['fileKey', 'version'], 'source');
-  if (document.schemaVersion !== 1 || !record(document.groups) ||
+  if (document.schemaVersion !== 2 || !record(document.groups) ||
       typeof document.source.fileKey !== 'string' || !/^[A-Za-z0-9]+$/.test(document.source.fileKey) ||
       typeof document.source.version !== 'string' || !/^\d+$/.test(document.source.version)) {
     refuse('SPEC_INVALID', 'нужен versioned документ с Figma source');
@@ -46,7 +46,7 @@ export function authorStateGroupNames(document) {
 }
 
 /**
- * Закон сохраняет равную последнюю оболочку и заменяет целые внутренние группы.
+ * Закон сохраняет равный ordered suffix с последней оболочкой и заменяет prefix.
  * Все контуры проверяются до выдачи данных. Serializer и glyph compiler передаются
  * от production build; runtime не читает SVG и не доказывает correspondence заново.
  */
@@ -58,24 +58,39 @@ export function compileAuthorStateGroups(baseline, document, { compiler, assembl
   const output = {};
   for (const name of names) {
     const group = document.groups[name];
-    fields(group, ['law', 'defaultState', 'enclosurePartId', 'states'], name);
+    fields(group, ['law', 'defaultState', 'enclosurePartId', 'sharedParts', 'states'], name);
     if (group.law !== 'enclosure.replace') refuse('LAW_UNSUPPORTED', `${name}: неизвестный закон`);
     if (typeof group.enclosurePartId !== 'string' || !NAME.test(group.enclosurePartId) ||
         typeof group.defaultState !== 'string' || !NAME.test(group.defaultState) || !record(group.states) ||
-        Object.keys(group.states).length < 2 || !Object.hasOwn(group.states, group.defaultState)) {
+        Object.keys(group.states).length < 2 || !Object.hasOwn(group.states, group.defaultState) ||
+        !Array.isArray(group.sharedParts) || group.sharedParts.length === 0) {
       refuse('SPEC_INVALID', `${name}: нужны именованные состояния и объявленная начальная поза`);
     }
     const stateNames = Object.keys(group.states).sort();
-    const partIds = new Set([group.enclosurePartId]);
+    const partIds = new Set();
+    for (const [index, part] of group.sharedParts.entries()) {
+      fields(part, ['id', 'role'], `${name}.sharedParts[${index}]`);
+      if (typeof part.id !== 'string' || !NAME.test(part.id) || partIds.has(part.id) ||
+          part.role !== (index === group.sharedParts.length - 1 ? 'container' : 'content')) {
+        refuse('SPEC_INVALID', `${name}: общие part IDs уникальны, последняя часть — container`);
+      }
+      partIds.add(part.id);
+    }
+    if (group.sharedParts.at(-1).id !== group.enclosurePartId) {
+      refuse('SPEC_INVALID', `${name}: enclosurePartId обязан называть последнюю общую часть`);
+    }
     const members = new Set();
     const states = [];
     let reference;
-    let enclosureSvg;
+    let sharedSvg;
+    let enclosureIdentity;
     let frame;
     let variant;
+    let prefixBoundary;
+    let prefixBoundaryDiffers = false;
     for (const state of stateNames) {
       const member = group.states[state];
-      fields(member, ['icon', 'variant', 'masterSha256', 'pathFingerprintSha256', 'enclosurePathIndex', 'contentPartIds'], `${name}.${state}`);
+      fields(member, ['icon', 'variant', 'masterSha256', 'pathFingerprintSha256', 'contentPartIds'], `${name}.${state}`);
       if (!NAME.test(state) || typeof member.icon !== 'string' || !NAME.test(member.icon) ||
           !['outline', 'filled'].includes(member.variant) ||
           typeof member.masterSha256 !== 'string' || !HASH.test(member.masterSha256) ||
@@ -103,11 +118,10 @@ export function compileAuthorStateGroups(baseline, document, { compiler, assembl
         if (error instanceof AuthorStateGroupError) throw error;
         refuse('SOURCE_UNSUPPORTED', `${name}.${state}: paint/geometry вне поддержанного source-языка`);
       }
-      // Последнее место оболочки — часть доказательства z-order; не переставляем paths.
-      if (!Number.isSafeInteger(member.enclosurePathIndex) || member.enclosurePathIndex !== entries.length - 1 ||
-          entries.length < 2 || !Array.isArray(member.contentPartIds) ||
-          member.contentPartIds.length !== entries.length - 1) {
-        refuse('TOPOLOGY_UNSUPPORTED', `${name}.${state}: нужна отдельная последняя оболочка и полное interior покрытие`);
+      // Prefix и suffix полностью покрывают авторский порядок; индекс не хранится повторно.
+      if (!Array.isArray(member.contentPartIds) || member.contentPartIds.length === 0 ||
+          member.contentPartIds.length + group.sharedParts.length !== entries.length) {
+        refuse('TOPOLOGY_UNSUPPORTED', `${name}.${state}: нужны непустой prefix и полный общий suffix`);
       }
       const groupPartId = `state-${state}`;
       for (const id of [groupPartId, ...member.contentPartIds]) {
@@ -128,31 +142,52 @@ export function compileAuthorStateGroups(baseline, document, { compiler, assembl
       if (JSON.stringify(glyph.viewBox) !== '[0,0,24,24]') refuse('COMPILER_MISMATCH', `${name}.${state}: viewBox изменился`);
       if (variant !== undefined && member.variant !== variant) refuse('ENCLOSURE_MISMATCH', `${name}: нельзя смешивать начертания`);
       variant = member.variant;
-      const enclosure = glyph.parts[member.enclosurePathIndex];
-      const identity = stableJSON({ d: enclosure.d, fillRule: enclosure.fillRule, paint: enclosure.paint,
+      const enclosure = glyph.parts.at(-1);
+      const currentEnclosure = stableJSON({ d: enclosure.d, fillRule: enclosure.fillRule, paint: enclosure.paint,
         viewBox: glyph.viewBox, dimensions: [24, 24], placement: 'after-content' });
-      if (reference !== undefined && identity !== reference) refuse('ENCLOSURE_MISMATCH', `${name}.${state}: оболочка/paint/рамка не равна`);
+      if (enclosureIdentity !== undefined && currentEnclosure !== enclosureIdentity) {
+        refuse('ENCLOSURE_MISMATCH', `${name}.${state}: оболочка/paint/рамка не равна`);
+      }
+      const shared = glyph.parts.slice(member.contentPartIds.length)
+        .map((part, index) => ({ ...part, ...group.sharedParts[index] }));
+      const identity = stableJSON({ parts: shared.map(part => ({ id: part.id, role: part.role,
+        d: part.d, fillRule: part.fillRule, paint: part.paint })),
+      viewBox: glyph.viewBox, dimensions: [24, 24], placement: 'after-content' });
+      if (reference !== undefined && identity !== reference) {
+        refuse('SHARED_PART_MISMATCH', `${name}.${state}: ordered geometry/paint общих частей не равны`);
+      }
       if (reference === undefined) {
         reference = identity;
-        enclosureSvg = assembleGlyphLayers([{ ...enclosure, id: group.enclosurePartId, role: 'container' }]);
+        enclosureIdentity = currentEnclosure;
+        sharedSvg = assembleGlyphLayers(shared);
         frame = assembleGlyphFrame(glyph.viewBox, [24, 24]);
       }
-      const content = glyph.parts.slice(0, member.enclosurePathIndex)
+      const content = glyph.parts.slice(0, member.contentPartIds.length)
         .map((part, index) => ({ ...part, id: member.contentPartIds[index], role: 'content' }));
+      const boundary = content.at(-1);
+      const boundaryIdentity = stableJSON({ d: boundary.d, fillRule: boundary.fillRule, paint: boundary.paint });
+      if (prefixBoundary === undefined) prefixBoundary = boundaryIdentity;
+      else if (boundaryIdentity !== prefixBoundary) prefixBoundaryDiffers = true;
       states.push({ id: state, partId: groupPartId, icon: member.icon,
         contentSvg: assembleGlyphLayers(content), contentPartIds: [...member.contentPartIds], author: { ...source.author } });
     }
+    // Равная последняя часть prefix — ещё один безопасный shared suffix layer.
+    // Не оставляем её в opacity-группах: source-over затемнил бы общий рисунок.
+    if (!prefixBoundaryDiffers) {
+      refuse('SHARED_PART_UNDECLARED', `${name}: общая последняя часть prefix требует объявленной shared anatomy`);
+    }
     output[name] = {
-      schemaVersion: 1, group: name, variant, defaultState: group.defaultState,
-      frame, enclosureSvg, enclosurePartId: group.enclosurePartId, states,
-      proof: { law: group.law, source: { ...document.source }, enclosureSha256: sha256(reference),
-        specSha256: sha256(stableJSON({ schemaVersion: 1, source: document.source, name, group })) },
+      schemaVersion: 2, group: name, variant, defaultState: group.defaultState,
+      frame, sharedSvg, sharedPartIds: group.sharedParts.map(part => part.id), enclosurePartId: group.enclosurePartId, states,
+      proof: { law: group.law, source: { ...document.source }, enclosureSha256: sha256(enclosureIdentity),
+        sharedPartsSha256: sha256(reference),
+        specSha256: sha256(stableJSON({ schemaVersion: document.schemaVersion, source: document.source, name, group })) },
     };
   }
   return freezeTree(output);
 }
 
-/** Конечный module хранит оболочку один раз и не импортирует geometry/authoring. */
+/** Конечный module хранит общие части один раз и не импортирует geometry/authoring. */
 export function renderStateGroupModule(payload) {
   if (!NAME.test(payload?.group)) refuse('SPEC_INVALID', 'невалидный compiled group');
   return [

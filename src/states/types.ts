@@ -26,7 +26,7 @@ export interface StateRefusal {
 
 export type StateSvgResult = Readonly<{ ok: true; svg: string }> | StateRefusal;
 
-/** Стандартные opacity-стадии; начальное значение подхватывает executor. */
+/** Стандартные opacity-стадии; consumer связывает их с видимым началом. */
 export interface SymbolStateEffect {
   readonly contract: 'labpics.symbol-state-effect/1';
   readonly version: 1;
@@ -54,6 +54,7 @@ export interface StateGroupCapabilities<TState extends string = string> {
   readonly transition: 'enclosure-replacement';
   readonly morph: 'unavailable';
   readonly enclosurePartId: string;
+  readonly sharedPartIds: readonly string[];
   readonly states: readonly Readonly<{
     id: TState;
     partId: string;
@@ -69,6 +70,7 @@ export interface StateGroupCapabilities<TState extends string = string> {
     law: 'enclosure.replace';
     source: Readonly<{ fileKey: string; version: string }>;
     enclosureSha256: string;
+    sharedPartsSha256: string;
     specSha256: string;
   }>;
 }

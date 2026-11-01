@@ -28,7 +28,8 @@ const state = { data: null, name: 'time', variant: 'outline', view: 'original', 
 const REPLACEMENT_GESTURE = 'enclosure.replace';
 const stateLabels = Object.freeze({ confirmation: 'Подтверждение', dismissal: 'Закрыть',
   question: 'Вопрос', attention: 'Внимание', increase: 'Добавить', decrease: 'Убрать',
-  play: 'Воспроизвести', pause: 'Приостановить' });
+  play: 'Воспроизвести', pause: 'Приостановить',
+  aloof: 'Сдержанное выражение', sad: 'Грустное выражение', smile: 'Улыбка' });
 const stateLabel = id => stateLabels[id] ?? id;
 const replacementMode = () => Boolean(state.replacement && ui.gesture.value === REPLACEMENT_GESTURE &&
   state.view === 'original' && !state.legacy);
@@ -69,7 +70,7 @@ function inspectorPresentation() {
   ui['source-status'].textContent = `Lab UI v2.1. Версия ${author.version}. Узел ${author.nodeId}. ` +
     (active ? 'Авторский знак; общая оболочка сохраняется при замене.' : state.legacy ? 'Прежняя модель: паритет с новой авторской основой не принят.' : comparison ? `Красным — текущая основа, синим — прежняя ${row.model?.catalogState === 'accepted' ? 'модель' : 'модель на проверке'} при исходных параметрах. Части и образцы размеров относятся к текущему авторскому мастеру. Паритет не принят.` : 'Текущий авторский мастер. Возможности относятся к его закреплённой версии.');
   ui['consumer-import'].textContent = active ? `import { renderStateSvg, compileStateEffect } from\n  '@labpics/icons/states/${group.capabilities.group}';` : state.legacy ? `import { glyph } from '@labpics/icons/ir';\n// Прежняя основа; текущий master: ./symbols/${state.name}` : `import { glyph } from\n  '@labpics/icons/symbols/${state.name}';`;
-  const parts = active ? [...member.contentPartIds, group.capabilities.enclosurePartId].map(id => ({ id, role: id === group.capabilities.enclosurePartId ? 'container' : 'content' })) : state.glyph.parts;
+  const parts = active ? [...member.contentPartIds, ...group.capabilities.sharedPartIds].map(id => ({ id, role: id === group.capabilities.enclosurePartId ? 'container' : 'content' })) : state.glyph.parts;
   ui.parts.replaceChildren(...parts.map(part => {
     const item = document.createElement('li');
     item.textContent = part.role === 'unclassified' ? `Авторский контур ${part.zIndex + 1}; семантика пока не принята.` : `${comparison ? 'Авторский ' : ''}${part.id} — ${part.role}`;

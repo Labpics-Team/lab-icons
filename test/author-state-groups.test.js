@@ -84,19 +84,27 @@ describe.each(groupNames)('%s: точные author masters и единая об�
     expect(group.stateCapabilities().states.find(member => member.id === state).author).toEqual(baseline.icons[icon][variant].author);
   });
 
-  it('mount SVG содержит все целые группы и только одну неподвижную оболочку', () => {
+  it('mount SVG содержит все prefix-группы и единственный неподвижный suffix', () => {
     const mounted = group.renderStateSvg(spec.defaultState).svg;
     const groups = [...mounted.matchAll(/<g\b[^>]*data-state="([^"]+)"[^>]*opacity="([01])">([\s\S]*?)<\/g>/g)];
     expect(groups).toHaveLength(stateNames.length);
     expect(groups.filter(match => match[2] === '1').map(match => match[1])).toEqual([spec.defaultState]);
     expect(mounted.split(`data-part="${spec.enclosurePartId}"`)).toHaveLength(2);
+    const sharedIds = spec.sharedParts.map(part => part.id);
+    expect(group.stateCapabilities().sharedPartIds).toEqual(sharedIds);
+    for (const id of sharedIds) {
+      expect(mounted.split(`data-part="${id}"`)).toHaveLength(2);
+      expect(groups.every(match => !match[3].includes(`data-part="${id}"`))).toBe(true);
+    }
     for (const [, state, , body] of groups) {
       const { icon, variant, contentPartIds } = spec.states[state];
-      expect(rawPaths(body)).toEqual(rawPaths(baseline.icons[icon][variant].rawSvg).slice(0, -1));
+      expect(rawPaths(body)).toEqual(rawPaths(baseline.icons[icon][variant].rawSvg).slice(0, contentPartIds.length));
       expect([...body.matchAll(/data-part="([^"]+)"/g)].map(match => match[1])).toEqual(contentPartIds);
       expect(body).not.toContain('opacity=');
     }
-    expect(sha256(rawPaths(mounted).at(-1).d)).toBe('e968e80eacbedc69a95420ccbfb386db9a4a6b5c77f728e206eb1e970308c5c9');
+    const original = spec.states[spec.defaultState];
+    expect(rawPaths(mounted).slice(-sharedIds.length)).toEqual(
+      rawPaths(baseline.icons[original.icon][original.variant].rawSvg).slice(-sharedIds.length));
     expect(group.renderStateSvg().svg).toBe(mounted);
     expect(group.render().svg).toBe(group.render(spec.defaultState).svg);
   });
@@ -106,7 +114,7 @@ describe.each(groupNames)('%s: точные author masters и единая об�
       const result = group.compileStateEffect(state, { duration: 450 });
       expect(result).toMatchObject({ ok: true, effect: {
         contract: 'labpics.symbol-state-effect/1', version: 1, kind: 'enclosure-replacement', targetState: state,
-        unchangedPartIds: [spec.enclosurePartId], options: { duration: 450, easing: 'linear', fill: 'both' },
+        unchangedPartIds: spec.sharedParts.map(part => part.id), options: { duration: 450, easing: 'linear', fill: 'both' },
       } });
       expect(result.effect.stages).toEqual(stateNames.map(id => ({
         partId: `state-${id}`, property: 'opacity', to: id === state ? 1 : 0, at: 0, duration: 450,
@@ -141,17 +149,107 @@ describe.each(groupNames)('%s: точные author masters и единая об�
   });
 });
 
+describe('expression-face: общие глаза не входят в изменяемую opacity группу', () => {
+  const name = 'expression-face';
+  const faceSpec = document.groups[name];
+  const face = createCompiledStateGroup(payloads[name]);
+  const mutatePath = (svg, index, change) => {
+    let cursor = 0;
+    return svg.replace(/<path\b[^>]*>/g, tag => cursor++ === index ? change(tag) : tag);
+  };
+
+  it('сохраняет три fixed parts один раз независимо от числа смен и обратных намерений', () => {
+    const shared = ['face-left-eye', 'face-right-eye', 'face-enclosure'];
+    expect(face.stateCapabilities().sharedPartIds).toEqual(shared);
+    for (const state of ['aloof', 'sad', 'smile', 'sad', 'aloof']) {
+      const mounted = face.renderStateSvg(state).svg;
+      const bodies = [...mounted.matchAll(/<g\b[^>]*data-state="([^"]+)"[^>]*opacity="([01])">([\s\S]*?)<\/g>/g)];
+      expect(bodies).toHaveLength(3);
+      expect(bodies.every(match => rawPaths(match[3]).length === 1)).toBe(true);
+      for (const id of shared) expect(mounted.split(`data-part="${id}"`)).toHaveLength(2);
+      expect(face.compileStateEffect(state, { duration: 300 }).effect.unchangedPartIds).toEqual(shared);
+      expect(face.compileStateEffect(state, { duration: 300 }).effect.stages.every(stage => !shared.includes(stage.partId))).toBe(true);
+    }
+    expect(payloads[name].sharedSvg).not.toContain('mouth');
+    expect(payloads[name].states.every(state => !state.contentSvg.includes('face-left-eye'))).toBe(true);
+    expect(Object.isFrozen(face.stateCapabilities().sharedPartIds)).toBe(true);
+    expect(face.stateCapabilities().morph).toBe('unavailable');
+  });
+
+  it.each([
+    ['удалённый глаз', svg => mutatePath(svg, 1, () => ''), 'TOPOLOGY_UNSUPPORTED'],
+    ['другая eye geometry', svg => mutatePath(svg, 1, tag => tag.replace(/M([+-]?\d+(?:\.\d+)?)/,
+      (_, value) => `M${Number(value) + 0.01}`)), 'SHARED_PART_MISMATCH'],
+    ['другой eye rule', svg => mutatePath(svg, 1, tag => tag.replace('<path ', '<path fill-rule="evenodd" ')), 'SHARED_PART_MISMATCH'],
+    ['переставленные глаза', svg => {
+      const tags = [...svg.matchAll(/<path\b[^>]*>/g)].map(([tag]) => tag);
+      return mutatePath(mutatePath(svg, 1, () => tags[2]), 2, () => tags[1]);
+    }, 'SHARED_PART_MISMATCH'],
+    ['другая оболочка', svg => mutatePath(svg, 3, tag => tag.replace(/M([+-]?\d+(?:\.\d+)?)/,
+      (_, value) => `M${Number(value) + 0.01}`)), 'ENCLOSURE_MISMATCH'],
+  ])('%s: новый допустимый master не получает прежнюю shared anatomy', (_, mutate, code) => {
+    const source = structuredClone(baseline), input = structuredClone(document);
+    repin(source, input, 'smile', mutate, name);
+    expect(input.groups[name].states.smile.masterSha256).not.toBe(faceSpec.states.smile.masterSha256);
+    expect(() => compile(source, input)).toThrow(expect.objectContaining({ code }));
+  });
+
+  it('Filled evenodd compound не превращается в положительные глаза и кольцо', () => {
+    const source = baseline.icons.smile.filled;
+    expect(rawPaths(source.rawSvg)).toHaveLength(1);
+    const input = structuredClone(document);
+    Object.assign(input.groups[name].states.smile, { variant: 'filled',
+      masterSha256: source.author.masterSha256, pathFingerprintSha256: source.author.pathFingerprintSha256 });
+    expect(() => compile(baseline, input)).toThrow(expect.objectContaining({ code: 'TOPOLOGY_UNSUPPORTED' }));
+    expect(face.render('smile', { variant: 'filled' })).toMatchObject({ ok: false, reason: { code: 'VARIANT_UNSUPPORTED' } });
+  });
+
+  it('забытые общие глаза не допускаются как часть изменяемых prefix-групп', () => {
+    const input = structuredClone(document);
+    input.groups[name].sharedParts = [{ id: 'face-enclosure', role: 'container' }];
+    for (const [state, member] of Object.entries(input.groups[name].states)) {
+      member.contentPartIds.push(`${state}-left-eye`, `${state}-right-eye`);
+    }
+    expect(() => compile(baseline, input)).toThrow(expect.objectContaining({ code: 'SHARED_PART_UNDECLARED' }));
+  });
+
+  it('installed oracle обнаруживает eye duplication и движение неподвижной части', () => {
+    const expected = statePackageExpectations(baseline, document)[name];
+    const duplicate = { ...face, renderStateSvg(state) {
+      const result = face.renderStateSvg(state);
+      return { ...result, svg: result.svg.replace('</svg>', payloads[name].sharedSvg + '</svg>') };
+    } };
+    const moving = { ...face, compileStateEffect(state, request) {
+      const result = structuredClone(face.compileStateEffect(state, request));
+      result.effect.unchangedPartIds = ['face-enclosure'];
+      return result;
+    } };
+    const dimmed = { ...face, renderStateSvg(state) {
+      const result = face.renderStateSvg(state);
+      return { ...result, svg: result.svg.replace('data-part="face-left-eye"', 'opacity="0.5" data-part="face-left-eye"') };
+    } };
+    const extra = { ...face, renderStateSvg(state) {
+      const result = face.renderStateSvg(state);
+      return { ...result, svg: result.svg.replace('</svg>', '<path fill="currentColor" d="M0 0H1V1Z"/></svg>') };
+    } };
+    expect(() => verifyInstalledStateGroup(duplicate, expected)).toThrow('state artifact:');
+    expect(() => verifyInstalledStateGroup(moving, expected)).toThrow('state artifact:');
+    expect(() => verifyInstalledStateGroup(dimmed, expected)).toThrow('state artifact:');
+    expect(() => verifyInstalledStateGroup(extra, expected)).toThrow('state artifact:');
+  });
+});
+
 describe('enclosure.replace: adversarial admission и compatibility', () => {
   it.each([
     [0, 'TOPOLOGY_UNSUPPORTED'],
     [1, 'ENCLOSURE_MISMATCH'],
-  ])('stop-circle с корректным master и index %s не подменяет общий последний enclosure', (index, code) => {
+  ])('stop-circle с корректным master и prefix длины %s не подменяет общий последний enclosure', (length, code) => {
     const source = baseline.icons['stop-circle'].outline;
     const invalid = structuredClone(document);
     invalid.groups['playback-circle'].states.stop = {
       icon: 'stop-circle', variant: 'outline', masterSha256: source.author.masterSha256,
       pathFingerprintSha256: source.author.pathFingerprintSha256,
-      enclosurePathIndex: index, contentPartIds: ['stop-mark'],
+      contentPartIds: ['stop-mark'].slice(0, length),
     };
     expect(() => compile(baseline, invalid)).toThrow(expect.objectContaining({ code }));
   });
@@ -218,7 +316,10 @@ describe('enclosure.replace: adversarial admission и compatibility', () => {
     ['unknown law', input => { input.groups['status-circle'].law = 'morph'; }, 'LAW_UNSUPPORTED'],
     ['stale master', input => { input.groups['status-circle'].states.confirmation.masterSha256 = '0'.repeat(64); }, 'MASTER_MISMATCH'],
     ['partial parts', input => { input.groups['status-circle'].states.question.contentPartIds.pop(); }, 'TOPOLOGY_UNSUPPORTED'],
-    ['wrong enclosure index', input => { input.groups['status-circle'].states.confirmation.enclosurePathIndex = 0; }, 'TOPOLOGY_UNSUPPORTED'],
+    ['legacy enclosure index', input => { input.groups['status-circle'].states.confirmation.enclosurePathIndex = 0; }, 'SPEC_INVALID'],
+    ['legacy schema', input => { input.schemaVersion = 1; }, 'SPEC_INVALID'],
+    ['shared role', input => { input.groups['status-circle'].sharedParts[0].role = 'content'; }, 'SPEC_INVALID'],
+    ['wrong enclosure identity', input => { input.groups['status-circle'].sharedParts[0].id = 'other-container'; }, 'SPEC_INVALID'],
     ['duplicate part', input => { input.groups['status-circle'].states.confirmation.contentPartIds[0] = 'status-enclosure'; }, 'SPEC_INVALID'],
     ['unknown field', input => { input.groups['status-circle'].axes = {}; }, 'SPEC_INVALID'],
   ])('%s не проходит admission', (_, mutate, code) => {
@@ -253,7 +354,7 @@ describe('enclosure.replace: adversarial admission и compatibility', () => {
     const invalid = structuredClone(document);
     Object.assign(invalid.groups['status-circle'].states.confirmation, {
       variant: 'filled', masterSha256: source.author.masterSha256, pathFingerprintSha256: source.author.pathFingerprintSha256,
-      enclosurePathIndex: 0, contentPartIds: [],
+      contentPartIds: [],
     });
     expect(() => compile(baseline, invalid)).toThrow(expect.objectContaining({ code: 'TOPOLOGY_UNSUPPORTED' }));
   });
