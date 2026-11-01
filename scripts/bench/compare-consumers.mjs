@@ -12,6 +12,7 @@ import { build } from 'esbuild';
 import { chromium } from 'playwright';
 import { localTarballSpecifier, pnpmInvocation } from '../check-package-artifact.js';
 import { assertRemoteBenchmark, summarize } from './measurement.js';
+import { analyzeConsumerReport } from './report-analysis.js';
 import { validateAuthorObservation, validateRetainedPair } from './author-oracle.js';
 import { verifyExplorer } from './verify-explorer.mjs';
 import { verifyLottieConsumer } from './verify-lottie.mjs';
@@ -126,7 +127,7 @@ async function browserMeasurement(browser, origin, filename, count, slowdown, ex
     await session.send('Network.setCacheDisabled', { cacheDisabled: true });
     await session.send('Performance.enable', { timeDomain: 'timeTicks' });
     await page.goto(origin, { waitUntil: 'load' });
-    await page.evaluate(async () => { window.benchmarkScene = await import('/measurement/browser-scene.js'); });
+    if (!executor) await page.evaluate(async () => { window.benchmarkScene = await import('/measurement/browser-scene.js'); });
     const before = await session.send('Performance.getMetrics');
     const result = await page.evaluate(async ({ filename, count, executor }) => {
       let result;
@@ -184,7 +185,12 @@ try {
     warmImport: 'after useful scene', isolation: 'fresh context/document/module graph; HTTP cache disabled; browser process and OS cache shared',
     paintDeadlineMs: 30_000, interpretation: 'context/module cold; no GPU presentation claim or statistical acceptance',
     sources: ['https://w3c.github.io/paint-timing/', 'https://developer.mozilla.org/en-US/docs/Web/API/PerformancePaintTiming', 'https://playwright.dev/docs/browser-contexts'] };
-  report.protocol.bundleScope = 'tiny public adapters; measurement harness preloaded outside bundle and cold interval';
+  report.protocol.bundleScope = 'static/glyph adapters: harness outside bundle and cold interval; recorded motion: one harness inside its legacy measurement bundle';
+  report.protocol.analysis = { version: 1, method: 'exact-binomial-order-statistics/bonferroni-ratio-v1',
+    methodSha256: sha256(readFileSync(join(ROOT, 'scripts/bench/adjudication.js'))),
+    reportAnalysisSha256: sha256(readFileSync(join(ROOT, 'scripts/bench/report-analysis.js'))),
+    decimalBudgets: { defaultGlyphBytes: '1/20', staticByteOverhead: '21/20', coldRatio: '4/5', confidence: '19/20' },
+    samplingQualified: false, calibration: 'not executed by this descriptive protocol; BENCH-01 remains INCOMPLETE' };
   report.staticPairs = [];
   for (const variant of ['outline', 'filled']) report.staticPairs.push(await makeStaticPair(prepared[1], variant, outdir));
   for (const testCase of CASES) {
@@ -278,7 +284,10 @@ try {
   }
   report.lottie = await verifyLottieConsumer({ browser, prepared: prepared[1], origin, outdir, output });
   report.authoring = await verifyAuthoringConsumer({ browser, prepared: prepared[1], origin, outdir, output });
+  report.analysis = analyzeConsumerReport(report);
+  report.benchmarkStatus = report.analysis.benchmarkVerdict;
   writeFileSync(join(output, 'consumer-comparison.json'), JSON.stringify(report, null, 2));
+  if (report.benchmarkStatus === 'FAIL') throw new Error('benchmark: measured artifact budget failed; see analysis');
   // Instrumentation читает уже собранные candidate artifacts; не меняет ratchet в CI.
   command(process.execPath, [join(prepared[1].source, 'scripts/measure-platform-artifacts.mjs'), '--output', join(output, 'platform-artifacts.json')], prepared[1].source);
   process.stdout.write(`benchmark: полный отчёт ${join(output, 'consumer-comparison.json')}\n`);

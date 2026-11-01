@@ -28,11 +28,43 @@ browser context. Порядок baseline/candidate чередуется. Сыр�
 среднее, sample standard deviation и standard error доступны в JSON; плохие
 наблюдения не отбрасываются. Ошибка сохраняет частичный отчёт и красный job.
 
+Дополнительный matched static lane сравнивает Outline/Filled accessibility
+из одного установленного candidate tarball с **тем же SVG literal**. Native
+button, имя, декоративный SVG и его размеры совпадают; harness загружен отдельно
+и исключён из обоих minified bundles. Отчёт сохраняет raw/gzip/brotli, точный
+SVG hash и `bytesInOutput` для retained inputs. Parsed inputs не считаются
+доказательством shipped runtime. Recorded motion сохраняет собственный единичный
+measurement harness внутри своего bundle; static byte budget к нему не применяется.
+
 Node измеряет cold/warm import, создание SVG, GC, полный жизненный цикл,
 heap и RSS. Он не притворяется браузерным рендерером. Chromium отдельно
 измеряет импорт consumer bundle, создание DOM, mount/layout, возможность первого
 paint, rAF-интервалы, DOM-элементы, mutations и CDP-память при mounted DOM,
 после cleanup и GC. Button имеет подпись и hit target 44 px.
+
+Cold span теперь начинается **до** dynamic import и включает обязательные create,
+DOM и mount до native `first-contentful-paint.startTime` пустого документа.
+Ранний/отсутствующий/неподдержанный FCP вызывает отказ; rAF не заменяет его.
+Warm import следует после полезного результата. Milestones и отдельные
+paint/presentation fields сохраняются без утверждения о времени фактического
+показа GPU. HTTP cache выключен, но browser process и OS cache общие: это
+context/module cold, а не machine cold или доказанная независимость всех samples.
+
+`report.analysis` разделяет наблюдённые byte budgets и conditional quantile
+inference. Source hashes метода и анализа, decimal targets и uncertainty scope
+сохраняются до observations. Binomial tails и nearest ranks вычисляются точными
+целыми числами; budgets/confidence/quantile интерпретируются как десятичное
+`String(number)`. Исходные измеренные значения сохраняют binary64 identity;
+ratio boundaries округляются наружу, а budget сравнивается с точным отношением
+наблюдённых endpoints. Отсутствующий хвост/разрешение/арифметическая граница
+возвращает `INCOMPLETE`, нулевая работа не получает tolerance. Calibration
+имеет fixed 95% policy и максимум 5%; noisy sample не расширяет hard cap.
+
+Этот запуск не выполняет baseline-only calibration и независимый frozen-run
+qualification. Три browser samples не доказывают p95 confidence, а совпавший
+byte budget не закрывает warm/CPU/memory/motion/fidelity conjuncts. Поэтому
+успешное исполнение consumer procedure может сохранять `benchmarkStatus:
+INCOMPLETE`; это не BENCH-01 PASS. Наблюдённый FAIL byte budget делает job красным.
 
 Движение time.advance из recorded полного IR проходит через обычные WAAPI keyframes и публичный
 `@labpics/motion@0.5.0`. Проверяются прерывание с обратным направлением,
@@ -69,3 +101,7 @@ delivery gate. Linux-результат не закрывает native пров�
 - [Chromium CPU throttling](https://chromedevtools.github.io/devtools-protocol/tot/Emulation/#method-setCPUThrottlingRate): slowdown factor, 1 без замедления.
 - [Chromium Performance](https://chromedevtools.github.io/devtools-protocol/tot/Performance/): текущие runtime metrics, duration domain `timeTicks`.
 - [Playwright CDP session](https://playwright.dev/docs/api/class-browsercontext#browser-context-new-cdp-session): только Chromium; независимые context.
+- [W3C Paint Timing](https://w3c.github.io/paint-timing/): FCP включает отрисованные SVG descendants; timestamp не заменяет proof GPU presentation.
+- [MDN PerformancePaintTiming](https://developer.mozilla.org/en-US/docs/Web/API/PerformancePaintTiming): native paint observations и support boundary.
+- [Lehmann and Paromau, quantile uncertainty](https://doi.org/10.1016/j.mlwa.2026.101033): order-statistic/binomial confidence и ограничения малого sample.
+- [De Angelis, Hall and Young, coverage error](https://www.math.wustl.edu/~kuffner/AlastairYoung/DeAngelisHallYoung1993a.pdf): bootstrap percentile intervals не устраняют автоматически quantile uncertainty.
