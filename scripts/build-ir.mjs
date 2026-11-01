@@ -21,6 +21,31 @@ const TARGETS = ['ir', 'symbols', 'motion'];
 const REQUIRED_DECLARATIONS = ['author-catalog.generated.d.ts', 'author-source.d.ts', 'candidates.d.ts', 'catalog.generated.d.ts', 'compiler.d.ts', 'index.d.ts', 'recipes.d.ts', 'render.d.ts', 'request.d.ts'];
 const read = (root, file) => JSON.parse(readFileSync(join(root, file), 'utf8'));
 
+/** Только локальный checkout и его OS namespace: неизвестный или живой PID сохраняется. */
+function recoverAbandonedStaging(root) {
+  for (const name of readdirSync(root)) {
+    const owner = /^\.dist-ir-build-([1-9]\d*)-[A-Za-z0-9]{6}$/.exec(name);
+    if (!owner) continue;
+    const pid = Number(owner[1]);
+    if (!Number.isSafeInteger(pid)) continue;
+    const path = join(root, name);
+    try {
+      if (!lstatSync(path).isDirectory()) continue;
+    } catch (error) {
+      if (error.code === 'ENOENT') continue;
+      throw error;
+    }
+    try {
+      process.kill(pid, 0);
+      continue;
+    } catch (error) {
+      // ESRCH подтверждает отсутствие процесса. EPERM и reuse PID не разрешают GC.
+      if (error.code !== 'ESRCH') continue;
+    }
+    rmSync(path, { recursive: true, force: true });
+  }
+}
+
 function entryKind(path) {
   const entry = lstatSync(path);
   if (entry.isDirectory()) return 'directory';
@@ -142,8 +167,10 @@ function validateStagedSurface(staging, contract) {
 export async function buildIr({ root = ROOT, compileTargets = compileIrTargets, transactionFs } = {}) {
   const output = join(root, 'dist');
   const backup = join(root, '.dist-ir-previous');
+  recoverAbandonedStaging(root);
   recoverOwnedDirectory({ output, backup, fs: transactionFs });
-  const staging = mkdtempSync(join(root, '.dist-ir-build-'));
+  // PID входит в атомарно созданное имя: crash до записи marker не оставляет unknown owner.
+  const staging = mkdtempSync(join(root, `.dist-ir-build-${process.pid}-`));
   try {
     retainStaticArtifacts(output, staging);
     const symbolCount = await compileTargets({ root, staging });

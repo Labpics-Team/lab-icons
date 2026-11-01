@@ -1,4 +1,6 @@
 import assert from 'node:assert/strict';
+import { spawn, spawnSync } from 'node:child_process';
+import { once } from 'node:events';
 import * as fs from 'node:fs';
 import { tmpdir } from 'node:os';
 import { basename, dirname, join, resolve } from 'node:path';
@@ -17,6 +19,7 @@ const STATIC_FILES = {
   'anatomy.json': '{"static":"preserved"}',
   'catalog.json': '{"catalog":"preserved"}',
 };
+const BUILD_MODULE = new URL('../scripts/build-ir.mjs', import.meta.url).href;
 
 function write(root, path, value) {
   fs.mkdirSync(dirname(join(root, path)), { recursive: true });
@@ -70,6 +73,114 @@ afterEach(() => {
 });
 
 describe('публикация единой эпохи IR/symbols/motion', () => {
+  it.each(['exit', 'kill'])('после настоящего process crash %s следующий build убирает только abandoned staging', async mode => {
+    const { root, output } = fixture();
+    const script = `
+      import { buildIr } from ${JSON.stringify(BUILD_MODULE)};
+      import { mkdirSync, writeFileSync } from 'node:fs';
+      import { join } from 'node:path';
+      await buildIr({ root: ${JSON.stringify(root)}, compileTargets({ staging }) {
+        mkdirSync(join(staging, 'ir'));
+        writeFileSync(join(staging, 'ir/index.js'), 'partial crash output');
+        ${mode === 'exit' ? 'process.exit(17)' : "process.kill(process.pid, 'SIGKILL')"};
+      } });
+    `;
+    const crashed = spawnSync(process.execPath, ['--input-type=module', '--eval', script], {
+      cwd: root, encoding: 'utf8', timeout: 5000, windowsHide: true,
+    });
+    expect(crashed.error).toBeUndefined();
+    if (mode === 'exit') expect(crashed.status, crashed.stderr).toBe(17);
+    else if (process.platform === 'win32') {
+      expect(crashed.status, crashed.stderr).toBe(1);
+      expect(crashed.signal).toBeNull();
+    } else expect(crashed.signal, crashed.stderr).toBe('SIGKILL');
+    expect(crashed.stderr).toBe('');
+    expect(fs.readdirSync(root).filter(name => name.startsWith('.dist-ir-build-'))).toHaveLength(1);
+    expect(epochs(output)).toEqual(['old', 'old', 'old']);
+    await expect(buildIr({ root, compileTargets: ({ staging }) => writeTargets(staging) })).resolves.toBe(1);
+    expect(epochs(output)).toEqual(['new', 'new', 'new']);
+    expectStatic(output);
+    expectNoTransactionFiles(root);
+  });
+
+  it('не удаляет staging живого соседнего процесса, но восстанавливает после его crash', async () => {
+    const { root, output } = fixture();
+    const script = `
+      import { buildIr } from ${JSON.stringify(BUILD_MODULE)};
+      import { mkdirSync, writeFileSync } from 'node:fs';
+      import { join } from 'node:path';
+      await buildIr({ root: ${JSON.stringify(root)}, async compileTargets({ staging }) {
+        mkdirSync(join(staging, 'ir'));
+        writeFileSync(join(staging, 'ir/index.js'), 'live operation');
+        const released = new Promise(resolve => process.once('message', resolve));
+        process.send({ staging });
+        await released;
+      } });
+    `;
+    const child = spawn(process.execPath, ['--input-type=module', '--eval', script], {
+      cwd: root, stdio: ['ignore', 'ignore', 'pipe', 'ipc'], windowsHide: true,
+    });
+    const closed = once(child, 'close');
+    let timer;
+    try {
+      const [message] = await Promise.race([
+        once(child, 'message'),
+        new Promise((_, reject) => { timer = setTimeout(() => reject(new Error('live staging child timeout')), 5000); }),
+      ]);
+      clearTimeout(timer);
+      await expect(buildIr({ root, compileTargets: ({ staging }) => writeTargets(staging) })).resolves.toBe(1);
+      expect(fs.readFileSync(join(message.staging, 'ir/index.js'), 'utf8')).toBe('live operation');
+      expect(epochs(output)).toEqual(['new', 'new', 'new']);
+      expectStatic(output);
+      expect(child.kill('SIGKILL')).toBe(true);
+      await closed;
+      await expect(buildIr({ root, compileTargets: ({ staging }) => writeTargets(staging) })).resolves.toBe(1);
+      expectNoTransactionFiles(root);
+    } finally {
+      clearTimeout(timer);
+      if (child.exitCode === null && child.signalCode === null) child.kill('SIGKILL');
+      await closed;
+    }
+  });
+
+  it('recovery сохраняет legacy, неизвестные имена, файлы, symlink и живой PID', async () => {
+    const { root } = fixture();
+    const departed = spawnSync(process.execPath, ['--eval', 'process.exit(0)'], { windowsHide: true });
+    expect(departed.status).toBe(0);
+    const abandoned = `.dist-ir-build-${departed.pid}-oldxxx`;
+    write(root, `${abandoned}/value`, 'abandoned owned stage');
+    const retained = ['.dist-ir-build-legacy', '.dist-ir-build-0-ABCdef', `.dist-ir-build-${process.pid}-living`];
+    for (const name of retained) write(root, `${name}/value`, 'preserved');
+    const file = `.dist-ir-build-${departed.pid}-afilex`;
+    write(root, file, 'preserved file');
+    const outside = join(root, 'unowned-link-target');
+    write(outside, 'value', 'preserved outside link');
+    const link = `.dist-ir-build-${departed.pid}-linked`;
+    fs.symlinkSync(outside, join(root, link), process.platform === 'win32' ? 'junction' : 'dir');
+    await expect(buildIr({ root, compileTargets: ({ staging }) => writeTargets(staging) })).resolves.toBe(1);
+    expect(fs.existsSync(join(root, abandoned))).toBe(false);
+    for (const name of retained) expect(fs.readFileSync(join(root, name, 'value'), 'utf8')).toBe('preserved');
+    expect(fs.readFileSync(join(root, file), 'utf8')).toBe('preserved file');
+    expect(fs.lstatSync(join(root, link)).isSymbolicLink()).toBe(true);
+    expect(fs.readFileSync(join(outside, 'value'), 'utf8')).toBe('preserved outside link');
+  });
+
+  it('EPERM при проверке owner не считается разрешением удалить staging', async () => {
+    const { root } = fixture();
+    const stage = join(root, `.dist-ir-build-${process.pid}-denied`);
+    write(stage, 'value', 'permission unknown');
+    const probe = vi.spyOn(process, 'kill').mockImplementation(() => {
+      throw Object.assign(new Error('owner permission unknown'), { code: 'EPERM' });
+    });
+    try {
+      await expect(buildIr({ root, compileTargets: ({ staging }) => writeTargets(staging) })).resolves.toBe(1);
+      expect(probe).toHaveBeenCalledWith(process.pid, 0);
+      expect(fs.readFileSync(join(stage, 'value'), 'utf8')).toBe('permission unknown');
+    } finally {
+      probe.mockRestore();
+    }
+  });
+
   it('заменяет все targets вместе, сохраняя static/catalog bytes и исключая прежние staging/backup', async () => {
     const { root, output } = fixture();
     write(output, 'symbols/stale.js', 'stale target');
