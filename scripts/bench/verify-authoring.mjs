@@ -3,7 +3,7 @@ import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { build } from 'esbuild';
 import { assertRemoteBenchmark } from './measurement.js';
 
@@ -47,8 +47,10 @@ export async function verifyAuthoringConsumer({ browser, prepared, origin, outdi
   const typeSource = join(prepared.consumer, 'authoring-types.ts');
   writeFileSync(typeSource, authoringTypeConsumer(example));
   const requireSource = createRequire(join(prepared.source, 'package.json'));
-  const typescript = requireSource.resolve('typescript/bin/tsc');
-  const typescriptVersion = JSON.parse(readFileSync(requireSource.resolve('typescript/package.json'), 'utf8')).version;
+  const typescriptPackagePath = requireSource.resolve('typescript/package.json');
+  const typescriptPackage = JSON.parse(readFileSync(typescriptPackagePath, 'utf8'));
+  const typescript = join(dirname(typescriptPackagePath), typescriptPackage.bin.tsc);
+  const typescriptVersion = typescriptPackage.version;
   execFileSync(process.execPath, [typescript, '--noEmit', '--strict', '--module', 'nodenext',
     '--target', 'es2022', '--lib', 'es2022,dom', typeSource],
   { cwd: prepared.consumer, stdio: 'inherit', windowsHide: true });
