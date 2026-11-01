@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "fileKey": "LuaiBd4anRi4DMZayKAnY2",
+    "version": "2416636003859748575"
+  },
+  "groups": {
+    "status-circle": {
+      "law": "enclosure.replace",
+      "defaultState": "question",
+      "enclosurePartId": "status-enclosure",
+      "states": {
+        "confirmation": {
+          "icon": "checkmark-circle",
+          "variant": "outline",
+          "masterSha256": "e186493576bcc419ca7038013395ee021c547d91dc1b069b3ea67b24278c63c4",
+          "pathFingerprintSha256": "6afbf3a4ba0379b7dcd801901c34db3cff004da17c947f35cd8ea7000ba73527",
+          "enclosurePathIndex": 1,
+          "contentPartIds": [
+            "confirmation-mark"
+          ]
+        },
+        "dismissal": {
+          "icon": "close-circle",
+          "variant": "outline",
+          "masterSha256": "3aa89b46e44c8d65f0ac60847d3dd1a7883d26cc58e6b2d686240ddd69276cdb",
+          "pathFingerprintSha256": "b232d89c62b9aac9da78b1cbe0ad35e7210bc910f61f1e09c1c8a1cdf0cd7d3f",
+          "enclosurePathIndex": 1,
+          "contentPartIds": [
+            "dismissal-mark"
+          ]
+        },
+        "question": {
+          "icon": "question-circle",
+          "variant": "outline",
+          "masterSha256": "a3fc2394714dbf91ac9fea7e92611a2348566309a5858bfd2d919b2fa9c92c7f",
+          "pathFingerprintSha256": "9b02e0ecfc6bbc7aa003c9edf01cb60c81e82095b872176b6ad383b995f5ed4f",
+          "enclosurePathIndex": 2,
+          "contentPartIds": [
+          "question-dot",
+          "question-stem"
+          ]
+        },
+        "attention": {
+          "icon": "alert-circle",
+          "variant": "outline",
+          "masterSha256": "bd832c1a7812efcd0f2a065acf3afcff0ea7aeab397e8df4bf44115d9df7db6d",
+          "pathFingerprintSha256": "6ed22c2281ff78106a9b54ff058433f8594fdc9080f5bead686a87530f1e84a6",
+          "enclosurePathIndex": 2,
+          "contentPartIds": [
+          "attention-dot",
+          "attention-stem"
+          ]
+        },
+        "increase": {
+          "icon": "plus-circle",
+          "variant": "outline",
+          "masterSha256": "1187b32d965b0d97f97dae969f8d62c9e573757b9588341d41368657bd6dde54",
+          "pathFingerprintSha256": "052020c37b091e1697ce6f7bcae632fdcc5a220150a0ffcbaee5e2ad9a9360c2",
+          "enclosurePathIndex": 1,
+          "contentPartIds": [
+            "increase-mark"
+          ]
+        },
+        "decrease": {
+          "icon": "minus-circle",
+          "variant": "outline",
+          "masterSha256": "07be6c7e5b87e9f4ba0facd8fb3b31dbfaba03cb9a3bb9b0f6f552d16b4aaf85",
+          "pathFingerprintSha256": "29cc46dcf51cd5525021420d1f8428086bf7ba0a697527fdc1a8e4035813e508",
+          "enclosurePathIndex": 1,
+          "contentPartIds": [
+            "decrease-mark"
+          ]
+        }
+      }
+    }
+  }
+}

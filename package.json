@@ -51,6 +51,10 @@
     "./lottie/*": {
       "types": "./dist/lottie/*.d.ts",
       "import": "./dist/lottie/*.js"
+    },
+    "./states/*": {
+      "types": "./dist/states/*.d.ts",
+      "import": "./dist/states/*.js"
     }
   },
   "sideEffects": false,
@@ -77,6 +81,8 @@
     "dist/ir/render.js",
     "dist/ir/request.d.ts",
     "dist/ir/request.js",
+    "dist/ir/state-runtime.js",
+    "dist/ir/state-types.d.ts",
     "dist/ir/symbol-runtime.js",
     "dist/lottie/accessibility.d.ts",
     "dist/lottie/accessibility.js",
@@ -740,6 +746,8 @@
     "dist/lottie/waveform.js",
     "dist/motion/index.d.ts",
     "dist/motion/index.js",
+    "dist/states/status-circle.d.ts",
+    "dist/states/status-circle.js",
     "dist/symbols/accessibility.d.ts",
     "dist/symbols/accessibility.js",
     "dist/symbols/actions.d.ts",

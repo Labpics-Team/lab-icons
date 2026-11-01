@@ -47,6 +47,7 @@ pnpm add @labpics/icons
 | `@labpics/icons/motion` | `./dist/motion/index.js` | `./dist/motion/index.d.ts` |
 | `@labpics/icons/symbols/*` | `./dist/symbols/*.js` | `./dist/symbols/*.d.ts` |
 | `@labpics/icons/lottie/*` | `./dist/lottie/*.js` | `./dist/lottie/*.d.ts` |
+| `@labpics/icons/states/*` | `./dist/states/*.js` | `./dist/states/*.d.ts` |
 
 ## Файлы контракта поставки
 
@@ -75,6 +76,8 @@ pnpm add @labpics/icons
 - `dist/ir/render.js`
 - `dist/ir/request.d.ts`
 - `dist/ir/request.js`
+- `dist/ir/state-runtime.js`
+- `dist/ir/state-types.d.ts`
 - `dist/ir/symbol-runtime.js`
 - `dist/lottie/accessibility.d.ts`
 - `dist/lottie/accessibility.js`
@@ -738,6 +741,8 @@ pnpm add @labpics/icons
 - `dist/lottie/waveform.js`
 - `dist/motion/index.d.ts`
 - `dist/motion/index.js`
+- `dist/states/status-circle.d.ts`
+- `dist/states/status-circle.js`
 - `dist/symbols/accessibility.d.ts`
 - `dist/symbols/accessibility.js`
 - `dist/symbols/actions.d.ts`
@@ -1408,3 +1413,4 @@ pnpm add @labpics/icons
 - `dist/ir/compiler.d.ts`
 - `dist/ir/lottie-types.d.ts`
 - `dist/ir/request.d.ts`
+- `dist/ir/state-types.d.ts`

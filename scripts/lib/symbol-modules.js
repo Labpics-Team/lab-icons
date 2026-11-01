@@ -1,9 +1,11 @@
 const SYMBOL_NAME = /^[a-z][a-z0-9-]*$/;
 
 /** Единственная release-проекция каталога; wildcard раскрывается в точные файлы. */
-export function symbolReleaseProjection(base, iconIds) {
+export function symbolReleaseProjection(base, iconIds, stateGroupIds = []) {
   const ids = [...iconIds].sort();
-  if (new Set(ids).size !== ids.length || ids.some(id => !SYMBOL_NAME.test(id))) {
+  const groups = [...stateGroupIds].sort();
+  if (new Set(ids).size !== ids.length || ids.some(id => !SYMBOL_NAME.test(id)) ||
+      new Set(groups).size !== groups.length || groups.some(id => !SYMBOL_NAME.test(id))) {
     throw new TypeError('symbol module projection: невалидные или повторные имена');
   }
   const exports = {
@@ -16,15 +18,22 @@ export function symbolReleaseProjection(base, iconIds) {
     './motion': { types: './dist/motion/index.d.ts', import: './dist/motion/index.js' },
     './symbols/*': { types: './dist/symbols/*.d.ts', import: './dist/symbols/*.js' },
     './lottie/*': { types: './dist/lottie/*.d.ts', import: './dist/lottie/*.js' },
+    ...(groups.length ? { './states/*': { types: './dist/states/*.d.ts', import: './dist/states/*.js' } } : {}),
   };
   const publicFiles = Object.entries(exports).flatMap(([key, conditions]) =>
     key.includes('*')
-      ? ids.flatMap(id => Object.values(conditions).map(target => target.replace('*', id).slice(2)))
+      ? (key === './states/*' ? groups : ids).flatMap(id => Object.values(conditions).map(target => target.replace('*', id).slice(2)))
       : Object.values(conditions).map(target => target.slice(2)));
   const typeDependencies = ['dist/authoring/design-spec.d.ts', 'dist/ir/author-catalog.generated.d.ts', 'dist/ir/author-source.d.ts', 'dist/ir/catalog.generated.d.ts', 'dist/ir/compiler.d.ts', 'dist/ir/request.d.ts', 'dist/ir/lottie-types.d.ts'].sort();
   const runtimeDependencies = ['dist/ir/compiler.js', 'dist/ir/request.js', 'dist/ir/symbol-runtime.js', 'dist/ir/lottie-runtime.js'].sort();
+  if (groups.length) {
+    typeDependencies.push('dist/ir/state-types.d.ts');
+    runtimeDependencies.push('dist/ir/state-runtime.js');
+    typeDependencies.sort();
+    runtimeDependencies.sort();
+  }
   return {
-    version: 6,
+    version: 7,
     packageName: base.packageName,
     primary: base.primary,
     fallback: base.fallback,

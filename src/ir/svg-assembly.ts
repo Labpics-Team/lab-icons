@@ -17,28 +17,46 @@ function stableSvgId(value: string): string {
   return `lab-icons-mask-${sha256Hex(value)}`;
 }
 
+function pathForPart(part: GlyphPart, color = 'currentColor'): string {
+  const paint = part.paint.kind === 'fill'
+    ? `fill="${color}"`
+    : `fill="none" stroke="${color}" stroke-width="${part.paint.strokeWidth}" ` +
+      `stroke-linecap="${part.paint.linecap}" stroke-linejoin="${part.paint.linejoin}"`;
+  const fillRule = part.fillRule == null ? '' : ` fill-rule="${part.fillRule}"`;
+  return `<path data-part="${escapeAttribute(part.id)}" ` +
+    `data-role="${escapeAttribute(part.role)}" ${paint} ` +
+    `${fillRule} d="${escapeAttribute(part.d)}"/>`;
+}
+
+/** Общая сериализация самостоятельных слоёв для glyph и build-time state groups. */
+export function assembleGlyphLayers(parts: readonly GlyphPart[]): string {
+  if (parts.some(part => part.fillRule == null)) {
+    throw new Error('@labpics/icons/ir: layer обязан иметь самостоятельный fillRule');
+  }
+  return parts.map(part => pathForPart(part)).join('');
+}
+
+/** Рамка готовится при сборке; state runtime получает только строки. */
+export function assembleGlyphFrame(
+  viewBox: readonly [number, number, number, number],
+  dimensions: readonly [number, number] = [viewBox[2], viewBox[3]],
+): readonly [string, string] {
+  return [
+    `<svg viewBox="${viewBox.join(' ')}" xmlns="http://www.w3.org/2000/svg" ` +
+      `width="${dimensions[0]}" height="${dimensions[1]}" fill="currentColor">`,
+    '</svg>',
+  ];
+}
+
 export function assembleGlyphSvg(
   viewBox: readonly [number, number, number, number],
   parts: readonly GlyphPart[],
   composition: GlyphComposition,
   dimensions: readonly [number, number] = [viewBox[2], viewBox[3]],
 ): string {
-  const pathForPart = (part: GlyphPart, color = 'currentColor') => {
-    const paint = part.paint.kind === 'fill'
-      ? `fill="${color}"`
-      : `fill="none" stroke="${color}" stroke-width="${part.paint.strokeWidth}" ` +
-        `stroke-linecap="${part.paint.linecap}" stroke-linejoin="${part.paint.linejoin}"`;
-    const fillRule = part.fillRule == null ? '' : ` fill-rule="${part.fillRule}"`;
-    return `<path data-part="${escapeAttribute(part.id)}" ` +
-      `data-role="${escapeAttribute(part.role)}" ${paint} ` +
-      `${fillRule} d="${escapeAttribute(part.d)}"/>`;
-  };
   let paths: string;
   if (composition.kind === 'layers') {
-    if (parts.some((part) => part.fillRule == null)) {
-      throw new Error('@labpics/icons/ir: layer обязан иметь самостоятельный fillRule');
-    }
-    paths = parts.map((part) => pathForPart(part)).join('');
+    paths = assembleGlyphLayers(parts);
   } else if (composition.kind === 'compound') {
     paths = (() => {
         if (parts.some((part) => part.paint.kind !== 'fill')) {
@@ -76,9 +94,7 @@ export function assembleGlyphSvg(
       `x="${x}" y="${y}" width="${width}" height="${height}" mask-type="luminance">` +
       `${maskBody}</mask></defs><g mask="url(#${maskId})">${visibleBody}</g>`;
   }
-  return (
-    `<svg viewBox="${viewBox.join(' ')}" xmlns="http://www.w3.org/2000/svg" ` +
-    `width="${dimensions[0]}" height="${dimensions[1]}" fill="currentColor">${paths}</svg>`
-  );
+  const [start, end] = assembleGlyphFrame(viewBox, dimensions);
+  return `${start}${paths}${end}`;
 }
 

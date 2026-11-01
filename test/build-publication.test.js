@@ -186,6 +186,7 @@ describe('публикация единой эпохи IR/symbols/motion/Lottie'
     const { root, output } = fixture();
     write(output, 'symbols/stale.js', 'stale target');
     write(output, 'lottie/stale.js', 'stale Lottie target');
+    write(output, 'states/stale.js', 'stale state target');
     write(output, '.ir-previous/leaked.js', 'previous target');
     write(output, '.ir-platform-build-old/leaked.js', 'unfinished staging');
     const moves = [];
@@ -198,6 +199,7 @@ describe('публикация единой эпохи IR/symbols/motion/Lottie'
     expect(moves[1][1]).toBe(output);
     expect(fs.existsSync(join(output, 'symbols/stale.js'))).toBe(false);
     expect(fs.existsSync(join(output, 'lottie/stale.js'))).toBe(false);
+    expect(fs.existsSync(join(output, 'states/stale.js'))).toBe(false);
     expect(fs.readdirSync(output).filter(name => name.startsWith('.'))).toEqual([]);
     expectNoTransactionFiles(root);
   });
@@ -213,7 +215,7 @@ describe('публикация единой эпохи IR/symbols/motion/Lottie'
     expectNoTransactionFiles(root);
   });
 
-  it.each(['ir/index.js', 'ir/lottie-runtime.js'])('при отказе bundle %s ждёт остальных writers до cleanup, не оставляя поздний staging', async rejectedTarget => {
+  it.each(['ir/index.js', 'ir/lottie-runtime.js', 'ir/state-runtime.js'])('при отказе bundle %s ждёт остальных writers до cleanup, не оставляя поздний staging', async rejectedTarget => {
     const { root, output } = fixture();
     write(root, 'scripts/build-anatomy-projection.mjs', 'export {};');
     let started = 0;
@@ -236,10 +238,12 @@ describe('публикация единой эпохи IR/symbols/motion/Lottie'
     });
     try {
       await expect(buildIr({ root })).rejects.toThrow(`bundle ${rejectedTarget} refused`);
-      expect(started).toBe(10);
+      expect(started).toBe(12);
       expect(finished).toBe(started);
       expect(completed).toContain('authoring/index.js');
       expect(completed).toContain('ir/lottie-runtime.js');
+      expect(completed).toContain('ir/state-runtime.js');
+      expect(completed.some(target => target.endsWith('/svg-assembly.mjs'))).toBe(true);
       expect(epochs(output)).toEqual(Object.keys(TARGET_FILES).map(() => 'old'));
       expectStatic(output);
       expectNoTransactionFiles(root);

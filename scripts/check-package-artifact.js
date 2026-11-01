@@ -45,6 +45,7 @@ import {
 import { loadAuthorBaseline } from './lib/author-baseline.js';
 import { compileAuthorAnatomy } from './lib/author-anatomy.js';
 import { expectedAuthorEffect, expectedAuthorMotion } from './bench/author-oracle.js';
+import { statePackageExpectations, stateArtifactConsumerSource } from './lib/state-artifact-consumer.js';
 
 export const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -469,6 +470,8 @@ export function checkPackageArtifact({
     const authorBaseline = loadAuthorBaseline(cleanSource);
     const authorExpected = authorPackageExpectations(authorBaseline, JSON.parse(readFileSync(join(cleanSource, 'semantics/author-anatomy.json'), 'utf8')));
     writeFileSync(join(consumer, 'author-expected.json'), `${JSON.stringify(authorExpected)}\n`, 'utf8');
+    const stateExpected = statePackageExpectations(authorBaseline, JSON.parse(readFileSync(join(cleanSource, 'semantics/author-state-groups.json'), 'utf8')));
+    writeFileSync(join(consumer, 'state-expected.json'), `${JSON.stringify(stateExpected)}\n`, 'utf8');
 
     writeFileSync(
       join(consumer, 'smoke.mjs'),
@@ -534,7 +537,8 @@ export function checkPackageArtifact({
         `registerCandidates();\n` +
         `for (const icon of iconIds) for (const variant of ['outline', 'filled']) glyph({ icon, variant, modelMode: 'allow-candidate' });\n` +
         `if (calendar.provenance.kind !== 'recipe' || calendar.provenance.context.day !== 16) throw new Error('calendar recipe broken');\n` +
-        `if (arrow.parts.length !== 2 || arrow.joins?.[0]?.lowering !== 'expand-strokes-then-union') throw new Error('operator recipe broken');\n`,
+        `if (arrow.parts.length !== 2 || arrow.joins?.[0]?.lowering !== 'expand-strokes-then-union') throw new Error('operator recipe broken');\n` +
+        stateArtifactConsumerSource(),
       'utf8',
     );
     execFileSync(process.execPath, [join(consumer, 'smoke.mjs')], {
@@ -553,6 +557,7 @@ export function checkPackageArtifact({
         `import { glyph as activityGlyph, glyphCapabilities as activityCapabilities } from '@labpics/icons/symbols/ellipsis-horizontal';\n` +
         `import { compileSymbolEffect, type SymbolEffectResult, type SymbolOpacityStage } from '@labpics/icons/motion';\n` +
         `import { renderGlyphSvg } from '@labpics/icons/ir/render';\n` +
+        `import { render as renderStatus, renderStateSvg, compileStateEffect, type State } from '@labpics/icons/states/status-circle';\n` +
         `const svg: string = accessibilityOutline;\n` +
         `const name: IconName = 'accessibilityOutline';\n` +
         `const icon: IconId = 'reload';\n` +
@@ -580,7 +585,19 @@ export function checkPackageArtifact({
         `glyph({ icon: 'align-bottom' });\n` +
         `// @ts-expect-error символ уже связан с icon; private coordinates не принимаются\n` +
         `symbolGlyph({ icon: 'alert' });\n` +
-        `void [svg, name, icon, ir, calendar, recipe, contract, sliced, effect, mounted, addedName, authorVersion, addedEffect, addedMounted, activity];\n`,
+        `const status: State = 'confirmation';\n` +
+        `const statusSvg = renderStatus(status);\n` +
+        `const statusMount = renderStateSvg('question');\n` +
+        `const statusEffect = compileStateEffect(status, { duration: 300, reducedMotion: true });\n` +
+        `if (statusSvg.ok) { const markup: string = statusSvg.svg; void markup; }\n` +
+        `if (statusEffect.ok) { const property: 'opacity' = statusEffect.effect.stages[0].property; void property; }\n` +
+        `// @ts-expect-error application error не является автоматически объявленным знаком\n` +
+        `renderStatus('error');\n` +
+        `// @ts-expect-error состояние не принимает private path coordinates\n` +
+        `renderStatus(status, { d: 'M0 0' });\n` +
+        `// @ts-expect-error takeover получает текущую opacity от executor, from не объявлен\n` +
+        `compileStateEffect(status, { duration: 300, from: 'question' });\n` +
+        `void [svg, name, icon, ir, calendar, recipe, contract, sliced, effect, mounted, addedName, authorVersion, addedEffect, addedMounted, activity, statusSvg, statusMount];\n`,
       'utf8',
     );
     writeFileSync(
@@ -620,6 +637,12 @@ export function checkPackageArtifact({
         `const symbol: GlyphIR = symbolGlyph();\n` +
         `const added: GlyphIR<string> = addedGlyph();\n` +
         `const addedName: 'align-bottom' = addedGlyph().icon;\n` +
+        `const statusModule = await import('@labpics/icons/states/status-circle');\n` +
+        `const statusEffect = statusModule.compileStateEffect('confirmation', { duration: 300 });\n` +
+        `const statusName: 'confirmation' | 'dismissal' | 'question' | 'attention' | 'increase' | 'decrease' = statusModule.stateCapabilities().states[0].id;\n` +
+        `// @ts-expect-error неизвестный semantic state не принимается публичным NodeNext entrypoint\n` +
+        `statusModule.render('error');\n` +
+        `void [statusEffect, statusName];\n` +
         `void [accessibilityOutline, ir, buildDirectionalArrow, symbol, added, addedName];\n`,
       'utf8',
     );

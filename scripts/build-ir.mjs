@@ -16,9 +16,10 @@ import { renderSymbolModule, symbolExportName, symbolModuleDeclaration } from '.
 import { authorSymbolPayload, loadAuthorBaseline } from './lib/author-baseline.js';
 import { compileAuthorAnatomy } from './lib/author-anatomy.js';
 import { compileLottieGeometry, renderLottieSymbolModule, lottieSymbolDeclaration } from './lib/lottie-geometry.js';
+import { compileAuthorStateGroups, renderStateGroupModule, stateGroupDeclaration } from './lib/author-state-groups.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const TARGETS = ['ir', 'symbols', 'motion', 'lottie', 'authoring'];
+const TARGETS = ['ir', 'symbols', 'motion', 'lottie', 'authoring', 'states'];
 const REQUIRED_DECLARATIONS = ['author-catalog.generated.d.ts', 'author-source.d.ts', 'candidates.d.ts', 'catalog.generated.d.ts', 'compiler.d.ts', 'index.d.ts', 'recipes.d.ts', 'render.d.ts', 'request.d.ts'];
 const read = (root, file) => JSON.parse(readFileSync(join(root, file), 'utf8'));
 
@@ -104,6 +105,9 @@ async function compileIrTargets({ root, staging }) {
       bundle(root, staging, 'src/ir/candidates.ts', 'ir/candidates.js', ['./index.js']),
       bundle(root, staging, 'src/motion/index.ts', 'motion/index.js'),
       bundle(root, staging, 'src/lottie/runtime.ts', 'ir/lottie-runtime.js', ['../motion/index.js']),
+      bundle(root, staging, 'src/states/runtime.ts', 'ir/state-runtime.js'),
+      // Serializer остаётся build-only: runtime групп потребляет проверенные строки.
+      bundle(root, declarations, 'src/ir/svg-assembly.ts', 'svg-assembly.mjs'),
     ]);
     // Все операции записи завершаются до удаления staging при ошибке одной
     // сборки: поздняя запись иначе заново создаст уже убранный каталог.
@@ -115,6 +119,7 @@ async function compileIrTargets({ root, staging }) {
     copyFileSync(join(declarations, 'lottie/types.d.ts'), join(staging, 'ir/lottie-types.d.ts'));
     copyFileSync(join(declarations, 'authoring/index.d.ts'), join(staging, 'authoring/index.d.ts'));
     copyFileSync(join(declarations, 'authoring/design-spec.d.ts'), join(staging, 'authoring/design-spec.d.ts'));
+    copyFileSync(join(declarations, 'states/types.d.ts'), join(staging, 'ir/state-types.d.ts'));
 
     const catalog = read(root, 'semantics/catalog.json');
     const grid = read(root, 'semantics/grid.json');
@@ -152,6 +157,13 @@ async function compileIrTargets({ root, staging }) {
       writeFileSync(join(staging, 'symbols', `${icon}.d.ts`), symbolModuleDeclaration(icon));
       writeFileSync(join(staging, 'lottie', `${icon}.js`), renderLottieSymbolModule(icon, targets));
       writeFileSync(join(staging, 'lottie', `${icon}.d.ts`), lottieSymbolDeclaration());
+    }
+    const stateSpec = read(root, 'semantics/author-state-groups.json');
+    const assembly = await import(pathToFileURL(join(declarations, 'svg-assembly.mjs')).href);
+    const stateGroups = compileAuthorStateGroups(author, stateSpec, { compiler, ...assembly });
+    for (const [name, payload] of Object.entries(stateGroups)) {
+      writeFileSync(join(staging, 'states', `${name}.js`), renderStateGroupModule(payload));
+      writeFileSync(join(staging, 'states', `${name}.d.ts`), stateGroupDeclaration(stateSpec, name));
     }
     return names.length;
   } finally {
