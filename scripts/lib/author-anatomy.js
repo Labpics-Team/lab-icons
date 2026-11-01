@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { iconGeometry } from '../../src/core/icon-geometry.js';
 import { validateMotionGesture } from '../../src/core/motion-sampler.js';
 
 const NAME = /^[a-z][a-z0-9-]*$/;
@@ -143,10 +144,38 @@ function signalLevels(icon, variant, declaration, parts) {
   return [gesture];
 }
 
-function compileLaw(icon, variant, declaration, parts) {
+/** Направление задано автором; общий пик равен 1/8 соответствующей стороны
+ * viewBox. Оболочка с внутренним знаком требует отдельно адресуемой анатомии. */
+function directionNudge(icon, variant, declaration, parts, source) {
+  fields(declaration, ['law', 'partId', 'direction'], `${icon}/${variant}.gesture`);
+  if (!['left', 'right', 'up', 'down'].includes(declaration.direction)) {
+    refuse('LAW_SEMANTICS_UNSUPPORTED', `${icon}/${variant}: direction.nudge требует явно объявленное физическое направление left/right/up/down`);
+  }
+  const part = parts.find(item => item.id === declaration.partId);
+  if (!part || parts.length !== 1 || part.role !== 'control' ||
+      part.topologySignature.includes('|') || !part.topologySignature.endsWith('Z')) {
+    refuse('LAW_TOPOLOGY_UNSUPPORTED', `${icon}/${variant}: direction.nudge требует одну целую замкнутую управляющую часть`);
+  }
+  const { width, height } = iconGeometry(source.artifactSvg).viewBox;
+  const horizontal = declaration.direction === 'left' || declaration.direction === 'right';
+  const sign = declaration.direction === 'left' || declaration.direction === 'up' ? -1 : 1;
+  const gesture = {
+    id: `${icon}.nudge`, kind: 'cycle',
+    meaning: 'Один толчок в явно объявленном направлении с возвратом в авторскую позу; промежуточное движение можно развернуть или продолжить.',
+    partIds: [part.id], progress: 'normalized-0-to-1',
+    tracks: [{ partId: part.id, kind: 'translate', axis: horizontal ? 'x' : 'y',
+      unit: 'viewBox', interpolation: 'linear',
+      stops: [{ at: 0, value: 0 }, { at: 0.5, value: sign * (horizontal ? width : height) / 8 }, { at: 1, value: 0 }] }],
+  };
+  validateMotionGesture(gesture);
+  return [gesture];
+}
+
+function compileLaw(icon, variant, declaration, parts, source) {
   if (declaration?.law === 'cycle.clockwise') return clockwiseCycle(icon, variant, declaration, parts);
   if (declaration?.law === 'activity.triad') return activityTriad(icon, variant, declaration, parts);
   if (declaration?.law === 'signal.levels') return signalLevels(icon, variant, declaration, parts);
+  if (declaration?.law === 'direction.nudge') return directionNudge(icon, variant, declaration, parts, source);
   refuse('LAW_UNSUPPORTED', `${icon}/${variant}: закон ${declaration?.law} не объявлен`);
 }
 
@@ -213,7 +242,7 @@ export function compileAuthorAnatomy(baseline, document) {
         return { ...part, id: annotation.id, identity: 'declared', role: annotation.role,
           ...(annotation.anchor && { anchor: [...annotation.anchor], anchorSource: 'declared' }) };
       });
-      const gestures = compileLaw(icon, variant, declaration.gesture, parts);
+      const gestures = compileLaw(icon, variant, declaration.gesture, parts, source);
       const annotationSha256 = createHash('sha256').update(stableJSON({
         schemaVersion: document.schemaVersion, source: document.source, icon, variant,
         declaration, gestures,

@@ -293,6 +293,358 @@
           ]
         }
       }
+    },
+    "arrow-back": {
+      "outline": {
+        "masterSha256": "a1e403feb8fc7ab1913eceffd8da5c5c07ae6e1ea77d671daf420f6cec231771",
+        "pathFingerprintSha256": "edefa0fbad31b4a4d8ea25532722ab8722a0717adbe7bbf9da495a5d79c3d1c5",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "direction-body",
+            "role": "control",
+            "anchor": [
+              0.5,
+              0.5
+            ],
+            "anchorMeaning": "canvas-center"
+          }
+        ],
+        "gesture": {
+          "law": "direction.nudge",
+          "partId": "direction-body",
+          "direction": "left"
+        }
+      },
+      "filled": {
+        "masterSha256": "e3b43f67da4993fd70057cdd1a2c8cf9e5c300b8cc6c8d8ec864d78d63ba496b",
+        "pathFingerprintSha256": "1db6ca3784e429048154eed1616e4bc30611c119341ecb8067dbeef8e5c307c0",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "direction-body",
+            "role": "control",
+            "anchor": [
+              0.5,
+              0.5
+            ],
+            "anchorMeaning": "canvas-center"
+          }
+        ],
+        "gesture": {
+          "law": "direction.nudge",
+          "partId": "direction-body",
+          "direction": "left"
+        }
+      }
+    },
+    "arrow-forward": {
+      "outline": {
+        "masterSha256": "e44d4d1e0b5cab5b42dc254a8a1a39ebbca17ee59c3fc9343a5c48e563a98b1d",
+        "pathFingerprintSha256": "b21b90aaf06fcf1fc4b3213d468fa1e5ef6489776a5fd24a35714a91c0cf8522",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "direction-body",
+            "role": "control",
+            "anchor": [
+              0.5,
+              0.5
+            ],
+            "anchorMeaning": "canvas-center"
+          }
+        ],
+        "gesture": {
+          "law": "direction.nudge",
+          "partId": "direction-body",
+          "direction": "right"
+        }
+      },
+      "filled": {
+        "masterSha256": "76027d7d4b6ef86c899bb4faa0553bf5b091b157820791890c37c4d6addab15b",
+        "pathFingerprintSha256": "3248c9f712c515ea2482b750383b066d5d26c614129ac439c263500946e53473",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "direction-body",
+            "role": "control",
+            "anchor": [
+              0.5,
+              0.5
+            ],
+            "anchorMeaning": "canvas-center"
+          }
+        ],
+        "gesture": {
+          "law": "direction.nudge",
+          "partId": "direction-body",
+          "direction": "right"
+        }
+      }
+    },
+    "arrow-up": {
+      "outline": {
+        "masterSha256": "507d6321146eec1de6b2a877d1c6d0e5c82363dc299902fbb43be2709bc122df",
+        "pathFingerprintSha256": "faa5bb604d280b11586d89e0868b48ed3775403eab0fd4907c88a84cf834f582",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "direction-body",
+            "role": "control",
+            "anchor": [
+              0.5,
+              0.5
+            ],
+            "anchorMeaning": "canvas-center"
+          }
+        ],
+        "gesture": {
+          "law": "direction.nudge",
+          "partId": "direction-body",
+          "direction": "up"
+        }
+      },
+      "filled": {
+        "masterSha256": "d6ff20fb7c6029f941fbaf9d72c2c1b05333c7a2dcd6723c71a482b569ca500e",
+        "pathFingerprintSha256": "9f5786395e025a4e1665f9e4f8ea124fae3fb1bf0faccc27c7bcd4b56a7ecc33",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "direction-body",
+            "role": "control",
+            "anchor": [
+              0.5,
+              0.5
+            ],
+            "anchorMeaning": "canvas-center"
+          }
+        ],
+        "gesture": {
+          "law": "direction.nudge",
+          "partId": "direction-body",
+          "direction": "up"
+        }
+      }
+    },
+    "arrow-down": {
+      "outline": {
+        "masterSha256": "0c5e93ca32295d4fb3cd6c9fcf2dc9a1783ef465a4f5475c3561aa16ffcec8f5",
+        "pathFingerprintSha256": "43b793884b975e064b9a4940ab5c4af4cf9ff2357849797cc884cc51e5a62d47",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "direction-body",
+            "role": "control",
+            "anchor": [
+              0.5,
+              0.5
+            ],
+            "anchorMeaning": "canvas-center"
+          }
+        ],
+        "gesture": {
+          "law": "direction.nudge",
+          "partId": "direction-body",
+          "direction": "down"
+        }
+      },
+      "filled": {
+        "masterSha256": "937930bf98ca317d95439c4c1aabfdbbc65e77ec7f8cb5195080e6a664ef835e",
+        "pathFingerprintSha256": "c179d8416e5556a441d0587f55c5ea78c06d49fdfabd1662f23d7646cdcd5e55",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "direction-body",
+            "role": "control",
+            "anchor": [
+              0.5,
+              0.5
+            ],
+            "anchorMeaning": "canvas-center"
+          }
+        ],
+        "gesture": {
+          "law": "direction.nudge",
+          "partId": "direction-body",
+          "direction": "down"
+        }
+      }
+    },
+    "chevron-back": {
+      "outline": {
+        "masterSha256": "4d678dbd20a63fb971d4607b5a52b175a24c2d87b878e220fa4c66562af92aac",
+        "pathFingerprintSha256": "03bc0ac36ee41fcb13048497bb258e83d602fcfa91158cb1d30f5b0b2e8a7bda",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "direction-body",
+            "role": "control",
+            "anchor": [
+              0.5,
+              0.5
+            ],
+            "anchorMeaning": "canvas-center"
+          }
+        ],
+        "gesture": {
+          "law": "direction.nudge",
+          "partId": "direction-body",
+          "direction": "left"
+        }
+      },
+      "filled": {
+        "masterSha256": "8172c40779ddfef12f2bfd711027f2942f229716e64ab1ab70fffbda1e65bc61",
+        "pathFingerprintSha256": "ac80b0f2707f7f6b4c001b429c603f0013ba6437c4471d161d7d80a107516e0c",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "direction-body",
+            "role": "control",
+            "anchor": [
+              0.5,
+              0.5
+            ],
+            "anchorMeaning": "canvas-center"
+          }
+        ],
+        "gesture": {
+          "law": "direction.nudge",
+          "partId": "direction-body",
+          "direction": "left"
+        }
+      }
+    },
+    "chevron-forward": {
+      "outline": {
+        "masterSha256": "cd80e4cba160b97284705d2f4940d64ed7f775adc716bd72145ada4dd2e6843f",
+        "pathFingerprintSha256": "c262d82bec693c8b8be60f28b966444435076701a0c4c53ff7646a48241b2ad5",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "direction-body",
+            "role": "control",
+            "anchor": [
+              0.5,
+              0.5
+            ],
+            "anchorMeaning": "canvas-center"
+          }
+        ],
+        "gesture": {
+          "law": "direction.nudge",
+          "partId": "direction-body",
+          "direction": "right"
+        }
+      },
+      "filled": {
+        "masterSha256": "273045f9d1d71dfd6fda2ea8de0503ab808c486c9fd63e72fcc386205f87faa6",
+        "pathFingerprintSha256": "75b86620899839c4d6291a74a76267eb85775fb54f3dd6ea9dc00a818ab77ff0",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "direction-body",
+            "role": "control",
+            "anchor": [
+              0.5,
+              0.5
+            ],
+            "anchorMeaning": "canvas-center"
+          }
+        ],
+        "gesture": {
+          "law": "direction.nudge",
+          "partId": "direction-body",
+          "direction": "right"
+        }
+      }
+    },
+    "chevron-up": {
+      "outline": {
+        "masterSha256": "107044a3c02856114c6c29dd37a7babdb51992f6e9a6f319b08586d4217899da",
+        "pathFingerprintSha256": "21f21801840f578475d7fe2641c94fa9d75a1bde35e9e5f79fcffa0724a944fb",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "direction-body",
+            "role": "control",
+            "anchor": [
+              0.5,
+              0.5
+            ],
+            "anchorMeaning": "canvas-center"
+          }
+        ],
+        "gesture": {
+          "law": "direction.nudge",
+          "partId": "direction-body",
+          "direction": "up"
+        }
+      },
+      "filled": {
+        "masterSha256": "d1798c339f16ac99d6bdcf69b4c33011e4051a3854cc32fa793d9c8fc037bd7c",
+        "pathFingerprintSha256": "2336e11224c7afac65d05ca1fb2e5ad595d2c53db6e92d8d7f4759eaf8b87997",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "direction-body",
+            "role": "control",
+            "anchor": [
+              0.5,
+              0.5
+            ],
+            "anchorMeaning": "canvas-center"
+          }
+        ],
+        "gesture": {
+          "law": "direction.nudge",
+          "partId": "direction-body",
+          "direction": "up"
+        }
+      }
+    },
+    "chevron-down": {
+      "outline": {
+        "masterSha256": "9663e5889fd22fc96ef73c049f1730107fd1d087c6620a0931c960ef6519545a",
+        "pathFingerprintSha256": "f4c498c6b4cd3937299f081bb58627ed980ad79c5df650c4d2bbaa657acbcd70",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "direction-body",
+            "role": "control",
+            "anchor": [
+              0.5,
+              0.5
+            ],
+            "anchorMeaning": "canvas-center"
+          }
+        ],
+        "gesture": {
+          "law": "direction.nudge",
+          "partId": "direction-body",
+          "direction": "down"
+        }
+      },
+      "filled": {
+        "masterSha256": "235d673da7387588df6b01d83e470064d6fbc789a4c5b6eeead3554c375bbda3",
+        "pathFingerprintSha256": "ad689e3a38486c6e0bc904232580e2b0d4f25112e5ef6b37461f78f4abbbf742",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "direction-body",
+            "role": "control",
+            "anchor": [
+              0.5,
+              0.5
+            ],
+            "anchorMeaning": "canvas-center"
+          }
+        ],
+        "gesture": {
+          "law": "direction.nudge",
+          "partId": "direction-body",
+          "direction": "down"
+        }
+      }
     }
   }
 }
