@@ -32,7 +32,7 @@ describe('build-only exact closed fill key', () => {
     expect(key('M10 0V10H0V0Z', rule)).toBe(key(outer, rule));
     expect(key('M0 0V10H10V0Z', rule)).toBe(key(outerReverse, rule));
     expect(key('M0 0H1 2V3,4H0Z', rule)).toBe(key('M0 0L1 0L2 0L2 3L2 4L0 4Z', rule));
-    expect(key('M0 0H0H10V10H0Z', rule)).not.toBe(key(outer, rule));
+    expect(key('M0 0H0H10V10H0Z', rule)).toBe(key(outer, rule));
     expect(key('M0 0H10.00000000000000000000001V10H0Z', rule)).not.toBe(key(outer, rule));
     expect(key('M-1.20 2e-20H3e+1V4.000Z', rule)).toBe(key('M-1.2 .00000000000000000002L30 .00000000000000000002L30 4Z', rule));
   });
@@ -65,13 +65,60 @@ describe('build-only exact closed fill key', () => {
     expect(key(solid, 'evenodd')).toBe(key(innerReverse + outerReverse, 'evenodd'));
   });
 
-  it.each(['evenodd', 'nonzero'])('%s: contour count и multiplicity рёбер сохраняются', rule => {
+  it.each(['evenodd', 'nonzero'])('%s: contour count и multiplicity обходов сохраняются', rule => {
     expect(key(outer + outer, rule)).not.toBe(key(outer, rule));
     expect(key('M0 0L10 0L10 10L0 10L0 0L10 0L10 10L0 10Z', rule)).not.toBe(key(outer, rule));
-    expect(key('M0 0L0 0L10 0L10 10L0 10Z', rule)).not.toBe(key(outer, rule));
+    expect(key('M0 0L0 0L10 0L10 10L0 10Z', rule)).toBe(key(outer, rule));
     expect(key('M0 0Z', rule)).not.toBe(key('M1 0Z', rule));
-    expect(key('M0 0Z', rule)).not.toBe(key('M0 0L0 0Z', rule));
-    expect(key('M0 0L10 0L10 10Z', rule)).not.toBe(key('M0 0C0 0 10 0 10 0L10 10Z', rule));
+    expect(key('M0 0Z', rule)).toBe(key('M0 0L0 0Z', rule));
+    expect(key('M0 0L10 0L10 10Z', rule)).toBe(key('M0 0C0 0 10 0 10 0L10 10Z', rule));
+  });
+
+  it.each(['evenodd', 'nonzero'])('%s: forward straight subdivision и cyclic seam не меняют key', rule => {
+    const expected = key(outer, rule);
+    expect(expected).not.toBeNull();
+    for (const d of [
+      'M0 0L0 0L5 0L10 0L10 10L0 10Z',
+      'M5 0L10 0L10 10L0 10L0 0Z',
+      'M5 0L0 0L0 10L10 10L10 0Z',
+      'M0 5L0 10L10 10L10 0L0 0Z',
+    ]) expect(key(d, rule)).toBe(expected);
+    expect(key('M0 0L1 2L1.5 3L2 4L3 6L6 0Z', rule)).toBe(key('M0 0L3 6L6 0Z', rule));
+    expect(key('M-3 -6L0 0L3 6L6 -6Z', rule)).toBe(key('M-3 -6L3 6L6 -6Z', rule));
+    // Независимые целочисленные приращения: (99999,1) + (99999,1).
+    expect(key('M1 0L100000 1L199999 2L0 3Z', rule)).toBe(key('M1 0L199999 2L0 3Z', rule));
+  });
+
+  it('угол, backtracking и точный near-collinear поворот не сливаются', () => {
+    expect(key('M0 0L10 0L10 10L0 10Z', 'nonzero')).not.toBe(key('M0 0L10 10L0 10Z', 'nonzero'));
+    expect(key('M0 0L10 0L5 0L10 0L10 10L0 10Z', 'nonzero')).not.toBe(key(outer, 'nonzero'));
+    expect(key('M0 0L1 2.000000000000000000001L3 6L6 0Z', 'nonzero')).not.toBe(key('M0 0L3 6L6 0Z', 'nonzero'));
+    expect(key('M0 0C0 0 0 0 0 0Z', 'nonzero')).toBe(key('M0 0Z', 'nonzero'));
+    expect(key('M0 0C1 1 -1 -1 0 0Z', 'nonzero')).not.toBe(key('M0 0Z', 'nonzero'));
+  });
+
+  it('collinear C с упорядоченными controls задаёт тот же forward отрезок', () => {
+    const expected = key('M0 0L3 6L6 0Z', 'nonzero');
+    expect(key('M0 0C1 2 2 4 3 6L6 0Z', 'nonzero')).toBe(expected);
+    expect(key('M0 0C0 0 3 6 3 6L6 0Z', 'nonzero')).toBe(expected);
+    expect(key('M3 6C2 4 1 2 0 0L6 0Z', 'nonzero')).toBe(expected);
+    expect(key('M0 0C1 2.000000000000000000001 2 4 3 6L6 0Z', 'nonzero')).not.toBe(expected);
+    expect(key('M0 0C6 12 -3 -6 3 6L6 0Z', 'nonzero')).not.toBe(expected);
+    // Неупорядоченный, но монотонный cubic намеренно остаётся вне упрощения.
+    expect(key('M0 0C3 6 0 0 3 6L6 0Z', 'nonzero')).not.toBe(expected);
+  });
+
+  it('sparse determinant не расширяет огромные exponent gaps и сохраняет малый residual', () => {
+    const exponent = '1000000000000000000000000';
+    const straight = `M0 0L3e${exponent} 6e${exponent}L6e${exponent} 0Z`;
+    const split = `M0 0L1e${exponent} 2e${exponent}L2e${exponent} 4e${exponent}L3e${exponent} 6e${exponent}L6e${exponent} 0Z`;
+    expect(key(straight, 'nonzero')).not.toBeNull();
+    expect(key(split, 'nonzero')).toBe(key(straight, 'nonzero'));
+    const base = `M1 0L2e${exponent} 2L0 3Z`;
+    // determinant = -1: два огромных products взаимно гасятся, малый term остаётся.
+    expect(key(`M1 0L1e${exponent} 1L2e${exponent} 2L0 3Z`, 'nonzero')).not.toBe(key(base, 'nonzero'));
+    expect(key(`M1e${exponent} 1L2e${exponent} 2L3e${exponent} 3L0 4Z`, 'nonzero'))
+      .toBe(key(`M1e${exponent} 1L3e${exponent} 3L0 4Z`, 'nonzero'));
   });
 
   it('повторяющиеся последовательности сохраняют canonical rotation на всех стартах', () => {

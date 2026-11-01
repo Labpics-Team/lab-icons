@@ -361,6 +361,26 @@ describe('enclosure.replace: необъявленный общий рисуно�
     expect(() => compile(source, input)).toThrow(expect.objectContaining({ code: 'TOPOLOGY_UNSUPPORTED' }));
   });
 
+  it.each(['first', 'middle'].flatMap(position => [
+    ['split', 'M10 5L10.5 5L11 5L11 6L10 6Z'],
+    ['zero', 'M10 5L10 5L11 5L11 6L10 6Z'],
+    ['straight-cubic', 'M10 5C10 5 11 5 11 5L11 6L10 6Z'],
+  ].map(([kind, d]) => [position, kind, d])))
+  ('%s prefix: %s прямой alias требует SHARED_PART_UNDECLARED', (position, _, d) => {
+    const { source, input } = witness(position, ['aloof', 'sad']);
+    repin(source, input, 'sad', svg => svg.replace(`d="${square}"`, `d="${d}"`), 'expression-face');
+    expect(() => compile(source, input)).toThrow(expect.objectContaining({ code: 'SHARED_PART_UNDECLARED' }));
+  });
+
+  it('настоящий угол и near-collinear decimal corner сохраняют исходные static paths', () => {
+    for (const corner of ['5.1', '5.00000000000000000000001']) {
+      const { source, input } = witness('first', ['aloof', 'sad']);
+      repin(source, input, 'sad', svg => svg.replace(`d="${square}"`, `d="M10 5L10.5 ${corner}L11 5L11 6L10 6Z"`), 'expression-face');
+      const compiled = createCompiledStateGroup(compile(source, input)['expression-face']);
+      expect(rawPaths(compiled.render('sad').svg)).toEqual(rawPaths(source.icons.sad.outline.rawSvg));
+    }
+  });
+
   it('уникальный relative prefix также требует установленного exact key', () => {
     const { source, input } = witness('first', []);
     repin(source, input, 'aloof', svg => svg.replace(`d="${unique[0]}"`, 'd="M4 5h1v1h-1Z"'), 'expression-face');
