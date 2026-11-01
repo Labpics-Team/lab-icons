@@ -20,6 +20,12 @@ masters Lab UI v2.1; построение проверяет их точное �
 
 ## Подключить переход
 
+Установите Icons и отдельный исполнитель Motion:
+
+```sh
+pnpm add @labpics/icons @labpics/motion@^0.5.0
+```
+
 ```ts
 import {
   renderStateSvg, compileStateEffect, type State,
