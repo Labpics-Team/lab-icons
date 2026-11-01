@@ -11,6 +11,12 @@ const { glyph, glyphCapabilities: capabilities } = createGlyphCompiler({
 });
 
 describe('объявленный эффект time.advance', () => {
+  it('отказывает возможностям другой версии anchor при том же icon/variant', () => {
+    const time = glyph({ icon: 'time' });
+    const drifted = { ...time, parts: time.parts.map(part => part.id === 'hand-minute' ? { ...part, anchor: [0.6, 0.5] as const } : part) };
+    expect(compileSymbolEffect(drifted, capabilities('time'), 'time.advance', { duration: 800 })).toMatchObject({ ok: false, reason: { code: 'CAPABILITY_MISMATCH' } });
+  });
+
   it.each(['outline', 'filled'] as const)('сохраняет циферблат и независимые законы стрелок: %s', (variant) => {
     const result = compileSymbolEffect(glyph({ icon: 'time', variant }), capabilities('time', variant), 'time.advance', { duration: 800 });
     expect(result.ok).toBe(true);

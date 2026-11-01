@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { writeFile } from 'node:fs/promises';
 import { describe, expect } from 'vitest';
 import { it } from './fixtures/documentation.js';
-import { ROOT, auditRepo, documentationLinkErrors, distributionClaimErrors, findInkHexClaims, writePackageReference } from '../scripts/check-docs-drift.js';
+import { ROOT, auditRepo, documentationLinkErrors, distributionClaimErrors, findInkHexClaims, manualCorpusCountErrors, writePackageReference } from '../scripts/check-docs-drift.js';
 import { packageReferenceErrors, renderPackageReference } from '../scripts/lib/docs-reference.js';
 
 const pkg = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'));
@@ -44,6 +44,13 @@ describe('Справка поставки', () => {
 });
 
 describe('Согласованность документации', () => {
+  it('не принимает часть составного имени типа SVG-строка за счётчик корпуса', () => {
+    expect(manualCorpusCountErrors('Текущий авторский символ подключается одной SVG-строкой.')).toEqual([]);
+    expect(manualCorpusCountErrors('A symbol returns one SVG string.')).toEqual([]);
+    expect(manualCorpusCountErrors('В библиотеке одна SVG.')).toHaveLength(1);
+    expect(manualCorpusCountErrors('В библиотеке 660 SVG-файлов.')).toHaveLength(1);
+  });
+
   it('отделяет датированные результаты исследования от текущих ручных счётчиков', ({ root }) => {
     mkdirSync(join(root, 'docs/evidence'), { recursive: true });
     mkdirSync(join(root, 'docs/research'), { recursive: true });

@@ -70,7 +70,10 @@ export function manualCorpusCountErrors(source) {
   const connector = '(?:and|и)';
   const words = `${word}(?:[\\s-]+(?:${word}|${connector})){0,12}`;
   const number = `(?:\\d+(?:[.,]\\d+)?|${words})`;
-  const unit = '(?:икон(?:ка|ки|ок|ку)|имён|имени|имен|SVG|глиф(?:а|ов)?|(?:именованных\\s+)?(?:ESM[- ]?)?экспорт(?:а|ов)?|(?:release[- ]?)?файл(?:а|ов)?|icons?|glyphs?|exports?|files?)';
+  // SVG-строка называет представление значения, а не элемент census.
+  // Частичное совпадение SVG внутри такого типа давало ложный corpus claim.
+  const svgUnit = 'SVG(?![-\\s]+(?:строк[\\p{L}]*|strings?)(?=$|[^\\p{L}\\p{N}_]))';
+  const unit = `(?:икон(?:ка|ки|ок|ку)|имён|имени|имен|${svgUnit}|глиф(?:а|ов)?|(?:именованных\\s+)?(?:ESM[- ]?)?экспорт(?:а|ов)?|(?:release[- ]?)?файл(?:а|ов)?|icons?|glyphs?|exports?|files?)`;
   const patterns = [
     new RegExp(`(?:^|[^\\p{L}\\p{N}_])(${number}\\s+${unit})(?=$|[^\\p{L}\\p{N}_])`, 'giu'),
     new RegExp(`(?:^|[^\\p{L}\\p{N}_])(${unit}\\s*[:=]\\s*${number})(?=$|[^\\p{L}\\p{N}_])`, 'giu'),

@@ -1,4 +1,4 @@
-import type { GlyphCapabilities, GlyphIR } from '../ir/index.js';
+import type { GlyphCapabilities, GlyphIR } from '../ir/compiler.js';
 import { validateMotionGesture } from '../core/motion-sampler.js';
 
 export type SymbolEffectRefusalCode =
@@ -29,7 +29,7 @@ export interface SymbolEffectTarget {
 /** Данные эффекта; исполнитель и его часы принадлежат потребителю. */
 export interface SymbolEffect {
   readonly version: 1;
-  readonly icon: GlyphIR['icon'];
+  readonly icon: string;
   readonly variant: GlyphIR['variant'];
   readonly gesture: string;
   readonly from: number;
@@ -52,8 +52,8 @@ function refuse(code: SymbolEffectRefusalCode, message: string): SymbolEffectRes
  * from задаёт уже видимый прогресс: прерывание не возвращает символ к началу.
  */
 export function compileSymbolEffect(
-  glyph: GlyphIR,
-  capabilities: GlyphCapabilities,
+  glyph: GlyphIR<string>,
+  capabilities: GlyphCapabilities<string>,
   gestureId: string,
   request: SymbolEffectRequest,
 ): SymbolEffectResult {
@@ -87,6 +87,12 @@ export function compileSymbolEffect(
       gesture.partIds.some((id) => !partIds.has(id)) ||
       glyph.composition.kind === 'compound') {
     return refuse('COMPOSITION_NOT_ADDRESSABLE', 'Композиция не сохраняет отдельные цели объявленного жеста.');
+  }
+  if (gesture.tracks.some(track => {
+    const part = glyph.parts.find(part => part.id === track.partId);
+    return !part || part.anchorSource !== 'declared' || part.anchor.some((value, index) => value !== track.anchor[index]);
+  })) {
+    return refuse('CAPABILITY_MISMATCH', 'Якоря возможностей не относятся к этой версии анатомии.');
   }
   const animatedPartIds = new Set(gesture.tracks.map((track) => track.partId));
   const targets = gesture.tracks.map((track): SymbolEffectTarget => Object.freeze({
