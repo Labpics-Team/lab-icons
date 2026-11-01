@@ -111,6 +111,37 @@ export async function verifyAuthoringPlayground({ browser, origin, output }) {
 
     await page.getByRole('button', { name: 'Вернуть пример' }).click();
     assertAuthoringRender(await observe(), tutorialCircleExpectations(starter));
+    report.narrowFeedback = [];
+    await page.setViewportSize({ width: 390, height: 640 });
+    const feedback = selector => page.evaluate(selector => {
+      const bounds = document.querySelector(selector).getBoundingClientRect();
+      return { top: bounds.top, bottom: bounds.bottom, viewport: innerHeight, focus: document.activeElement.id };
+    }, selector);
+    for (const reducedMotion of ['no-preference', 'reduce']) {
+      await page.emulateMedia({ reducedMotion });
+      await editor.fill(JSON.stringify(changed));
+      await build.scrollIntoViewIfNeeded();
+      const before = await feedback('#authoring-status');
+      assert(before.bottom < 0);
+      await build.focus();
+      await page.keyboard.press('Enter');
+      const success = await feedback('#authoring-stage');
+      const status = await feedback('#authoring-status');
+      assert(success.top >= 0 && success.bottom <= success.viewport, JSON.stringify(success));
+      assert(status.top >= 0 && status.bottom <= status.viewport);
+      assert.equal(success.focus, 'authoring-stage');
+      assertAuthoringRender(await observe(), tutorialCircleExpectations(changed));
+      await editor.fill('{"version":');
+      await build.scrollIntoViewIfNeeded();
+      await build.focus();
+      await page.keyboard.press('Enter');
+      const error = await feedback('#authoring-error');
+      assert(error.top >= 0 && error.bottom <= error.viewport);
+      assert.equal(error.focus, 'authoring-spec');
+      assert(await download.isDisabled());
+      report.narrowFeedback.push({ reducedMotion, before, success, status, error });
+      await page.getByRole('button', { name: 'Вернуть пример' }).click();
+    }
     await page.setViewportSize({ width: 390, height: 844 });
     await page.screenshot({ path: join(output, 'authoring-narrow.png'), fullPage: true });
     report.narrow = await page.evaluate(() => ({ viewport: innerWidth, content: document.documentElement.scrollWidth,

@@ -7,6 +7,16 @@ let runtime;
 let starter;
 let current = null;
 
+function reveal(element) {
+  const bounds = element.getBoundingClientRect();
+  if (bounds.top < 0 || bounds.bottom > innerHeight) element.scrollIntoView({ block: 'start', behavior: 'instant' });
+}
+
+function revealPreview() {
+  ui.stage.focus({ preventScroll: true });
+  reveal(ui.stage);
+}
+
 function invalidate() {
   current = null;
   ui.download.disabled = true;
@@ -29,6 +39,8 @@ function showError(error) {
   const field = error instanceof runtime.DesignSpecError && error.at.startsWith('options.icon') ? ui.name : ui.spec;
   field.setAttribute('aria-invalid', 'true');
   ui.status.textContent = 'Исправьте ошибку и постройте превью.';
+  field.focus({ preventScroll: true });
+  reveal(ui.error);
 }
 
 function svgElement(glyph, instanceId) {
@@ -73,14 +85,14 @@ ui.form.addEventListener('submit', event => {
   event.preventDefault();
   if (!runtime) return;
   invalidate();
-  try { present(JSON.parse(ui.spec.value), ui.name.value); }
+  try { present(JSON.parse(ui.spec.value), ui.name.value); revealPreview(); }
   catch (error) { showError(error); }
 });
 ui.reset.addEventListener('click', () => {
   invalidate();
   ui.spec.value = JSON.stringify(starter.spec, null, 2);
   ui.name.value = starter.glyph.icon;
-  try { present(starter.spec, starter.glyph.icon, starter.glyph); }
+  try { present(starter.spec, starter.glyph.icon, starter.glyph); revealPreview(); }
   catch (error) { showError(error); }
 });
 ui.download.addEventListener('click', () => {
