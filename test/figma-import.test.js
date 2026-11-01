@@ -31,6 +31,46 @@ describe('Figma intake — каноническая граница source SVG', 
     );
   });
 
+  it('сохраняет d, порядок и локальные fill-rule при удалении именованных экспортных групп', () => {
+    const first = 'M11.9922 5.15234C12.4892 5.15244 12.8926 5.55574 12.8926 6.05273Z';
+    const second = 'M12 1.5C17.7989 1.5 22.4998 6.20118 22.5 12Z';
+    const exported = simpleFigmaSvg({ body:
+      `<g id="time" data-node-id="6431:3963"><g id="Vector" data-node-id="6432:261">` +
+      `<path id="hand" data-node-id="6432:262" d="${first}" fill="#101012"/>` +
+      `<path d="${second}" fill-rule="evenodd" clip-rule="evenodd" fill="#101012"/>` +
+      '</g></g>',
+    });
+    const normalized = normalizeFigmaSvg(exported, { source: 'time.svg' });
+    expect(normalized).toBe(simpleFigmaSvg({ body:
+      `<path d="${first}"/><path d="${second}" fill-rule="evenodd" clip-rule="evenodd"/>`,
+    }).replace(' fill="none"', '') + '\n');
+  });
+
+  it.each([
+    'transform="translate(1 0)"',
+    'opacity="0.5"',
+    'fill="#101012"',
+    'fill-rule="evenodd"',
+    'style="fill-rule:evenodd"',
+    'clip-path="url(#unknown)"',
+    'mask="url(#cut)"',
+    'filter="url(#blur)"',
+  ])('отвергает экспортную группу с влияющим на изображение %s', (attribute) => {
+    const exported = simpleFigmaSvg({ body:
+      `<g id="time" ${attribute}><path d="M2 2H22V22H2Z" fill="#101012"/></g>`,
+    });
+    expect(() => normalizeFigmaSvg(exported, { source: 'unsafe.svg' })).toThrow();
+  });
+
+  it.each([
+    '<g id="time"><path d="M2 2H22V22H2Z" fill="#101012"/>',
+    '<path d="M2 2H22V22H2Z" fill="#101012"/></g>',
+    '<g id="time" id="again"><path d="M2 2H22V22H2Z" fill="#101012"/></g>',
+    '<path id="time" id="again" d="M2 2H22V22H2Z" fill="#101012"/>',
+  ])('отвергает повреждённую нейтральную обвязку', (body) => {
+    expect(() => normalizeFigmaSvg(simpleFigmaSvg({ body }), { source: 'malformed.svg' })).toThrow();
+  });
+
   it('fail-closed отвергает мусор до root и цвет, меняющий смысл иконки', () => {
     expect(() => normalizeFigmaSvg(`\\n${simpleFigmaSvg()}`, { source: 'broken.svg' }))
       .toThrow(/ровно один корневой <svg>/);

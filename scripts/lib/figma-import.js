@@ -12,6 +12,38 @@ import {
 const ICON_ID_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const MONOCHROME_PAINT = new Set(['none', 'currentcolor', '#101012']);
 const PATH_PAINT = new Set(['currentcolor', '#101012']);
+/** Имена и node ID сохраняются в provenance мастера, отдельно от геометрии. */
+function stripExportMetadata(tag, source) {
+  const seen = new Set();
+  return tag.replace(/\s(id|data-node-id)\s*=\s*(?:"[^"]*"|'[^']*')/g, (attribute, name) => {
+    if (seen.has(name)) throw new Error(`figma-import: ${source} повторяет export metadata ${name}`);
+    seen.add(name);
+    return '';
+  });
+}
+
+/** Удаление сбалансированной группы допустимо лишь без наследуемых эффектов. */
+function lowerNeutralExportGroups(svg, source) {
+  let depth = 0;
+  const lowered = svg.replace(/<\/?g\b[^>]*>/gi, (tag) => {
+    if (/^<\/g\s*>$/i.test(tag)) {
+      if (depth === 0) throw new Error(`figma-import: ${source} имеет несбалансированную группу`);
+      depth -= 1;
+      return '';
+    }
+    if (!/^<g\b/i.test(tag)) {
+      throw new Error(`figma-import: ${source} имеет невалидный closing group`);
+    }
+    const neutral = stripExportMetadata(tag, source);
+    if (!/^<g\s*\/?\s*>$/i.test(neutral)) {
+      throw new Error(`figma-import: ${source} группа несёт render-семантику; допустимы только id/data-node-id`);
+    }
+    if (!/\/\s*>$/.test(tag)) depth += 1;
+    return '';
+  });
+  if (depth !== 0) throw new Error(`figma-import: ${source} имеет несбалансированную группу`);
+  return lowered.replace(/<path\b[^>]*>/gi, (tag) => stripExportMetadata(tag, source));
+}
 
 export function canonicalIconName(value) {
   const normalized = String(value ?? '').trim().toLowerCase().replace(/\s+/g, '-');
@@ -66,6 +98,7 @@ export function normalizeFigmaSvg(input, { source = '<memory>' } = {}) {
 
   let normalized = stripRootPaint(document, source);
   normalized = lowerViewportIdentityClip(normalized);
+  normalized = lowerNeutralExportGroups(normalized, source);
   normalized = stripPathPaint(normalized, source);
 
   // Это одновременно проверяет viewBox, закрытый svg+path-язык, локальный
