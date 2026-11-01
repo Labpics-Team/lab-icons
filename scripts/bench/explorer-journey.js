@@ -119,12 +119,17 @@ export async function runExplorerJourney() {
       const effectDownload = downloads.at(-1);
       const exportedEffect = JSON.parse(await effectDownload.blob.text());
       check(`${name}/${variant}/effect-export`, effectDownload.filename === `${name}-${variant}.effect.json` && exportedEffect.icon === name && exportedEffect.variant === variant && exportedEffect.targets[0].partId === 'cycle-body');
-      for (const format of ['lottie', 'sf-symbols']) {
-        const before = downloads.length;
-        q('export-format').value = format;
-        q('export').click();
-        check(`${name}/${variant}/${format}-refusal`, downloads.length === before && q('export-status').textContent.includes('нет проверенного адаптера'));
-      }
+      const beforeLottie = downloads.length;
+      q('export-format').value = 'lottie'; q('export').click();
+      await wait(() => downloads.length > beforeLottie || q('export-status').textContent.startsWith('Lottie не подготовлен:'), 'Lottie export');
+      const lottieDownload = downloads.at(-1);
+      const animation = JSON.parse(await lottieDownload.blob.text());
+      check(`${name}/${variant}/lottie-export`, lottieDownload.filename === `${name}-${variant}.lottie.json` &&
+        animation.meta.labIcons.masterSha256 === glyph.provenance.author.masterSha256 && animation.layers[0].nm === 'cycle-body' &&
+        animation.meta.labIcons.profile === 'lottie-web-svg-5.13');
+      const beforeSf = downloads.length;
+      q('export-format').value = 'sf-symbols'; q('export').click();
+      check(`${name}/${variant}/sf-symbols-refusal`, downloads.length === beforeSf && q('export-status').textContent.includes('нет проверенного адаптера'));
     }
 
     await choose('reload', 'outline');

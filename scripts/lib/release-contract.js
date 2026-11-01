@@ -15,7 +15,7 @@ const ROOT_KEYS = [
 ];
 const PRIMARY_KEYS = ['access', 'install', 'kind'];
 const FALLBACK_KEYS = ['immutable', 'kind', 'specifier'];
-const EXPORT_KEYS = ['.', './ir', './ir/candidates', './ir/recipes', './ir/render', './motion', './symbols/*'];
+const EXPORT_KEYS = ['.', './ir', './ir/candidates', './ir/recipes', './ir/render', './motion', './symbols/*', './lottie/*'];
 const EXPORT_CONDITIONS = Object.freeze({
   '.': ['types', 'import'],
   './ir': ['types', 'import'],
@@ -25,6 +25,7 @@ const EXPORT_CONDITIONS = Object.freeze({
   './ir/render': ['types', 'import'],
   './motion': ['types', 'import'],
   './symbols/*': ['types', 'import'],
+  './lottie/*': ['types', 'import'],
 });
 export const STRICT_SEMVER = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*)(?:\.(?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*))*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$/;
 
@@ -179,9 +180,10 @@ export function validateReleaseContract(contract) {
       )) {
         continue;
       }
-      if (subpath === './symbols/*') {
-        if (conditions.types !== './dist/symbols/*.d.ts' || conditions.import !== './dist/symbols/*.js') {
-          errors.push('release symbols wildcard обязан указывать только на dist/symbols/<name>');
+      if (subpath === './symbols/*' || subpath === './lottie/*') {
+        const directory = subpath.slice(2, -2);
+        if (conditions.types !== `./dist/${directory}/*.d.ts` || conditions.import !== `./dist/${directory}/*.js`) {
+          errors.push(`release ${directory} wildcard обязан указывать только на dist/${directory}/<name>`);
         }
         continue;
       }
@@ -197,7 +199,7 @@ export function validateReleaseContract(contract) {
       }
     }
     const expanded = expandReleaseExports(contract);
-    const symbols = Object.entries(expanded).filter(([subpath]) => subpath.startsWith('./symbols/'));
+    const symbols = Object.entries(expanded).filter(([subpath]) => subpath.startsWith('./symbols/') || subpath.startsWith('./lottie/'));
     if (symbols.length === 0) errors.push('release symbols wildcard не имеет точных symbol outputs');
     for (const [subpath, conditions] of symbols) {
       for (const [condition, target] of Object.entries(conditions)) validateExportTarget({
@@ -227,12 +229,14 @@ export function expandReleaseExports(contract) {
   const result = {};
   for (const [subpath, conditions] of Object.entries(contract?.exports ?? {})) {
     if (!subpath.includes('*')) { result[subpath] = conditions; continue; }
-    if (subpath !== './symbols/*' || conditions?.import !== './dist/symbols/*.js') continue;
+    if (!['./symbols/*', './lottie/*'].includes(subpath)) continue;
+    const directory = subpath.slice(2, -2);
+    if (conditions?.import !== `./dist/${directory}/*.js`) continue;
     for (const file of contract.files ?? []) {
-      const match = /^dist\/symbols\/([a-z][a-z0-9-]*)\.js$/.exec(file);
+      const match = new RegExp(`^dist/${directory}/([a-z][a-z0-9-]*)\\.js$`).exec(file);
       if (!match) continue;
       const name = match[1];
-      result[`./symbols/${name}`] = {
+      result[`./${directory}/${name}`] = {
         types: typeof conditions.types === 'string' ? conditions.types.replace('*', name) : conditions.types,
         import: conditions.import.replace('*', name),
       };

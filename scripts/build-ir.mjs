@@ -15,9 +15,10 @@ import { recoverOwnedDirectory, replaceOwnedDirectory } from './lib/owned-direct
 import { renderSymbolModule, symbolExportName, symbolModuleDeclaration } from './lib/symbol-modules.js';
 import { authorSymbolPayload, loadAuthorBaseline } from './lib/author-baseline.js';
 import { compileAuthorAnatomy } from './lib/author-anatomy.js';
+import { compileLottieGeometry, renderLottieSymbolModule, lottieSymbolDeclaration } from './lib/lottie-geometry.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const TARGETS = ['ir', 'symbols', 'motion'];
+const TARGETS = ['ir', 'symbols', 'motion', 'lottie'];
 const REQUIRED_DECLARATIONS = ['author-catalog.generated.d.ts', 'author-source.d.ts', 'candidates.d.ts', 'catalog.generated.d.ts', 'compiler.d.ts', 'index.d.ts', 'recipes.d.ts', 'render.d.ts', 'request.d.ts'];
 const read = (root, file) => JSON.parse(readFileSync(join(root, file), 'utf8'));
 
@@ -101,6 +102,7 @@ async function compileIrTargets({ root, staging }) {
       bundle(root, staging, 'src/ir/render.ts', 'ir/render.js'),
       bundle(root, staging, 'src/ir/candidates.ts', 'ir/candidates.js', ['./index.js']),
       bundle(root, staging, 'src/motion/index.ts', 'motion/index.js'),
+      bundle(root, staging, 'src/lottie/runtime.ts', 'ir/lottie-runtime.js', ['../motion/index.js']),
     ]);
     // Все операции записи завершаются до удаления staging при ошибке одной
     // сборки: поздняя запись иначе заново создаст уже убранный каталог.
@@ -109,6 +111,7 @@ async function compileIrTargets({ root, staging }) {
     execFileSync(process.execPath, [join(root, 'node_modules/typescript/bin/tsc'), '-p', join(root, 'tsconfig.build.json'), '--outDir', declarations], { cwd: root, stdio: 'inherit' });
     for (const file of REQUIRED_DECLARATIONS) copyFileSync(join(declarations, 'ir', file), join(staging, 'ir', file));
     copyFileSync(join(declarations, 'motion/index.d.ts'), join(staging, 'motion/index.d.ts'));
+    copyFileSync(join(declarations, 'lottie/types.d.ts'), join(staging, 'lottie/types.d.ts'));
 
     const catalog = read(root, 'semantics/catalog.json');
     const grid = read(root, 'semantics/grid.json');
@@ -136,8 +139,16 @@ async function compileIrTargets({ root, staging }) {
     });
     for (const icon of names) {
       const payload = authorSymbolPayload(icon, authorSources[icon], compiler);
-      writeFileSync(join(staging, 'symbols', `${icon}.js`), renderSymbolModule(payload));
+      const targets = Object.fromEntries(['outline', 'filled'].map(variant => [variant, compileLottieGeometry(payload.source[variant])]));
+      const capabilities = Object.fromEntries(['outline', 'filled'].map(variant => {
+        const capability = payload.capabilities[variant];
+        return [variant, { ...capability, motion: { ...capability.motion, adapters: { ...capability.motion.adapters,
+          lottie: targets[variant].ok && capability.motion.state === 'gesture-ready' ? 'lottie-web-svg-5.13' : 'not-exported' } } }];
+      }));
+      writeFileSync(join(staging, 'symbols', `${icon}.js`), renderSymbolModule({ ...payload, capabilities }));
       writeFileSync(join(staging, 'symbols', `${icon}.d.ts`), symbolModuleDeclaration(icon));
+      writeFileSync(join(staging, 'lottie', `${icon}.js`), renderLottieSymbolModule(icon, targets));
+      writeFileSync(join(staging, 'lottie', `${icon}.d.ts`), lottieSymbolDeclaration());
     }
     return names.length;
   } finally {

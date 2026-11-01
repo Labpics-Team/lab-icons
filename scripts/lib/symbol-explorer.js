@@ -29,8 +29,8 @@ export function writeSymbolExplorer({ repo, outDir, report, visuals, canvas, ico
   });
   const contract = JSON.parse(readFileSync(join(repo, 'release', 'contract.json'), 'utf8'));
   const baseline = loadAuthorBaseline(repo);
-  const browserFiles = ['dist/ir/request.js', 'dist/ir/symbol-runtime.js', 'dist/ir/render.js', 'dist/motion/index.js',
-    ...Object.keys(baseline.icons).map(name => `dist/symbols/${name}.js`)];
+  const browserFiles = ['dist/ir/request.js', 'dist/ir/symbol-runtime.js', 'dist/ir/render.js', 'dist/motion/index.js', 'dist/ir/lottie-runtime.js',
+    ...Object.keys(baseline.icons).flatMap(name => [`dist/symbols/${name}.js`, `dist/lottie/${name}.js`])];
   for (const relative of browserFiles) {
     if (!contract.files.includes(relative)) throw new Error(`symbol explorer: ${relative} не принадлежит package contract`);
     const target = join(outDir, 'package', relative.slice('dist/'.length));

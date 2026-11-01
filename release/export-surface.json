@@ -515,5 +515,1325 @@
     "placeNotificationBadge",
     "resolveCalendarDay",
     "roundedDigitGeometry"
+  ],
+  "./lottie/accessibility": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/actions": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/alert": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/alert-circle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/align-bottom": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/align-horizontal-center": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/align-items-bottom": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/align-items-horizontal-center": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/align-items-left": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/align-items-right": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/align-items-top": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/align-items-vertical-center": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/align-left": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/align-right": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/align-top": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/align-vertical-center": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/aloof": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/apps": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/archive": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/archive-close": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/arrow-back": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/arrow-back-circle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/arrow-down": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/arrow-down-circle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/arrow-forward": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/arrow-forward-circle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/arrow-redo": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/arrow-redo-circle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/arrow-redo-curve": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/arrow-undo": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/arrow-undo-circle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/arrow-undo-curve": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/arrow-up": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/arrow-up-circle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/at": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/attach": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/bag": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/bag-checkmark": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/bag-close": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/bag-minus": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/bag-plus": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/ban": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/basket": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/bill": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/bin": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/book": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/bookmark": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/bookmarks": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/boolean": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/brain": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/branch": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/branches": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/brush": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/bulb": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/calendar": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/calendar-clear": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/calendar-number": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/calendar-today": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/camera": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/camera-reverse": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/cards": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/caret-back": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/caret-down": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/caret-forward": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/caret-up": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/caret-vertical": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/cart": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/chart": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/chart-area": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/chart-area-panel": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/chart-bars-horizontal": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/chart-columns": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/chart-combo": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/chart-donut": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/chart-flow": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/chart-lines": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/chart-metric": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/chart-nodes": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/chart-pie": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/chart-treemap-horizontal": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/chart-treemap-vertical": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/chart-trend-up": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/chatbubble": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/chatbubble-ellipses": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/chatbubbles": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/checkmark": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/checkmark-circle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/checkmarks": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/checkmarks-circle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/cherries": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/chevron-back": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/chevron-back-circle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/chevron-down": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/chevron-down-circle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/chevron-forward": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/chevron-forward-circle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/chevron-up": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/chevron-up-circle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/chevrons-down": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/close": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/close-circle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/close-octagon": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/cloud": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/cloud-checkmark": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/cloud-download": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/cloud-off": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/cloud-upload": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/code": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/code-frame": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/cog": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/coin-dollar": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/coin-ruble": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/collapse-horizontal": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/collapse-horizontal-line": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/collapse-vertical": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/collapse-vertical-line": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/color-filter": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/color-wand": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/commit": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/commits": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/compas": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/component": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/computer": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/connect": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/connectors": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/console": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/contrast": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/copy": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/corners-in": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/corners-out": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/cursor": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/cursor-click": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/dashboard": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/database": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/database-export": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/database-plus": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/database-search": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/database-settings": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/dice": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/download": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/duplicate": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/ear": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/earth": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/ellipse": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/ellipsis-horizontal": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/ellipsis-vertical": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/enter": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/exit": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/expand-horizontal-line": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/expand-vertical": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/extension-puzzle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/eye": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/eye-off": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/eyedrop": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/field-text": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/file": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/file-clear": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/files": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/filter": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/fingerprint": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/fire": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/flash": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/flash-off": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/folder": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/folder-open": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/fork": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/fullscreen-enter": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/fullscreen-exit": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/glasses": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/globe": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/golf": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/group": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/group-circle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/hand-point-down": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/hand-point-left": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/hand-point-right": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/hand-point-up": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/hand-two-fingers": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/hard-drive": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/hash": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/headphone": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/heart": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/heart-off": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/heart-pulse": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/history": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/home": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/hourglass": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/image": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/images": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/info": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/info-circle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/invert": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/justify-horizontal": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/justify-items-horizontal": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/justify-items-vertical": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/justify-vertical": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/key": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/keyboard": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/keys": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/layers": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/link": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/link-horizontal": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/link-horizontal-off": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/list": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/lock": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/mail": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/mail-open": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/mail-unread": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/mcp": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/megaphone": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/menu": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/merge": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/mic": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/mic-circle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/mic-off": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/minus": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/minus-circle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/monitor-pulse": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/moon": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/moon-sparkles": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/move": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/musical-note": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/musical-notes": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/navigate": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/notifications": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/notifications-off": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/notifications-unread": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/options": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/palette": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/pause": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/pause-circle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/paw": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/pencil": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/person": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/person-circle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/person-minus": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/person-plus": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/phone": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/pin": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/pin-vertical": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/pin-vertical-off": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/place": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/plane": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/play": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/play-back": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/play-back-circle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/play-circle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/play-forward": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/play-forward-circle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/play-skip-back": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/play-skip-back-circle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/play-skip-forward": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/play-skip-forward-circle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/plus": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/plus-circle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/print": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/priority": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/pull-request": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/push": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/qr": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/question": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/question-circle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/radio": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/refresh": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/reload": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/repeat": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/resize": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/revert": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/rhomb": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/rocket": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/sad": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/scan": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/school": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/search": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/send": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/server": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/settings": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/share": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/share-display": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/share-social": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/shield": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/shield-checkmark": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/sidebar-collapsed": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/sidebar-expanded": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/signature": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/smile": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/sparkle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/sparkles": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/speed": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/square": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/star": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/stats": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/steps": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/stop": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/stop-circle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/storefront": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/sun": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/sun-low": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/swap-horizontal": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/swap-vertical": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/sync": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/tablet-landscape": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/tablet-portrait": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/tag": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/tag-dollar": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/tag-ruble": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/tags": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/target": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/text": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/ticket": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/time": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/timer": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/translate": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/triangle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/trophy": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/turn-off": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/unlock": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/upload": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/video": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/video-camera": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/video-camera-off": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/volume": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/volume-high": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/volume-low": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/volume-middle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/volume-mute": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/volume-muted": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/wallet": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/warning": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/waveform": [
+    "exportLottie",
+    "lottieCapabilities"
   ]
 }

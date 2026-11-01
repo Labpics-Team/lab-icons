@@ -252,7 +252,7 @@ export interface MotionCapabilities {
   readonly tracks: readonly MotionTrackContract[];
   readonly gestures: readonly MotionGestureContract[];
   readonly adapters: Readonly<{
-    readonly lottie: 'not-exported';
+    readonly lottie: 'not-exported' | 'lottie-web-svg-5.13';
     readonly sfSymbols: 'not-exported';
   }>;
 }

@@ -431,10 +431,12 @@ function reduceCurrentMotion() {
 }
 ui['reduce-motion'].addEventListener('change', () => { if (ui['reduce-motion'].checked) reduceCurrentMotion(); });
 reducedPreference.addEventListener('change', () => { ui['reduce-motion'].checked = reducedPreference.matches; if (reducedPreference.matches) reduceCurrentMotion(); });
-ui.export.addEventListener('click', () => {
+ui.export.addEventListener('click', async () => {
   if (!state.loaded || state.viewLoading) return;
   const format = ui['export-format'].value;
   const legacyExport = state.view === 'generated' && state.legacy;
+  const revision = state.revision;
+  const viewRevision = state.viewRevision;
   let content;
   if (format === 'svg') content = legacyExport ? state.glyph.svg : state.original;
   else if (format === 'effect') {
@@ -442,11 +444,29 @@ ui.export.addEventListener('click', () => {
     const result = effect(0, 1);
     if (!result.ok) { ui['export-status'].textContent = result.reason.message; return; }
     content = JSON.stringify(result.effect, null, 2);
-  } else { ui['export-status'].textContent = `${format === 'lottie' ? 'Lottie' : 'SF Symbols'}: для этого варианта нет проверенного адаптера.`; return; }
+  } else if (format === 'lottie') {
+    if (state.legacy || state.view !== 'original') { ui['export-status'].textContent = 'Lottie экспортирует текущий авторский вид.'; return; }
+    ui.export.disabled = true;
+    ui['export-status'].textContent = 'Подготавливаем Lottie…';
+    try {
+      const target = await import(`./package/lottie/${state.name}.js`);
+      if (state.revision !== revision || state.viewRevision !== viewRevision || state.viewLoading || state.view !== 'original' || state.legacy) return;
+      const gesture = ui.gesture.value;
+      const result = target.exportLottie({ variant: state.variant, color: displayColor.value,
+        ...(gesture ? { gesture, duration: 1000, from: 0, to: 1, reducedMotion: ui['reduce-motion'].checked } : {}) });
+      if (!result.ok) { ui['export-status'].textContent = `Lottie: ${result.reason.message}`; return; }
+      content = JSON.stringify(result.animation);
+    } catch (error) {
+      if (state.revision === revision) ui['export-status'].textContent = `Lottie не подготовлен: ${error.message}`;
+      return;
+    } finally {
+      if (state.revision === revision) ui.export.disabled = !state.loaded || state.viewLoading;
+    }
+  } else { ui['export-status'].textContent = 'SF Symbols: для этого варианта нет проверенного адаптера.'; return; }
   const url = URL.createObjectURL(new Blob([content], { type: format === 'svg' ? 'image/svg+xml' : 'application/json' }));
   const link = document.createElement('a');
   link.href = url;
-  link.download = `${state.name}-${state.variant}${legacyExport ? '-recorded-model' : ''}.${format === 'svg' ? 'svg' : 'effect.json'}`;
+  link.download = `${state.name}-${state.variant}${legacyExport ? '-recorded-model' : ''}.${format === 'svg' ? 'svg' : format === 'lottie' ? 'lottie.json' : 'effect.json'}`;
   link.click();
   setTimeout(() => URL.revokeObjectURL(url), 0);
   ui['export-status'].textContent = 'Файл подготовлен.';

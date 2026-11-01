@@ -14,13 +14,14 @@ export function symbolReleaseProjection(base, iconIds) {
     './ir/render': { types: './dist/ir/render.d.ts', import: './dist/ir/render.js' },
     './motion': { types: './dist/motion/index.d.ts', import: './dist/motion/index.js' },
     './symbols/*': { types: './dist/symbols/*.d.ts', import: './dist/symbols/*.js' },
+    './lottie/*': { types: './dist/lottie/*.d.ts', import: './dist/lottie/*.js' },
   };
   const publicFiles = Object.entries(exports).flatMap(([key, conditions]) =>
     key.includes('*')
       ? ids.flatMap(id => Object.values(conditions).map(target => target.replace('*', id).slice(2)))
       : Object.values(conditions).map(target => target.slice(2)));
-  const typeDependencies = ['dist/ir/author-catalog.generated.d.ts', 'dist/ir/author-source.d.ts', 'dist/ir/catalog.generated.d.ts', 'dist/ir/compiler.d.ts', 'dist/ir/request.d.ts'];
-  const runtimeDependencies = ['dist/ir/compiler.js', 'dist/ir/request.js', 'dist/ir/symbol-runtime.js'];
+  const typeDependencies = ['dist/ir/author-catalog.generated.d.ts', 'dist/ir/author-source.d.ts', 'dist/ir/catalog.generated.d.ts', 'dist/ir/compiler.d.ts', 'dist/ir/request.d.ts', 'dist/lottie/types.d.ts'];
+  const runtimeDependencies = ['dist/ir/compiler.js', 'dist/ir/request.js', 'dist/ir/symbol-runtime.js', 'dist/ir/lottie-runtime.js'].sort();
   return {
     version: 5,
     packageName: base.packageName,
