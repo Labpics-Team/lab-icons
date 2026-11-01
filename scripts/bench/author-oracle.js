@@ -88,8 +88,10 @@ function sourceSupportsLottie(svg, compositionKind, parts) {
           if (!open) return false;
           open = false; cursor = start;
         } else {
-          if (!open) return false;
           const end = [segment.x, segment.y];
+          // Совпадающие endpoints дуги не рисуют ничего, в том числе после Z.
+          if (segment.cmd === 'A' && cursor && cursor[0] === end[0] && cursor[1] === end[1]) continue;
+          if (!open) return false;
           if (segment.cmd === 'A') {
             if (segment.rx !== 0 && segment.ry !== 0 && (cursor[0] !== end[0] || cursor[1] !== end[1])) return false;
           } else if (segment.cmd === 'C' || segment.cmd === 'Q') {

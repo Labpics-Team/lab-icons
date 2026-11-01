@@ -88,7 +88,7 @@ describe('независимая consumer projection directional law', () => {
     expect(compileLottieGeometry({ ...glyph, parts: glyph.parts.map(part => ({ ...part, paint: { kind: 'stroke', stroke: 'currentColor' } })) }).ok).toBe(false);
   });
 
-  it.each(['M1 1A0 1 0 0 1 2 2Z', 'M1 1A1 1 0 0 1 1 1L2 2Z'])('вырожденная A сохраняет exact line/no-op capability: %s', d => {
+  it.each(['M1 1A0 1 0 0 1 2 2Z', 'M1 1A1 1 0 0 1 1 1L2 2Z', 'M1 1L2 2Z A1 1 0 0 1 1 1'])('вырожденная A сохраняет exact line/no-op capability: %s', d => {
     const glyph = symbol.glyph(), source = sources.outline;
     const target = compileLottieGeometry({ ...glyph, parts: glyph.parts.map(part => ({ ...part, d })) });
     expect(target.ok).toBe(true);
