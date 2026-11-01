@@ -78,8 +78,12 @@ const consumerMeasurements = {};
 for (const [name, entry] of Object.entries(entries)) {
   const measured = await bundleScenario(entry, { includeBrotli: true });
   consumerMeasurements[name] = measured;
-  const old = oldConsumers.scenarios[name] ??
-    (name === 'full-ir-opt-in' ? oldConsumers.scenarios['glyph-one'] : undefined);
+  // Потолок относится к exact consumer entry: прежний glyph-one был полным IR.
+  // Его бюджет переходит в full-ir-opt-in, а новый symbol import начинает свой.
+  const previousScenario = oldConsumers.scenarios[name];
+  const legacyIrScenario = name === 'full-ir-opt-in' ? oldConsumers.scenarios['glyph-one'] : undefined;
+  const old = previousScenario?.entry === entry ? previousScenario
+    : legacyIrScenario?.entry === entry ? legacyIrScenario : undefined;
   scenarios[name] = {
     entry, baselineBytes: measured.bytes, baselineGzipBytes: measured.gzipBytes,
     maxBytes: old?.maxBytes ?? measured.bytes,
@@ -92,6 +96,9 @@ for (const [name, entry] of Object.entries(entries)) {
 }
 for (const name of Object.keys(oldConsumers.scenarios)) {
   if (!Object.hasOwn(scenarios, name)) policyViolations.push(`${name}: previous consumer scenario отсутствует в measurement`);
+  if (!Object.values(scenarios).some(({ entry }) => entry === oldConsumers.scenarios[name].entry)) {
+    policyViolations.push(`${name}: previous consumer entry отсутствует в measurement`);
+  }
 }
 const report = {
   sourceSha: execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim(),

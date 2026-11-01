@@ -10,6 +10,7 @@ const hash = '0'.repeat(40);
 const file = 'dist/ir/recipes.js';
 const twin = 'dist/ir/retained.js';
 const original = '// scripts/lib/kernel.js\nexport const value = 1;\n';
+const legacyGlyphEntry = "import { glyph } from '@labpics/icons/ir';\nconsole.log(glyph({ icon: 'alert' }));\n";
 
 afterEach(() => {
   for (const root of roots.splice(0)) rmSync(root, { recursive: true, force: true });
@@ -49,6 +50,7 @@ function fixture({ source = original, other = source, modules = ['scripts/lib/ke
   const scenarios = Object.fromEntries(['one-static', 'glyph-one', 'full-catalog', 'recipes-only'].map(name => [name, {
     entry, baselineBytes: 10, baselineGzipBytes: 11, maxBytes: 100, maxGzipBytes: 101,
   }]));
+  scenarios['glyph-one'].entry = legacyGlyphEntry;
   const policy = { version: 1, measurement: 'fixture package oracle', artifacts };
   writeFileSync(join(root, 'release/package-size-ratchet.json'), JSON.stringify(policy));
   writeFileSync(join(root, 'release/consumer-size-ratchet.json'), JSON.stringify({ version: 1, measurement: 'fixture consumer oracle', scenarios }));
@@ -104,6 +106,55 @@ describe('platform measurement admission policy', () => {
     expect(report.candidatePolicies.package.artifacts[file].allowedModules).toEqual(policy.artifacts[file].allowedModules);
     expect(report.candidatePolicies.consumer.scenarios['status-circle-state'].entry).toMatch(/renderStateSvg.*compileStateEffect/s);
     expect(report.consumers['status-circle-state'].bytes).toBe(10);
+  });
+
+  it('новый symbol import получает свой потолок, а прежний IR сохраняет entry и budget', () => {
+    const { root } = fixture();
+    const result = run(root, ['--update']);
+    expect(result.status, result.stderr).toBe(0);
+    const scenarios = JSON.parse(readFileSync(join(root, 'release/consumer-size-ratchet.json'))).scenarios;
+    expect(scenarios['glyph-one'].entry).toMatch(/@labpics\/icons\/symbols\/alert/);
+    expect(scenarios['glyph-one'].maxBytes).toBe(10);
+    expect(scenarios['glyph-one'].maxGzipBytes).toBe(11);
+    expect(scenarios['full-ir-opt-in'].entry).toBe(legacyGlyphEntry);
+    expect(scenarios['full-ir-opt-in'].maxBytes).toBe(100);
+    expect(scenarios['full-ir-opt-in'].maxGzipBytes).toBe(101);
+  });
+
+  it('не ратифицирует возврат symbol import к цене полного каталога', () => {
+    const { root } = fixture();
+    const initial = run(root, ['--update']);
+    expect(initial.status, initial.stderr).toBe(0);
+    const consumerOracle = join(root, 'scripts/check-consumer-size.js');
+    writeFileSync(consumerOracle, readFileSync(consumerOracle, 'utf8').replace(
+      'export async function bundleScenario()',
+      'export async function bundleScenario(entry)',
+    ).replace(
+      "return { bytes: 10, gzipBytes: 11, modules: ['dist/fixture.js'] };",
+      "return { bytes: entry.includes('/symbols/alert') ? 50 : 10, gzipBytes: entry.includes('/symbols/alert') ? 51 : 11, modules: ['dist/fixture.js'] };",
+    ));
+    const policyPath = join(root, 'release/consumer-size-ratchet.json');
+    const before = readFileSync(policyPath);
+    const result = run(root, ['--update']);
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toMatch(/glyph-one.*consumer budget/);
+    expect(readFileSync(policyPath).equals(before)).toBe(true);
+  });
+
+  it.each(['glyph-one', 'full-ir-opt-in'])('не удаляет прежний entry при сохранённом имени %s', name => {
+    const { root } = fixture();
+    const policyPath = join(root, 'release/consumer-size-ratchet.json');
+    const policy = JSON.parse(readFileSync(policyPath));
+    policy.scenarios[name] = {
+      ...policy.scenarios['glyph-one'],
+      entry: "import { glyph } from '@labpics/icons/symbols/reload';\nconsole.log(glyph());\n",
+    };
+    writeFileSync(policyPath, JSON.stringify(policy));
+    const before = readFileSync(policyPath);
+    const result = run(root, ['--update']);
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toMatch(new RegExp(`${name}.*previous consumer entry`));
+    expect(readFileSync(policyPath).equals(before)).toBe(true);
   });
 
   it('не удаляет ранее установленный consumer budget при добавлении сценариев', () => {
