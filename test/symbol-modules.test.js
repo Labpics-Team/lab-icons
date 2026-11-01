@@ -1,8 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { build } from 'esbuild';
 import { fileURLToPath } from 'node:url';
-import { renderSymbolModule, symbolModuleDeclaration, symbolReleaseProjection } from '../scripts/lib/symbol-modules.js';
+import { readFileSync } from 'node:fs';
+import { renderSymbolModule, symbolExportName, symbolModuleDeclaration, symbolReleaseProjection } from '../scripts/lib/symbol-modules.js';
 import { expandReleaseExports, runtimeModuleSpecifiers, validateReleaseContract, validateReleaseRuntimeDependencyGraph } from '../scripts/lib/release-contract.js';
+import { authorSymbolPayload, loadAuthorBaseline } from '../scripts/lib/author-baseline.js';
+import { compileAuthorAnatomy } from '../scripts/lib/author-anatomy.js';
+import { createGlyphCompiler } from '../src/ir/compiler.js';
 
 const base = {
   packageName: '@labpics/icons', primary: { kind: 'npm', access: 'public', install: 'pnpm add @labpics/icons' },
@@ -21,6 +25,45 @@ async function consumeSymbol(contents, entry) {
     } }],
   });
   return output.outputFiles[0].text;
+}
+
+function metadataControl() {
+  const source = {}, capabilities = {};
+  for (const variant of ['outline', 'filled']) {
+    const author = { masterSha256: `${variant.toUpperCase()}_AUTHOR_RECEIPT` };
+    const anatomy = { annotationSha256: `${variant.toUpperCase()}_ANATOMY_RECEIPT` };
+    source[variant] = { icon: 'alert', variant, svg: 'AUTHOR_IR_SENTINEL', parts: [],
+      provenance: { kind: 'source', author: { ...author }, anatomy: { ...anatomy } } };
+    capabilities[variant] = { trace: 'AUTHOR_CAPS_SENTINEL', author, anatomy };
+  }
+  return { icon: 'alert', source, capabilities, staticSvg: { outline: 'SVG_STATIC_CONTROL', filled: 'FILLED_UNUSED' } };
+}
+
+async function importSymbol(contents) {
+  const bundled = await consumeSymbol(contents, 'export { glyph, glyphCapabilities, outline, filled } from "test-symbol";');
+  return import(`data:text/javascript;base64,${Buffer.from(bundled).toString('base64')}`);
+}
+
+function authoredControl(icon) {
+  const root = fileURLToPath(new URL('..', import.meta.url));
+  const read = file => JSON.parse(readFileSync(new URL(`../${file}`, import.meta.url), 'utf8'));
+  const captured = read('semantics/figma-baseline.json');
+  const manifest = { ...captured, counts: { families: 1, variants: 2 }, icons: { [icon]: captured.icons[icon] } };
+  const baseline = loadAuthorBaseline(root, { manifest });
+  const annotations = read('semantics/author-anatomy.json');
+  const contracts = compileAuthorAnatomy(baseline, { ...annotations,
+    icons: annotations.icons[icon] ? { [icon]: annotations.icons[icon] } : {} });
+  const sources = Object.fromEntries(['outline', 'filled'].map(variant => [variant, {
+    ...baseline.icons[icon][variant], sourceContract: contracts[`${icon}/${variant}`] ?? baseline.icons[icon][variant].sourceContract,
+  }]));
+  const compiler = createGlyphCompiler({
+    catalog: { canvas: { viewBox: [0, 0, 24, 24] }, axes: read('semantics/catalog.json').axes,
+      icons: { [icon]: { model: null, source: Object.fromEntries(['outline', 'filled'].map(variant => [variant, sources[variant].sourceContract])) } } },
+    anatomy: { version: 1, glyphs: {} }, grid: read('semantics/grid.json'),
+    staticIcons: Object.fromEntries(['outline', 'filled'].map(variant =>
+      [symbolExportName(icon, variant), sources[variant].artifactSvg])),
+  });
+  return authorSymbolPayload(icon, sources, compiler);
 }
 
 describe('замкнутые symbol modules', () => {
@@ -65,6 +108,81 @@ describe('замкнутые symbol modules', () => {
     expect(actual).not.toContain(discarded);
     expect(actual).not.toContain('SVG_STATIC_CONTROL');
     expect(actual).not.toContain('FILLED_UNUSED');
+  });
+
+  it('общие receipts одного варианта материализуются один раз, без объединения Outline/Filled', async () => {
+    const input = metadataControl();
+    const before = structuredClone(input);
+    const module = renderSymbolModule(input);
+    for (const variant of ['OUTLINE', 'FILLED']) {
+      for (const field of ['AUTHOR', 'ANATOMY']) expect(module.match(new RegExp(`${variant}_${field}_RECEIPT`, 'g'))).toHaveLength(1);
+    }
+    const consumer = await importSymbol(module);
+    for (const variant of ['outline', 'filled']) {
+      const glyph = consumer.glyph({ variant }), caps = consumer.glyphCapabilities(variant);
+      expect(glyph).toEqual(input.source[variant]);
+      expect(caps).toEqual(input.capabilities[variant]);
+      expect(glyph.provenance.author).toBe(caps.author);
+      expect(glyph.provenance.anatomy).toBe(caps.anatomy);
+      expect(Object.isFrozen(caps.author)).toBe(true);
+      expect(Object.isFrozen(caps.anatomy)).toBe(true);
+    }
+    expect(consumer.glyph().provenance.author).not.toBe(consumer.glyph({ variant: 'filled' }).provenance.author);
+    expect(consumer.glyph().provenance.anatomy).not.toBe(consumer.glyph({ variant: 'filled' }).provenance.anatomy);
+    expect(input).toEqual(before);
+    expect(Object.isFrozen(input.source.outline.provenance.author)).toBe(false);
+  });
+
+  it.each([
+    ['glyph', 'AUTHOR_IR_SENTINEL', 'AUTHOR_CAPS_SENTINEL'],
+    ['glyphCapabilities', 'AUTHOR_CAPS_SENTINEL', 'AUTHOR_IR_SENTINEL'],
+  ])('общие receipts не удерживают чужой payload для %s', async (name, retained, discarded) => {
+    const actual = await consumeSymbol(renderSymbolModule(metadataControl()), `import { ${name} } from "test-symbol"; console.log(${name}());`);
+    expect(actual).toContain(retained);
+    expect(actual).not.toContain(discarded);
+    expect(actual).not.toContain('SVG_STATIC_CONTROL');
+    expect(actual).not.toContain('FILLED_UNUSED');
+    expect(actual).toContain('OUTLINE_AUTHOR_RECEIPT');
+    expect(actual).toContain('OUTLINE_ANATOMY_RECEIPT');
+  });
+
+  it('static import удаляет общие receipts и обе независимые фабрики', async () => {
+    const actual = await consumeSymbol(renderSymbolModule(metadataControl()), 'import { outline } from "test-symbol"; console.log(outline);');
+    expect(actual).toContain('SVG_STATIC_CONTROL');
+    for (const discarded of ['RECEIPT', 'AUTHOR_IR_SENTINEL', 'AUTHOR_CAPS_SENTINEL', 'FILLED_UNUSED', 'AUTHOR_PARITY_REQUIRED']) {
+      expect(actual).not.toContain(discarded);
+    }
+  });
+
+  it.each(['time', 'reload'])('настоящий %s проходит compiler → module → consumer без изменения authored paths и admission', async icon => {
+    const payload = authoredControl(icon);
+    const consumer = await importSymbol(renderSymbolModule(payload));
+    for (const variant of ['outline', 'filled']) {
+      const glyph = consumer.glyph({ variant }), caps = consumer.glyphCapabilities(variant);
+      expect(glyph).toEqual(payload.source[variant]);
+      expect(caps).toEqual(payload.capabilities[variant]);
+      expect(glyph.provenance.author).toBe(caps.author);
+      expect(glyph.provenance.anatomy).toBe(caps.anatomy);
+      expect(Object.isFrozen(glyph.provenance.author)).toBe(true);
+      expect(consumer[variant]).toBe(payload.staticSvg[variant]);
+    }
+    expect(consumer.glyph()).toBe(consumer.glyph());
+    expect(consumer.glyph()).not.toBe(consumer.glyph({ variant: 'filled' }));
+    expect(() => consumer.glyph({ axes: { weight: 1 } })).toThrow(expect.objectContaining({ code: 'AUTHOR_PARITY_REQUIRED' }));
+    expect(() => consumer.glyph({ modelMode: 'allow-candidate' })).toThrow(expect.objectContaining({ code: 'AUTHOR_PARITY_REQUIRED' }));
+  });
+
+  it('расходящиеся или отсутствующие metadata не заменяются общей записью', async () => {
+    const input = metadataControl();
+    input.capabilities.outline.author.masterSha256 = 'OTHER_AUTHOR_RECEIPT';
+    delete input.capabilities.filled.anatomy;
+    const consumer = await importSymbol(renderSymbolModule(input));
+    for (const variant of ['outline', 'filled']) {
+      expect(consumer.glyph({ variant })).toEqual(input.source[variant]);
+      expect(consumer.glyphCapabilities(variant)).toEqual(input.capabilities[variant]);
+    }
+    expect(consumer.glyph().provenance.author).not.toBe(consumer.glyphCapabilities().author);
+    expect(consumer.glyphCapabilities('filled')).not.toHaveProperty('anatomy');
   });
 
   it('outline-only consumer удаляет настоящий runtime и весь IR payload; прежний member-read это нарушает', async () => {

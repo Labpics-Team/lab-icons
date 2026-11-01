@@ -48,19 +48,50 @@ export function symbolExportName(icon, variant) {
   return `${icon.replace(/-([a-z0-9])/g, (_, char) => char.toUpperCase())}${variant === 'outline' ? 'Outline' : 'Filled'}`;
 }
 
+/** Build-only ссылки заменяют только названные поля проверенной JSON-проекции. */
+function renderJSONRecord(value, references) {
+  if (!references.size) return JSON.stringify(value);
+  return `{${Object.entries(value).flatMap(([key, item]) => {
+    const encoded = references.get(key) ?? JSON.stringify(item);
+    return encoded === undefined ? [] : [`${JSON.stringify(key)}:${encoded}`];
+  }).join(',')}}`;
+}
+
 /** Компактный символ собирается тем же compiler, которым проверяется общий IR. */
 export function renderSymbolModule({ icon, source, capabilities, staticSvg }) {
   if (!SYMBOL_NAME.test(icon)) throw new TypeError('symbol module: невалидное имя');
   const json = value => JSON.stringify(value);
+  const record = value => value !== null && typeof value === 'object' && !Array.isArray(value);
+  const shared = [], sources = {}, capabilityReferences = new Map();
+  for (const variant of ['outline', 'filled']) {
+    const provenance = source[variant]?.provenance, capability = capabilities[variant];
+    const provenanceReferences = new Map(), receiptReferences = new Map();
+    for (const field of ['author', 'anatomy']) {
+      const left = provenance?.[field], right = capability?.[field];
+      // Независимые авторские варианты не объединяются даже при равных receipts.
+      // Расходящиеся или отсутствующие записи остаются исходными JSON-литералами.
+      if (!record(left) || !record(right)) continue;
+      const encoded = json(left);
+      if (encoded !== json(right)) continue;
+      const name = `${variant}${field === 'author' ? 'Author' : 'Anatomy'}`;
+      shared.push(`const ${name} = ${encoded};`);
+      provenanceReferences.set(field, name);
+      receiptReferences.set(field, name);
+    }
+    sources[variant] = renderJSONRecord(source[variant], provenanceReferences.size
+      ? new Map([['provenance', renderJSONRecord(provenance, provenanceReferences)]]) : new Map());
+    if (receiptReferences.size) capabilityReferences.set(variant, renderJSONRecord(capability, receiptReferences));
+  }
   const lines = [
     '/** GENERATED: проверенные текущие авторские masters одного символа. */',
     "import { createCompiledGlyph, createCompiledCapabilities } from '../ir/symbol-runtime.js';",
     `export const outline = ${json(staticSvg.outline)};`,
     `export const filled = ${json(staticSvg.filled)};`,
-    `const outlineSource = ${json(source.outline)};`,
-    `const filledSource = ${json(source.filled)};`,
+    ...shared,
+    `const outlineSource = ${sources.outline};`,
+    `const filledSource = ${sources.filled};`,
     `export const glyph = /* @__PURE__ */ createCompiledGlyph(${json(icon)}, { outline: outlineSource, filled: filledSource });`,
-    `export const glyphCapabilities = /* @__PURE__ */ createCompiledCapabilities(${json(capabilities)});`,
+    `export const glyphCapabilities = /* @__PURE__ */ createCompiledCapabilities(${renderJSONRecord(capabilities, capabilityReferences)});`,
     '',
   ];
   return lines.join('\n');
