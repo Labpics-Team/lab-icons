@@ -8,6 +8,8 @@ import {
   authorPathEntries,
   lowerViewportIdentityClip,
 } from '../../src/core/icon-geometry.js';
+import { parsePathData } from '../../src/core/path-data.js';
+import { optimize } from 'svgo';
 
 const ICON_ID_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const MONOCHROME_PAINT = new Set(['none', 'currentcolor', '#101012']);
@@ -99,6 +101,9 @@ export function normalizeFigmaSvg(input, { source = '<memory>' } = {}) {
   if (!/^<svg\b[^>]*>[\s\S]*<\/svg>$/i.test(document) || openingRoots !== 1 || closingRoots !== 1) {
     throw new Error(`figma-import: ${source} обязан иметь ровно один корневой <svg> без мусора до него`);
   }
+  // Проверяем исходный XML штатным парсером уже используемого SVGO. Его
+  // сериализация отброшена: она не меняет авторские d или порядок контуров.
+  optimize(document, { plugins: [], multipass: false, path: source });
 
   let normalized = stripRootPaint(document, source);
   normalized = lowerViewportIdentityClip(normalized);
@@ -107,8 +112,15 @@ export function normalizeFigmaSvg(input, { source = '<memory>' } = {}) {
 
   // Это одновременно проверяет viewBox, закрытый svg+path-язык, локальный
   // fill-rule и непустую геометрию. Ошибка возникает до любой записи на диск.
-  if (authorPathEntries(normalized).length === 0) {
+  const entries = authorPathEntries(normalized);
+  if (entries.length === 0) {
     throw new Error(`figma-import: ${source} не содержит рендерящихся path`);
+  }
+  for (const entry of entries) {
+    const segments = parsePathData(entry.d);
+    if (segments[0]?.cmd !== 'M' || segments.some((segment) => Object.values(segment).some((value) => typeof value === 'number' && !Number.isFinite(value)))) {
+      throw new Error(`figma-import: ${source} имеет невалидный path`);
+    }
   }
   return `${normalized}\n`;
 }

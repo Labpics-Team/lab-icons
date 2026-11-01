@@ -11,6 +11,14 @@ const simpleFigmaSvg = ({ rootFill = 'none', pathFill = '#101012', body } = {}) 
 
 describe('Figma intake — каноническая граница source SVG', () => {
   it.each([
+    '<g / ><path d="M2 2H22V22H2Z" fill="#101012"/>',
+    '<g><path d="M2 2H22V22H2Z" fill="#101012"/></G>',
+    '<g id="a&b"><path d="M2 2H22V22H2Z" fill="#101012"/></g>',
+  ])('отвергает повреждённый XML до удаления нейтральной группы', (body) => {
+    expect(() => normalizeFigmaSvg(simpleFigmaSvg({ body }))).toThrow();
+  });
+
+  it.each([
     'style="fill-rule:evenodd id=\'x\'"',
     'd="M2 2H22V22H2Z id=\'x\' M7 7H17V17H7Z"',
     'style="fill-rule:evenodd fill=\'#101012\'"',
