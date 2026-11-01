@@ -6,12 +6,15 @@ import {
   type RecipeResult,
   type RecipeStrokePaint,
 } from '../ir/recipes.js';
+import type { DesignSpecGlyphProvenance, GlyphIR, GlyphPart } from '../ir/compiler.js';
+import { assembleGlyphSvg } from '../ir/svg-assembly.js';
+import { sha256Hex } from '../ir/sha256.js';
 // @ts-ignore — существующий zero-IO geometry owner пока JS-only.
 import { _canonicalPoint, _negativeSpaceConstraint, buildConstructivePrimitive } from '../core/glyph-operators.js';
 // @ts-expect-error — существующий zero-IO geometry owner пока JS-only.
 import { genSuperellipse, topologySignature as computeTopologySignature } from '../core/anatomy-gen.js';
 // @ts-expect-error — существующий exact geometry utility пока JS-only.
-import { pathBBox } from '../core/path-data.js';
+import { parsePathData, pathBBox } from '../core/path-data.js';
 
 export type DesignSpecErrorCode =
   | 'UNSUPPORTED_VERSION'
@@ -26,6 +29,7 @@ export type DesignSpecErrorCode =
   | 'UNDERDEFINED_CONSTRAINT'
   | 'CONTRADICTORY_CONSTRAINT'
   | 'UNBOUNDED_RESIDUAL'
+  | 'UNSUPPORTED_COMPOSITION'
   | 'CONSTRAINT_VIOLATION';
 
 export class DesignSpecError extends Error {
@@ -121,16 +125,16 @@ export type DesignAnchor =
 
 export type DesignGeometry =
   | Readonly<{ kind: 'circle'; center: string; radius: number }>
-  | Readonly<{ kind: 'ellipse'; center: string; rx: number; ry: number; rotation: number }>
+  | Readonly<{ kind: 'ellipse'; center: string; rx: number; ry: number; rotation?: number }>
   | Readonly<{ kind: 'line'; from: string; to: string }>
   | Readonly<{ kind: 'arc'; center: string; radius: number; startAngle: number; endAngle: number; direction: 'cw' | 'ccw' }>
   | Readonly<{ kind: 'capsule'; from: string; to: string; radius: number }>
-  | Readonly<{ kind: 'rect'; center: string; width: number; height: number; cornerRadius: number }>
-  | Readonly<{ kind: 'residual'; recipe: 'superellipse'; center: string; rx: number; ry: number; exponent: number; rotation: number }>;
+  | Readonly<{ kind: 'rect'; center: string; width: number; height: number; cornerRadius?: number }>
+  | Readonly<{ kind: 'residual'; recipe: 'superellipse'; center: string; rx: number; ry: number; exponent: number; rotation?: number }>;
 
 export type DesignPaint =
   | Readonly<{ kind: 'fill' }>
-  | Readonly<{ kind: 'stroke'; width: number; linecap: 'round' | 'butt' }>;
+  | Readonly<{ kind: 'stroke'; width: number; linecap?: 'round' | 'butt' }>;
 
 export interface DesignPart {
   readonly id: string;
@@ -182,6 +186,25 @@ export interface LoweredDesignPart extends RecipePart {
   readonly morphGroup: string | null;
 }
 
+export interface CompileDesignSpecOptions<TIcon extends string = string> {
+  readonly icon: TIcon;
+  readonly variant?: 'outline' | 'filled';
+  /** Размер SVG в пикселях; геометрия остаётся в normalized canvas. */
+  readonly size?: number;
+}
+
+export interface DesignSpecGlyph<TIcon extends string = string> extends GlyphIR<TIcon> {
+  readonly provenance: DesignSpecGlyphProvenance;
+  readonly designSpec: Readonly<{
+    specVersion: 1;
+    specSha256: `sha256:${string}`;
+    anchors: LoweredDesignSpec['anchors'];
+    decorators: LoweredDesignSpec['decorators'];
+    negativeSpace: LoweredDesignSpec['negativeSpace'];
+    topologyKey: string;
+  }>;
+}
+
 function fail(code: DesignSpecErrorCode, at: string, message: string): never {
   throw new DesignSpecError(code, at, message);
 }
@@ -214,8 +237,8 @@ function exact(
 ): Record<string, unknown> {
   const source = record(value, at);
   const allowed = new Set([...required, ...optional]);
-  for (const key of Object.keys(source)) {
-    if (!allowed.has(key)) classifyUnknownField(key, at);
+  for (const key of Reflect.ownKeys(source)) {
+    if (typeof key !== 'string' || !allowed.has(key)) classifyUnknownField(String(key), at);
   }
   for (const key of required) {
     if (!Object.hasOwn(source, key)) fail('INVALID_VALUE', at, `нет обязательного поля ${key}`);
@@ -759,7 +782,7 @@ function lowerPaint(paint: DesignPaint): RecipeFillPaint | RecipeStrokePaint {
     fill: 'none',
     stroke: 'currentColor',
     strokeWidth: paint.width,
-    linecap: paint.linecap,
+    linecap: paint.linecap ?? 'round',
     linejoin: 'round',
   });
 }
@@ -849,6 +872,9 @@ function lowerNegativeSpace(
 
 export function lowerDesignSpec(value: unknown): LoweredDesignSpec {
   const spec = parseDesignSpec(value);
+  if (spec.composition.kind === 'compound' && spec.parts.some(({ paint }) => paint.kind === 'stroke')) {
+    fail('UNSUPPORTED_COMPOSITION', 'composition', 'compound поддерживает только fill; stroke требует layers или mask-subtract');
+  }
   const anchors = resolveAnchors(spec.anchors);
   const parts = spec.parts.map((part): LoweredDesignPart => {
     let lowered: ReturnType<typeof lowerGeometry>;
@@ -857,6 +883,18 @@ export function lowerDesignSpec(value: unknown): LoweredDesignSpec {
     } catch (error) {
       if (error instanceof DesignSpecError) throw error;
       fail('INVALID_VALUE', `parts.${part.id}.geometry`, String(error));
+    }
+    // Проверяем реальный сериализованный контур: положительный residual radius
+    // может округлиться до точки и больше не выражать объявленную фигуру.
+    const serializedBounds = pathBBox(lowered.geometry.d) as RecipePart['bbox'];
+    const width = serializedBounds.maxX - serializedBounds.minX;
+    const height = serializedBounds.maxY - serializedBounds.minY;
+    const open = part.geometry.kind === 'line' || part.geometry.kind === 'arc';
+    const zeroArc = (parsePathData(lowered.geometry.d) as { cmd: string; rx?: number; ry?: number }[])
+      .some(({ cmd, rx, ry }) => cmd === 'A' && (rx === 0 || ry === 0));
+    if (!Number.isFinite(width) || !Number.isFinite(height)
+      || zeroArc || (open ? width <= 0 && height <= 0 : width <= 0 || height <= 0)) {
+      fail('INVALID_VALUE', `parts.${part.id}.geometry`, 'сериализация выродила объявленную геометрию');
     }
     const paint = lowerPaint(part.paint);
     const bbox = inkBounds(lowered.bbox, paint);
@@ -887,5 +925,69 @@ export function lowerDesignSpec(value: unknown): LoweredDesignSpec {
     decorators: spec.decorators,
     anchors,
     specVersion: 1,
+  });
+}
+
+function canonicalSpecJson(value: unknown): string {
+  if (Array.isArray(value)) return `[${value.map(canonicalSpecJson).join(',')}]`;
+  if (value !== null && typeof value === 'object') {
+    const source = value as Record<string, unknown>;
+    return `{${Object.keys(source).sort().map((key) => (
+      `${JSON.stringify(key)}:${canonicalSpecJson(source[key])}`
+    )).join(',')}}`;
+  }
+  return JSON.stringify(value);
+}
+
+/** Компилирует самостоятельный авторский знак в тот же IR, что потребляет renderer. */
+export function compileDesignSpec<TIcon extends string>(
+  value: unknown,
+  options: CompileDesignSpecOptions<TIcon>,
+): DesignSpecGlyph<TIcon> {
+  const source = exact(options, 'options', ['icon'], ['variant', 'size']);
+  const icon = stableId(source.icon, 'options.icon') as TIcon;
+  const variant = !Object.hasOwn(source, 'variant') || source.variant === undefined
+    ? 'outline'
+    : oneOf(source.variant, ['outline', 'filled'] as const, 'options.variant');
+  const size = !Object.hasOwn(source, 'size') || source.size === undefined
+    ? 24
+    : positive(source.size, 'options.size', Number.MAX_VALUE);
+  const spec = parseDesignSpec(value);
+  const lowered = lowerDesignSpec(spec);
+  const specSha256 = `sha256:${sha256Hex(canonicalSpecJson(spec))}` as const;
+  const parts: readonly GlyphPart[] = Object.freeze(lowered.parts.map((part, zIndex): GlyphPart => {
+    const bbox = pathBBox(part.geometry.d) as RecipePart['bbox'];
+    return deepFreeze({
+      id: part.id,
+      role: spec.parts[zIndex]!.role,
+      zIndex,
+      d: part.geometry.d,
+      fillRule: lowered.composition.kind === 'compound' ? null : 'nonzero',
+      paint: part.paint,
+      anchor: [(bbox.minX + bbox.maxX) / 2, (bbox.minY + bbox.maxY) / 2] as const,
+      anchorSource: 'geometry-bbox-center',
+      topologySignature: part.topologySignature,
+      morphGroup: part.morphGroup,
+      provenance: { kind: 'recipe', identity: 'declared', recipe: 'design-spec/1' },
+    });
+  }));
+  const viewBox = [0, 0, 1, 1] as const;
+  return deepFreeze({
+    icon,
+    variant,
+    viewBox,
+    parts,
+    d: parts.map(({ d }) => d).join(''),
+    svg: assembleGlyphSvg(viewBox, parts, lowered.composition, [size, size]),
+    composition: lowered.composition,
+    provenance: { kind: 'design-spec', specVersion: 1, specSha256, state: 'candidate' },
+    designSpec: {
+      specVersion: 1,
+      specSha256,
+      anchors: lowered.anchors,
+      decorators: lowered.decorators,
+      negativeSpace: lowered.negativeSpace,
+      topologyKey: lowered.topologyKey!,
+    },
   });
 }
