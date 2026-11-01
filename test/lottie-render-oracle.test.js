@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { canonicalCubicPath, compareLottiePixels } from '../scripts/bench/lottie-render.js';
+import { canonicalCubicPath, compareLottiePixels, referenceLottieTiming } from '../scripts/bench/lottie-render.js';
 
 describe('независимый raw author oracle Lottie', () => {
   it('переиспользует только доказанную эквивалентность L/H/V и zero-tangent C', () => {
@@ -12,6 +12,11 @@ describe('независимый raw author oracle Lottie', () => {
   it('не угадывает unsupported raw grammar', () => {
     expect(() => canonicalCubicPath('M0 0A1 1 0 0 0 1 1Z')).toThrow('неподдержанная команда A');
     expect(() => canonicalCubicPath('m0 0l1 1z')).toThrow('absolute author commands');
+  });
+  it('получает ожидаемый прогресс и terminal из request, без producer metadata', () => {
+    expect(referenceLottieTiming({ gesture: 'reload.cycle', from: 0.17, to: 0.73, duration: 1000 })).toEqual({ from: 0.17, to: 0.73, terminalFrame: 60 });
+    expect(referenceLottieTiming({ gesture: 'reload.cycle', from: 1, to: 0.3, reducedMotion: true })).toEqual({ from: 1, to: 0.3, terminalFrame: 0 });
+    expect(referenceLottieTiming({})).toEqual({ from: 0, to: 0, terminalFrame: 0 });
   });
   it('принимает одинаковые nonempty pixels и отвергает blank producer', () => {
     const source = new Uint8ClampedArray([18, 52, 86, 255]);

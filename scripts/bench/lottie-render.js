@@ -40,14 +40,43 @@ function expectedOpacity(declaration, id, gesture, progress) {
   const a = points[next - 1], b = points[next];
   return a[1] + (b[1] - a[1]) * (progress - a[0]) / (b[0] - a[0]);
 }
-function referenceSvg(testCase, animation, progress, canonical = false) {
-  const meta = animation.meta.labIcons;
+export function referenceLottieTiming(request) {
+  const duration = request.gesture && !request.reducedMotion ? request.duration ?? 1000 : 0;
+  return { terminalFrame: duration * (request.frameRate ?? 60) / 1000,
+    from: request.gesture ? request.from ?? 0 : 0, to: request.gesture ? request.to ?? 1 : 0 };
+}
+function rawSource(testCase) {
   const source = new DOMParser().parseFromString(testCase.rawSvg, 'image/svg+xml');
   assert(!source.querySelector('parsererror'), `${testCase.name}: raw SVG не прочитан`);
+  const viewBox = source.documentElement.getAttribute('viewBox').trim().split(/[\s,]+/).map(Number);
+  assert(viewBox.length === 4 && viewBox.every(Number.isFinite) && viewBox[2] > 0 && viewBox[3] > 0, 'raw viewBox невалиден');
+  return { source, viewBox };
+}
+function referenceFrame(testCase) {
+  const { source, viewBox } = rawSource(testCase);
+  let minX = viewBox[0], minY = viewBox[1], maxX = minX + viewBox[2], maxY = minY + viewBox[3];
+  for (const [index, path] of [...source.querySelectorAll('path')].entries()) {
+    const values = canonicalCubicPath(path.getAttribute('d')).match(/[-+]?(?:\d*\.\d+|\d+\.?\d*)(?:[eE][-+]?\d+)?/g).map(Number);
+    const points = Array.from({ length: values.length / 2 }, (_, index) => values.slice(index * 2, index * 2 + 2));
+    const part = testCase.annotation?.parts.find(item => item.pathIndex === index);
+    if (testCase.request.gesture && testCase.annotation?.gesture.law === 'cycle.clockwise' && testCase.annotation.gesture.partId === part?.id) {
+      const pivot = [viewBox[0] + part.anchor[0] * viewBox[2], viewBox[1] + part.anchor[1] * viewBox[3]];
+      const radius = Math.max(...points.map(point => Math.hypot(point[0] - pivot[0], point[1] - pivot[1])));
+      minX = Math.min(minX, pivot[0] - radius); minY = Math.min(minY, pivot[1] - radius);
+      maxX = Math.max(maxX, pivot[0] + radius); maxY = Math.max(maxY, pivot[1] + radius);
+    } else for (const point of points) {
+      minX = Math.min(minX, point[0]); minY = Math.min(minY, point[1]);
+      maxX = Math.max(maxX, point[0]); maxY = Math.max(maxY, point[1]);
+    }
+  }
+  // Область наблюдения принадлежит raw master. Cropped target не обрезает oracle.
+  return [Math.floor(minX), Math.floor(minY), Math.ceil(maxX) - Math.floor(minX), Math.ceil(maxY) - Math.floor(minY)];
+}
+function referenceSvg(testCase, frame, progress, canonical = false) {
+  const { source, viewBox } = rawSource(testCase);
   const svg = document.createElementNS(NS, 'svg');
-  svg.setAttribute('viewBox', `0 0 ${animation.w} ${animation.h}`);
+  svg.setAttribute('viewBox', frame.join(' '));
   const root = document.createElementNS(NS, 'g');
-  root.setAttribute('transform', `translate(${meta.offset.join(' ')})`);
   svg.append(root);
   for (const [index, sourcePath] of [...source.querySelectorAll('path')].entries()) {
     const path = document.createElementNS(NS, 'path');
@@ -57,11 +86,21 @@ function referenceSvg(testCase, animation, progress, canonical = false) {
     const part = testCase.annotation?.parts.find(item => item.pathIndex === index);
     path.setAttribute('opacity', String(expectedOpacity(testCase.annotation, part?.id, testCase.request.gesture, progress)));
     if (testCase.annotation?.gesture.law === 'cycle.clockwise' && testCase.annotation.gesture.partId === part?.id && testCase.request.gesture) {
-      const viewBox = meta.logicalViewBox;
       path.setAttribute('transform', `rotate(${progress * 360} ${viewBox[0] + part.anchor[0] * viewBox[2]} ${viewBox[1] + part.anchor[1] * viewBox[3]})`);
     }
     root.append(path);
   }
+  return svg;
+}
+function observedSvg(rendered, animation, frame) {
+  const svg = document.createElementNS(NS, 'svg');
+  svg.setAttribute('viewBox', frame.join(' '));
+  const target = rendered.cloneNode(true);
+  target.removeAttribute('style');
+  target.setAttribute('x', -animation.meta.labIcons.offset[0]); target.setAttribute('y', -animation.meta.labIcons.offset[1]);
+  target.setAttribute('width', animation.w); target.setAttribute('height', animation.h);
+  target.setAttribute('overflow', 'hidden');
+  svg.append(target);
   return svg;
 }
 async function pixels(svg, width, height) {
@@ -95,15 +134,22 @@ export function compareLottiePixels(actual, expected) {
   return { referenceInk, alphaError, maxAlphaError, relativeInkError, colorError, maxColorError, relativeColorError,
     pass: referenceInk > 0 && relativeInkError <= 0.001 && maxAlphaError <= 4 && relativeColorError <= 0.001 && maxColorError <= 4 };
 }
-export async function runLottieRenderCases(create, testCases) {
+export async function runLottieRenderCases(create, testCases, { controls = true, visible = true } = {}) {
   assert(window.lottie?.version === '5.13.0', 'Нужен pinned lottie-web 5.13.0 SVG player.');
   const rows = [];
-  const gallery = document.createElement('div'); gallery.id = 'lottie-gallery'; document.body.append(gallery);
+  const gallery = document.createElement('div');
+  if (visible) gallery.id = 'lottie-gallery';
+  else gallery.style.cssText = 'position:absolute;left:-10000px;top:0';
+  document.body.append(gallery);
+  try {
   for (const testCase of testCases) {
     const exported = create(testCase.name, testCase.request);
     assert(exported.ok, `${testCase.name}: ${exported.reason?.code}`);
     const animation = exported.animation, before = JSON.stringify(animation), meta = animation.meta.labIcons;
+    const expectedTime = referenceLottieTiming(testCase.request), frame = referenceFrame(testCase), rawViewBox = rawSource(testCase).viewBox;
     assert(meta.masterSha256 === testCase.masterSha256, `${testCase.name}: master identity drift`);
+    assert(JSON.stringify(meta.logicalViewBox) === JSON.stringify(rawViewBox), `${testCase.name}: raw viewBox drift`);
+    assert(meta.terminalFrame === expectedTime.terminalFrame && meta.from === expectedTime.from && meta.to === expectedTime.to, `${testCase.name}: request timing drift`);
     const card = document.createElement('section'); card.style.cssText = 'display:inline-grid;gap:8px;vertical-align:top;margin:12px';
     const label = document.createElement('div'); label.textContent = `${testCase.name}/${testCase.request.variant ?? 'outline'} · ${testCase.request.gesture ?? 'static'}`;
     const container = document.createElement('div'); container.style.cssText = `width:${animation.w * 2}px;height:${animation.h * 2}px`;
@@ -117,16 +163,16 @@ export async function runLottieRenderCases(create, testCases) {
         player.addEventListener('DOMLoaded', () => { clearTimeout(timer); resolve(); });
         player.addEventListener('data_failed', () => { clearTimeout(timer); reject(new Error('Lottie data_failed')); });
       });
-      for (const t of [...new Set([0, meta.terminalFrame / 2, meta.terminalFrame])]) {
+      for (const t of [...new Set([0, expectedTime.terminalFrame / 2, expectedTime.terminalFrame])]) {
         player.goToAndStop(t, true);
-        const fraction = meta.terminalFrame ? t / meta.terminalFrame : 1;
-        const progress = testCase.request.gesture ? meta.from + (meta.to - meta.from) * fraction : 0;
-        const reference = referenceSvg(testCase, animation, progress);
-        const canonicalReference = referenceSvg(testCase, animation, progress, true);
+        const fraction = expectedTime.terminalFrame ? t / expectedTime.terminalFrame : 1;
+        const progress = testCase.request.gesture ? expectedTime.from + (expectedTime.to - expectedTime.from) * fraction : 0;
+        const reference = referenceSvg(testCase, frame, progress);
+        const canonicalReference = referenceSvg(testCase, frame, progress, true);
         const rendered = container.querySelector('svg'); assert(rendered, 'SVG player ничего не нарисовал');
         for (const size of [16, 24, 48]) {
-          const width = Math.ceil(animation.w * size / meta.logicalViewBox[2]), height = Math.ceil(animation.h * size / meta.logicalViewBox[3]);
-          const renderedPixels = await pixels(rendered, width, height);
+          const width = Math.ceil(frame[2] * size / rawViewBox[2]), height = Math.ceil(frame[3] * size / rawViewBox[3]);
+          const renderedPixels = await pixels(observedSvg(rendered, animation, frame), width, height);
           const nativeRaster = compareLottiePixels(renderedPixels, await pixels(reference, width, height));
           const observation = compareLottiePixels(renderedPixels, await pixels(canonicalReference, width, height));
           rows.push({ name: testCase.name, variant: testCase.request.variant ?? 'outline', gesture: testCase.request.gesture ?? null, t, size, ...observation, nativeRaster });
@@ -139,13 +185,13 @@ export async function runLottieRenderCases(create, testCases) {
           }
         }
       }
-      if (meta.terminalFrame) {
+      if (expectedTime.terminalFrame) {
         await new Promise((resolve, reject) => {
           const timer = setTimeout(() => reject(new Error('Lottie completion timeout')), 3000);
           player.addEventListener('complete', () => { clearTimeout(timer); resolve(); });
           player.goToAndStop(0, true); player.setSpeed(100); player.play();
         });
-        assert(player.currentFrame === meta.terminalFrame, `natural completion=${player.currentFrame}, terminal=${meta.terminalFrame}`);
+        assert(player.currentFrame === expectedTime.terminalFrame, `natural completion=${player.currentFrame}, terminal=${expectedTime.terminalFrame}`);
       }
       assert(JSON.stringify(create(testCase.name, testCase.request).animation) === before, 'Player изменил следующий export.');
       // Сохраняется независимый SVG snapshot для ручного просмотра; player освобождается.
@@ -158,7 +204,7 @@ export async function runLottieRenderCases(create, testCases) {
         sample.style.height = `${animation.h * size / meta.logicalViewBox[3]}px`;
         sample.setAttribute('aria-label', `${size}px Lottie`); container.append(sample);
       }
-      const authored = referenceSvg(testCase, animation, testCase.request.gesture ? meta.to : 0);
+      const authored = referenceSvg(testCase, [-meta.offset[0], -meta.offset[1], animation.w, animation.h], testCase.request.gesture ? expectedTime.to : 0);
       authored.style.width = `${animation.w * 2}px`; authored.style.height = `${animation.h * 2}px`;
       authored.setAttribute('aria-label', '48px author SVG'); container.append(authored);
     } finally { if (player.renderer) player.destroy(); }
@@ -167,5 +213,39 @@ export async function runLottieRenderCases(create, testCases) {
   const expected = new Uint8ClampedArray([0, 0, 0, 255, 0, 0, 0, 0]);
   assert(!compareLottiePixels(new Uint8ClampedArray([0, 0, 0, 0, 0, 0, 0, 255]), expected).pass, 'Pixel oracle допускает другую форму.');
   assert(rows.every(row => row.pass), `raster mismatches: ${rows.filter(row => !row.pass).length}/${rows.length}; ${JSON.stringify(rows.filter(row => !row.pass).slice(0, 2))}`);
-  return { player: window.lottie.version, rows, complete: true };
+  const negativeControls = controls ? await runLottieNegativeControls(create, testCases) : [];
+  return { player: window.lottie.version, rows, negativeControls, complete: true };
+  } finally { if (!visible) gallery.remove(); }
+}
+
+async function runLottieNegativeControls(create, testCases) {
+  const rotating = testCases.find(item => item.name === 'reload' && item.request.variant === 'outline' && item.request.gesture === 'reload.cycle');
+  const countershape = testCases.find(item => item.name === 'chatbubble-ellipses' && item.request.variant === 'outline' && !item.request.gesture);
+  assert(rotating && countershape, 'Нужны реальные cycle и countershape controls.');
+  const cycle = { ...rotating, request: { ...rotating.request, duration: 1000, frameRate: 60, from: 0.17, to: 0.73 } };
+  const reverse = { ...cycle, request: { ...cycle.request, from: 0.73, to: 0.17 } };
+  const reduced = { ...reverse, request: { ...reverse.request, reducedMotion: true } };
+  await runLottieRenderCases(create, [cycle, countershape, reverse, reduced], { controls: false, visible: false });
+  const mutants = [
+    ['geometry', cycle, animation => { animation.layers[0].shapes.find(shape => shape.ty === 'sh').ks.k.v[0][0] += 1; }, /raster mismatches/],
+    ['anchor', cycle, animation => { const layer = animation.layers.find(layer => layer.ks.r.a); layer.ks.a.k[0] += 1; layer.ks.p.k[0] += 1; }, /raster mismatches/],
+    ['fill-countershape', countershape, animation => { const layer = animation.layers.find(layer => layer.shapes.filter(shape => shape.ty === 'sh').length > 1); layer.shapes.splice(layer.shapes.findLastIndex(shape => shape.ty === 'sh'), 1); }, /raster mismatches/],
+    ['terminal-hold', cycle, animation => { animation.op -= 1; for (const layer of animation.layers) layer.op -= 1; }, /natural completion=59, terminal=60/],
+    ['canvas-crop', cycle, animation => { animation.w = Math.floor(animation.w / 2); }, /raster mismatches/],
+  ];
+  const receipt = [];
+  for (const [id, testCase, mutate, expectedFailure] of mutants) {
+    let failure;
+    try {
+      await runLottieRenderCases((name, request) => {
+        const result = create(name, request);
+        assert(result.ok, `control ${id}: producer refusal`);
+        mutate(result.animation); return result;
+      }, [testCase], { controls: false, visible: false });
+    } catch (error) { failure = error.message; }
+    assert(failure && expectedFailure.test(failure), `control ${id} не обнаружил предметный дефект: ${failure ?? 'PASS'}`);
+    receipt.push({ id, detected: true, failure: failure.split(';')[0] });
+  }
+  delete window.__lottieFailure;
+  return receipt;
 }
