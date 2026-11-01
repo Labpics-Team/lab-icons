@@ -30,7 +30,13 @@ export async function verifyLottieConsumer({ browser, prepared, origin, outdir, 
     const common = { name, rawSvg: raw.toString('utf8'), masterSha256: master.sha256, annotation };
     const gestures = referenceLottieGestures(name, annotation);
     return [{ ...common, request: { variant, color: '#123456' } },
-      ...gestures.map(gesture => ({ ...common, request: { variant, gesture, duration: 1000, from: 0, to: 1, color: '#123456' } }))];
+      ...gestures.flatMap(gesture => {
+        const request = { variant, gesture, duration: 1000, from: 0, to: 1, color: '#123456' };
+        return [{ ...common, request }, ...annotation.gesture.law === 'confirmation.presence' ? [
+          { ...common, request: { ...request, from: 1, to: 0 } },
+          { ...common, request: { ...request, from: 1, to: 0, reducedMotion: true } },
+        ] : []];
+      })];
   }));
   const entry = join(prepared.consumer, 'lottie-render-consumer.mjs');
   writeFileSync(entry, `${names.map((name, index) => `import { exportLottie as icon${index} } from ${JSON.stringify(`@labpics/icons/lottie/${name}`)};`).join('\n')}
