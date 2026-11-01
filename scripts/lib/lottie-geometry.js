@@ -99,7 +99,7 @@ export function renderLottieSymbolModule(icon, variants) {
 
 export function lottieSymbolDeclaration() {
   return [
-    "import type { LottieExportRequest, LottieExportResult, LottieCapabilities } from './types.js';",
+    "import type { LottieExportRequest, LottieExportResult, LottieCapabilities } from '../ir/lottie-types.js';",
     "import type { IconVariant } from '../ir/compiler.js';",
     'export declare function exportLottie(request?: LottieExportRequest): LottieExportResult;',
     'export declare function lottieCapabilities(variant?: IconVariant): LottieCapabilities;', '',

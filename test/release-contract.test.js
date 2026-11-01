@@ -41,8 +41,8 @@ const DECLARATIONS = Object.freeze({
   'dist/ir/render.d.ts': "import type { GlyphIR } from './compiler.js';\nexport declare function renderGlyphSvg(glyph: GlyphIR): string;\n",
   'dist/motion/index.d.ts': "import type { GlyphIR } from '../ir/index.js';\nexport declare function compileSymbolEffect(glyph: GlyphIR): unknown;\n",
   'dist/symbols/fixture.d.ts': "import type { AuthorSourceGlyph } from '../ir/author-source.js';\nexport declare function glyph(): AuthorSourceGlyph;\n",
-  'dist/lottie/fixture.d.ts': "import type { LottieExportResult } from './types.js';\nexport declare function exportLottie(): LottieExportResult;\n",
-  'dist/lottie/types.d.ts': "import type { GlyphIR } from '../ir/compiler.js';\nexport interface LottieExportResult { readonly glyph: GlyphIR }\n",
+  'dist/lottie/fixture.d.ts': "import type { LottieExportResult } from '../ir/lottie-types.js';\nexport declare function exportLottie(): LottieExportResult;\n",
+  'dist/ir/lottie-types.d.ts': "import type { GlyphIR } from './compiler.js';\nexport interface LottieExportResult { readonly glyph: GlyphIR }\n",
   'dist/ir/recipes.d.ts': 'export interface RecipeResult { readonly kind: string }\n',
   'dist/ir/candidates.d.ts': 'export declare function registerCandidates(): void;\n',
 });
@@ -104,6 +104,14 @@ afterEach(() => {
 });
 
 describe('release contract', () => {
+  it('отказывает declaration-only модулю под публичным wildcard', () => {
+    for (const directory of ['symbols', 'lottie']) {
+      const ghost = `dist/${directory}/private-types.d.ts`;
+      const contract = { ...CONTRACT, files: [...CONTRACT.files, ghost].sort(),
+        typeDependencies: [...CONTRACT.typeDependencies, ghost].sort() };
+      expect(validateReleaseContract(contract)).toContain(`release ${directory} wildcard имеет types без runtime: ${ghost}`);
+    }
+  });
   it('является точным SSOT для npm projection и физических outputs', () => {
     expect(validateReleaseContract(REPO_CONTRACT)).toEqual([]);
     expect(validatePackageProjection(REPO_PACKAGE, REPO_CONTRACT)).toEqual([]);

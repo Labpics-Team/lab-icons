@@ -64,6 +64,7 @@ pnpm add @labpics/icons
 - `dist/ir/index.d.ts`
 - `dist/ir/index.js`
 - `dist/ir/lottie-runtime.js`
+- `dist/ir/lottie-types.d.ts`
 - `dist/ir/recipes.d.ts`
 - `dist/ir/recipes.js`
 - `dist/ir/render.d.ts`
@@ -703,7 +704,6 @@ pnpm add @labpics/icons
 - `dist/lottie/trophy.js`
 - `dist/lottie/turn-off.d.ts`
 - `dist/lottie/turn-off.js`
-- `dist/lottie/types.d.ts`
 - `dist/lottie/unlock.d.ts`
 - `dist/lottie/unlock.js`
 - `dist/lottie/upload.d.ts`
@@ -1401,5 +1401,5 @@ pnpm add @labpics/icons
 - `dist/ir/author-source.d.ts`
 - `dist/ir/catalog.generated.d.ts`
 - `dist/ir/compiler.d.ts`
+- `dist/ir/lottie-types.d.ts`
 - `dist/ir/request.d.ts`
-- `dist/lottie/types.d.ts`

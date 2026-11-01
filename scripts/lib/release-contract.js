@@ -185,6 +185,13 @@ export function validateReleaseContract(contract) {
         if (conditions.types !== `./dist/${directory}/*.d.ts` || conditions.import !== `./dist/${directory}/*.js`) {
           errors.push(`release ${directory} wildcard обязан указывать только на dist/${directory}/<name>`);
         }
+        // Wildcard действует и в TypeScript: helper.d.ts без helper.js
+        // создаёт публичный subpath, который нельзя исполнить.
+        for (const file of files) {
+          if (file.startsWith(`dist/${directory}/`) && file.endsWith('.d.ts') && !files.has(file.slice(0, -5) + '.js')) {
+            errors.push(`release ${directory} wildcard имеет types без runtime: ${file}`);
+          }
+        }
         continue;
       }
       for (const [condition, target] of Object.entries(conditions)) {

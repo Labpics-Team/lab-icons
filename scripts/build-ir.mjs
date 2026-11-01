@@ -111,7 +111,7 @@ async function compileIrTargets({ root, staging }) {
     execFileSync(process.execPath, [join(root, 'node_modules/typescript/bin/tsc'), '-p', join(root, 'tsconfig.build.json'), '--outDir', declarations], { cwd: root, stdio: 'inherit' });
     for (const file of REQUIRED_DECLARATIONS) copyFileSync(join(declarations, 'ir', file), join(staging, 'ir', file));
     copyFileSync(join(declarations, 'motion/index.d.ts'), join(staging, 'motion/index.d.ts'));
-    copyFileSync(join(declarations, 'lottie/types.d.ts'), join(staging, 'lottie/types.d.ts'));
+    copyFileSync(join(declarations, 'lottie/types.d.ts'), join(staging, 'ir/lottie-types.d.ts'));
 
     const catalog = read(root, 'semantics/catalog.json');
     const grid = read(root, 'semantics/grid.json');
