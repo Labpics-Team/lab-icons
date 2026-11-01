@@ -12,7 +12,10 @@ interface CompiledStateGroup {
   readonly sharedSvg: string;
   readonly sharedPartIds: readonly string[];
   readonly enclosurePartId: string;
-  readonly states: readonly (StateGroupCapabilities['states'][number] & Readonly<{ contentSvg: string }>)[];
+  readonly states: readonly (StateGroupCapabilities['states'][number] & Readonly<{
+    contentSvg: string;
+    staticSharedSvg?: string;
+  }>)[];
   readonly proof: StateGroupCapabilities['proof'];
 }
 
@@ -40,7 +43,7 @@ export function createCompiledStateGroup(input: CompiledStateGroup) {
     group: data.group, variant: data.variant, defaultState: data.defaultState,
     transition: 'enclosure-replacement', morph: 'unavailable', enclosurePartId: data.enclosurePartId,
     sharedPartIds: data.sharedPartIds,
-    states: data.states.map(({ contentSvg: _, ...state }) => state),
+    states: data.states.map(({ contentSvg: _, staticSharedSvg: _static, ...state }) => state),
     formats: { static: ['svg'], transition: ['web-effect'] }, proof: data.proof,
   });
 
@@ -65,7 +68,7 @@ export function createCompiledStateGroup(input: CompiledStateGroup) {
     const invalid = validate(state, request, ['variant']);
     if (invalid) return invalid;
     const content = byState.get(state)!;
-    return Object.freeze({ ok: true, svg: data.frame[0] + content.contentSvg + data.sharedSvg + data.frame[1] });
+    return Object.freeze({ ok: true, svg: data.frame[0] + content.contentSvg + (content.staticSharedSvg ?? data.sharedSvg) + data.frame[1] });
   }
 
   function renderStateSvg(state = data.defaultState, request: StateRenderRequest = {}): StateSvgResult {

@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import { authorPathEntries, sourcePathEntries } from '../../src/core/icon-geometry.js';
+import { exactClosedFillPathKey } from './exact-closed-fill-path.js';
 
 const NAME = /^[a-z][a-z0-9-]*$/;
 const HASH = /^[a-f0-9]{64}$/;
@@ -30,6 +31,16 @@ function freezeTree(value) {
   }
   return value;
 }
+
+function sameFillPart(left, right) {
+  const { d: a, ...leftContract } = left;
+  const { d: b, ...rightContract } = right;
+  if (stableJSON(leftContract) !== stableJSON(rightContract)) return false;
+  if (a === b) return true;
+  const key = exactClosedFillPathKey(a, left.fillRule);
+  return key !== null && key === exactClosedFillPathKey(b, right.fillRule);
+}
+const fillPart = part => ({ d: part.d, fillRule: part.fillRule, paint: part.paint });
 
 /** Имена release-проекции выводятся из spec, не из параллельного списка. */
 export function authorStateGroupNames(document) {
@@ -82,12 +93,15 @@ export function compileAuthorStateGroups(baseline, document, { compiler, assembl
     const members = new Set();
     const states = [];
     let reference;
+    let referenceShared;
+    let referenceEnclosure;
     let sharedSvg;
     let enclosureIdentity;
     let frame;
     let variant;
     let prefixBoundary;
     let prefixBoundaryDiffers = false;
+    const staticSharedByState = new Map();
     for (const state of stateNames) {
       const member = group.states[state];
       fields(member, ['icon', 'variant', 'masterSha256', 'pathFingerprintSha256', 'contentPartIds'], `${name}.${state}`);
@@ -143,9 +157,9 @@ export function compileAuthorStateGroups(baseline, document, { compiler, assembl
       if (variant !== undefined && member.variant !== variant) refuse('ENCLOSURE_MISMATCH', `${name}: нельзя смешивать начертания`);
       variant = member.variant;
       const enclosure = glyph.parts.at(-1);
-      const currentEnclosure = stableJSON({ d: enclosure.d, fillRule: enclosure.fillRule, paint: enclosure.paint,
-        viewBox: glyph.viewBox, dimensions: [24, 24], placement: 'after-content' });
-      if (enclosureIdentity !== undefined && currentEnclosure !== enclosureIdentity) {
+      const enclosureContract = { ...fillPart(enclosure),
+        viewBox: glyph.viewBox, dimensions: [24, 24], placement: 'after-content' };
+      if (referenceEnclosure !== undefined && !sameFillPart(enclosureContract, referenceEnclosure)) {
         refuse('ENCLOSURE_MISMATCH', `${name}.${state}: оболочка/paint/рамка не равна`);
       }
       const shared = glyph.parts.slice(member.contentPartIds.length)
@@ -153,21 +167,28 @@ export function compileAuthorStateGroups(baseline, document, { compiler, assembl
       const identity = stableJSON({ parts: shared.map(part => ({ id: part.id, role: part.role,
         d: part.d, fillRule: part.fillRule, paint: part.paint })),
       viewBox: glyph.viewBox, dimensions: [24, 24], placement: 'after-content' });
-      if (reference !== undefined && identity !== reference) {
+      const sharedContract = shared.map(part => ({ id: part.id, role: part.role, ...fillPart(part) }));
+      if (referenceShared !== undefined && sharedContract.some((part, index) => !sameFillPart(part, referenceShared[index]))) {
         refuse('SHARED_PART_MISMATCH', `${name}.${state}: ordered geometry/paint общих частей не равны`);
       }
-      if (reference === undefined) {
+      if (referenceShared === undefined) {
+        referenceShared = sharedContract;
+        referenceEnclosure = enclosureContract;
+      }
+      const staticSharedSvg = assembleGlyphLayers(shared);
+      staticSharedByState.set(state, staticSharedSvg);
+      if (state === group.defaultState) {
         reference = identity;
-        enclosureIdentity = currentEnclosure;
-        sharedSvg = assembleGlyphLayers(shared);
+        enclosureIdentity = stableJSON(enclosureContract);
+        sharedSvg = staticSharedSvg;
         frame = assembleGlyphFrame(glyph.viewBox, [24, 24]);
       }
       const content = glyph.parts.slice(0, member.contentPartIds.length)
         .map((part, index) => ({ ...part, id: member.contentPartIds[index], role: 'content' }));
       const boundary = content.at(-1);
-      const boundaryIdentity = stableJSON({ d: boundary.d, fillRule: boundary.fillRule, paint: boundary.paint });
+      const boundaryIdentity = fillPart(boundary);
       if (prefixBoundary === undefined) prefixBoundary = boundaryIdentity;
-      else if (boundaryIdentity !== prefixBoundary) prefixBoundaryDiffers = true;
+      else if (!sameFillPart(boundaryIdentity, prefixBoundary)) prefixBoundaryDiffers = true;
       states.push({ id: state, partId: groupPartId, icon: member.icon,
         contentSvg: assembleGlyphLayers(content), contentPartIds: [...member.contentPartIds], author: { ...source.author } });
     }
@@ -175,6 +196,10 @@ export function compileAuthorStateGroups(baseline, document, { compiler, assembl
     // Не оставляем её в opacity-группах: source-over затемнил бы общий рисунок.
     if (!prefixBoundaryDiffers) {
       refuse('SHARED_PART_UNDECLARED', `${name}: общая последняя часть prefix требует объявленной shared anatomy`);
+    }
+    for (const state of states) {
+      const staticSharedSvg = staticSharedByState.get(state.id);
+      if (staticSharedSvg !== sharedSvg) state.staticSharedSvg = staticSharedSvg;
     }
     output[name] = {
       schemaVersion: 2, group: name, variant, defaultState: group.defaultState,

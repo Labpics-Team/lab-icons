@@ -22,7 +22,8 @@ const spec = document.groups['status-circle'];
 const manifest = read('semantics/figma-baseline.json');
 const groupNames = Object.keys(document.groups).sort();
 const names = [...new Set([...Object.values(document.groups).flatMap(group =>
-  Object.values(group.states).map(state => state.icon)), 'stop-circle'])];
+  Object.values(group.states).map(state => state.icon)), 'stop-circle',
+  ...['back', 'down', 'forward', 'up'].map(direction => `arrow-${direction}-circle`)])];
 const baseline = loadAuthorBaseline(root, { manifest: { ...manifest,
   counts: { families: names.length, variants: names.length * 2 },
   icons: Object.fromEntries(names.map(name => [name, manifest.icons[name]])),
@@ -67,6 +68,153 @@ function repin(source, input, state, mutate, name = 'status-circle') {
   member.sourceContract = buildSourceVariantContractFromSvg({ file: member.master,
     sourceSvg: member.normalizedSvg, artifactSvg: member.artifactSvg });
 }
+
+// Только test-built declaration: публичная предметная группа этим не принимается.
+function directionDocument(directions = ['back', 'down'], variant = 'outline') {
+  return { schemaVersion: 2, source: document.source, groups: { 'direction-witness': {
+    law: 'enclosure.replace', defaultState: 'down', enclosurePartId: 'direction-ring',
+    sharedParts: [{ id: 'direction-ring', role: 'container' }],
+    states: Object.fromEntries(directions.map(direction => {
+      const icon = `arrow-${direction}-circle`, source = baseline.icons[icon][variant];
+      return [direction, { icon, variant, masterSha256: source.author.masterSha256,
+        pathFingerprintSha256: source.author.pathFingerprintSha256, contentPartIds: [`${direction}-arrow`] }];
+    })),
+  } } };
+}
+
+// Независимый oracle для этой пары: восемь рёбер и явная карта соответствия.
+// Его decimal tokens уже имеют одинаковое написание; canonical key не участвует.
+function authoredCubicContours(d) {
+  return d.split('Z').filter(Boolean).map(contour => {
+    const commands = [...contour.matchAll(/([MC])([^MC]+)/g)];
+    expect(commands.map(match => match[1])).toEqual(['M', 'C', 'C', 'C', 'C']);
+    const points = commands.map(match => match[2].trim().split(/\s+/));
+    expect(points[0]).toHaveLength(2);
+    const edges = points.slice(1).map((values, index) => {
+      expect(values).toHaveLength(6);
+      return [index === 0 ? points[0] : points[index].slice(-2),
+        values.slice(0, 2), values.slice(2, 4), values.slice(4)];
+    });
+    expect(edges.at(-1).at(-1)).toEqual(points[0]);
+    return edges;
+  });
+}
+
+describe('exact shared contours: настоящий build/runtime путь без изменения masters', () => {
+  it('байты трёх буквальных payload/module/proof сохраняются', () => {
+    // SHA получены до исправления на a85395d; не регенерировать из нового key.
+    expect(Object.fromEntries(groupNames.map(name => [name, {
+      payload: sha256(JSON.stringify(payloads[name])), module: sha256(renderStateGroupModule(payloads[name])),
+      proof: sha256(JSON.stringify(payloads[name].proof)),
+    }]))).toEqual({
+      'expression-face': {
+        payload: 'b9ee497d047cac1f3621143fb649daf8cc872e3be00d94dea6eac9fb5e024b49',
+        module: '1e4236845e7142a2a900de9a2f2235ba9f0a8f4535cc72e4201a17804982a52b',
+        proof: '6a0c0f72df5b43a1671844e85995756b84aac82fbbc8090431763a7b25f4d89c',
+      },
+      'playback-circle': {
+        payload: '7cced098e81dc69a1a2bfed24604c84f00322e3553e5b54bc1729b2da88c0d6e',
+        module: 'a334e7e6f1d55ccd5893dab3f796eaf92c1ea2446ab4bca13648a799321bf593',
+        proof: '9ee269bd3d3a6a6facb237e87a904e9facae848daa433c4f9c2e5db48629b68e',
+      },
+      'status-circle': {
+        payload: 'b3611800148803d54aedefdf293a4b22b380139e7f0a406cfdad0339c5486d7d',
+        module: '2683e8515aa68827bf979941c00d773352d4ccd763ae88a1e257954bf721b6e3',
+        proof: 'f8b42ed4c8cbdb1e665c63fba7e519f36559c26179ad0e5ba69eea87e9189738',
+      },
+    });
+  });
+
+  it('back/down совпадают восемью directed cubic edges независимо от production key', () => {
+    const back = rawPaths(baseline.icons['arrow-back-circle'].outline.rawSvg).at(-1);
+    const down = rawPaths(baseline.icons['arrow-down-circle'].outline.rawSvg).at(-1);
+    expect(back.fillRule).toBe('evenodd');
+    expect(down.fillRule).toBe('evenodd');
+    expect(back.d).not.toBe(down.d);
+    const b = authoredCubicContours(back.d), d = authoredCubicContours(down.d);
+    expect(b).toHaveLength(2);
+    expect(d).toHaveLength(2);
+    const reverse = edge => [...edge].reverse();
+    expect(d[0]).toEqual([2, 1, 0, 3].map(index => reverse(b[0][index])));
+    expect(d[1]).toEqual([0, 3, 2, 1].map(index => reverse(b[1][index])));
+  });
+
+  it('back/down проходят production compile и raw static oracle; mount использует defaultState', () => {
+    const input = directionDocument();
+    const payload = compile(baseline, input)['direction-witness'];
+    const group = createCompiledStateGroup(payload);
+    const expected = statePackageExpectations(baseline, input)['direction-witness'];
+    expect(() => verifyInstalledStateGroup(group, expected)).not.toThrow();
+    for (const state of ['back', 'down']) {
+      expect(rawPaths(group.render(state).svg)).toEqual(rawPaths(baseline.icons[`arrow-${state}-circle`].outline.rawSvg));
+      const mounted = group.renderStateSvg(state).svg;
+      expect(mounted.split('data-part="direction-ring"')).toHaveLength(2);
+      expect(rawPaths(mounted).at(-1)).toEqual(rawPaths(baseline.icons['arrow-down-circle'].outline.rawSvg).at(-1));
+      expect(group.compileStateEffect(state, { duration: 300 }).effect.unchangedPartIds).toEqual(['direction-ring']);
+      expect(Object.hasOwn(group.stateCapabilities().states.find(member => member.id === state), 'staticSharedSvg')).toBe(false);
+    }
+    expect(payload.states.find(member => member.id === 'back').staticSharedSvg).toBeDefined();
+    expect(Object.hasOwn(payload.states.find(member => member.id === 'down'), 'staticSharedSvg')).toBe(false);
+  });
+
+  it.each(['forward', 'up'])('%s с точным master остаётся ENCLOSURE_MISMATCH', direction => {
+    expect(() => compile(baseline, directionDocument(['back', 'down', direction])))
+      .toThrow(expect.objectContaining({ code: 'ENCLOSURE_MISMATCH' }));
+  });
+
+  it('изменение control point ниже точности Number остаётся ENCLOSURE_MISMATCH', () => {
+    const source = structuredClone(baseline), input = directionDocument();
+    repin(source, input, 'down', svg => svg.replace('C22.4999 17.7988', 'C22.499900000000000000000000001 17.7988'), 'direction-witness');
+    expect(() => compile(source, input)).toThrow(expect.objectContaining({ code: 'ENCLOSURE_MISMATCH' }));
+  });
+
+  it('общая content часть suffix допускает exact spelling и сохраняет raw static SVG', () => {
+    const source = structuredClone(baseline), input = structuredClone(document);
+    repin(source, input, 'smile', svg => {
+      let index = 0;
+      return svg.replace(/<path\b[^>]*>/g, tag => index++ === 1
+        ? tag.replace(/\bd="([^"]+)"/, (_, d) => `d="${d.replaceAll(' ', '  ')}"`) : tag);
+    }, 'expression-face');
+    const compiled = createCompiledStateGroup(compile(source, input)['expression-face']);
+    expect(rawPaths(compiled.render('smile').svg)).toEqual(rawPaths(source.icons.smile.outline.rawSvg));
+    expect(() => verifyInstalledStateGroup(compiled, statePackageExpectations(source, input)['expression-face'])).not.toThrow();
+  });
+
+  it('неподдержанный H/V fallback сохраняет тип отказа; literal H/V остаётся допустимым', () => {
+    const source = structuredClone(baseline), input = directionDocument();
+    const replaceRing = d => svg => {
+      let index = 0;
+      return svg.replace(/<path\b[^>]*>/g, tag => index++ === 1 ? tag.replace(/\bd="[^"]+"/, `d="${d}"`) : tag);
+    };
+    repin(source, input, 'back', replaceRing('M0 0L10 0L10 10L0 10Z'), 'direction-witness');
+    repin(source, input, 'down', replaceRing('M0 0H10V10H0Z'), 'direction-witness');
+    expect(() => compile(source, input)).toThrow(expect.objectContaining({ code: 'ENCLOSURE_MISMATCH' }));
+    repin(source, input, 'back', replaceRing('M0 0H10V10H0Z'), 'direction-witness');
+    expect(() => compile(source, input)).not.toThrow();
+  });
+
+  it.each(['back', 'down', 'forward', 'up'])('Filled %s compound не разбивается для admission', direction => {
+    expect(rawPaths(baseline.icons[`arrow-${direction}-circle`].filled.rawSvg)).toHaveLength(1);
+    const input = directionDocument(['back', 'down', 'forward', 'up'], 'filled');
+    const members = input.groups['direction-witness'].states;
+    input.groups['direction-witness'].states = { a: members[direction], down: members[direction === 'down' ? 'back' : 'down'] };
+    expect(() => compile(baseline, input)).toThrow(expect.objectContaining({ code: 'TOPOLOGY_UNSUPPORTED' }));
+  });
+
+  it('геометрически равная последняя prefix path требует shared anatomy при другом spelling', () => {
+    const source = structuredClone(baseline), input = structuredClone(document);
+    input.groups['expression-face'].sharedParts = [{ id: 'face-enclosure', role: 'container' }];
+    for (const [state, member] of Object.entries(input.groups['expression-face'].states)) {
+      member.contentPartIds.push(`${state}-left-eye`, `${state}-right-eye`);
+    }
+    repin(source, input, 'smile', svg => {
+      let index = 0;
+      return svg.replace(/<path\b[^>]*>/g, tag => index++ === 2
+        ? tag.replace(/\bd="([^"]+)"/, (_, d) => `d="${d.replaceAll(' ', '  ')}"`) : tag);
+    }, 'expression-face');
+    expect(() => compile(source, input)).toThrow(expect.objectContaining({ code: 'SHARED_PART_UNDECLARED' }));
+  });
+});
 
 describe.each(groupNames)('%s: точные author masters и единая оболочка', name => {
   const spec = document.groups[name];

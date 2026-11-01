@@ -34,6 +34,50 @@ SHA-256 `e968e80eacbedc69a95420ccbfb386db9a4a6b5c77f728e206eb1e970308c5c9`.
 transforms отсутствуют. Interior d/rules/order сохраняются буквально.
 Paths не перенумеровываются по близости: IDs задаёт versioned semantic spec.
 
+## Точное равенство при другом начале контура
+
+Source-срез 2026-11-02 расширяет проверку только у build-time владельца
+`enclosure.replace`. Outline `arrow-back-circle` и `arrow-down-circle` имеют
+точно одинаковые восемь кубических рёбер кольца; начало каждого контура и
+направление обхода различаются. Независимая проверка raw masters сопоставляет
+`(P0,C1,C2,P1)` с `(P1,C2,C1,P0)` и сохраняет каждую десятичную координату.
+
+После прежнего literal сравнения частный ключ поддерживает абсолютные
+`M/L/C/Z`, включая повторные наборы аргументов. Числа представляются значащими
+десятичными цифрами и целой степенью десяти; округления, epsilon и `Number`
+для координат нет. Ключ сохраняет тип, количество и multiplicity рёбер,
+границы и число контуров. [SVG 2 closepath](https://www.w3.org/TR/SVG2/paths.html#PathDataClosePathCommand)
+задаёт прямое ребро от текущей точки до начала; ключ включает его, когда
+точки различаются. Все контуры должны быть явно закрыты `Z`. Циклический
+сдвиг выбирает первое ребро без изменения координат; минимальная rotation
+находится за линейное число сравнений без хранения всех вариантов.
+
+[SVG 2 fill-rule](https://www.w3.org/TR/SVG2/painting.html#FillRuleProperty)
+позволяет переставлять контуры. Для `evenodd` допустим независимый разворот
+каждого; для `nonzero` — только одновременный разворот всех. Контрпример:
+`M0 0L10 0L10 10L0 10Z M2 2L8 2L8 8L2 8Z` даёт winding 2 в центре;
+разворот только внутреннего квадрата даёт winding 0 и отверстие.
+Paint, fill-rule, рамка, размеры, порядок path, semantic IDs и роли
+проверяются отдельно. Arcs, shorthand и relative commands дают «не доказано»
+и прежний тип отказа; literal-identical пути сохраняют прежний допуск.
+
+Бесплатный [picosvg svg_reuse.py, commit 933657f](https://github.com/googlefonts/picosvg/blob/933657f783b48e533952ffd3f5cfb8085b8388a5/src/picosvg/svg_reuse.py)
+использует tolerance, rounding и affine transforms. Его сравнение не сохраняет
+требуемую exact-decimal границу; новый geometry engine здесь не нужен.
+
+Mounted suffix берётся из объявленного `defaultState` и хранится один раз.
+Только другое authored spelling добавляет частный `staticSharedSvg` к состоянию:
+static render сохраняет оригинальные `d`, rule и порядок. Capabilities это
+внутреннее поле не публикует; runtime получает только готовые SVG строки.
+Хеши прежних трёх payload, module и proof сохраняются.
+
+Back/down проверяются test-built декларацией через production compiler и raw
+static oracle. Публичная directional группа этим срезом не добавляется.
+Outline forward/up имеют реальные decimal различия и сохраняют
+`ENCLOSURE_MISMATCH`; каждый из четырёх Filled masters содержит один compound
+path и сохраняет `TOPOLOGY_UNSUPPORTED`. Masters остаются неизменными.
+Packed consumer, browser/optical admission и performance требуют своих гейтов.
+
 ## Альтернативы и различители
 
 | Способ | Проверенное ограничение | Решение |

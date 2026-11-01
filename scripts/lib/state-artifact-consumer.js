@@ -10,7 +10,7 @@ const sha256 = value => createHash('sha256').update(value).digest('hex');
 export function statePackageExpectations(baseline, document) {
   return Object.fromEntries(authorStateGroupNames(document).map(name => {
     const group = document.groups[name];
-    const member = Object.values(group.states)[0];
+    const member = group.states[group.defaultState];
     const shared = [...baseline.icons[member.icon][member.variant].rawSvg.matchAll(/<path\b[^>]*>/g)]
       .slice(-group.sharedParts.length).map(([tag], index) => ({ ...group.sharedParts[index],
         d: /\bd="([^"]+)"/.exec(tag)[1], fillRule: /\bfill-rule="([^"]+)"/.exec(tag)?.[1] ?? 'nonzero',
@@ -62,7 +62,7 @@ export function verifyInstalledStateGroup(group, expected) {
     /\bfill="currentColor"/.test(tag) && !/\b(?:stroke(?:-[a-z]+)?|opacity)=/.test(tag)), 'mount path paint');
   require(initial.svg.split(`data-part="${expected.enclosurePartId}"`).length === 2, 'single enclosure');
   const shared = paths(initial.svg).slice(-expected.sharedPartIds.length);
-  require(equal(shared, expected.states[0].paths.slice(-expected.sharedPartIds.length)), 'raw ordered shared suffix');
+  require(equal(shared, expected.states.find(state => state.id === expected.defaultState).paths.slice(-expected.sharedPartIds.length)), 'raw ordered shared suffix');
   require(equal(paths(initial.svg), [...expected.states.flatMap(state => state.paths.slice(0, state.contentPartIds.length)), ...shared]),
     'full mounted ordered geometry');
   const sharedTags = [...initial.svg.matchAll(/<path\b[^>]*>/g)].slice(-expected.sharedPartIds.length);
