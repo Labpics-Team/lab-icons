@@ -83,6 +83,29 @@ describe('Согласованность документации', () => {
     expect(manualCorpusCountErrors('На baseline 03a4ca3 сохранены 238 имён. Теперь 999 icons.')).toHaveLength(1);
   });
 
+  it('ограничивает историческую ссылку её блоком Markdown и частью до точки с запятой', () => {
+    for (const source of [
+      '- На 2026-11-01: 660 SVG\n- В пакете 999 icons',
+      'Baseline commit 03a4ca3: 476 SVG\n\n999 icons',
+      '# Baseline commit 03a4ca3: 476 SVG\n\n999 icons',
+      '> Baseline commit 03a4ca3: 476 SVG\n\n999 icons',
+      '| Срез | Корпус |\n| --- | --- |\n| На 2026-11-01 | 660 SVG |\n| Пакет | 999 icons |',
+      'Baseline commit 03a4ca3: 476 SVG; 999 icons.',
+      'Baseline commit 03a4ca3: 476 SVG; теперь 999 icons.',
+    ]) {
+      expect(manualCorpusCountErrors(source), source).toHaveLength(1);
+    }
+    for (const source of [
+      'Baseline commit **03a4ca3**:\n476 SVG.',
+      '- На 2026-11-01: 660 SVG\n- Baseline commit 03a4ca3: 476 SVG',
+      '| Срез | Корпус |\n| --- | --- |\n| На 2026-11-01 | 660 SVG |\n| Baseline commit 03a4ca3 | 476 SVG |',
+      'Текущий символ возвращает одну\nSVG-строку.',
+      'Icons: 4045:632; Lab icons: 6431:3712.',
+    ]) {
+      expect(manualCorpusCountErrors(source), source).toEqual([]);
+    }
+  });
+
   it('отклоняет неверный канал установки с учётом Markdown', () => {
     for (const text of ['private: true', 'Пакет не **публикуется**\nв `npm`', 'Ставится только как git-зависимость', 'Нужен GH_PAT', 'Нужен **GH_PAT**', 'Пакет _не публикуется_ в `npm`']) {
       expect(distributionClaimErrors(text).length).toBeGreaterThan(0);
