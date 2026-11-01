@@ -68,6 +68,9 @@ describe('независимая consumer projection directional law', () => {
     ['arc', 'M1 1A1 1 0 0 1 2 2Z', 'layers'],
     ['open fill', 'M1 1L2 2', 'layers'],
     ['compound', 'M1 1L2 2Z', 'compound'],
+    ['zero rx after close', 'M1 1L2 2Z A0 1 0 0 1 1 1', 'layers'],
+    ['zero ry after close', 'M1 1L2 2Z A1 0 0 0 1 1 1', 'layers'],
+    ['zero radii after close', 'M1 1L2 2Z A0 0 0 0 1 1 1', 'layers'],
   ])('%s: unsupported source сохраняет точный not-exported', (_, d, compositionKind) => {
     const variant = 'outline', source = sources[variant];
     const svg = source.normalizedSvg.replace(/\bd="[^"]+"/, `d="${d}"`);
