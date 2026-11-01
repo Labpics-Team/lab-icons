@@ -38,8 +38,9 @@ if (!staticSvg.ok || !mountedSvg.ok || !replacement.ok) {
 
 Mount и подключение public Motion sequence используют
 [тот же порядок](status-circle.md#подключить-переход): постоянные
-`g[data-state][data-part]`, scalar targets из effect, новый control перед
-остановкой прежнего. При смене намерения группы сохраняют текущую видимую
+`g[data-state][data-part]`, targets из effect и снимок видимой opacity всех
+групп до новой sequence, новый control перед остановкой прежнего. При смене
+намерения группы сохраняют текущую видимую
 opacity. Оболочка не входит в stages. Reduced motion задаёт конечную позу
 с duration 0. Статическому `render()` Motion не нужен.
 

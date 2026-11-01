@@ -52,8 +52,12 @@ function changeState(state: State) {
   });
   if (!result.ok) throw new Error(result.reason.code);
   const effect = result.effect;
+  const visible = new Map(effect.stages.map(stage => {
+    const part = targets.get(stage.partId)!;
+    return [stage.partId, Number(getComputedStyle(part).opacity)] as const;
+  }));
   const next = sequence(effect.stages.map(stage => [
-    targets.get(stage.partId)!, { opacity: stage.to },
+    targets.get(stage.partId)!, { opacity: [visible.get(stage.partId)!, stage.to] },
     { at: stage.at, duration: stage.duration, ease: effect.options.easing },
   ]), { reducedMotion: effect.options.duration === 0 ? 'always' : 'user' });
   control?.stop();
@@ -70,7 +74,10 @@ changeState('attention');
 ```
 
 `renderStateSvg()` устанавливает начальную opacity до mount. Все группы
-остаются в DOM; новая sequence подхватывает их фактическую видимую opacity.
+остаются в DOM. Сначала считайте видимую opacity всех целевых групп, затем
+передайте её первым значением публичной пары `[видимое начало, цель]`.
+Так новое намерение сохраняет отрисованный кадр: внутренний clock fallback
+может уже обогнать его. В effect data по-прежнему передаётся только цель.
 Создайте новый control до остановки прежнего. Повторный mount или установка
 начальной opacity во время перехода вернули бы символ к исходной позе.
 Оболочка не входит в stages. Для reduced motion конечная поза имеет duration 0.

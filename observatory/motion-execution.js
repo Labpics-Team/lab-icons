@@ -1,6 +1,26 @@
 import { animate, sequence } from '@labpics/motion';
 
-/** Consumer передаёт значения публичному исполнителю; clock и поза принадлежат ему. */
+function opacityStages(stages, byPart, easing) {
+  // Читаем все видимые начала до admission любого канала. В fallback модель
+  // исполнителя может уже обогнать последний отрисованный кадр.
+  const visible = new Map();
+  for (const { partId } of stages) {
+    if (visible.has(partId)) continue;
+    const value = getComputedStyle(byPart.get(partId)).opacity;
+    const opacity = Number(value);
+    if (!value || !Number.isFinite(opacity)) throw new Error(`Не определена видимая opacity ${partId}.`);
+    visible.set(partId, opacity);
+  }
+  const first = new Set();
+  return stages.map(stage => {
+    const value = first.has(stage.partId) ? stage.to : [visible.get(stage.partId), stage.to];
+    first.add(stage.partId);
+    return [byPart.get(stage.partId), { opacity: value },
+      { at: stage.at, duration: stage.duration, ease: easing }];
+  });
+}
+
+/** Consumer сохраняет видимое начало; clock принадлежит публичному исполнителю. */
 export function executeSymbolEffect(root, effect, { initialize = false } = {}) {
   const viewport = root instanceof SVGElement ? root : root.querySelector('svg');
   if (!viewport) throw new Error('Композиция не содержит SVG viewport.');
@@ -13,10 +33,8 @@ export function executeSymbolEffect(root, effect, { initialize = false } = {}) {
         effect.stages.some(stage => effect.unchangedPartIds.includes(stage.partId))) {
       throw new Error('Замена требует отдельных групп и неподвижной оболочки.');
     }
-    return [sequence(effect.stages.map(stage => [
-      byPart.get(stage.partId), { opacity: stage.to },
-      { at: stage.at, duration: stage.duration, ease: effect.options.easing },
-    ]), { reducedMotion: effect.options.duration === 0 ? 'always' : 'user' })];
+    return [sequence(opacityStages(effect.stages, byPart, effect.options.easing),
+      { reducedMotion: effect.options.duration === 0 ? 'always' : 'user' })];
   }
   if (effect.targets.some((target) => !byPart.has(target.partId))) throw new Error('Композиция не содержит цель объявленного жеста.');
   if (effect.version === 3 && (effect.targets.some(target => !['x', 'y'].includes(target.property) || target.unit !== 'viewBox') ||
@@ -28,10 +46,8 @@ export function executeSymbolEffect(root, effect, { initialize = false } = {}) {
   try {
     Object.assign(viewport.style, effect.viewport);
     if (effect.version === 2) {
-      controls.push(sequence(effect.stages.map(stage => [
-        byPart.get(stage.partId), { opacity: stage.to },
-        { at: stage.at, duration: stage.duration, ease: effect.options.easing },
-      ]), { reducedMotion: effect.options.duration === 0 ? 'always' : 'user' }));
+      controls.push(sequence(opacityStages(effect.stages, byPart, effect.options.easing),
+        { reducedMotion: effect.options.duration === 0 ? 'always' : 'user' }));
       return controls;
     }
     if (effect.version === 3) {

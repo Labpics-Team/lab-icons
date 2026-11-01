@@ -22,6 +22,7 @@ const effect = () => ({
 
 beforeEach(() => {
   vi.stubGlobal('SVGElement', SvgViewport);
+  vi.stubGlobal('getComputedStyle', element => ({ opacity: String(element.style.opacity ?? 1) }));
   sequence.mockReturnValue(control()); animate.mockReturnValue(control());
 });
 afterEach(() => { vi.clearAllMocks(); });
@@ -68,7 +69,7 @@ describe('публичное исполнение semantic translation', () => {
     const opacity = { ...value, version: 2, targets: [{ partId: 'direction-body' }],
       stages: [{ partId: 'direction-body', property: 'opacity', to: 0.35, at: 0, duration: 0 }] };
     executeSymbolEffect(svg, opacity);
-    expect(sequence.mock.calls[1][0]).toEqual([[svg.parts[0], { opacity: 0.35 }, { at: 0, duration: 0, ease: 'linear' }]]);
+    expect(sequence.mock.calls[1][0]).toEqual([[svg.parts[0], { opacity: [1, 0.35] }, { at: 0, duration: 0, ease: 'linear' }]]);
   });
 });
 
@@ -91,13 +92,13 @@ describe('публичное исполнение смены знака в об�
     return svg;
   };
 
-  it('передаёт целые группы скалярными целями без сброса текущей смешанной позы', () => {
+  it('сохраняет видимую смешанную позу явными начальными значениями', () => {
     const svg = viewport(), before = svg.parts.map(part => ({ ...part.style }));
     const controls = executeSymbolEffect(svg, replacement());
     expect(sequence).toHaveBeenCalledWith([
-      [svg.parts[0], { opacity: 0 }, { at: 0, duration: 900, ease: 'linear' }],
-      [svg.parts[1], { opacity: 0 }, { at: 0, duration: 900, ease: 'linear' }],
-      [svg.parts[2], { opacity: 1 }, { at: 0, duration: 900, ease: 'linear' }],
+      [svg.parts[0], { opacity: [0.3, 0] }, { at: 0, duration: 900, ease: 'linear' }],
+      [svg.parts[1], { opacity: [0.7, 0] }, { at: 0, duration: 900, ease: 'linear' }],
+      [svg.parts[2], { opacity: [0.7, 1] }, { at: 0, duration: 900, ease: 'linear' }],
     ], { reducedMotion: 'user' });
     expect(controls).toEqual([sequence.mock.results[0].value]);
     expect(svg.parts.map(part => part.style)).toEqual(before);
@@ -121,6 +122,31 @@ describe('публичное исполнение смены знака в об�
     effect.stages = effect.stages.map(stage => ({ ...stage, duration: 0 }));
     executeSymbolEffect(svg, effect);
     expect(sequence.mock.calls[0][1]).toEqual({ reducedMotion: 'always' });
-    expect(sequence.mock.calls[0][0].every(([, properties]) => typeof properties.opacity === 'number')).toBe(true);
+    expect(sequence.mock.calls[0][0].every(([, properties]) => properties.opacity.length === 2)).toBe(true);
+  });
+
+  it('читает каждый видимый кадр один раз до записи и связывает только первую opacity-стадию', () => {
+    const svg = viewport();
+    const read = vi.fn(element => ({ opacity: element === svg.parts[0] ? '0.005' : '0.995' }));
+    vi.stubGlobal('getComputedStyle', read);
+    const value = { version: 2, viewport: {}, targets: [{ partId: 'state-question' }],
+      options: { duration: 600, easing: 'linear' }, stages: [
+        { partId: 'state-question', property: 'opacity', to: 0.35, at: 0, duration: 300 },
+        { partId: 'state-question', property: 'opacity', to: 1, at: 300, duration: 300 },
+      ] };
+    sequence.mockImplementation(() => {
+      expect(read).toHaveBeenCalledTimes(1);
+      svg.parts[0].style.opacity = '0.0263333';
+      return control();
+    });
+    executeSymbolEffect(svg, value);
+    expect(sequence.mock.calls[0][0].map(([, properties]) => properties.opacity)).toEqual([[0.005, 0.35], 1]);
+  });
+
+  it.each(['', 'not-opacity'])('отказывает неопределённому видимому началу %s до admission', opacity => {
+    const svg = viewport();
+    vi.stubGlobal('getComputedStyle', () => ({ opacity }));
+    expect(() => executeSymbolEffect(svg, replacement())).toThrow(/Не определена видимая opacity/);
+    expect(sequence).not.toHaveBeenCalled();
   });
 });

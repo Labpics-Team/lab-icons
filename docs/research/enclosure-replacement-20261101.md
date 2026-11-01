@@ -42,7 +42,7 @@ Paths не перенумеровываются по близости: IDs за�
 | Заменить весь SVG | Статический endpoint точен, но shell/DOM identity теряются; interruption начинается заново | Оставить static export; transition сохраняет группы |
 | Анимировать каждый interior path | Object opacity и group opacity различны при compositing перекрытий | Применять opacity целой группе |
 | Две постоянно создаваемые группы | При третьем намерении нужно сохранить многокомпонентную текущую смесь либо потерять continuity | Один bounded mounted group на каждое объявленное состояние |
-| Подключить новый animation engine | Публичный Lab Motion sequence уже принимает scalar opacity stages и подхватывает DOM pose | Сохранить generic effect contract, без scheduler в Icons |
+| Подключить новый animation engine | Публичный Lab Motion sequence принимает явное начальное значение opacity и последующие scalar stages | Сохранить generic effect contract, без scheduler в Icons |
 
 Состояния называют знаки. В частности, close-circle не назначается ошибкой:
 семантическую связь с действиями и доступным текстом задаёт приложение.
@@ -58,8 +58,23 @@ Build compiler проверяет raw/normalized/path receipts, production glyph
 ordered paint и одинаковую рамку до выдачи всего payload. Общий SVG serializer
 готовит enclosure и interior fragments. Runtime получает только строки,
 semantic IDs и receipts; единственная variable state операция создаёт opacity
-targets. Все группы остаются mounted, предыдущая visible смесь подхватывается
-executor при смене намерения. Reduced motion задаёт конечные targets с duration 0.
+targets. Все группы остаются mounted. Consumer читает видимую opacity всех
+групп до admission и передаёт `[visible, to]` первой стадии каждой группы;
+последующие стадии сохраняют scalar targets. Reduced motion задаёт конечные
+targets с duration 0.
+
+Self-hosted [Lab UI run 41314071704](https://github.com/Labpics-Team/labui/actions/runs/41314071704)
+зафиксировал fallback без native animations: admission менял opacity
+`0.005 → 0.0263333`, хотя document timeline оставался тем же. Последний
+отрисованный кадр и текущий внутренний clock исполнителя различались.
+Source probe публичного Motion 0.5.0 ESM воспроизводит этот RED, а явное
+видимое начало сохраняет `0.005`; варианты со сбросом и scalar pickup остаются
+RED. Пауза и нулевое продвижение clock служат здоровыми контролями.
+Это проверка CSS style host, а не browser paint или native WAAPI parity.
+Первая стадия задаёт начальное значение, как в публичной модели
+[KeyframeEffect](https://developer.mozilla.org/en-US/docs/Web/API/KeyframeEffect/KeyframeEffect).
+Семантические effect data по-прежнему содержат только цель; clock и выполнение
+остаются у Motion. Полный browser gate нового consumer ещё требуется.
 
 Static SVG и web effect поддержаны. Group transition в Lottie/dotLottie/native
 не экспортируется; format request получает точный отказ. Это не обещание
