@@ -1,6 +1,6 @@
 import { build } from 'esbuild';
 import { describe, expect, it } from 'vitest';
-import { bundleMeasurements, staticAdapterSource } from '../scripts/bench/static-consumer.js';
+import { bundleMeasurements, inspectStaticRuntime, staticAdapterSource } from '../scripts/bench/static-consumer.js';
 
 const svg = '<svg viewBox="0 0 24 24"><path d="M1 1L23 23"/></svg>';
 
@@ -45,5 +45,15 @@ describe('matched static SVG consumer', () => {
       outputs: { 'consumer.js': { inputs: { 'symbol.js': { bytesInOutput: 20 }, 'catalog.json': { bytesInOutput: 0 } } } } });
     expect(result.inputs).toHaveLength(2);
     expect(result.retainedInputs).toEqual([{ file: 'symbol.js', bytesInOutput: 20 }]);
+  });
+  it('один graph predicate отказывает IR, authoring, motion и catalog на обеих ОС', () => {
+    for (const file of ['/installed/dist/ir/index.js', '/installed/dist/authoring/index.js',
+      '/installed/dist/motion/index.js', '/installed/catalog.json', '/installed/anatomy.json', 'E:\\installed\\dist\\ir\\index.js']) {
+      expect(inspectStaticRuntime([{ file, bytesInOutput: 1 }]).verdict).toBe('FAIL');
+    }
+    expect(inspectStaticRuntime([{ file: '/installed/dist/symbols/accessibility.js', bytesInOutput: 1 }]).verdict).toBe('PASS');
+    expect(inspectStaticRuntime(undefined).verdict).toBe('INCOMPLETE');
+    expect(inspectStaticRuntime([{}]).verdict).toBe('INCOMPLETE');
+    expect(inspectStaticRuntime(Array(2)).verdict).toBe('INCOMPLETE');
   });
 });

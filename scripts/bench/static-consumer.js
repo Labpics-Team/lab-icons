@@ -21,3 +21,12 @@ export function bundleMeasurements(bytes, metafile) {
     retainedInputs: [...retained].map(([file, bytesInOutput]) => ({ file, bytesInOutput })),
     compressors: { gzip: 'node:zlib level 9', brotli: 'node:zlib defaults' } };
 }
+
+/** Один owner static graph contract используется driver и сохранённым анализом. */
+export function inspectStaticRuntime(retainedInputs) {
+  if (!Array.isArray(retainedInputs)) return { verdict: 'INCOMPLETE', reason: 'MISSING_RETAINED_GRAPH' };
+  if (Array.from(retainedInputs).some(row => !row || typeof row.file !== 'string' || !row.file.length ||
+      !Number.isSafeInteger(row.bytesInOutput) || row.bytesInOutput <= 0)) return { verdict: 'INCOMPLETE', reason: 'INVALID_RETAINED_GRAPH' };
+  const forbidden = retainedInputs.filter(row => /\/(?:dist\/(?:ir|motion|authoring)\/|(?:catalog|anatomy)\.json$)/.test(row.file.replaceAll('\\', '/')));
+  return { verdict: forbidden.length ? 'FAIL' : 'PASS', forbidden };
+}

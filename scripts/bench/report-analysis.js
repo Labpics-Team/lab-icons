@@ -1,4 +1,5 @@
 import { assessCount, assessQuantile, quantileRatio } from './adjudication.js';
+import { inspectStaticRuntime } from './static-consumer.js';
 
 const BYTE_FIELDS = ['rawBytes', 'gzipBytes', 'brotliBytes'];
 const QUANTILES = [0.5, 0.95];
@@ -33,11 +34,9 @@ function cold(rows, baselineLabel, candidateLabel, maximumRatio) {
 export function analyzeConsumerReport(report) {
   const staticPairs = (report.staticPairs ?? []).map(pair => {
     const imported = pair.bundles.find(row => row.label === 'imported');
-    const forbidden = imported?.retainedInputs?.filter(row => /(?:authoring|motion|catalog\.generated|symbol-runtime|compiler)\.(?:js|ts)$|[\\/]authoring[\\/]|[\\/]motion[\\/]/.test(row.file)) ?? null;
     return { icon: pair.icon, variant: pair.variant, artifact: pair.artifact, svgSha256: pair.svgSha256,
       byteOverhead: bytes(pair.bundles, 'literal', 'imported', 1.05),
-      staticRuntime: forbidden === null ? { verdict: 'INCOMPLETE', reason: 'MISSING_RETAINED_GRAPH' } :
-        { verdict: forbidden.length ? 'FAIL' : 'PASS', forbidden },
+      staticRuntime: inspectStaticRuntime(imported?.retainedInputs),
       // Для static cold overhead не вводится новый target: r14 задаёт здесь bytes.
       conditionalColdRatio: cold(pair.browser, 'literal', 'imported') };
   });

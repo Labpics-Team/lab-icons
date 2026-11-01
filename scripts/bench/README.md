@@ -52,12 +52,13 @@ context/module cold, а не machine cold или доказанная незав
 
 `report.analysis` разделяет наблюдённые byte budgets и conditional quantile
 inference. Source hashes метода и анализа, decimal targets и uncertainty scope
-сохраняются до observations. Binomial tails и nearest ranks вычисляются точными
+сохраняются до анализируемых static/server/browser observations. Binomial tails и nearest ranks вычисляются точными
 целыми числами; budgets/confidence/quantile интерпретируются как десятичное
 `String(number)`. Исходные измеренные значения сохраняют binary64 identity;
 ratio boundaries округляются наружу, а budget сравнивается с точным отношением
-наблюдённых endpoints. Отсутствующий хвост/разрешение/арифметическая граница
-возвращает `INCOMPLETE`, нулевая работа не получает tolerance. Calibration
+наблюдённых endpoints. Отсутствующий хвост, значения ниже заданного resolution и
+непредставимая арифметическая граница возвращают `INCOMPLETE`; отсутствие clock
+qualification остаётся отдельным открытым обязательством. Нулевая работа не получает tolerance. Calibration
 имеет fixed 95% policy и максимум 5%; noisy sample не расширяет hard cap.
 
 Этот запуск не выполняет baseline-only calibration и независимый frozen-run

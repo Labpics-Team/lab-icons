@@ -17,7 +17,7 @@ import { validateAuthorObservation, validateRetainedPair } from './author-oracle
 import { verifyExplorer } from './verify-explorer.mjs';
 import { verifyLottieConsumer } from './verify-lottie.mjs';
 import { verifyAuthoringConsumer } from './verify-authoring.mjs';
-import { bundleMeasurements, staticAdapterSource } from './static-consumer.js';
+import { bundleMeasurements, inspectStaticRuntime, staticAdapterSource } from './static-consumer.js';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const BASELINE = '03a4ca3ac1bf7978f9e8f554106c132a69668afb';
@@ -99,7 +99,7 @@ async function makeStaticPair(prepared, variant, outdir) {
     const result = await build({ entryPoints: [entry], outfile: file, bundle: true, format: 'esm', platform: 'browser',
       target: 'es2022', minify: true, metafile: true, logLevel: 'silent' });
     const facts = bundleMeasurements(readFileSync(file), result.metafile);
-    if (facts.retainedInputs.some(input => /\/(?:dist\/(?:ir|motion|authoring)\/|(?:catalog|anatomy)\.json$)/.test(input.file.replaceAll('\\', '/')))) {
+    if (inspectStaticRuntime(facts.retainedInputs).verdict !== 'PASS') {
       throw new Error(`benchmark: ${label}/${variant} retained catalog/authoring/motion/IR runtime`);
     }
     pair.bundles.push({ label, file, ...facts });
@@ -189,6 +189,7 @@ try {
   report.protocol.analysis = { version: 1, method: 'exact-binomial-order-statistics/bonferroni-ratio-v1',
     methodSha256: sha256(readFileSync(join(ROOT, 'scripts/bench/adjudication.js'))),
     reportAnalysisSha256: sha256(readFileSync(join(ROOT, 'scripts/bench/report-analysis.js'))),
+    graphOwnerSha256: sha256(readFileSync(join(ROOT, 'scripts/bench/static-consumer.js'))),
     decimalBudgets: { defaultGlyphBytes: '1/20', staticByteOverhead: '21/20', coldRatio: '4/5', confidence: '19/20' },
     samplingQualified: false, calibration: 'not executed by this descriptive protocol; BENCH-01 remains INCOMPLETE' };
   report.staticPairs = [];

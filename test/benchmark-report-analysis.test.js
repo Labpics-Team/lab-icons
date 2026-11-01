@@ -21,6 +21,8 @@ describe('наблюдения не подменяют BENCH qualification', () 
     source.bundles[1] = bundle('imported', 100);
     source.bundles[1].retainedInputs.push({ file: '/installed/dist/ir/symbol-runtime.js', bytesInOutput: 1 });
     expect(analyzeConsumerReport({ staticPairs: [source] }).staticPairs[0].staticRuntime.verdict).toBe('FAIL');
+    source.bundles[1].retainedInputs = [{ file: '/installed/dist/ir/index.js', bytesInOutput: 1 }];
+    expect(analyzeConsumerReport({ staticPairs: [source] }).staticPairs[0].staticRuntime.verdict).toBe('FAIL');
   });
   it('не сравнивает geometry-confounded lane как cold speedup', () => {
     const changed = { id: 'current-author-time', lane: 'current-author', kind: 'glyph', comparison: { sameGeometryComparison: false, attribution: 'geometry-and-representation-confounded' },
