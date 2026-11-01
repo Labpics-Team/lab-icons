@@ -20,11 +20,14 @@ masters Lab UI v2.1; построение проверяет их точное �
 
 ## Подключить переход
 
-Установите Icons и отдельный исполнитель Motion:
+Этот пример использует новые state entrypoints source-кандидата 0.3.0.
+Установите подготовленный архив Icons и отдельный исполнитель Motion:
 
 ```sh
-pnpm add @labpics/icons @labpics/motion@^0.5.0
+pnpm add ./labpics-icons-0.3.0.tgz @labpics/motion@^0.5.0
 ```
+
+Доступность этой версии в npm проверяется отдельно по [контракту поставки](package.md).
 
 ```ts
 import {
