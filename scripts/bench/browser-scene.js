@@ -52,7 +52,7 @@ export async function measureScene(create, count) {
   await Promise.resolve();
   const cleanupMs = performance.now() - cleanupStarted;
   observer.disconnect();
-  return { count, completed: count, completedBytes, firstCreateMs, createDomMs, mountLayoutMs, firstPaintOpportunityMs, cleanupMs, lifecycleMs: performance.now() - firstStarted, mountedCDPMetrics, domElements, mutations, frames, stageWidth: layout.width, stageHeight: layout.height };
+  return { count, completed: count, completedBytes, firstSvg: first, firstCreateMs, createDomMs, mountLayoutMs, firstPaintOpportunityMs, cleanupMs, lifecycleMs: performance.now() - firstStarted, mountedCDPMetrics, domElements, mutations, frames, stageWidth: layout.width, stageHeight: layout.height };
 }
 
 /** Обычный WAAPI исполняет данные Lab Icons; движение не сравнивается с отсутствующим baseline API. */

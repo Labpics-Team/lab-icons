@@ -13,15 +13,21 @@ import { build } from 'esbuild';
 import { chromium } from 'playwright';
 import { localTarballSpecifier, pnpmInvocation } from '../check-package-artifact.js';
 import { assertRemoteBenchmark, summarize } from './measurement.js';
+import { validateAuthorObservation, validateRetainedPair } from './author-oracle.js';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const BASELINE = '03a4ca3ac1bf7978f9e8f554106c132a69668afb';
 const COUNTS = [1, 100, 10000];
 const CASES = [
-  { id: 'static-accessibility', kind: 'static', icon: 'accessibility' },
-  { id: 'source-alert', kind: 'glyph', icon: 'alert' },
-  { id: 'model-time', kind: 'glyph', icon: 'time' },
-  { id: 'axes-chevron-forward', kind: 'glyph', icon: 'chevron-forward', axes: { weight: 1.1, opsz: 32 } },
+  { id: 'retained-static-accessibility', lane: 'retained-identical-output', kind: 'static', icon: 'accessibility' },
+  { id: 'retained-source-alert', lane: 'retained-identical-output', kind: 'glyph', icon: 'alert' },
+  { id: 'retained-model-time', lane: 'retained-identical-output', kind: 'glyph', icon: 'time' },
+  { id: 'retained-default-chevron-forward', lane: 'retained-identical-output', kind: 'glyph', icon: 'chevron-forward' },
+  { id: 'retained-axes-chevron-forward', lane: 'retained-identical-output', kind: 'glyph', icon: 'chevron-forward', axes: { weight: 1.1, opsz: 32 } },
+  { id: 'current-author-alert', lane: 'current-author', kind: 'glyph', icon: 'alert', baselineReference: 'retained-source-alert' },
+  { id: 'current-author-time', lane: 'current-author', kind: 'glyph', icon: 'time', baselineReference: 'retained-model-time' },
+  { id: 'current-author-chevron-forward', lane: 'current-author', kind: 'glyph', icon: 'chevron-forward', baselineReference: 'retained-default-chevron-forward' },
+  { id: 'current-author-caret-forward', lane: 'current-author', kind: 'glyph', icon: 'caret-forward', candidateOnly: true },
 ];
 const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
 function command(file, args, cwd) {
@@ -58,11 +64,11 @@ function prepare(temp, label, revision) {
   return { label, source, consumer, packageRoot, revision, packageVersion: pkg.version, packageManager: pkg.packageManager, lockSha256: sha256(readFileSync(join(source, 'pnpm-lock.yaml'))), tarballSha256: sha256(readFileSync(tarball)), tarballBytes: readFileSync(tarball).length, packMs, installMs };
 }
 function caseImport(testCase, label) {
-  return testCase.kind === 'static' ? '@labpics/icons' : label === 'candidate' ? `@labpics/icons/symbols/${testCase.icon}` : '@labpics/icons/ir';
+  return testCase.kind === 'static' ? '@labpics/icons' : testCase.lane === 'current-author' && label === 'candidate' ? `@labpics/icons/symbols/${testCase.icon}` : '@labpics/icons/ir';
 }
 function createExpression(testCase, label) {
   if (testCase.kind === 'static') return '() => symbol.accessibilityOutline';
-  const request = { ...(label === 'baseline' ? { icon: testCase.icon } : {}), ...(testCase.axes ? { axes: testCase.axes } : {}) };
+  const request = { ...(testCase.lane !== 'current-author' || label === 'baseline' ? { icon: testCase.icon } : {}), ...(testCase.axes ? { axes: testCase.axes } : {}) };
   return `() => symbol.glyph(${Object.keys(request).length ? JSON.stringify(request) : ''}).svg`;
 }
 async function makeBundle(prepared, testCase, outdir) {
@@ -76,7 +82,7 @@ async function makeBundle(prepared, testCase, outdir) {
 }
 async function makeMotionBundle(prepared, outdir) {
   const entry = join(prepared.consumer, 'motion.mjs');
-  writeFileSync(entry, `import { glyph, glyphCapabilities } from '@labpics/icons/symbols/time';\nimport { renderGlyphSvg } from '@labpics/icons/ir/render';\nimport { compileSymbolEffect } from '@labpics/icons/motion';\nimport { animate } from '@labpics/motion';\nimport { measureMotion } from ${JSON.stringify(join(ROOT, 'scripts/bench/browser-scene.js'))};\nconst executeLabMotion = (root, effect) => effect.targets.map(target => { const element = root.querySelector('[data-part="' + target.partId + '"]'); Object.assign(element.style, target.style); return animate(element, { rotate: target.rotation.to }, { duration: effect.options.duration, ease: effect.options.easing, reducedMotion: effect.options.duration === 0 ? 'always' : 'user' }); });\nexport const run = (count, executor) => measureMotion({glyph, glyphCapabilities, renderGlyphSvg, compileSymbolEffect, executeLabMotion}, count, executor);\n`);
+  writeFileSync(entry, `import { glyph as recordedGlyph, glyphCapabilities as recordedCapabilities } from '@labpics/icons/ir';\nimport { renderGlyphSvg } from '@labpics/icons/ir/render';\nimport { compileSymbolEffect } from '@labpics/icons/motion';\nimport { animate } from '@labpics/motion';\nimport { measureMotion } from ${JSON.stringify(join(ROOT, 'scripts/bench/browser-scene.js'))};\nconst glyph = request => recordedGlyph({icon:'time', ...request});\nconst glyphCapabilities = variant => recordedCapabilities('time', variant);\nconst executeLabMotion = (root, effect) => effect.targets.map(target => { const element = root.querySelector('[data-part="' + target.partId + '"]'); Object.assign(element.style, target.style); return animate(element, { rotate: target.rotation.to }, { duration: effect.options.duration, ease: effect.options.easing, reducedMotion: effect.options.duration === 0 ? 'always' : 'user' }); });\nexport const run = (count, executor) => measureMotion({glyph, glyphCapabilities, renderGlyphSvg, compileSymbolEffect, executeLabMotion}, count, executor);\n`);
   const outfile = join(outdir, 'candidate-motion.js');
   await build({ entryPoints: [entry], outfile, bundle: true, format: 'esm', platform: 'browser', target: 'es2022', minify: true, logLevel: 'silent' });
   return outfile;
@@ -103,6 +109,10 @@ async function browserMeasurement(browser, origin, filename, count, slowdown, ex
       const warmImportMs = performance.now() - warmStarted;
       return { coldImportMs, warmImportMs, ...(await consumer.run(count, executor)) };
     }, { filename, count, executor });
+    if (result.firstSvg) {
+      result.svgSha256 = sha256(result.firstSvg);
+      delete result.firstSvg;
+    }
     const allocated = await session.send('Performance.getMetrics');
     await session.send('HeapProfiler.collectGarbage');
     const retained = await session.send('Performance.getMetrics');
@@ -121,30 +131,49 @@ const temp = mkdtempSync(join(tmpdir(), 'lab-icons-benchmark-'));
 let browser, server, report;
 try {
   const revision = command('git', ['rev-parse', 'HEAD'], ROOT).trim();
-  report = { version: 1, baseline: BASELINE, candidate: revision, timestamp: new Date().toISOString(), environment: { node: process.version, v8: process.versions.v8, platform: platform(), osRelease: release(), hostname: hostname(), cpus: cpus().map(cpu => ({ model: cpu.model, speed: cpu.speed })), totalmem: totalmem(), freemem: freemem(), runnerEnvironment: process.env.BENCHMARK_RUNNER_ENVIRONMENT, githubRunId: process.env.GITHUB_RUN_ID, githubRunAttempt: process.env.GITHUB_RUN_ATTEMPT }, protocol: { serverRepetitions: 7, browserRepetitions: 3, counts: COUNTS, cpuSlowdowns: [1, 4], comparison: 'baseline/candidate чередуются; каждый server sample — новый Node process; каждый browser sample — новый context', caveats: ['4× CDP slowdown — синтетическое замедление, не физическое constrained hardware', '10000 mounted symbols включают offscreen DOM; viewport 1280×800', 'rAF интервал — frame opportunity, не GPU presentation time', 'peak heap не заявляется: CDP и Node сохраняют точечные наблюдения', '7/3 повторов характеризуют среднее и разброс, не редкие хвосты', 'pack/install и bundler compile — одиночные наблюдения, не latency distribution', 'server измеряет создание SVG, browser измеряет DOM/layout', 'motion — новая возможность, baseline speedup не заявляется'] }, packages: [], cases: [], motion: [] };
+  report = { version: 2, baseline: BASELINE, candidate: revision, timestamp: new Date().toISOString(), environment: { node: process.version, v8: process.versions.v8, platform: platform(), osRelease: release(), hostname: hostname(), cpus: cpus().map(cpu => ({ model: cpu.model, speed: cpu.speed })), totalmem: totalmem(), freemem: freemem(), runnerEnvironment: process.env.BENCHMARK_RUNNER_ENVIRONMENT, githubRunId: process.env.GITHUB_RUN_ID, githubRunAttempt: process.env.GITHUB_RUN_ATTEMPT }, protocol: { serverRepetitions: 7, browserRepetitions: 3, counts: COUNTS, cpuSlowdowns: [1, 4], comparison: 'baseline/candidate чередуются; каждый server sample — новый Node process; каждый browser sample — новый context', lanes: { 'retained-identical-output': 'root/full IR: тот же SVG, без снятия equality oracle', 'current-author': 'sliced current master против recorded baseline: geometry/representation confound; не same-geometry speedup' }, caveats: ['4× CDP slowdown — синтетическое замедление, не физическое constrained hardware', '10000 mounted symbols включают offscreen DOM; viewport 1280×800', 'rAF интервал — frame opportunity, не GPU presentation time', 'peak heap не заявляется: CDP и Node сохраняют точечные наблюдения', '7/3 повторов характеризуют среднее и разброс, не редкие хвосты', 'pack/install и bundler compile — одиночные наблюдения, не latency distribution', 'server измеряет создание SVG, browser измеряет DOM/layout', 'motion принадлежит recorded full IR, не текущим source-only Figma masters', 'current-author lane меняет author geometry и representation: причинный same-geometry speedup не заявляется'] }, packages: [], cases: [], motion: [] };
   writeFileSync(join(output, 'consumer-comparison.json'), JSON.stringify(report, null, 2));
   const prepared = [prepare(temp, 'baseline', BASELINE), prepare(temp, 'candidate', revision)];
   report.packages = prepared.map(({ source, consumer, packageRoot, ...facts }) => facts);
+  const authorRequest = join(temp, 'author-request.json');
+  writeFileSync(authorRequest, JSON.stringify({ sourceRoot: prepared[1].source, packageRoot: prepared[1].packageRoot, output: join(output, 'author-consumer.json') }));
+  command(process.execPath, [join(ROOT, 'scripts/bench/verify-author-consumer.mjs'), authorRequest], prepared[1].consumer);
+  const authorConsumer = JSON.parse(readFileSync(join(output, 'author-consumer.json'), 'utf8'));
+  report.currentAuthor = { source: authorConsumer.source, manifestSha256: authorConsumer.manifestSha256, counts: authorConsumer.expectedCounts, completed: authorConsumer.completed };
   const outdir = join(temp, 'bundles');
   mkdirSync(outdir);
   for (const testCase of CASES) {
     const result = { ...testCase, bundles: [], server: [], browser: [] };
+    const selected = testCase.candidateOnly ? [prepared[1]] : prepared;
+    const labels = selected.map(item => item.label);
+    const author = testCase.lane === 'current-author' ? authorConsumer.icons[testCase.icon]?.outline : null;
+    if (testCase.lane === 'current-author' && !author) throw new Error(`${testCase.icon}: нет проверенного current master`);
+    result.comparison = testCase.lane === 'retained-identical-output'
+      ? { outputContract: 'identical SVG bytes', sameGeometryComparison: true }
+      : { outputContract: 'exact current author manifest', sameGeometryComparison: false, attribution: testCase.candidateOnly ? 'новый авторский символ; baseline отсутствует' : 'geometry-and-representation-confounded', author, baselineReference: testCase.baselineReference ?? null };
     report.cases.push(result);
-    for (const packageCase of prepared) result.bundles.push({ label: packageCase.label, ...(await makeBundle(packageCase, testCase, outdir)) });
+    for (const packageCase of selected) result.bundles.push({ label: packageCase.label, ...(await makeBundle(packageCase, testCase, outdir)) });
     for (const count of COUNTS) {
       const observations = { baseline: [], candidate: [] };
-      const serverRows = ['baseline', 'candidate'].map(label => ({ label, count, observations: observations[label] }));
+      const serverRows = labels.map(label => ({ label, count, observations: observations[label] }));
       result.server.push(...serverRows);
       for (let repeat = 0; repeat < 7; repeat++) {
-        for (const packageCase of repeat % 2 ? [...prepared].reverse() : prepared) {
-          const request = { ...testCase, count, sliced: packageCase.label === 'candidate', modulePath: join(packageCase.packageRoot, testCase.kind === 'static' ? 'dist/index.js' : packageCase.label === 'baseline' ? 'dist/ir/index.js' : `dist/symbols/${testCase.icon}.js`) };
+        for (const packageCase of repeat % 2 ? [...selected].reverse() : selected) {
+          const sliced = testCase.lane === 'current-author' && packageCase.label === 'candidate';
+          const request = { ...testCase, count, sliced, inspectAuthor: sliced, modulePath: join(packageCase.packageRoot, testCase.kind === 'static' ? 'dist/index.js' : sliced ? `dist/symbols/${testCase.icon}.js` : 'dist/ir/index.js') };
           const input = join(temp, 'request.json');
           writeFileSync(input, JSON.stringify(request));
           const sample = JSON.parse(command(process.execPath, ['--expose-gc', join(ROOT, 'scripts/bench/probe.mjs'), input], packageCase.consumer));
           observations[packageCase.label].push(sample);
+          if (sliced) validateAuthorObservation(sample, author);
+          else if (testCase.lane === 'current-author') {
+            const reference = report.cases.find(item => item.id === testCase.baselineReference)?.server.find(item => item.label === 'baseline' && item.count === count)?.observations[0];
+            if (!reference) throw new Error(`${testCase.id}: recorded baseline reference отсутствует`);
+            validateRetainedPair(reference, sample);
+          }
         }
       }
-      if (observations.baseline.some((row, index) => row.svgSha256 !== observations.candidate[index].svgSha256)) throw new Error(`${testCase.id}: baseline/candidate geometry или SVG отличаются`);
+      if (testCase.lane === 'retained-identical-output') observations.baseline.forEach((row, index) => validateRetainedPair(row, observations.candidate[index]));
       for (const row of serverRows) row.summary = aggregate(row.observations, ['importMs', 'firstSvgMs', 'svgGenerationMs', 'warmImportMs', 'cleanupMs', 'lifecycleMs', 'heapAfterGeneration', 'heapRetained', 'rss']);
       writeFileSync(join(output, 'consumer-comparison.json'), JSON.stringify(report, null, 2));
     }
@@ -160,12 +189,17 @@ try {
   browser = await chromium.launch({ headless: true });
   report.environment.chromium = browser.version();
   for (const result of report.cases) {
+    const labels = result.candidateOnly ? ['candidate'] : ['baseline', 'candidate'];
     for (const slowdown of [1, 4]) for (const count of COUNTS) {
       const observations = { baseline: [], candidate: [] };
-      const browserRows = ['baseline', 'candidate'].map(label => ({ label, count, slowdown, observations: observations[label] }));
+      const browserRows = labels.map(label => ({ label, count, slowdown, observations: observations[label] }));
       result.browser.push(...browserRows);
-      for (let repeat = 0; repeat < 3; repeat++) for (const label of repeat % 2 ? ['candidate', 'baseline'] : ['baseline', 'candidate']) {
-        observations[label].push(await browserMeasurement(browser, origin, `${label}-${result.id}.js`, count, slowdown));
+      for (let repeat = 0; repeat < 3; repeat++) for (const label of repeat % 2 ? [...labels].reverse() : labels) {
+        const observation = await browserMeasurement(browser, origin, `${label}-${result.id}.js`, count, slowdown);
+        observations[label].push(observation);
+        const serverReference = result.server.find(row => row.label === label && row.count === count)?.observations[0];
+        if (!serverReference) throw new Error(`${result.id}/${label}: проверенный server output отсутствует`);
+        validateRetainedPair(serverReference, observation);
       }
       for (const row of browserRows) row.summary = aggregate(row.observations, ['coldImportMs', 'warmImportMs', 'firstCreateMs', 'createDomMs', 'mountLayoutMs', 'firstPaintOpportunityMs', 'cleanupMs', 'lifecycleMs', 'domElements']);
     }
@@ -175,7 +209,7 @@ try {
   await makeMotionBundle(prepared[1], outdir);
   for (const executor of ['waapi', 'lab-motion']) for (const slowdown of [1, 4]) for (const count of COUNTS) {
     const observations = [];
-    const motionRow = { executor, slowdown, count, observations };
+    const motionRow = { executor, slowdown, count, source: 'recorded @labpics/icons/ir time', authorParity: false, observations };
     report.motion.push(motionRow);
     for (let repeat = 0; repeat < 3; repeat++) observations.push(await browserMeasurement(browser, origin, 'candidate-motion.js', count, slowdown, executor));
     motionRow.summary = aggregate(observations, ['startMs', 'interruptMs', 'interruptArrivalDelayMs', 'cleanupMs']);

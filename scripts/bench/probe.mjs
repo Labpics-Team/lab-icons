@@ -14,7 +14,8 @@ const importMs = performance.now() - started;
 const create = request.kind === 'static' ? () => module.accessibilityOutline : request.sliced ? () => request.axes ? module.glyph({ axes: request.axes }) : module.glyph() : () => module.glyph({ icon: request.icon, ...(request.axes ? { axes: request.axes } : {}) });
 const svgOf = (value) => typeof value === 'string' ? value : value.svg;
 const firstStarted = performance.now();
-const first = svgOf(create());
+const firstValue = create();
+const first = svgOf(firstValue);
 const firstSvgMs = performance.now() - firstStarted;
 if (typeof first !== 'string' || !first.startsWith('<svg') || !first.includes('</svg>')) throw new Error('benchmark: consumer не получил SVG');
 let completedBytes = 0;
@@ -30,4 +31,18 @@ const gcStarted = performance.now();
 global.gc();
 const cleanupMs = performance.now() - gcStarted;
 const retained = process.memoryUsage();
-console.log(JSON.stringify({ count: request.count, completed: request.count, completedBytes, svgSha256: createHash('sha256').update(first).digest('hex'), importMs, firstSvgMs, svgGenerationMs, warmImportMs, cleanupMs, lifecycleMs: performance.now() - started, heapBefore: before.heapUsed, heapAfterGeneration: allocated.heapUsed, heapRetained: retained.heapUsed, rss: retained.rss, resourceUsage: process.resourceUsage() }));
+const metrics = { count: request.count, completed: request.count, completedBytes, svgSha256: createHash('sha256').update(first).digest('hex'), importMs, firstSvgMs, svgGenerationMs, warmImportMs, cleanupMs, lifecycleMs: performance.now() - started, heapBefore: before.heapUsed, heapAfterGeneration: allocated.heapUsed, heapRetained: retained.heapUsed, rss: retained.rss, resourceUsage: process.resourceUsage() };
+// Oracle-инструменты загружаются после observations и не входят в consumer heap/import.
+const { inspectAuthorSvg, sha256, svgComplexity } = await import('./author-oracle.js');
+metrics.complexity = svgComplexity(first);
+if (request.inspectAuthor) {
+  metrics.icon = firstValue.icon;
+  metrics.variant = firstValue.variant;
+  metrics.sourceFile = firstValue.provenance.file;
+  metrics.compositionKind = firstValue.composition.kind;
+  metrics.author = firstValue.provenance.author;
+  metrics.staticArtifactSha256 = sha256(module[request.variant ?? 'outline']);
+  metrics.parts = firstValue.parts.map(part => ({ id: part.id, role: part.role, zIndex: part.zIndex, fillRule: part.fillRule, d: part.d }));
+  Object.assign(metrics, inspectAuthorSvg(first, { ir: true }));
+}
+console.log(JSON.stringify(metrics));
