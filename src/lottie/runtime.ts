@@ -14,9 +14,13 @@ interface SymbolSource {
   glyphCapabilities(variant?: IconVariant): GlyphCapabilities<string>;
 }
 const profile = 'lottie-web-svg-5.13' as const;
+const supportedEffectVersions = [1, 2, 3];
 const refuse = (code: LottieRefusalCode, message: string): LottieExportResult => ({ ok: false, reason: { code, message } });
 const fixed = (k: unknown) => ({ a: 0, k });
-const frame = (t: number, value: number) => ({ t, s: [value], i: { x: [1], y: [1] }, o: { x: [0], y: [0] } });
+const frame = (t: number, value: number | readonly number[]) => {
+  const s = typeof value === 'number' ? [value] : [...value];
+  return { t, s, i: { x: s.map(() => 1), y: s.map(() => 1) }, o: { x: s.map(() => 0), y: s.map(() => 0) } };
+};
 const cloneContour = (contour: Contour) => ({ c: true, v: contour.v.map(p => [...p]), i: contour.i.map(p => [...p]), o: contour.o.map(p => [...p]) });
 
 /** @internal Геометрия уже скомпилирована. Runtime не импортирует parser или каталог. */
@@ -40,8 +44,10 @@ export function createLottieSymbol(source: SymbolSource, variants: Record<IconVa
     const target = selected(variant);
     if (!target.ok) return { profile, static: false, gestures: [], reason: target.reason };
     const glyph = source.glyph({ variant }), caps = source.glyphCapabilities(variant);
-    return { profile, static: true, gestures: caps.motion.gestures.filter(gesture =>
-      compileSymbolEffect(glyph, caps, gesture.id, { duration: 0 }).ok).map(gesture => gesture.id) };
+    return { profile, static: true, gestures: caps.motion.gestures.filter(gesture => {
+      const result = compileSymbolEffect(glyph, caps, gesture.id, { duration: 0 });
+      return result.ok && supportedEffectVersions.includes(result.effect.version);
+    }).map(gesture => gesture.id) };
   }
   function exportLottie(request: LottieExportRequest = {}): LottieExportResult {
     if (!request || typeof request !== 'object' || Array.isArray(request) ||
@@ -67,6 +73,7 @@ export function createLottieSymbol(source: SymbolSource, variants: Record<IconVa
       source.glyph({ variant }), source.glyphCapabilities(variant), request.gesture, { duration, from, to, reducedMotion: request.reducedMotion });
     if (effectResult && !effectResult.ok) return refuse('MOTION_UNAVAILABLE', `${effectResult.reason.code}: ${effectResult.reason.message}`);
     const effect = effectResult?.ok ? effectResult.effect : null;
+    if (effect && !supportedEffectVersions.includes(effect.version)) return refuse('MOTION_UNAVAILABLE', 'Версия эффекта не поддержана Lottie target.');
     const effectiveDuration = effect?.options.duration ?? 0;
     const terminalFrame = Math.round(effectiveDuration * rate / 1000);
     // Exact roundtrip допускает N*1000/fps в Number, без epsilon и
@@ -75,6 +82,11 @@ export function createLottieSymbol(source: SymbolSource, variants: Record<IconVa
         effectiveDuration !== terminalFrame * 1000 / rate) return refuse('DURATION_NOT_FRAME_ALIGNED', 'Duration обязан состоять из безопасного целого числа кадров выбранного fps с терминальным кадром.');
     const opacityTargets = effect?.version === 2 ? new Map(effect.targets.map(track => [track.partId, track])) : new Map();
     const rotations = effect?.version === 1 ? new Map(effect.targets.map(track => [track.partId, track.rotation])) : new Map();
+    const translations = effect?.version === 3 ? new Map(effect.targets.map(track => [track.partId, track])) : new Map();
+    if (effect?.version === 3 && (translations.size !== effect.targets.length || effect.targets.some(track =>
+      track.unit !== 'viewBox' || !['x', 'y'].includes(track.property)))) {
+      return refuse('MOTION_UNAVAILABLE', 'Translation target требует одну объявленную ось viewBox на часть.');
+    }
     let minX = geometry.viewBox[0]!, minY = geometry.viewBox[1]!;
     let maxX = minX + geometry.viewBox[2]!, maxY = minY + geometry.viewBox[3]!;
     // Bézier находится внутри convex hull controls. Полный круг вокруг anchor
@@ -91,13 +103,26 @@ export function createLottieSymbol(source: SymbolSource, variants: Record<IconVa
       minX = Math.min(minX, pivot[0] - radius); minY = Math.min(minY, pivot[1] - radius);
       maxX = Math.max(maxX, pivot[0] + radius); maxY = Math.max(maxY, pivot[1] + radius);
     }
+    if (effect?.version === 3) for (const track of effect.targets) {
+      // Linear scalar stages не выходят за extrema своих endpoints.
+      // Внутренний пик out-and-back входит в stages, даже когда from=to=0.
+      const values = terminalFrame ? [track.from, track.to, ...effect.stages.filter(stage => stage.partId === track.partId).map(stage => stage.to)] : [track.to];
+      const low = Math.min(...values), high = Math.max(...values);
+      if (track.property === 'x') {
+        minX = Math.min(minX, geometry.viewBox[0]! + low);
+        maxX = Math.max(maxX, geometry.viewBox[0]! + geometry.viewBox[2]! + high);
+      } else {
+        minY = Math.min(minY, geometry.viewBox[1]! + low);
+        maxY = Math.max(maxY, geometry.viewBox[1]! + geometry.viewBox[3]! + high);
+      }
+    }
     const origin: Point = [Math.floor(minX), Math.floor(minY)], offset: Point = [-origin[0], -origin[1]];
     const width = Math.ceil(maxX) - origin[0], height = Math.ceil(maxY) - origin[1];
     if (![width, height, ...origin].every(Number.isSafeInteger) || width <= 0 || height <= 0) return refuse('CANVAS_UNSUPPORTED', 'Canvas не представим безопасными целыми размерами target.');
     const rgb = [1, 3, 5].map(index => Number.parseInt(color.slice(index, index + 2), 16) / 255);
     const op = terminalFrame + 1;
     const layers = geometry.parts.map((part, index) => {
-      const rotation = rotations.get(part.id), opacity = opacityTargets.get(part.id);
+      const rotation = rotations.get(part.id), opacity = opacityTargets.get(part.id), translation = translations.get(part.id);
       const pivot: Point = rotation ? [geometry.viewBox[0]! + part.anchor[0] * geometry.viewBox[2]!, geometry.viewBox[1]! + part.anchor[1] * geometry.viewBox[3]!] : [0, 0];
       let opacityProperty: unknown = fixed(opacity ? (terminalFrame ? opacity.from : opacity.to) * 100 : 100);
       if (opacity && terminalFrame && effect?.version === 2) {
@@ -112,9 +137,23 @@ export function createLottieSymbol(source: SymbolSource, variants: Record<IconVa
         }
         opacityProperty = { a: 1, k: values };
       }
+      const position = (value = 0) => [pivot[0] + offset[0] + (translation?.property === 'x' ? value : 0),
+        pivot[1] + offset[1] + (translation?.property === 'y' ? value : 0), 0];
+      let positionProperty: unknown = fixed(position(translation?.to ?? 0));
+      if (translation && terminalFrame && effect?.version === 3) {
+        const values = [frame(0, position(translation.from))];
+        const stages = effect.stages.filter(stage => stage.partId === part.id);
+        for (const [stageIndex, stage] of stages.entries()) {
+          const t = stageIndex === stages.length - 1 ? terminalFrame : (stage.at + stage.duration) / effectiveDuration * terminalFrame;
+          const keyframe = frame(t, position(stage.to));
+          if (t === values.at(-1)!.t) values[values.length - 1] = keyframe;
+          else values.push(keyframe);
+        }
+        positionProperty = { a: 1, k: values };
+      }
       return { ddd: 0, ind: index + 1, ty: 4, nm: part.id, sr: 1, ip: 0, op, st: 0, bm: 0,
         ks: { o: opacityProperty, r: rotation && terminalFrame ? { a: 1, k: [frame(0, rotation.from), frame(terminalFrame, rotation.to)] } : fixed(rotation?.to ?? 0),
-          p: fixed([pivot[0] + offset[0], pivot[1] + offset[1], 0]), a: fixed([...pivot, 0]), s: fixed([100, 100, 100]) },
+          p: positionProperty, a: fixed([...pivot, 0]), s: fixed([100, 100, 100]) },
         // Один fill scope на исходный SVG path, включая все его countershapes.
         shapes: [...part.contours.map(contour => ({ ty: 'sh', ks: fixed(cloneContour(contour)), nm: part.id })),
           { ty: 'fl', c: fixed(rgb), o: fixed(100), r: part.fillRule === 'evenodd' ? 2 : 1, bm: 0, nm: 'ink' }] };

@@ -8,7 +8,9 @@ import { createGlyphCompiler } from '../../src/ir/compiler.js';
 import { createCompiledSymbol } from '../../src/ir/symbol-runtime.js';
 import { createLottieSymbol } from '../../src/lottie/runtime.js';
 
-export const names = ['reload', 'refresh', 'ellipsis-horizontal', 'chatbubble-ellipses', 'volume-high', 'volume-middle'];
+export const nudgeNames = ['chevron-back', 'chevron-forward', 'chevron-up', 'chevron-down',
+  'arrow-back', 'arrow-forward', 'arrow-up', 'arrow-down'];
+export const names = ['reload', 'refresh', 'ellipsis-horizontal', 'chatbubble-ellipses', 'volume-high', 'volume-middle', ...nudgeNames];
 export function lottieSymbols() {
   const root = fileURLToPath(new URL('../..', import.meta.url));
   const read = path => JSON.parse(readFileSync(new URL(path, new URL('../..', import.meta.url)), 'utf8'));

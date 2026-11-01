@@ -1,17 +1,17 @@
 import { describe, expect, it } from 'vitest';
 import { lottieContours, compileLottieGeometry, renderLottieSymbolModule } from '../scripts/lib/lottie-geometry.js';
 import { createLottieSymbol } from '../src/lottie/runtime.js';
-import { lottieSymbols, names } from './helpers/lottie-symbols.js';
+import { lottieSymbols, names, nudgeNames } from './helpers/lottie-symbols.js';
 import { sampleMotionGesture } from '../src/core/motion-sampler.js';
 const consumers = lottieSymbols();
 const layer = (animation, id) => animation.layers.find(item => item.nm === id);
-function scalar(property, t) {
-  if (!property.a) return property.k;
+function scalar(property, t, component = 0) {
+  if (!property.a) return Array.isArray(property.k) ? property.k[component] : property.k;
   const keyframes = property.k;
   const next = keyframes.findIndex(item => item.t >= t);
-  if (next <= 0) return keyframes[next < 0 ? keyframes.length - 1 : 0].s[0];
+  if (next <= 0) return keyframes[next < 0 ? keyframes.length - 1 : 0].s[component];
   const a = keyframes[next - 1], b = keyframes[next];
-  return a.s[0] + (b.s[0] - a.s[0]) * (t - a.t) / (b.t - a.t);
+  return a.s[component] + (b.s[component] - a.s[component]) * (t - a.t) / (b.t - a.t);
 }
 
 describe('точный build-time Lottie target', () => {
@@ -60,11 +60,11 @@ describe('Lottie использует единые semantic effects', () => {
   it('принимает канонический целый кадр без ложного floating-point отказа', () => {
     for (const frameRate of [24, 30, 60, 120]) {
       const duration = 1000 / frameRate;
-      for (const [name, gesture] of [['reload', 'reload.cycle'], ['volume-high', 'volume-high.level'], ['ellipsis-horizontal', 'ellipsis-horizontal.activity']]) {
+      for (const [name, gesture] of [['reload', 'reload.cycle'], ['volume-high', 'volume-high.level'], ['ellipsis-horizontal', 'ellipsis-horizontal.activity'], ['arrow-up', 'arrow-up.nudge']]) {
         const result = consumers[name].lottie.exportLottie({ gesture, duration, frameRate });
         expect(result.ok, `${name}: ${frameRate} fps`).toBe(true);
         expect(result.animation.meta.labIcons.terminalFrame).toBe(1);
-        for (const item of result.animation.layers) for (const property of [item.ks.r, item.ks.o]) {
+        for (const item of result.animation.layers) for (const property of [item.ks.r, item.ks.o, item.ks.p]) {
           if (property.a) expect(property.k.at(-1).t).toBe(1);
         }
       }
@@ -84,7 +84,13 @@ describe('Lottie использует единые semantic effects', () => {
         const expected = sampleMotionGesture(gesture, from + (to - from) * t / 60);
         for (const sample of expected) {
           const ks = layer(animation, sample.partId).ks;
-          expect(scalar(sample.kind === 'rotate' ? ks.r : ks.o, t)).toBeCloseTo(sample.kind === 'rotate' ? sample.rotation : sample.opacity * 100, 10);
+          if (sample.kind === 'translate') {
+            const axis = sample.axis === 'x' ? 0 : 1;
+            expect(scalar(ks.p, t, axis) - animation.meta.labIcons.offset[axis]).toBeCloseTo(sample.translation, 10);
+            expect(scalar(ks.p, t, 1 - axis) - animation.meta.labIcons.offset[1 - axis]).toBe(0);
+          } else {
+            expect(scalar(sample.kind === 'rotate' ? ks.r : ks.o, t)).toBeCloseTo(sample.kind === 'rotate' ? sample.rotation : sample.opacity * 100, 10);
+          }
         }
       }
     }
@@ -93,7 +99,7 @@ describe('Lottie использует единые semantic effects', () => {
     const gesture = consumers['volume-high'].symbol.glyphCapabilities().motion.gestures[0].id;
     const result = consumers['volume-high'].lottie.exportLottie({ gesture, duration: 1000, from: 1, to: 0.3, reducedMotion: true });
     expect(result.ok).toBe(true); expect(result.animation.op).toBe(1); expect(result.animation.meta.labIcons.durationMs).toBe(0);
-    expect(result.animation.layers.every(item => item.ks.o.a === 0 && item.ks.r.a === 0)).toBe(true);
+    expect(result.animation.layers.every(item => item.ks.o.a === 0 && item.ks.r.a === 0 && item.ks.p.a === 0)).toBe(true);
   });
   it('не приписывает motion source-only variant и сохраняет precise geometry refusals', () => {
     expect(consumers['volume-middle'].lottie.exportLottie({ gesture: 'volume-middle.level' })).toMatchObject({ ok: false, reason: { code: 'MOTION_UNAVAILABLE' } });
@@ -117,6 +123,11 @@ describe('Lottie использует единые semantic effects', () => {
     first.layers[0].shapes[0].ks.k.v[0][0] += 20;
     first.meta.labIcons.logicalViewBox[0] += 30;
     expect(consumers.reload.lottie.exportLottie().animation).toEqual(pristine);
+    const moving = consumers['arrow-forward'].lottie.exportLottie({ gesture: 'arrow-forward.nudge' }).animation;
+    const initial = structuredClone(moving);
+    moving.layers[0].ks.p.k[1].s[0] += 10;
+    moving.layers[0].ks.p.k[1].o.x[0] = 1;
+    expect(consumers['arrow-forward'].lottie.exportLottie({ gesture: 'arrow-forward.nudge' }).animation).toEqual(initial);
   });
   it('canvas покрывает полный круг контрольных точек вокруг declared anchor', () => {
     const result = consumers.reload.lottie.exportLottie({ gesture: 'reload.cycle' });
@@ -130,6 +141,42 @@ describe('Lottie использует единые semantic effects', () => {
         const actual = [pivot[0] + x * Math.cos(radians) - y * Math.sin(radians) + animation.meta.labIcons.offset[0], pivot[1] + x * Math.sin(radians) + y * Math.cos(radians) + animation.meta.labIcons.offset[1]];
         expect(actual[0]).toBeGreaterThanOrEqual(0); expect(actual[0]).toBeLessThanOrEqual(animation.w);
         expect(actual[1]).toBeGreaterThanOrEqual(0); expect(actual[1]).toBeLessThanOrEqual(animation.h);
+      }
+    }
+  });
+  it.each(nudgeNames)('%s: внутренний nudge-пик, canvas и terminal без изменения contours', name => {
+    for (const variant of ['outline', 'filled']) {
+      const { symbol, lottie, targets } = consumers[name];
+      const result = lottie.exportLottie({ variant, gesture: `${name}.nudge`, duration: 1000 });
+      expect(result.ok).toBe(true);
+      const animation = result.animation, gesture = symbol.glyphCapabilities(variant).motion.gestures[0];
+      const track = gesture.tracks[0], axis = track.axis === 'x' ? 0 : 1;
+      const part = layer(animation, track.partId);
+      expect(part.ks.p.a).toBe(1);
+      expect(part.ks.p.k.map(item => item.t)).toEqual([0, 30, 60]);
+      expect(scalar(part.ks.p, 0, axis) - animation.meta.labIcons.offset[axis]).toBe(0);
+      expect(scalar(part.ks.p, 30, axis) - animation.meta.labIcons.offset[axis]).toBe(track.stops[1].value);
+      expect(scalar(part.ks.p, 60, axis) - animation.meta.labIcons.offset[axis]).toBe(0);
+      expect(part.ks.p.k.every(item => item.s.length === 3 && item.i.x.length === 3 && item.o.x.length === 3)).toBe(true);
+      const geometry = targets[variant].geometry, span = geometry.viewBox[axis + 2];
+      expect(axis === 0 ? animation.w : animation.h).toBe(span + Math.abs(track.stops[1].value));
+      expect(axis === 0 ? animation.h : animation.w).toBe(geometry.viewBox[3 - axis]);
+      const staticAnimation = lottie.exportLottie({ variant }).animation;
+      expect(part.shapes).toEqual(layer(staticAnimation, track.partId).shapes);
+      expect(part.ks.a).toEqual(layer(staticAnimation, track.partId).ks.a);
+      for (const endpoint of [0, track.stops[1].value]) for (const contour of geometry.parts[0].contours) {
+        for (let index = 0; index < contour.v.length; index++) for (const tangent of [[0, 0], contour.i[index], contour.o[index]]) {
+          const point = contour.v[index].map((value, coordinate) => value + tangent[coordinate] + animation.meta.labIcons.offset[coordinate] + (coordinate === axis ? endpoint : 0));
+          expect(point[0]).toBeGreaterThanOrEqual(0); expect(point[0]).toBeLessThanOrEqual(animation.w);
+          expect(point[1]).toBeGreaterThanOrEqual(0); expect(point[1]).toBeLessThanOrEqual(animation.h);
+        }
+      }
+      for (const request of [{ duration: 0 }, { from: 0.37, to: 0.37 }, { from: 1, to: 0.37, reducedMotion: true }]) {
+        const fixed = lottie.exportLottie({ variant, gesture: `${name}.nudge`, ...request }).animation;
+        expect(fixed.op).toBe(1); expect(fixed.layers.every(item => !item.ks.p.a && !item.ks.o.a && !item.ks.r.a)).toBe(true);
+        const terminal = request.to ?? 1;
+        expect(scalar(layer(fixed, track.partId).ks.p, 0, axis) - fixed.meta.labIcons.offset[axis])
+          .toBeCloseTo(sampleMotionGesture(gesture, terminal)[0].translation, 10);
       }
     }
   });

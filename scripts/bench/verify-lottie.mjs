@@ -7,7 +7,8 @@ import { build } from 'esbuild';
 import { assertRemoteBenchmark } from './measurement.js';
 
 const HERE = fileURLToPath(new URL('.', import.meta.url));
-const NAMES = ['reload', 'refresh', 'ellipsis-horizontal', 'chatbubble-ellipses', 'volume-high', 'volume-middle'];
+const NAMES = ['reload', 'refresh', 'ellipsis-horizontal', 'chatbubble-ellipses', 'volume-high', 'volume-middle',
+  'chevron-back', 'chevron-forward', 'chevron-up', 'chevron-down', 'arrow-back', 'arrow-forward', 'arrow-up', 'arrow-down'];
 const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
 
 /** Проверка настоящего packed target, выполненная после сравнительных замеров. */
@@ -26,7 +27,8 @@ export async function verifyLottieConsumer({ browser, prepared, origin, outdir, 
     if (annotation && annotation.masterSha256 !== master.sha256) throw new Error(`${name}/${variant}: raw annotation SHA drift`);
     const common = { name, rawSvg: raw.toString('utf8'), masterSha256: master.sha256, annotation };
     const gestures = !annotation ? [] : annotation.gesture.law === 'cycle.clockwise' ? [`${name}.cycle`] :
-      annotation.gesture.law === 'signal.levels' ? [`${name}.level`] : annotation.gesture.law === 'activity.triad' ? [`${name}.activity`, `${name}.idle`] : null;
+      annotation.gesture.law === 'signal.levels' ? [`${name}.level`] : annotation.gesture.law === 'activity.triad' ? [`${name}.activity`, `${name}.idle`] :
+      annotation.gesture.law === 'direction.nudge' ? [`${name}.nudge`] : null;
     if (!gestures) throw new Error(`${name}/${variant}: raw law не имеет независимого oracle`);
     return [{ ...common, request: { variant, color: '#123456' } },
       ...gestures.map(gesture => ({ ...common, request: { variant, gesture, duration: 1000, from: 0, to: 1, color: '#123456' } }))];

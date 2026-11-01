@@ -40,6 +40,17 @@ function expectedOpacity(declaration, id, gesture, progress) {
   const a = points[next - 1], b = points[next];
   return a[1] + (b[1] - a[1]) * (progress - a[0]) / (b[0] - a[0]);
 }
+/** Независимый physical direction law по raw viewport; producer stops не читаются. */
+export function referenceNudgeTranslation(declaration, id, gesture, progress, viewBox) {
+  const law = declaration?.gesture;
+  if (!gesture || law?.law !== 'direction.nudge' || law.partId !== id) return [0, 0];
+  assert(['left', 'right', 'up', 'down'].includes(law.direction), 'raw direction.nudge имеет неизвестное направление');
+  const pulse = 1 - Math.abs(2 * progress - 1);
+  if (pulse === 0) return [0, 0];
+  const horizontal = law.direction === 'left' || law.direction === 'right';
+  const amount = (horizontal ? viewBox[2] : viewBox[3]) / 8 * pulse;
+  return horizontal ? [law.direction === 'left' ? -amount : amount, 0] : [0, law.direction === 'up' ? -amount : amount];
+}
 export function referenceLottieTiming(request) {
   const from = request.gesture ? request.from ?? 0 : 0, to = request.gesture ? request.to ?? 1 : 0;
   const duration = request.gesture && !request.reducedMotion && from !== to ? request.duration ?? 1000 : 0;
@@ -56,6 +67,7 @@ function rawSource(testCase) {
 }
 function referenceFrame(testCase) {
   const { source, viewBox } = rawSource(testCase);
+  const time = referenceLottieTiming(testCase.request);
   let minX = viewBox[0], minY = viewBox[1], maxX = minX + viewBox[2], maxY = minY + viewBox[3];
   for (const [index, path] of [...source.querySelectorAll('path')].entries()) {
     const values = canonicalCubicPath(path.getAttribute('d')).match(/[-+]?(?:\d*\.\d+|\d+\.?\d*)(?:[eE][-+]?\d+)?/g).map(Number);
@@ -66,9 +78,13 @@ function referenceFrame(testCase) {
       const radius = Math.max(...points.map(point => Math.hypot(point[0] - pivot[0], point[1] - pivot[1])));
       minX = Math.min(minX, pivot[0] - radius); minY = Math.min(minY, pivot[1] - radius);
       maxX = Math.max(maxX, pivot[0] + radius); maxY = Math.max(maxY, pivot[1] + radius);
-    } else for (const point of points) {
-      minX = Math.min(minX, point[0]); minY = Math.min(minY, point[1]);
-      maxX = Math.max(maxX, point[0]); maxY = Math.max(maxY, point[1]);
+    } else {
+      const phases = time.terminalFrame ? [time.from, time.to, ...(Math.min(time.from, time.to) < 0.5 && Math.max(time.from, time.to) > 0.5 ? [0.5] : [])] : [time.to];
+      const offsets = phases.map(progress => referenceNudgeTranslation(testCase.annotation, part?.id, testCase.request.gesture, progress, viewBox));
+      for (const point of points) for (const translation of offsets) {
+        minX = Math.min(minX, point[0] + translation[0]); minY = Math.min(minY, point[1] + translation[1]);
+        maxX = Math.max(maxX, point[0] + translation[0]); maxY = Math.max(maxY, point[1] + translation[1]);
+      }
     }
   }
   // Область наблюдения принадлежит raw master. Cropped target не обрезает oracle.
@@ -89,6 +105,9 @@ function referenceSvg(testCase, frame, progress, canonical = false) {
     path.setAttribute('opacity', String(expectedOpacity(testCase.annotation, part?.id, testCase.request.gesture, progress)));
     if (testCase.annotation?.gesture.law === 'cycle.clockwise' && testCase.annotation.gesture.partId === part?.id && testCase.request.gesture) {
       path.setAttribute('transform', `rotate(${progress * 360} ${viewBox[0] + part.anchor[0] * viewBox[2]} ${viewBox[1] + part.anchor[1] * viewBox[3]})`);
+    } else if (testCase.annotation?.gesture.law === 'direction.nudge' && testCase.annotation.gesture.partId === part?.id && testCase.request.gesture) {
+      const translation = referenceNudgeTranslation(testCase.annotation, part.id, testCase.request.gesture, progress, viewBox);
+      path.setAttribute('transform', `translate(${translation[0]} ${translation[1]})`);
     }
     root.append(path);
   }
@@ -165,7 +184,12 @@ export async function runLottieRenderCases(create, testCases, { controls = true,
         player.addEventListener('DOMLoaded', () => { clearTimeout(timer); resolve(); });
         player.addEventListener('data_failed', () => { clearTimeout(timer); reject(new Error('Lottie data_failed')); });
       });
-      for (const t of [...new Set([0, expectedTime.terminalFrame / 2, expectedTime.terminalFrame])]) {
+      const phases = testCase.annotation?.gesture.law === 'direction.nudge' ? [0, 0.25, 0.5, 0.75, 1] : [0, 0.5, 1];
+      if (testCase.annotation?.gesture.law === 'direction.nudge' && expectedTime.from !== expectedTime.to) {
+        const peak = (0.5 - expectedTime.from) / (expectedTime.to - expectedTime.from);
+        if (peak > 0 && peak < 1) phases.push(peak);
+      }
+      for (const t of [...new Set(phases.map(fraction => expectedTime.terminalFrame * fraction))].sort((a, b) => a - b)) {
         player.goToAndStop(t, true);
         const fraction = expectedTime.terminalFrame ? t / expectedTime.terminalFrame : 1;
         const progress = testCase.request.gesture ? expectedTime.from + (expectedTime.to - expectedTime.from) * fraction : 0;
@@ -223,17 +247,25 @@ export async function runLottieRenderCases(create, testCases, { controls = true,
 async function runLottieNegativeControls(create, testCases) {
   const rotating = testCases.find(item => item.name === 'reload' && item.request.variant === 'outline' && item.request.gesture === 'reload.cycle');
   const countershape = testCases.find(item => item.name === 'chatbubble-ellipses' && item.request.variant === 'outline' && !item.request.gesture);
-  assert(rotating && countershape, 'Нужны реальные cycle и countershape controls.');
+  const nudging = testCases.find(item => item.name === 'arrow-forward' && item.request.variant === 'outline' && item.request.gesture === 'arrow-forward.nudge');
+  assert(rotating && countershape && nudging, 'Нужны реальные cycle, countershape и nudge controls.');
   const cycle = { ...rotating, request: { ...rotating.request, duration: 1000, frameRate: 60, from: 0.17, to: 0.73 } };
   const reverse = { ...cycle, request: { ...cycle.request, from: 0.73, to: 0.17 } };
   const reduced = { ...reverse, request: { ...reverse.request, reducedMotion: true } };
-  await runLottieRenderCases(create, [cycle, countershape, reverse, reduced], { controls: false, visible: false });
+  const nudge = { ...nudging, request: { ...nudging.request, duration: 1000, frameRate: 60, from: 0.17, to: 0.73 } };
+  const nudgeReverse = { ...nudge, request: { ...nudge.request, from: 0.73, to: 0.17 } };
+  const nudgeReduced = { ...nudgeReverse, request: { ...nudgeReverse.request, to: 0.37, reducedMotion: true } };
+  const nudgeNoop = { ...nudge, request: { ...nudge.request, from: 0.37, to: 0.37 } };
+  await runLottieRenderCases(create, [cycle, countershape, reverse, reduced, nudge, nudgeReverse, nudgeReduced, nudgeNoop], { controls: false, visible: false });
   const mutants = [
     ['geometry', cycle, animation => { animation.layers[0].shapes.find(shape => shape.ty === 'sh').ks.k.v[0][0] += 1; }, /raster mismatches/],
     ['anchor', cycle, animation => { const layer = animation.layers.find(layer => layer.ks.r.a); layer.ks.a.k[0] += 1; layer.ks.p.k[0] += 1; }, /raster mismatches/],
     ['fill-countershape', countershape, animation => { const layer = animation.layers.find(layer => layer.shapes.filter(shape => shape.ty === 'sh').length > 1); layer.shapes.splice(layer.shapes.findLastIndex(shape => shape.ty === 'sh'), 1); }, /raster mismatches/],
     ['terminal-hold', cycle, animation => { animation.op -= 1; for (const layer of animation.layers) layer.op -= 1; }, /natural completion=59, terminal=60/],
     ['canvas-crop', cycle, animation => { animation.w = Math.floor(animation.w / 2); }, /raster mismatches/],
+    ['nudge-axis', nudge, animation => { const position = animation.layers.find(layer => layer.ks.p.a).ks.p; for (const keyframe of position.k) [keyframe.s[0], keyframe.s[1]] = [keyframe.s[1], keyframe.s[0]]; }, /raster mismatches/],
+    ['nudge-interior-peak', nudge, animation => { const position = animation.layers.find(layer => layer.ks.p.a).ks.p; position.k.splice(1, position.k.length - 2); }, /raster mismatches/],
+    ['nudge-canvas-crop', nudge, animation => { animation.w = Math.floor(animation.w / 2); }, /raster mismatches/],
   ];
   const receipt = [];
   for (const [id, testCase, mutate, expectedFailure] of mutants) {

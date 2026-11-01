@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { canonicalCubicPath, compareLottiePixels, referenceLottieTiming } from '../scripts/bench/lottie-render.js';
+import { canonicalCubicPath, compareLottiePixels, referenceLottieTiming, referenceNudgeTranslation } from '../scripts/bench/lottie-render.js';
 
 describe('независимый raw author oracle Lottie', () => {
   it('переиспользует только доказанную эквивалентность L/H/V и zero-tangent C', () => {
@@ -28,6 +28,20 @@ describe('независимый raw author oracle Lottie', () => {
     const source = new Uint8ClampedArray([18, 52, 86, 255]);
     expect(compareLottiePixels(source, source).pass).toBe(true);
     expect(compareLottiePixels(new Uint8ClampedArray(4), source).pass).toBe(false);
+  });
+  it('direction.nudge выводится из physical direction и actual raw axis span', () => {
+    const annotation = direction => ({ gesture: { law: 'direction.nudge', partId: 'body', direction } });
+    const viewport = [11, -3, 32, 16];
+    for (const [direction, peak] of [['left', [-4, 0]], ['right', [4, 0]], ['up', [0, -2]], ['down', [0, 2]]]) {
+      expect(referenceNudgeTranslation(annotation(direction), 'body', 'test.nudge', 0, viewport)).toEqual([0, 0]);
+      expect(referenceNudgeTranslation(annotation(direction), 'body', 'test.nudge', 0.5, viewport)).toEqual(peak);
+      expect(referenceNudgeTranslation(annotation(direction), 'body', 'test.nudge', 0.25, viewport)).toEqual(peak.map(value => value / 2));
+      expect(referenceNudgeTranslation(annotation(direction), 'body', 'test.nudge', 0.75, viewport)).toEqual(peak.map(value => value / 2));
+      expect(referenceNudgeTranslation(annotation(direction), 'body', 'test.nudge', 1, viewport)).toEqual([0, 0]);
+    }
+    expect(referenceNudgeTranslation(annotation('right'), 'other-part', 'test.nudge', 0.5, viewport)).toEqual([0, 0]);
+    expect(referenceNudgeTranslation(annotation('right'), 'body', undefined, 0.5, viewport)).toEqual([0, 0]);
+    expect(() => referenceNudgeTranslation(annotation('logical-start'), 'body', 'test.nudge', 0.5, viewport)).toThrow('неизвестное направление');
   });
   it('отвергает иной RGB при сохранённой форме', () => {
     expect(compareLottiePixels(new Uint8ClampedArray([18, 52, 0, 255]), new Uint8ClampedArray([18, 52, 86, 255])).pass).toBe(false);
