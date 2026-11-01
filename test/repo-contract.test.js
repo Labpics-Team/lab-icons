@@ -7,6 +7,10 @@ import {
   releaseWorkflowErrors,
   validateRepoContract,
   workflowJobBlocks,
+  selfHostedWorkflowErrors,
+  benchmarkWorkflowErrors,
+  TRUSTED_VERIFY_RUNNER,
+  TRUSTED_BENCHMARK_RUNNER,
 } from '../scripts/check-repo-contract.js';
 
 const PACKAGE_MANAGER = 'pnpm@11.13.1';
@@ -322,11 +326,43 @@ jobs:
     );
   });
 
-  it('запрещает persistent self-hosted runner', () => {
+  it('запрещает необъявленный persistent self-hosted runner', () => {
     const ci = workflow({ jobs: [job({ runner: '[self-hosted, linux]' })] });
     expect(fixture({ filesPatch: { '.github/workflows/ci.yml': ci } })).toContain(
       '.github/workflows/ci.yml: persistent self-hosted runner запрещён для repository code',
     );
+  });
+
+  it('принимает trusted ARC Linux и сохраняет hosted isolation внешнего fork', () => {
+    const source = readFileSync(new URL('../.github/workflows/ci.yml', import.meta.url), 'utf8');
+    expect(selfHostedWorkflowErrors('.github/workflows/ci.yml', source)).toEqual([]);
+    expect(benchmarkWorkflowErrors(source)).toEqual([]);
+    expect(source).toContain(`runs-on: ${TRUSTED_VERIFY_RUNNER}`);
+    expect(source).toContain(`runs-on: ${TRUSTED_BENCHMARK_RUNNER}`);
+    expect(source).toContain('os: windows-latest');
+    expect(source).toContain('os: macos-latest');
+    expect(source).toContain('run: pnpm verify');
+  });
+
+  it.each([
+    ['fork без проверки trust', source => source.replaceAll("(github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)", 'true')],
+    ['pull_request_target', source => source.replace('  pull_request:', '  pull_request_target:')],
+    ['generic pool без Linux boundary', source => source.replaceAll('["self-hosted","Linux","X64"]', '["self-hosted"]')],
+    ['Windows заменён Linux', source => source.replace('["self-hosted","Windows","X64"]', '["self-hosted","Linux","X64"]')],
+  ])('routing guard отвергает %s', (_, mutate) => {
+    const source = readFileSync(new URL('../.github/workflows/ci.yml', import.meta.url), 'utf8');
+    expect(selfHostedWorkflowErrors('.github/workflows/ci.yml', mutate(source))).not.toEqual([]);
+  });
+
+  it.each([
+    ['benchmark не входит в CI', source => source.replace('needs: [verify, security, benchmark]', 'needs: [verify, security]')],
+    ['удалён success outcome', source => source.replace(' && "$BENCHMARK_RESULT" == \'success\'', '')],
+    ['ошибка замаскирована', source => source.replace('    name: Чистый consumer и browser benchmark', '    continue-on-error: true\n    name: Чистый consumer и browser benchmark')],
+    ['baseline меняется автоматически', source => source.replace('node scripts/bench/compare-consumers.mjs benchmark-results', 'node scripts/bench/compare-consumers.mjs benchmark-results --update')],
+    ['вместо consumer выполняется фикстура', source => source.replace('node scripts/bench/compare-consumers.mjs benchmark-results', 'node test/fixture.js')],
+  ])('benchmark guard отвергает %s', (_, mutate) => {
+    const source = readFileSync(new URL('../.github/workflows/ci.yml', import.meta.url), 'utf8');
+    expect(benchmarkWorkflowErrors(mutate(source))).not.toEqual([]);
   });
 
   it.each(['self-hosted', '[self-hosted, Linux, X64]'])(

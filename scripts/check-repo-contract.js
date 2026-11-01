@@ -25,6 +25,8 @@ export const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const EXACT_PNPM = /^pnpm@(\d+\.\d+\.\d+)$/;
 const PINNED_ACTION_REF = /^[0-9a-f]{40}$/;
 const CANONICAL_ENGINES = Object.freeze({ node: '>=22.14.0', pnpm: '>=11.13.1' });
+export const TRUSTED_VERIFY_RUNNER = `\${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && fromJSON(matrix.os == 'windows-latest' && '["self-hosted","Windows","X64"]' || matrix.os == 'macos-latest' && '["self-hosted","macOS","X64"]' || '["self-hosted","Linux","X64"]') || matrix.os }}`;
+export const TRUSTED_BENCHMARK_RUNNER = `\${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && fromJSON('["self-hosted","Linux","X64"]') || 'ubuntu-latest' }}`;
 const PNPM_POLICY = Object.freeze({
   blockExoticSubdeps: 'true',
   engineStrict: 'true',
@@ -247,7 +249,9 @@ function pnpmJobErrors({ relativePath, job, expectedPnpmVersion }) {
     errors.push(`${prefix}: зависимости обязаны ставиться через «pnpm install --frozen-lockfile»`);
   }
 
-  if (!hasCanonicalVerify(job.text)) {
+  // Измерение внешнего consumer не определяет список verify и обязано войти в CI.
+  const measuredConsumer = relativePath === '.github/workflows/ci.yml' && job.id === 'benchmark';
+  if (!measuredConsumer && !hasCanonicalVerify(job.text)) {
     errors.push(`${prefix}: полный гейт должен запускаться канонической командой «pnpm verify»`);
   }
 
@@ -266,6 +270,46 @@ function pnpmJobErrors({ relativePath, job, expectedPnpmVersion }) {
   return errors;
 }
 
+/** Общий ARC pool допускает только trusted code; native matrix и fork isolation сохраняются. */
+export function selfHostedWorkflowErrors(relativePath, text) {
+  const runnerLines = source => source.split(/\r?\n/).filter(line => !line.trim().startsWith('#') && /\bself-hosted\b/.test(line));
+  if (runnerLines(text).length === 0) return [];
+  const forbidden = `${relativePath}: persistent self-hosted runner запрещён для repository code`;
+  if (relativePath !== '.github/workflows/ci.yml' || /\bpull_request_target\b/.test(text)) return [forbidden];
+  const allowed = { verify: TRUSTED_VERIFY_RUNNER, benchmark: TRUSTED_BENCHMARK_RUNNER, security: TRUSTED_BENCHMARK_RUNNER };
+  let acceptedLines = 0;
+  for (const job of workflowJobBlocks(text)) {
+    const lines = runnerLines(job.text);
+    if (lines.some(line => line.trim() !== `runs-on: ${allowed[job.id]}`)) return [forbidden];
+    acceptedLines += lines.length;
+  }
+  if (runnerLines(text).length !== acceptedLines) return [forbidden];
+  return [];
+}
+
+/** Добавочный performance job не может стать заменой проверки или необязательным PASS. */
+export function benchmarkWorkflowErrors(text) {
+  const jobs = workflowJobBlocks(text);
+  const benchmark = jobs.find(job => job.id === 'benchmark');
+  if (!benchmark) return [];
+  const errors = [];
+  const required = jobs.find(job => job.id === 'required');
+  if (!/^\s*needs:\s*\[verify, security, benchmark\]\s*$/m.test(required?.text ?? '') ||
+      !required?.text.includes("BENCHMARK_RESULT: ${{ needs.benchmark.result }}") ||
+      !required?.text.includes("\"$BENCHMARK_RESULT\" == 'success'")) {
+    errors.push('.github/workflows/ci.yml: consumer benchmark обязан блокировать стабильный CI context');
+  }
+  if (!/^\s*run: node scripts\/bench\/compare-consumers\.mjs benchmark-results\s*$/m.test(benchmark.text) ||
+      !/^\s*run: pnpm exec playwright install --with-deps chromium\s*$/m.test(benchmark.text) ||
+      !/^\s*BENCHMARK_RUNNER_ENVIRONMENT: \$\{\{ runner\.environment \}\}\s*$/m.test(benchmark.text)) {
+    errors.push('.github/workflows/ci.yml: benchmark обязан измерять clean packed consumer и настоящий Chromium на runner');
+  }
+  if (/continue-on-error:\s*true|--update\b/.test(benchmark.text)) {
+    errors.push('.github/workflows/ci.yml: benchmark запрещено маскировать или автоматически менять size baseline');
+  }
+  return errors;
+}
+
 function workflowErrors({ relativePath, text, expectedPnpmVersion }) {
   const errors = [];
   const jobs = workflowJobBlocks(text);
@@ -273,9 +317,8 @@ function workflowErrors({ relativePath, text, expectedPnpmVersion }) {
     return [`${relativePath}: секция jobs отсутствует или не распознана`];
   }
 
-  if (/\bself-hosted\b/.test(text)) {
-    errors.push(`${relativePath}: persistent self-hosted runner запрещён для repository code`);
-  }
+  errors.push(...selfHostedWorkflowErrors(relativePath, text));
+  if (relativePath === '.github/workflows/ci.yml') errors.push(...benchmarkWorkflowErrors(text));
   for (const match of text.matchAll(/^\s*(?:-\s+)?uses:\s*([^\s#]+)@([^\s#]+)/gm)) {
     const [, action, ref] = match;
     if (!action.startsWith('./') && !PINNED_ACTION_REF.test(ref)) {
