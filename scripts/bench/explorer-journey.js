@@ -156,6 +156,13 @@ export async function runExplorerJourney() {
     setReduced(true);
     await wait(() => Number(q('progress').value) === 0, 'reduced reverse terminal');
     check('reduced-motion-terminal', angleDistance(0, angle(part)) < 0.01);
+    setReduced(false);
+    q('play').click();
+    await wait(() => Number(q('progress').value) > 0.1, 'scrub control setup');
+    q('pause').click();
+    await setProgress(0.6);
+    check('scrub-clears-paused-occurrence', q('pause').disabled && q('pause').textContent === 'Пауза');
+    check('scrub-keeps-selected-phase', Math.abs(Number(q('progress').value) - 0.6) < 0.000001 && angleDistance(216, angle(part)) < 0.01);
     await setProgress(1);
     setReduced(false);
     q('play').click();
@@ -230,5 +237,48 @@ export async function runExplorerJourney() {
     for (const control of controls) control.stop();
     for (const fixture of fixtures) fixture.remove();
     if (failed && q('pause')?.textContent === 'Пауза' && !q('pause').disabled) q('pause').click();
+  }
+}
+
+/** Реальная задержка module load; не подменяет content исполнителя. */
+export async function verifyLazyPause({ page, origin }) {
+  let release;
+  let requested = false;
+  const held = new Promise(resolve => { release = resolve; });
+  await page.route('**/motion-execution.js', async route => {
+    requested = true;
+    await held;
+    await route.continue();
+  });
+  try {
+    await page.goto(origin, { waitUntil: 'load' });
+    await page.locator('#symbol-inspector[aria-busy="false"]').waitFor();
+    await page.locator('#symbol-search').fill('reload');
+    await page.locator('[data-symbol="reload"]').click();
+    await page.locator('#symbol-inspector[aria-busy="false"]').waitFor();
+    await page.locator('#reduce-motion').uncheck();
+    await page.locator('#play').click();
+    await page.waitForFunction(() => !document.querySelector('#pause').disabled);
+    await page.locator('#pause').click();
+    release();
+    await page.waitForFunction(() => document.querySelector('#symbol-stage [data-part]').style.transform !== '');
+    const paused = await page.evaluate(async () => {
+      for (let count = 0; count < 8; count++) await new Promise(resolve => requestAnimationFrame(resolve));
+      const part = document.querySelector('#symbol-stage [data-part]');
+      const matrix = new DOMMatrix(getComputedStyle(part).transform);
+      return { progress: Number(document.querySelector('#progress').value),
+        angle: Math.atan2(matrix.b, matrix.a) * 180 / Math.PI,
+        label: document.querySelector('#pause').textContent };
+    });
+    if (!requested || paused.progress !== 0 || Math.abs(paused.angle) > 0.01 || paused.label !== 'Продолжить') {
+      throw new Error(`lazy pause intent lost: ${JSON.stringify({ requested, ...paused })}`);
+    }
+    await page.locator('#pause').click();
+    await page.waitForFunction(() => Number(document.querySelector('#progress').value) > 0.05);
+    await page.locator('#pause').click();
+    return { pass: true, requested, paused, resumed: true };
+  } finally {
+    release();
+    await page.unroute('**/motion-execution.js');
   }
 }

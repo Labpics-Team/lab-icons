@@ -18,7 +18,7 @@ function displayStyle() {
 const $ = (selector) => document.querySelector(selector);
 const ui = Object.fromEntries(['symbol-search', 'variant', 'symbol-grid', 'more-symbols', 'empty-search', 'corpus-count', 'visible-count', 'symbol-inspector', 'symbol-name', 'model-status', 'symbol-stage', 'size-samples', 'source-status', 'axis-controls', 'axis-status', 'parts', 'gesture', 'play', 'reverse', 'pause', 'progress', 'reduce-motion', 'motion-status', 'consumer-import', 'export-format', 'export', 'export-status'].map((id) => [id, $(`#${id}`)]));
 const reducedPreference = matchMedia('(prefers-reduced-motion: reduce)');
-const state = { data: null, name: 'time', variant: 'outline', view: 'original', viewLoading: false, limit: 48, revision: 0, viewRevision: 0, motionRevision: 0, loaded: false, legacy: false, modelModule: null, abort: null, module: null, capabilities: null, glyph: null, axes: {}, original: '', effect: null, animations: [], frame: null, playhead: null };
+const state = { data: null, name: 'time', variant: 'outline', view: 'original', viewLoading: false, limit: 48, revision: 0, viewRevision: 0, motionRevision: 0, pendingMotion: null, loaded: false, legacy: false, modelModule: null, abort: null, module: null, capabilities: null, glyph: null, axes: {}, original: '', effect: null, animations: [], frame: null, playhead: null };
 
 function progress() {
   const head = state.playhead;
@@ -35,10 +35,13 @@ function stop() {
   state.animations = [];
   state.effect = null;
   state.playhead = null;
+  state.pendingMotion = null;
   state.motionRevision++;
   cancelAnimationFrame(state.frame);
   state.frame = null;
   ui.progress.value = String(value);
+  ui.pause.textContent = 'Пауза';
+  ui.pause.disabled = true;
   return value;
 }
 
@@ -93,7 +96,9 @@ function cyclicGesture() {
 function updateMotionControls() {
   const admitted = state.loaded && motionAdmission()?.ok;
   const ready = admitted && !state.viewLoading && motionView();
-  for (const id of ['play', 'reverse', 'pause', 'progress', 'gesture']) ui[id].disabled = !ready;
+  for (const id of ['play', 'reverse', 'progress', 'gesture']) ui[id].disabled = !ready;
+  ui.pause.disabled = !ready || (!state.playhead && !state.pendingMotion);
+  ui.pause.textContent = (state.pendingMotion?.paused ?? (state.playhead && !state.playhead.running)) ? 'Продолжить' : 'Пауза';
   const identity = state.data.executionIdentity;
   ui['motion-status'].textContent = ready ? `${identity.package} ${identity.version}. ${cyclicGesture() ? 'Можно повторить, развернуть или прервать движение.' : 'Можно развернуть или прервать движение.'}${state.legacy ? ' Жест относится к прежней модели.' : ''}` : admitted ? 'Выберите авторский вид, чтобы управлять его жестом.' : 'Для этой авторской основы семантический жест пока не принят.';
 }
@@ -313,6 +318,9 @@ async function advance(to, { repeatCycle = false } = {}) {
   const revision = state.revision;
   const viewRevision = state.viewRevision;
   const motionRevision = ++state.motionRevision;
+  const pending = { paused: false };
+  state.pendingMotion = pending;
+  updateMotionControls();
   // Новый полный оборот — отдельное намерение пользователя. Ретаргет
   // незавершённого движения задаёт конечное значение и подхватывает текущую позу.
   const initialize = repeatCycle && cyclicGesture() && !state.playhead && progress() === 1;
@@ -321,7 +329,7 @@ async function advance(to, { repeatCycle = false } = {}) {
     if (revision !== state.revision || viewRevision !== state.viewRevision || motionRevision !== state.motionRevision) return;
     const from = initialize ? 0 : progress();
     const result = effect(from, to);
-    if (!result.ok) { ui['motion-status'].textContent = result.reason.message; return; }
+    if (!result.ok) { state.pendingMotion = null; updateMotionControls(); ui['motion-status'].textContent = result.reason.message; return; }
     const previous = state.animations;
     const controls = executor.executeSymbolEffect(ui['symbol-stage'], result.effect, { initialize });
     // Successor считывает текущую позу до освобождения предыдущего execution.
@@ -329,21 +337,28 @@ async function advance(to, { repeatCycle = false } = {}) {
     cancelAnimationFrame(state.frame);
     state.effect = result.effect;
     state.animations = controls;
-    state.playhead = { from, to, elapsed: 0, duration: result.effect.options.duration, startedAt: performance.now(), running: true };
-    ui.pause.textContent = 'Пауза';
+    state.pendingMotion = null;
+    state.playhead = { from, to, elapsed: 0, duration: result.effect.options.duration, startedAt: performance.now(), running: !pending.paused };
+    if (pending.paused) for (const control of controls) control.pause();
+    updateMotionControls();
     const update = () => {
       if (motionRevision !== state.motionRevision) return;
       ui.progress.value = String(progress());
-      if (controls.some((control) => control.state === 'running')) state.frame = requestAnimationFrame(update);
+      if (state.playhead?.running && controls.some((control) => control.state === 'running')) state.frame = requestAnimationFrame(update);
     };
     update();
     Promise.all(controls.map(control => control.finished)).then(results => {
       if (motionRevision !== state.motionRevision || results.some(result => result.status !== 'finished')) return;
       state.playhead = null;
       ui.progress.value = String(to);
+      updateMotionControls();
     }).catch(error => { if (motionRevision === state.motionRevision) ui['motion-status'].textContent = error.message; });
   } catch (error) {
-    if (revision === state.revision && viewRevision === state.viewRevision && motionRevision === state.motionRevision) ui['motion-status'].textContent = error.message;
+    if (revision === state.revision && viewRevision === state.viewRevision && motionRevision === state.motionRevision) {
+      state.pendingMotion = null;
+      updateMotionControls();
+      ui['motion-status'].textContent = error.message;
+    }
   }
 }
 
@@ -357,24 +372,26 @@ ui.play.addEventListener('click', () => advance(1, { repeatCycle: true }));
 ui.reverse.addEventListener('click', () => advance(0));
 ui.pause.addEventListener('click', () => {
   const head = state.playhead;
-  if (!head) return;
-  if (head.running) {
+  const pending = state.pendingMotion;
+  if (!head && !pending) return;
+  const pause = pending ? !pending.paused : head.running;
+  if (pending) pending.paused = pause;
+  if (head && head.running && pause) {
     head.elapsed += performance.now() - head.startedAt;
     head.running = false;
     for (const control of state.animations) control.pause();
     cancelAnimationFrame(state.frame);
     state.frame = null;
     ui.progress.value = String(progress());
-    ui.pause.textContent = 'Продолжить';
-  } else {
+  } else if (head && !head.running && !pause) {
     head.startedAt = performance.now();
     head.running = true;
     for (const control of state.animations) control.play();
-    ui.pause.textContent = 'Пауза';
     const motionRevision = state.motionRevision;
     const update = () => { if (motionRevision !== state.motionRevision) return; ui.progress.value = String(progress()); if (state.playhead?.running) state.frame = requestAnimationFrame(update); };
     update();
   }
+  updateMotionControls();
 });
 ui.progress.addEventListener('input', async () => {
   const to = Number(ui.progress.value);

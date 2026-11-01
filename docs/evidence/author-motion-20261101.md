@@ -13,13 +13,18 @@
 проекция оставалась source-only. Упаковка всего проекта локально не выполнялась.
 
 - Windows, Chrome `156.0.0.0`; публичный `@labpics/motion@0.5.0`.
-- `runExplorerJourney()` прошёл **75 из 75** проверок: независимые master paths,
+- `runExplorerJourney()` прошёл **77 из 77** проверок: независимые master paths,
   receipts, controls, SVG/effect export, отказы Lottie/SF, клавиатурный focus,
   ошибки текущей и устаревшей загрузки, независимые Filled instances и cleanup.
 - Пауза фиксирует позу и индикатор. На границе reverse admission:
   `39.96001548194913° → 39.96001548194913°`.
 - Scrub применяет нулевую длительность; повтор завершённого цикла создаёт новое
   occurrence. Reduced motion сразу принимает конечную позу.
+- Изолированное UI-ревью нашло потерю паузы во время первого lazy import и
+  устаревшую кнопку «Продолжить» после scrub. Исправленный pending intent хранит
+  паузу до admission. Проверка задержала реальный module request: после загрузки
+  progress и угол остались `0`, затем «Продолжить» запустила движение. Scrub
+  завершает прежнее occurrence и выключает его Pause control.
 - Текущий `time` отказывает `time.advance`: сваренные руки не получили допуск
   прежней двухчастной модели.
 - Syntax и `git diff --check` прошли. Core targeted tests/typecheck/security и два

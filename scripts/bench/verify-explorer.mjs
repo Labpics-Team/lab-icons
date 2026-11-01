@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os';
 import { dirname, extname, join, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { assertRemoteBenchmark } from './measurement.js';
+import { verifyLazyPause } from './explorer-journey.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8',
@@ -49,6 +50,7 @@ export async function verifyExplorer({ browser, source, output }) {
     context = await browser.newContext({ viewport: { width: 1440, height: 960 }, reducedMotion: 'no-preference' });
     page = await context.newPage();
     page.on('pageerror', error => report.pageErrors.push(error.message));
+    report.lazyPause = await verifyLazyPause({ page, origin });
     await page.goto(origin, { waitUntil: 'load' });
     report.journey = await page.evaluate(async () => {
       try { return await (await import('/journey.js')).runExplorerJourney(); }
