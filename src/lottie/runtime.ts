@@ -68,8 +68,11 @@ export function createLottieSymbol(source: SymbolSource, variants: Record<IconVa
     if (effectResult && !effectResult.ok) return refuse('MOTION_UNAVAILABLE', `${effectResult.reason.code}: ${effectResult.reason.message}`);
     const effect = effectResult?.ok ? effectResult.effect : null;
     const effectiveDuration = effect?.options.duration ?? 0;
-    const terminalFrame = effectiveDuration * rate / 1000;
-    if (!Number.isSafeInteger(terminalFrame) || !Number.isSafeInteger(terminalFrame + 1)) return refuse('DURATION_NOT_FRAME_ALIGNED', 'Duration обязан состоять из безопасного целого числа кадров выбранного fps с терминальным кадром.');
+    const terminalFrame = Math.round(effectiveDuration * rate / 1000);
+    // Exact roundtrip допускает N*1000/fps в Number, без epsilon и
+    // молчаливого округления произвольной пользовательской длительности.
+    if (!Number.isSafeInteger(terminalFrame) || !Number.isSafeInteger(terminalFrame + 1) ||
+        effectiveDuration !== terminalFrame * 1000 / rate) return refuse('DURATION_NOT_FRAME_ALIGNED', 'Duration обязан состоять из безопасного целого числа кадров выбранного fps с терминальным кадром.');
     const opacityTargets = effect?.version === 2 ? new Map(effect.targets.map(track => [track.partId, track])) : new Map();
     const rotations = effect?.version === 1 ? new Map(effect.targets.map(track => [track.partId, track.rotation])) : new Map();
     let minX = geometry.viewBox[0]!, minY = geometry.viewBox[1]!;
@@ -99,8 +102,11 @@ export function createLottieSymbol(source: SymbolSource, variants: Record<IconVa
       let opacityProperty: unknown = fixed(opacity ? (terminalFrame ? opacity.from : opacity.to) * 100 : 100);
       if (opacity && terminalFrame && effect?.version === 2) {
         const values = [frame(0, opacity.from * 100)];
-        for (const stage of effect.stages.filter(stage => stage.partId === part.id)) {
-          const t = (stage.at + stage.duration) * rate / 1000;
+        const stages = effect.stages.filter(stage => stage.partId === part.id);
+        for (const [stageIndex, stage] of stages.entries()) {
+          const stageEnd = stage.at + stage.duration;
+          const t = stageIndex === stages.length - 1
+            ? terminalFrame : stageEnd / effectiveDuration * terminalFrame;
           if (t === values.at(-1)!.t) values[values.length - 1] = frame(t, stage.to * 100);
           else values.push(frame(t, stage.to * 100));
         }

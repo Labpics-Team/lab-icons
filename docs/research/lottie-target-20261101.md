@@ -136,6 +136,17 @@ container duration `(N+1)/fr`. Непопавшая на grid длительно
 terminal state без animated properties. Export clip не обещает lifecycle
 live state machine или interruptible retarget внутри standalone player.
 
+Source counterexample: `duration = 1000/60` представляет один кадр,
+но `duration*60/1000` даёт `1.0000000000000002`. Проверка целочисленности
+этого промежуточного результата ошибочно отказывала законному запросу.
+Конечный compiler выбирает целый кандидат `N` и требует строгий roundtrip
+`duration === N*1000/fps`, вместе с безопасными `N` и `N+1`.
+Длительность не округляется, epsilon не используется; последний opacity
+keyframe закреплён на том же `N`. Граница Number рассмотрена по
+[MDN: Number.EPSILON](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/EPSILON),
+прочитанному 2026-11-01: фиксированный epsilon без учёта масштаба не задаёт
+общую гарантию численной эквивалентности.
+
 ## Владение данными и стоимость
 
 `compileSymbolEffect` остаётся owner admission, прогресса, reduced motion и

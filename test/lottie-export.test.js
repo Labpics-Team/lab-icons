@@ -57,6 +57,21 @@ describe('точный build-time Lottie target', () => {
 });
 
 describe('Lottie использует единые semantic effects', () => {
+  it('принимает канонический целый кадр без ложного floating-point отказа', () => {
+    for (const frameRate of [24, 30, 60, 120]) {
+      const duration = 1000 / frameRate;
+      for (const [name, gesture] of [['reload', 'reload.cycle'], ['volume-high', 'volume-high.level'], ['ellipsis-horizontal', 'ellipsis-horizontal.activity']]) {
+        const result = consumers[name].lottie.exportLottie({ gesture, duration, frameRate });
+        expect(result.ok, `${name}: ${frameRate} fps`).toBe(true);
+        expect(result.animation.meta.labIcons.terminalFrame).toBe(1);
+        for (const item of result.animation.layers) for (const property of [item.ks.r, item.ks.o]) {
+          if (property.a) expect(property.k.at(-1).t).toBe(1);
+        }
+      }
+    }
+    expect(consumers.reload.lottie.exportLottie({ gesture: 'reload.cycle', duration: 1001, frameRate: 60 }))
+      .toMatchObject({ ok: false, reason: { code: 'DURATION_NOT_FRAME_ALIGNED' } });
+  });
   const variants = names.flatMap(name => ['outline', 'filled'].flatMap(variant => consumers[name].symbol.glyphCapabilities(variant).motion.gestures.map(gesture => [name, variant, gesture])));
   it.each(variants)('%s/%s gesture соответствует sampler, включая reverse/segment/terminal', (name, variant, gesture) => {
     const { lottie } = consumers[name];
