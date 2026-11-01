@@ -170,7 +170,10 @@ export function auditRepo(root = ROOT) {
   for (const file of files) {
     const source = readFileSync(join(root, file), 'utf8');
     errors.push(...documentationLinkErrors(root, file, source));
-    if (file.replaceAll('\\', '/') !== 'docs/package.md') {
+    const normalizedPath = file.replaceAll('\\', '/');
+    // Снимки и эксперименты содержат датированные измерения и node IDs;
+    // они не проецируют текущий размер пакета в пользовательскую справку.
+    if (normalizedPath !== 'docs/package.md' && !/^docs\/(?:evidence|research)\//.test(normalizedPath)) {
       errors.push(...manualCorpusCountErrors(source).map((error) => `${file}: ${error}`));
     }
     for (const error of distributionClaimErrors(source)) {

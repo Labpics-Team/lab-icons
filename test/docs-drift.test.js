@@ -44,6 +44,19 @@ describe('Справка поставки', () => {
 });
 
 describe('Согласованность документации', () => {
+  it('отделяет датированные результаты исследования от текущих ручных счётчиков', ({ root }) => {
+    mkdirSync(join(root, 'docs/evidence'), { recursive: true });
+    mkdirSync(join(root, 'docs/research'), { recursive: true });
+    writeFileSync(join(root, 'docs/evidence/snapshot.md'), 'На 2026-11-01: 660 SVG. Страница Icons: 4045:632.');
+    writeFileSync(join(root, 'docs/research/comparison.md'), 'Baseline commit abc: 476 SVG.');
+    expect(auditRepo(root).errors).toEqual([]);
+    writeFileSync(join(root, 'docs/guide.md'), 'В пакете 660 SVG.');
+    expect(auditRepo(root).errors.some(error => error.replaceAll('\\', '/').includes('docs/guide.md') && error.includes('ручной счётчик'))).toBe(true);
+    unlinkSync(join(root, 'docs/guide.md'));
+    writeFileSync(join(root, 'docs/evidence/snapshot.md'), 'Нужен GH_PAT.');
+    expect(auditRepo(root).errors.some(error => error.replaceAll('\\', '/').includes('docs/evidence/snapshot.md') && error.includes('каналу поставки'))).toBe(true);
+  });
+
   it('отклоняет неверный канал установки с учётом Markdown', () => {
     for (const text of ['private: true', 'Пакет не **публикуется**\nв `npm`', 'Ставится только как git-зависимость', 'Нужен GH_PAT', 'Нужен **GH_PAT**', 'Пакет _не публикуется_ в `npm`']) {
       expect(distributionClaimErrors(text).length).toBeGreaterThan(0);
