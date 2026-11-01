@@ -3,13 +3,16 @@ import { dirname, join } from 'node:path';
 import { buildSync } from 'esbuild';
 import { authorPathEntries } from '../../src/core/icon-geometry.js';
 import { loadAuthorBaseline } from './author-baseline.js';
+import { authoringTutorialMaterial } from './authoring-tutorial.js';
 
 /** Observatory использует уже проверенные изображения и production package. */
 export function writeSymbolExplorer({ repo, outDir, report, visuals, canvas, iconSvg, comparisonVisual, packageDir = join(repo, 'dist') }) {
   mkdirSync(outDir, { recursive: true });
-  for (const name of ['index.html', 'explorer.css', 'explorer.js']) {
+  for (const name of ['index.html', 'explorer.css', 'explorer.js', 'authoring.html', 'authoring.js', 'download.js']) {
     copyFileSync(join(repo, 'observatory', name), join(outDir, name));
   }
+  const starter = authoringTutorialMaterial(readFileSync(join(repo, 'docs/authoring.md'), 'utf8'), join(packageDir, 'authoring/index.js'));
+  writeFileSync(join(outDir, 'authoring-example.js'), `export const starter = ${JSON.stringify(starter)};\n`);
   const motionPackage = JSON.parse(readFileSync(join(repo, 'node_modules/@labpics/motion/package.json'), 'utf8'));
   const executionIdentity = { package: motionPackage.name, version: motionPackage.version };
   buildSync({
@@ -29,7 +32,7 @@ export function writeSymbolExplorer({ repo, outDir, report, visuals, canvas, ico
   });
   const contract = JSON.parse(readFileSync(join(repo, 'release', 'contract.json'), 'utf8'));
   const baseline = loadAuthorBaseline(repo);
-  const browserFiles = ['dist/ir/request.js', 'dist/ir/symbol-runtime.js', 'dist/ir/render.js', 'dist/motion/index.js', 'dist/ir/lottie-runtime.js',
+  const browserFiles = ['dist/ir/request.js', 'dist/ir/symbol-runtime.js', 'dist/ir/render.js', 'dist/motion/index.js', 'dist/ir/lottie-runtime.js', 'dist/authoring/index.js',
     ...Object.keys(baseline.icons).flatMap(name => [`dist/symbols/${name}.js`, `dist/lottie/${name}.js`])];
   for (const relative of browserFiles) {
     if (!contract.files.includes(relative)) throw new Error(`symbol explorer: ${relative} не принадлежит package contract`);

@@ -6,6 +6,7 @@ import { dirname, extname, join, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { assertRemoteBenchmark } from './measurement.js';
 import { verifyLazyPause } from './explorer-journey.js';
+import { verifyAuthoringPlayground } from './authoring-journey.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8',
@@ -62,6 +63,7 @@ export async function verifyExplorer({ browser, source, output }) {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.locator('#symbol-inspector').scrollIntoViewIfNeeded();
     await page.screenshot({ path: join(destination, 'explorer-mobile.png'), fullPage: true, scale: 'css' });
+    report.authoring = await verifyAuthoringPlayground({ browser, origin, output: destination });
     report.complete = true;
     writeFileSync(join(destination, 'explorer-journey.json'), JSON.stringify(report, null, 2));
     return report;

@@ -6,6 +6,8 @@ import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
 import { build } from 'esbuild';
 import { assertRemoteBenchmark } from './measurement.js';
+import { authoringTutorialExample } from '../lib/authoring-tutorial.js';
+export { authoringTutorialExample } from '../lib/authoring-tutorial.js';
 
 const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
 
@@ -52,16 +54,6 @@ export function assertAuthoringRender(observed, expected) {
       } else assert.notEqual(path.fill, 'none');
     }
   }
-}
-
-/** Исполняется первый самостоятельный пример из публичного tutorial. */
-export function authoringTutorialExample(document) {
-  const code = document.match(/```ts\r?\n([\s\S]*?)\r?\n```/)?.[1];
-  if (!code || !code.includes("from '@labpics/icons/authoring'") ||
-      !/\bconst\s+glyph\s*=\s*compileDesignSpec\(/.test(code)) {
-    throw new Error('authoring consumer: tutorial не содержит самостоятельного public compile примера');
-  }
-  return code;
 }
 
 /** Types проверяются в consumer без source aliases; каждый запрет имеет свой diagnostic. */

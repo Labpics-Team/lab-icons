@@ -1,5 +1,6 @@
 import { compileSymbolEffect } from './package/motion/index.js';
 import { renderGlyphSvg } from './package/ir/render.js';
+import { downloadFile } from './download.js';
 let execution;
 const motionExecutor = () => execution ??= import('./motion-execution.js');
 let recordedModels;
@@ -464,12 +465,8 @@ ui.export.addEventListener('click', async () => {
       if (state.revision === revision) ui.export.disabled = !state.loaded || state.viewLoading;
     }
   } else { ui['export-status'].textContent = 'SF Symbols: для этого варианта нет проверенного адаптера.'; return; }
-  const url = URL.createObjectURL(new Blob([content], { type: format === 'svg' ? 'image/svg+xml' : 'application/json' }));
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = `${state.name}-${state.variant}${legacyExport ? '-recorded-model' : ''}.${format === 'svg' ? 'svg' : format === 'lottie' ? 'lottie.json' : 'effect.json'}`;
-  link.click();
-  setTimeout(() => URL.revokeObjectURL(url), 0);
+  downloadFile(content, format === 'svg' ? 'image/svg+xml' : 'application/json',
+    `${state.name}-${state.variant}${legacyExport ? '-recorded-model' : ''}.${format === 'svg' ? 'svg' : format === 'lottie' ? 'lottie.json' : 'effect.json'}`);
   ui['export-status'].textContent = 'Файл подготовлен.';
 });
 
