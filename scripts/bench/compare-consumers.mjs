@@ -4,11 +4,10 @@ import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { mkdirSync, mkdtempSync, readFileSync, readdirSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
 import { cpus, freemem, hostname, platform, release, tmpdir, totalmem } from 'node:os';
-import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { basename, dirname, join, resolve } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { createServer } from 'node:http';
 import { performance } from 'node:perf_hooks';
-import { brotliCompressSync, gzipSync } from 'node:zlib';
 import { build } from 'esbuild';
 import { chromium } from 'playwright';
 import { localTarballSpecifier, pnpmInvocation } from '../check-package-artifact.js';
@@ -17,6 +16,7 @@ import { validateAuthorObservation, validateRetainedPair } from './author-oracle
 import { verifyExplorer } from './verify-explorer.mjs';
 import { verifyLottieConsumer } from './verify-lottie.mjs';
 import { verifyAuthoringConsumer } from './verify-authoring.mjs';
+import { bundleMeasurements, staticAdapterSource } from './static-consumer.js';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const BASELINE = '03a4ca3ac1bf7978f9e8f554106c132a69668afb';
@@ -76,12 +76,34 @@ function createExpression(testCase, label) {
 }
 async function makeBundle(prepared, testCase, outdir) {
   const entry = join(prepared.consumer, `${testCase.id}.mjs`);
-  writeFileSync(entry, `import * as symbol from ${JSON.stringify(caseImport(testCase, prepared.label))};\nimport { measureScene } from ${JSON.stringify(join(ROOT, 'scripts/bench/browser-scene.js'))};\nexport const run = count => measureScene(${createExpression(testCase, prepared.label)}, count);\n`);
+  writeFileSync(entry, `import * as symbol from ${JSON.stringify(caseImport(testCase, prepared.label))};\nexport const create = ${createExpression(testCase, prepared.label)};\n`);
   const outfile = join(outdir, `${prepared.label}-${testCase.id}.js`);
   const started = performance.now();
   const result = await build({ entryPoints: [entry], outfile, bundle: true, format: 'esm', platform: 'browser', target: 'es2022', minify: true, metafile: true, logLevel: 'silent' });
   const bytes = readFileSync(outfile);
-  return { file: outfile, bundleCompileMs: performance.now() - started, rawBytes: bytes.length, gzipBytes: gzipSync(bytes, { level: 9 }).length, brotliBytes: brotliCompressSync(bytes).length, sha256: sha256(bytes), inputs: Object.entries(result.metafile.inputs).map(([file, input]) => ({ file, bytes: input.bytes })) };
+  return { file: outfile, bundleCompileMs: performance.now() - started, ...bundleMeasurements(bytes, result.metafile) };
+}
+
+async function makeStaticPair(prepared, variant, outdir) {
+  const installed = await import(pathToFileURL(join(prepared.packageRoot, 'dist/symbols/accessibility.js')).href);
+  const svg = installed[variant];
+  if (typeof svg !== 'string') throw new Error(`benchmark: installed static ${variant} отсутствует`);
+  const pair = { icon: 'accessibility', variant, artifact: prepared.tarballSha256, svgSha256: sha256(svg),
+    svgBytes: Buffer.byteLength(svg), completedBytes: svg.length, count: 1,
+    comparison: 'same installed SVG string; imported adapter versus literal; no historical geometry comparison', bundles: [], browser: [] };
+  for (const label of ['imported', 'literal']) {
+    const entry = join(prepared.consumer, `static-${variant}-${label}.mjs`);
+    writeFileSync(entry, staticAdapterSource(variant, label === 'literal' ? svg : undefined));
+    const file = join(outdir, `${prepared.label}-static-accessibility-${variant}-${label}.js`);
+    const result = await build({ entryPoints: [entry], outfile: file, bundle: true, format: 'esm', platform: 'browser',
+      target: 'es2022', minify: true, metafile: true, logLevel: 'silent' });
+    const facts = bundleMeasurements(readFileSync(file), result.metafile);
+    if (facts.retainedInputs.some(input => /\/(?:dist\/(?:ir|motion|authoring)\/|(?:catalog|anatomy)\.json$)/.test(input.file.replaceAll('\\', '/')))) {
+      throw new Error(`benchmark: ${label}/${variant} retained catalog/authoring/motion/IR runtime`);
+    }
+    pair.bundles.push({ label, file, ...facts });
+  }
+  return pair;
 }
 async function makeMotionBundle(prepared, outdir) {
   const entry = join(prepared.consumer, 'motion.mjs');
@@ -100,17 +122,29 @@ async function browserMeasurement(browser, origin, filename, count, slowdown, ex
       return Object.fromEntries(values.metrics.map(metric => [metric.name, metric.value]));
     });
     await session.send('Emulation.setCPUThrottlingRate', { rate: slowdown });
+    await session.send('Network.enable');
+    await session.send('Network.setCacheDisabled', { cacheDisabled: true });
     await session.send('Performance.enable', { timeDomain: 'timeTicks' });
     await page.goto(origin, { waitUntil: 'load' });
+    await page.evaluate(async () => { window.benchmarkScene = await import('/measurement/browser-scene.js'); });
     const before = await session.send('Performance.getMetrics');
     const result = await page.evaluate(async ({ filename, count, executor }) => {
-      const started = performance.now();
-      const consumer = await import(`/bundles/${filename}`);
-      const coldImportMs = performance.now() - started;
+      let result;
+      if (executor) {
+        const started = performance.now();
+        const consumer = await import(`/bundles/${filename}`);
+        const coldImportMs = performance.now() - started;
+        result = { coldImportMs, ...(await consumer.run(count, executor)) };
+      } else {
+        result = await window.benchmarkScene.measureColdScene(async () => {
+          const consumer = await import(`/bundles/${filename}`);
+          return consumer.create ?? (() => consumer.svg);
+        }, count);
+      }
       const warmStarted = performance.now();
       await import(`/bundles/${filename}`);
       const warmImportMs = performance.now() - warmStarted;
-      return { coldImportMs, warmImportMs, ...(await consumer.run(count, executor)) };
+      return { ...result, warmImportMs };
     }, { filename, count, executor });
     if (result.firstSvg) {
       result.svgSha256 = sha256(result.firstSvg);
@@ -145,6 +179,14 @@ try {
   report.currentAuthor = { source: authorConsumer.source, manifestSha256: authorConsumer.manifestSha256, counts: authorConsumer.expectedCounts, completed: authorConsumer.completed };
   const outdir = join(temp, 'bundles');
   mkdirSync(outdir);
+  report.benchmarkStatus = 'INCOMPLETE';
+  report.protocol.coldRender = { endpoint: 'native first-contentful-paint.startTime after import/create/mount in an empty document',
+    warmImport: 'after useful scene', isolation: 'fresh context/document/module graph; HTTP cache disabled; browser process and OS cache shared',
+    paintDeadlineMs: 30_000, interpretation: 'context/module cold; no GPU presentation claim or statistical acceptance',
+    sources: ['https://w3c.github.io/paint-timing/', 'https://developer.mozilla.org/en-US/docs/Web/API/PerformancePaintTiming', 'https://playwright.dev/docs/browser-contexts'] };
+  report.protocol.bundleScope = 'tiny public adapters; measurement harness preloaded outside bundle and cold interval';
+  report.staticPairs = [];
+  for (const variant of ['outline', 'filled']) report.staticPairs.push(await makeStaticPair(prepared[1], variant, outdir));
   for (const testCase of CASES) {
     const result = { ...testCase, bundles: [], server: [], browser: [] };
     const selected = testCase.candidateOnly ? [prepared[1]] : prepared;
@@ -184,7 +226,9 @@ try {
   server = createServer((request, response) => {
     const name = request.url?.match(/^\/bundles\/([a-z-]+\.js)$/)?.[1];
     response.setHeader('Cache-Control', 'no-store');
-    if (name) { response.setHeader('Content-Type', 'text/javascript'); response.end(readFileSync(join(outdir, name))); }
+    const measurement = request.url?.match(/^\/measurement\/(browser-scene|measurement)\.js$/)?.[1];
+    if (measurement) { response.setHeader('Content-Type', 'text/javascript'); response.end(readFileSync(join(ROOT, 'scripts/bench', `${measurement}.js`))); }
+    else if (name) { response.setHeader('Content-Type', 'text/javascript'); response.end(readFileSync(join(outdir, name))); }
     else { response.setHeader('Content-Type', 'text/html'); response.end('<!doctype html><meta charset="utf-8"><style>body{margin:0}#stage{display:grid;grid-template-columns:repeat(auto-fill,44px)}button{width:44px;height:44px}svg{width:24px;height:24px}</style><div id="stage"></div>'); }
   });
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
@@ -192,6 +236,19 @@ try {
   browser = await chromium.launch({ headless: true });
   report.environment.chromium = browser.version();
   report.explorer = await verifyExplorer({ browser, source: prepared[1].source, output });
+  for (const pair of report.staticPairs) {
+    for (const slowdown of [1, 4]) {
+      const observations = { imported: [], literal: [] };
+      pair.browser.push(...['imported', 'literal'].map(label => ({ label, count: 1, slowdown, observations: observations[label] })));
+      for (let repeat = 0; repeat < 3; repeat++) for (const label of repeat % 2 ? ['literal', 'imported'] : ['imported', 'literal']) {
+        const bundle = pair.bundles.find(bundle => bundle.label === label);
+        const observation = await browserMeasurement(browser, origin, basename(bundle.file), 1, slowdown);
+        validateRetainedPair({ svgSha256: pair.svgSha256, completedBytes: pair.completedBytes, completed: 1 }, observation);
+        observations[label].push(observation);
+      }
+    }
+    writeFileSync(join(output, 'consumer-comparison.json'), JSON.stringify(report, null, 2));
+  }
   for (const result of report.cases) {
     const labels = result.candidateOnly ? ['candidate'] : ['baseline', 'candidate'];
     for (const slowdown of [1, 4]) for (const count of COUNTS) {
@@ -205,7 +262,7 @@ try {
         if (!serverReference) throw new Error(`${result.id}/${label}: проверенный server output отсутствует`);
         validateRetainedPair(serverReference, observation);
       }
-      for (const row of browserRows) row.summary = aggregate(row.observations, ['coldImportMs', 'warmImportMs', 'firstCreateMs', 'createDomMs', 'mountLayoutMs', 'firstPaintOpportunityMs', 'cleanupMs', 'lifecycleMs', 'domElements']);
+      for (const row of browserRows) row.summary = aggregate(row.observations, ['coldImportMs', 'coldImportToUsefulRenderMs', 'warmImportMs', 'firstCreateMs', 'createDomMs', 'mountLayoutMs', 'firstPaintOpportunityMs', 'cleanupMs', 'lifecycleMs', 'domElements']);
     }
     writeFileSync(join(output, 'consumer-comparison.json'), JSON.stringify(report, null, 2));
     process.stdout.write(`${result.id}: server/browser observations сохранены\n`);
