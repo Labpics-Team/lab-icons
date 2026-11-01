@@ -5,7 +5,7 @@ import { loadAuthorBaseline, authorSymbolPayload } from '../scripts/lib/author-b
 import { compileAuthorAnatomy } from '../scripts/lib/author-anatomy.js';
 import { symbolExportName } from '../scripts/lib/symbol-modules.js';
 import { createGlyphCompiler } from '../src/ir/compiler.js';
-import { createCompiledSymbol } from '../src/ir/symbol-runtime.js';
+import { createCompiledGlyph, createCompiledCapabilities } from '../src/ir/symbol-runtime.js';
 import { compileSymbolEffect } from '../src/motion/index.js';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
@@ -36,7 +36,9 @@ const compiler = createGlyphCompiler({
 
 describe('авторская анатомия в production compiler и эффекте', () => {
   it.each(['reload', 'refresh'])('сохраняет независимые masters и делает %s.cycle адресуемым', icon => {
-    const symbol = createCompiledSymbol(authorSymbolPayload(icon, sources[icon], compiler));
+    const payload = authorSymbolPayload(icon, sources[icon], compiler);
+    const symbol = { glyph: createCompiledGlyph(payload.icon, payload.source),
+      glyphCapabilities: createCompiledCapabilities(payload.capabilities) };
     for (const variant of ['outline', 'filled']) {
       const glyph = symbol.glyph({ variant });
       const caps = symbol.glyphCapabilities(variant);
@@ -65,7 +67,9 @@ describe('авторская анатомия в production compiler и эффе
   });
 
   it('отказывает потерянному/чужому receipt и anchor; role сама не даёт admission', () => {
-    const symbol = createCompiledSymbol(authorSymbolPayload('reload', sources.reload, compiler));
+    const payload = authorSymbolPayload('reload', sources.reload, compiler);
+    const symbol = { glyph: createCompiledGlyph(payload.icon, payload.source),
+      glyphCapabilities: createCompiledCapabilities(payload.capabilities) };
     const glyph = symbol.glyph();
     const caps = symbol.glyphCapabilities();
     const refuse = (changed, capability = caps) => compileSymbolEffect(changed, capability, 'reload.cycle', { duration: 800 });

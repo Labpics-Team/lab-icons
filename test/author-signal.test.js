@@ -5,7 +5,7 @@ import { loadAuthorBaseline, authorSymbolPayload } from '../scripts/lib/author-b
 import { compileAuthorAnatomy } from '../scripts/lib/author-anatomy.js';
 import { symbolExportName } from '../scripts/lib/symbol-modules.js';
 import { createGlyphCompiler } from '../src/ir/compiler.js';
-import { createCompiledSymbol } from '../src/ir/symbol-runtime.js';
+import { createCompiledGlyph, createCompiledCapabilities } from '../src/ir/symbol-runtime.js';
 import { compileSymbolEffect } from '../src/motion/index.js';
 import { sampleMotionGesture } from '../src/core/motion-sampler.js';
 
@@ -55,7 +55,11 @@ function consumer() {
     staticIcons: Object.fromEntries(Object.entries(sources).flatMap(([icon, variants]) =>
       Object.entries(variants).map(([variant, item]) => [symbolExportName(icon, variant), item.artifactSvg]))),
   });
-  return Object.fromEntries(names.map(icon => [icon, createCompiledSymbol(authorSymbolPayload(icon, sources[icon], compiler))]));
+  return Object.fromEntries(names.map(icon => {
+    const payload = authorSymbolPayload(icon, sources[icon], compiler);
+    return [icon, { glyph: createCompiledGlyph(payload.icon, payload.source),
+      glyphCapabilities: createCompiledCapabilities(payload.capabilities) }];
+  }));
 }
 
 function errorCode(changed, expected) {

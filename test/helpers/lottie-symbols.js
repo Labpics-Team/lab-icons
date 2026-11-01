@@ -5,7 +5,7 @@ import { compileAuthorAnatomy } from '../../scripts/lib/author-anatomy.js';
 import { compileLottieGeometry } from '../../scripts/lib/lottie-geometry.js';
 import { symbolExportName } from '../../scripts/lib/symbol-modules.js';
 import { createGlyphCompiler } from '../../src/ir/compiler.js';
-import { createCompiledSymbol } from '../../src/ir/symbol-runtime.js';
+import { createCompiledGlyph, createCompiledCapabilities } from '../../src/ir/symbol-runtime.js';
 import { createLottieSymbol } from '../../src/lottie/runtime.js';
 
 export const nudgeNames = ['chevron-back', 'chevron-forward', 'chevron-up', 'chevron-down',
@@ -29,7 +29,9 @@ export function lottieSymbols() {
     staticIcons: Object.fromEntries(Object.entries(sources).flatMap(([icon, variants]) => Object.entries(variants).map(([variant, item]) =>
       [symbolExportName(icon, variant), item.artifactSvg]))) });
   return Object.fromEntries(names.map(icon => {
-    const payload = authorSymbolPayload(icon, sources[icon], compiler), symbol = createCompiledSymbol(payload);
+    const payload = authorSymbolPayload(icon, sources[icon], compiler);
+    const symbol = { glyph: createCompiledGlyph(payload.icon, payload.source),
+      glyphCapabilities: createCompiledCapabilities(payload.capabilities) };
     const targets = Object.fromEntries(['outline', 'filled'].map(variant => [variant, compileLottieGeometry(payload.source[variant])]));
     return [icon, { symbol, payload, targets, lottie: createLottieSymbol(symbol, targets), masters: baseline.icons[icon] }];
   }));

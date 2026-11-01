@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { loadAuthorBaseline, authorSymbolPayload } from '../scripts/lib/author-baseline.js';
 import { compileAuthorAnatomy } from '../scripts/lib/author-anatomy.js';
 import { createGlyphCompiler } from '../src/ir/compiler.js';
-import { createCompiledSymbol } from '../src/ir/symbol-runtime.js';
+import { createCompiledGlyph, createCompiledCapabilities } from '../src/ir/symbol-runtime.js';
 import { compileSymbolEffect } from '../src/motion/index.js';
 import { authorPackageExpectations } from '../scripts/check-package-artifact.js';
 import { inspectAuthorSvg, observeAuthorGlyph, sha256, stableJSON, validateAuthorAdmission, validateAuthorObservation, validateRetainedPair } from '../scripts/bench/author-oracle.js';
@@ -32,7 +32,9 @@ describe('benchmark author oracle и сохранённый output', () => {
     const [icon, variant] = id.split('/');
     const sources = Object.fromEntries(Object.entries(baseline.icons[icon]).map(([name, record]) => [name, { ...record, sourceContract: contracts[`${icon}/${name}`] }]));
     const compiler = createGlyphCompiler({ catalog: { canvas: { viewBox: [0, 0, 24, 24] }, axes: read('semantics/catalog.json').axes, icons: { [icon]: { model: null, source: { outline: sources.outline.sourceContract, filled: sources.filled.sourceContract } } } }, anatomy: { version: 1, glyphs: {} }, grid: read('semantics/grid.json'), staticIcons: Object.fromEntries(Object.entries(sources).map(([name, record]) => [`${icon}${name === 'outline' ? 'Outline' : 'Filled'}`, record.artifactSvg])) });
-    const symbol = createCompiledSymbol(authorSymbolPayload(icon, sources, compiler));
+    const payload = authorSymbolPayload(icon, sources, compiler);
+    const symbol = { glyph: createCompiledGlyph(payload.icon, payload.source),
+      glyphCapabilities: createCompiledCapabilities(payload.capabilities) };
     const record = sources[variant];
     const glyph = symbol.glyph({ variant });
     const metadata = record.sourceContract.parts.map(({ id, role }) => ({ id, role }));
@@ -72,7 +74,9 @@ describe('benchmark author oracle и сохранённый output', () => {
     const master = loadAuthorBaseline(fileURLToPath(rootPath), { manifest: { ...captured, counts: { families: 1, variants: 2 }, icons: { time: captured.icons.time } } });
     const source = master.icons.time;
     const compiler = createGlyphCompiler({ catalog: { canvas: { viewBox: [0, 0, 24, 24] }, axes: read('semantics/catalog.json').axes, icons: { time: { model: null, source: { outline: source.outline.sourceContract, filled: source.filled.sourceContract } } } }, anatomy: { version: 1, glyphs: {} }, grid: read('semantics/grid.json'), staticIcons: { timeOutline: source.outline.artifactSvg, timeFilled: source.filled.artifactSvg } });
-    const symbol = createCompiledSymbol(authorSymbolPayload('time', source, compiler));
+    const payload = authorSymbolPayload('time', source, compiler);
+    const symbol = { glyph: createCompiledGlyph(payload.icon, payload.source),
+      glyphCapabilities: createCompiledCapabilities(payload.capabilities) };
     for (const variant of ['outline', 'filled']) {
       const record = source[variant];
       const original = inspectAuthorSvg(record.artifactSvg);

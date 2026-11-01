@@ -7,7 +7,7 @@ import { authorPackageExpectations } from '../scripts/check-package-artifact.js'
 import { expectedAuthorEffect, validateAuthorAdmission } from '../scripts/bench/author-oracle.js';
 import { symbolExportName } from '../scripts/lib/symbol-modules.js';
 import { createGlyphCompiler } from '../src/ir/compiler.js';
-import { createCompiledSymbol } from '../src/ir/symbol-runtime.js';
+import { createCompiledGlyph, createCompiledCapabilities } from '../src/ir/symbol-runtime.js';
 import { compileSymbolEffect } from '../src/motion/index.js';
 import { sampleMotionGesture, validateMotionGesture } from '../src/core/motion-sampler.js';
 
@@ -34,7 +34,11 @@ const compiler = createGlyphCompiler({ catalog: {
 staticIcons: Object.fromEntries(Object.entries(sources).flatMap(([icon, variants]) =>
   Object.entries(variants).map(([variant, item]) => [symbolExportName(icon, variant), item.artifactSvg]))),
 });
-const symbol = icon => createCompiledSymbol(authorSymbolPayload(icon, sources[icon], compiler));
+const symbol = icon => {
+  const payload = authorSymbolPayload(icon, sources[icon], compiler);
+  return { glyph: createCompiledGlyph(payload.icon, payload.source),
+    glyphCapabilities: createCompiledCapabilities(payload.capabilities) };
+};
 const dotIds = ['dot-leading', 'dot-middle', 'dot-trailing'];
 
 describe('activity.triad: exact author anatomy, finite scalar stages', () => {

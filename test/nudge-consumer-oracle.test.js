@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { loadAuthorBaseline, authorSymbolPayload } from '../scripts/lib/author-baseline.js';
 import { compileAuthorAnatomy } from '../scripts/lib/author-anatomy.js';
 import { createGlyphCompiler } from '../src/ir/compiler.js';
-import { createCompiledSymbol } from '../src/ir/symbol-runtime.js';
+import { createCompiledGlyph, createCompiledCapabilities } from '../src/ir/symbol-runtime.js';
 import { compileSymbolEffect } from '../src/motion/index.js';
 import { compileLottieGeometry } from '../scripts/lib/lottie-geometry.js';
 import { authorPackageExpectations } from '../scripts/check-package-artifact.js';
@@ -22,7 +22,9 @@ const compiler = createGlyphCompiler({ catalog: { canvas: { viewBox: [0, 0, 24, 
   icons: { [icon]: { model: null, source: Object.fromEntries(Object.entries(sources).map(([variant, source]) => [variant, source.sourceContract])) } } },
   anatomy: { version: 1, glyphs: {} }, grid: read('semantics/grid.json'),
   staticIcons: { arrowForwardOutline: sources.outline.artifactSvg, arrowForwardFilled: sources.filled.artifactSvg } });
-const symbol = createCompiledSymbol(authorSymbolPayload(icon, sources, compiler));
+const payload = authorSymbolPayload(icon, sources, compiler);
+const symbol = { glyph: createCompiledGlyph(payload.icon, payload.source),
+  glyphCapabilities: createCompiledCapabilities(payload.capabilities) };
 const packageContext = (variant, svg = sources[variant].normalizedSvg, compositionKind = 'layers') =>
   ({ kind: 'package', svg, compositionKind });
 

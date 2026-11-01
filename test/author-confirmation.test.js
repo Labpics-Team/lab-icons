@@ -6,7 +6,7 @@ import { compileAuthorAnatomy } from '../scripts/lib/author-anatomy.js';
 import { compileLottieGeometry } from '../scripts/lib/lottie-geometry.js';
 import { symbolExportName } from '../scripts/lib/symbol-modules.js';
 import { createGlyphCompiler } from '../src/ir/compiler.js';
-import { createCompiledSymbol } from '../src/ir/symbol-runtime.js';
+import { createCompiledGlyph, createCompiledCapabilities } from '../src/ir/symbol-runtime.js';
 import { compileSymbolEffect } from '../src/motion/index.js';
 import { createLottieSymbol } from '../src/lottie/runtime.js';
 import { sampleMotionGesture } from '../src/core/motion-sampler.js';
@@ -42,7 +42,8 @@ const compiler = createGlyphCompiler({
 });
 const consumers = Object.fromEntries(names.map(icon => {
   const payload = authorSymbolPayload(icon, sources[icon], compiler);
-  const symbol = createCompiledSymbol(payload);
+  const symbol = { glyph: createCompiledGlyph(payload.icon, payload.source),
+    glyphCapabilities: createCompiledCapabilities(payload.capabilities) };
   const lottie = createLottieSymbol(symbol, Object.fromEntries(['outline', 'filled'].map(variant =>
     [variant, compileLottieGeometry(payload.source[variant])])));
   return [icon, { symbol, lottie }];

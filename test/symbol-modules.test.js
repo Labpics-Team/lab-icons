@@ -10,6 +10,19 @@ const base = {
   exports: Object.fromEntries([['.', 'index'], ['./ir', 'ir/index'], ['./ir/recipes', 'ir/recipes'], ['./ir/candidates', 'ir/candidates']].map(([key, file]) => [key, { types: `./dist/${file}.d.ts`, import: `./dist/${file}.js` }])),
 };
 
+async function consumeSymbol(contents, entry) {
+  const output = await build({
+    stdin: { contents: entry, loader: 'js' },
+    bundle: true, write: false, minify: true, platform: 'browser', format: 'esm', logLevel: 'silent',
+    plugins: [{ name: 'single-symbol-control', setup(plugin) {
+      plugin.onResolve({ filter: /^test-symbol$/ }, () => ({ path: 'symbol', namespace: 'symbol', sideEffects: false }));
+      plugin.onLoad({ filter: /.*/, namespace: 'symbol' }, () => ({ contents, loader: 'js' }));
+      plugin.onResolve({ filter: /symbol-runtime\.js$/ }, () => ({ path: fileURLToPath(new URL('../src/ir/symbol-runtime.ts', import.meta.url)) }));
+    } }],
+  });
+  return output.outputFiles[0].text;
+}
+
 describe('замкнутые symbol modules', () => {
   it('projection растёт от настоящего catalog и не требует фиксированного числа иконок', () => {
     const contract = symbolReleaseProjection(base, ['time', 'alert', 'new-symbol']);
@@ -28,7 +41,7 @@ describe('замкнутые symbol modules', () => {
     expect(runtimeModuleSpecifiers(result).specifiers).toEqual(['../ir/symbol-runtime.js']);
     expect(result).not.toContain('createGlyphCompiler');
     expect(result).not.toContain('catalog.json');
-    expect(result).toContain('source: { outline: outlineSource, filled: filledSource }');
+    expect(result).toContain('createCompiledGlyph("alert", { outline: outlineSource, filled: filledSource })');
   });
 
   it('declaration связывает реальное добавленное имя с author corpus', () => {
@@ -39,21 +52,25 @@ describe('замкнутые symbol modules', () => {
     expect(() => symbolModuleDeclaration('../escape')).toThrow();
   });
 
+  it.each([
+    ['glyph', 'AUTHOR_IR_SENTINEL', 'AUTHOR_CAPS_SENTINEL'],
+    ['glyphCapabilities', 'AUTHOR_CAPS_SENTINEL', 'AUTHOR_IR_SENTINEL'],
+  ])('%s consumer оставляет только свой независимый payload', async (name, retained, discarded) => {
+    const shape = { icon: 'alert', svg: 'AUTHOR_IR_SENTINEL', parts: [] };
+    const caps = { trace: 'AUTHOR_CAPS_SENTINEL' };
+    const module = renderSymbolModule({ icon: 'alert', source: { outline: shape, filled: shape },
+      capabilities: { outline: caps, filled: caps }, staticSvg: { outline: 'SVG_STATIC_CONTROL', filled: 'FILLED_UNUSED' } });
+    const actual = await consumeSymbol(module, `import { ${name} } from "test-symbol"; console.log(${name}());`);
+    expect(actual).toContain(retained);
+    expect(actual).not.toContain(discarded);
+    expect(actual).not.toContain('SVG_STATIC_CONTROL');
+    expect(actual).not.toContain('FILLED_UNUSED');
+  });
+
   it('outline-only consumer удаляет настоящий runtime и весь IR payload; прежний member-read это нарушает', async () => {
     const shape = { icon: 'alert', svg: 'AUTHOR_IR_SENTINEL', parts: [] };
     const module = renderSymbolModule({ icon: 'alert', source: { outline: shape, filled: shape }, capabilities: { trace: 'AUTHOR_CAPS_SENTINEL' }, staticSvg: { outline: '<svg>SVG_STATIC_CONTROL</svg>', filled: '<svg>FILLED_UNUSED</svg>' } });
-    async function consume(contents) {
-      const output = await build({
-        stdin: { contents: 'import { outline } from "test-symbol"; console.log(outline);', loader: 'js' },
-        bundle: true, write: false, minify: true, platform: 'browser', format: 'esm', logLevel: 'silent',
-        plugins: [{ name: 'single-symbol-control', setup(plugin) {
-          plugin.onResolve({ filter: /^test-symbol$/ }, () => ({ path: 'symbol', namespace: 'symbol', sideEffects: false }));
-          plugin.onLoad({ filter: /.*/, namespace: 'symbol' }, () => ({ contents, loader: 'js' }));
-          plugin.onResolve({ filter: /symbol-runtime\.js$/ }, () => ({ path: fileURLToPath(new URL('../src/ir/symbol-runtime.ts', import.meta.url)) }));
-        } }],
-      });
-      return output.outputFiles[0].text;
-    }
+    const consume = contents => consumeSymbol(contents, 'import { outline } from "test-symbol"; console.log(outline);');
     const actual = await consume(module);
     expect(actual).toContain('SVG_STATIC_CONTROL');
     expect(actual).not.toContain('AUTHOR_IR_SENTINEL');
@@ -61,8 +78,10 @@ describe('замкнутые symbol modules', () => {
     expect(actual).not.toContain('FILLED_UNUSED');
     expect(actual).not.toContain('AUTHOR_PARITY_REQUIRED');
     const stale = module
-      .replace('export function glyph(request) { return symbol.glyph(request); }', 'export const glyph = symbol.glyph;')
-      .replace('export function glyphCapabilities(variant) { return symbol.glyphCapabilities(variant); }', 'export const glyphCapabilities = symbol.glyphCapabilities;');
+      .replace('export const glyph = /* @__PURE__ */', 'const symbolGlyph = /* @__PURE__ */')
+      .replace('export const glyphCapabilities = /* @__PURE__ */', 'const symbolCapabilities = /* @__PURE__ */') +
+      '\nconst symbol = { glyph: symbolGlyph, glyphCapabilities: symbolCapabilities };\n' +
+      'export const glyph = symbol.glyph;\nexport const glyphCapabilities = symbol.glyphCapabilities;\n';
     expect(await consume(stale)).toContain('AUTHOR_IR_SENTINEL');
   });
 

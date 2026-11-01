@@ -9,7 +9,7 @@ import { symbolExportName, symbolReleaseProjection } from '../scripts/lib/symbol
 import { authorPathEntries, renderedPathEntries } from '../src/core/icon-geometry.js';
 import { pathBBox } from '../src/core/path-data.js';
 import { createGlyphCompiler } from '../src/ir/compiler.js';
-import { createCompiledSymbol } from '../src/ir/symbol-runtime.js';
+import { createCompiledGlyph, createCompiledCapabilities } from '../src/ir/symbol-runtime.js';
 import { compileSymbolEffect } from '../src/motion/index.js';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
@@ -73,7 +73,8 @@ describe('текущий author baseline в production compiler', () => {
   it('source-only compile сохраняет raw master paths, fill-rule, z-order и независимый Filled', () => {
     const baseline = loadAuthorBaseline(root, { manifest: oneManifest() });
     const payload = compileTime(baseline);
-    const symbol = createCompiledSymbol(payload);
+    const symbol = { glyph: createCompiledGlyph(payload.icon, payload.source),
+      glyphCapabilities: createCompiledCapabilities(payload.capabilities) };
     for (const variant of ['outline', 'filled']) {
       const glyph = symbol.glyph({ variant });
       const authored = baseline.icons.time[variant];

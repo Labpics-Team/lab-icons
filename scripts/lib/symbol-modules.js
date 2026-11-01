@@ -54,18 +54,13 @@ export function renderSymbolModule({ icon, source, capabilities, staticSvg }) {
   const json = value => JSON.stringify(value);
   const lines = [
     '/** GENERATED: проверенные текущие авторские masters одного символа. */',
-    "import { createCompiledSymbol } from '../ir/symbol-runtime.js';",
+    "import { createCompiledGlyph, createCompiledCapabilities } from '../ir/symbol-runtime.js';",
     `export const outline = ${json(staticSvg.outline)};`,
     `export const filled = ${json(staticSvg.filled)};`,
     `const outlineSource = ${json(source.outline)};`,
     `const filledSource = ${json(source.filled)};`,
-    'const symbol = /* @__PURE__ */ createCompiledSymbol({',
-    `  icon: ${json(icon)},`,
-    '  source: { outline: outlineSource, filled: filledSource },',
-    `  capabilities: ${json(capabilities)},`,
-    '});',
-    'export function glyph(request) { return symbol.glyph(request); }',
-    'export function glyphCapabilities(variant) { return symbol.glyphCapabilities(variant); }',
+    `export const glyph = /* @__PURE__ */ createCompiledGlyph(${json(icon)}, { outline: outlineSource, filled: filledSource });`,
+    `export const glyphCapabilities = /* @__PURE__ */ createCompiledCapabilities(${json(capabilities)});`,
     '',
   ];
   return lines.join('\n');

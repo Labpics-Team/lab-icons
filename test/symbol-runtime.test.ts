@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createCompiledSymbol } from '../src/ir/symbol-runtime.js';
+import { createCompiledGlyph, createCompiledCapabilities } from '../src/ir/symbol-runtime.js';
 import { GlyphModelError, parseSymbolOptions } from '../src/ir/request.js';
 import type { AxisContract, AxisName, GlyphCapabilities, GlyphIR, IconVariant } from '../src/ir/index.js';
 
@@ -35,28 +35,54 @@ function data(modelState: GlyphCapabilities['modelState'] = null, supportedAxes:
 
 describe('предварительно собранный символ', () => {
   it('повторный default render возвращает immutable snapshot без вызова compiler', () => {
-    const symbol = createCompiledSymbol(data());
-    const first = symbol.glyph();
-    expect(symbol.glyph()).toBe(first);
-    expect(symbol.glyph({ variant: 'outline' })).toBe(first);
-    expect(symbol.glyph({ modelMode: 'source-only' })).toBe(first);
+    const input = data(), glyph = createCompiledGlyph(input.icon, input.source);
+    expect(glyph.name).toBe('glyph');
+    expect(glyph.length).toBe(1);
+    const first = glyph();
+    expect(glyph()).toBe(first);
+    expect(glyph({ variant: 'outline' })).toBe(first);
+    expect(glyph({ modelMode: 'source-only' })).toBe(first);
     expect(Object.isFrozen(first)).toBe(true);
     expect(Object.isFrozen(first.viewBox)).toBe(true);
     expect(() => { (first.viewBox as unknown as number[])[0] = 99; }).toThrow();
+    const filled = glyph({ variant: 'filled' });
+    expect(filled).toBe(input.source.filled);
+    expect(filled).not.toBe(first);
+    expect(glyph({ variant: 'filled', modelMode: 'source-only' })).toBe(filled);
+    expect(Object.isFrozen(filled.viewBox)).toBe(true);
   });
 
   it('материализованный capability не меняется при render и не строит геометрию', () => {
-    const symbol = createCompiledSymbol(data());
-    const first = symbol.glyphCapabilities('filled');
-    expect(symbol.glyphCapabilities('filled')).toBe(first);
+    const input = data(), glyphCapabilities = createCompiledCapabilities(input.capabilities);
+    expect(glyphCapabilities.name).toBe('glyphCapabilities');
+    expect(glyphCapabilities.length).toBe(1);
+    const first = glyphCapabilities('filled');
+    expect(glyphCapabilities('filled')).toBe(first);
     expect(Object.isFrozen(first.motion.gestures)).toBe(true);
-    expect(symbol.glyph({ variant: 'filled' }).variant).toBe('filled');
+    expect(first.variant).toBe('filled');
+    expect(glyphCapabilities()).toBe(input.capabilities.outline);
+    expect(glyphCapabilities('outline')).toBe(glyphCapabilities());
+  });
+
+  it('каждая фабрика материализует только свой независимый input', () => {
+    const input = data();
+    createCompiledGlyph(input.icon, input.source);
+    expect(Object.isFrozen(input.source.outline)).toBe(true);
+    expect(Object.isFrozen(input.capabilities.outline)).toBe(false);
+    const other = data();
+    createCompiledCapabilities(other.capabilities);
+    expect(Object.isFrozen(other.capabilities.outline)).toBe(true);
+    expect(Object.isFrozen(other.source.outline)).toBe(false);
+  });
+
+  it.each([null, [], {}, 'mixed'])('capability variant сохраняет parser refusal: %j', input => {
+    expect(() => createCompiledCapabilities(data().capabilities)(input as never)).toThrow(TypeError);
   });
 
   it.each([{ weight: 1 }, { opsz: 24 }, { corner: 1 }, { weight: 1000 }])('авторский source не наследует старый axis domain: %j', requestedAxes => {
-    const symbol = createCompiledSymbol(data());
+    const input = data(), glyph = createCompiledGlyph(input.icon, input.source);
     try {
-      symbol.glyph({ axes: requestedAxes });
+      glyph({ axes: requestedAxes });
       throw new Error('axis unexpectedly accepted');
     } catch (error) {
       expect(error).toBeInstanceOf(GlyphModelError);
@@ -65,17 +91,18 @@ describe('предварительно собранный символ', () => {
   });
 
   it('явно отказывает в candidate admission и source axes', () => {
-    const symbol = createCompiledSymbol(data());
-    expect(symbol.glyph().provenance.kind).toBe('source');
-    expect(() => symbol.glyph({ modelMode: 'allow-candidate' })).toThrow(GlyphModelError);
-    try { symbol.glyph({ modelMode: 'allow-candidate' }); }
+    const input = data(), glyph = createCompiledGlyph(input.icon, input.source);
+    expect(glyph().provenance.kind).toBe('source');
+    expect(() => glyph({ modelMode: 'allow-candidate' })).toThrow(GlyphModelError);
+    try { glyph({ modelMode: 'allow-candidate' }); }
     catch (error) { expect((error as GlyphModelError).code).toBe('AUTHOR_PARITY_REQUIRED'); }
-    expect(() => symbol.glyph({ modelMode: 'source-only', axes: { weight: 1 } })).toThrow(GlyphModelError);
+    expect(() => glyph({ modelMode: 'source-only', axes: { weight: 1 } })).toThrow(GlyphModelError);
     expect(() => parseSymbolOptions({ axes: { weight: 1000 } }, axes)).toThrow(RangeError);
   });
 
   it.each([null, [], { icon: 'time' }, { modelMode: null }, { variant: 'mixed' }, { axes: null }, { axes: { weight: NaN } }, { axes: { alien: 1 } }])('недоверенный запрос отвергается: %j', input => {
     expect(() => parseSymbolOptions(input, axes)).toThrow();
-    expect(() => createCompiledSymbol(data()).glyph(input as never)).toThrow();
+    const payload = data();
+    expect(() => createCompiledGlyph(payload.icon, payload.source)(input as never)).toThrow();
   });
 });

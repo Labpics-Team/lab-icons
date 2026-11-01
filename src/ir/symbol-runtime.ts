@@ -3,12 +3,6 @@ import type { GlyphCapabilities, GlyphIR, GlyphRequest, IconId, IconVariant } fr
 
 export type SymbolGlyphRequest = Omit<GlyphRequest, 'icon'>;
 
-interface CompiledSymbolData<TIcon extends string> {
-  readonly icon: TIcon;
-  readonly source: Readonly<Record<IconVariant, GlyphIR<TIcon>>>;
-  readonly capabilities: Readonly<Record<IconVariant, GlyphCapabilities<TIcon>>>;
-}
-
 function freezeTree<T>(value: T): T {
   if (value !== null && typeof value === 'object') {
     for (const child of Object.values(value)) freezeTree(child);
@@ -17,27 +11,32 @@ function freezeTree<T>(value: T): T {
   return value;
 }
 
-/** @internal Сборка даёт только проверенные данные одного символа. */
-export function createCompiledSymbol<TIcon extends string = IconId>(
-  input: CompiledSymbolData<TIcon>,
-) {
-  const data = freezeTree(input);
+/** @internal Сборка передаёт только проверенные авторские формы одного символа. */
+export function createCompiledGlyph<TIcon extends string = IconId>(
+  icon: TIcon,
+  input: Readonly<Record<IconVariant, GlyphIR<TIcon>>>,
+): (request?: SymbolGlyphRequest) => GlyphIR<TIcon> {
+  const source = freezeTree(input);
 
-  function glyph(request?: SymbolGlyphRequest): GlyphIR<TIcon> {
+  return function glyph(request?: SymbolGlyphRequest): GlyphIR<TIcon> {
     // Отсутствующий запрос — самый частый статический путь: без разбора,
     // geometry generation, хеширования и новых объектов на каждый render.
-    if (request === undefined) return data.source.outline;
+    if (request === undefined) return source.outline;
     const parsed = parseSymbolOptions(request);
     if (Object.keys(parsed.axes).length || parsed.modelMode === 'allow-candidate') {
       throw new GlyphModelError('AUTHOR_PARITY_REQUIRED',
-        `@labpics/icons/symbols: ${data.icon}/${parsed.variant} сохраняет текущий авторский master; оси и candidate-модель требуют доказательства его паритета`);
+        `@labpics/icons/symbols: ${icon}/${parsed.variant} сохраняет текущий авторский master; оси и candidate-модель требуют доказательства его паритета`);
     }
-    return data.source[parsed.variant];
-  }
+    return source[parsed.variant];
+  };
+}
 
-  function glyphCapabilities(variant: IconVariant = 'outline'): GlyphCapabilities<TIcon> {
-    return data.capabilities[parseSymbolVariant(variant)];
-  }
-
-  return Object.freeze({ glyph, glyphCapabilities });
+/** @internal Потребитель возможностей не удерживает геометрию авторских форм. */
+export function createCompiledCapabilities<TIcon extends string = IconId>(
+  input: Readonly<Record<IconVariant, GlyphCapabilities<TIcon>>>,
+): (variant?: IconVariant) => GlyphCapabilities<TIcon> {
+  const capabilities = freezeTree(input);
+  return function glyphCapabilities(variant?: IconVariant): GlyphCapabilities<TIcon> {
+    return capabilities[parseSymbolVariant(variant === undefined ? 'outline' : variant)];
+  };
 }
