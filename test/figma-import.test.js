@@ -10,6 +10,18 @@ const simpleFigmaSvg = ({ rootFill = 'none', pathFill = '#101012', body } = {}) 
   '</svg>';
 
 describe('Figma intake — каноническая граница source SVG', () => {
+  it.each(['m,2 2H22V22H2Z', 'm2,,2H22V22H2Z'])('проверяет исходный path до нормализации начального moveto %s', (d) => {
+    expect(() => normalizeFigmaSvg(simpleFigmaSvg({ body: `<path d="${d}" fill="#101012"/>` }))).toThrow();
+  });
+
+  it.each([
+    simpleFigmaSvg().replace('d="', 'D="'),
+    simpleFigmaSvg().replace('viewBox=', 'viewbox='),
+    simpleFigmaSvg({ body: '<path d="M2 2H22V22H2Z M7 7H17V17H7Z" FILL-RULE="evenodd" fill="#101012"/>' }),
+  ])('сохраняет регистр XML-атрибутов', (svg) => {
+    expect(() => normalizeFigmaSvg(svg)).toThrow();
+  });
+
   it('сохраняет inherited none, отказывая path без самостоятельной заливки', () => {
     expect(() => normalizeFigmaSvg(simpleFigmaSvg({ body: '<path d="M2 2H22V22H2Z"/>' }))).toThrow();
   });
