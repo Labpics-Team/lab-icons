@@ -49,6 +49,13 @@ describe('confidence admission benchmark', () => {
     const encoded = JSON.parse(JSON.stringify(quantileRatio([1, 2], [1, 2], { quantile: 0.95 })));
     expect(encoded).toMatchObject({ upper: null, reason: 'INSUFFICIENT_TAIL_OR_ZERO_BASELINE' });
   });
+  it('численная потеря positive ratio не превращается в CI нулевой ширины', () => {
+    for (const [base, head] of [[1e308, 1e-308], [1e-308, 1e308]]) {
+      const result = assessQuantile(copies(base), copies(head), 0.8);
+      expect(result).toMatchObject({ verdict: 'INCOMPLETE', point: null, lower: null, upper: null, reason: 'ARITHMETIC_UNRESOLVED' });
+      expect(JSON.parse(JSON.stringify(result)).reason).toBe('ARITHMETIC_UNRESOLVED');
+    }
+  });
   it('order и scale не меняют ratio или admission', () => {
     const baseline = Array.from({ length: 96 }, (_, index) => 100 + index / 1000);
     const candidate = baseline.map(value => value * 0.5);

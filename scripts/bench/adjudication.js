@@ -55,14 +55,24 @@ export function quantileRatio(baseline, candidate, { quantile = 0.5, confidence 
   const marginalConfidence = 1 - (1 - confidence) / 2;
   const base = quantileInterval(baseline, quantile, marginalConfidence);
   const head = quantileInterval(candidate, quantile, marginalConfidence);
-  const lower = base.upper === null || base.upper === 0 ? null : head.lower / base.upper;
-  const upper = head.upper === null || base.lower === 0 ? null : head.upper / base.lower;
-  const point = base.estimate === 0 ? null : head.estimate / base.estimate;
+  let arithmeticUnresolved = false;
+  const divide = (numerator, denominator) => {
+    if (numerator === null || denominator === null || denominator === 0) return null;
+    const value = numerator / denominator;
+    if (!Number.isFinite(value) || (numerator > 0 && value === 0)) {
+      arithmeticUnresolved = true;
+      return null;
+    }
+    return value;
+  };
+  const lower = divide(head.lower, base.upper);
+  const upper = divide(head.upper, base.lower);
+  const point = divide(head.estimate, base.estimate);
   const unresolvedClock = base.lower <= resolution || head.lower <= resolution;
   return {
     method: 'binomial-order-statistics/bonferroni-ratio-v1', confidence, quantile,
     baseline: base, candidate: head, point, lower, upper, resolution,
-    reason: upper === null ? 'INSUFFICIENT_TAIL_OR_ZERO_BASELINE' : unresolvedClock ? 'BELOW_CLOCK_RESOLUTION' : null,
+    reason: arithmeticUnresolved ? 'ARITHMETIC_UNRESOLVED' : upper === null ? 'INSUFFICIENT_TAIL_OR_ZERO_BASELINE' : unresolvedClock ? 'BELOW_CLOCK_RESOLUTION' : null,
   };
 }
 
