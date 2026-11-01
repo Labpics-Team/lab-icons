@@ -8,5 +8,5 @@
     "noEmit": false,
     "rootDir": "./src"
   },
-  "include": ["src/ir/**/*.ts", "src/motion/**/*.ts", "src/lottie/**/*.ts"]
+  "include": ["src/ir/**/*.ts", "src/motion/**/*.ts", "src/lottie/**/*.ts", "src/authoring/**/*.ts"]
 }
