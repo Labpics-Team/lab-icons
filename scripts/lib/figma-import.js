@@ -14,6 +14,7 @@ import { optimize } from 'svgo';
 const ICON_ID_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const MONOCHROME_PAINT = new Set(['none', 'currentcolor', '#101012']);
 const PATH_PAINT = new Set(['currentcolor', '#101012']);
+const ELEMENT_NAMES = new Set(['svg', 'path', 'g', 'defs', 'clipPath', 'rect']);
 
 // Целый атрибут потребляется вместе с кавычками: текст внутри d/style не
 // является отдельным атрибутом, даже если выглядит как id='…' или fill='…'.
@@ -65,7 +66,8 @@ export function canonicalIconName(value) {
 }
 
 function stripRootPaint(svg, source) {
-  return svg.replace(/^<svg\b[^>]*>/i, (tag) => {
+  let inheritsNone = false;
+  const stripped = svg.replace(/^<svg\b[^>]*>/, (tag) => {
     let seen = false;
     return mapAttributes(tag, ({ original, name, value }) => {
       if (name !== 'fill') return original;
@@ -73,9 +75,21 @@ function stripRootPaint(svg, source) {
       seen = true;
       const paint = value.trim().toLowerCase();
       if (!MONOCHROME_PAINT.has(paint)) throw new Error(`figma-import: ${source} root fill=${JSON.stringify(paint)} вне монохромного контракта`);
+      inheritsNone = paint === 'none';
       return '';
     });
   });
+  if (inheritsNone) {
+    for (const tag of svg.match(/<path\b[^>]*>/g) ?? []) {
+      let explicitFill = false;
+      mapAttributes(tag, ({ original, name }) => {
+        if (name === 'fill') explicitFill = true;
+        return original;
+      });
+      if (!explicitFill) throw new Error(`figma-import: ${source} path наследует root fill=none; требуется явная поддержанная заливка`);
+    }
+  }
+  return stripped;
 }
 
 function stripPathPaint(svg, source) {
@@ -103,7 +117,12 @@ export function normalizeFigmaSvg(input, { source = '<memory>' } = {}) {
   }
   // Проверяем исходный XML штатным парсером уже используемого SVGO. Его
   // сериализация отброшена: она не меняет авторские d или порядок контуров.
-  optimize(document, { plugins: [], multipass: false, path: source });
+  optimize(document, { plugins: [{
+    name: 'validate-author-element-names',
+    fn: () => ({ element: { enter(node) {
+      if (!ELEMENT_NAMES.has(node.name)) throw new Error(`figma-import: ${source} недопустимый SVG элемент <${node.name}>`);
+    } } }),
+  }], multipass: false, path: source });
 
   let normalized = stripRootPaint(document, source);
   normalized = lowerViewportIdentityClip(normalized);
