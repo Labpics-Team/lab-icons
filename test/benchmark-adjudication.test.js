@@ -31,6 +31,10 @@ describe('confidence admission benchmark', () => {
     expect(calibrateNoRegression(copies(10), copies(11))).toMatchObject({ verdict: 'INCOMPLETE', tolerance: null, reason: 'CALIBRATION_EXCEEDS_FIVE_PERCENT' });
     expect(calibrateNoRegression(copies(10, 3), copies(10, 3))).toMatchObject({ verdict: 'INCOMPLETE', tolerance: null });
   });
+  it('calibration сохраняет точную границу5% без floating subtraction refusal', () => {
+    expect(calibrateNoRegression(copies(10), copies(10.5))).toMatchObject({ verdict: 'PASS', tolerance: 0.05 });
+    expect(calibrateNoRegression(copies(10), copies(10.5001)).verdict).toBe('INCOMPLETE');
+  });
   it('zero counts остаются zero; ниже resolution speedup не заявляется', () => {
     expect(assessCount(0, 0)).toMatchObject({ verdict: 'PASS', ratio: null });
     expect(assessCount(0, 1)).toMatchObject({ verdict: 'FAIL', ratio: null });

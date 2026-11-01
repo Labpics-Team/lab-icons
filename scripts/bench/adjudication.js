@@ -83,9 +83,11 @@ export function calibrateNoRegression(left, right, options = {}) {
   const forward = quantileRatio(left, right, { ...options, confidence: directionalConfidence });
   const reverse = quantileRatio(right, left, { ...options, confidence: directionalConfidence });
   if (forward.reason || reverse.reason) return { verdict: 'INCOMPLETE', tolerance: null, confidence, forward, reverse, reason: 'CALIBRATION_UNRESOLVED' };
-  const tolerance = Math.max(0, forward.upper - 1, reverse.upper - 1);
-  return { verdict: tolerance <= 0.05 ? 'PASS' : 'INCOMPLETE', tolerance: tolerance <= 0.05 ? tolerance : null,
-    observedUpperTolerance: tolerance, confidence, forward, reverse, reason: tolerance <= 0.05 ? null : 'CALIBRATION_EXCEEDS_FIVE_PERCENT' };
+  const maximumRatio = Math.max(1, forward.upper, reverse.upper);
+  const accepted = maximumRatio <= 1.05;
+  const tolerance = maximumRatio - 1;
+  return { verdict: accepted ? 'PASS' : 'INCOMPLETE', tolerance: accepted ? Math.min(0.05, tolerance) : null,
+    observedUpperTolerance: tolerance, confidence, forward, reverse, reason: accepted ? null : 'CALIBRATION_EXCEEDS_FIVE_PERCENT' };
 }
 
 /** Counts не получают статистического послабления, включая baseline=0. */
