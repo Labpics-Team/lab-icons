@@ -25,9 +25,10 @@ export function canonicalCubicPath(d) {
   }
   return output;
 }
-function expectedOpacity(declaration, id, gesture, progress) {
+export function referenceLottieOpacity(declaration, id, gesture, progress) {
   if (!declaration || !gesture) return 1;
   const law = declaration.gesture;
+  if (law.law === 'confirmation.presence') return id === law.partId ? progress : 1;
   const index = law.partIds?.indexOf(id) ?? -1;
   if (index < 0 || gesture.endsWith('.idle')) return 1;
   if (law.law === 'signal.levels') return Math.max(0, Math.min(1, law.partIds.length * progress - index));
@@ -39,6 +40,16 @@ function expectedOpacity(declaration, id, gesture, progress) {
   if (next === 0) return points[0][1];
   const a = points[next - 1], b = points[next];
   return a[1] + (b[1] - a[1]) * (progress - a[0]) / (b[0] - a[0]);
+}
+export function referenceLottieGestures(name, declaration) {
+  if (!declaration) return [];
+  const law = declaration.gesture.law;
+  if (law === 'cycle.clockwise') return [`${name}.cycle`];
+  if (law === 'signal.levels') return [`${name}.level`];
+  if (law === 'activity.triad') return [`${name}.activity`, `${name}.idle`];
+  if (law === 'direction.nudge') return [`${name}.nudge`];
+  if (law === 'confirmation.presence') return [`${name}.presence`];
+  throw new Error(`${name}: raw law не имеет независимого oracle`);
 }
 /** Независимый physical direction law по raw viewport; producer stops не читаются. */
 export function referenceNudgeTranslation(declaration, id, gesture, progress, viewBox) {
@@ -102,7 +113,7 @@ function referenceSvg(testCase, frame, progress, canonical = false) {
     path.setAttribute('fill-rule', sourcePath.getAttribute('fill-rule') ?? 'nonzero');
     path.setAttribute('fill', testCase.request.color ?? '#000000');
     const part = testCase.annotation?.parts.find(item => item.pathIndex === index);
-    path.setAttribute('opacity', String(expectedOpacity(testCase.annotation, part?.id, testCase.request.gesture, progress)));
+    path.setAttribute('opacity', String(referenceLottieOpacity(testCase.annotation, part?.id, testCase.request.gesture, progress)));
     if (testCase.annotation?.gesture.law === 'cycle.clockwise' && testCase.annotation.gesture.partId === part?.id && testCase.request.gesture) {
       path.setAttribute('transform', `rotate(${progress * 360} ${viewBox[0] + part.anchor[0] * viewBox[2]} ${viewBox[1] + part.anchor[1] * viewBox[3]})`);
     } else if (testCase.annotation?.gesture.law === 'direction.nudge' && testCase.annotation.gesture.partId === part?.id && testCase.request.gesture) {

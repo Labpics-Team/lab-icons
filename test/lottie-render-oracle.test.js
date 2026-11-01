@@ -1,7 +1,35 @@
 import { describe, expect, it } from 'vitest';
-import { canonicalCubicPath, compareLottiePixels, referenceLottieTiming, referenceNudgeTranslation } from '../scripts/bench/lottie-render.js';
+import { readFileSync } from 'node:fs';
+import { canonicalCubicPath, compareLottiePixels, referenceLottieTiming, referenceLottieOpacity, referenceLottieGestures, referenceNudgeTranslation } from '../scripts/bench/lottie-render.js';
 
 describe('независимый raw author oracle Lottie', () => {
+  it('каждая принятая raw law имеет точный consumer gesture, неизвестная получает отказ', () => {
+    const annotations = JSON.parse(readFileSync(new URL('../semantics/author-anatomy.json', import.meta.url), 'utf8'));
+    for (const [name, variants] of Object.entries(annotations.icons)) {
+      for (const declaration of Object.values(variants)) {
+        expect(referenceLottieGestures(name, declaration).length).toBeGreaterThan(0);
+      }
+    }
+    expect(() => referenceLottieGestures('future', { gesture: { law: 'unknown' } })).toThrow('не имеет независимого oracle');
+    expect(referenceLottieGestures('source-only', undefined)).toEqual([]);
+  });
+  it('presence изменяет только confirmation mark в прямой, обратной и reduced конечной позе', () => {
+    const annotations = JSON.parse(readFileSync(new URL('../semantics/author-anatomy.json', import.meta.url), 'utf8'));
+    let variants = 0;
+    for (const [name, declarations] of Object.entries(annotations.icons)) {
+      for (const declaration of Object.values(declarations)) {
+        if (declaration.gesture.law !== 'confirmation.presence') continue;
+        variants++;
+        expect(referenceLottieGestures(name, declaration)).toEqual([`${name}.presence`]);
+        for (const progress of [0, 0.25, 0.5, 0.75, 1]) {
+          expect(referenceLottieOpacity(declaration, declaration.gesture.partId, `${name}.presence`, progress)).toBe(progress);
+          expect(referenceLottieOpacity(declaration, 'unchanged-enclosure', `${name}.presence`, progress)).toBe(1);
+          expect(referenceLottieOpacity(declaration, declaration.gesture.partId, undefined, progress)).toBe(1);
+        }
+      }
+    }
+    expect(variants).toBe(5);
+  });
   it('переиспользует только доказанную эквивалентность L/H/V и zero-tangent C', () => {
     expect(canonicalCubicPath('M1 2L3 4H5V6Z')).toBe('M1 2C1 2 3 4 3 4C3 4 5 4 5 4C5 4 5 6 5 6C5 6 1 2 1 2Z');
   });

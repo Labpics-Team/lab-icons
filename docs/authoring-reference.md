@@ -98,7 +98,7 @@ Paint: `{ kind: 'fill' }` либо
 | Композиция | Поля | Окраска |
 |---|---|---|
 | `layers` | Только `kind` | Отдельные fill/stroke части в порядке массива |
-| `compound` | `fillRule: 'nonzero' | 'evenodd'` | Один общий fill-контур; только fill части |
+| `compound` | `fillRule: 'nonzero' \| 'evenodd'` | Один общий fill-контур; только fill части |
 | `mask-subtract` | `basePartIds`, `subtractPartIds` | Base видны, subtract вычитаются luminance mask; fill и stroke |
 
 В `mask-subtract` каждая часть входит ровно в один список, списки непусты.

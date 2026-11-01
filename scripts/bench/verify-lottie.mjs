@@ -5,10 +5,9 @@ import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { build } from 'esbuild';
 import { assertRemoteBenchmark } from './measurement.js';
+import { referenceLottieGestures } from './lottie-render.js';
 
 const HERE = fileURLToPath(new URL('.', import.meta.url));
-const NAMES = ['reload', 'refresh', 'ellipsis-horizontal', 'chatbubble-ellipses', 'volume-high', 'volume-middle',
-  'chevron-back', 'chevron-forward', 'chevron-up', 'chevron-down', 'arrow-back', 'arrow-forward', 'arrow-up', 'arrow-down'];
 const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
 
 /** Проверка настоящего packed target, выполненная после сравнительных замеров. */
@@ -16,27 +15,27 @@ export async function verifyLottieConsumer({ browser, prepared, origin, outdir, 
   assertRemoteBenchmark();
   const manifest = JSON.parse(readFileSync(join(prepared.source, 'semantics/figma-baseline.json'), 'utf8'));
   const annotations = JSON.parse(readFileSync(join(prepared.source, 'semantics/author-anatomy.json'), 'utf8'));
+  // Новая принятая семья автоматически попадает в consumer; неизвестная law
+  // требует независимого oracle и не может исчезнуть из проверки по списку имён.
+  const names = Object.keys(annotations.icons).sort();
   const requireSource = createRequire(join(prepared.source, 'package.json'));
   const playerPath = requireSource.resolve('lottie-web/build/player/lottie_light.min.js');
   const playerPackage = JSON.parse(readFileSync(requireSource.resolve('lottie-web/package.json'), 'utf8'));
   if (playerPackage.version !== '5.13.0') throw new Error('Lottie consumer: нужен pinned SVG player 5.13.0');
-  const cases = NAMES.flatMap(name => ['outline', 'filled'].flatMap(variant => {
+  const cases = names.flatMap(name => ['outline', 'filled'].flatMap(variant => {
     const master = manifest.icons[name][variant], raw = readFileSync(join(prepared.source, master.master));
     if (sha256(raw) !== master.sha256) throw new Error(`${name}/${variant}: raw master SHA drift`);
     const annotation = annotations.icons[name]?.[variant];
     if (annotation && annotation.masterSha256 !== master.sha256) throw new Error(`${name}/${variant}: raw annotation SHA drift`);
     const common = { name, rawSvg: raw.toString('utf8'), masterSha256: master.sha256, annotation };
-    const gestures = !annotation ? [] : annotation.gesture.law === 'cycle.clockwise' ? [`${name}.cycle`] :
-      annotation.gesture.law === 'signal.levels' ? [`${name}.level`] : annotation.gesture.law === 'activity.triad' ? [`${name}.activity`, `${name}.idle`] :
-      annotation.gesture.law === 'direction.nudge' ? [`${name}.nudge`] : null;
-    if (!gestures) throw new Error(`${name}/${variant}: raw law не имеет независимого oracle`);
+    const gestures = referenceLottieGestures(name, annotation);
     return [{ ...common, request: { variant, color: '#123456' } },
       ...gestures.map(gesture => ({ ...common, request: { variant, gesture, duration: 1000, from: 0, to: 1, color: '#123456' } }))];
   }));
   const entry = join(prepared.consumer, 'lottie-render-consumer.mjs');
-  writeFileSync(entry, `${NAMES.map((name, index) => `import { exportLottie as icon${index} } from '@labpics/icons/lottie/${name}';`).join('\n')}
+  writeFileSync(entry, `${names.map((name, index) => `import { exportLottie as icon${index} } from ${JSON.stringify(`@labpics/icons/lottie/${name}`)};`).join('\n')}
 import { runLottieRenderCases } from ${JSON.stringify(join(HERE, 'lottie-render.js'))};
-const icons = {${NAMES.map((name, index) => `${JSON.stringify(name)}:icon${index}`).join(',')}};
+const icons = {${names.map((name, index) => `${JSON.stringify(name)}:icon${index}`).join(',')}};
 export const run = cases => runLottieRenderCases((name, request) => icons[name](request), cases);
 `);
   const bundle = await build({ entryPoints: [entry], outfile: join(outdir, 'candidate-lottie.js'), bundle: true, format: 'esm',
