@@ -850,7 +850,7 @@ export function createGlyphCompiler({ catalog: catalogJson, anatomy: anatomyJson
           state: 'gesture-ready',
           partIds: Object.freeze(source.parts.map(part => part.id)),
           tracks: Object.freeze([...new Map(gestures.flatMap(gesture => gesture.tracks.map(track => {
-            const id = `${track.kind}.${track.partId}`;
+            const id = track.kind === 'translate' ? `translate.${track.axis}.${track.partId}` : `${track.kind}.${track.partId}`;
             const capability: MotionTrackContract = Object.freeze(track.kind === 'rotate' ? {
               id, kind: 'rotate', partIds: Object.freeze([track.partId]), anchor: track.anchor,
             } : track.kind === 'translate' ? { id, kind: 'translate', partIds: Object.freeze([track.partId]), axis: track.axis, unit: track.unit }

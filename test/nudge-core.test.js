@@ -3,12 +3,25 @@ import { sampleMotionGesture, validateMotionGesture } from '../src/core/motion-s
 import { compileSymbolEffect } from '../src/motion/index.js';
 import { lottieSymbols } from './helpers/lottie-symbols.js';
 import { motionEntriesAt, proveMotionTrajectory } from '../scripts/lib/motion-trajectory.js';
+import { createGlyphCompiler } from '../src/ir/compiler.js';
+import grid from '../semantics/grid.json';
 
 const gesture = { id: 'chevron-forward.nudge', kind: 'cycle', partIds: ['direction-body'],
   progress: 'normalized-0-to-1', restProgress: 0, tracks: [{ partId: 'direction-body', kind: 'translate',
     axis: 'x', unit: 'viewBox', interpolation: 'linear', stops: [{ at: 0, value: 0 }, { at: 0.5, value: 3 }, { at: 1, value: 0 }] }] };
 
 describe('направленное движение в единицах viewBox', () => {
+  it('разные жесты одной части сохраняют оба translation канала', () => {
+    const gestures = ['x', 'y'].map(axis => ({ ...gesture, id: `direction.${axis}`, tracks: [{ ...gesture.tracks[0], axis }] }));
+    const source = { parts: [{ id: 'direction-body' }], anatomy: {}, gestures };
+    const compiler = createGlyphCompiler({ catalog: { axes: {}, icons: { 'arrow-forward': { model: null, source: { outline: source, filled: source } } } },
+      anatomy: { glyphs: {} }, grid, staticIcons: {} });
+    expect(compiler.glyphCapabilities('arrow-forward', 'outline').motion.tracks).toEqual([
+      { id: 'translate.x.direction-body', kind: 'translate', partIds: ['direction-body'], axis: 'x', unit: 'viewBox' },
+      { id: 'translate.y.direction-body', kind: 'translate', partIds: ['direction-body'], axis: 'y', unit: 'viewBox' },
+    ]);
+  });
+
   it('старый fixed-canvas proof явно отказывает translation вместо неподвижного ложного PASS', () => {
     const parts = [{ id: 'direction-body', d: 'M1 1L3 1L3 3L1 3Z' }];
     const composition = { kind: 'layers', order: ['direction-body'] };
