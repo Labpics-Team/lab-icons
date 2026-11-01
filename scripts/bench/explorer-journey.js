@@ -262,6 +262,43 @@ export async function runExplorerJourney() {
     await choose('ellipsis-vertical', 'outline');
     check('vertical-menu-does-not-inherit-loading', q('play').disabled && q('gesture').value === '');
 
+    for (const [name, variant, halfway] of [
+      ['volume-high', 'outline', [1, 0.5, 0]],
+      ['volume-high', 'filled', [1, 0.5, 0]],
+      ['volume-middle', 'filled', [1, 0]],
+    ]) {
+      setReduced(false);
+      await choose(name, variant);
+      const stage = q('symbol-stage');
+      const row = data.rows.find(item => item.name === name && item.variant === variant);
+      const master = new DOMParser().parseFromString(await (await originalFetch(row.views.master)).text(), 'image/svg+xml').documentElement;
+      const symbol = await import(`./package/symbols/${name}.js`);
+      const gesture = symbol.glyphCapabilities(variant).motion.gestures[0];
+      const bands = gesture.partIds.map(id => stage.querySelector(`[data-part="${id}"]`));
+      const opacity = () => bands.map(part => Number(getComputedStyle(part).opacity));
+      const speaker = stage.querySelector('[data-part="speaker"]');
+      const speakerBefore = speaker.outerHTML;
+      check(`${name}/${variant}/level-rest-matches-master`, gesture.restProgress === 1 && Number(q('progress').value) === 1 && opacity().every(value => value === 1));
+      check(`${name}/${variant}/level-authored-paths`, JSON.stringify(paths(stage.querySelector('svg'))) === JSON.stringify(paths(master)));
+      await setProgress(0.5);
+      check(`${name}/${variant}/level-halfway`, opacity().every((value, index) => Math.abs(value - halfway[index]) < 0.000001), opacity());
+      q('reverse').click();
+      await wait(() => Number(q('progress').value) < 0.4, 'volume reverse phase');
+      q('pause').click();
+      const before = opacity();
+      q('play').click();
+      await Promise.resolve();
+      await Promise.resolve();
+      check(`${name}/${variant}/level-interruption-pickup`, before.every((value, index) => Math.abs(value - opacity()[index]) < 0.000001), { before, after: opacity() });
+      setReduced(true);
+      await wait(() => Number(q('progress').value) === 1 && opacity().every(value => value === 1), 'volume latest terminal');
+      check(`${name}/${variant}/level-reduced-latest-target`, opacity().every(value => value === 1));
+      check(`${name}/${variant}/level-stationary-speaker`, speaker.outerHTML === speakerBefore);
+      check(`${name}/${variant}/level-paths-unchanged`, JSON.stringify(paths(stage.querySelector('svg'))) === JSON.stringify(paths(master)));
+    }
+    await choose('volume-middle', 'outline');
+    check('split-volume-band-refuses-object-opacity', q('play').disabled && q('gesture').value === '');
+
     await choose('time', 'outline');
     check('latest-clock-motion-refuses', q('play').disabled && q('gesture').value === '');
     await choose('reload', 'outline');

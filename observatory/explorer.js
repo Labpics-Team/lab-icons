@@ -16,7 +16,7 @@ function displayStyle() {
 }
 
 const $ = (selector) => document.querySelector(selector);
-const ui = Object.fromEntries(['symbol-search', 'variant', 'symbol-grid', 'more-symbols', 'empty-search', 'corpus-count', 'visible-count', 'symbol-inspector', 'symbol-name', 'model-status', 'symbol-stage', 'size-samples', 'source-status', 'axis-controls', 'axis-status', 'parts', 'gesture', 'play', 'reverse', 'pause', 'progress', 'reduce-motion', 'motion-status', 'consumer-import', 'export-format', 'export', 'export-status'].map((id) => [id, $(`#${id}`)]));
+const ui = Object.fromEntries(['symbol-search', 'variant', 'symbol-grid', 'more-symbols', 'empty-search', 'corpus-count', 'visible-count', 'symbol-inspector', 'symbol-name', 'model-status', 'symbol-stage', 'size-samples', 'source-status', 'axis-controls', 'axis-status', 'parts', 'gesture', 'play', 'reverse', 'pause', 'progress', 'progress-label', 'reduce-motion', 'motion-status', 'consumer-import', 'export-format', 'export', 'export-status'].map((id) => [id, $(`#${id}`)]));
 const reducedPreference = matchMedia('(prefers-reduced-motion: reduce)');
 const loadStatus = document.querySelector('#load-status');
 function loadMessage(message = '') {
@@ -94,13 +94,18 @@ function motionView() {
   return (state.view === 'original' && !state.legacy) || (state.view === 'generated' && state.legacy);
 }
 
+function selectedGesture() {
+  return state.capabilities?.motion.gestures.find(gesture => gesture.id === ui.gesture.value);
+}
+
 function cyclicGesture() {
-  return state.capabilities?.motion.gestures.find(gesture => gesture.id === ui.gesture.value)?.kind === 'cycle';
+  return selectedGesture()?.kind === 'cycle';
 }
 
 function updateMotionControls() {
   const admitted = state.loaded && motionAdmission()?.ok;
   const ready = admitted && !state.viewLoading && motionView();
+  ui['progress-label'].textContent = selectedGesture()?.kind === 'state' ? 'Состояние' : 'Прогресс';
   for (const id of ['play', 'reverse', 'progress', 'gesture']) ui[id].disabled = !ready;
   ui.pause.disabled = !ready || (!state.playhead && !state.pendingMotion);
   ui.pause.textContent = (state.pendingMotion?.paused ?? (state.playhead && !state.playhead.running)) ? 'Продолжить' : 'Пауза';
@@ -184,9 +189,10 @@ async function renderView(view = state.view) {
     Object.assign(state, { view, glyph, capabilities, modelModule, legacy, axes, viewLoading: false });
     ui['symbol-stage'].dataset.view = view;
     ui['symbol-stage'].innerHTML = svg;
-    ui.progress.value = '0';
     ui.pause.textContent = 'Пауза';
     if (changedControls) controls();
+    // Значение неподвижного мастера задаёт семантика, а не имя иконки.
+    ui.progress.value = String(motionAdmission()?.ok ? selectedGesture()?.restProgress ?? 0 : 0);
     ui['source-status'].textContent = `Lab UI v2.1. Версия ${row.original.version}. Узел ${row.original.nodeId}. ` +
       (legacy ? 'Прежняя модель: паритет с новой авторской основой не принят.' : ['overlay', 'difference'].includes(view) ? `Красным — текущая основа, синим — прежняя ${row.model?.catalogState === 'accepted' ? 'модель' : 'модель на проверке'} при исходных параметрах. Паритет не принят.` : 'Текущий авторский мастер. Возможности относятся к его закреплённой версии.');
     ui['size-samples'].replaceChildren(...[16, 24, 48].map((size) => {
