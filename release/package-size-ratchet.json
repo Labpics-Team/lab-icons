@@ -72,20 +72,11 @@
    "maxBytes": 805816,
    "maxGzipBytes": 125445,
    "allowedModules": [
-    "src/core/anatomy-gen.js",
-    "src/core/calendar-geometry.js",
-    "src/core/circle-dictionary.js",
-    "src/core/glyph-operators.js",
-    "src/core/icon-geometry.js",
-    "src/core/motion-sampler.js",
-    "src/core/path-data.js",
     "semantics/anatomy.runtime.json",
     "semantics/catalog.json",
     "semantics/grid.json",
     "src/ir/catalog.generated.ts",
-    "src/ir/index.ts",
-    "src/ir/recipes.ts",
-    "src/ir/sha256.ts"
+    "src/ir/index.ts"
    ],
    "forbiddenNeedles": [
     "sourceMappingURL"
