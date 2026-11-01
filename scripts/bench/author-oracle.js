@@ -48,6 +48,15 @@ export function inspectAuthorSvg(svg, { ir = false, expectedMetadata } = {}) {
   };
 }
 
+/** Снимает фактический packet после измерения; допуск задаёт независимый manifest. */
+export function observeAuthorGlyph(glyph, staticSvg, renderedSvg = glyph.svg) {
+  const parts = glyph.parts.map(({ id, role, zIndex, fillRule, d }) => ({ id, role, zIndex, fillRule, d }));
+  return { icon: glyph.icon, variant: glyph.variant, sourceFile: glyph.provenance.file,
+    compositionKind: glyph.composition.kind, author: glyph.provenance.author, anatomy: glyph.provenance.anatomy ?? null,
+    staticArtifactSha256: sha256(staticSvg), parts,
+    ...inspectAuthorSvg(renderedSvg, { ir: true, expectedMetadata: parts.map(({ id, role }) => ({ id, role })) }) };
+}
+
 /** Неравенство сохраняется как confound, но неподтверждённый новый рисунок всегда RED. */
 export function validateAuthorObservation(observation, expected) {
   if (observation.icon !== expected.icon || observation.variant !== expected.variant ||

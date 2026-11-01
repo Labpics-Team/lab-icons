@@ -33,16 +33,9 @@ const cleanupMs = performance.now() - gcStarted;
 const retained = process.memoryUsage();
 const metrics = { count: request.count, completed: request.count, completedBytes, svgSha256: createHash('sha256').update(first).digest('hex'), importMs, firstSvgMs, svgGenerationMs, warmImportMs, cleanupMs, lifecycleMs: performance.now() - started, heapBefore: before.heapUsed, heapAfterGeneration: allocated.heapUsed, heapRetained: retained.heapUsed, rss: retained.rss, resourceUsage: process.resourceUsage() };
 // Oracle-инструменты загружаются после observations и не входят в consumer heap/import.
-const { inspectAuthorSvg, sha256, svgComplexity } = await import('./author-oracle.js');
+const { observeAuthorGlyph, svgComplexity } = await import('./author-oracle.js');
 metrics.complexity = svgComplexity(first);
 if (request.inspectAuthor) {
-  metrics.icon = firstValue.icon;
-  metrics.variant = firstValue.variant;
-  metrics.sourceFile = firstValue.provenance.file;
-  metrics.compositionKind = firstValue.composition.kind;
-  metrics.author = firstValue.provenance.author;
-  metrics.staticArtifactSha256 = sha256(module[request.variant ?? 'outline']);
-  metrics.parts = firstValue.parts.map(part => ({ id: part.id, role: part.role, zIndex: part.zIndex, fillRule: part.fillRule, d: part.d }));
-  Object.assign(metrics, inspectAuthorSvg(first, { ir: true }));
+  Object.assign(metrics, observeAuthorGlyph(firstValue, module[request.variant ?? 'outline'], first));
 }
 console.log(JSON.stringify(metrics));
