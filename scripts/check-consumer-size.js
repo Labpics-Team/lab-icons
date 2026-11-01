@@ -30,14 +30,23 @@ export const CONSUMER_SIZE_MEASUREMENT =
   `esbuild@${pinnedVersion('esbuild')} bundle+minify+treeshake es2022 browser; ` +
   `fflate@${pinnedVersion('fflate')} gzipSync level=9 mtime=0`;
 
-/** Subpath-резолюция как у потребителя опубликованного пакета: exports → dist. */
-const ENTRY_ALIAS = Object.freeze({
-  '@labpics/icons': 'dist/index.js',
-  '@labpics/icons/ir': 'dist/ir/index.js',
-  '@labpics/icons/ir/recipes': 'dist/ir/recipes.js',
-  '@labpics/icons/ir/render': 'dist/ir/render.js',
-  '@labpics/icons/motion': 'dist/motion/index.js',
-});
+/** ESM targets принадлежат package exports; измерение не ведёт второй список. */
+const ENTRY_EXPORTS = Object.freeze(Object.fromEntries(
+  Object.entries(PACKAGE_JSON.exports).map(([subpath, conditions]) => [subpath, conditions.import]),
+));
+
+function packageEntryTarget(specifier) {
+  const subpath = specifier === PACKAGE_JSON.name
+    ? '.' : `.${specifier.slice(PACKAGE_JSON.name.length)}`;
+  if (Object.hasOwn(ENTRY_EXPORTS, subpath)) return ENTRY_EXPORTS[subpath];
+  for (const [pattern, target] of Object.entries(ENTRY_EXPORTS)) {
+    if (!pattern.endsWith('/*') || !subpath.startsWith(pattern.slice(0, -1))) continue;
+    const name = subpath.slice(pattern.length - 1);
+    if (!/^[a-z][a-z0-9-]*$/.test(name)) return null;
+    return target.replace('*', name);
+  }
+  return null;
+}
 
 const ROOT_FIELDS = ['version', 'measurement', 'scenarios'];
 const SCENARIO_FIELDS = [
@@ -133,9 +142,6 @@ export function parseConsumerSizeRatchet(value) {
 }
 
 export async function bundleScenario(entry, { root = ROOT, includeBrotli = false } = {}) {
-  const alias = Object.fromEntries(
-    Object.entries(ENTRY_ALIAS).map(([spec, target]) => [spec, join(root, target)]),
-  );
   const out = await build({
     stdin: { contents: entry, resolveDir: root, loader: 'js' },
     bundle: true,
@@ -148,10 +154,9 @@ export async function bundleScenario(entry, { root = ROOT, includeBrotli = false
       name: 'consumer-package-entry',
       setup(buildApi) {
         buildApi.onResolve({ filter: /^@labpics\/icons(?:\/.*)?$/ }, (args) => {
-          const sliced = /^@labpics\/icons\/(symbols|states)\/([a-z][a-z0-9-]*)$/.exec(args.path);
-          const path = alias[args.path] ?? (sliced ? join(root, 'dist', sliced[1], `${sliced[2]}.js`) : null);
-          if (!path) return { errors: [{ text: `неизвестный package subpath ${args.path}` }] };
-          return { path, namespace: 'consumer-package-entry' };
+          const target = packageEntryTarget(args.path);
+          if (!target) return { errors: [{ text: `неизвестный package subpath ${args.path}` }] };
+          return { path: join(root, target), namespace: 'consumer-package-entry' };
         });
         buildApi.onLoad({ filter: /.*/, namespace: 'consumer-package-entry' }, (args) => ({
           contents: readFileSync(args.path, 'utf8'),

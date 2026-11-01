@@ -51,6 +51,33 @@ function updateRatchet(root, update) {
 }
 
 describe('consumer size ratchet', () => {
+  it.each([
+    ['lottie/time', 'dist/lottie/time.js'],
+    ['authoring', 'dist/authoring/index.js'],
+    ['ir/candidates', 'dist/ir/candidates.js'],
+  ])('измеряет опубликованный ESM entry %s по exports', async (subpath, target) => {
+    const { root } = await fixture();
+    mkdirSync(join(root, target, '..'), { recursive: true });
+    writeFileSync(join(root, target), 'export const payload = "PUBLIC_ENTRY_CONTROL";\n');
+    const measured = await bundleScenario(
+      `import { payload } from '@labpics/icons/${subpath}';\nconsole.log(payload);\n`,
+      { root },
+    );
+    expect(measured.bytes).toBeGreaterThan(0);
+    expect(measured.modules).toContain(target);
+    expect(measured.modules).not.toContain(target.replace(/\.js$/, '.d.ts'));
+  });
+
+  it.each(['private/time', 'lottie/', 'lottie/../time', 'lottie/time/extra'])(
+    'отказывает непубличному или невалидному subpath %s', async subpath => {
+      const { root } = await fixture();
+      await expect(bundleScenario(
+        `import { payload } from '@labpics/icons/${subpath}';\nconsole.log(payload);\n`,
+        { root },
+      )).rejects.toThrow(/неизвестный package subpath/);
+    },
+  );
+
   it('измеряет публичный state entry и отказывает удалённому contribution', async () => {
     const { root } = await fixture();
     mkdirSync(join(root, 'dist/states'), { recursive: true });
