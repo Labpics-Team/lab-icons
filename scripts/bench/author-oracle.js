@@ -77,7 +77,8 @@ export function expectedAuthorMotion(contract) {
     tracks: [...new Map(gestures.flatMap(gesture => gesture.tracks.map(track => {
       const id = `${track.kind}.${track.partId}`;
       return [id, { id, kind: track.kind, partIds: [track.partId],
-        ...(track.kind === 'rotate' ? { anchor: track.anchor } : {}) }];
+        ...(track.kind === 'rotate' ? { anchor: track.anchor }
+          : track.kind === 'translate' ? { axis: track.axis, unit: track.unit } : {}) }];
     }))).values()],
     gestures,
     adapters: { lottie: 'not-exported', sfSymbols: 'not-exported' },
@@ -87,6 +88,8 @@ export function expectedAuthorMotion(contract) {
 export function expectedAuthorEffectTargets(gesture) {
   return gesture.tracks.map(track => track.kind === 'opacity' ? {
     partId: track.partId, property: 'opacity', from: track.stops[0].value, to: track.stops.at(-1).value,
+  } : track.kind === 'translate' ? {
+    partId: track.partId, property: track.axis, from: track.stops[0].value, to: track.stops.at(-1).value, unit: 'viewBox',
   } : {
     partId: track.partId,
     rotation: { from: track.from, to: track.to, unit: 'degrees' },
@@ -98,13 +101,15 @@ export function expectedAuthorEffectTargets(gesture) {
 /** Независимая full-timeline projection от декларации, без импорта motion compiler. */
 export function expectedAuthorEffect(gesture, duration = 360) {
   const opacity = gesture.tracks.every(track => track.kind === 'opacity');
+  const translation = gesture.tracks.every(track => track.kind === 'translate');
   const targets = expectedAuthorEffectTargets(gesture);
-  if (!opacity) return { version: 1, targets };
+  if (!opacity && !translation) return { version: 1, targets };
   const stages = gesture.tracks.flatMap(track => track.stops.slice(1).map((stop, index) => {
     const at = track.stops[index].at * duration;
-    return { partId: track.partId, property: 'opacity', to: stop.value, at, duration: stop.at * duration - at };
+    return { partId: track.partId, property: opacity ? 'opacity' : track.axis,
+      ...(translation ? { unit: 'viewBox' } : {}), to: stop.value, at, duration: stop.at * duration - at };
   })).sort((a, b) => a.at - b.at || (a.partId < b.partId ? -1 : a.partId > b.partId ? 1 : 0));
-  return { version: 2, targets, stages };
+  return { version: opacity ? 2 : 3, targets, stages };
 }
 
 export function validateAuthorAdmission(glyph, caps, record, contract) {

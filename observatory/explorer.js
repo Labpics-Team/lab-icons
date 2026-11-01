@@ -28,7 +28,8 @@ const state = { data: null, name: 'time', variant: 'outline', view: 'original', 
 function progress() {
   const head = state.playhead;
   if (!head) return Number(ui.progress.value);
-  // Только индикатор UI: новые цели не используют эти часы для вычисления позы.
+  // Фаза нужна для выбора обратного участка: одинаковый сдвиг бывает на
+  // исходящей и возвратной ветви. Видимую позу подхватывает исполнитель.
   const elapsed = head.elapsed + (head.running ? performance.now() - head.startedAt : 0);
   const fraction = head.duration === 0 ? 1 : Math.min(1, elapsed / head.duration);
   return head.from + (head.to - head.from) * fraction;

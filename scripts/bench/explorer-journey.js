@@ -304,6 +304,128 @@ export async function runExplorerJourney() {
     await choose('volume-middle', 'outline');
     check('split-volume-band-refuses-object-opacity', q('play').disabled && q('gesture').value === '');
 
+    const screenPosition = element => {
+      const matrix = element.getScreenCTM();
+      return [matrix.e, matrix.f];
+    };
+    const nudgeNames = ['chevron-back', 'chevron-forward', 'chevron-up', 'chevron-down',
+      'arrow-back', 'arrow-forward', 'arrow-up', 'arrow-down'];
+    for (const name of nudgeNames) for (const variant of ['outline', 'filled']) {
+      await choose(name, variant);
+      const row = data.rows.find(item => item.name === name && item.variant === variant);
+      const master = new DOMParser().parseFromString(await (await originalFetch(row.views.master)).text(), 'image/svg+xml').documentElement;
+      const svg = q('symbol-stage').querySelector('svg');
+      const part = svg.querySelector('[data-part="direction-body"]');
+      const symbol = await import(`./package/symbols/${name}.js`);
+      const glyph = symbol.glyph({ variant }), caps = symbol.glyphCapabilities(variant);
+      const fromOutbound = compileSymbolEffect(glyph, caps, `${name}.nudge`, { duration: 900, from: 0.25, to: 0 });
+      const fromInbound = compileSymbolEffect(glyph, caps, `${name}.nudge`, { duration: 900, from: 0.75, to: 0 });
+      check(`${name}/${variant}/nudge-author-paths`, JSON.stringify(paths(svg)) === JSON.stringify(paths(master)));
+      check(`${name}/${variant}/nudge-declared-part`, Boolean(part) && caps.motion.gestures[0].kind === 'cycle' && q('gesture').value === `${name}.nudge`);
+      check(`${name}/${variant}/nudge-source-admission`, fromOutbound.ok && fromInbound.ok && fromOutbound.effect.version === 3 &&
+        glyph.provenance.kind === 'source' && glyph.provenance.anatomy.annotationSha256 === caps.anatomy.annotationSha256);
+      check(`${name}/${variant}/nudge-phase-correspondence`, fromOutbound.effect.targets[0].from === fromInbound.effect.targets[0].from &&
+        fromOutbound.effect.stages.length === 1 && fromInbound.effect.stages.length === 2 &&
+        fromOutbound.effect.stages[0].to === 0 && Math.abs(fromInbound.effect.stages[0].to) > Math.abs(fromInbound.effect.targets[0].from));
+      check(`${name}/${variant}/nudge-no-unproved-axes`, q('axis-controls').children.length === 0);
+      const axis = name.endsWith('up') || name.endsWith('down') ? 1 : 0;
+      const sign = name.endsWith('back') || name.endsWith('up') ? -1 : 1;
+      setReduced(false);
+      for (const size of [16, 24, 48]) {
+        q('display-size').value = String(size);
+        q('display-size').dispatchEvent(new Event('input', { bubbles: true }));
+        await setProgress(0);
+        const before = screenPosition(part);
+        await setProgress(0.5);
+        const after = screenPosition(part);
+        const shift = after.map((value, index) => value - before[index]);
+        // CTM наблюдает физическое перемещение; style transform не служит oracle.
+        check(`${name}/${variant}/nudge-${size}px-viewbox-units`, Math.abs(shift[axis] - sign * size / 8) < 0.01 &&
+          Math.abs(shift[1 - axis]) < 0.01, { size, shift });
+        check(`${name}/${variant}/nudge-${size}px-preserves-master`, JSON.stringify(paths(svg)) === JSON.stringify(paths(master)));
+      }
+      authority.push({ name, variant, author: glyph.provenance.author, anatomy: glyph.provenance.anatomy });
+      q('export-format').value = 'effect'; q('export').click();
+      const downloaded = downloads.at(-1);
+      const exported = JSON.parse(await downloaded.blob.text());
+      check(`${name}/${variant}/nudge-effect-export`, downloaded.filename === `${name}-${variant}.effect.json` &&
+        exported.version === 3 && exported.targets[0].property === (axis === 0 ? 'x' : 'y') && exported.targets[0].unit === 'viewBox');
+      const beforeLottie = downloads.length;
+      q('export-format').value = 'lottie'; q('export').click();
+      await wait(() => downloads.length > beforeLottie || q('export-status').textContent.startsWith('Lottie:'), 'nudge Lottie export');
+      const lottieDownload = downloads.at(-1);
+      const animation = JSON.parse(await lottieDownload.blob.text());
+      const position = animation.layers[0].ks.p;
+      check(`${name}/${variant}/nudge-lottie-export`, lottieDownload.filename === `${name}-${variant}.lottie.json` &&
+        animation.meta.labIcons.masterSha256 === glyph.provenance.author.masterSha256 && animation.layers[0].nm === 'direction-body' &&
+        position.a === 1 && position.k.length === 3 && position.k[1].s[axis] - position.k[0].s[axis] === sign * 3 &&
+        position.k[2].s[axis] === position.k[0].s[axis]);
+    }
+
+    await choose('arrow-forward', 'outline');
+    q('display-size').value = '112';
+    q('display-size').dispatchEvent(new Event('input', { bubbles: true }));
+    const nudgePart = q('symbol-stage').querySelector('[data-part="direction-body"]');
+    await setProgress(0);
+    const nudgeOrigin = screenPosition(nudgePart)[0];
+    const displacement = () => screenPosition(nudgePart)[0] - nudgeOrigin;
+    const phasePoses = [];
+    for (const phase of [0.25, 0.75]) {
+      await setProgress(phase);
+      const before = displacement();
+      phasePoses.push(before);
+      q('reverse').click();
+      await Promise.resolve(); await Promise.resolve();
+      check(`nudge-phase-${phase}/reverse-retains-pose`, Math.abs(displacement() - before) < 0.01);
+      await wait(() => Number(q('progress').value) < phase - 0.01, 'nudge reverse phase');
+      q('pause').click();
+      const after = displacement();
+      check(`nudge-phase-${phase}/distinct-reverse-continuation`, phase < 0.5 ? after < before : after > before, { before, after });
+      for (let count = 0; count < 8; count++) await frame();
+      check(`nudge-phase-${phase}/pause-freezes-visible-pose`, Math.abs(displacement() - after) < 0.01);
+      q('play').click();
+      await Promise.resolve(); await Promise.resolve();
+      check(`nudge-phase-${phase}/new-target-pickup`, Math.abs(displacement() - after) < 0.01);
+      setReduced(true);
+      await wait(() => Number(q('progress').value) === 1 && Math.abs(displacement()) < 0.01, 'nudge latest reduced terminal');
+      setReduced(false);
+    }
+    check('nudge-equal-pose-distinct-histories', Math.abs(phasePoses[0] - phasePoses[1]) < 0.01, phasePoses);
+    q('play').click();
+    await wait(() => Number(q('progress').value) > 0.04 && Number(q('progress').value) < 0.4 && displacement() > 0.1, 'nudge repeat');
+    check('nudge-completed-cycle-repeats', !q('pause').disabled);
+    setReduced(true);
+    await wait(() => Number(q('progress').value) === 1 && Math.abs(displacement()) < 0.01, 'nudge repeat terminal');
+
+    // Синтетический viewport проверяет единицы исполнителя независимо от Figma masters.
+    const shiftedViewport = document.createElement('div');
+    shiftedViewport.setAttribute('aria-hidden', 'true');
+    shiftedViewport.style.cssText = 'position:absolute;left:0;top:0;pointer-events:none';
+    fixtures.push(shiftedViewport);
+    document.body.append(shiftedViewport);
+    for (const axis of ['x', 'y']) for (const size of [16, 24, 48]) {
+      shiftedViewport.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="10 20 48 48" width="${size}" height="${size}"><path data-part="physics-part" d="M22 32h8v8h-8z"/></svg>`;
+      const svg = shiftedViewport.querySelector('svg'), part = svg.querySelector('path');
+      const before = screenPosition(part);
+      const effect = { version: 3, viewport: { overflow: 'visible' },
+        targets: [{ partId: 'physics-part', property: axis, unit: 'viewBox', from: 0, to: -6 }],
+        stages: [{ partId: 'physics-part', property: axis, unit: 'viewBox', to: -6, at: 0, duration: 0 }],
+        options: { duration: 0, easing: 'linear', fill: 'both' } };
+      const running = executeSymbolEffect(svg, effect, { initialize: true });
+      controls.push(...running);
+      await Promise.all(running.map(control => control.finished));
+      const after = screenPosition(part), index = axis === 'x' ? 0 : 1;
+      const shift = after.map((value, position) => value - before[position]);
+      check(`nudge-nonzero-viewbox/${axis}/${size}px`, Math.abs(shift[index] + size / 8) < 0.01 &&
+        Math.abs(shift[1 - index]) < 0.01, { viewBox: [10, 20, 48, 48], size, shift });
+    }
+    shiftedViewport.remove();
+    check('nudge-viewport-fixture-cleanup', !document.body.contains(shiftedViewport));
+    for (const variant of ['outline', 'filled']) {
+      await choose('arrow-forward-circle', variant);
+      check(`circle/${variant}/nudge-not-inferred`, q('play').disabled && q('gesture').value === '');
+    }
+
     await choose('time', 'outline');
     check('latest-clock-motion-refuses', q('play').disabled && q('gesture').value === '');
     await choose('reload', 'outline');
