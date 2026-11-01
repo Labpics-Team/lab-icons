@@ -132,6 +132,22 @@ describe('enclosure.replace: точные author masters и единая обо�
   });
 
   it.each([
+    ['render', {}], ['renderStateSvg', {}],
+    ['compileStateEffect', { duration: 300 }],
+    ['exportStateTransition', { duration: 300, format: 'web-effect' }],
+  ])('%s: только missing/undefined variant использует default, null получает точный отказ', (method, request) => {
+    expect(group[method]('confirmation', { ...request, variant: null })).toMatchObject({
+      ok: false, reason: { code: 'INVALID_REQUEST' },
+    });
+    expect(group[method]('confirmation', request).ok).toBe(true);
+    expect(group[method]('confirmation', { ...request, variant: undefined }).ok).toBe(true);
+    expect(group[method]('confirmation', { ...request, variant: 'outline' }).ok).toBe(true);
+    expect(group[method]('confirmation', { ...request, variant: 'filled' })).toMatchObject({
+      ok: false, reason: { code: 'VARIANT_UNSUPPORTED' },
+    });
+  });
+
+  it.each([
     null, undefined, [], { duration: -1 }, { duration: NaN }, { duration: Infinity },
     { duration: '300' }, { duration: 300, reducedMotion: 1 }, { duration: 300, from: 'question' },
   ])('отказывает malformed effect request %j', request => {

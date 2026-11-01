@@ -49,7 +49,7 @@ export function createCompiledStateGroup(input: CompiledStateGroup) {
     if (!record(request) || Object.keys(request).some(key => !allowed.includes(key))) {
       return refuse('INVALID_REQUEST', 'Нужен объект только с поддержанными параметрами.');
     }
-    const variant = request.variant ?? data.variant;
+    const variant = request.variant === undefined ? data.variant : request.variant;
     if (typeof variant !== 'string' || !['outline', 'filled'].includes(variant)) {
       return refuse('INVALID_REQUEST', 'Начертание обязано быть outline или filled.');
     }
