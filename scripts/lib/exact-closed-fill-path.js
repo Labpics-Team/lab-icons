@@ -226,7 +226,7 @@ function contourKeys({ start, edges }) {
 /**
  * Частный build-only достаточный признак: absolute M/L/H/V/C/Z, closed fill-only.
  * null означает «не доказано». Paint/rule/frame/IDs проверяет вызывающий владелец.
- * Контуры переставляются с сохранением количества и multiplicity всех рёбер.
+ * Контуры переставляются; нормализация прямых сохраняет кратность обходов.
  */
 export function exactClosedFillPathKey(d, fillRule) {
   if (!['evenodd', 'nonzero'].includes(fillRule)) return null;
