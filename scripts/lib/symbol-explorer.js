@@ -15,6 +15,21 @@ export function stateExplorerGroups(spec) {
   }));
 }
 
+/** Runtime presence задаёт package contract; semantic spec задаёт точное членство. */
+export function symbolExplorerBrowserFiles(contract, iconIds, stateGroups) {
+  const stateFiles = stateGroups.map(({ group }) => `dist/states/${group}.js`);
+  const files = ['dist/ir/request.js', 'dist/ir/symbol-runtime.js', 'dist/ir/render.js', 'dist/motion/index.js', 'dist/ir/lottie-runtime.js', 'dist/authoring/index.js',
+    ...iconIds.flatMap(name => [`dist/symbols/${name}.js`, `dist/lottie/${name}.js`]),
+    ...contract.files.filter(file => file === 'dist/ir/state-runtime.js'), ...stateFiles];
+  for (const file of files) {
+    if (!contract.files.includes(file)) throw new Error(`symbol explorer: ${file} не принадлежит package contract`);
+  }
+  for (const file of contract.files.filter(file => /^dist\/states\/[^/]+\.js$/.test(file))) {
+    if (!stateFiles.includes(file)) throw new Error(`symbol explorer: ${file} не имеет semantic group`);
+  }
+  return files;
+}
+
 /** Observatory использует уже проверенные изображения и production package. */
 export function writeSymbolExplorer({ repo, outDir, report, visuals, canvas, iconSvg, comparisonVisual, packageDir = join(repo, 'dist') }) {
   mkdirSync(outDir, { recursive: true });
@@ -43,11 +58,8 @@ export function writeSymbolExplorer({ repo, outDir, report, visuals, canvas, ico
   const contract = JSON.parse(readFileSync(join(repo, 'release', 'contract.json'), 'utf8'));
   const baseline = loadAuthorBaseline(repo);
   const stateGroups = stateExplorerGroups(JSON.parse(readFileSync(join(repo, 'semantics/author-state-groups.json'), 'utf8')));
-  const browserFiles = ['dist/ir/request.js', 'dist/ir/symbol-runtime.js', 'dist/ir/render.js', 'dist/motion/index.js', 'dist/ir/lottie-runtime.js', 'dist/authoring/index.js',
-    ...Object.keys(baseline.icons).flatMap(name => [`dist/symbols/${name}.js`, `dist/lottie/${name}.js`]),
-    'dist/ir/state-runtime.js', ...stateGroups.map(({ group }) => `dist/states/${group}.js`)];
+  const browserFiles = symbolExplorerBrowserFiles(contract, Object.keys(baseline.icons), stateGroups);
   for (const relative of browserFiles) {
-    if (!contract.files.includes(relative)) throw new Error(`symbol explorer: ${relative} не принадлежит package contract`);
     const target = join(outDir, 'package', relative.slice('dist/'.length));
     mkdirSync(dirname(target), { recursive: true });
     copyFileSync(join(packageDir, relative.slice('dist/'.length)), target);
