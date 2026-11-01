@@ -18,10 +18,18 @@ export async function verifyAuthoringPlayground({ browser, origin, output }) {
     const download = page.getByRole('button', { name: 'Скачать SVG' });
     await page.waitForFunction(() => !document.querySelector('#authoring-download').disabled);
     const starter = JSON.parse(await editor.inputValue());
-    const observe = () => page.evaluate(() => [...document.querySelectorAll('#authoring-samples svg')].map(svg => {
+    const observe = () => page.evaluate(async () => {
+      const { compileDesignSpec, renderGlyphSvg } = await import('./package/authoring/index.js');
+      const spec = JSON.parse(document.querySelector('#authoring-spec').value);
+      const icon = document.querySelector('#authoring-name').value;
+      return [...document.querySelectorAll('#authoring-samples svg')].map(svg => {
       const bounds = svg.getBoundingClientRect();
-      return { size: Number(svg.getAttribute('width')), width: bounds.width, height: bounds.height,
-        viewBox: svg.getAttribute('viewBox'), staticMatches: true,
+      const size = Number(svg.getAttribute('width'));
+      const expected = document.createElement('div');
+      expected.innerHTML = renderGlyphSvg(compileDesignSpec(spec, { icon, size }), { instanceId: `authoring-sample-${size}` });
+      expected.querySelector('svg').setAttribute('aria-hidden', 'true');
+      return { size, width: bounds.width, height: bounds.height,
+        viewBox: svg.getAttribute('viewBox'), staticMatches: svg.outerHTML === expected.innerHTML,
         parts: [...svg.querySelectorAll('[data-part]')].map(part => part.dataset.part),
         paths: [...svg.querySelectorAll('path')].map(path => {
           const bounds = path.getBBox(), style = getComputedStyle(path);
@@ -31,7 +39,8 @@ export async function verifyAuthoringPlayground({ browser, origin, output }) {
             opacity: parseFloat(style.opacity), visibility: style.visibility, display: style.display };
         }),
       };
-    }));
+      });
+    });
     report.initial = await observe();
     assert.deepEqual(report.initial.map(row => row.size), [16, 24, 48]);
     assertAuthoringRender(report.initial, tutorialCircleExpectations(starter));
