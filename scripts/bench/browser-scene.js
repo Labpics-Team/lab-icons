@@ -1,5 +1,34 @@
+import { coldRenderSpan } from './measurement.js';
+
+/** Native FCP наблюдается только на пустом документе; rAF его не подменяет. */
+export async function measureColdScene(load, count) {
+  if (!PerformanceObserver.supportedEntryTypes.includes('paint')) throw new Error('benchmark: native paint timing недоступен');
+  if (performance.getEntriesByName('first-contentful-paint').length || document.getElementById('stage').childElementCount) {
+    throw new Error('benchmark: cold render требует пустой документ без прежнего FCP');
+  }
+  let observer, timer;
+  const painted = new Promise((resolve, reject) => {
+    observer = new PerformanceObserver(list => {
+      const entry = list.getEntries().find(entry => entry.name === 'first-contentful-paint');
+      if (entry) resolve({ name: entry.name, startTime: entry.startTime, duration: entry.duration,
+        paintTime: Number.isFinite(entry.paintTime) ? entry.paintTime : null,
+        presentationTime: Number.isFinite(entry.presentationTime) ? entry.presentationTime : null });
+    });
+    observer.observe({ type: 'paint', buffered: true });
+    timer = setTimeout(() => reject(new Error('benchmark: native FCP не наступил за 30 секунд')), 30_000);
+  });
+  // При отказе import callback таймер всё равно принадлежит этому scope.
+  painted.catch(() => {});
+  try {
+    const importStartedAt = performance.now();
+    const create = await load();
+    const importResolvedAt = performance.now();
+    return await measureScene(create, count, { importStartedAt, importResolvedAt, painted });
+  } finally { observer.disconnect(); clearTimeout(timer); }
+}
+
 /** Внешний consumer: одинаковый DOM и полезный результат для двух пакетов. */
-export async function measureScene(create, count) {
+export async function measureScene(create, count, cold) {
   const stage = document.getElementById('stage');
   const mutations = { records: 0, addedNodes: 0, removedNodes: 0, attributes: 0 };
   const observer = new MutationObserver(records => {
@@ -13,7 +42,8 @@ export async function measureScene(create, count) {
   observer.observe(stage, { attributes: true, childList: true, subtree: true });
   const firstStarted = performance.now();
   const first = create();
-  const firstCreateMs = performance.now() - firstStarted;
+  const firstCreatedAt = performance.now();
+  const firstCreateMs = firstCreatedAt - firstStarted;
   const fragment = document.createDocumentFragment();
   let completedBytes = 0;
   const started = performance.now();
@@ -25,6 +55,7 @@ export async function measureScene(create, count) {
     button.type = 'button';
     button.setAttribute('aria-label', 'Открыть действие');
     button.innerHTML = svg;
+    button.querySelector('svg').setAttribute('aria-hidden', 'true');
     fragment.append(button);
   }
   const createDomMs = performance.now() - started;
@@ -32,9 +63,27 @@ export async function measureScene(create, count) {
   stage.append(fragment);
   // Layout один раз входит в полный mount, а не скрывается за концом таймера.
   const layout = stage.getBoundingClientRect();
-  const mountLayoutMs = performance.now() - mountStarted;
+  const mountedAt = performance.now();
+  const mountLayoutMs = mountedAt - mountStarted;
   await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
   const firstPaintOpportunityMs = performance.now() - started;
+  let coldTiming;
+  if (cold) {
+    const paint = await cold.painted;
+    const timing = { importStartedAt: cold.importStartedAt, importResolvedAt: cold.importResolvedAt,
+      firstCreateStartedAt: firstStarted, firstCreateEndedAt: firstCreatedAt,
+      mountStartedAt: mountStarted, mountEndedAt: mountedAt, contentfulPaintAt: paint.startTime };
+    coldTiming = { ...coldRenderSpan(timing), milestones: timing, paint };
+    const button = stage.querySelector('button'), svg = button.querySelector('svg');
+    const bounds = svg.getBoundingClientRect(), ink = svg.getBBox(), style = getComputedStyle(svg);
+    if (bounds.width !== 24 || bounds.height !== 24 || ink.width <= 0 || ink.height <= 0 ||
+        style.display === 'none' || style.visibility !== 'visible' || Number(style.opacity) <= 0 ||
+        !button.getAttribute('aria-label') || svg.getAttribute('aria-hidden') !== 'true') {
+      throw new Error('benchmark: FCP не подтверждает видимый доступный SVG consumer');
+    }
+    coldTiming.visible = { width: bounds.width, height: bounds.height, inkWidth: ink.width, inkHeight: ink.height,
+      buttonLabel: button.getAttribute('aria-label'), decorativeSvg: true };
+  }
   const mountedCDPMetrics = await window.sampleMountedMetrics();
   const frames = [];
   let previous = performance.now();
@@ -52,7 +101,8 @@ export async function measureScene(create, count) {
   await Promise.resolve();
   const cleanupMs = performance.now() - cleanupStarted;
   observer.disconnect();
-  return { count, completed: count, completedBytes, firstSvg: first, firstCreateMs, createDomMs, mountLayoutMs, firstPaintOpportunityMs, cleanupMs, lifecycleMs: performance.now() - firstStarted, mountedCDPMetrics, domElements, mutations, frames, stageWidth: layout.width, stageHeight: layout.height };
+  return { count, completed: count, completedBytes, firstSvg: first, firstCreateMs, createDomMs, mountLayoutMs, firstPaintOpportunityMs, cleanupMs, lifecycleMs: performance.now() - firstStarted, mountedCDPMetrics, domElements, mutations, frames, stageWidth: layout.width, stageHeight: layout.height,
+    ...(coldTiming ? { coldImportMs: coldTiming.coldImportMs, coldImportToUsefulRenderMs: coldTiming.coldImportToUsefulRenderMs, coldTiming } : {}) };
 }
 
 /** Обычный WAAPI исполняет данные Lab Icons; движение не сравнивается с отсутствующим baseline API. */
