@@ -12,10 +12,19 @@ import {
 const ICON_ID_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const MONOCHROME_PAINT = new Set(['none', 'currentcolor', '#101012']);
 const PATH_PAINT = new Set(['currentcolor', '#101012']);
+
+// Целый атрибут потребляется вместе с кавычками: текст внутри d/style не
+// является отдельным атрибутом, даже если выглядит как id='…' или fill='…'.
+function mapAttributes(tag, transform) {
+  return tag.replace(/[\t\n\r ]+([^\t\n\r <>="'/]+)[\t\n\r ]*=[\t\n\r ]*(?:"([^"]*)"|'([^']*)')/g,
+    (original, name, doubleQuoted, singleQuoted) => transform({ original, name, value: doubleQuoted ?? singleQuoted }));
+}
+
 /** Имена и node ID сохраняются в provenance мастера, отдельно от геометрии. */
 function stripExportMetadata(tag, source) {
   const seen = new Set();
-  return tag.replace(/\s(id|data-node-id)\s*=\s*(?:"[^"]*"|'[^']*')/g, (attribute, name) => {
+  return mapAttributes(tag, ({ original, name }) => {
+    if (name !== 'id' && name !== 'data-node-id') return original;
     if (seen.has(name)) throw new Error(`figma-import: ${source} повторяет export metadata ${name}`);
     seen.add(name);
     return '';
@@ -55,35 +64,30 @@ export function canonicalIconName(value) {
 
 function stripRootPaint(svg, source) {
   return svg.replace(/^<svg\b[^>]*>/i, (tag) => {
-    const paints = [...tag.matchAll(/\sfill\s*=\s*(?:"([^"]*)"|'([^']*)')/gi)];
-    if (paints.length > 1) {
-      throw new Error(`figma-import: ${source} повторяет root fill`);
-    }
-    if (paints.length === 0) return tag;
-    const paint = paints[0];
-    const value = (paint[1] ?? paint[2] ?? '').trim().toLowerCase();
-    if (!MONOCHROME_PAINT.has(value)) {
-      throw new Error(`figma-import: ${source} root fill=${JSON.stringify(value)} вне монохромного контракта`);
-    }
-    return tag.replace(paint[0], '');
+    let seen = false;
+    return mapAttributes(tag, ({ original, name, value }) => {
+      if (name !== 'fill') return original;
+      if (seen) throw new Error(`figma-import: ${source} повторяет root fill`);
+      seen = true;
+      const paint = value.trim().toLowerCase();
+      if (!MONOCHROME_PAINT.has(paint)) throw new Error(`figma-import: ${source} root fill=${JSON.stringify(paint)} вне монохромного контракта`);
+      return '';
+    });
   });
 }
 
 function stripPathPaint(svg, source) {
   return svg.replace(/<path\b[^>]*>/gi, (tag) => {
-    if (/(?:^|;)\s*fill\s*:/i.test(tag.match(/\sstyle\s*=\s*(?:"([^"]*)"|'([^']*)')/i)?.slice(1).find((value) => value != null) ?? '')) {
-      throw new Error(`figma-import: ${source} path style.fill вне закрытого paint-контракта`);
-    }
-    const paints = [...tag.matchAll(/\sfill\s*=\s*(?:"([^"]*)"|'([^']*)')/gi)];
-    if (paints.length > 1) {
-      throw new Error(`figma-import: ${source} повторяет path.fill`);
-    }
-    if (paints.length === 0) return tag;
-    const value = (paints[0][1] ?? paints[0][2] ?? '').trim().toLowerCase();
-    if (!PATH_PAINT.has(value)) {
-      throw new Error(`figma-import: ${source} path fill=${JSON.stringify(value)} вне монохромного контракта`);
-    }
-    return tag.replace(paints[0][0], '');
+    let seen = false;
+    return mapAttributes(tag, ({ original, name, value }) => {
+      if (name === 'style' && /(?:^|;)\s*fill\s*:/i.test(value)) throw new Error(`figma-import: ${source} path style.fill вне закрытого paint-контракта`);
+      if (name !== 'fill') return original;
+      if (seen) throw new Error(`figma-import: ${source} повторяет path.fill`);
+      seen = true;
+      const paint = value.trim().toLowerCase();
+      if (!PATH_PAINT.has(paint)) throw new Error(`figma-import: ${source} path fill=${JSON.stringify(paint)} вне монохромного контракта`);
+      return '';
+    });
   });
 }
 

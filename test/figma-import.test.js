@@ -10,6 +10,17 @@ const simpleFigmaSvg = ({ rootFill = 'none', pathFill = '#101012', body } = {}) 
   '</svg>';
 
 describe('Figma intake — каноническая граница source SVG', () => {
+  it.each([
+    'style="fill-rule:evenodd id=\'x\'"',
+    'd="M2 2H22V22H2Z id=\'x\' M7 7H17V17H7Z"',
+    'style="fill-rule:evenodd fill=\'#101012\'"',
+  ])('не переписывает текст внутри значения атрибута %s', (attribute) => {
+    const body = attribute.startsWith('d=')
+      ? `<path ${attribute} fill="#101012"/>`
+      : `<path d="M2 2H22V22H2ZM7 7H17V17H7Z" ${attribute}${attribute.includes(' fill=') ? '' : ' fill="#101012"'}/>`;
+    expect(() => normalizeFigmaSvg(simpleFigmaSvg({ body, rootFill: '#101012' }))).toThrow();
+  });
+
   it('сохраняет корневой svg, удаляя только нейтральную paint-семантику Figma', () => {
     const normalized = normalizeFigmaSvg(simpleFigmaSvg(), { source: 'square.svg' });
 
