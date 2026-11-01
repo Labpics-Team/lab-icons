@@ -1,6 +1,7 @@
 import type { AxisContract, AxisName, IconVariant, ModelMode } from './compiler.js';
+import { AXIS_NAMES } from './catalog.generated.js';
 
-export type GlyphModelErrorCode = 'CANDIDATES_REQUIRED';
+export type GlyphModelErrorCode = 'CANDIDATES_REQUIRED' | 'AUTHOR_PARITY_REQUIRED';
 
 /** Потребитель проверяет code; сообщение не является машинным контрактом. */
 export class GlyphModelError extends Error {
@@ -28,7 +29,7 @@ export function parseSymbolVariant(value: unknown): IconVariant {
 /** Общая граница запроса для полного каталога и предварительно собранного символа. */
 export function parseSymbolOptions(
   value: unknown,
-  contracts: Readonly<Record<AxisName, AxisContract>>,
+  contracts?: Readonly<Record<AxisName, AxisContract>>,
 ): SymbolOptions {
   if (value === null || typeof value !== 'object' || Array.isArray(value)) {
     throw new TypeError('@labpics/icons/ir: запрос обязан быть объектом');
@@ -48,14 +49,14 @@ export function parseSymbolOptions(
       throw new TypeError('@labpics/icons/ir: axes обязан быть объектом');
     }
     for (const [name, value] of Object.entries(input.axes)) {
-      if (!Object.hasOwn(contracts, name)) {
+      if (contracts ? !Object.hasOwn(contracts, name) : !AXIS_NAMES.includes(name as AxisName)) {
         throw new TypeError(`@labpics/icons/ir: неизвестная ось «${name}»`);
       }
-      const axis = contracts[name as AxisName];
+      const axis = contracts?.[name as AxisName];
       if (typeof value !== 'number' || !Number.isFinite(value)) {
         throw new TypeError(`@labpics/icons/ir: ось ${name} обязана быть конечным числом`);
       }
-      if (value < axis.min || value > axis.max) {
+      if (axis && (value < axis.min || value > axis.max)) {
         throw new RangeError(`@labpics/icons/ir: ось ${name}=${value} вне диапазона [${axis.min}, ${axis.max}]`);
       }
       axes[name as AxisName] = value;

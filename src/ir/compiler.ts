@@ -26,6 +26,7 @@ import {
 } from './recipes.js';
 import { sha256Hex } from './sha256.js';
 import { GlyphModelError, parseSymbolOptions, parseSymbolVariant as parseVariant } from './request.js';
+import type { AuthorSourceProvenance } from './author-source.js';
 export { GlyphModelError } from './request.js';
 export type { GlyphModelErrorCode } from './request.js';
 
@@ -46,15 +47,15 @@ export type PartRole =
   | 'decorator'
   | 'unclassified';
 
-export interface GlyphRequest {
-  readonly icon: IconId;
+export interface GlyphRequest<TIcon extends string = IconId> {
+  readonly icon: TIcon;
   readonly variant?: IconVariant;
   readonly modelMode?: ModelMode;
   readonly axes?: Readonly<Partial<Record<AxisName, number>>>;
 }
 
-export interface ParsedGlyphRequest {
-  readonly icon: IconId;
+export interface ParsedGlyphRequest<TIcon extends string = IconId> {
+  readonly icon: TIcon;
   readonly variant: IconVariant;
   readonly modelMode: ModelMode;
   readonly axes: Readonly<Partial<Record<AxisName, number>>>;
@@ -105,6 +106,7 @@ export interface GlyphPart {
 export interface SourceGlyphProvenance {
   readonly kind: 'source';
   readonly file: string;
+  readonly author?: AuthorSourceProvenance;
 }
 
 export interface ModelGlyphProvenance {
@@ -131,8 +133,8 @@ export interface RecipeGlyphProvenance {
 
 export type GlyphProvenance = SourceGlyphProvenance | ModelGlyphProvenance | RecipeGlyphProvenance;
 
-export interface GlyphIR {
-  readonly icon: IconId;
+export interface GlyphIR<TIcon extends string = IconId> {
+  readonly icon: TIcon;
   readonly variant: IconVariant;
   readonly viewBox: readonly [number, number, number, number];
   readonly parts: readonly GlyphPart[];
@@ -166,13 +168,14 @@ function cloneGlyphComposition(composition: GlyphComposition): GlyphComposition 
   });
 }
 
-export interface GlyphCapabilities {
-  readonly icon: IconId;
+export interface GlyphCapabilities<TIcon extends string = IconId> {
+  readonly icon: TIcon;
   readonly variant: IconVariant;
   readonly modelState: ModelState | null;
   readonly supportedAxes: readonly AxisName[];
   readonly axes: Readonly<Partial<Record<AxisName, AxisContract>>>;
   readonly motion: MotionCapabilities;
+  readonly author?: AuthorSourceProvenance;
 }
 
 export interface AxisContract {

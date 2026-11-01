@@ -16,10 +16,11 @@ const previous = read('release/package-size-ratchet.json');
 const oldConsumers = read('release/consumer-size-ratchet.json');
 const entries = {
   'one-static': oldConsumers.scenarios['one-static'].entry,
+  'authored-static': "import { outline } from '@labpics/icons/symbols/time';\nconsole.log(outline);\n",
   'glyph-one': "import { glyph } from '@labpics/icons/symbols/alert';\nconsole.log(glyph());\n",
-  'model-one': "import { glyph } from '@labpics/icons/symbols/time';\nconsole.log(glyph());\n",
-  'model-axis': "import { glyph } from '@labpics/icons/symbols/chevron-forward';\nconsole.log(glyph({ axes: { weight: 1.1, opsz: 32 } }));\n",
-  'motion-one': "import { glyph, glyphCapabilities } from '@labpics/icons/symbols/time';\nimport { compileSymbolEffect } from '@labpics/icons/motion';\nconsole.log(compileSymbolEffect(glyph(), glyphCapabilities(), 'time.advance', { duration: 400 }));\n",
+  'authored-time': "import { glyph } from '@labpics/icons/symbols/time';\nconsole.log(glyph());\n",
+  'recorded-model-axis': "import { glyph } from '@labpics/icons/ir';\nconsole.log(glyph({ icon: 'chevron-forward', axes: { weight: 1.1, opsz: 32 } }));\n",
+  'recorded-motion': "import { glyph, glyphCapabilities } from '@labpics/icons/ir';\nimport { compileSymbolEffect } from '@labpics/icons/motion';\nconsole.log(compileSymbolEffect(glyph({ icon: 'time' }), glyphCapabilities('time'), 'time.advance', { duration: 400 }));\n",
   'full-ir-opt-in': "import { glyph } from '@labpics/icons/ir';\nconsole.log(glyph({ icon: 'alert' }));\n",
   'full-catalog': oldConsumers.scenarios['full-catalog'].entry,
   'recipes-only': oldConsumers.scenarios['recipes-only'].entry,

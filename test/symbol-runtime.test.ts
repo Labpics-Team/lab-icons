@@ -28,22 +28,20 @@ function capability(variant: IconVariant, modelState: GlyphCapabilities['modelSt
 function data(modelState: GlyphCapabilities['modelState'] = null, supportedAxes: AxisName[] = []) {
   const sources = { outline: source('outline'), filled: source('filled') };
   return {
-    icon: 'alert' as const, axes, source: sources, defaults: sources,
+    icon: 'alert' as const, source: sources,
     capabilities: { outline: capability('outline', modelState, supportedAxes), filled: capability('filled', modelState, supportedAxes) },
   };
 }
 
 describe('предварительно собранный символ', () => {
   it('повторный default render возвращает immutable snapshot без вызова compiler', () => {
-    let calls = 0;
-    const symbol = createCompiledSymbol(data(), () => { calls++; throw new Error('unexpected geometry work'); });
+    const symbol = createCompiledSymbol(data());
     const first = symbol.glyph();
     expect(symbol.glyph()).toBe(first);
     expect(symbol.glyph({ variant: 'outline' })).toBe(first);
     expect(symbol.glyph({ modelMode: 'source-only' })).toBe(first);
     expect(Object.isFrozen(first)).toBe(true);
     expect(Object.isFrozen(first.viewBox)).toBe(true);
-    expect(calls).toBe(0);
     expect(() => { (first.viewBox as unknown as number[])[0] = 99; }).toThrow();
   });
 
@@ -55,27 +53,25 @@ describe('предварительно собранный символ', () => {
     expect(symbol.glyph({ variant: 'filled' }).variant).toBe('filled');
   });
 
-  it('только действительно поддержанный non-default axis вызывает общий compiler', () => {
-    const input = data('accepted', ['weight']);
-    const requests: unknown[] = [];
-    const result = source('outline');
-    const symbol = createCompiledSymbol(input, request => { requests.push(request); return result; });
-    expect(symbol.glyph({ axes: { weight: 1 } })).toBe(input.defaults.outline);
-    expect(requests).toHaveLength(0);
-    expect(symbol.glyph({ axes: { weight: 1.1 } })).toBe(result);
-    expect(requests).toEqual([{ icon: 'alert', variant: 'outline', modelMode: 'accepted-only', axes: { weight: 1.1 } }]);
-    expect(() => symbol.glyph({ axes: { opsz: 24 } })).toThrow(RangeError);
-    expect(() => symbol.glyph({ axes: { weight: 0.5 } })).toThrow(RangeError);
+  it.each([{ weight: 1 }, { opsz: 24 }, { corner: 1 }, { weight: 1000 }])('авторский source не наследует старый axis domain: %j', requestedAxes => {
+    const symbol = createCompiledSymbol(data());
+    try {
+      symbol.glyph({ axes: requestedAxes });
+      throw new Error('axis unexpectedly accepted');
+    } catch (error) {
+      expect(error).toBeInstanceOf(GlyphModelError);
+      expect((error as GlyphModelError).code).toBe('AUTHOR_PARITY_REQUIRED');
+    }
   });
 
-  it('явно отказывает в source axes и candidate admission', () => {
-    expect(() => createCompiledSymbol(data()).glyph({ axes: { weight: 1 } })).toThrow(RangeError);
-    const candidate = createCompiledSymbol(data('candidate', ['weight']));
-    expect(candidate.glyph().provenance.kind).toBe('source');
-    expect(() => candidate.glyph({ modelMode: 'allow-candidate' })).toThrow(GlyphModelError);
-    try { candidate.glyph({ modelMode: 'allow-candidate' }); }
-    catch (error) { expect((error as GlyphModelError).code).toBe('CANDIDATES_REQUIRED'); }
-    expect(() => candidate.glyph({ modelMode: 'source-only', axes: { weight: 1 } })).toThrow(RangeError);
+  it('явно отказывает в candidate admission и source axes', () => {
+    const symbol = createCompiledSymbol(data());
+    expect(symbol.glyph().provenance.kind).toBe('source');
+    expect(() => symbol.glyph({ modelMode: 'allow-candidate' })).toThrow(GlyphModelError);
+    try { symbol.glyph({ modelMode: 'allow-candidate' }); }
+    catch (error) { expect((error as GlyphModelError).code).toBe('AUTHOR_PARITY_REQUIRED'); }
+    expect(() => symbol.glyph({ modelMode: 'source-only', axes: { weight: 1 } })).toThrow(GlyphModelError);
+    expect(() => parseSymbolOptions({ axes: { weight: 1000 } }, axes)).toThrow(RangeError);
   });
 
   it.each([null, [], { icon: 'time' }, { modelMode: null }, { variant: 'mixed' }, { axes: null }, { axes: { weight: NaN } }, { axes: { alien: 1 } }])('недоверенный запрос отвергается: %j', input => {

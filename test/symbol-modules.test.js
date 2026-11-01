@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { anatomyForSymbol, renderSymbolModule, symbolReleaseProjection } from '../scripts/lib/symbol-modules.js';
+import { build } from 'esbuild';
+import { fileURLToPath } from 'node:url';
+import { renderSymbolModule, symbolModuleDeclaration, symbolReleaseProjection } from '../scripts/lib/symbol-modules.js';
 import { expandReleaseExports, runtimeModuleSpecifiers, validateReleaseContract, validateReleaseRuntimeDependencyGraph } from '../scripts/lib/release-contract.js';
 
 const base = {
@@ -22,18 +24,46 @@ describe('замкнутые symbol modules', () => {
 
   it('source-only module не импортирует ни compiler, ни геометрию соседнего символа', () => {
     const shape = { icon: 'alert', svg: '<svg/>', parts: [] };
-    const result = renderSymbolModule({ icon: 'alert', source: { outline: shape, filled: shape }, defaults: { outline: shape, filled: shape }, capabilities: {}, axes: {}, staticSvg: { outline: '<svg/>', filled: '<svg/>' } });
+    const result = renderSymbolModule({ icon: 'alert', source: { outline: shape, filled: shape }, capabilities: {}, staticSvg: { outline: '<svg/>', filled: '<svg/>' } });
     expect(runtimeModuleSpecifiers(result).specifiers).toEqual(['../ir/symbol-runtime.js']);
     expect(result).not.toContain('createGlyphCompiler');
     expect(result).not.toContain('catalog.json');
-    expect(result).toContain('outline: outlineSource, filled: filledSource');
+    expect(result).toContain('source: { outline: outlineSource, filled: filledSource }');
   });
 
-  it('mirror slice содержит ровно declaration и реальный mirror source', () => {
-    const catalog = { icons: { back: { model: { declaration: 'back' } } } };
-    const anatomy = { version: 1, glyphs: { back: { archetype: 'mirror', of: 'forward' }, forward: { archetype: 'arrow' }, unrelated: { archetype: 'circle' } } };
-    expect(Object.keys(anatomyForSymbol('back', catalog, anatomy).glyphs).sort()).toEqual(['back', 'forward']);
-    expect(() => anatomyForSymbol('back', catalog, { version: 1, glyphs: { back: { archetype: 'mirror', of: 'back' } } })).toThrow(/цикл/);
+  it('declaration связывает реальное добавленное имя с author corpus', () => {
+    const declaration = symbolModuleDeclaration('align-bottom');
+    expect(declaration).toContain("AuthorSourceGlyph<'align-bottom'>");
+    expect(declaration).toContain("AuthorSourceCapabilities<'align-bottom'>");
+    expect(declaration).not.toContain('CatalogIconId');
+    expect(() => symbolModuleDeclaration('../escape')).toThrow();
+  });
+
+  it('outline-only consumer удаляет настоящий runtime и весь IR payload; прежний member-read это нарушает', async () => {
+    const shape = { icon: 'alert', svg: 'AUTHOR_IR_SENTINEL', parts: [] };
+    const module = renderSymbolModule({ icon: 'alert', source: { outline: shape, filled: shape }, capabilities: { trace: 'AUTHOR_CAPS_SENTINEL' }, staticSvg: { outline: '<svg>SVG_STATIC_CONTROL</svg>', filled: '<svg>FILLED_UNUSED</svg>' } });
+    async function consume(contents) {
+      const output = await build({
+        stdin: { contents: 'import { outline } from "test-symbol"; console.log(outline);', loader: 'js' },
+        bundle: true, write: false, minify: true, platform: 'browser', format: 'esm', logLevel: 'silent',
+        plugins: [{ name: 'single-symbol-control', setup(plugin) {
+          plugin.onResolve({ filter: /^test-symbol$/ }, () => ({ path: 'symbol', namespace: 'symbol', sideEffects: false }));
+          plugin.onLoad({ filter: /.*/, namespace: 'symbol' }, () => ({ contents, loader: 'js' }));
+          plugin.onResolve({ filter: /symbol-runtime\.js$/ }, () => ({ path: fileURLToPath(new URL('../src/ir/symbol-runtime.ts', import.meta.url)) }));
+        } }],
+      });
+      return output.outputFiles[0].text;
+    }
+    const actual = await consume(module);
+    expect(actual).toContain('SVG_STATIC_CONTROL');
+    expect(actual).not.toContain('AUTHOR_IR_SENTINEL');
+    expect(actual).not.toContain('AUTHOR_CAPS_SENTINEL');
+    expect(actual).not.toContain('FILLED_UNUSED');
+    expect(actual).not.toContain('AUTHOR_PARITY_REQUIRED');
+    const stale = module
+      .replace('export function glyph(request) { return symbol.glyph(request); }', 'export const glyph = symbol.glyph;')
+      .replace('export function glyphCapabilities(variant) { return symbol.glyphCapabilities(variant); }', 'export const glyphCapabilities = symbol.glyphCapabilities;');
+    expect(await consume(stale)).toContain('AUTHOR_IR_SENTINEL');
   });
 
   it('runtime parser различает настоящие imports, данные и template expressions', () => {

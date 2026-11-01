@@ -69,6 +69,8 @@ function validPackage() {
       'export declare const iconIds: readonly CatalogIconId[]; export declare function glyph(): unknown;\n',
   );
   write(root, 'dist/ir/catalog.generated.d.ts', "export type CatalogIconId = 'fixture';\n");
+  write(root, 'dist/ir/author-catalog.generated.d.ts', "export type AuthorIconId = 'fixture';\n");
+  write(root, 'dist/ir/author-source.d.ts', "import type { AuthorIconId } from './author-catalog.generated.js';\nimport type { GlyphIR } from './compiler.js';\nexport type AuthorSourceGlyph = GlyphIR & { readonly icon: AuthorIconId };\n");
   write(root, 'dist/ir/recipes.js', 'export const buildDirectionalArrow = () => ({});\n');
   write(root, 'dist/ir/recipes.d.ts', 'export declare function buildDirectionalArrow(): unknown;\n');
   write(root, 'dist/ir/candidates.js', 'export const registerCandidates = () => {};\n');
@@ -83,7 +85,7 @@ function validPackage() {
   write(root, 'dist/motion/index.js', 'export const fixture = 1;\n');
   write(root, 'dist/motion/index.d.ts', 'export declare const fixture: number;\n');
   write(root, 'dist/symbols/fixture.js', 'import "../ir/symbol-runtime.js"; export const fixture = 1;\n');
-  write(root, 'dist/symbols/fixture.d.ts', "import type { GlyphIR } from '../ir/compiler.js';\nexport declare function glyph(): GlyphIR;\n");
+  write(root, 'dist/symbols/fixture.d.ts', "import type { AuthorSourceGlyph } from '../ir/author-source.js';\nexport declare function glyph(): AuthorSourceGlyph;\n");
   return root;
 }
 

@@ -29,6 +29,8 @@ const DIST_COMMIT = 'b'.repeat(40);
 const DECLARATIONS = Object.freeze({
   'dist/index.d.ts': 'export declare const accessibilityOutline: string;\n',
   'dist/ir/catalog.generated.d.ts': "export type CatalogIconId = 'fixture';\n",
+  'dist/ir/author-catalog.generated.d.ts': "export type AuthorIconId = 'fixture';\n",
+  'dist/ir/author-source.d.ts': "import type { AuthorIconId } from './author-catalog.generated.js';\nimport type { GlyphIR } from './compiler.js';\nexport type AuthorSourceGlyph = GlyphIR & { readonly icon: AuthorIconId };\n",
   'dist/ir/index.d.ts':
     `import type { CatalogIconId } from './catalog.generated.js';\n` +
     `export type { RecipeResult } from './recipes.js';\n` +
@@ -38,7 +40,7 @@ const DECLARATIONS = Object.freeze({
   'dist/ir/request.d.ts': "export type GlyphModelErrorCode = 'CANDIDATES_REQUIRED';\n",
   'dist/ir/render.d.ts': "import type { GlyphIR } from './compiler.js';\nexport declare function renderGlyphSvg(glyph: GlyphIR): string;\n",
   'dist/motion/index.d.ts': "import type { GlyphIR } from '../ir/index.js';\nexport declare function compileSymbolEffect(glyph: GlyphIR): unknown;\n",
-  'dist/symbols/fixture.d.ts': "import type { GlyphIR } from '../ir/compiler.js';\nexport declare function glyph(): GlyphIR;\n",
+  'dist/symbols/fixture.d.ts': "import type { AuthorSourceGlyph } from '../ir/author-source.js';\nexport declare function glyph(): AuthorSourceGlyph;\n",
   'dist/ir/recipes.d.ts': 'export interface RecipeResult { readonly kind: string }\n',
   'dist/ir/candidates.d.ts': 'export declare function registerCandidates(): void;\n',
 });

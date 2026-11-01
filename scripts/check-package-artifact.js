@@ -42,6 +42,7 @@ import {
   EXPECTED_ICON_NAMES,
   EXPECTED_SOURCE_VARIANTS,
 } from './lib/corpus-contract.js';
+import { loadAuthorBaseline } from './lib/author-baseline.js';
 
 export const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -441,10 +442,24 @@ export function checkPackageArtifact({
     const installed = join(consumer, 'node_modules', '@labpics', 'icons');
     const result = validateInstalledPackage(installed, contract);
     if (result.errors.length > 0) return result;
+    const authorBaseline = loadAuthorBaseline(cleanSource);
+    const authorExpected = Object.fromEntries(Object.entries(authorBaseline.icons).map(([icon, variants]) => [icon,
+      Object.fromEntries(Object.entries(variants).map(([variant, record]) => {
+        const sourcePaths = [...record.normalizedSvg.matchAll(/<path\b[^>]*\bd="([^"]+)"/g)].map(match => match[1]);
+        return [variant, {
+          master: record.master, author: record.author, svg: record.artifactSvg,
+          parts: record.sourceContract.parts.map(({ id, fillRule, zIndex, sourceFingerprint, artifactFingerprint }, index) => ({
+            id, fillRule, zIndex, sourceFingerprint, artifactFingerprint, d: sourcePaths[index],
+          })),
+        }];
+      })),
+    ]));
+    writeFileSync(join(consumer, 'author-expected.json'), `${JSON.stringify(authorExpected)}\n`, 'utf8');
 
     writeFileSync(
       join(consumer, 'smoke.mjs'),
-      `import { accessibilityOutline } from '@labpics/icons';\n` +
+      `import { readFileSync } from 'node:fs';\n` +
+        `import { accessibilityOutline } from '@labpics/icons';\n` +
         `import * as fullIr from '@labpics/icons/ir';\n` +
         `import { axisNames, calendarNumberGlyph, glyph, glyphCapabilities, iconDesignContract, iconIds } from '@labpics/icons/ir';\n` +
         `import { buildDirectionalArrow } from '@labpics/icons/ir/recipes';\n` +
@@ -461,24 +476,37 @@ export function checkPackageArtifact({
         `if (iconIds.length !== ${EXPECTED_ICON_NAMES} || axisNames.length !== 3 || !Object.isFrozen(iconIds) || !Object.isFrozen(axisNames) || ir.provenance.kind !== 'source' || ir.parts.length < 1) throw new Error('ir ESM export broken');\n` +
         `if (iconDesignContract.targets.lottie !== 'not-exported' || glyphCapabilities('time', 'outline').motion.state !== 'gesture-ready' || glyphCapabilities('time', 'outline').motion.gestures[0]?.id !== 'time.advance') throw new Error('capability contract broken');\n` +
         `for (const icon of iconIds) for (const variant of ['outline', 'filled']) glyph({ icon, variant, modelMode: 'source-only' });\n` +
-        `for (const icon of iconIds) {\n` +
+        `const authorExpected = JSON.parse(readFileSync(new URL('./author-expected.json', import.meta.url), 'utf8'));\n` +
+        `if (Object.keys(authorExpected).length !== ${authorBaseline.counts.families}) throw new Error('current author census broken');\n` +
+        `for (const [icon, variants] of Object.entries(authorExpected)) {\n` +
         `  const symbol = await import('@labpics/icons/symbols/' + icon);\n` +
         `  if (symbol.glyph() !== symbol.glyph() || !Object.isFrozen(symbol.glyph().parts)) throw new Error('symbol cache broken: ' + icon);\n` +
         `  for (const variant of ['outline', 'filled']) {\n` +
-        `    const sourceRequest = { icon, variant, modelMode: 'source-only' };\n` +
-        `    if (JSON.stringify(symbol.glyph({ variant, modelMode: 'source-only' })) !== JSON.stringify(glyph(sourceRequest))) throw new Error('compiled source differs: ' + icon + '/' + variant);\n` +
-        `    if (JSON.stringify(symbol.glyph({ variant })) !== JSON.stringify(glyph({ icon, variant }))) throw new Error('compiled default differs: ' + icon + '/' + variant);\n` +
+        `    const expected = variants[variant];\n` +
+        `    const current = symbol.glyph({ variant });\n` +
+        `    if (symbol[variant] !== expected.svg) throw new Error('current static master differs: ' + icon + '/' + variant);\n` +
+        `    if (symbol.glyph({ variant, modelMode: 'source-only' }) !== current || current.icon !== icon || current.variant !== variant || current.composition.kind !== 'layers') throw new Error('current source/default differs: ' + icon + '/' + variant);\n` +
+        `    if (JSON.stringify(current.viewBox) !== '[0,0,24,24]' || !/<svg\\b[^>]*\\bfill="currentColor"/.test(current.svg) || current.parts.some(part => part.paint.kind !== 'fill' || part.paint.fill !== 'currentColor')) throw new Error('current viewport/paint differs: ' + icon + '/' + variant);\n` +
+        `    if (current.provenance.kind !== 'source' || current.provenance.file !== expected.master || JSON.stringify(current.provenance.author) !== JSON.stringify(expected.author)) throw new Error('current author provenance differs: ' + icon + '/' + variant);\n` +
+        `    const actualParts = current.parts.map(part => ({ id: part.id, fillRule: part.fillRule, zIndex: part.zIndex, sourceFingerprint: part.provenance.sourceFingerprint, artifactFingerprint: part.provenance.artifactFingerprint, d: part.d }));\n` +
+        `    if (JSON.stringify(actualParts) !== JSON.stringify(expected.parts) || current.parts.some(part => part.role !== 'unclassified' || part.morphGroup !== null)) throw new Error('current source path/fill/z-order differs: ' + icon + '/' + variant);\n` +
+        `    const renderedD = [...current.svg.matchAll(/<path\\b[^>]*\\bd="([^"]+)"/g)].map(match => match[1]);\n` +
+        `    const renderedRules = [...current.svg.matchAll(/<path\\b[^>]*\\bfill-rule="([^"]+)"/g)].map(match => match[1]);\n` +
+        `    if (JSON.stringify(renderedD) !== JSON.stringify(expected.parts.map(part => part.d)) || JSON.stringify(renderedRules) !== JSON.stringify(expected.parts.map(part => part.fillRule))) throw new Error('current SVG assembly differs: ' + icon + '/' + variant);\n` +
         `    const capabilities = symbol.glyphCapabilities(variant);\n` +
-        `    if (JSON.stringify(capabilities) !== JSON.stringify(glyphCapabilities(icon, variant))) throw new Error('compiled capabilities differ: ' + icon + '/' + variant);\n` +
-        `    if (capabilities.modelState === 'accepted') for (const axis of capabilities.supportedAxes) for (const value of [capabilities.axes[axis].min, capabilities.axes[axis].default, capabilities.axes[axis].max]) {\n` +
-        `      const request = { variant, axes: { [axis]: value } };\n` +
-        `      if (JSON.stringify(symbol.glyph(request)) !== JSON.stringify(glyph({ icon, ...request }))) throw new Error('compiled axis differs: ' + icon + '/' + variant + '/' + axis);\n` +
+        `    if (capabilities.icon !== icon || capabilities.variant !== variant || capabilities.modelState !== null || capabilities.supportedAxes.length || Object.keys(capabilities.axes).length || capabilities.motion.state !== 'source-only' || capabilities.motion.partIds.length || capabilities.motion.gestures.length || capabilities.motion.tracks.length || capabilities.motion.adapters.lottie !== 'not-exported' || capabilities.motion.adapters.sfSymbols !== 'not-exported' || JSON.stringify(capabilities.author) !== JSON.stringify(expected.author)) throw new Error('current source inherited stale admission: ' + icon + '/' + variant);\n` +
+        `    for (const request of [{ variant, axes: { weight: 1 } }, { variant, axes: { opsz: 24 } }, { variant, axes: { corner: 1 } }, { variant, modelMode: 'allow-candidate' }]) {\n` +
+        `      let refused = false;\n` +
+        `      try { symbol.glyph(request); } catch (error) { refused = error.code === 'AUTHOR_PARITY_REQUIRED'; }\n` +
+        `      if (!refused) throw new Error('current author capability did not refuse precisely: ' + icon + '/' + variant);\n` +
         `    }\n` +
         `  }\n` +
         `}\n` +
-        `const effect = compileSymbolEffect(timeSymbol.glyph(), timeSymbol.glyphCapabilities(), 'time.advance', { duration: 200 });\n` +
-        `if (!effect.ok || effect.effect.targets.length !== 2) throw new Error('symbol motion export broken');\n` +
-        `const maskGlyph = timeSymbol.glyph({ variant: 'filled' });\n` +
+        `const currentEffect = compileSymbolEffect(timeSymbol.glyph(), timeSymbol.glyphCapabilities(), 'time.advance', { duration: 200 });\n` +
+        `if (currentEffect.ok || currentEffect.reason.code !== 'SEMANTIC_MOTION_UNAVAILABLE') throw new Error('current author inherited stale motion');\n` +
+        `const effect = compileSymbolEffect(glyph({ icon: 'time' }), glyphCapabilities('time'), 'time.advance', { duration: 200 });\n` +
+        `if (!effect.ok || effect.effect.targets.length !== 2) throw new Error('recorded symbol motion export broken');\n` +
+        `const maskGlyph = glyph({ icon: 'time', variant: 'filled' });\n` +
         `if (renderGlyphSvg(maskGlyph, { instanceId: 'one' }) === renderGlyphSvg(maskGlyph, { instanceId: 'two' })) throw new Error('symbol mask instance isolation broken');\n` +
         `registerCandidates();\n` +
         `for (const icon of iconIds) for (const variant of ['outline', 'filled']) glyph({ icon, variant, modelMode: 'allow-candidate' });\n` +
@@ -498,6 +526,7 @@ export function checkPackageArtifact({
         `import { calendarNumberGlyph, glyph, iconDesignContract, type GlyphIR, type IconDesignContract, type IconId } from '@labpics/icons/ir';\n` +
         `import { buildDirectionalArrow, type RecipeResult } from '@labpics/icons/ir/recipes';\n` +
         `import { glyph as symbolGlyph, glyphCapabilities as symbolCapabilities } from '@labpics/icons/symbols/time';\n` +
+        `import { glyph as addedGlyph, glyphCapabilities as addedCapabilities } from '@labpics/icons/symbols/align-bottom';\n` +
         `import { compileSymbolEffect, type SymbolEffectResult } from '@labpics/icons/motion';\n` +
         `import { renderGlyphSvg } from '@labpics/icons/ir/render';\n` +
         `const svg: string = accessibilityOutline;\n` +
@@ -510,9 +539,16 @@ export function checkPackageArtifact({
         `const sliced: GlyphIR = symbolGlyph({ variant: 'outline' });\n` +
         `const effect: SymbolEffectResult = compileSymbolEffect(sliced, symbolCapabilities(), 'time.advance', { duration: 200 });\n` +
         `const mounted: string = renderGlyphSvg(sliced, { instanceId: 'consumer' });\n` +
+        `const added = addedGlyph();\n` +
+        `const addedName: 'align-bottom' = added.icon;\n` +
+        `const authorVersion: string = added.provenance.author.version;\n` +
+        `const addedEffect: SymbolEffectResult = compileSymbolEffect(added, addedCapabilities(), 'time.advance', { duration: 200 });\n` +
+        `const addedMounted: string = renderGlyphSvg(added, { instanceId: 'added' });\n` +
+        `// @ts-expect-error записанный IR сохраняет собственный census\n` +
+        `glyph({ icon: 'align-bottom' });\n` +
         `// @ts-expect-error символ уже связан с icon; private coordinates не принимаются\n` +
         `symbolGlyph({ icon: 'alert' });\n` +
-        `void [svg, name, icon, ir, calendar, recipe, contract, sliced, effect, mounted];\n`,
+        `void [svg, name, icon, ir, calendar, recipe, contract, sliced, effect, mounted, addedName, authorVersion, addedEffect, addedMounted];\n`,
       'utf8',
     );
     writeFileSync(
@@ -547,9 +583,12 @@ export function checkPackageArtifact({
         `import { glyph, type GlyphIR } from '@labpics/icons/ir';\n` +
         `import { buildDirectionalArrow } from '@labpics/icons/ir/recipes';\n` +
         `import { glyph as symbolGlyph } from '@labpics/icons/symbols/alert';\n` +
+        `import { glyph as addedGlyph } from '@labpics/icons/symbols/align-bottom';\n` +
         `const ir: GlyphIR = glyph({ icon: 'reload' });\n` +
         `const symbol: GlyphIR = symbolGlyph();\n` +
-        `void [accessibilityOutline, ir, buildDirectionalArrow, symbol];\n`,
+        `const added: GlyphIR<string> = addedGlyph();\n` +
+        `const addedName: 'align-bottom' = addedGlyph().icon;\n` +
+        `void [accessibilityOutline, ir, buildDirectionalArrow, symbol, added, addedName];\n`,
       'utf8',
     );
     writeFileSync(

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Полный IR, символы и motion собираются из одного production compiler.
+ * Записанный IR, текущие авторские символы и motion используют один compiler.
  * Default/source parts, fingerprint, bounds и topology вычисляются при сборке;
  * браузер получает замкнутый символ и не восстанавливает анатомию из path.
  */
@@ -12,12 +12,13 @@ import { dirname, join, relative } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { validateReleaseTypeDependencyGraph, validateReleaseRuntimeDependencyGraph } from './lib/release-contract.js';
 import { recoverOwnedDirectory, replaceOwnedDirectory } from './lib/owned-directory.js';
-import { anatomyForSymbol, renderSymbolModule, symbolExportName, symbolModuleDeclaration } from './lib/symbol-modules.js';
+import { renderSymbolModule, symbolExportName, symbolModuleDeclaration } from './lib/symbol-modules.js';
+import { authorSymbolPayload, loadAuthorBaseline } from './lib/author-baseline.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DIST_DIR = join(ROOT, 'dist');
 const TARGETS = ['ir', 'symbols', 'motion'];
-const REQUIRED_DECLARATIONS = ['candidates.d.ts', 'catalog.generated.d.ts', 'compiler.d.ts', 'index.d.ts', 'recipes.d.ts', 'render.d.ts', 'request.d.ts'];
+const REQUIRED_DECLARATIONS = ['author-catalog.generated.d.ts', 'author-source.d.ts', 'candidates.d.ts', 'catalog.generated.d.ts', 'compiler.d.ts', 'index.d.ts', 'recipes.d.ts', 'render.d.ts', 'request.d.ts'];
 const read = file => JSON.parse(readFileSync(join(ROOT, file), 'utf8'));
 
 function listFiles(root, directory = root) {
@@ -60,36 +61,27 @@ try {
   copyFileSync(join(declarations, 'motion/index.d.ts'), join(staging, 'motion/index.d.ts'));
 
   const catalog = read('semantics/catalog.json');
-  const anatomy = read('semantics/anatomy.runtime.json');
   const grid = read('semantics/grid.json');
-  const compiler = await import(pathToFileURL(join(staging, 'ir/index.js')).href);
-  const staticIcons = await import(pathToFileURL(join(DIST_DIR, 'index.js')).href);
-  for (const icon of Object.keys(catalog.icons).sort()) {
-    const source = {};
-    const defaults = {};
-    const capabilities = {};
-    const staticSvg = {};
-    for (const variant of ['outline', 'filled']) {
-      source[variant] = compiler.glyph({ icon, variant, modelMode: 'source-only' });
-      defaults[variant] = compiler.glyph({ icon, variant });
-      capabilities[variant] = compiler.glyphCapabilities(icon, variant);
-      staticSvg[variant] = staticIcons[symbolExportName(icon, variant)];
-      if (typeof staticSvg[variant] !== 'string') throw new Error(`symbol module: ${icon}/${variant} source отсутствует`);
-    }
-    const needsAxes = Object.values(capabilities).some(value => value.modelState === 'accepted' && value.supportedAxes.length > 0);
-    let compilerInput;
-    if (needsAxes) {
-      compilerInput = {
-        catalog: { canvas: catalog.canvas, axes: catalog.axes, icons: { [icon]: catalog.icons[icon] } },
-        anatomy: anatomyForSymbol(icon, catalog, anatomy),
-        grid,
-        // Поддержанные axes всегда строят accepted-модель. Source уже проверен
-        // и материализован выше; повторный parser не нужен осевому исполнителю.
-        staticIcons: {},
-      };
-    }
-    writeFileSync(join(staging, 'symbols', `${icon}.js`), renderSymbolModule({ icon, source, defaults, capabilities, axes: catalog.axes, staticSvg, compilerInput }));
-    writeFileSync(join(staging, 'symbols', `${icon}.d.ts`), symbolModuleDeclaration());
+  const author = loadAuthorBaseline(ROOT);
+  const names = Object.keys(author.icons).sort();
+  const sourceCatalog = {
+    canvas: catalog.canvas,
+    axes: catalog.axes,
+    icons: Object.fromEntries(names.map(icon => [icon, {
+      source: Object.fromEntries(['outline', 'filled'].map(variant => [variant, author.icons[icon][variant].sourceContract])),
+      model: null,
+    }])),
+  };
+  const staticIcons = Object.fromEntries(names.flatMap(icon =>
+    ['outline', 'filled'].map(variant => [symbolExportName(icon, variant), author.icons[icon][variant].artifactSvg])));
+  const { createGlyphCompiler } = await import(pathToFileURL(join(staging, 'ir/compiler.js')).href);
+  const compiler = createGlyphCompiler({
+    catalog: sourceCatalog, anatomy: { version: 1, glyphs: {} }, grid, staticIcons,
+  });
+  for (const icon of names) {
+    const payload = authorSymbolPayload(icon, author.icons[icon], compiler);
+    writeFileSync(join(staging, 'symbols', `${icon}.js`), renderSymbolModule(payload));
+    writeFileSync(join(staging, 'symbols', `${icon}.d.ts`), symbolModuleDeclaration(icon));
   }
 
   const contract = read('release/contract.json');
@@ -109,7 +101,7 @@ try {
   for (const name of TARGETS) {
     replaceOwnedDirectory({ staging: join(staging, name), output: join(DIST_DIR, name), backup: join(DIST_DIR, `.${name}-previous`) });
   }
-  console.log(`build-ir: ${Object.keys(catalog.icons).length} precompiled symbol modules + IR + isolated motion`);
+  console.log(`build-ir: ${names.length} current author symbol modules + recorded IR + isolated motion`);
 } finally {
   rmSync(staging, { recursive: true, force: true });
   rmSync(declarations, { recursive: true, force: true });

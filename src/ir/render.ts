@@ -9,7 +9,7 @@ export interface GlyphSvgInstance {
  * Изолирует mask/clip ресурсы экземпляра, сохраняя семантические data-part.
  * Повторный символ может двигаться независимо от соседнего с той же геометрией.
  */
-export function renderGlyphSvg(glyph: GlyphIR, options: GlyphSvgInstance): string {
+export function renderGlyphSvg(glyph: GlyphIR<string>, options: GlyphSvgInstance): string {
   if (!options || typeof options.instanceId !== 'string' || !/^[A-Za-z][A-Za-z0-9_-]{0,63}$/.test(options.instanceId)) {
     throw new TypeError('@labpics/icons/ir/render: instanceId обязан быть безопасным уникальным идентификатором');
   }

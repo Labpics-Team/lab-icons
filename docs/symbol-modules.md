@@ -1,116 +1,129 @@
 # Подключить отдельный символ
 
-Модуль `@labpics/icons/symbols/<имя>` содержит SVG, предварительно собранные части
-и возможности одного символа. Установка использует tarball проверяемого выпуска;
-публикация и номер версии подтверждаются отдельно в [процедуре выпуска](build-release.md).
+`@labpics/icons/symbols/<имя>` содержит Outline, Filled и предварительно собранные
+части одного текущего авторского символа. Исходники закреплены в
+[Figma manifest](../semantics/figma-baseline.json): Lab UI v2.1,
+версия `2416636003859748575`, 330 семейств и 660 независимых вариантов.
+Примеры относятся к собранному checkout; номер и публикация выпуска проверяются
+по [процедуре поставки](build-release.md).
 
 ```sh
 pnpm add ./labpics-icons-<version>.tgz
 ```
 
-Для статической иконки достаточно строки SVG:
+## Показать авторский SVG
 
 ```js
-import { timeOutline } from '@labpics/icons';
+import { outline } from '@labpics/icons/symbols/align-bottom';
 
 const button = document.querySelector('button');
-button.setAttribute('aria-label', 'Показать время');
-button.innerHTML = timeOutline;
+button.setAttribute('aria-label', 'Выровнять по нижнему краю');
+button.innerHTML = outline;
 button.querySelector('svg').setAttribute('aria-hidden', 'true');
 ```
 
-Размер, цвет и доступная область нажатия задаются компонентом приложения.
-Оптическая ось `opsz` задаётся отдельно, когда вариант её поддерживает.
+Для Filled импортируйте `filled`. Строки сохраняют авторские `d`, порядок путей
+и fill-rule, а цвет наследуют через `currentColor`. Импорт одной строки удаляет
+неиспользуемый IR и runtime символа. Размер, цвет, доступность и область нажатия
+задаёт компонент приложения.
 
-## Получить части и возможности
-
-```js
-import { glyph, glyphCapabilities, outline, filled } from '@labpics/icons/symbols/time';
-
-const symbol = glyph({ variant: 'outline' });
-const capabilities = glyphCapabilities('outline');
-console.log(symbol.parts, capabilities.motion.gestures);
-```
-
-`glyph()` возвращает неизменяемый, повторно используемый результат для Outline.
-Запрос `glyph({ variant: 'filled' })` выбирает самостоятельный Filled-вариант.
-`glyph({ modelMode: 'source-only' })` выбирает точный статический источник.
-Параметры частей, topology, anchors и fingerprint этого источника проверяются при сборке.
-
-При запросе оси сначала проверьте `modelState === 'accepted'`, `supportedAxes`
-и опубликованный интервал `axes`. Например, принятый `chevron-forward` поддерживает
-оптический размер:
-
-```js
-import { glyph, glyphCapabilities } from '@labpics/icons/symbols/chevron-forward';
-
-const capabilities = glyphCapabilities('outline');
-if (capabilities.modelState !== 'accepted' || !capabilities.supportedAxes.includes('opsz')) {
-  throw new Error('Этот вариант не поддерживает оптическую ось');
-}
-const symbol = glyph({ axes: { opsz: 32 } });
-```
-
-Неподдержанная ось и значение вне интервала вызывают `RangeError`; неправильное
-имя или форма запроса — `TypeError`. Исследовательские candidate-модели подключаются
-через `@labpics/icons/ir/candidates` и полный `@labpics/icons/ir`.
-Модуль отдельного символа отказывает в таком допуске кодом `CANDIDATES_REQUIRED`.
-
-## Смонтировать независимые экземпляры
-
-Filled-композиция может использовать SVG mask. Каждый одновременно смонтированный
-экземпляр получает собственный `instanceId`, чтобы его движение сохраняло независимость.
-
-```js
-import { glyph } from '@labpics/icons/symbols/time';
-import { renderGlyphSvg } from '@labpics/icons/ir/render';
-
-document.querySelector('#main-clock').innerHTML = renderGlyphSvg(
-  glyph({ variant: 'filled' }),
-  { instanceId: 'main-clock' },
-);
-document.querySelector('#small-clock').innerHTML = renderGlyphSvg(
-  glyph({ variant: 'filled' }),
-  { instanceId: 'small-clock' },
-);
-```
-
-`renderGlyphSvg` переименовывает локальные resource ID и их ссылки.
-Семантические `data-part` сохраняются. `instanceId` уникален в документе, начинается
-с латинской буквы и содержит до 64 букв, цифр, `-` или `_`.
-
-## Получить семантический эффект
+## Получить части и источник
 
 ```js
 import { glyph, glyphCapabilities } from '@labpics/icons/symbols/time';
+
+const symbol = glyph({ variant: 'outline' });
+const capabilities = glyphCapabilities('outline');
+console.log(symbol.parts, symbol.provenance.author, capabilities);
+```
+
+Default и `glyph({ modelMode: 'source-only' })` возвращают один неизменяемый результат.
+Filled строится из собственного master. Разбор path, fingerprints, topology и
+геометрические anchors выполняются при сборке; вызов `glyph()` возвращает готовые данные.
+
+`provenance.author` содержит Figma fileKey, version, nodeId, nodeSha256,
+masterSha256, normalizedSha256 и pathFingerprintSha256. Сборка проверяет raw bytes,
+нормализованный SVG и fingerprint порядка/fill-rule перед выдачей модулей.
+Части имеют `role: 'unclassified'` и geometry-derived identity. Их bbox anchors
+не объявляют смысл или correspondence для morph.
+
+## Проверить допустимое изменение
+
+Текущая авторская поверхность возвращает `modelState: null`, пустые `supportedAxes`
+и `motion.state: 'source-only'`. Запрос любой известной оси, включая её прежнее
+default-значение, или `modelMode: 'allow-candidate'` вызывает ошибку с кодом
+`AUTHOR_PARITY_REQUIRED`. Ошибочная форма запроса, неизвестная ось и нечисловое
+значение вызывают `TypeError`. Значения не зажимаются и не заменяют master.
+
+```js
+try {
+  glyph({ axes: { opsz: 32 } });
+} catch (error) {
+  if (error.code !== 'AUTHOR_PARITY_REQUIRED') throw error;
+}
+```
+
+Совпадение имени со старой моделью не переносит её admission на новый рисунок.
+Например, текущий `time` имеет другую внешнюю окружность и два самостоятельных
+fill scopes. Записанные модели, оси и candidate-регистрация продолжают работать
+через полный `@labpics/icons/ir`, а прежние именованные SVG — через корневой импорт.
+Оба пути сохраняют свой записанный baseline.
+
+## Получить семантический эффект
+
+`compileSymbolEffect` принимает GlyphIR и capabilities без каталога или parser.
+Для текущего source-only master он возвращает `SEMANTIC_MOTION_UNAVAILABLE`.
+Принятый `time.advance` доступен у записанной модели:
+
+```js
+import { glyph as recordedGlyph, glyphCapabilities as recordedCapabilities } from '@labpics/icons/ir';
 import { compileSymbolEffect } from '@labpics/icons/motion';
 
 const result = compileSymbolEffect(
-  glyph(), glyphCapabilities(), 'time.advance',
+  recordedGlyph({ icon: 'time' }), recordedCapabilities('time'), 'time.advance',
   { duration: 400, from: 0.35, to: 1, reducedMotion: false },
 );
 if (!result.ok) throw new Error(result.reason.code);
 console.log(result.effect.targets, result.effect.options);
 ```
 
-Эффект задаёт семантические цели, ключевые кадры и длительность. Исполнение,
-время и отмена находятся у motion-исполнителя. `from` принимает уже видимый прогресс
-для продолжения после прерывания; `reducedMotion: true` материализует конечное состояние
-с нулевой длительностью. Публичное исполнение и отмена описаны в документации
-[Lab Motion](https://github.com/Labpics-Team/lab-motion).
+Lab Icons задаёт части, anchors и ключевые кадры. Исполнение и отмена находятся
+у [Lab Motion](https://github.com/Labpics-Team/lab-motion). `from` продолжает
+видимый прогресс после прерывания; reduced motion материализует конечное состояние
+с нулевой длительностью. Lottie и SF Symbols сохраняют статус `not-exported`.
 
-Поддержка SVG, gesture, Lottie и SF Symbols читается из соответствующего контракта.
-Каждый неподдержанный эффект получает машинный код отказа. Для форматов Lottie
-и SF Symbols текущий контракт сохраняет `not-exported`.
+SVG с локальными mask/clip получает уникальный `instanceId` при одновременном монтаже:
 
-## Добавить символ
+```js
+import { renderGlyphSvg } from '@labpics/icons/ir/render';
 
-Авторский master и его декларация остаются в общем authoring-пути. После обновления
-каталога `node scripts/generate-symbol-surface.mjs` выводит release allowlist и
-package exports из настоящих имён. `pnpm build` создаёт модули всех имён тем же compiler.
-Собственный SVG parser или отдельный набор геометрии у потребителя не нужен.
+const svg = renderGlyphSvg(recordedGlyph({ icon: 'time', variant: 'filled' }), {
+  instanceId: 'main-clock',
+});
+```
 
-`pnpm check:package-artifact` устанавливает чистый tarball и сравнивает источники,
-default-части, возможности и поддержанные крайние значения осей с production IR.
-Размеры и время выполнения измеряются на runner; [скрипт измерения](../scripts/measure-platform-artifacts.mjs)
-сохраняет точный source SHA, среду, байты и реально включённые модули.
+`instanceId` уникален в документе, начинается с латинской буквы и содержит
+до 64 букв, цифр, `-` или `_`. Renderer сохраняет `data-part` и переименовывает ресурсы.
+При отсутствии ресурсов он возвращает готовую SVG-строку.
+
+## Добавить и проверить символ
+
+Авторский snapshot проходит [общий приём мастеров](agent-workflow.md).
+`node scripts/generate-symbol-surface.mjs` выводит конечные имена, declarations
+и release allowlist из Figma manifest. `pnpm build` проверяет весь snapshot,
+передаёт источники существующему source compiler и создаёт отдельные модули.
+Осевые и semantic admissions принимаются отдельно после доказательства паритета.
+
+`pnpm check:package-artifact` устанавливает чистый tarball, проверяет каждый текущий
+master и его parts/provenance, добавленные типизированные имена, прежние статические
+интеграции и точные отказы. Тяжёлые проверки и
+[измерения пакета](../scripts/measure-platform-artifacts.mjs) выполняются на runner.
+Отчёт сохраняет SHA, среду, байты и включённые модули; policy обновляется только
+явным `--update` после проверки измерений.
+
+Путь следует [SVG 2 path semantics](https://www.w3.org/TR/SVG2/paths.html)
+и [правилам заливки](https://www.w3.org/TR/SVG2/painting.html): compound contour
+и порядок fill scopes сохраняются. Для статического потребления выбран обычный
+подход [Lucide icon data](https://lucide.dev/guide/icons) — отдельные данные без
+обязательного renderer. [Node subpath patterns](https://nodejs.org/api/packages.html#subpath-patterns)
+сохраняют конечную проверяемую поверхность без ручного export map на каждое имя.
