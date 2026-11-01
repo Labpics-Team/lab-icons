@@ -23,6 +23,9 @@ describe('confidence admission benchmark', () => {
   it('uncertain interval не становится доказанной регрессией или PASS', () => {
     expect(assessQuantile([1, 2, 3, 4, 5, 6, 7, 8], [1, 2, 3, 4, 5, 6, 7, 8], 1.05).verdict).toBe('INCOMPLETE');
   });
+  it('доказанная нижней границей регрессия не требует finite upper bound', () => {
+    expect(assessQuantile(copies(10), copies(100, 3), 1.05, { quantile: 0.95 })).toMatchObject({ verdict: 'FAIL', lower: 10, upper: null });
+  });
   it('calibration не принимает шум более 5% и не смотрит candidate', () => {
     expect(calibrateNoRegression(copies(10), copies(10))).toMatchObject({ verdict: 'PASS', tolerance: 0 });
     expect(calibrateNoRegression(copies(10), copies(11))).toMatchObject({ verdict: 'INCOMPLETE', tolerance: null, reason: 'CALIBRATION_EXCEEDS_FIVE_PERCENT' });

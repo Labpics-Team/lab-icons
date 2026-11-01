@@ -69,8 +69,9 @@ export function quantileRatio(baseline, candidate, { quantile = 0.5, confidence 
 export function assessQuantile(baseline, candidate, maximumRatio, options) {
   if (!Number.isFinite(maximumRatio) || maximumRatio <= 0) throw new TypeError('benchmark: неверный ratio budget');
   const interval = quantileRatio(baseline, candidate, options);
-  const verdict = interval.reason ? 'INCOMPLETE' : interval.upper <= maximumRatio ? 'PASS' :
-    interval.lower !== null && interval.lower > maximumRatio ? 'FAIL' : 'INCOMPLETE';
+  const verdict = interval.reason === 'BELOW_CLOCK_RESOLUTION' ? 'INCOMPLETE' :
+    interval.lower !== null && interval.lower > maximumRatio ? 'FAIL' :
+    interval.reason ? 'INCOMPLETE' : interval.upper <= maximumRatio ? 'PASS' : 'INCOMPLETE';
   return { verdict, maximumRatio, ...interval };
 }
 
