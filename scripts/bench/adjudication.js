@@ -11,6 +11,33 @@ function probability(value, name) {
   if (!Number.isFinite(value) || value <= 0 || value >= 1) throw new TypeError(`benchmark: неверная ${name}`);
 }
 
+function bitsOf(value) {
+  const view = new DataView(new ArrayBuffer(8));
+  view.setFloat64(0, value);
+  return view.getBigUint64(0);
+}
+
+function adjacent(value, direction) {
+  if (value === 0) return direction > 0 ? Number.MIN_VALUE : 0;
+  const view = new DataView(new ArrayBuffer(8));
+  view.setBigUint64(0, bitsOf(value) + BigInt(direction));
+  return view.getFloat64(0);
+}
+
+function binary(value) {
+  const bits = bitsOf(value), exponent = Number((bits >> 52n) & 2047n);
+  return { significand: (bits & ((1n << 52n) - 1n)) + (exponent ? 1n << 52n : 0n), exponent: exponent ? exponent - 1075 : -1074 };
+}
+
+/** Сравнение с budget выполняется до округления ratio, без tolerance/epsilon. */
+function ratioWithin(numerator, denominator, maximum) {
+  if (numerator === null || denominator === null || denominator === 0) return null;
+  const left = binary(numerator), divisor = binary(denominator), limit = binary(maximum);
+  const shift = left.exponent - divisor.exponent - limit.exponent;
+  return shift >= 0 ? (left.significand << BigInt(shift)) <= divisor.significand * limit.significand :
+    left.significand <= (divisor.significand * limit.significand << BigInt(-shift));
+}
+
 /** Binomial(n,p): log-рекурсия сохраняет малые tail probabilities. */
 function binomialMass(n, p) {
   const logs = [n * Math.log1p(-p)];
@@ -56,22 +83,25 @@ export function quantileRatio(baseline, candidate, { quantile = 0.5, confidence 
   const base = quantileInterval(baseline, quantile, marginalConfidence);
   const head = quantileInterval(candidate, quantile, marginalConfidence);
   let arithmeticUnresolved = false;
-  const divide = (numerator, denominator) => {
+  const divide = (numerator, denominator, direction = 0) => {
     if (numerator === null || denominator === null || denominator === 0) return null;
     const value = numerator / denominator;
     if (!Number.isFinite(value) || (numerator > 0 && value === 0)) {
       arithmeticUnresolved = true;
       return null;
     }
-    return value;
+    const rounded = direction && value > 0 ? adjacent(value, direction) : value;
+    if (!Number.isFinite(rounded)) { arithmeticUnresolved = true; return null; }
+    return rounded;
   };
-  const lower = divide(head.lower, base.upper);
-  const upper = divide(head.upper, base.lower);
+  const lower = divide(head.lower, base.upper, -1);
+  const upper = divide(head.upper, base.lower, 1);
   const point = divide(head.estimate, base.estimate);
   const unresolvedClock = base.lower <= resolution || head.lower <= resolution;
   return {
     method: 'binomial-order-statistics/bonferroni-ratio-v1', confidence, quantile,
     baseline: base, candidate: head, point, lower, upper, resolution,
+    arithmetic: 'outward binary64 bounds; exact binary64 input-ratio budget comparison',
     reason: arithmeticUnresolved ? 'ARITHMETIC_UNRESOLVED' : upper === null ? 'INSUFFICIENT_TAIL_OR_ZERO_BASELINE' : unresolvedClock ? 'BELOW_CLOCK_RESOLUTION' : null,
   };
 }
@@ -79,10 +109,11 @@ export function quantileRatio(baseline, candidate, { quantile = 0.5, confidence 
 export function assessQuantile(baseline, candidate, maximumRatio, options) {
   if (!Number.isFinite(maximumRatio) || maximumRatio <= 0) throw new TypeError('benchmark: неверный ratio budget');
   const interval = quantileRatio(baseline, candidate, options);
-  const verdict = interval.reason === 'BELOW_CLOCK_RESOLUTION' ? 'INCOMPLETE' :
-    interval.lower !== null && interval.lower > maximumRatio ? 'FAIL' :
-    interval.reason ? 'INCOMPLETE' : interval.upper <= maximumRatio ? 'PASS' : 'INCOMPLETE';
-  return { verdict, maximumRatio, ...interval };
+  const upperWithinBudget = ratioWithin(interval.candidate.upper, interval.baseline.lower, maximumRatio);
+  const lowerWithinBudget = ratioWithin(interval.candidate.lower, interval.baseline.upper, maximumRatio);
+  const verdict = ['BELOW_CLOCK_RESOLUTION', 'ARITHMETIC_UNRESOLVED'].includes(interval.reason) ? 'INCOMPLETE' :
+    lowerWithinBudget === false ? 'FAIL' : interval.reason ? 'INCOMPLETE' : upperWithinBudget ? 'PASS' : 'INCOMPLETE';
+  return { verdict, maximumRatio, upperWithinBudget, lowerWithinBudget, ...interval };
 }
 
 /** Calibration выполняется до candidate; шум не расширяет предел 5%. */
@@ -94,7 +125,7 @@ export function calibrateNoRegression(left, right, options = {}) {
   const reverse = quantileRatio(right, left, { ...options, confidence: directionalConfidence });
   if (forward.reason || reverse.reason) return { verdict: 'INCOMPLETE', tolerance: null, confidence, forward, reverse, reason: 'CALIBRATION_UNRESOLVED' };
   const maximumRatio = Math.max(1, forward.upper, reverse.upper);
-  const accepted = maximumRatio <= 1.05;
+  const accepted = ratioWithin(forward.candidate.upper, forward.baseline.lower, 1.05) && ratioWithin(reverse.candidate.upper, reverse.baseline.lower, 1.05);
   const tolerance = maximumRatio - 1;
   return { verdict: accepted ? 'PASS' : 'INCOMPLETE', tolerance: accepted ? Math.min(0.05, tolerance) : null,
     observedUpperTolerance: tolerance, confidence, forward, reverse, reason: accepted ? null : 'CALIBRATION_EXCEEDS_FIVE_PERCENT' };
@@ -104,6 +135,7 @@ export function calibrateNoRegression(left, right, options = {}) {
 export function assessCount(baseline, candidate, maximumRatio = 1) {
   if (!Number.isSafeInteger(baseline) || baseline < 0 || !Number.isSafeInteger(candidate) || candidate < 0 ||
       !Number.isFinite(maximumRatio) || maximumRatio <= 0) throw new TypeError('benchmark: неверный count budget');
-  return { verdict: candidate <= baseline * maximumRatio ? 'PASS' : 'FAIL', baseline, candidate, maximumRatio,
+  const accepted = baseline === 0 ? candidate === 0 : ratioWithin(candidate, baseline, maximumRatio);
+  return { verdict: accepted ? 'PASS' : 'FAIL', baseline, candidate, maximumRatio,
     ratio: baseline === 0 ? null : candidate / baseline };
 }

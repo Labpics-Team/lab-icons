@@ -24,10 +24,14 @@ describe('confidence admission benchmark', () => {
     expect(assessQuantile([1, 2, 3, 4, 5, 6, 7, 8], [1, 2, 3, 4, 5, 6, 7, 8], 1.05).verdict).toBe('INCOMPLETE');
   });
   it('доказанная нижней границей регрессия не требует finite upper bound', () => {
-    expect(assessQuantile(copies(10), copies(100, 3), 1.05, { quantile: 0.95 })).toMatchObject({ verdict: 'FAIL', lower: 10, upper: null });
+    const result = assessQuantile(copies(10), copies(100, 3), 1.05, { quantile: 0.95 });
+    expect(result).toMatchObject({ verdict: 'FAIL', upper: null });
+    expect(result.lower).toBeCloseTo(10);
   });
   it('calibration не принимает шум более 5% и не смотрит candidate', () => {
-    expect(calibrateNoRegression(copies(10), copies(10))).toMatchObject({ verdict: 'PASS', tolerance: 0 });
+    const identical = calibrateNoRegression(copies(10), copies(10));
+    expect(identical.verdict).toBe('PASS');
+    expect(identical.tolerance).toBeLessThan(1e-15);
     expect(calibrateNoRegression(copies(10), copies(11))).toMatchObject({ verdict: 'INCOMPLETE', tolerance: null, reason: 'CALIBRATION_EXCEEDS_FIVE_PERCENT' });
     expect(calibrateNoRegression(copies(10, 3), copies(10, 3))).toMatchObject({ verdict: 'INCOMPLETE', tolerance: null });
   });
@@ -55,6 +59,18 @@ describe('confidence admission benchmark', () => {
       expect(result).toMatchObject({ verdict: 'INCOMPLETE', point: null, lower: null, upper: null, reason: 'ARITHMETIC_UNRESOLVED' });
       expect(JSON.parse(JSON.stringify(result)).reason).toBe('ARITHMETIC_UNRESOLVED');
     }
+  });
+  it('subnormal и normal округление вниз не создаёт ложный PASS на budget', () => {
+    const unit = Number.MIN_VALUE;
+    const subnormal = assessQuantile(copies(2), copies(5 * unit), 2 * unit);
+    expect(subnormal).toMatchObject({ verdict: 'FAIL', lower: unit, upper: 3 * unit, lowerWithinBudget: false });
+    // 3/10 строго больше binary64 значения0.3; округлённый quotient равен ему.
+    const normal = assessQuantile(copies(10), copies(3), 0.3);
+    expect(normal).toMatchObject({ verdict: 'FAIL', lowerWithinBudget: false });
+    expect(normal.lower).toBeLessThan(0.3);
+    expect(normal.upper).toBeGreaterThan(0.3);
+    // Ratio3/10 также строго меньше следующего binary64 budget.
+    expect(assessQuantile(copies(10), copies(3), 0.30000000000000004).verdict).toBe('PASS');
   });
   it('order и scale не меняют ratio или admission', () => {
     const baseline = Array.from({ length: 96 }, (_, index) => 100 + index / 1000);
