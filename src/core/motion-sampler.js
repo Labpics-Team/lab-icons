@@ -17,6 +17,7 @@ export function validateMotionGesture(gesture) {
   if (gesture.progress !== 'normalized-0-to-1') {
     throw new TypeError('motion-sampler: gesture обязан использовать normalized-0-to-1');
   }
+  if (gesture.restProgress !== undefined) finiteProgress(gesture.restProgress);
   if (!Array.isArray(gesture.partIds) || gesture.partIds.length === 0) {
     throw new TypeError('motion-sampler: gesture.partIds обязан быть непустым массивом');
   }

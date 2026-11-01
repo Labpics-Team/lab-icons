@@ -221,6 +221,8 @@ export interface MotionGestureContract {
   readonly partIds: readonly string[];
   readonly meaning: string;
   readonly progress: 'normalized-0-to-1';
+  /** Поза неподвижного мастера; отсутствие сохраняет прежний прогресс 0. */
+  readonly restProgress?: number;
   readonly tracks: readonly MotionGestureTrackContract[];
 }
 
@@ -393,21 +395,8 @@ export function createGlyphCompiler({ catalog: catalogJson, anatomy: anatomyJson
       readonly status?: Readonly<Partial<Record<IconVariant, string>>>;
       readonly motion?: Readonly<{
         readonly state?: string;
-        readonly gestures?: readonly Readonly<{
-          readonly id: string;
-          readonly kind: string;
-          readonly partIds: readonly string[];
-          readonly meaning: string;
-          readonly progress: 'normalized-0-to-1';
-          readonly tracks: readonly Readonly<{
-            readonly partId: string;
-            readonly kind: 'rotate';
-            readonly anchor: readonly [number, number];
-            readonly from: number;
-            readonly to: number;
-            readonly unit: 'degrees';
-            readonly interpolation: 'linear';
-          }>[];
+        readonly gestures?: readonly Readonly<Omit<MotionGestureContract, 'tracks'> & {
+          readonly tracks: readonly MotionGestureRotationTrackContract[];
         }>[];
       }>;
       readonly parts?: readonly Readonly<{
@@ -905,6 +894,7 @@ export function createGlyphCompiler({ catalog: catalogJson, anatomy: anatomyJson
         partIds: Object.freeze([...gesture.partIds]),
         meaning: gesture.meaning,
         progress: gesture.progress,
+        ...(gesture.restProgress !== undefined ? { restProgress: gesture.restProgress } : {}),
         tracks: Object.freeze(gesture.tracks.map((track) => Object.freeze({
           partId: track.partId,
           kind: track.kind,
