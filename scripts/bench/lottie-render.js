@@ -51,6 +51,9 @@ export function referenceLottieGestures(name, declaration) {
   if (law === 'confirmation.presence') return [`${name}.presence`];
   throw new Error(`${name}: raw law не имеет независимого oracle`);
 }
+export function referenceLottieEmptyPose(declaration, rawPartIds, gesture, progress) {
+  return rawPartIds.length > 0 && rawPartIds.every(id => referenceLottieOpacity(declaration, id, gesture, progress) === 0);
+}
 /** Независимый physical direction law по raw viewport; producer stops не читаются. */
 export function referenceNudgeTranslation(declaration, id, gesture, progress, viewBox) {
   const law = declaration?.gesture;
@@ -148,7 +151,8 @@ async function pixels(svg, width, height) {
     return context.getImageData(0, 0, width, height).data;
   } finally { URL.revokeObjectURL(url); }
 }
-export function compareLottiePixels(actual, expected) {
+export function compareLottiePixels(actual, expected, { expectedEmpty = false } = {}) {
+  if (actual.length !== expected.length || expected.length === 0 || expected.length % 4 !== 0) return { pass: false };
   let referenceInk = 0, alphaError = 0, maxAlphaError = 0, colorError = 0, maxColorError = 0;
   for (let index = 3; index < expected.length; index += 4) {
     referenceInk += expected[index];
@@ -164,7 +168,8 @@ export function compareLottiePixels(actual, expected) {
   const relativeInkError = alphaError / Math.max(1, referenceInk);
   const relativeColorError = colorError / Math.max(1, referenceInk * 3);
   return { referenceInk, alphaError, maxAlphaError, relativeInkError, colorError, maxColorError, relativeColorError,
-    pass: referenceInk > 0 && relativeInkError <= 0.001 && maxAlphaError <= 4 && relativeColorError <= 0.001 && maxColorError <= 4 };
+    pass: expectedEmpty ? referenceInk === 0 && alphaError === 0 :
+      referenceInk > 0 && relativeInkError <= 0.001 && maxAlphaError <= 4 && relativeColorError <= 0.001 && maxColorError <= 4 };
 }
 export async function runLottieRenderCases(create, testCases, { controls = true, visible = true } = {}) {
   assert(window.lottie?.version === '5.13.0', 'Нужен pinned lottie-web 5.13.0 SVG player.');
@@ -206,12 +211,15 @@ export async function runLottieRenderCases(create, testCases, { controls = true,
         const progress = testCase.request.gesture ? expectedTime.from + (expectedTime.to - expectedTime.from) * fraction : 0;
         const reference = referenceSvg(testCase, frame, progress);
         const canonicalReference = referenceSvg(testCase, frame, progress, true);
+        const rawPartIds = [...rawSource(testCase).source.querySelectorAll('path')].map((_, index) =>
+          testCase.annotation?.parts.find(part => part.pathIndex === index)?.id);
+        const expectedEmpty = referenceLottieEmptyPose(testCase.annotation, rawPartIds, testCase.request.gesture, progress);
         const rendered = container.querySelector('svg'); assert(rendered, 'SVG player ничего не нарисовал');
         for (const size of [16, 24, 48]) {
           const width = Math.ceil(frame[2] * size / rawViewBox[2]), height = Math.ceil(frame[3] * size / rawViewBox[3]);
           const renderedPixels = await pixels(observedSvg(rendered, animation, frame), width, height);
-          const nativeRaster = compareLottiePixels(renderedPixels, await pixels(reference, width, height));
-          const observation = compareLottiePixels(renderedPixels, await pixels(canonicalReference, width, height));
+          const nativeRaster = compareLottiePixels(renderedPixels, await pixels(reference, width, height), { expectedEmpty });
+          const observation = compareLottiePixels(renderedPixels, await pixels(canonicalReference, width, height), { expectedEmpty });
           rows.push({ name: testCase.name, variant: testCase.request.variant ?? 'outline', gesture: testCase.request.gesture ?? null, t, size, ...observation, nativeRaster });
           if (!observation.pass) {
             window.__lottieFailure = { rows, rendered: rendered.outerHTML, reference: reference.outerHTML, animation };

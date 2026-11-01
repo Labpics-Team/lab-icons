@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { canonicalCubicPath, compareLottiePixels, referenceLottieTiming, referenceLottieOpacity, referenceLottieGestures, referenceNudgeTranslation } from '../scripts/bench/lottie-render.js';
+import { canonicalCubicPath, compareLottiePixels, referenceLottieTiming, referenceLottieOpacity, referenceLottieGestures, referenceLottieEmptyPose, referenceNudgeTranslation } from '../scripts/bench/lottie-render.js';
 
 describe('независимый raw author oracle Lottie', () => {
   it('каждая принятая raw law имеет точный consumer gesture, неизвестная получает отказ', () => {
@@ -56,6 +56,23 @@ describe('независимый raw author oracle Lottie', () => {
     const source = new Uint8ClampedArray([18, 52, 86, 255]);
     expect(compareLottiePixels(source, source).pass).toBe(true);
     expect(compareLottiePixels(new Uint8ClampedArray(4), source).pass).toBe(false);
+  });
+  it('разрешает только точную прозрачную позу, независимо заданную raw law', () => {
+    const declaration = { gesture: { law: 'confirmation.presence', partId: 'mark' } };
+    expect(referenceLottieEmptyPose(declaration, ['mark'], 'checkmark.presence', 0)).toBe(true);
+    expect(referenceLottieEmptyPose(declaration, ['mark', 'shell'], 'checkmark.presence', 0)).toBe(false);
+    expect(referenceLottieEmptyPose(declaration, ['mark'], 'checkmark.presence', 0.5)).toBe(false);
+    expect(referenceLottieEmptyPose(declaration, ['mark'], undefined, 0)).toBe(false);
+    expect(referenceLottieEmptyPose(declaration, [], 'checkmark.presence', 0)).toBe(false);
+    const blank = new Uint8ClampedArray(4);
+    const ink = new Uint8ClampedArray([18, 52, 86, 255]);
+    expect(compareLottiePixels(blank, blank).pass).toBe(false);
+    expect(compareLottiePixels(blank, blank, { expectedEmpty: true }).pass).toBe(true);
+    expect(compareLottiePixels(new Uint8ClampedArray([18, 52, 86, 1]), blank, { expectedEmpty: true }).pass).toBe(false);
+    expect(compareLottiePixels(blank, ink, { expectedEmpty: true }).pass).toBe(false);
+    expect(compareLottiePixels(ink, ink, { expectedEmpty: true }).pass).toBe(false);
+    expect(compareLottiePixels(new Uint8ClampedArray(0), blank, { expectedEmpty: true }).pass).toBe(false);
+    expect(compareLottiePixels(new Uint8ClampedArray(0), new Uint8ClampedArray(0), { expectedEmpty: true }).pass).toBe(false);
   });
   it('direction.nudge выводится из physical direction и actual raw axis span', () => {
     const annotation = direction => ({ gesture: { law: 'direction.nudge', partId: 'body', direction } });
