@@ -10,12 +10,13 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { expandReleaseExports } from './release-contract.js';
 
 /** Entrypoints из контракта: subpath → относительный путь import-файла. */
 export function contractEntrypoints(root) {
   const contract = JSON.parse(readFileSync(join(root, 'release', 'contract.json'), 'utf8'));
   const entries = {};
-  for (const [subpath, target] of Object.entries(contract.exports)) {
+  for (const [subpath, target] of Object.entries(expandReleaseExports(contract))) {
     if (typeof target?.import !== 'string') {
       throw new Error(`export-surface: у entrypoint «${subpath}» нет поля import в release/contract.json`);
     }

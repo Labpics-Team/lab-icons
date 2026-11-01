@@ -24,11 +24,12 @@ import {
   shouldCopyCleanPackPath,
   validateInstalledPackage,
 } from '../scripts/check-package-artifact.js';
+import { symbolReleaseProjection } from '../scripts/lib/symbol-modules.js';
 
 vi.mock('node:child_process', () => ({ execFileSync: vi.fn() }));
 
 const roots = [];
-const CONTRACT = JSON.parse(readFileSync(new URL('../release/contract.json', import.meta.url), 'utf8'));
+const CONTRACT = symbolReleaseProjection(JSON.parse(readFileSync(new URL('../release/contract.json', import.meta.url), 'utf8')), ['fixture']);
 
 function write(root, path, content = '') {
   const absolute = join(root, path);
@@ -59,11 +60,12 @@ function validPackage() {
   write(root, 'LICENSE', 'MIT\n');
   write(root, 'dist/index.js', 'export const accessibilityOutline = `<svg/>`;\n');
   write(root, 'dist/index.d.ts', 'export declare const accessibilityOutline: string;\n');
-  write(root, 'dist/ir/index.js', 'export const iconIds = []; export const glyph = () => ({});\n');
+  write(root, 'dist/ir/index.js', 'import "./compiler.js"; export const iconIds = []; export const glyph = () => ({});\n');
   write(
     root,
     'dist/ir/index.d.ts',
     `import type { CatalogIconId } from './catalog.generated.js';\n` +
+      `export type { GlyphIR } from './compiler.js';\n` +
       'export declare const iconIds: readonly CatalogIconId[]; export declare function glyph(): unknown;\n',
   );
   write(root, 'dist/ir/catalog.generated.d.ts', "export type CatalogIconId = 'fixture';\n");
@@ -71,6 +73,17 @@ function validPackage() {
   write(root, 'dist/ir/recipes.d.ts', 'export declare function buildDirectionalArrow(): unknown;\n');
   write(root, 'dist/ir/candidates.js', 'export const registerCandidates = () => {};\n');
   write(root, 'dist/ir/candidates.d.ts', 'export declare function registerCandidates(): void;\n');
+  write(root, 'dist/ir/compiler.js', 'import "./request.js"; export const fixture = 1;\n');
+  write(root, 'dist/ir/compiler.d.ts', "import type { GlyphModelErrorCode } from './request.js';\nexport interface GlyphIR { readonly code: GlyphModelErrorCode }\n");
+  write(root, 'dist/ir/request.js', 'export const fixture = 1;\n');
+  write(root, 'dist/ir/request.d.ts', "export type GlyphModelErrorCode = 'CANDIDATES_REQUIRED';\n");
+  write(root, 'dist/ir/symbol-runtime.js', 'import "./request.js"; export const fixture = 1;\n');
+  write(root, 'dist/ir/render.js', 'export const fixture = 1;\n');
+  write(root, 'dist/ir/render.d.ts', "import type { GlyphIR } from './compiler.js';\nexport declare function renderGlyphSvg(glyph: GlyphIR): string;\n");
+  write(root, 'dist/motion/index.js', 'export const fixture = 1;\n');
+  write(root, 'dist/motion/index.d.ts', 'export declare const fixture: number;\n');
+  write(root, 'dist/symbols/fixture.js', 'import "../ir/symbol-runtime.js"; export const fixture = 1;\n');
+  write(root, 'dist/symbols/fixture.d.ts', "import type { GlyphIR } from '../ir/compiler.js';\nexport declare function glyph(): GlyphIR;\n");
   return root;
 }
 
@@ -92,7 +105,11 @@ describe('check-package-artifact', () => {
     write(
       fixture,
       'package.json',
-      readFileSync(new URL('../package.json', import.meta.url), 'utf8'),
+      JSON.stringify({
+        ...JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')),
+        files: CONTRACT.files,
+        exports: CONTRACT.exports,
+      }),
     );
     write(fixture, 'release/contract.json', JSON.stringify(CONTRACT));
     mkdirSync(join(fixture, 'node_modules'));

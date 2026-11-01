@@ -36,6 +36,7 @@ import {
   validatePackageProjection,
   validateReleaseContract,
   validateReleaseTypeDependencyGraph,
+  validateReleaseRuntimeDependencyGraph,
 } from './lib/release-contract.js';
 import {
   EXPECTED_ICON_NAMES,
@@ -143,6 +144,10 @@ export function validateInstalledPackage(packageRoot, contract) {
     readText(file) {
       return readFileSync(join(packageRoot, file), 'utf8');
     },
+  }));
+  errors.push(...validateReleaseRuntimeDependencyGraph({
+    contract,
+    readText(file) { return readFileSync(join(packageRoot, file), 'utf8'); },
   }));
 
   let pkg = null;
@@ -444,6 +449,9 @@ export function checkPackageArtifact({
         `import { axisNames, calendarNumberGlyph, glyph, glyphCapabilities, iconDesignContract, iconIds } from '@labpics/icons/ir';\n` +
         `import { buildDirectionalArrow } from '@labpics/icons/ir/recipes';\n` +
         `import { registerCandidates } from '@labpics/icons/ir/candidates';\n` +
+        `import * as timeSymbol from '@labpics/icons/symbols/time';\n` +
+        `import { compileSymbolEffect } from '@labpics/icons/motion';\n` +
+        `import { renderGlyphSvg } from '@labpics/icons/ir/render';\n` +
         `if (typeof accessibilityOutline !== 'string' || !accessibilityOutline.includes('<svg')) throw new Error('root ESM export broken');\n` +
         `if ('buildDirectionalArrow' in fullIr) throw new Error('full IR leaks lightweight recipe surface');\n` +
         `if (typeof registerCandidates !== 'function') throw new Error('candidates ESM export broken');\n` +
@@ -453,6 +461,25 @@ export function checkPackageArtifact({
         `if (iconIds.length !== ${EXPECTED_ICON_NAMES} || axisNames.length !== 3 || !Object.isFrozen(iconIds) || !Object.isFrozen(axisNames) || ir.provenance.kind !== 'source' || ir.parts.length < 1) throw new Error('ir ESM export broken');\n` +
         `if (iconDesignContract.targets.lottie !== 'not-exported' || glyphCapabilities('time', 'outline').motion.state !== 'gesture-ready' || glyphCapabilities('time', 'outline').motion.gestures[0]?.id !== 'time.advance') throw new Error('capability contract broken');\n` +
         `for (const icon of iconIds) for (const variant of ['outline', 'filled']) glyph({ icon, variant, modelMode: 'source-only' });\n` +
+        `for (const icon of iconIds) {\n` +
+        `  const symbol = await import('@labpics/icons/symbols/' + icon);\n` +
+        `  if (symbol.glyph() !== symbol.glyph() || !Object.isFrozen(symbol.glyph().parts)) throw new Error('symbol cache broken: ' + icon);\n` +
+        `  for (const variant of ['outline', 'filled']) {\n` +
+        `    const sourceRequest = { icon, variant, modelMode: 'source-only' };\n` +
+        `    if (JSON.stringify(symbol.glyph({ variant, modelMode: 'source-only' })) !== JSON.stringify(glyph(sourceRequest))) throw new Error('compiled source differs: ' + icon + '/' + variant);\n` +
+        `    if (JSON.stringify(symbol.glyph({ variant })) !== JSON.stringify(glyph({ icon, variant }))) throw new Error('compiled default differs: ' + icon + '/' + variant);\n` +
+        `    const capabilities = symbol.glyphCapabilities(variant);\n` +
+        `    if (JSON.stringify(capabilities) !== JSON.stringify(glyphCapabilities(icon, variant))) throw new Error('compiled capabilities differ: ' + icon + '/' + variant);\n` +
+        `    if (capabilities.modelState === 'accepted') for (const axis of capabilities.supportedAxes) for (const value of [capabilities.axes[axis].min, capabilities.axes[axis].default, capabilities.axes[axis].max]) {\n` +
+        `      const request = { variant, axes: { [axis]: value } };\n` +
+        `      if (JSON.stringify(symbol.glyph(request)) !== JSON.stringify(glyph({ icon, ...request }))) throw new Error('compiled axis differs: ' + icon + '/' + variant + '/' + axis);\n` +
+        `    }\n` +
+        `  }\n` +
+        `}\n` +
+        `const effect = compileSymbolEffect(timeSymbol.glyph(), timeSymbol.glyphCapabilities(), 'time.advance', { duration: 200 });\n` +
+        `if (!effect.ok || effect.effect.targets.length !== 2) throw new Error('symbol motion export broken');\n` +
+        `const maskGlyph = timeSymbol.glyph({ variant: 'filled' });\n` +
+        `if (renderGlyphSvg(maskGlyph, { instanceId: 'one' }) === renderGlyphSvg(maskGlyph, { instanceId: 'two' })) throw new Error('symbol mask instance isolation broken');\n` +
         `registerCandidates();\n` +
         `for (const icon of iconIds) for (const variant of ['outline', 'filled']) glyph({ icon, variant, modelMode: 'allow-candidate' });\n` +
         `if (calendar.provenance.kind !== 'recipe' || calendar.provenance.context.day !== 16) throw new Error('calendar recipe broken');\n` +
@@ -470,6 +497,9 @@ export function checkPackageArtifact({
       `import { accessibilityOutline, type IconName } from '@labpics/icons';\n` +
         `import { calendarNumberGlyph, glyph, iconDesignContract, type GlyphIR, type IconDesignContract, type IconId } from '@labpics/icons/ir';\n` +
         `import { buildDirectionalArrow, type RecipeResult } from '@labpics/icons/ir/recipes';\n` +
+        `import { glyph as symbolGlyph, glyphCapabilities as symbolCapabilities } from '@labpics/icons/symbols/time';\n` +
+        `import { compileSymbolEffect, type SymbolEffectResult } from '@labpics/icons/motion';\n` +
+        `import { renderGlyphSvg } from '@labpics/icons/ir/render';\n` +
         `const svg: string = accessibilityOutline;\n` +
         `const name: IconName = 'accessibilityOutline';\n` +
         `const icon: IconId = 'reload';\n` +
@@ -477,7 +507,12 @@ export function checkPackageArtifact({
         `const calendar: GlyphIR = calendarNumberGlyph({ date: new Date(0), timeZone: 'UTC' });\n` +
         `const recipe: RecipeResult = buildDirectionalArrow();\n` +
         `const contract: IconDesignContract = iconDesignContract;\n` +
-        `void [svg, name, icon, ir, calendar, recipe, contract];\n`,
+        `const sliced: GlyphIR = symbolGlyph({ variant: 'outline' });\n` +
+        `const effect: SymbolEffectResult = compileSymbolEffect(sliced, symbolCapabilities(), 'time.advance', { duration: 200 });\n` +
+        `const mounted: string = renderGlyphSvg(sliced, { instanceId: 'consumer' });\n` +
+        `// @ts-expect-error символ уже связан с icon; private coordinates не принимаются\n` +
+        `symbolGlyph({ icon: 'alert' });\n` +
+        `void [svg, name, icon, ir, calendar, recipe, contract, sliced, effect, mounted];\n`,
       'utf8',
     );
     writeFileSync(
@@ -511,8 +546,10 @@ export function checkPackageArtifact({
       `import { accessibilityOutline } from '@labpics/icons';\n` +
         `import { glyph, type GlyphIR } from '@labpics/icons/ir';\n` +
         `import { buildDirectionalArrow } from '@labpics/icons/ir/recipes';\n` +
+        `import { glyph as symbolGlyph } from '@labpics/icons/symbols/alert';\n` +
         `const ir: GlyphIR = glyph({ icon: 'reload' });\n` +
-        `void [accessibilityOutline, ir, buildDirectionalArrow];\n`,
+        `const symbol: GlyphIR = symbolGlyph();\n` +
+        `void [accessibilityOutline, ir, buildDirectionalArrow, symbol];\n`,
       'utf8',
     );
     writeFileSync(

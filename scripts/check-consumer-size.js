@@ -6,7 +6,7 @@
  * tree-shake обязан работать, рост baseline виден в обе стороны.
  */
 import { readFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { dirname, join, relative } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { build } from 'esbuild';
 import { gzipSync } from 'fflate';
@@ -34,6 +34,8 @@ const ENTRY_ALIAS = Object.freeze({
   '@labpics/icons': 'dist/index.js',
   '@labpics/icons/ir': 'dist/ir/index.js',
   '@labpics/icons/ir/recipes': 'dist/ir/recipes.js',
+  '@labpics/icons/ir/render': 'dist/ir/render.js',
+  '@labpics/icons/motion': 'dist/motion/index.js',
 });
 
 const ROOT_FIELDS = ['version', 'measurement', 'scenarios'];
@@ -145,7 +147,8 @@ export async function bundleScenario(entry, { root = ROOT } = {}) {
       name: 'consumer-package-entry',
       setup(buildApi) {
         buildApi.onResolve({ filter: /^@labpics\/icons(?:\/.*)?$/ }, (args) => {
-          const path = alias[args.path];
+          const symbol = /^@labpics\/icons\/symbols\/([a-z][a-z0-9-]*)$/.exec(args.path);
+          const path = alias[args.path] ?? (symbol ? join(root, 'dist/symbols', `${symbol[1]}.js`) : null);
           if (!path) return { errors: [{ text: `неизвестный package subpath ${args.path}` }] };
           return { path, namespace: 'consumer-package-entry' };
         });
@@ -173,6 +176,10 @@ export async function bundleScenario(entry, { root = ROOT } = {}) {
   return Object.freeze({
     bytes: bytes.byteLength,
     gzipBytes: gzipSync(bytes, { level: 9, mtime: 0 }).byteLength,
+    modules: Object.freeze(Object.keys(out.metafile.inputs).map(file => {
+      const normalized = file.replace(/^consumer-package-entry:/, '');
+      return relative(root, normalized).replaceAll('\\', '/');
+    }).sort()),
   });
 }
 

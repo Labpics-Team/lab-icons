@@ -17,23 +17,25 @@ import { accessibilityOutline } from '@labpics/icons';
 console.log(accessibilityOutline);
 ```
 
-Геометрическую модель и доступные оси запрашивают отдельно:
+Части и возможности символа подключают через его собственный модуль:
 
 ```js
-import { glyph, glyphCapabilities } from '@labpics/icons/ir';
+import { glyph, glyphCapabilities } from '@labpics/icons/symbols/time';
 
 const source = glyph({
-  icon: 'accessibility',
   variant: 'outline',
   modelMode: 'source-only',
 });
-const capabilities = glyphCapabilities('reload', 'outline');
+const capabilities = glyphCapabilities('outline');
 console.log(source, capabilities);
 ```
 
 Перед использованием оси проверяйте возможности конкретного варианта.
 Режим `source-only` возвращает авторскую геометрию без придуманной
 декомпозиции. Исследовательские модели подключаются явно.
+
+[Отдельные символы, части, оси и эффекты](docs/symbol-modules.md) показывают полный
+путь подключения. Для динамического выбора из всего каталога доступен `@labpics/icons/ir`.
 
 ## Работа с исходниками
 

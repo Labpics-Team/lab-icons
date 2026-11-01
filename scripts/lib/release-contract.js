@@ -1,5 +1,6 @@
 import { isDeepStrictEqual } from 'node:util';
 import { posix } from 'node:path';
+import { buildSync } from 'esbuild';
 
 const SAFE_SEGMENT = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
 const ROOT_KEYS = [
@@ -8,18 +9,22 @@ const ROOT_KEYS = [
   'files',
   'packageName',
   'primary',
+  'runtimeDependencies',
   'typeDependencies',
   'version',
 ];
 const PRIMARY_KEYS = ['access', 'install', 'kind'];
 const FALLBACK_KEYS = ['immutable', 'kind', 'specifier'];
-const EXPORT_KEYS = ['.', './ir', './ir/candidates', './ir/recipes'];
+const EXPORT_KEYS = ['.', './ir', './ir/candidates', './ir/recipes', './ir/render', './motion', './symbols/*'];
 const EXPORT_CONDITIONS = Object.freeze({
   '.': ['types', 'import'],
   './ir': ['types', 'import'],
   // INV-06: candidate-корпус — отдельный opt-in субпат, не default-поставка.
   './ir/candidates': ['types', 'import'],
   './ir/recipes': ['types', 'import'],
+  './ir/render': ['types', 'import'],
+  './motion': ['types', 'import'],
+  './symbols/*': ['types', 'import'],
 });
 export const STRICT_SEMVER = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*)(?:\.(?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*))*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$/;
 
@@ -79,8 +84,8 @@ export function validateReleaseContract(contract) {
   const errors = [];
   if (!isRecord(contract)) return ['release/contract.json обязан быть объектом'];
   validateExactKeys(contract, ROOT_KEYS, 'release contract', errors);
-  if (contract.version !== 4) {
-    errors.push(`release contract version обязан быть 4; найдено ${String(contract.version)}`);
+  if (contract.version !== 5) {
+    errors.push(`release contract version обязан быть 5; найдено ${String(contract.version)}`);
   }
   if (contract.packageName !== '@labpics/icons') {
     errors.push(`release packageName изменён: ${String(contract.packageName)}`);
@@ -144,6 +149,24 @@ export function validateReleaseContract(contract) {
     }
   }
 
+  const runtimeDependencies = new Set();
+  if (!Array.isArray(contract.runtimeDependencies)) {
+    errors.push('release runtimeDependencies обязан быть массивом точных .js файлов');
+  } else {
+    if (new Set(contract.runtimeDependencies).size !== contract.runtimeDependencies.length ||
+        !isDeepStrictEqual(contract.runtimeDependencies, [...contract.runtimeDependencies].sort())) {
+      errors.push('release runtimeDependencies обязан быть отсортирован без дубликатов');
+    }
+    const files = new Set(Array.isArray(contract.files) ? contract.files : []);
+    for (const file of contract.runtimeDependencies) {
+      if (!isExactDistFile(file) || !file.endsWith('.js')) {
+        errors.push(`release runtimeDependencies содержит не точный .js файл: ${String(file)}`);
+      } else if (!files.has(file)) {
+        errors.push(`release runtimeDependency отсутствует в release files: ${file}`);
+      } else runtimeDependencies.add(file);
+    }
+  }
+
   if (validateExactKeys(contract.exports, EXPORT_KEYS, 'release exports', errors)) {
     const files = new Set(Array.isArray(contract.files) ? contract.files : []);
     const referenced = new Set();
@@ -154,6 +177,12 @@ export function validateReleaseContract(contract) {
         `release export ${subpath}`,
         errors,
       )) {
+        continue;
+      }
+      if (subpath === './symbols/*') {
+        if (conditions.types !== './dist/symbols/*.d.ts' || conditions.import !== './dist/symbols/*.js') {
+          errors.push('release symbols wildcard обязан указывать только на dist/symbols/<name>');
+        }
         continue;
       }
       for (const [condition, target] of Object.entries(conditions)) {
@@ -167,10 +196,22 @@ export function validateReleaseContract(contract) {
         });
       }
     }
+    const expanded = expandReleaseExports(contract);
+    const symbols = Object.entries(expanded).filter(([subpath]) => subpath.startsWith('./symbols/'));
+    if (symbols.length === 0) errors.push('release symbols wildcard не имеет точных symbol outputs');
+    for (const [subpath, conditions] of symbols) {
+      for (const [condition, target] of Object.entries(conditions)) validateExportTarget({
+        target, label: `release export ${subpath}.${condition}`,
+        suffix: condition === 'types' ? '.d.ts' : '.js', files, referenced, errors,
+      });
+    }
     for (const file of files) {
-      if (!referenced.has(file) && !typeDependencies.has(file)) {
-        errors.push(`release file не достижим ни из export, ни как typeDependency: ${file}`);
+      if (!referenced.has(file) && !typeDependencies.has(file) && !runtimeDependencies.has(file)) {
+        errors.push(`release file не достижим из export или dependency: ${file}`);
       }
+    }
+    for (const file of runtimeDependencies) {
+      if (referenced.has(file)) errors.push(`release runtimeDependency уже является export target: ${file}`);
     }
     for (const file of typeDependencies) {
       if (referenced.has(file)) {
@@ -179,6 +220,25 @@ export function validateReleaseContract(contract) {
     }
   }
   return errors;
+}
+
+/** Node subpath pattern раскрывается только в exact allowlist уже объявленных файлов. */
+export function expandReleaseExports(contract) {
+  const result = {};
+  for (const [subpath, conditions] of Object.entries(contract?.exports ?? {})) {
+    if (!subpath.includes('*')) { result[subpath] = conditions; continue; }
+    if (subpath !== './symbols/*' || conditions?.import !== './dist/symbols/*.js') continue;
+    for (const file of contract.files ?? []) {
+      const match = /^dist\/symbols\/([a-z][a-z0-9-]*)\.js$/.exec(file);
+      if (!match) continue;
+      const name = match[1];
+      result[`./symbols/${name}`] = {
+        types: typeof conditions.types === 'string' ? conditions.types.replace('*', name) : conditions.types,
+        import: conditions.import.replace('*', name),
+      };
+    }
+  }
+  return result;
 }
 
 function declarationTarget(fromFile, specifier) {
@@ -312,7 +372,7 @@ export function validateReleaseTypeDependencyGraph({ contract, readText }) {
     Array.isArray(contract?.typeDependencies) ? contract.typeDependencies : [],
   );
   const entrypoints = new Set();
-  for (const value of Object.values(contract?.exports ?? {})) {
+  for (const value of Object.values(expandReleaseExports(contract))) {
     const target = value?.types;
     if (typeof target === 'string' && target.startsWith('./')) entrypoints.add(target.slice(2));
   }
@@ -362,6 +422,82 @@ export function validateReleaseTypeDependencyGraph({ contract, readText }) {
       `release typeDependencies не равен import closure: ` +
         `declared [${expected.join(', ')}], actual [${actual.join(', ')}]`,
     );
+  }
+  return errors;
+}
+
+/** Parser закреплённого esbuild видит imports и в template expressions. */
+export function runtimeModuleSpecifiers(source) {
+  if (typeof source !== 'string') return { specifiers: [], errors: ['runtime source обязан быть строкой'] };
+  let built;
+  try {
+    built = buildSync({
+      stdin: { contents: source, loader: 'js' },
+      bundle: false, write: false, metafile: true, format: 'esm',
+      treeShaking: false, supported: { 'template-literal': false }, logLevel: 'silent',
+    });
+  } catch (error) {
+    return { specifiers: [], errors: [`runtime module не разбирается (${error.message})`] };
+  }
+  const output = Object.values(built.metafile.outputs)[0];
+  const errors = [];
+  const { tokens } = declarationTokens(built.outputFiles[0].text);
+  for (let index = 0; index < tokens.length; index++) {
+    if (tokens[index].kind === 'identifier' && tokens[index].value === 'import' &&
+        tokens[index + 1]?.value === '(' && tokens[index - 1]?.value !== '.') {
+      let closing = index + 1;
+      let depth = 0;
+      for (; closing < tokens.length; closing++) {
+        if (tokens[closing].value === '(') depth++;
+        if (tokens[closing].value === ')' && --depth === 0) break;
+      }
+      // Метод с именем import — обычный JS-идентификатор, не module load.
+      if (tokens[closing + 1]?.value === '{') continue;
+      if (tokens[index + 2]?.kind !== 'string' || ![',', ')'].includes(tokens[index + 3]?.value)) {
+        errors.push('runtime module имеет неразрешимый dynamic import');
+      }
+    }
+  }
+  return { specifiers: [...new Set((output.imports ?? []).map(entry => entry.path))], errors };
+}
+
+/** Private compiler-файл разрешён только как доказанная closure публичных imports. */
+export function validateReleaseRuntimeDependencyGraph({ contract, readText }) {
+  const errors = [];
+  const files = new Set(contract?.files ?? []);
+  const entrypoints = new Set(Object.values(expandReleaseExports(contract))
+    .map(conditions => conditions?.import)
+    .filter(target => typeof target === 'string' && target.startsWith('./'))
+    .map(target => target.slice(2)));
+  const reached = new Set();
+  const queue = [...entrypoints];
+  while (queue.length) {
+    const file = queue.shift();
+    if (reached.has(file)) continue;
+    reached.add(file);
+    let parsed;
+    try { parsed = runtimeModuleSpecifiers(readText(file)); }
+    catch (error) { errors.push(`release runtime graph: ${file} не читается (${error.message})`); continue; }
+    for (const error of parsed.errors) errors.push(`release runtime graph: ${file}: ${error}`);
+    for (const specifier of parsed.specifiers) {
+      let target;
+      if (specifier === contract.packageName) target = contract.exports['.'].import.slice(2);
+      else if (specifier.startsWith('.')) target = posix.normalize(posix.join(posix.dirname(file), specifier));
+      else {
+        errors.push(`release runtime graph: ${file} содержит внешнюю runtime-зависимость ${specifier}`);
+        continue;
+      }
+      if (!target.startsWith('dist/') || !target.endsWith('.js') || !files.has(target)) {
+        errors.push(`release runtime graph: ${file} импортирует отсутствующий или внешний ${target}`);
+        continue;
+      }
+      if (!reached.has(target)) queue.push(target);
+    }
+  }
+  const actual = [...reached].filter(file => !entrypoints.has(file)).sort();
+  const declared = [...(contract?.runtimeDependencies ?? [])].sort();
+  if (!isDeepStrictEqual(actual, declared)) {
+    errors.push(`release runtimeDependencies не равен import closure: declared [${declared.join(', ')}], actual [${actual.join(', ')}]`);
   }
   return errors;
 }
