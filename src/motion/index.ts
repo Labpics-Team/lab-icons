@@ -1,5 +1,5 @@
-import type { GlyphCapabilities, GlyphIR, MotionGestureOpacityTrackContract } from '../ir/compiler.js';
-import { sampleOpacityTrack, validateMotionGesture } from '../core/motion-sampler.js';
+import type { GlyphCapabilities, GlyphIR, MotionGestureOpacityTrackContract, MotionGestureTranslationTrackContract } from '../ir/compiler.js';
+import { sampleOpacityTrack, sampleTranslationTrack, validateMotionGesture } from '../core/motion-sampler.js';
 
 export type SymbolEffectRefusalCode =
   | 'INVALID_REQUEST'
@@ -66,32 +66,65 @@ export interface SymbolSequenceEffect {
   readonly options: Readonly<{ duration: number; easing: 'linear'; fill: 'both' }>;
 }
 
+export interface SymbolTranslationStage {
+  readonly partId: string;
+  readonly property: 'x' | 'y';
+  readonly unit: 'viewBox';
+  readonly to: number;
+  readonly at: number;
+  readonly duration: number;
+}
+
+/** Неподвижные контуры перемещаются в системе координат исходного SVG. */
+export interface SymbolTranslationEffect {
+  readonly version: 3;
+  readonly icon: string;
+  readonly variant: GlyphIR['variant'];
+  readonly gesture: string;
+  readonly from: number;
+  readonly to: number;
+  readonly targets: readonly Readonly<{ partId: string; property: 'x' | 'y'; unit: 'viewBox'; from: number; to: number }>[];
+  readonly stages: readonly SymbolTranslationStage[];
+  readonly unchangedPartIds: readonly string[];
+  readonly viewport: Readonly<{ overflow: 'visible' }>;
+  readonly options: Readonly<{ duration: number; easing: 'linear'; fill: 'both' }>;
+}
+
 export type SymbolEffectResult =
-  | Readonly<{ ok: true; effect: SymbolEffect | SymbolSequenceEffect }>
+  | Readonly<{ ok: true; effect: SymbolEffect | SymbolSequenceEffect | SymbolTranslationEffect }>
   | Readonly<{ ok: false; reason: Readonly<{ code: SymbolEffectRefusalCode; message: string }> }>;
 
 function refuse(code: SymbolEffectRefusalCode, message: string): SymbolEffectResult {
   return Object.freeze({ ok: false, reason: Object.freeze({ code, message }) });
 }
 
-function opacityStages(track: MotionGestureOpacityTrackContract, from: number, to: number, duration: number): readonly SymbolOpacityStage[] {
-  if (duration === 0) return [Object.freeze({ partId: track.partId, property: 'opacity',
-    to: sampleOpacityTrack(track, to), at: 0, duration: 0 })];
+function scalarStages(stops: readonly Readonly<{ at: number; value: number }>[], sample: (progress: number) => number,
+  from: number, to: number, duration: number): readonly Readonly<{ to: number; at: number; duration: number }>[] {
+  if (duration === 0) return [Object.freeze({ to: sample(to), at: 0, duration: 0 })];
   const forward = to > from;
-  const stops = track.stops.filter(stop => forward ? stop.at > from && stop.at < to : stop.at < from && stop.at > to);
-  if (!forward) stops.reverse();
-  const points = [from, ...stops.map(stop => stop.at), to];
-  const stages: SymbolOpacityStage[] = [];
+  const interior = stops.filter(stop => forward ? stop.at > from && stop.at < to : stop.at < from && stop.at > to);
+  if (!forward) interior.reverse();
+  const points = [from, ...interior.map(stop => stop.at), to];
+  const stages: Readonly<{ to: number; at: number; duration: number }>[] = [];
   let at = 0;
   for (let index = 1; index < points.length; index++) {
     const progress = points[index]!;
     const end = index === points.length - 1 ? duration : Math.abs((progress - from) / (to - from)) * duration;
-    stages.push(Object.freeze({ partId: track.partId, property: 'opacity',
-      to: sampleOpacityTrack(track, progress), at, duration: end - at }));
+    stages.push(Object.freeze({ to: sample(progress), at, duration: end - at }));
     // Следующий этап начинается в том же IEEE-754 end, который отдаётся executor.
     at += end - at;
   }
   return stages;
+}
+
+function opacityStages(track: MotionGestureOpacityTrackContract, from: number, to: number, duration: number): readonly SymbolOpacityStage[] {
+  return scalarStages(track.stops, progress => sampleOpacityTrack(track, progress), from, to, duration)
+    .map(stage => Object.freeze({ partId: track.partId, property: 'opacity' as const, ...stage }));
+}
+
+function translationStages(track: MotionGestureTranslationTrackContract, from: number, to: number, duration: number): readonly SymbolTranslationStage[] {
+  return scalarStages(track.stops, progress => sampleTranslationTrack(track, progress), from, to, duration)
+    .map(stage => Object.freeze({ partId: track.partId, property: track.axis, unit: track.unit, ...stage }));
 }
 
 /**
@@ -171,6 +204,25 @@ export function compileSymbolEffect(
       version: 2, icon: glyph.icon, variant: glyph.variant, gesture: gesture.id, from, to,
       targets: Object.freeze(tracks.map(track => Object.freeze({ partId: track.partId, property: 'opacity' as const,
         from: sampleOpacityTrack(track, from), to: sampleOpacityTrack(track, to) }))),
+      stages: Object.freeze(stages),
+      unchangedPartIds: Object.freeze(glyph.parts.filter(part => !animated.has(part.id)).map(part => part.id)),
+      viewport: Object.freeze({ overflow: 'visible' as const }),
+      options: Object.freeze({ duration, easing: 'linear' as const, fill: 'both' as const }),
+    }) });
+  }
+  if (gesture.tracks.every(track => track.kind === 'translate')) {
+    if (glyph.composition.kind !== 'layers') {
+      return refuse('COMPOSITION_NOT_ADDRESSABLE', 'Translation-стадии требуют независимых layers авторской композиции.');
+    }
+    const duration = request.reducedMotion || from === to ? 0 : request.duration;
+    const tracks = gesture.tracks as readonly MotionGestureTranslationTrackContract[];
+    const animated = new Set(tracks.map(track => track.partId));
+    const stages = tracks.flatMap(track => translationStages(track, from, to, duration))
+      .sort((a, b) => a.at - b.at || (a.partId < b.partId ? -1 : a.partId > b.partId ? 1 : 0));
+    return Object.freeze({ ok: true, effect: Object.freeze({
+      version: 3, icon: glyph.icon, variant: glyph.variant, gesture: gesture.id, from, to,
+      targets: Object.freeze(tracks.map(track => Object.freeze({ partId: track.partId, property: track.axis, unit: track.unit,
+        from: sampleTranslationTrack(track, from), to: sampleTranslationTrack(track, to) }))),
       stages: Object.freeze(stages),
       unchangedPartIds: Object.freeze(glyph.parts.filter(part => !animated.has(part.id)).map(part => part.id)),
       viewport: Object.freeze({ overflow: 'visible' as const }),

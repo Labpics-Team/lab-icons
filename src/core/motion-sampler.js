@@ -1,4 +1,4 @@
-/** Pure, target-neutral sampling of a normalized semantic gesture. */
+/** Чистая выборка нормализованного жеста, независимая от renderer. */
 
 function finiteProgress(progress) {
   if (!Number.isFinite(progress) || progress < 0 || progress > 1) {
@@ -46,19 +46,22 @@ export function validateMotionGesture(gesture) {
       if (![track.from, track.to].every(Number.isFinite)) {
         throw new TypeError(`motion-sampler: track ${track.partId} имеет нечисловые границы`);
       }
-    } else if (track.kind === 'opacity') {
-      if (track.unit !== 'fraction' || track.interpolation !== 'linear' ||
-          Object.keys(track).some(key => !['partId', 'kind', 'unit', 'interpolation', 'stops'].includes(key)) ||
+    } else if (track.kind === 'opacity' || track.kind === 'translate') {
+      const translation = track.kind === 'translate';
+      const keys = ['partId', 'kind', 'unit', 'interpolation', 'stops', ...(translation ? ['axis'] : [])];
+      if (track.unit !== (translation ? 'viewBox' : 'fraction') || track.interpolation !== 'linear' ||
+          (translation && !['x', 'y'].includes(track.axis)) ||
+          Object.keys(track).some(key => !keys.includes(key)) ||
           !Array.isArray(track.stops) || track.stops.length < 2 ||
           track.stops[0]?.at !== 0 || track.stops.at(-1)?.at !== 1) {
-        throw new TypeError(`motion-sampler: невалидная opacity-шкала для ${track.partId}`);
+        throw new TypeError(`motion-sampler: невалидная ${track.kind}-шкала для ${track.partId}`);
       }
       let previous = -1;
       for (const stop of track.stops) {
         if (!stop || typeof stop !== 'object' || Object.keys(stop).sort().join(',') !== 'at,value' ||
             !Number.isFinite(stop.at) || stop.at < 0 || stop.at > 1 || stop.at <= previous ||
-            !Number.isFinite(stop.value) || stop.value < 0 || stop.value > 1) {
-          throw new TypeError(`motion-sampler: невалидный opacity stop для ${track.partId}`);
+            !Number.isFinite(stop.value) || (!translation && (stop.value < 0 || stop.value > 1))) {
+          throw new TypeError(`motion-sampler: невалидный ${track.kind} stop для ${track.partId}`);
         }
         previous = stop.at;
       }
@@ -77,6 +80,16 @@ export function sampleOpacityTrack(track, progress) {
   return previous.value + (next.value - previous.value) * ((t - previous.at) / (next.at - previous.at));
 }
 
+export function sampleTranslationTrack(track, progress) {
+  const t = finiteProgress(progress);
+  const nextIndex = track.stops.findIndex(stop => stop.at >= t);
+  if (nextIndex === 0) return track.stops[0].value;
+  const next = track.stops[nextIndex], previous = track.stops[nextIndex - 1];
+  const fraction = (t - previous.at) / (next.at - previous.at);
+  // Convex combination не вычитает противоположные большие координаты.
+  return previous.value * (1 - fraction) + next.value * fraction;
+}
+
 export function sampleMotionGesture(gesture, progress) {
   validateMotionGesture(gesture);
   const t = finiteProgress(progress);
@@ -84,6 +97,9 @@ export function sampleMotionGesture(gesture, progress) {
     partId: track.partId,
     kind: track.kind,
     opacity: sampleOpacityTrack(track, t),
+  } : track.kind === 'translate' ? {
+    partId: track.partId, kind: track.kind, axis: track.axis, unit: track.unit,
+    translation: sampleTranslationTrack(track, t),
   } : {
     partId: track.partId,
     kind: track.kind,

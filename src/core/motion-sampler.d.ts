@@ -16,7 +16,16 @@ export interface MotionSamplerOpacityTrack {
   readonly stops: readonly Readonly<{ at: number; value: number }>[];
 }
 
-export type MotionSamplerTrack = MotionSamplerRotationTrack | MotionSamplerOpacityTrack;
+export interface MotionSamplerTranslationTrack {
+  readonly partId: string;
+  readonly kind: 'translate';
+  readonly axis: 'x' | 'y';
+  readonly unit: 'viewBox';
+  readonly interpolation: 'linear';
+  readonly stops: readonly Readonly<{ at: number; value: number }>[];
+}
+
+export type MotionSamplerTrack = MotionSamplerRotationTrack | MotionSamplerOpacityTrack | MotionSamplerTranslationTrack;
 
 export interface MotionSamplerGesture {
   readonly id: string;
@@ -33,9 +42,11 @@ export interface MotionSamplerRotationSample {
 }
 
 export type MotionSamplerSample = MotionSamplerRotationSample |
-  Readonly<{ partId: string; kind: 'opacity'; opacity: number }>;
+  Readonly<{ partId: string; kind: 'opacity'; opacity: number }> |
+  Readonly<{ partId: string; kind: 'translate'; axis: 'x' | 'y'; unit: 'viewBox'; translation: number }>;
 
 export function sampleOpacityTrack(track: MotionSamplerOpacityTrack, progress: number): number;
+export function sampleTranslationTrack(track: MotionSamplerTranslationTrack, progress: number): number;
 
 export function validateMotionGesture<T extends MotionSamplerGesture>(gesture: T): T;
 export function sampleMotionGesture(

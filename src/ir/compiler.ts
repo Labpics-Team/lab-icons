@@ -213,7 +213,16 @@ export interface MotionGestureOpacityTrackContract {
   readonly stops: readonly Readonly<{ at: number; value: number }>[];
 }
 
-export type MotionGestureTrackContract = MotionGestureRotationTrackContract | MotionGestureOpacityTrackContract;
+export interface MotionGestureTranslationTrackContract {
+  readonly partId: string;
+  readonly kind: 'translate';
+  readonly axis: 'x' | 'y';
+  readonly unit: 'viewBox';
+  readonly interpolation: 'linear';
+  readonly stops: readonly Readonly<{ at: number; value: number }>[];
+}
+
+export type MotionGestureTrackContract = MotionGestureRotationTrackContract | MotionGestureOpacityTrackContract | MotionGestureTranslationTrackContract;
 
 export interface MotionGestureContract {
   readonly id: string;
@@ -234,7 +243,8 @@ export interface MotionGestureRotationSample {
 }
 
 export type MotionGestureSample = MotionGestureRotationSample |
-  Readonly<{ partId: string; kind: 'opacity'; opacity: number }>;
+  Readonly<{ partId: string; kind: 'opacity'; opacity: number }> |
+  Readonly<{ partId: string; kind: 'translate'; axis: 'x' | 'y'; unit: 'viewBox'; translation: number }>;
 
 export interface MotionRotationTrackContract {
   readonly id: string;
@@ -244,7 +254,8 @@ export interface MotionRotationTrackContract {
 }
 
 export type MotionTrackContract = MotionRotationTrackContract |
-  Readonly<{ id: string; kind: 'opacity'; partIds: readonly string[] }>;
+  Readonly<{ id: string; kind: 'opacity'; partIds: readonly string[] }> |
+  Readonly<{ id: string; kind: 'translate'; partIds: readonly string[]; axis: 'x' | 'y'; unit: 'viewBox' }>;
 
 export interface MotionCapabilities {
   readonly state: MotionCapabilityState;
@@ -842,7 +853,8 @@ export function createGlyphCompiler({ catalog: catalogJson, anatomy: anatomyJson
             const id = `${track.kind}.${track.partId}`;
             const capability: MotionTrackContract = Object.freeze(track.kind === 'rotate' ? {
               id, kind: 'rotate', partIds: Object.freeze([track.partId]), anchor: track.anchor,
-            } : { id, kind: 'opacity', partIds: Object.freeze([track.partId]) });
+            } : track.kind === 'translate' ? { id, kind: 'translate', partIds: Object.freeze([track.partId]), axis: track.axis, unit: track.unit }
+              : { id, kind: 'opacity', partIds: Object.freeze([track.partId]) });
             return [id, capability] as const;
           }))).values()]),
           gestures: Object.freeze(gestures),
