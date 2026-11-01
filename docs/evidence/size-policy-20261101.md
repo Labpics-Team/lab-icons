@@ -7,7 +7,8 @@
 [self-hosted runner](https://github.com/Labpics-Team/labui/actions/runs/41339731144/job/124946991060).
 Отчёт создан `2026-11-01T19:16:56.628Z`; SHA-256 исходных JSON bytes:
 `955753c387455248b5575c95608530cece0dfd32460baaf16a46cdeb2ce9bf80`.
-Он содержит 1354 файла контракта и 10 consumers. Source между этим producer
+На baseline `dc04d50903c658c29782f900da33a83c9a3fcb93` отчёт содержит
+1354 файла контракта и 10 consumers. Source между этим producer
 и `7596be310086504bb0967d64b08a77c241f9bc98` изменил четыре документа;
 build inputs и lockfile сохранились.
 
@@ -24,10 +25,12 @@ quality 11. Запуск consumer подтвердил отсутствие на
 Таблица сравнивает маршруты одного пакета; comparative cold/render/frame/memory
 приёмка BENCH-01 остаётся открытой.
 
-Прежняя package policy охватывала 9 файлов при контракте из 1354.
+На baseline `7596be310086504bb0967d64b08a77c241f9bc98` package policy
+охватывала 9 файлов при контракте из 1354.
 Проверка exact file set обнаруживает этот дефект до измерения файлов.
-Runner projection теперь закрепляет все 1354 baseline; потолки, module lists,
-запреты и equality прежних девяти файлов сохранены. Для новых outputs потолок
+На baseline `f9a0897a89a525b6b14330bc02fe098ed3bd8e83` runner projection
+закрепила все 1354 baseline и сохранила потолки, module lists,
+запреты и equality прежних девяти файлов. Для новых outputs потолок
 равен измеренному raw/gzip размеру.
 
 Consumer budget принадлежит точному import entry. Прежний `glyph-one`
