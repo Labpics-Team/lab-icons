@@ -25,7 +25,7 @@ export function createCompiledGlyph<TIcon extends string = IconId>(
     const parsed = parseSymbolOptions(request);
     if (Object.keys(parsed.axes).length || parsed.modelMode === 'allow-candidate') {
       throw new GlyphModelError('AUTHOR_PARITY_REQUIRED',
-        `@labpics/icons/symbols: ${icon}/${parsed.variant} сохраняет текущий авторский master; оси и candidate-модель требуют доказательства его паритета`);
+        `@labpics/icons/symbols: ${icon}/${parsed.variant}: модель требует паритета с авторским master`);
     }
     return source[parsed.variant];
   };
