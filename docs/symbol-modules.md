@@ -100,7 +100,8 @@ if (!result.ok) throw new Error(result.reason.message);
 Публичный Lab Motion исполняет числовой канал `rotate`; пример связки находится
 в [Observatory consumer](../observatory/motion-execution.js).
 
-У эффекта версия 1 содержит вращение; версия 2 содержит скалярные opacity-стадии.
+У эффекта версия 1 содержит вращение; версия 2 содержит скалярные opacity-стадии;
+версия 3 содержит направленный перенос в единицах исходного `viewBox`.
 Перед чтением полей канала проверьте `effect.version`.
 `ellipsis-horizontal` в обоих начертаниях и `chatbubble-ellipses` в Outline
 поддерживают `<имя>.activity` и `<имя>.idle`. Один закон `activity.triad`
@@ -143,6 +144,45 @@ setMotion('chatbubble-ellipses.activity', 0.3, 1);
 компилируют путь к более ранней фазе; это новое намерение, а не вызов отсутствующего
 `reverse()` в root API 0.5.0. Idle восстанавливает opacity 1, reduced motion сразу
 принимает конечную позу, повтор завершённого activity создаёт новую occurrence.
+
+### Подсказать направление действия
+
+`chevron-{back,forward,up,down}` и `arrow-{back,forward,up,down}` в обоих
+начертаниях поддерживают `<имя>.nudge`. Жест сдвигает цельный авторский силуэт
+на 1/8 соответствующего размера viewBox и возвращает его. Физическое направление
+задаёт аннотация; автоматическое RTL-зеркалирование не обещается.
+
+```js
+import { glyph, glyphCapabilities } from '@labpics/icons/symbols/chevron-forward';
+import { compileSymbolEffect } from '@labpics/icons/motion';
+
+const result = compileSymbolEffect(glyph(), glyphCapabilities(), 'chevron-forward.nudge', {
+  duration: 800, from: 0, to: 1,
+});
+if (!result.ok) throw new Error(result.reason.message);
+if (result.effect.version !== 3) throw new Error('Нужен эффект переноса');
+```
+
+`targets` задают `partId`, `property: 'x' | 'y'`, `unit: 'viewBox'` и значения
+`from/to`. `stages` — линейные этапы с `at/duration` в миллисекундах. Их исполняет
+публичный `sequence` Lab Motion 0.5.0 через числовые `x/y`; библиотека иконок
+не добавляет часы или scheduler. При новом событии первый этап явно задаёт
+начальную позу; при прерывании скалярная цель подхватывает видимую позу.
+[Рабочий consumer](../observatory/motion-execution.js) показывает оба случая.
+
+Храните текущую нормализованную фазу у владельца исполнения. Фазы 0.25 и 0.75
+имеют одинаковый сдвиг, но обратный interval проходит разные этапы: координата
+не восстанавливает фазу. Reduced motion сразу принимает конечную позу;
+`from===to` даёт неподвижный эффект. Родительский clip не должен обрезать
+объявленный `overflow: visible`. Интерактивный hit target и accessible name
+принадлежат кнопке приложения, декоративный SVG получает `aria-hidden`.
+
+Круговые варианты автоматически этот закон не наследуют: сохранение оболочки
+требует отдельно принятой переносимой части. [Lottie target](lottie.md) использует
+тот же effect. [Source evidence](evidence/author-nudge-20261101.md) содержит
+границы проверки и открытые delivery gates.
+
+### Сохранённая модель часов
 
 Принятый `time.advance` доступен у записанной модели:
 
