@@ -51,6 +51,25 @@ function updateRatchet(root, update) {
 }
 
 describe('consumer size ratchet', () => {
+  it('измеряет публичный state entry и отказывает удалённому contribution', async () => {
+    const { root } = await fixture();
+    mkdirSync(join(root, 'dist/states'), { recursive: true });
+    writeFileSync(join(root, 'dist/states/status-circle.js'),
+      'export const renderStateSvg = state => ({ svg: "<svg>" + state + "</svg>" });\n' +
+      'export const compileStateEffect = state => ({ effect: { targetState: state } });\n' +
+      `export const unused = "UNUSED_STATE_SENTINEL_${'x'.repeat(2048)}";\n`);
+    const entry = "import { renderStateSvg, compileStateEffect } from '@labpics/icons/states/status-circle';\n" +
+      "console.log(renderStateSvg('question'), compileStateEffect('confirmation', { duration: 180 }));\n";
+    const measured = await bundleScenario(entry, { root, includeBrotli: true });
+    expect(measured.bytes).toBeGreaterThan(0);
+    expect(measured.brotliBytes).toBeGreaterThan(0);
+    expect(measured.bytes).toBeLessThan(500);
+    expect(measured.modules).toContain('dist/states/status-circle.js');
+    await expect(bundleScenario(
+      "import { renderStateSvg } from '@labpics/icons/states/status-circle';\nconsole.log('unused');\n", { root },
+    )).rejects.toThrow(/не внёс байтов/);
+  });
+
   it('фиксирует consumer-бандл сценария и tree-shake неиспользуемого экспорта', async () => {
     const { root } = await fixture();
     const result = await checkConsumerSize({ root });

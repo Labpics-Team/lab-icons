@@ -262,8 +262,12 @@ const effect = result.effect;
 master и его parts/provenance, добавленные типизированные имена, прежние статические
 интеграции и точные отказы. Тяжёлые проверки и
 [измерения пакета](../scripts/measure-platform-artifacts.mjs) выполняются на runner.
-Отчёт сохраняет SHA, среду, байты и включённые модули; policy обновляется только
-явным `--update` после проверки измерений.
+Отчёт сохраняет SHA, lockfile, среду, raw/gzip/Brotli и включённые модули, включая
+смонтированную группу `status-circle` с effect. `candidatePolicies` содержит
+фактические baselines с прежними потолками и защитами; `policyViolations` сообщает
+превышение бюджета, дрейф модулей, запрещённый marker или нарушение equality.
+Явный `--update` разрешён только без этих нарушений и сохраняет прежние запреты
+и `identicalTo`. Изменение допустимого графа требует отдельного разбора у владельца.
 
 Путь следует [SVG 2 path semantics](https://www.w3.org/TR/SVG2/paths.html)
 и [правилам заливки](https://www.w3.org/TR/SVG2/painting.html): compound contour

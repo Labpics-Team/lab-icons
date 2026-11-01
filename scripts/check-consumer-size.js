@@ -10,6 +10,7 @@ import { dirname, join, relative } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { build } from 'esbuild';
 import { gzipSync } from 'fflate';
+import { brotliCompressSync, constants } from 'node:zlib';
 
 export const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const PACKAGE_JSON = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'));
@@ -131,7 +132,7 @@ export function parseConsumerSizeRatchet(value) {
   });
 }
 
-export async function bundleScenario(entry, { root = ROOT } = {}) {
+export async function bundleScenario(entry, { root = ROOT, includeBrotli = false } = {}) {
   const alias = Object.fromEntries(
     Object.entries(ENTRY_ALIAS).map(([spec, target]) => [spec, join(root, target)]),
   );
@@ -147,8 +148,8 @@ export async function bundleScenario(entry, { root = ROOT } = {}) {
       name: 'consumer-package-entry',
       setup(buildApi) {
         buildApi.onResolve({ filter: /^@labpics\/icons(?:\/.*)?$/ }, (args) => {
-          const symbol = /^@labpics\/icons\/symbols\/([a-z][a-z0-9-]*)$/.exec(args.path);
-          const path = alias[args.path] ?? (symbol ? join(root, 'dist/symbols', `${symbol[1]}.js`) : null);
+          const sliced = /^@labpics\/icons\/(symbols|states)\/([a-z][a-z0-9-]*)$/.exec(args.path);
+          const path = alias[args.path] ?? (sliced ? join(root, 'dist', sliced[1], `${sliced[2]}.js`) : null);
           if (!path) return { errors: [{ text: `неизвестный package subpath ${args.path}` }] };
           return { path, namespace: 'consumer-package-entry' };
         });
@@ -176,6 +177,9 @@ export async function bundleScenario(entry, { root = ROOT } = {}) {
   return Object.freeze({
     bytes: bytes.byteLength,
     gzipBytes: gzipSync(bytes, { level: 9, mtime: 0 }).byteLength,
+    ...(includeBrotli ? { brotliBytes: brotliCompressSync(bytes, {
+      params: { [constants.BROTLI_PARAM_QUALITY]: 11 },
+    }).byteLength } : {}),
     modules: Object.freeze(Object.keys(out.metafile.inputs).map(file => {
       const normalized = file.replace(/^consumer-package-entry:/, '');
       return relative(root, normalized).replaceAll('\\', '/');
