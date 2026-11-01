@@ -32,6 +32,24 @@ WWDC25 объясняет, почему Draw не эквивалентен `stro
 
 Решение: generic spin/fade не назначается всему каталогу. Clock использует реальные anchors рук; draw/progress получают authored annotations; state replacement сохраняет доказанную общую оболочку. Наличие частей не равно поддержанному gesture или morph. До полной аннотации возвращается точный отказ.
 
+Реализация выявила отдельную достаточную границу: source geometry может иметь
+принятую семантическую анатомию до параметрической реконструкции. У актуальных
+`reload` и `refresh` оба начертания содержат по одному замкнутому целому контуру.
+Закон `cycle.clockwise` с явно объявленным центром canvas сохраняет каждый `d`
+без splitting или trace. Аннотация связывается с file/version/master/path hashes;
+конструктор компилирует её в существующие source parts и motion capabilities.
+Оси остаются неподдержанными. Это не разрешение вращать все одноконтурные SVG:
+смысл цикла задаётся конкретной декларацией и проходит отдельное review.
+
+Контрпример — новая `time`: Outline имеет сваренный L и отдельный круг; Filled
+имеет диск и L-вырез. Ригидное вращение L не воспроизводит независимые руки
+360°/30°. Этот случай отвергнут тем же intake, а не скрытым исключением имени.
+Для циклического силуэта также проверяется
+[SVG overflow](https://www.w3.org/TR/SVG2/render.html#OverflowAndClipProperties):
+поворот может выходить за исходный viewBox. Выход эффекта явно требует visible
+overflow вместо изменения авторской формы или размера. Compositor-only claim
+без runtime trace по-прежнему не делается.
+
 [CSS transform-box](https://developer.mozilla.org/en-US/docs/Web/CSS/transform-box) связывает transform-origin с chosen reference box. Для viewBox anchor применяется `view-box` и origin в той же системе координат; `fill-box` около центра bounding box руки даёт другой физический pivot. [WAAPI reverse](https://developer.mozilla.org/en-US/docs/Web/API/Animation/reverse) сохраняет current playhead, но запускает paused animation обратно. [commitStyles](https://developer.mozilla.org/en-US/docs/Web/API/Animation/commitStyles) записывает текущие вычисленные стили перед освобождением effect; бесконечно filling effects удерживают приоритет над дальнейшим styling.
 
 Lab Icons владеет эффектом как данными. Consumer связывает part ID с DOM/target и публичным Lab Motion execution. Новый scalar state берётся от текущей позы; новый authored `[from,to]` occurrence имеет другую семантику и не выдаётся за непрерывный retarget. Порядок cleanup и successor admission проверяется на interruption/new state, а не на одном завершённом проигрывании.

@@ -26,7 +26,7 @@ import {
 } from './recipes.js';
 import { sha256Hex } from './sha256.js';
 import { GlyphModelError, parseSymbolOptions, parseSymbolVariant as parseVariant } from './request.js';
-import type { AuthorSourceProvenance } from './author-source.js';
+import type { AuthorAnatomyReceipt, AuthorSourceProvenance } from './author-source.js';
 export { GlyphModelError } from './request.js';
 export type { GlyphModelErrorCode } from './request.js';
 
@@ -63,7 +63,7 @@ export interface ParsedGlyphRequest<TIcon extends string = IconId> {
 
 export interface SourcePartProvenance {
   readonly kind: 'source';
-  readonly identity: 'geometry-derived';
+  readonly identity: 'geometry-derived' | 'declared';
   readonly file: string;
   /** Fingerprint авторского source-path до build-оптимизации. */
   readonly sourceFingerprint: `sha256:${string}`;
@@ -107,6 +107,7 @@ export interface SourceGlyphProvenance {
   readonly kind: 'source';
   readonly file: string;
   readonly author?: AuthorSourceProvenance;
+  readonly anatomy?: AuthorAnatomyReceipt;
 }
 
 export interface ModelGlyphProvenance {
@@ -176,6 +177,7 @@ export interface GlyphCapabilities<TIcon extends string = IconId> {
   readonly axes: Readonly<Partial<Record<AxisName, AxisContract>>>;
   readonly motion: MotionCapabilities;
   readonly author?: AuthorSourceProvenance;
+  readonly anatomy?: AuthorAnatomyReceipt;
 }
 
 export interface AxisContract {
@@ -283,8 +285,10 @@ export interface IconDesignContract {
 
 interface SourcePartContract {
   readonly id: string;
-  readonly identity: 'geometry-derived';
-  readonly role: 'unclassified';
+  readonly identity: 'geometry-derived' | 'declared';
+  readonly role: PartRole;
+  readonly anchor?: readonly [number, number];
+  readonly anchorSource?: 'declared';
   readonly zIndex: number;
   readonly fillRule: FillRule;
   readonly topologySignature: string;
@@ -295,6 +299,8 @@ interface SourcePartContract {
 interface SourceVariantContract {
   readonly file: string;
   readonly parts: readonly SourcePartContract[];
+  readonly anatomy?: AuthorAnatomyReceipt;
+  readonly gestures?: readonly MotionGestureContract[];
 }
 
 interface ModelPartContract {
@@ -615,8 +621,10 @@ export function createGlyphCompiler({ catalog: catalogJson, anatomy: anatomyJson
         d: entry.d,
         fillRule: entry.fillRule,
         paint: Object.freeze({ kind: 'fill', fill: 'currentColor' }),
-        anchor: normalizedAnchor(entry.d, catalog.canvas.viewBox),
-        anchorSource: 'geometry-bbox-center',
+        anchor: part.anchor && contract.anatomy
+          ? Object.freeze([...part.anchor] as [number, number])
+          : normalizedAnchor(entry.d, catalog.canvas.viewBox),
+        anchorSource: part.anchor && contract.anatomy ? 'declared' : 'geometry-bbox-center',
         topologySignature,
         morphGroup: null,
         provenance: Object.freeze({
@@ -811,6 +819,26 @@ export function createGlyphCompiler({ catalog: catalogJson, anatomy: anatomyJson
   /** Состояние модели читается без её построения и без побочных эффектов. */
   function motionCapabilities(icon: IconId, variant: IconVariant, model?: ModelVariantContract): MotionCapabilities {
     if (!model) {
+      const source = catalog.icons[icon].source[variant];
+      if (source.anatomy && source.gestures?.length) {
+        const gestures = source.gestures.map(gesture => Object.freeze({
+          ...gesture,
+          partIds: Object.freeze([...gesture.partIds]),
+          tracks: Object.freeze(gesture.tracks.map(track => Object.freeze({
+            ...track, anchor: Object.freeze([...track.anchor] as [number, number]),
+          }))),
+        }));
+        return Object.freeze({
+          state: 'gesture-ready',
+          partIds: Object.freeze(source.parts.map(part => part.id)),
+          tracks: Object.freeze(gestures.flatMap(gesture => gesture.tracks.map(track => Object.freeze({
+            id: `rotate.${track.partId}`, kind: 'rotate' as const,
+            partIds: Object.freeze([track.partId]), anchor: track.anchor,
+          })))),
+          gestures: Object.freeze(gestures),
+          adapters: motionAdapters,
+        });
+      }
       return Object.freeze({
         state: 'source-only',
         partIds: Object.freeze([]),
@@ -893,6 +921,9 @@ export function createGlyphCompiler({ catalog: catalogJson, anatomy: anatomyJson
         supportedAxes.map((name) => [name, axisContracts[name]]),
       )),
       motion: motionCapabilities(icon, variant, model),
+      ...(model ? {} : catalog.icons[icon].source[variant].anatomy && {
+        anatomy: Object.freeze({ ...catalog.icons[icon].source[variant].anatomy! }),
+      }),
     });
   }
 
@@ -950,7 +981,10 @@ export function createGlyphCompiler({ catalog: catalogJson, anatomy: anatomyJson
       }
       const source = iconContract.source[parsed.variant];
       parts = sourceParts(parsed.icon, parsed.variant, source);
-      provenance = Object.freeze({ kind: 'source', file: source.file });
+      provenance = Object.freeze({
+        kind: 'source', file: source.file,
+        ...(source.anatomy && { anatomy: Object.freeze({ ...source.anatomy }) }),
+      });
       composition = cloneGlyphComposition({ kind: 'layers' });
     }
 

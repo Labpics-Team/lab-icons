@@ -14,6 +14,7 @@ import { validateReleaseTypeDependencyGraph, validateReleaseRuntimeDependencyGra
 import { recoverOwnedDirectory, replaceOwnedDirectory } from './lib/owned-directory.js';
 import { renderSymbolModule, symbolExportName, symbolModuleDeclaration } from './lib/symbol-modules.js';
 import { authorSymbolPayload, loadAuthorBaseline } from './lib/author-baseline.js';
+import { compileAuthorAnatomy } from './lib/author-anatomy.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const DIST_DIR = join(ROOT, 'dist');
@@ -63,12 +64,18 @@ try {
   const catalog = read('semantics/catalog.json');
   const grid = read('semantics/grid.json');
   const author = loadAuthorBaseline(ROOT);
+  const annotatedSources = compileAuthorAnatomy(author, read('semantics/author-anatomy.json'));
+  const authorSources = Object.fromEntries(Object.entries(author.icons).map(([icon, variants]) => [icon,
+    Object.fromEntries(Object.entries(variants).map(([variant, item]) => [variant, {
+      ...item, sourceContract: annotatedSources[`${icon}/${variant}`] ?? item.sourceContract,
+    }])),
+  ]));
   const names = Object.keys(author.icons).sort();
   const sourceCatalog = {
     canvas: catalog.canvas,
     axes: catalog.axes,
     icons: Object.fromEntries(names.map(icon => [icon, {
-      source: Object.fromEntries(['outline', 'filled'].map(variant => [variant, author.icons[icon][variant].sourceContract])),
+      source: Object.fromEntries(['outline', 'filled'].map(variant => [variant, authorSources[icon][variant].sourceContract])),
       model: null,
     }])),
   };
@@ -79,7 +86,7 @@ try {
     catalog: sourceCatalog, anatomy: { version: 1, glyphs: {} }, grid, staticIcons,
   });
   for (const icon of names) {
-    const payload = authorSymbolPayload(icon, author.icons[icon], compiler);
+    const payload = authorSymbolPayload(icon, authorSources[icon], compiler);
     writeFileSync(join(staging, 'symbols', `${icon}.js`), renderSymbolModule(payload));
     writeFileSync(join(staging, 'symbols', `${icon}.d.ts`), symbolModuleDeclaration(icon));
   }

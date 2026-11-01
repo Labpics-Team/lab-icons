@@ -12,20 +12,31 @@ export function stableJSON(value) {
 }
 
 /** XML parser снимает только объявленные IR metadata; geometry language остаётся закрытым. */
-export function inspectAuthorSvg(svg, { ir = false } = {}) {
+export function inspectAuthorSvg(svg, { ir = false, expectedMetadata } = {}) {
+  if (expectedMetadata !== undefined && (!ir || !Array.isArray(expectedMetadata))) {
+    throw new TypeError('benchmark oracle: expected metadata требует IR и упорядоченный список частей');
+  }
   const metadata = [];
   const parsed = optimize(svg, { multipass: false, plugins: [{
     name: 'observe-source-symbol',
     fn: () => ({ element: { enter(node) {
       if (node.name !== 'svg' && node.name !== 'path') throw new Error(`benchmark oracle: <${node.name}> вне source layers`);
       if (node.name === 'path' && ir) {
-        if (node.attributes['data-role'] !== 'unclassified' || !node.attributes['data-part']) throw new Error('benchmark oracle: источник имеет выдуманную semantic anatomy');
+        const expected = expectedMetadata?.[metadata.length];
+        if (!node.attributes['data-part'] || (expectedMetadata === undefined
+          ? node.attributes['data-role'] !== 'unclassified'
+          : !expected || node.attributes['data-part'] !== expected.id || node.attributes['data-role'] !== expected.role)) {
+          throw new Error('benchmark oracle: источник имеет выдуманную semantic anatomy или другую part identity');
+        }
         metadata.push({ id: node.attributes['data-part'], role: node.attributes['data-role'] });
         delete node.attributes['data-part'];
         delete node.attributes['data-role'];
       }
     } } }),
   }] }).data;
+  if (expectedMetadata !== undefined && metadata.length !== expectedMetadata.length) {
+    throw new Error('benchmark oracle: неполная semantic anatomy');
+  }
   const paths = sourcePathEntries(parsed);
   return {
     svgSha256: sha256(svg),
@@ -52,6 +63,50 @@ export function validateAuthorObservation(observation, expected) {
       stableJSON(observation.metadata) !== stableJSON(observation.parts.map(({ id, role }) => ({ id, role })))) {
     throw new Error('benchmark oracle: утрачены contours, winding, z-order или stable part identity');
   }
+  if (stableJSON(observation.anatomy ?? null) !== stableJSON(expected.anatomy ?? null)) {
+    throw new Error('benchmark oracle: anatomy не соответствует проверенной source annotation');
+  }
+}
+
+/** Движение ожидается из проверенной декларации, не из capabilities потребителя. */
+export function expectedAuthorMotion(contract) {
+  const gestures = contract.anatomy ? contract.gestures : [];
+  return {
+    state: contract.anatomy ? 'gesture-ready' : 'source-only',
+    partIds: contract.anatomy ? contract.parts.map(part => part.id) : [],
+    tracks: gestures.flatMap(gesture => gesture.tracks.map(track => ({
+      id: `rotate.${track.partId}`, kind: 'rotate', partIds: [track.partId], anchor: track.anchor,
+    }))),
+    gestures,
+    adapters: { lottie: 'not-exported', sfSymbols: 'not-exported' },
+  };
+}
+
+export function expectedAuthorEffectTargets(gesture) {
+  return gesture.tracks.map(track => ({
+    partId: track.partId,
+    rotation: { from: track.from, to: track.to, unit: 'degrees' },
+    style: { transformBox: 'view-box', transformOrigin: `${track.anchor[0] * 100}% ${track.anchor[1] * 100}%` },
+    keyframes: [{ offset: 0, transform: `rotate(${track.from}deg)` }, { offset: 1, transform: `rotate(${track.to}deg)` }],
+  }));
+}
+
+export function validateAuthorAdmission(glyph, caps, record, contract) {
+  const anatomy = contract.anatomy ?? null;
+  if (caps.icon !== glyph.icon || caps.variant !== glyph.variant || caps.modelState !== null ||
+      caps.supportedAxes.length || Object.keys(caps.axes).length ||
+      stableJSON(caps.author) !== stableJSON(record.author) ||
+      stableJSON(caps.anatomy ?? null) !== stableJSON(anatomy) ||
+      stableJSON(glyph.provenance.anatomy ?? null) !== stableJSON(anatomy) ||
+      stableJSON(caps.motion) !== stableJSON(expectedAuthorMotion(contract))) {
+    throw new Error('benchmark oracle: неподтверждённые current capabilities или anatomy');
+  }
+  if (glyph.parts.length !== contract.parts.length || glyph.parts.some((part, index) => {
+    const expected = contract.parts[index];
+    return part.provenance.kind !== 'source' || part.provenance.identity !== expected.identity ||
+      part.morphGroup !== null || part.role !== expected.role ||
+      (anatomy && (part.anchorSource !== 'declared' || stableJSON(part.anchor) !== stableJSON(expected.anchor)));
+  })) throw new Error('benchmark oracle: source identity или declared anchor не соответствует anatomy');
 }
 
 /** Число DOM path включает mask payload: это объявленная структурная сложность, не ink area. */

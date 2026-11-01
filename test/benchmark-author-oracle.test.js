@@ -2,9 +2,12 @@ import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { loadAuthorBaseline, authorSymbolPayload } from '../scripts/lib/author-baseline.js';
+import { compileAuthorAnatomy } from '../scripts/lib/author-anatomy.js';
 import { createGlyphCompiler } from '../src/ir/compiler.js';
 import { createCompiledSymbol } from '../src/ir/symbol-runtime.js';
-import { inspectAuthorSvg, sha256, stableJSON, validateAuthorObservation, validateRetainedPair } from '../scripts/bench/author-oracle.js';
+import { compileSymbolEffect } from '../src/motion/index.js';
+import { authorPackageExpectations } from '../scripts/check-package-artifact.js';
+import { inspectAuthorSvg, sha256, stableJSON, validateAuthorAdmission, validateAuthorObservation, validateRetainedPair } from '../scripts/bench/author-oracle.js';
 
 const root = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">';
 const paths = [
@@ -18,6 +21,44 @@ const expected = { icon: 'test', variant: 'outline', master: 'master.svg', autho
 const observe = (entries = paths, rendered = svg(entries, true)) => ({ ...inspectAuthorSvg(rendered, { ir: true }), icon: 'test', variant: 'outline', sourceFile: 'master.svg', compositionKind: 'layers', author, staticArtifactSha256: sha256(artifact), parts: entries });
 
 describe('benchmark author oracle и сохранённый output', () => {
+  it.each(['reload/outline', 'reload/filled', 'refresh/outline', 'refresh/filled'])('принимает только проверенную анатомию current master: %s', id => {
+    const rootPath = new URL('..', import.meta.url);
+    const read = path => JSON.parse(readFileSync(new URL(path, rootPath), 'utf8'));
+    const captured = read('semantics/figma-baseline.json');
+    const baseline = loadAuthorBaseline(fileURLToPath(rootPath), { manifest: { ...captured, counts: { families: 2, variants: 4 }, icons: { reload: captured.icons.reload, refresh: captured.icons.refresh } } });
+    const contracts = compileAuthorAnatomy(baseline, read('semantics/author-anatomy.json'));
+    const [icon, variant] = id.split('/');
+    const sources = Object.fromEntries(Object.entries(baseline.icons[icon]).map(([name, record]) => [name, { ...record, sourceContract: contracts[`${icon}/${name}`] }]));
+    const compiler = createGlyphCompiler({ catalog: { canvas: { viewBox: [0, 0, 24, 24] }, axes: read('semantics/catalog.json').axes, icons: { [icon]: { model: null, source: { outline: sources.outline.sourceContract, filled: sources.filled.sourceContract } } } }, anatomy: { version: 1, glyphs: {} }, grid: read('semantics/grid.json'), staticIcons: Object.fromEntries(Object.entries(sources).map(([name, record]) => [`${icon}${name === 'outline' ? 'Outline' : 'Filled'}`, record.artifactSvg])) });
+    const symbol = createCompiledSymbol(authorSymbolPayload(icon, sources, compiler));
+    const record = sources[variant];
+    const glyph = symbol.glyph({ variant });
+    const metadata = record.sourceContract.parts.map(({ id, role }) => ({ id, role }));
+    expect(metadata).toEqual([{ id: 'cycle-body', role: 'control' }]);
+    const observation = { ...inspectAuthorSvg(glyph.svg, { ir: true, expectedMetadata: metadata }), icon, variant, sourceFile: glyph.provenance.file, compositionKind: glyph.composition.kind, author: glyph.provenance.author, anatomy: glyph.provenance.anatomy, staticArtifactSha256: sha256(record.artifactSvg), parts: glyph.parts.map(({ id, role, zIndex, fillRule, d }) => ({ id, role, zIndex, fillRule, d })) };
+    const original = inspectAuthorSvg(record.artifactSvg);
+    const expected = { icon, variant, master: record.master, author: record.author, anatomy: record.sourceContract.anatomy, artifactSha256: sha256(record.artifactSvg), pathFingerprintSha256: record.author.pathFingerprintSha256, partsSha256: sha256(stableJSON(record.sourceContract.parts.map((part, index) => ({ id: part.id, role: part.role, zIndex: part.zIndex, fillRule: part.fillRule, d: original.paths[index].d })))) };
+    expect(() => validateAuthorObservation(observation, expected)).not.toThrow();
+    expect(() => inspectAuthorSvg(glyph.svg, { ir: true })).toThrow(/semantic anatomy/);
+    expect(() => inspectAuthorSvg(glyph.svg.replace('data-role="control"', 'data-role="content"'), { ir: true, expectedMetadata: metadata })).toThrow();
+    expect(() => validateAuthorObservation({ ...observation, anatomy: { ...observation.anatomy, annotationSha256: 'a'.repeat(64) } }, expected)).toThrow(/anatomy/);
+    const caps = symbol.glyphCapabilities(variant);
+    expect(() => validateAuthorAdmission(glyph, caps, record, record.sourceContract)).not.toThrow();
+    expect(() => validateAuthorAdmission(glyph, { ...caps, anatomy: { ...caps.anatomy, masterSha256: 'a'.repeat(64) } }, record, record.sourceContract)).toThrow(/capabilities|anatomy/);
+    expect(() => validateAuthorAdmission({ ...glyph, parts: glyph.parts.map(part => ({ ...part, provenance: { ...part.provenance, identity: 'source-derived' } })) }, caps, record, record.sourceContract)).toThrow(/identity/);
+    expect(() => validateAuthorAdmission({ ...glyph, parts: glyph.parts.map(part => ({ ...part, anchor: [0.6, 0.5] })) }, caps, record, record.sourceContract)).toThrow(/anchor/);
+    expect(() => validateAuthorAdmission(glyph, { ...caps, motion: { ...caps.motion, gestures: [] } }, record, record.sourceContract)).toThrow(/capabilities/);
+    const packed = authorPackageExpectations(baseline, read('semantics/author-anatomy.json'))[icon][variant];
+    expect(packed.parts).toHaveLength(1);
+    expect(packed.parts[0]).toMatchObject({ id: 'cycle-body', identity: 'declared', role: 'control', anchor: [0.5, 0.5], anchorSource: 'declared', d: original.paths[0].d, sourceFingerprint: baseline.icons[icon][variant].sourceContract.parts[0].sourceFingerprint });
+    expect(packed.anatomy).toEqual(expected.anatomy);
+    expect(packed.motion).toEqual(caps.motion);
+    expect(glyph.parts[0].provenance.identity).toBe('declared');
+    expect(caps).toMatchObject({ modelState: null, supportedAxes: [], axes: {}, anatomy: expected.anatomy, motion: { state: 'gesture-ready', partIds: ['cycle-body'], gestures: [{ id: `${icon}.cycle` }] } });
+    expect(compileSymbolEffect(glyph, caps, `${icon}.cycle`, { duration: 360 })).toMatchObject({ ok: true, effect: { targets: [{ partId: 'cycle-body', keyframes: [{ offset: 0, transform: 'rotate(0deg)' }, { offset: 1, transform: 'rotate(360deg)' }] }] } });
+    expect(compileSymbolEffect(glyph, caps, 'time.advance', { duration: 360 })).toMatchObject({ ok: false, reason: { code: 'GESTURE_UNSUPPORTED' } });
+    for (const query of [{ variant, axes: { weight: 1.1 } }, { variant, modelMode: 'allow-candidate' }]) expect(() => symbol.glyph(query)).toThrow(expect.objectContaining({ code: 'AUTHOR_PARITY_REQUIRED' }));
+  });
   it('oracle принимает обе реальные time формы latest Figma через production source compiler', () => {
     const rootPath = new URL('..', import.meta.url);
     const read = path => JSON.parse(readFileSync(new URL(path, rootPath), 'utf8'));
@@ -33,6 +74,8 @@ describe('benchmark author oracle и сохранённый output', () => {
       const expected = { icon: 'time', variant, master: record.master, author: record.author, artifactSha256: sha256(record.artifactSvg), pathFingerprintSha256: record.normalizedSource.pathFingerprintSha256, partsSha256: sha256(stableJSON(record.sourceContract.parts.map((part, index) => ({ id: part.id, role: part.role, zIndex: part.zIndex, fillRule: part.fillRule, d: original.paths[index].d })))) };
       const observation = { ...inspectAuthorSvg(actual.svg, { ir: true }), icon: actual.icon, variant: actual.variant, sourceFile: actual.provenance.file, compositionKind: actual.composition.kind, author: actual.provenance.author, staticArtifactSha256: sha256(record.artifactSvg), parts: actual.parts.map(({ id, role, zIndex, fillRule, d }) => ({ id, role, zIndex, fillRule, d })) };
       expect(() => validateAuthorObservation(observation, expected)).not.toThrow();
+      expect(() => validateAuthorAdmission(actual, symbol.glyphCapabilities(variant), record, record.sourceContract)).not.toThrow();
+      expect(compileSymbolEffect(actual, symbol.glyphCapabilities(variant), 'time.advance', { duration: 360 })).toMatchObject({ ok: false, reason: { code: 'SEMANTIC_MOTION_UNAVAILABLE' } });
     }
   });
   it('принимает независимую XML обвязку с теми же contours, winding и part identity', () => {
@@ -55,6 +98,13 @@ describe('benchmark author oracle и сохранённый output', () => {
     expect(() => inspectAuthorSvg(svg(paths, true).replace('data-role="unclassified"', 'data-role="content"'), { ir: true })).toThrow();
     expect(() => inspectAuthorSvg(svg(paths, true).replace('<path', '<path opacity="0.5"'), { ir: true })).toThrow();
     expect(() => inspectAuthorSvg(svg(paths, true).replace('<path', '<path transform="translate(1)"'), { ir: true })).toThrow();
+  });
+  it('explicit metadata не разрешает пропавшие или добавленные paths и не снимает geometry guards', () => {
+    const metadata = paths.map(({ id, role }) => ({ id, role }));
+    expect(() => inspectAuthorSvg(svg(paths.slice(0, 1), true), { ir: true, expectedMetadata: metadata })).toThrow(/anatomy/);
+    expect(() => inspectAuthorSvg(svg(paths, true), { ir: true, expectedMetadata: metadata.slice(0, 1) })).toThrow(/anatomy/);
+    expect(() => inspectAuthorSvg(svg(paths, true).replace('<path', '<path opacity="0.5"'), { ir: true, expectedMetadata: metadata })).toThrow();
+    expect(() => inspectAuthorSvg(svg(paths, true).replace('<path', '<path transform="translate(1)"'), { ir: true, expectedMetadata: metadata })).toThrow();
   });
   it('не принимает самообъявленный provenance другого file/version/master', () => {
     expect(() => validateAuthorObservation({ ...observe(), author: { ...author, version: 'other' } }, expected)).toThrow(/manifest/);

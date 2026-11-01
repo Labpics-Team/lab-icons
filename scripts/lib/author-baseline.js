@@ -138,11 +138,21 @@ export function authorSymbolPayload(icon, variantSources, compiler) {
     const item = variantSources[variant];
     const glyph = compiler.glyph({ icon, variant, modelMode: 'source-only' });
     const capability = compiler.glyphCapabilities(icon, variant);
+    const expectedAnatomy = item.sourceContract.anatomy ?? null;
+    const annotated = expectedAnatomy !== null;
     if (glyph.icon !== icon || glyph.variant !== variant || capability.icon !== icon || capability.variant !== variant ||
         glyph.provenance.kind !== 'source' || glyph.provenance.file !== item.master ||
         capability.modelState !== null || capability.supportedAxes.length ||
-        capability.motion.state !== 'source-only' || capability.motion.partIds.length || capability.motion.tracks.length ||
-        capability.motion.gestures.length) {
+        stableJSON(glyph.provenance.anatomy ?? null) !== stableJSON(expectedAnatomy) ||
+        stableJSON(capability.anatomy ?? null) !== stableJSON(expectedAnatomy) ||
+        (annotated
+          ? expectedAnatomy.masterSha256 !== item.author.masterSha256 ||
+            expectedAnatomy.pathFingerprintSha256 !== item.author.pathFingerprintSha256 ||
+            capability.motion.state !== 'gesture-ready' ||
+            stableJSON(capability.motion.partIds) !== stableJSON(item.sourceContract.parts.map(part => part.id)) ||
+            stableJSON(capability.motion.gestures) !== stableJSON(item.sourceContract.gestures)
+          : capability.motion.state !== 'source-only' || capability.motion.partIds.length ||
+            capability.motion.tracks.length || capability.motion.gestures.length)) {
       refuse('SOURCE_CAPABILITY_DRIFT', `${icon}/${variant}: авторскому источнику приписана другая модель или admission`);
     }
     source[variant] = { ...glyph, provenance: { ...glyph.provenance, author: item.author } };

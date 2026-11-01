@@ -44,13 +44,17 @@ Filled строится из собственного master. Разбор path,
 `provenance.author` содержит Figma fileKey, version, nodeId, nodeSha256,
 masterSha256, normalizedSha256 и pathFingerprintSha256. Сборка проверяет raw bytes,
 нормализованный SVG и fingerprint порядка/fill-rule перед выдачей модулей.
-Части имеют `role: 'unclassified'` и geometry-derived identity. Их bbox anchors
-не объявляют смысл или correspondence для morph.
+Неаннотированные части имеют `role: 'unclassified'` и geometry-derived identity.
+Их bbox anchors не объявляют смысл или correspondence для morph. У `reload` и
+`refresh` в обоих начертаниях анатомия закреплена отдельно: `cycle-body`, роль
+`control` и объявленный canvas anchor. Receipt `anatomy` связывает её с конкретными
+master/path хешами. Исходные контуры остаются прежними.
 
 ## Проверить допустимое изменение
 
-Текущая авторская поверхность возвращает `modelState: null`, пустые `supportedAxes`
-и `motion.state: 'source-only'`. Запрос любой известной оси, включая её прежнее
+Текущая авторская поверхность возвращает `modelState: null` и пустые `supportedAxes`.
+Без принятой анатомии движение имеет состояние `source-only`; проверенная
+анатомия `reload`/`refresh` объявляет `gesture-ready`. Запрос любой известной оси, включая её прежнее
 default-значение, или `modelMode: 'allow-candidate'` вызывает ошибку с кодом
 `AUTHOR_PARITY_REQUIRED`. Ошибочная форма запроса, неизвестная ось и нечисловое
 значение вызывают `TypeError`. Значения не зажимаются и не заменяют master.
@@ -72,7 +76,30 @@ fill scopes. Записанные модели, оси и candidate-регист
 ## Получить семантический эффект
 
 `compileSymbolEffect` принимает GlyphIR и capabilities без каталога или parser.
-Для текущего source-only master он возвращает `SEMANTIC_MOTION_UNAVAILABLE`.
+Неаннотированный master получает `SEMANTIC_MOTION_UNAVAILABLE`. Текущие
+авторские `reload` и `refresh` поддерживают соответственно `reload.cycle` и
+`refresh.cycle`: один оборот по часовой стрелке с обратным ходом и прерыванием.
+Тип жеста `cycle` означает, что завершённый оборот можно повторить как новое
+событие. Scalar retarget из текущей позы сохраняет прерванный оборот; новый
+explicit `[from,to]` используется только для новой occurrence или scrub.
+
+```js
+import { glyph, glyphCapabilities } from '@labpics/icons/symbols/reload';
+import { compileSymbolEffect } from '@labpics/icons/motion';
+
+const result = compileSymbolEffect(glyph(), glyphCapabilities(), 'reload.cycle', {
+  duration: 900, from: 0, to: 1,
+});
+if (!result.ok) throw new Error(result.reason.message);
+```
+
+`effect.viewport` задаёт `overflow: 'visible'`: вращаемый силуэт может выйти за
+статический viewBox, который сохраняет авторский размер. Приложение учитывает
+эту область при размещении и не обрезает её родительским clip. `targets` содержат
+стабильные `partId`, normalized anchor, градусы и стандартные keyframes.
+Публичный Lab Motion исполняет числовой канал `rotate`; пример связки находится
+в [Observatory consumer](../observatory/motion-execution.js).
+
 Принятый `time.advance` доступен у записанной модели:
 
 ```js

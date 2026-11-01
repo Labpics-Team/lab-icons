@@ -1,0 +1,93 @@
+{
+    "schemaVersion":  1,
+    "source":  {
+                   "fileKey":  "LuaiBd4anRi4DMZayKAnY2",
+                   "version":  "2416636003859748575"
+               },
+    "icons":  {
+                  "reload":  {
+                                 "outline":  {
+                                                 "masterSha256":  "9a6784d21805bb7374a37a62fab427be8a49b985bdb5ffc04876bfb3ed93bd80",
+                                                 "pathFingerprintSha256":  "0539b295f7e1087d3f3fb12524d578c5cdfb0a19655ea99786cee975b52b8f7c",
+                                                 "parts":  [
+                                                               {
+                                                                   "pathIndex":  0,
+                                                                   "id":  "cycle-body",
+                                                                   "role":  "control",
+                                                                   "anchor":  [
+                                                                                  0.5,
+                                                                                  0.5
+                                                                              ],
+                                                                   "anchorMeaning":  "canvas-center"
+                                                               }
+                                                           ],
+                                                 "gesture":  {
+                                                                 "law":  "cycle.clockwise",
+                                                                 "partId":  "cycle-body"
+                                                             }
+                                             },
+                                 "filled":  {
+                                                "masterSha256":  "3c7a57edcdac59581175696289e383f78ec43381bcbb72ed49c5034ae8ae871a",
+                                                "pathFingerprintSha256":  "3441f62d5640362954f6229439a867913aee6aae98c463ee11a326419b958c62",
+                                                "parts":  [
+                                                              {
+                                                                  "pathIndex":  0,
+                                                                  "id":  "cycle-body",
+                                                                  "role":  "control",
+                                                                  "anchor":  [
+                                                                                 0.5,
+                                                                                 0.5
+                                                                             ],
+                                                                  "anchorMeaning":  "canvas-center"
+                                                              }
+                                                          ],
+                                                "gesture":  {
+                                                                "law":  "cycle.clockwise",
+                                                                "partId":  "cycle-body"
+                                                            }
+                                            }
+                             },
+                  "refresh":  {
+                                  "outline":  {
+                                                  "masterSha256":  "197a388b68b7038a978d1653f5c00a8c0676326a5ec5b74cc3b461c7c551e3af",
+                                                  "pathFingerprintSha256":  "e8d0dff9194dca19f6223ee84e9c644f99dab9b10fe92da733acac9937fe8202",
+                                                  "parts":  [
+                                                                {
+                                                                    "pathIndex":  0,
+                                                                    "id":  "cycle-body",
+                                                                    "role":  "control",
+                                                                    "anchor":  [
+                                                                                   0.5,
+                                                                                   0.5
+                                                                               ],
+                                                                    "anchorMeaning":  "canvas-center"
+                                                                }
+                                                            ],
+                                                  "gesture":  {
+                                                                  "law":  "cycle.clockwise",
+                                                                  "partId":  "cycle-body"
+                                                              }
+                                              },
+                                  "filled":  {
+                                                 "masterSha256":  "d087792f28dbe52e5fe4937a17885a8e502e2618a03eec5d8c0323cac560227a",
+                                                 "pathFingerprintSha256":  "210a3be010a2fa6118adcb8c41b7ab792533075783fc1cac2875a04ad4505d6a",
+                                                 "parts":  [
+                                                               {
+                                                                   "pathIndex":  0,
+                                                                   "id":  "cycle-body",
+                                                                   "role":  "control",
+                                                                   "anchor":  [
+                                                                                  0.5,
+                                                                                  0.5
+                                                                              ],
+                                                                   "anchorMeaning":  "canvas-center"
+                                                               }
+                                                           ],
+                                                 "gesture":  {
+                                                                 "law":  "cycle.clockwise",
+                                                                 "partId":  "cycle-body"
+                                                             }
+                                             }
+                              }
+              }
+}

@@ -36,6 +36,8 @@ export interface SymbolEffect {
   readonly to: number;
   readonly targets: readonly SymbolEffectTarget[];
   readonly unchangedPartIds: readonly string[];
+  /** Вращение authored silhouette может выходить за статический viewBox. */
+  readonly viewport: Readonly<{ overflow: 'visible' }>;
   readonly options: Readonly<{ duration: number; easing: 'linear'; fill: 'both' }>;
 }
 
@@ -71,8 +73,24 @@ export function compileSymbolEffect(
   if (glyph.icon !== capabilities.icon || glyph.variant !== capabilities.variant) {
     return refuse('CAPABILITY_MISMATCH', 'Возможности относятся к другому символу или варианту.');
   }
-  if (glyph.provenance.kind !== 'model' || glyph.provenance.state !== 'accepted' ||
-      capabilities.modelState !== 'accepted' || capabilities.motion.state !== 'gesture-ready') {
+  const modelReady = glyph.provenance.kind === 'model' && glyph.provenance.state === 'accepted' &&
+    capabilities.modelState === 'accepted';
+  const anatomy = glyph.provenance.kind === 'source' ? glyph.provenance.anatomy : undefined;
+  const author = glyph.provenance.kind === 'source' ? glyph.provenance.author : undefined;
+  const sourceReady = capabilities.modelState === null && anatomy?.version === 1 && capabilities.anatomy?.version === 1 &&
+    /^[a-f0-9]{64}$/.test(anatomy.annotationSha256) &&
+    anatomy.annotationSha256 === capabilities.anatomy?.annotationSha256 &&
+    anatomy.masterSha256 === capabilities.anatomy?.masterSha256 &&
+    anatomy.pathFingerprintSha256 === capabilities.anatomy?.pathFingerprintSha256 &&
+    anatomy.masterSha256 === author?.masterSha256 &&
+    anatomy.pathFingerprintSha256 === author?.pathFingerprintSha256 &&
+    author?.fileKey === capabilities.author?.fileKey && author?.version === capabilities.author?.version &&
+    author?.nodeId === capabilities.author?.nodeId && author?.nodeSha256 === capabilities.author?.nodeSha256 &&
+    author?.masterSha256 === capabilities.author?.masterSha256 &&
+    author?.normalizedSha256 === capabilities.author?.normalizedSha256 &&
+    author?.pathFingerprintSha256 === capabilities.author?.pathFingerprintSha256 &&
+    glyph.parts.every(part => part.provenance.kind === 'source' && part.provenance.identity === 'declared');
+  if ((!modelReady && !sourceReady) || capabilities.motion.state !== 'gesture-ready') {
     return refuse('SEMANTIC_MOTION_UNAVAILABLE', 'Для этого варианта нет принятого семантического жеста.');
   }
   const gesture = capabilities.motion.gestures.find((entry) => entry.id === gestureId);
@@ -123,6 +141,7 @@ export function compileSymbolEffect(
       to,
       targets: Object.freeze(targets),
       unchangedPartIds: Object.freeze(glyph.parts.filter((part) => !animatedPartIds.has(part.id)).map((part) => part.id)),
+      viewport: Object.freeze({ overflow: 'visible' }),
       options: Object.freeze({
         duration: request.reducedMotion || from === to ? 0 : request.duration,
         easing: 'linear',

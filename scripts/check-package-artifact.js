@@ -43,8 +43,31 @@ import {
   EXPECTED_SOURCE_VARIANTS,
 } from './lib/corpus-contract.js';
 import { loadAuthorBaseline } from './lib/author-baseline.js';
+import { compileAuthorAnatomy } from './lib/author-anatomy.js';
+import { expectedAuthorEffectTargets, expectedAuthorMotion } from './bench/author-oracle.js';
 
 export const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
+
+/** Expected metadata относится только к проверенному annotation/master, не к installed output. */
+export function authorPackageExpectations(baseline, annotations) {
+  const contracts = compileAuthorAnatomy(baseline, annotations);
+  return Object.fromEntries(Object.entries(baseline.icons).map(([icon, variants]) => [icon,
+    Object.fromEntries(Object.entries(variants).map(([variant, record]) => {
+      const contract = contracts[`${icon}/${variant}`] ?? record.sourceContract;
+      const sourcePaths = [...record.normalizedSvg.matchAll(/<path\b[^>]*\bd="([^"]+)"/g)].map(match => match[1]);
+      return [variant, {
+        master: record.master, author: record.author, svg: record.artifactSvg,
+        anatomy: contract.anatomy ?? null, motion: expectedAuthorMotion(contract),
+        effects: Object.fromEntries((contract.gestures ?? []).map(gesture => [gesture.id, expectedAuthorEffectTargets(gesture)])),
+        parts: contract.parts.map(({ id, role, identity, fillRule, zIndex, sourceFingerprint, artifactFingerprint, anchor }, index) => ({
+          id, fillRule, zIndex, sourceFingerprint, artifactFingerprint, d: sourcePaths[index], role, identity,
+          anchorSource: contract.anatomy ? 'declared' : 'geometry-bbox-center',
+          ...(contract.anatomy && { anchor }),
+        })),
+      }];
+    })),
+  ]));
+}
 
 const CLEAN_PACK_EXCLUDES = new Set([
   '.git',
@@ -443,17 +466,7 @@ export function checkPackageArtifact({
     const result = validateInstalledPackage(installed, contract);
     if (result.errors.length > 0) return result;
     const authorBaseline = loadAuthorBaseline(cleanSource);
-    const authorExpected = Object.fromEntries(Object.entries(authorBaseline.icons).map(([icon, variants]) => [icon,
-      Object.fromEntries(Object.entries(variants).map(([variant, record]) => {
-        const sourcePaths = [...record.normalizedSvg.matchAll(/<path\b[^>]*\bd="([^"]+)"/g)].map(match => match[1]);
-        return [variant, {
-          master: record.master, author: record.author, svg: record.artifactSvg,
-          parts: record.sourceContract.parts.map(({ id, fillRule, zIndex, sourceFingerprint, artifactFingerprint }, index) => ({
-            id, fillRule, zIndex, sourceFingerprint, artifactFingerprint, d: sourcePaths[index],
-          })),
-        }];
-      })),
-    ]));
+    const authorExpected = authorPackageExpectations(authorBaseline, JSON.parse(readFileSync(join(cleanSource, 'semantics/author-anatomy.json'), 'utf8')));
     writeFileSync(join(consumer, 'author-expected.json'), `${JSON.stringify(authorExpected)}\n`, 'utf8');
 
     writeFileSync(
@@ -487,14 +500,23 @@ export function checkPackageArtifact({
         `    if (symbol[variant] !== expected.svg) throw new Error('current static master differs: ' + icon + '/' + variant);\n` +
         `    if (symbol.glyph({ variant, modelMode: 'source-only' }) !== current || current.icon !== icon || current.variant !== variant || current.composition.kind !== 'layers') throw new Error('current source/default differs: ' + icon + '/' + variant);\n` +
         `    if (JSON.stringify(current.viewBox) !== '[0,0,24,24]' || !/<svg\\b[^>]*\\bfill="currentColor"/.test(current.svg) || current.parts.some(part => part.paint.kind !== 'fill' || part.paint.fill !== 'currentColor')) throw new Error('current viewport/paint differs: ' + icon + '/' + variant);\n` +
-        `    if (current.provenance.kind !== 'source' || current.provenance.file !== expected.master || JSON.stringify(current.provenance.author) !== JSON.stringify(expected.author)) throw new Error('current author provenance differs: ' + icon + '/' + variant);\n` +
-        `    const actualParts = current.parts.map(part => ({ id: part.id, fillRule: part.fillRule, zIndex: part.zIndex, sourceFingerprint: part.provenance.sourceFingerprint, artifactFingerprint: part.provenance.artifactFingerprint, d: part.d }));\n` +
-        `    if (JSON.stringify(actualParts) !== JSON.stringify(expected.parts) || current.parts.some(part => part.role !== 'unclassified' || part.morphGroup !== null)) throw new Error('current source path/fill/z-order differs: ' + icon + '/' + variant);\n` +
+        `    if (current.provenance.kind !== 'source' || current.provenance.file !== expected.master || JSON.stringify(current.provenance.author) !== JSON.stringify(expected.author) || JSON.stringify(current.provenance.anatomy ?? null) !== JSON.stringify(expected.anatomy)) throw new Error('current author provenance differs: ' + icon + '/' + variant);\n` +
+        `    const actualParts = current.parts.map(part => ({ id: part.id, fillRule: part.fillRule, zIndex: part.zIndex, sourceFingerprint: part.provenance.sourceFingerprint, artifactFingerprint: part.provenance.artifactFingerprint, d: part.d, role: part.role, identity: part.provenance.identity, anchorSource: part.anchorSource, ...(expected.anatomy && { anchor: part.anchor }) }));\n` +
+        `    if (JSON.stringify(actualParts) !== JSON.stringify(expected.parts) || current.parts.some(part => part.provenance.kind !== 'source' || part.morphGroup !== null)) throw new Error('current source path/fill/z-order differs: ' + icon + '/' + variant);\n` +
         `    const renderedD = [...current.svg.matchAll(/<path\\b[^>]*\\bd="([^"]+)"/g)].map(match => match[1]);\n` +
         `    const renderedRules = [...current.svg.matchAll(/<path\\b[^>]*\\bfill-rule="([^"]+)"/g)].map(match => match[1]);\n` +
         `    if (JSON.stringify(renderedD) !== JSON.stringify(expected.parts.map(part => part.d)) || JSON.stringify(renderedRules) !== JSON.stringify(expected.parts.map(part => part.fillRule))) throw new Error('current SVG assembly differs: ' + icon + '/' + variant);\n` +
+        `    const renderedParts = [...current.svg.matchAll(/<path\\b[^>]*\\bdata-part="([^"]+)"/g)].map(match => match[1]);\n` +
+        `    const renderedRoles = [...current.svg.matchAll(/<path\\b[^>]*\\bdata-role="([^"]+)"/g)].map(match => match[1]);\n` +
+        `    if (JSON.stringify(renderedParts) !== JSON.stringify(expected.parts.map(part => part.id)) || JSON.stringify(renderedRoles) !== JSON.stringify(expected.parts.map(part => part.role))) throw new Error('current rendered anatomy differs: ' + icon + '/' + variant);\n` +
         `    const capabilities = symbol.glyphCapabilities(variant);\n` +
-        `    if (capabilities.icon !== icon || capabilities.variant !== variant || capabilities.modelState !== null || capabilities.supportedAxes.length || Object.keys(capabilities.axes).length || capabilities.motion.state !== 'source-only' || capabilities.motion.partIds.length || capabilities.motion.gestures.length || capabilities.motion.tracks.length || capabilities.motion.adapters.lottie !== 'not-exported' || capabilities.motion.adapters.sfSymbols !== 'not-exported' || JSON.stringify(capabilities.author) !== JSON.stringify(expected.author)) throw new Error('current source inherited stale admission: ' + icon + '/' + variant);\n` +
+        `    if (capabilities.icon !== icon || capabilities.variant !== variant || capabilities.modelState !== null || capabilities.supportedAxes.length || Object.keys(capabilities.axes).length || JSON.stringify(capabilities.motion) !== JSON.stringify(expected.motion) || JSON.stringify(capabilities.anatomy ?? null) !== JSON.stringify(expected.anatomy) || JSON.stringify(capabilities.author) !== JSON.stringify(expected.author)) throw new Error('current source inherited stale admission: ' + icon + '/' + variant);\n` +
+        `    const foreignMotion = compileSymbolEffect(current, capabilities, 'time.advance', { duration: 360 });\n` +
+        `    if (foreignMotion.ok || foreignMotion.reason.code !== (expected.anatomy ? 'GESTURE_UNSUPPORTED' : 'SEMANTIC_MOTION_UNAVAILABLE')) throw new Error('current motion did not refuse precisely: ' + icon + '/' + variant);\n` +
+        `    for (const [gesture, targets] of Object.entries(expected.effects)) {\n` +
+        `      const effect = compileSymbolEffect(current, capabilities, gesture, { duration: 360 });\n` +
+        `      if (!effect.ok || JSON.stringify(effect.effect.targets) !== JSON.stringify(targets)) throw new Error('current declared motion differs: ' + icon + '/' + variant);\n` +
+        `    }\n` +
         `    for (const request of [{ variant, axes: { weight: 1 } }, { variant, axes: { opsz: 24 } }, { variant, axes: { corner: 1 } }, { variant, modelMode: 'allow-candidate' }]) {\n` +
         `      let refused = false;\n` +
         `      try { symbol.glyph(request); } catch (error) { refused = error.code === 'AUTHOR_PARITY_REQUIRED'; }\n` +
