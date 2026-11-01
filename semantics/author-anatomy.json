@@ -645,6 +645,109 @@
           "direction": "down"
         }
       }
+    },
+    "checkmark": {
+      "outline": {
+        "masterSha256": "0d35757e3ac5c23a1c1a3a3aad3d3558a354057742500fd2341ad3872d644a14",
+        "pathFingerprintSha256": "0a9ede481eec1e8a805b0396c216a71a1643fddf1e90e5fa9718ae445c4a03e1",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "confirmation-mark",
+            "role": "content"
+          }
+        ],
+        "gesture": {
+          "law": "confirmation.presence",
+          "purpose": "confirmation",
+          "partId": "confirmation-mark"
+        }
+      },
+      "filled": {
+        "masterSha256": "d44e67b12491261b5d90d40ad7c3045518a0fc15eab96b8661d63bff382385e3",
+        "pathFingerprintSha256": "6435afa2f133ae1b820f94431312bd6635039d51c9708bd7142d4a915a2a0ca0",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "confirmation-mark",
+            "role": "content"
+          }
+        ],
+        "gesture": {
+          "law": "confirmation.presence",
+          "purpose": "confirmation",
+          "partId": "confirmation-mark"
+        }
+      }
+    },
+    "checkmark-circle": {
+      "outline": {
+        "masterSha256": "e186493576bcc419ca7038013395ee021c547d91dc1b069b3ea67b24278c63c4",
+        "pathFingerprintSha256": "6afbf3a4ba0379b7dcd801901c34db3cff004da17c947f35cd8ea7000ba73527",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "confirmation-mark",
+            "role": "content"
+          },
+          {
+            "pathIndex": 1,
+            "id": "confirmation-enclosure",
+            "role": "container"
+          }
+        ],
+        "gesture": {
+          "law": "confirmation.presence",
+          "purpose": "confirmation",
+          "partId": "confirmation-mark"
+        }
+      }
+    },
+    "cloud-checkmark": {
+      "outline": {
+        "masterSha256": "85635f0fb2e122a50aa3f7f7544e833f26985cdeefbd218c7f38ee09571c8dfb",
+        "pathFingerprintSha256": "b4c717cfe09c2822ff4cc4234af253db4bdb4f4c4b0731dfecd29bc785a6e080",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "confirmation-mark",
+            "role": "content"
+          },
+          {
+            "pathIndex": 1,
+            "id": "confirmation-enclosure",
+            "role": "container"
+          }
+        ],
+        "gesture": {
+          "law": "confirmation.presence",
+          "purpose": "confirmation",
+          "partId": "confirmation-mark"
+        }
+      }
+    },
+    "shield-checkmark": {
+      "outline": {
+        "masterSha256": "67a13aeaf153992b91feaaae23fc346d2e42741dcdd63d142567da69706d8691",
+        "pathFingerprintSha256": "85e6c88b0a59fae726e6aed8d949e5c90d1adc60a62e9144400cf104b9cb7554",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "confirmation-mark",
+            "role": "content"
+          },
+          {
+            "pathIndex": 1,
+            "id": "confirmation-enclosure",
+            "role": "container"
+          }
+        ],
+        "gesture": {
+          "law": "confirmation.presence",
+          "purpose": "confirmation",
+          "partId": "confirmation-mark"
+        }
+      }
     }
   }
 }

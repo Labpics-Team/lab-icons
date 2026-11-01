@@ -171,10 +171,36 @@ function directionNudge(icon, variant, declaration, parts, source) {
   return [gesture];
 }
 
+/** Подтверждение меняет видимость целой авторской отметки. Оболочка и её
+ * контрформы сохраняются; отрицательный контур внутри Filled body не является
+ * самостоятельной отметкой и не получает этот закон. */
+function confirmationPresence(icon, variant, declaration, parts) {
+  fields(declaration, ['law', 'purpose', 'partId'], `${icon}/${variant}.gesture`);
+  if (declaration.purpose !== 'confirmation') {
+    refuse('LAW_SEMANTICS_UNSUPPORTED', `${icon}/${variant}: confirmation.presence требует явно объявленное подтверждение`);
+  }
+  const mark = parts.find(part => part.id === declaration.partId);
+  if (!mark || mark.role !== 'content' || mark.fillRule !== 'nonzero' ||
+      mark.topologySignature.includes('|') || !mark.topologySignature.endsWith('Z') ||
+      parts.some(part => part.id !== mark.id && part.role !== 'container')) {
+    refuse('LAW_TOPOLOGY_UNSUPPORTED', `${icon}/${variant}: confirmation.presence требует одну отдельную закрытую отметку и неподвижные container части`);
+  }
+  const gesture = {
+    id: `${icon}.presence`, kind: 'state',
+    meaning: 'Подтверждение: показать или скрыть целую авторскую отметку, сохраняя оболочку этого символа.',
+    partIds: [mark.id], progress: 'normalized-0-to-1', restProgress: 1,
+    tracks: [{ partId: mark.id, kind: 'opacity', unit: 'fraction', interpolation: 'linear',
+      stops: [{ at: 0, value: 0 }, { at: 1, value: 1 }] }],
+  };
+  validateMotionGesture(gesture);
+  return [gesture];
+}
+
 function compileLaw(icon, variant, declaration, parts, source) {
   if (declaration?.law === 'cycle.clockwise') return clockwiseCycle(icon, variant, declaration, parts);
   if (declaration?.law === 'activity.triad') return activityTriad(icon, variant, declaration, parts);
   if (declaration?.law === 'signal.levels') return signalLevels(icon, variant, declaration, parts);
+  if (declaration?.law === 'confirmation.presence') return confirmationPresence(icon, variant, declaration, parts);
   if (declaration?.law === 'direction.nudge') return directionNudge(icon, variant, declaration, parts, source);
   refuse('LAW_UNSUPPORTED', `${icon}/${variant}: закон ${declaration?.law} не объявлен`);
 }
