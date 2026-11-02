@@ -12,6 +12,8 @@ import { bundle } from '../scripts/build-ir.mjs';
 import { optimize } from 'svgo';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
+// Сравнению нужна Git-история baseline; shallow checkout не даёт PASS через skip.
+// Восстановление истории описано в docs/research/compiler-entrypoints-20261102.md.
 const baseline = process.env.LAB_ICONS_COMPILER_BASELINE ?? '8fbb434';
 const svgo = createRequire(import.meta.url)(join(root, 'svgo.config.cjs'));
 const npmExecutable = process.platform === 'win32'

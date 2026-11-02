@@ -67,3 +67,13 @@ tarball и consumer hashes, metafile contributions и retained-function witnesse
 Полная сборка пакета и точная внешняя consumer пара остаются удалённым гейтом;
 этот ограниченный fixture их не квалифицирует. Registry SVG 0.2 parity, browser
 rendering, timing и memory stress в данном опыте не проверялись.
+
+Для `test/compiler-entrypoints.test.js` нужна полная Git-история с исходником
+baseline `8fbb434` либо явно выбранным `LAB_ICONS_COMPILER_BASELINE`.
+Сравнение намеренно не пропускается при отсутствии исходника: без него
+результат не подтверждает сохранение поведения и стоимости consumer.
+Канонический CI использует `actions/checkout` с `fetch-depth: 0`.
+В shallow checkout до запуска восстановите историю через
+`git fetch --unshallow origin`; доступность baseline проверьте
+`git cat-file -e 8fbb434:src/ir/compiler.ts`. Изменение baseline требует
+сопоставимого consumer, а не выбора более удобных чисел.
