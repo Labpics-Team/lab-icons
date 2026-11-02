@@ -645,6 +645,14 @@ export function checkPackageArtifact({
         `const varied: GlyphIR = activityGlyph({ variation: { dotScale: 1.1, spacingScale: 0.9 } });\n` +
         `const verticalVaried: GlyphIR = verticalGlyph({ variant: 'filled', variation: { spacingScale: 1.1 } });\n` +
         `const authoredDomain: 'convex-linear' = activityCapabilities().variation.domain.kind;\n` +
+        `type AuthorVariationGlyphRequest = Parameters<typeof activityGlyph>[0];\n` +
+        `const typedVariationRequest: AuthorVariationGlyphRequest = { variation: { dotScale: 1.1 } };\n` +
+        `const namedVariationKind: 'source' | 'authored-variation' = activityGlyph(typedVariationRequest).provenance.kind;\n` +
+        `const exactDefaultKind: 'source' = activityGlyph().provenance.kind;\n` +
+        `// @ts-expect-error: named variation не обещает exact source.\n` +
+        `const falseSourcePromise: 'source' = activityGlyph(typedVariationRequest).provenance.kind;\n` +
+        `// @ts-expect-error: неподдержанный symbol отвергает named variation.\n` +
+        `ellipseGlyph(typedVariationRequest);\n` +
         `// @ts-expect-error: геометрия ellipse не получает triad variation по сходству.\n` +
         `ellipseGlyph({ variation: { dotScale: 1.1 } });\n` +
         `// @ts-expect-error: runtime не принимает controls или raw path.\n` +
