@@ -145,6 +145,13 @@ export function expectedAuthorMotion(contract, context = { kind: 'source' }) {
   };
 }
 
+/** Наличие частей ещё не означает наличие принятого жеста. */
+export function expectedAuthorMotionRefusal(contract, gestureId) {
+  const motion = expectedAuthorMotion(contract);
+  if (motion.state !== 'gesture-ready') return 'SEMANTIC_MOTION_UNAVAILABLE';
+  return motion.gestures.some(gesture => gesture.id === gestureId) ? null : 'GESTURE_UNSUPPORTED';
+}
+
 export function expectedAuthorEffectTargets(gesture) {
   return gesture.tracks.map(track => track.kind === 'opacity' ? {
     partId: track.partId, property: 'opacity', from: track.stops[0].value, to: track.stops.at(-1).value,

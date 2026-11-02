@@ -5,7 +5,7 @@ import { pathToFileURL } from 'node:url';
 import { loadAuthorBaseline } from '../lib/author-baseline.js';
 import { compileAuthorAnatomy } from '../lib/author-anatomy.js';
 import { assertRemoteBenchmark } from './measurement.js';
-import { expectedAuthorEffect, inspectAuthorSvg, sha256, stableJSON, validateAuthorAdmission, validateAuthorObservation } from './author-oracle.js';
+import { expectedAuthorEffect, expectedAuthorMotionRefusal, inspectAuthorSvg, sha256, stableJSON, validateAuthorAdmission, validateAuthorObservation } from './author-oracle.js';
 
 assertRemoteBenchmark();
 const request = JSON.parse(readFileSync(process.argv[2], 'utf8'));
@@ -49,7 +49,7 @@ try {
       try { module.glyph({ variant, axes: { weight: NaN } }); throw new Error(`${icon}/${variant}: невалидная axis принята`); }
       catch (error) { if (!(error instanceof TypeError)) throw error; }
       const motion = compileSymbolEffect(glyph, caps, 'time.advance', { duration: 360 });
-      const motionRefusal = contract.anatomy ? 'GESTURE_UNSUPPORTED' : 'SEMANTIC_MOTION_UNAVAILABLE';
+      const motionRefusal = expectedAuthorMotionRefusal(contract, 'time.advance');
       if (motion.ok || motion.reason.code !== motionRefusal) throw new Error(`${icon}/${variant}: чужой motion не получил точный отказ`);
       for (const gesture of contract.gestures ?? []) {
         const result = compileSymbolEffect(glyph, caps, gesture.id, { duration: 360 });

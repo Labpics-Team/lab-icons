@@ -7,7 +7,7 @@ import { createGlyphCompiler } from '../src/ir/compiler.js';
 import { createCompiledGlyph, createCompiledCapabilities } from '../src/ir/symbol-runtime.js';
 import { compileSymbolEffect } from '../src/motion/index.js';
 import { authorPackageExpectations } from '../scripts/check-package-artifact.js';
-import { inspectAuthorSvg, observeAuthorGlyph, sha256, stableJSON, validateAuthorAdmission, validateAuthorObservation, validateRetainedPair } from '../scripts/bench/author-oracle.js';
+import { expectedAuthorMotionRefusal, inspectAuthorSvg, observeAuthorGlyph, sha256, stableJSON, validateAuthorAdmission, validateAuthorObservation, validateRetainedPair } from '../scripts/bench/author-oracle.js';
 
 const root = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">';
 const paths = [
@@ -21,6 +21,24 @@ const expected = { icon: 'test', variant: 'outline', master: 'master.svg', autho
 const observe = (entries = paths, rendered = svg(entries, true)) => ({ ...inspectAuthorSvg(rendered, { ir: true }), icon: 'test', variant: 'outline', sourceFile: 'master.svg', compositionKind: 'layers', author, staticArtifactSha256: sha256(artifact), parts: entries });
 
 describe('benchmark author oracle и сохранённый output', () => {
+  it.each([
+    ['alert-circle', 'outline', 'SEMANTIC_MOTION_UNAVAILABLE'],
+    ['alert-circle', 'filled', 'SEMANTIC_MOTION_UNAVAILABLE'],
+    ['reload', 'outline', 'GESTURE_UNSUPPORTED'],
+    ['reload', 'filled', 'GESTURE_UNSUPPORTED'],
+  ])('различает анатомию и принятый жест: %s/%s', (icon, variant, code) => {
+    const rootPath = new URL('..', import.meta.url);
+    const read = path => JSON.parse(readFileSync(new URL(path, rootPath), 'utf8'));
+    const captured = read('semantics/figma-baseline.json');
+    const baseline = loadAuthorBaseline(fileURLToPath(rootPath), { manifest: { ...captured, counts: { families: 1, variants: 2 }, icons: { [icon]: captured.icons[icon] } } });
+    const allAnnotations = read('semantics/author-anatomy.json');
+    const contract = compileAuthorAnatomy(baseline, { ...allAnnotations, icons: { [icon]: allAnnotations.icons[icon] } })[`${icon}/${variant}`] ?? baseline.icons[icon][variant].sourceContract;
+    if (icon === 'reload' || variant === 'outline') expect(contract.anatomy).toBeTruthy();
+    else expect(contract.anatomy ?? null).toBeNull();
+    expect(expectedAuthorMotionRefusal(contract, 'time.advance')).toBe(code);
+    if (icon === 'reload') expect(expectedAuthorMotionRefusal(contract, 'reload.cycle')).toBeNull();
+    else expect(contract.gestures ?? []).toHaveLength(0);
+  });
   it.each(['reload/outline', 'reload/filled', 'refresh/outline', 'refresh/filled'])('принимает только проверенную анатомию current master: %s', id => {
     const rootPath = new URL('..', import.meta.url);
     const read = path => JSON.parse(readFileSync(new URL(path, rootPath), 'utf8'));
