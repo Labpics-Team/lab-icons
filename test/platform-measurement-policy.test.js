@@ -1,14 +1,20 @@
 import { spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
+import { checkPackageSize, measureArtifact, PACKAGE_SIZE_MEASUREMENT } from '../scripts/check-package-size.js';
+import { authoredSymbolPayloads } from './helpers/authored-symbol-payload.js';
+import { renderSymbolModules } from '../scripts/lib/symbol-modules.js';
 
 const roots = [];
 const subject = readFileSync(new URL('../scripts/measure-platform-artifacts.mjs', import.meta.url), 'utf8');
 const hash = '0'.repeat(40);
 const file = 'dist/ir/recipes.js';
 const twin = 'dist/ir/retained.js';
+const retiring = 'dist/ir/source-packet-runtime.js';
+const retirementLimits = JSON.parse(readFileSync(new URL('../release/package-size-ratchet.json', import.meta.url), 'utf8')).artifacts[retiring];
 const original = '// scripts/lib/kernel.js\nexport const value = 1;\n';
 const legacyGlyphEntry = "import { glyph } from '@labpics/icons/ir';\nconsole.log(glyph({ icon: 'alert' }));\n";
 const symbolGlyphEntry = "import { glyph } from '@labpics/icons/symbols/alert';\nconsole.log(glyph());\n";
@@ -18,15 +24,17 @@ afterEach(() => {
   for (const root of roots.splice(0)) rmSync(root, { recursive: true, force: true });
 });
 
-function fixture({ source = original, other = source, modules = ['scripts/lib/kernel.js'], ceiling = 4096 } = {}) {
+function fixture({ source = original, other = source, modules = ['scripts/lib/kernel.js'], ceiling = 4096, realPackageOracle = false } = {}) {
   const root = mkdtempSync(join(tmpdir(), 'lab-icons-measure-policy-'));
   roots.push(root);
   for (const directory of ['scripts', 'release', 'dist/ir']) mkdirSync(join(root, directory), { recursive: true });
   writeFileSync(join(root, 'scripts/measure-platform-artifacts.mjs'), subject.replace(
     "import { execFileSync } from 'node:child_process';", `const execFileSync = () => '${hash}';`,
-  ));
+  ).replace("'./lib/release-contract.js'", JSON.stringify(new URL('../scripts/lib/release-contract.js', import.meta.url).href)));
   // Здесь проверяется admission policy; compressor и bundler проверяются отдельно.
-  writeFileSync(join(root, 'scripts/check-package-size.js'), `
+  writeFileSync(join(root, 'scripts/check-package-size.js'), realPackageOracle
+    ? `export { PACKAGE_SIZE_MEASUREMENT, parsePackageSizeRatchet, measureArtifact } from ${JSON.stringify(new URL('../scripts/check-package-size.js', import.meta.url).href)};`
+    : `
     export const PACKAGE_SIZE_MEASUREMENT = 'fixture package oracle';
     export const parsePackageSizeRatchet = value => value;
     export function measureArtifact(source) {
@@ -43,7 +51,8 @@ function fixture({ source = original, other = source, modules = ['scripts/lib/ke
   writeFileSync(join(root, file), source);
   writeFileSync(join(root, twin), other);
   const artifacts = Object.fromEntries([file, twin].map(path => [path, {
-    baselineBytes: original.length, baselineGzipBytes: original.length + 1,
+    baselineBytes: realPackageOracle ? measureArtifact(Buffer.from(path === file ? source : other)).bytes : original.length,
+    baselineGzipBytes: realPackageOracle ? measureArtifact(Buffer.from(path === file ? source : other)).gzipBytes : original.length + 1,
     maxBytes: ceiling, maxGzipBytes: ceiling, allowedModules: modules,
     forbiddenNeedles: ['@labpics/icons', '<svg', 'ICON_IDS', 'semantics/catalog', 'sourceMappingURL'],
     ...(path === file ? { identicalTo: twin } : {}),
@@ -53,10 +62,11 @@ function fixture({ source = original, other = source, modules = ['scripts/lib/ke
     entry, baselineBytes: 10, baselineGzipBytes: 11, maxBytes: 100, maxGzipBytes: 101,
   }]));
   scenarios['glyph-one'].entry = legacyGlyphEntry;
-  const policy = { version: 1, measurement: 'fixture package oracle', artifacts };
+  const policy = { version: 1, measurement: realPackageOracle ? PACKAGE_SIZE_MEASUREMENT : 'fixture package oracle', artifacts };
   writeFileSync(join(root, 'release/package-size-ratchet.json'), JSON.stringify(policy));
   writeFileSync(join(root, 'release/consumer-size-ratchet.json'), JSON.stringify({ version: 1, measurement: 'fixture consumer oracle', scenarios }));
-  writeFileSync(join(root, 'release/contract.json'), JSON.stringify({ files: [file, twin] }));
+  writeFileSync(join(root, 'release/contract.json'), JSON.stringify({ files: [file, twin].sort(),
+    exports: { '.': { import: `./${file}` }, './retained': { import: `./${twin}` } }, runtimeDependencies: [], typeDependencies: [] }));
   writeFileSync(join(root, 'package.json'), JSON.stringify({ type: 'module' }));
   writeFileSync(join(root, 'pnpm-lock.yaml'), 'fixture-lock\n');
   return { root, policy };
@@ -96,6 +106,131 @@ function swapConsumerNames(root) {
 }
 
 describe('platform measurement admission policy', () => {
+  it('явное retirement закрывает настоящий zeroeligible compiler output без ослабления size checker', async () => {
+    const inputs = await authoredSymbolPayloads(['notifications']);
+    const input = structuredClone(inputs.notifications);
+    input.source.outline.extra = 'future-source-extension';
+    const source = renderSymbolModules(input).symbol;
+    expect(source).not.toContain('source-packet-runtime.js');
+    const { root, policy } = fixture({ source, modules: [], ceiling: 40000, realPackageOracle: true });
+    for (const path of [file, twin]) policy.artifacts[path].forbiddenNeedles = ['sourceMappingURL', 'semantics/catalog.json', 'anatomy.runtime.json'];
+    const runtime = 'dist/ir/symbol-runtime.js';
+    const runtimeSource = Buffer.from('export const fixture = true;\n');
+    writeFileSync(join(root, runtime), runtimeSource);
+    const fact = measureArtifact(runtimeSource);
+    policy.artifacts[runtime] = { baselineBytes: fact.bytes, baselineGzipBytes: fact.gzipBytes,
+      maxBytes: fact.bytes, maxGzipBytes: fact.gzipBytes, allowedModules: fact.modules, forbiddenNeedles: ['sourceMappingURL'] };
+    const contractPath = join(root, 'release/contract.json');
+    const contract = JSON.parse(readFileSync(contractPath));
+    contract.files = [...contract.files, runtime].sort(); contract.runtimeDependencies = [runtime];
+    writeFileSync(contractPath, JSON.stringify(contract));
+    writeFileSync(join(root, 'release/package-size-ratchet.json'), JSON.stringify(policy));
+    expect(checkPackageSize({ root }).errors).toEqual([]);
+    policy.artifacts[retiring] = retirementLimits;
+    const policyPath = join(root, 'release/package-size-ratchet.json');
+    writeFileSync(policyPath, JSON.stringify(policy));
+    expect(checkPackageSize({ root }).errors.join('\n')).toMatch(/exact release files/);
+    const before = readFileSync(policyPath);
+    const refused = run(root, ['--update']);
+    expect(refused.status).not.toBe(0);
+    expect(refused.stderr).toMatch(/previous artifact/);
+    expect(readFileSync(policyPath).equals(before)).toBe(true);
+    const accepted = run(root, ['--update', '--retire-artifact', retiring]);
+    expect(accepted.status, accepted.stderr).toBe(0);
+    expect(checkPackageSize({ root }).errors).toEqual([]);
+    const report = JSON.parse(readFileSync(join(root, 'report.json')));
+    expect(report.retiredArtifacts).toEqual([{ file: retiring, previousPolicy: retirementLimits,
+      previousPolicySha256: createHash('sha256').update(JSON.stringify(retirementLimits)).digest('hex') }]);
+    const next = JSON.parse(readFileSync(policyPath));
+    expect(next.artifacts).not.toHaveProperty(retiring);
+    for (const [path, limits] of Object.entries(policy.artifacts).filter(([path]) => path !== retiring)) {
+      expect(next.artifacts[path].maxBytes).toBe(limits.maxBytes);
+      expect(next.artifacts[path].maxGzipBytes).toBe(limits.maxGzipBytes);
+      expect(next.artifacts[path].identicalTo).toBe(limits.identicalTo);
+    }
+    next.artifacts[file].baselineBytes -= 1;
+    writeFileSync(policyPath, JSON.stringify(next));
+    expect(checkPackageSize({ root }).errors.join('\n')).toMatch(/factual baselineBytes/);
+  });
+
+  it('retirement требует отдельного сохранённого report', () => {
+    const { root } = fixture();
+    const policyPath = join(root, 'release/package-size-ratchet.json');
+    const before = readFileSync(policyPath);
+    const result = spawnSync(process.execPath, [join(root, 'scripts/measure-platform-artifacts.mjs'), '--update', '--retire-artifact', retiring], {
+      cwd: root, encoding: 'utf8', windowsHide: true,
+    });
+    expect(result.status).not.toBe(0); expect(result.stderr).toMatch(/--output/);
+    expect(readFileSync(policyPath).equals(before)).toBe(true);
+  });
+
+  it.each([
+    ['budget', { ceiling: 1 }, /budget/],
+    ['identicalTo', { other: original.replace('value = 1', 'value = 2') }, /identicalTo/],
+  ])('retirement не ослабляет сохранённый %s', (_, options, expected) => {
+    const { root, policy } = fixture(options);
+    policy.artifacts[retiring] = retirementLimits;
+    const policyPath = join(root, 'release/package-size-ratchet.json');
+    writeFileSync(policyPath, JSON.stringify(policy));
+    const before = readFileSync(policyPath);
+    const result = run(root, ['--update', '--retire-artifact', retiring]);
+    expect(result.status).not.toBe(0); expect(result.stderr).toMatch(expected);
+    expect(readFileSync(policyPath).equals(before)).toBe(true);
+  });
+
+  it('подтверждение одного retirement не удаляет другой previous artifact', () => {
+    const { root, policy } = fixture();
+    const unacknowledged = 'dist/ir/other-unused.js';
+    policy.artifacts[retiring] = retirementLimits;
+    policy.artifacts[unacknowledged] = retirementLimits;
+    const policyPath = join(root, 'release/package-size-ratchet.json');
+    writeFileSync(policyPath, JSON.stringify(policy));
+    const before = readFileSync(policyPath);
+    const result = run(root, ['--update', '--retire-artifact', retiring]);
+    expect(result.status).not.toBe(0); expect(result.stderr).toContain(`${unacknowledged}: previous artifact`);
+    expect(readFileSync(policyPath).equals(before)).toBe(true);
+  });
+
+  it.each([
+    ['unknown', ['--retire-artifact', 'dist/ir/unknown.js'], /unknown|неизвест/],
+    ['active', ['--retire-artifact', file], /active|release contract/],
+    ['duplicate', ['--retire-artifact', retiring, '--retire-artifact', retiring], /duplicate|повтор/],
+    ['missing argument', ['--retire-artifact'], /exact|точн|аргумент/],
+  ])('retirement %s не меняет ни одну policy', (_, args, expected) => {
+    const { root, policy } = fixture();
+    policy.artifacts[retiring] = retirementLimits;
+    const policyPath = join(root, 'release/package-size-ratchet.json');
+    writeFileSync(policyPath, JSON.stringify(policy));
+    const before = readFileSync(policyPath);
+    const consumersBefore = readFileSync(join(root, 'release/consumer-size-ratchet.json'));
+    const result = run(root, ['--update', ...args]);
+    expect(result.status).not.toBe(0); expect(result.stderr).toMatch(expected);
+    expect(readFileSync(policyPath).equals(before)).toBe(true);
+    expect(readFileSync(join(root, 'release/consumer-size-ratchet.json')).equals(consumersBefore)).toBe(true);
+  });
+
+  it.each(['output', 'runtime import', 'type import'])('retirement отвергает остающийся %s', mode => {
+    const { root, policy } = fixture();
+    policy.artifacts[retiring] = retirementLimits;
+    const policyPath = join(root, 'release/package-size-ratchet.json');
+    writeFileSync(policyPath, JSON.stringify(policy));
+    if (mode === 'output') writeFileSync(join(root, retiring), 'export const stale = true;\n');
+    if (mode === 'runtime import') writeFileSync(join(root, file), `${original}import './source-packet-runtime.js';\n`);
+    if (mode === 'type import') {
+      const declaration = 'dist/ir/recipes.d.ts';
+      writeFileSync(join(root, declaration), "export type { Missing } from './source-packet-runtime.js';\n");
+      const contractPath = join(root, 'release/contract.json');
+      const contract = JSON.parse(readFileSync(contractPath));
+      contract.exports['.'].types = `./${declaration}`;
+      writeFileSync(contractPath, JSON.stringify(contract));
+    }
+    const before = readFileSync(policyPath);
+    const result = run(root, ['--update', '--retire-artifact', retiring]);
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toMatch(mode === 'output' ? /output/ : /graph|closure/);
+    expect(readFileSync(policyPath).equals(before)).toBe(true);
+  });
+
   it.each([
     ['signature', 'export async function bundleScenario()', 'export async function bundleScenario(input)'],
     ['return', "return { bytes: 10, gzipBytes: 11, modules: ['dist/fixture.js'] };", "return { bytes: 10.0, gzipBytes: 11, modules: ['dist/fixture.js'] };"],

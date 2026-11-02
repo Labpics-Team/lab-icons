@@ -532,3 +532,28 @@ warm `glyph()` не создаёт новых объектов. Cold/parse/alloc
 node scripts/bench/source-packet-qualification.mjs qualification.json
 node scripts/bench/semantic-packet-probe.mjs alternatives.json
 ```
+
+### Удаление неиспользуемого packet target
+
+Контрпример AC-01: допустимый extension сохраняет literal source, последний
+packet import исчезает и release projection исключает helper. Старый size record
+при этом требует отсутствующий output. Статическое сохранение helper отвергнуто
+реальным `validateReleaseRuntimeDependencyGraph`: private dependencies должны
+равняться closure публичных imports. Искусственная зависимость не принята.
+
+В [опыте 2026-11-02](source-packet-lifecycle-probe-20261102.json) на source
+`cf4d9f5` inline materializers дали 4594/5431 B gzip;
+полная esbuild minification — 4421/5231 B против потолков 4165/5034 B.
+Это исключает проверенный inline layout, а не все возможные представления.
+Обычные [npm files](https://docs.npmjs.com/cli/v11/configuring-npm/package-json/#files)
+определяют tarball; [esbuild tree shaking](https://esbuild.github.io/api/#tree-shaking)
+определяет оставленный consumer code. Оба первичных раздела прочитаны 2026-11-02.
+
+Существующий measurement owner теперь принимает явный `--retire-artifact` только
+при отсутствии прежнего файла в release/output и корректных runtime/type graphs.
+Отчёт сохраняет прежние ограничения и digest записи. Исторический отчёт служит
+разбору PR; активная policy по-прежнему содержит только exact release files.
+Повторное добавление рассматривается отдельно владельцем, без постоянного ledger.
+Regression соединяет настоящий notification compiler fallback, этот CLI и
+неподменённые `measureArtifact` / `checkPackageSize`; consumer bundler в policy
+fixture подменён, поэтому этот тест не утверждает installed-consumer qualification.

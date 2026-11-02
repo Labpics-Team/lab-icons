@@ -307,6 +307,23 @@ master и его parts/provenance, добавленные типизирован
 Явный `--update` разрешён только без этих нарушений и сохраняет прежние запреты
 и `identicalTo`. Изменение допустимого графа требует отдельного разбора у владельца.
 
+Удаление прежнего артефакта отдельно подтверждается аргументом
+`--retire-artifact <exact-dist-path>` той же команды. Когда новый compiler output
+перестал использовать helper и сборка его исключила, на runner:
+
+```sh
+node scripts/measure-platform-artifacts.mjs --output retirement.json --update \
+  --retire-artifact dist/ir/source-packet-runtime.js
+```
+
+Команда принимает только прежний файл, отсутствующий в release allowlist и
+физическом output, при корректном runtime/type import graph. Каждый удаляемый
+файл требует своего аргумента. Отчёт сохраняет его прежние ограничения и SHA256
+записи; оставшиеся потолки, equality и запреты сохраняются. Текущий используемый
+helper удалить этим аргументом нельзя. Возвращение артефакта требует отдельного
+разбора новой policy в PR с прежним отчётом; её новый потолок не следует из
+факта удаления.
+
 Путь следует [SVG 2 path semantics](https://www.w3.org/TR/SVG2/paths.html)
 и [правилам заливки](https://www.w3.org/TR/SVG2/painting.html): compound contour
 и порядок fill scopes сохраняются. Для статического потребления выбран обычный

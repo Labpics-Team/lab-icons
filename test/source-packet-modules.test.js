@@ -64,14 +64,28 @@ describe('целый source/cycle packet сохраняет действующи
 
   it('static consumer удаляет обе semantic factories и private helper целиком', async () => {
     const input = inputs.notifications;
-    const { text, module } = await consume(input, 'import {outline} from "packet";export const result=outline;');
+    const { text, module, metafile } = await consume(input, 'import {outline} from "packet";export const result=outline;');
     expect(module.result).toBe(input.staticSvg.outline);
     expect(text).not.toContain('sourceFingerprint'); expect(text).not.toContain('gesture-ready');
     expect(text).not.toContain(input.source.outline.provenance.author.nodeSha256);
+    const retained = Object.values(metafile.outputs).flatMap(output => Object.entries(output.inputs)
+      .filter(([, input]) => input.bytesInOutput > 0).map(([file]) => file));
+    expect(retained.some(file => file.includes('src/ir/'))).toBe(false);
     const sentinel = 'PACKET_PRIVATE_HELPER_SENTINEL';
     const { text: staticControl } = await consume(input, 'import {outline} from "packet";export const result=outline;',
       module => module.replace('materializeSourceV1(', `materializeSourceV1(${JSON.stringify(sentinel)},`));
     expect(staticControl).not.toContain(sentinel);
+  });
+
+  it('literal glyph consumer не удерживает packet runtime при допустимом extension', async () => {
+    const input = structuredClone(inputs.notifications);
+    input.source.outline.extra = 'future-source-extension';
+    const { module, metafile } = await consume(input, 'export {glyph} from "packet";');
+    expect(JSON.stringify(module.glyph())).toBe(JSON.stringify(input.source.outline));
+    const retained = Object.values(metafile.outputs).flatMap(output => Object.entries(output.inputs)
+      .filter(([, input]) => input.bytesInOutput > 0).map(([file]) => file));
+    expect(retained.some(file => file.endsWith('src/ir/symbol-runtime.ts'))).toBe(true);
+    expect(retained.some(file => file.endsWith('src/ir/source-packet-runtime.ts'))).toBe(false);
   });
 
   it('снятие PURE с source materialization удерживает геометрию в caps и ловится контролем', async () => {

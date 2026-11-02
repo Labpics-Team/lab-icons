@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-/** Запускается на runner после build; --update явно меняет только factual size policy. */
-import { readFileSync, writeFileSync } from 'node:fs';
+/** Runner после build: factual update и явное retirement сохраняют действующие потолки. */
+import { lstatSync, readFileSync, writeFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { dirname, join } from 'node:path';
@@ -9,8 +9,22 @@ import { cpus, totalmem } from 'node:os';
 import { brotliCompressSync, constants } from 'node:zlib';
 import { measureArtifact, PACKAGE_SIZE_MEASUREMENT, parsePackageSizeRatchet } from './check-package-size.js';
 import { bundleScenario, CONSUMER_SIZE_MEASUREMENT, parseConsumerSizeRatchet } from './check-consumer-size.js';
+import { validateReleaseRuntimeDependencyGraph, validateReleaseTypeDependencyGraph } from './lib/release-contract.js';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
+const args = process.argv.slice(2);
+const outputFlag = args.indexOf('--output');
+const outputPath = outputFlag >= 0 ? args[outputFlag + 1] : undefined;
+const retirementAcknowledgments = [];
+for (let index = 0; index < args.length; index++) {
+  if (args[index] !== '--retire-artifact') continue;
+  const file = args[++index];
+  if (!file || file.startsWith('--')) throw new TypeError('--retire-artifact требует exact previous dist artifact');
+  retirementAcknowledgments.push(file);
+}
+if (retirementAcknowledgments.length && (!outputPath || outputPath.startsWith('--'))) {
+  throw new TypeError('--retire-artifact требует --output <path> для сохранения прежней policy identity');
+}
 const read = path => JSON.parse(readFileSync(join(root, path), 'utf8'));
 const contract = read('release/contract.json');
 const previous = parsePackageSizeRatchet(read('release/package-size-ratchet.json'));
@@ -69,8 +83,47 @@ for (const file of contract.files) {
     if (source.toString('utf8').includes(needle)) policyViolations.push(`${file}: forbidden marker ${needle}`);
   }
 }
+const retiredArtifacts = [];
+const acknowledged = new Set(retirementAcknowledgments);
+if (acknowledged.size !== retirementAcknowledgments.length) policyViolations.push('retirement acknowledgment содержит повторные artifacts');
+let retirementGraphErrors = [];
+if (acknowledged.size) {
+  const readText = file => readFileSync(join(root, file), 'utf8');
+  retirementGraphErrors = [
+    ...validateReleaseRuntimeDependencyGraph({ contract, readText }),
+    ...validateReleaseTypeDependencyGraph({ contract, readText }),
+  ];
+  policyViolations.push(...retirementGraphErrors);
+}
+for (const file of acknowledged) {
+  if (!Object.hasOwn(previous.artifacts, file)) {
+    policyViolations.push(`${file}: unknown previous artifact; retirement запрещён`);
+    continue;
+  }
+  if (artifactSources.has(file)) {
+    policyViolations.push(`${file}: active artifact в release contract; retirement запрещён`);
+    continue;
+  }
+  // lstat видит и повреждённую ссылку; только ENOENT удостоверяет отсутствие output.
+  try {
+    lstatSync(join(root, file));
+    policyViolations.push(`${file}: previous output ещё существует; retirement запрещён`);
+    continue;
+  } catch (error) {
+    if (error.code !== 'ENOENT') {
+      policyViolations.push(`${file}: отсутствие previous output не установлено (${error.message})`);
+      continue;
+    }
+  }
+  if (!retirementGraphErrors.length) retiredArtifacts.push({
+    file, previousPolicy: previous.artifacts[file],
+    previousPolicySha256: createHash('sha256').update(JSON.stringify(previous.artifacts[file])).digest('hex'),
+  });
+}
 for (const file of Object.keys(previous.artifacts)) {
-  if (!artifactSources.has(file)) policyViolations.push(`${file}: previous artifact отсутствует в release contract`);
+  if (!artifactSources.has(file) && !acknowledged.has(file)) {
+    policyViolations.push(`${file}: previous artifact отсутствует в release contract; требуется --retire-artifact ${file}`);
+  }
 }
 for (const [file, limits] of Object.entries(artifacts)) {
   if (limits.identicalTo && !artifactSources.get(file).equals(artifactSources.get(limits.identicalTo) ?? Buffer.alloc(0))) {
@@ -117,15 +170,14 @@ const report = {
   consumerMeasurement: CONSUMER_SIZE_MEASUREMENT,
   brotliMeasurement: 'node:zlib brotliCompressSync quality=11; environment.versions.brotli',
   lockfileSha256: createHash('sha256').update(readFileSync(join(root, 'pnpm-lock.yaml'))).digest('hex'),
-  artifacts: artifactMeasurements, consumers: consumerMeasurements,
+  artifacts: artifactMeasurements, consumers: consumerMeasurements, retiredArtifacts,
   candidatePolicies: {
     package: { version: 1, measurement: PACKAGE_SIZE_MEASUREMENT, artifacts },
     consumer: { version: 1, measurement: CONSUMER_SIZE_MEASUREMENT, scenarios },
   },
   policyViolations,
 };
-const outputFlag = process.argv.indexOf('--output');
-if (outputFlag >= 0) writeFileSync(process.argv[outputFlag + 1], `${JSON.stringify(report, null, 2)}\n`);
+if (outputFlag >= 0) writeFileSync(outputPath, `${JSON.stringify(report, null, 2)}\n`);
 if (process.argv.includes('--update')) {
   if (policyViolations.length) throw new Error(`measurement policy отказала:\n${policyViolations.join('\n')}`);
   parsePackageSizeRatchet(report.candidatePolicies.package);
