@@ -146,8 +146,8 @@ function replacementChoices() {
   ui['state-choices'].replaceChildren();
   if (!group || state.legacy) return;
   ui['state-choices'].dataset.transition = group.capabilities.transition;
-  ui['state-choices'].setAttribute('aria-label', sourceGroup(group) ? 'Состояние символа' : 'Знак в общей оболочке');
-  ui['state-choices'].setAttribute('aria-label', contourGroup(group) ? 'Ориентация многоточия' : 'Знак в общей оболочке');
+  ui['state-choices'].setAttribute('aria-label', sourceGroup(group) ? 'Состояние символа'
+    : contourGroup(group) ? 'Ориентация многоточия' : 'Знак в общей оболочке');
   for (const member of group.capabilities.states) {
     const result = group.module.render(member.id, { variant: state.variant });
     if (!result.ok) throw new Error(`${result.reason.code}: ${result.reason.message}`);
