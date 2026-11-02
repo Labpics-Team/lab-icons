@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { iconGeometry } from '../../src/core/icon-geometry.js';
 import { validateMotionGesture } from '../../src/core/motion-sampler.js';
 import { compileAuthorVariation } from './author-variation.js';
+import { compileAuthorAnnulus, projectAuthorAnnulusRuntime } from './author-annulus.js';
 import defaultGrid from '../../semantics/grid.json' with { type: 'json' };
 
 const NAME = /^[a-z][a-z0-9-]*$/;
@@ -244,7 +245,7 @@ function compileLaw(icon, variant, declaration, parts, source) {
  * адресуют только этот закреплённый экспорт; наружу выходят стабильные part.id.
  * Весь документ проверяется до выдачи проекции, без частичного admission.
  */
-export function compileAuthorAnatomy(baseline, document, grid = defaultGrid) {
+function compileAuthorAnatomyResult(baseline, document, grid) {
   fields(document, ['schemaVersion', 'source', 'icons'], 'document');
   fields(document.source, ['fileKey', 'version'], 'source');
   if (document.schemaVersion !== 1 || !record(document.icons)) {
@@ -255,7 +256,7 @@ export function compileAuthorAnatomy(baseline, document, grid = defaultGrid) {
     refuse('SOURCE_MISMATCH', 'анатомия относится к другому файлу или версии Figma');
   }
 
-  const output = {};
+  const output = {}, evidence = {};
   for (const icon of Object.keys(document.icons).sort()) {
     if (!NAME.test(icon) || !Object.hasOwn(baseline.icons, icon)) {
       refuse('ANNOTATION_INVALID', `нет авторского семейства ${icon}`);
@@ -303,10 +304,19 @@ export function compileAuthorAnatomy(baseline, document, grid = defaultGrid) {
         return { ...part, id: annotation.id, identity: 'declared', role: annotation.role,
           ...(annotation.anchor && { anchor: [...annotation.anchor], anchorSource: 'declared' }) };
       });
-      // Без жеста разрешена только явно объявленная геометрия dots.affine.
-      // Отсутствующий или неизвестный motion law не превращается в admission.
-      const variation = declaration.variation
-        ? compileAuthorVariation(source, parts, declaration.variation, grid) : undefined;
+      // Семантический закон не угадывается по форме. Source receipt выводится
+      // из одного author spec, а полный annulus proof не входит в runtime contract.
+      let variation;
+      if (declaration.variation?.law === 'annulus.counter-scale') {
+        fields(declaration.variation, ['law', 'parameter', 'enclosurePartId'], `${label}.variation`);
+        const compiled = compileAuthorAnnulus(source, parts, { ...declaration.variation, variant,
+          source: { ...document.source, masterSha256: declaration.masterSha256,
+            pathFingerprintSha256: declaration.pathFingerprintSha256 } }, grid);
+        variation = projectAuthorAnnulusRuntime(compiled);
+        evidence[label] = compiled;
+      } else if (declaration.variation) {
+        variation = compileAuthorVariation(source, parts, declaration.variation, grid);
+      }
       if (declaration.gesture === null && !variation) {
         refuse('LAW_UNSUPPORTED', `${label}: static parts требуют явного геометрического закона и grid policy`);
       }
@@ -325,5 +335,15 @@ export function compileAuthorAnatomy(baseline, document, grid = defaultGrid) {
       };
     }
   }
-  return freezeTree(output);
+  return freezeTree({ contracts: output, evidence });
+}
+
+/** Существующие build consumers сохраняют прежнюю форму source contracts. */
+export function compileAuthorAnatomy(baseline, document, grid = defaultGrid) {
+  return compileAuthorAnatomyResult(baseline, document, grid).contracts;
+}
+
+/** Полный proof доступен build tooling без сериализации его в consumer runtime. */
+export function compileAuthorAnatomyWithEvidence(baseline, document, grid = defaultGrid) {
+  return compileAuthorAnatomyResult(baseline, document, grid);
 }

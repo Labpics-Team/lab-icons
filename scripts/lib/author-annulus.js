@@ -201,6 +201,23 @@ export function compileAuthorAnnulus(source, parts, declaration, grid) {
   return freeze({ ...compiled, geometrySha256: hash(stableJSON(compiled)) });
 }
 
+/** Runtime получает проверенные operands; полный сертификат остаётся у build owner. */
+export function projectAuthorAnnulusRuntime(compiled) {
+  if (compiled?.version !== 1 || compiled.law !== 'annulus.counter-scale' || compiled.variant !== 'outline') {
+    refuse('LAW_UNSUPPORTED', 'Нужен скомпилированный Outline annulus.');
+  }
+  const { enclosure, domain, source } = compiled;
+  return freeze({ version: compiled.version, law: compiled.law, geometrySha256: compiled.geometrySha256,
+    source: { masterSha256: source.masterSha256, pathFingerprintSha256: source.pathFingerprintSha256 },
+    partIds: compiled.defaults.parts.map(part => part.id),
+    enclosure: { id: enclosure.id, index: enclosure.index, outerD: enclosure.outerD,
+      // Последний endpoint совпадает с первым: runtime замыкает его без дубликата.
+      innerPoints: enclosure.innerPoints.slice(0, -1), center: enclosure.center,
+      outerRadius: enclosure.outerRadius, referenceInnerRadius: enclosure.referenceInnerRadius,
+      referenceThickness: enclosure.referenceThickness },
+    domain: { kind: domain.kind, parameter: domain.parameter, evaluated: domain.evaluated, scale: domain.scale } });
+}
+
 /** Build-only probe: никаких parser, fitting и повторного вывода semantics на запросе. */
 export function materializeAuthorAnnulus(compiled, variation = {}) {
   if (!variation || Object.getPrototypeOf(variation) !== Object.prototype ||

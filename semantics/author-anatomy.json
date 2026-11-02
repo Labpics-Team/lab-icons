@@ -865,6 +865,54 @@
         }
       }
     },
+    "plus-circle": {
+      "outline": {
+        "masterSha256": "1187b32d965b0d97f97dae969f8d62c9e573757b9588341d41368657bd6dde54",
+        "pathFingerprintSha256": "052020c37b091e1697ce6f7bcae632fdcc5a220150a0ffcbaee5e2ad9a9360c2",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "increase-mark",
+            "role": "content"
+          },
+          {
+            "pathIndex": 1,
+            "id": "status-enclosure",
+            "role": "container"
+          }
+        ],
+        "gesture": null,
+        "variation": {
+          "law": "annulus.counter-scale",
+          "parameter": "enclosureEmphasis",
+          "enclosurePartId": "status-enclosure"
+        }
+      }
+    },
+    "minus-circle": {
+      "outline": {
+        "masterSha256": "07be6c7e5b87e9f4ba0facd8fb3b31dbfaba03cb9a3bb9b0f6f552d16b4aaf85",
+        "pathFingerprintSha256": "29cc46dcf51cd5525021420d1f8428086bf7ba0a697527fdc1a8e4035813e508",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "decrease-mark",
+            "role": "content"
+          },
+          {
+            "pathIndex": 1,
+            "id": "status-enclosure",
+            "role": "container"
+          }
+        ],
+        "gesture": null,
+        "variation": {
+          "law": "annulus.counter-scale",
+          "parameter": "enclosureEmphasis",
+          "enclosurePartId": "status-enclosure"
+        }
+      }
+    },
     "ellipsis-vertical": {
       "outline": {
         "masterSha256": "c488b01da737ddf19adf1336b05a14c0c246d69d3456aea7e1c9dfe25e3ef9ed",
