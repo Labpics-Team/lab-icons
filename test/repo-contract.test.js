@@ -9,8 +9,8 @@ import {
   workflowJobBlocks,
   selfHostedWorkflowErrors,
   benchmarkWorkflowErrors,
-  TRUSTED_VERIFY_RUNNER,
-  TRUSTED_BENCHMARK_RUNNER,
+  PUBLIC_VERIFY_RUNNER,
+  PUBLIC_BENCHMARK_RUNNER,
 } from '../scripts/check-repo-contract.js';
 
 const PACKAGE_MANAGER = 'pnpm@11.13.1';
@@ -333,22 +333,22 @@ jobs:
     );
   });
 
-  it('принимает trusted ARC Linux и сохраняет hosted isolation внешнего fork', () => {
+  it('публичные проверки используют hosted isolation при сохранённой native matrix', () => {
     const source = readFileSync(new URL('../.github/workflows/ci.yml', import.meta.url), 'utf8');
     expect(selfHostedWorkflowErrors('.github/workflows/ci.yml', source)).toEqual([]);
     expect(benchmarkWorkflowErrors(source)).toEqual([]);
-    expect(source).toContain(`runs-on: ${TRUSTED_VERIFY_RUNNER}`);
-    expect(source).toContain(`runs-on: ${TRUSTED_BENCHMARK_RUNNER}`);
+    expect(source).toContain(`runs-on: ${PUBLIC_VERIFY_RUNNER}`);
+    expect(source).toContain(`runs-on: ${PUBLIC_BENCHMARK_RUNNER}`);
     expect(source).toContain('os: windows-latest');
     expect(source).toContain('os: macos-latest');
     expect(source).toContain('run: pnpm verify');
   });
 
   it.each([
-    ['fork без проверки trust', source => source.replaceAll("(github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)", 'true')],
+    ['ARC Linux', source => source.replace(`runs-on: ${PUBLIC_VERIFY_RUNNER}`, 'runs-on: [self-hosted, Linux, X64]')],
     ['pull_request_target', source => source.replace('  pull_request:', '  pull_request_target:')],
-    ['generic pool без Linux boundary', source => source.replaceAll('["self-hosted","Linux","X64"]', '["self-hosted"]')],
-    ['Windows заменён Linux', source => source.replace('["self-hosted","Windows","X64"]', '["self-hosted","Linux","X64"]')],
+    ['generic self-hosted pool', source => source.replace(`runs-on: ${PUBLIC_VERIFY_RUNNER}`, 'runs-on: self-hosted')],
+    ['self-hosted native Windows', source => source.replace(`runs-on: ${PUBLIC_VERIFY_RUNNER}`, 'runs-on: [self-hosted, Windows, X64]')],
   ])('routing guard отвергает %s', (_, mutate) => {
     const source = readFileSync(new URL('../.github/workflows/ci.yml', import.meta.url), 'utf8');
     expect(selfHostedWorkflowErrors('.github/workflows/ci.yml', mutate(source))).not.toEqual([]);
