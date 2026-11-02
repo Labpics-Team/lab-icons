@@ -119,11 +119,14 @@ async function compileIrTargets({ root, staging }) {
     for (const file of REQUIRED_DECLARATIONS) copyFileSync(join(declarations, 'ir', file), join(staging, 'ir', file));
     // Source state-types публикуется под прежним IR specifier того же владельца.
     writeFileSync(join(staging, 'motion/index.d.ts'), readFileSync(join(declarations, 'motion/index.d.ts'), 'utf8')
-      .replaceAll('../states/types.js', '../ir/state-types.js'));
+      .replaceAll('../states/contour-types.js', '../ir/contour-state-types.js'));
     copyFileSync(join(declarations, 'lottie/types.d.ts'), join(staging, 'ir/lottie-types.d.ts'));
     copyFileSync(join(declarations, 'authoring/index.d.ts'), join(staging, 'authoring/index.d.ts'));
     copyFileSync(join(declarations, 'authoring/design-spec.d.ts'), join(staging, 'authoring/design-spec.d.ts'));
-    copyFileSync(join(declarations, 'states/types.d.ts'), join(staging, 'ir/state-types.d.ts'));
+    for (const [source, target] of [['types', 'state-types'], ['common-types', 'state-common-types'], ['contour-types', 'contour-state-types']]) {
+      writeFileSync(join(staging, 'ir', `${target}.d.ts`), readFileSync(join(declarations, 'states', `${source}.d.ts`), 'utf8')
+        .replaceAll('./common-types.js', './state-common-types.js'));
+    }
 
     const catalog = read(root, 'semantics/catalog.json');
     const grid = read(root, 'semantics/grid.json');

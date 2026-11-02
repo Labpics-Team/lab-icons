@@ -69,6 +69,7 @@ pnpm add @labpics/icons
 - `dist/ir/compiler.d.ts`
 - `dist/ir/compiler.js`
 - `dist/ir/contour-runtime.js`
+- `dist/ir/contour-state-types.d.ts`
 - `dist/ir/index.d.ts`
 - `dist/ir/index.js`
 - `dist/ir/lottie-runtime.js`
@@ -79,6 +80,7 @@ pnpm add @labpics/icons
 - `dist/ir/render.js`
 - `dist/ir/request.d.ts`
 - `dist/ir/request.js`
+- `dist/ir/state-common-types.d.ts`
 - `dist/ir/state-runtime.js`
 - `dist/ir/state-types.d.ts`
 - `dist/ir/symbol-runtime.js`
@@ -1425,6 +1427,8 @@ pnpm add @labpics/icons
 - `dist/ir/authored-variation.d.ts`
 - `dist/ir/catalog.generated.d.ts`
 - `dist/ir/compiler.d.ts`
+- `dist/ir/contour-state-types.d.ts`
 - `dist/ir/lottie-types.d.ts`
 - `dist/ir/request.d.ts`
+- `dist/ir/state-common-types.d.ts`
 - `dist/ir/state-types.d.ts`

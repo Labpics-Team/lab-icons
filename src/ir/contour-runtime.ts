@@ -1,8 +1,9 @@
 import type {
   ContourStateCapabilities, ContourStateEffectRequest, ContourStateEffectResult, ContourStateExportRequest,
-  ContourStateRenderRequest, ContourStateTarget, PreparedContourStateEffect, StateRefusal, StateRefusalCode,
+  ContourStateRenderRequest, ContourStateTarget, PreparedContourStateEffect,
   StateSvgResult, SymbolContourStateEffect,
-} from '../states/types.js';
+} from '../states/contour-types.js';
+import type { StateRefusal, StateRefusalCode } from '../states/common-types.js';
 import { sha256Hex } from './sha256.js';
 
 const commands = ['M', 'C', 'C', 'C', 'C', 'Z'] as const;

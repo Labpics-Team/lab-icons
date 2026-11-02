@@ -14925,6 +14925,26 @@
     "semantics/catalog.json",
     "anatomy.runtime.json"
    ]
+  },
+  "dist/ir/state-common-types.d.ts": {
+   "baselineBytes": 523,
+   "baselineGzipBytes": 283,
+   "maxBytes": 523,
+   "maxGzipBytes": 283,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ]
+  },
+  "dist/ir/contour-state-types.d.ts": {
+   "baselineBytes": 3953,
+   "baselineGzipBytes": 1257,
+   "maxBytes": 3953,
+   "maxGzipBytes": 1257,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ]
   }
  }
 }

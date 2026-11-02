@@ -680,7 +680,7 @@ describe('enclosure.replace: adversarial admission и compatibility', () => {
         queue.push(target);
       }
     }
-    expect([...seen].sort()).toEqual(['src/ir/author-provenance.ts', 'src/states/types.ts']);
+    expect([...seen].sort()).toEqual(['src/ir/author-provenance.ts', 'src/states/common-types.ts', 'src/states/types.ts']);
   });
 
   it('тот же installed-consumer oracle различает geometry/stage/group-opacity подмены', () => {

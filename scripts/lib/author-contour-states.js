@@ -204,7 +204,7 @@ export function renderContourStateGroupModule(payload) {
 }
 export function contourStateGroupDeclaration(document, name) {
   return [
-    "import type { ContourStateRenderRequest, ContourStateEffectRequest, ContourStateExportRequest, StateSvgResult, ContourStateEffectResult, ContourStateCapabilities } from '../ir/state-types.js';",
+    "import type { ContourStateRenderRequest, ContourStateEffectRequest, ContourStateExportRequest, StateSvgResult, ContourStateEffectResult, ContourStateCapabilities } from '../ir/contour-state-types.js';",
     `export type State = ${Object.keys(document.groups[name].states).sort().map(state => JSON.stringify(state)).join(' | ')};`,
     'export declare function render(state?: State, options?: ContourStateRenderRequest): StateSvgResult;',
     'export declare function renderStateSvg(state?: State, options?: ContourStateRenderRequest): StateSvgResult;',

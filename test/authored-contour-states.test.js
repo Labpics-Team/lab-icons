@@ -244,7 +244,7 @@ describe('переносимый prepared sampler', () => {
         const bundle = await build({ stdin: { contents: entry, resolveDir: directory, sourcefile: 'consumer.js' }, bundle: true, write: false, format: 'esm', treeShaking: true, minify: true, logLevel: 'silent' });
         for (const value of absent) expect(bundle.outputFiles[0].text).not.toContain(value);
       }
-      expect(stateGroupDeclaration(document, name)).toContain("../ir/state-types.js");
+      expect(stateGroupDeclaration(document, name)).toContain("../ir/contour-state-types.js");
       const projected = symbolReleaseProjection(read('release/contract.json'), names, Object.keys(document.groups), names);
       expect(projected.files).toContain('dist/ir/contour-runtime.js');
       expect(native.stateCapabilities()).toMatchObject({ transition: 'contour-interpolation', morph: 'topology-proven', variation: 'exact-default-only' });
@@ -259,8 +259,11 @@ describe('переносимый prepared sampler', () => {
         '--noUncheckedIndexedAccess', '--target', 'ES2022', '--module', 'ESNext', '--moduleResolution', 'bundler', '--skipLibCheck',
         '--rootDir', join(root, 'src'), '--outDir', declarations, join(root, 'src/motion/index.ts'), join(root, 'src/states/types.ts')], { cwd: directory });
       cpSync(declarations, dist, { recursive: true }); mkdirSync(join(dist, 'states'), { recursive: true });
-      writeFileSync(join(dist, 'ir/state-types.d.ts'), readFileSync(join(declarations, 'states/types.d.ts')));
-      writeFileSync(join(dist, 'motion/index.d.ts'), readFileSync(join(declarations, 'motion/index.d.ts'), 'utf8').replaceAll('../states/types.js', '../ir/state-types.js'));
+      for (const [source, target] of [['types', 'state-types'], ['common-types', 'state-common-types'], ['contour-types', 'contour-state-types']]) {
+        writeFileSync(join(dist, 'ir', `${target}.d.ts`), readFileSync(join(declarations, 'states', `${source}.d.ts`), 'utf8')
+          .replaceAll('./common-types.js', './state-common-types.js'));
+      }
+      writeFileSync(join(dist, 'motion/index.d.ts'), readFileSync(join(declarations, 'motion/index.d.ts'), 'utf8').replaceAll('../states/contour-types.js', '../ir/contour-state-types.js'));
       const name = groupName('filled');
       writeFileSync(join(dist, 'states', `${name}.d.ts`), stateGroupDeclaration(document, name));
       writeFileSync(join(pkg, 'package.json'), JSON.stringify({ name: '@labpics/icons', type: 'module', exports: read('package.json').exports }));
