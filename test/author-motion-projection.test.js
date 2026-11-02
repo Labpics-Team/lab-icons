@@ -23,14 +23,25 @@ const names = ['reload', 'refresh', 'timer'].sort();
 const source = await authoredSymbolPayloads(names);
 const rich = await authoredSymbolPayloads(names, { scope: 'motion' });
 const packets = Object.fromEntries(names.map(icon => [icon, projectAuthorMotionSymbol(rich[icon], compileSymbolEffect)]));
+// Oracle читает raw master непосредственно, минуя production normalizer/parser.
+const rawPaths = svg => [...svg.matchAll(/<path\b[^>]*>/g)].map(([tag]) => ({
+  d: /\bd="([^"]+)"/.exec(tag)[1], fillRule: /\bfill-rule="([^"]+)"/.exec(tag)?.[1] ?? 'nonzero',
+}));
 const fixture = mkdtempSync(join(tmpdir(), 'lab-icons-motion-projection-'));
-afterAll(() => rmSync(fixture, { recursive: true, force: true }));
+const baselineFixture = mkdtempSync(join(root, 'node_modules', '.lab-icons-motion-baseline-'));
+afterAll(() => {
+  rmSync(fixture, { recursive: true, force: true });
+  rmSync(baselineFixture, { recursive: true, force: true });
+});
 
 async function importBaseline(file) {
   const contents = execFileSync('git', ['show', `2bf18f9903511d5b0ed703118e7134188253571a:${file}`], { cwd: root, encoding: 'utf8' });
-  const result = await build({ stdin: { contents, resolveDir: dirname(join(root, file)) },
-    bundle: true, write: false, platform: 'node', format: 'esm', target: 'es2022', logLevel: 'silent' });
-  return import(`data:text/javascript;base64,${Buffer.from(result.outputFiles[0].text).toString('base64')}`);
+  const result = await build({ stdin: { contents, resolveDir: dirname(join(root, file)), loader: file.endsWith('.ts') ? 'ts' : 'js' },
+    bundle: true, packages: 'external', write: false, platform: 'node', format: 'esm', target: 'es2022', logLevel: 'silent' });
+  // Node dependencies сохраняют свой import.meta.url и доступ к package assets.
+  const output = join(baselineFixture, `baseline-${file.replace(/[^a-z0-9]/gi, '-')}.mjs`);
+  writeFileSync(output, result.outputFiles[0].text);
+  return import(pathToFileURL(output).href);
 }
 
 async function consume(icon, expression) {
@@ -76,7 +87,7 @@ describe('авторский motion target без стоимости полно�
       expect(rendered).toEqual({ ok: true, svg: rich[icon].source[variant].svg });
       const raw = readFileSync(join(root, rich[icon].source[variant].provenance.file), 'utf8');
       expect(authorPathEntries(rendered.svg.replace(/ data-(?:part|role)="[^"]*"/g, '')).map(({ d, fillRule }) => ({ d, fillRule })))
-        .toEqual(authorPathEntries(raw).map(({ d, fillRule }) => ({ d, fillRule })));
+        .toEqual(rawPaths(raw));
       const caps = module.motionCapabilities(variant);
       expect(caps.ok).toBe(true);
       expect(caps.capabilities.author).toEqual(rich[icon].source[variant].provenance.author);
