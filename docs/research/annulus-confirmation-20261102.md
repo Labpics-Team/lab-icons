@@ -26,7 +26,8 @@ Figma `LuaiBd4anRi4DMZayKAnY2`, snapshot `2416636003859748575`, Outline node
 В source admission должны совпасть версии 1, поддержанный law, geometry hash,
 author и anatomy receipts. Capability сообщает существующий профиль
 `existing-part-gestures`; без этого обещания эффект не выдаётся. Последующий
-opacity-only gate сохраняется для обеих вариаций. Новая аннотация или жест
+receipt изменённой части имеет тот же law, version и geometry hash, что glyph.
+Opacity-only gate сохраняется для обеих вариаций. Новая аннотация или жест
 по имени символа не создаются. Rotation/translation изменённой геометрии,
 Lottie variation и morph остаются неподдержанными.
 
@@ -37,13 +38,19 @@ emphasis `0.9`, `1.1`, `2` возвращали `SEMANTIC_MOTION_UNAVAILABLE`, �
 source-контроль принимал тот же confirmation gesture. Raw master oracle
 подтвердил неизменённую отметку и изменение только внутреннего контура оболочки.
 
-28 новых controls проверяют явные v2 targets/stages, прямой/обратный и частичный
+30 новых controls проверяют явные v2 targets/stages, прямой/обратный и частичный
 прогресс, hold, reduced motion, source default, независимый Filled и точные
 отказы для подмены law/version/hash/target/author/anatomy/part identity,
 потери targets, duplicate IDs и non-opacity каналов. Все варианты дополняются
 достижимым healthy compile. Вместе с прежними dots, annulus, confirmation,
-rest-progress и native declarations прошли 104 tests в семи файлах; `tsc --noEmit`,
+rest-progress и native declarations прошли 106 tests в семи файлах; `tsc --noEmit`,
 syntax, docs-drift и diff checks прошли.
+
+Первое изолированное contract review `630667e` обнаружило P2: изменённая часть
+проверялась только по geometry hash. При отделённом receipt части подмена law
+или version оставляла верхний receipt корректным и всё ещё давала эффект.
+Оба фактических controls получили RED (2 FAIL / 28 PASS); существующий owner
+теперь проверяет совпадение law/version/hash без нового runtime механизма.
 
 Использован проверенный pnpm toolchain родительского checkout, Vitest `--root`
 указывает на этот изолированный worktree. Установки пакета, полной сборки,
@@ -57,7 +64,7 @@ Source hashes сверены с d1 Git blobs; отчёт фиксирует cand
 
 | Output | Baseline raw/gzip, B | Candidate raw/gzip, B | Прежний предел |
 |---|---:|---:|---:|
-| `motion/index.js` | 13381/3715 | 13564/3771 | 14620/3817 |
+| `motion/index.js` | 13381/3715 | 13700/3783 | 14620/3817 |
 | `variations/checkmark-circle.js` | 2157/932 | 2167/941 | Отдельный предел не задан |
 | `variations/plus-circle.js` | 2131/926 | 2141/936 | Отдельный предел не задан |
 

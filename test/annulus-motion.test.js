@@ -126,6 +126,12 @@ describe('annulus.counter-scale сохраняет объявленный confir
     ['необъявленная source identity изменённой части', value => {
       value.glyph.parts[1].provenance.source.identity = 'geometry-derived';
     }],
+    ['чужой закон receipt изменённой части', value => {
+      value.glyph.parts[1].provenance.variation = { ...value.glyph.parts[1].provenance.variation, law: 'dots.affine' };
+    }],
+    ['неподдержанная версия receipt изменённой части', value => {
+      value.glyph.parts[1].provenance.variation = { ...value.glyph.parts[1].provenance.variation, version: 2 };
+    }],
     ['чужой geometry hash изменённой части', value => {
       // Runtime разделяет один receipt; отделяем подмену части от glyph receipt.
       value.glyph.parts[1].provenance.variation = { ...value.glyph.parts[1].provenance.variation,

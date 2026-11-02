@@ -183,6 +183,8 @@ export function compileSymbolEffect(
       (part.provenance.kind === 'source' || glyph.provenance.kind === 'authored-variation' &&
        part.provenance.kind === 'authored-variation' && part.provenance.source.kind === 'source' &&
        part.provenance.source.identity === 'declared' &&
+       part.provenance.variation.version === glyph.provenance.variation.version &&
+       part.provenance.variation.law === glyph.provenance.variation.law &&
        part.provenance.variation.geometrySha256 === glyph.provenance.variation.geometrySha256));
   if ((!modelReady && !sourceReady) || capabilities.motion.state !== 'gesture-ready') {
     return refuse('SEMANTIC_MOTION_UNAVAILABLE', 'Для этого варианта нет принятого семантического жеста.');

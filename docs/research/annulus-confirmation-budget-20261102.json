@@ -20,12 +20,12 @@
   },
   "measurement": "production scripts/build-ir.mjs bundle; fflate gzipSync level=9 mtime=0",
   "sourceSha256": {
-    "src/motion/index.ts": "9bc7f5311648fd2140191b4f2e90926edd7245a4cd9db2ff98b16aca7e198e7b",
+    "src/motion/index.ts": "4a102b5f4cc30a65d4becb1d5099573cd71f81c3861617c431140d85bebd2de2",
     "src/ir/author-annulus-types.ts": "373b539e9799592073f09aa698017f12c2257040bd26845fe71b11f0acfbdffb",
     "scripts/lib/author-variation.js": "a4b626f5b11d740335a9618106a4706623940a9377a23c2ccd8ce3c3f09887da",
     "scripts/lib/symbol-modules.js": "80d08832720b5058bfe97e39cb0667ba255edc57177945ef10e0e4a8ac637b76",
     "scripts/build-ir.mjs": "1955819f0127dfdbd2298d6601ed6d5b9d623d5377c871e14e69fc3f8ed34632",
-    "test/annulus-motion.test.js": "c37098d0bf8af52856d8c32ee3e7c48ed7a04d3c91aed4ed0787ec58b07cfda5"
+    "test/annulus-motion.test.js": "a38411c1edfba3c8d32e254274d16f5daff926bcad5b6487a2cedad01c6dcd9e"
   },
   "native": {
     "baseline": {
@@ -34,9 +34,9 @@
       "sha256": "054d2864765a54ebfd8dd90421f0ab7cd07cc00f8ad74849aec66a587e81ad7f"
     },
     "candidate": {
-      "bytes": 13564,
-      "gzipBytes": 3771,
-      "sha256": "89d9b2059d48baa7d0252b64bbb565a7af4055f07cc6ce6b8e16278260d6c50e"
+      "bytes": 13700,
+      "gzipBytes": 3783,
+      "sha256": "b6e010f29d769474262bb9a3b9fc8f4ddb025fb26399afe28cb056aff9ba07bc"
     },
     "limits": {
       "maxBytes": 14620,
