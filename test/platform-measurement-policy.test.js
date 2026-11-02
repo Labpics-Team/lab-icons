@@ -1,6 +1,6 @@
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, linkSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -72,10 +72,24 @@ function fixture({ source = original, other = source, modules = ['scripts/lib/ke
   return { root, policy };
 }
 
-function run(root, args = []) {
-  return spawnSync(process.execPath, [join(root, 'scripts/measure-platform-artifacts.mjs'), '--output', join(root, 'report.json'), ...args], {
+function run(root, args = [], { output = join(root, 'report.json') } = {}) {
+  return spawnSync(process.execPath, [join(root, 'scripts/measure-platform-artifacts.mjs'), '--output', output, ...args], {
     cwd: root, encoding: 'utf8', windowsHide: true,
   });
+}
+
+function snapshotInputs(root) {
+  return Object.fromEntries([
+    'release/package-size-ratchet.json', 'release/consumer-size-ratchet.json', 'release/contract.json',
+    'package.json', 'pnpm-lock.yaml', 'scripts/measure-platform-artifacts.mjs',
+    'scripts/check-package-size.js', 'scripts/check-consumer-size.js', file, twin,
+  ].map(path => [path, readFileSync(join(root, path))]));
+}
+
+function expectNoWrites(root, before) {
+  for (const [path, contents] of Object.entries(before)) expect(readFileSync(join(root, path)).equals(contents), path).toBe(true);
+  expect(existsSync(join(root, retiring))).toBe(false);
+  expect(existsSync(join(root, 'report.json'))).toBe(false);
 }
 
 function measureConsumer(root, entry, bytes, gzipBytes) {
@@ -106,6 +120,75 @@ function swapConsumerNames(root) {
 }
 
 describe('platform measurement admission policy', () => {
+  it.each([
+    'release/package-size-ratchet.json', 'release/consumer-size-ratchet.json', 'release/contract.json',
+    'package.json', 'pnpm-lock.yaml', 'scripts/measure-platform-artifacts.mjs',
+    'scripts/check-package-size.js', 'scripts/check-consumer-size.js', file, retiring,
+    'dist/ir/new-output.json', './release/../release/package-size-ratchet.json',
+  ])('retirement report destination %s не пишет в защищённые inputs или output', destination => {
+    const { root, policy } = fixture();
+    policy.artifacts[retiring] = retirementLimits;
+    writeFileSync(join(root, 'release/package-size-ratchet.json'), JSON.stringify(policy));
+    const before = snapshotInputs(root);
+    const output = join(root, destination);
+    const existed = existsSync(output);
+    const result = run(root, ['--update', '--retire-artifact', retiring], { output });
+    expect(result.status, result.stderr).not.toBe(0);
+    expect(result.stderr).toMatch(/report destination|назначени|независим/);
+    expectNoWrites(root, before);
+    if (!existed) expect(existsSync(output)).toBe(false);
+  });
+
+  it.each(['release', 'dist/ir'])('retirement report отвергает parent alias к %s до любых записей', directory => {
+    const { root, policy } = fixture();
+    policy.artifacts[retiring] = retirementLimits;
+    writeFileSync(join(root, 'release/package-size-ratchet.json'), JSON.stringify(policy));
+    const alias = join(root, 'report-parent-alias');
+    symlinkSync(join(root, directory), alias, process.platform === 'win32' ? 'junction' : 'dir');
+    const before = snapshotInputs(root);
+    const output = join(alias, directory === 'release' ? 'package-size-ratchet.json' : 'source-packet-runtime.js');
+    const result = run(root, ['--update', '--retire-artifact', retiring], { output });
+    expect(result.status, result.stderr).not.toBe(0); expect(result.stderr).toMatch(/report destination|назначени|независим/);
+    expectNoWrites(root, before);
+  });
+
+  it('retirement report отвергает platform case alias и hardlink input', () => {
+    const { root, policy } = fixture();
+    policy.artifacts[retiring] = retirementLimits;
+    writeFileSync(join(root, 'release/package-size-ratchet.json'), JSON.stringify(policy));
+    const before = snapshotInputs(root);
+    const direct = join(root, 'release/package-size-ratchet.json');
+    const cased = process.platform === 'win32' ? direct.toUpperCase() : direct;
+    const caseResult = run(root, ['--update', '--retire-artifact', retiring], { output: cased });
+    expect(caseResult.status, caseResult.stderr).not.toBe(0); expectNoWrites(root, before);
+    const hardlink = join(root, 'report-hardlink.json');
+    linkSync(direct, hardlink);
+    const linked = run(root, ['--update', '--retire-artifact', retiring], { output: hardlink });
+    expect(linked.status, linked.stderr).not.toBe(0); expect(linked.stderr).toMatch(/report destination|назначени|независим/);
+    expectNoWrites(root, before);
+  });
+
+  it('retirement report сохраняется в независимом outside parent alias', () => {
+    const { root, policy } = fixture();
+    policy.artifacts[retiring] = retirementLimits;
+    writeFileSync(join(root, 'release/package-size-ratchet.json'), JSON.stringify(policy));
+    const outside = mkdtempSync(join(tmpdir(), 'lab-icons-independent-report-'));
+    roots.push(outside);
+    const alias = join(root, 'safe-report-parent');
+    symlinkSync(outside, alias, process.platform === 'win32' ? 'junction' : 'dir');
+    const result = run(root, ['--update', '--retire-artifact', retiring], { output: join(alias, 'retirement.json') });
+    expect(result.status, result.stderr).toBe(0);
+    const report = JSON.parse(readFileSync(join(outside, 'retirement.json')));
+    expect(report.retiredArtifacts[0].file).toBe(retiring);
+    expect(report.retiredArtifacts[0].previousPolicy).toEqual(retirementLimits);
+    const next = JSON.parse(readFileSync(join(root, 'release/package-size-ratchet.json')));
+    expect(next.artifacts).not.toHaveProperty(retiring);
+    for (const [path, limits] of Object.entries(policy.artifacts).filter(([path]) => path !== retiring)) {
+      expect(next.artifacts[path].maxBytes).toBe(limits.maxBytes);
+      expect(next.artifacts[path].maxGzipBytes).toBe(limits.maxGzipBytes);
+    }
+  });
+
   it('явное retirement закрывает настоящий zeroeligible compiler output без ослабления size checker', async () => {
     const inputs = await authoredSymbolPayloads(['notifications']);
     const input = structuredClone(inputs.notifications);

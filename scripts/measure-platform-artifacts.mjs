@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 /** Runner после build: factual update и явное retirement сохраняют действующие потолки. */
-import { lstatSync, readFileSync, writeFileSync } from 'node:fs';
+import { lstatSync, readFileSync, realpathSync, statSync, writeFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { dirname, join } from 'node:path';
+import { basename, dirname, join, resolve, sep, toNamespacedPath } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { cpus, totalmem } from 'node:os';
 import { brotliCompressSync, constants } from 'node:zlib';
@@ -29,6 +29,48 @@ const read = path => JSON.parse(readFileSync(join(root, path), 'utf8'));
 const contract = read('release/contract.json');
 const previous = parsePackageSizeRatchet(read('release/package-size-ratchet.json'));
 const oldConsumers = parseConsumerSizeRatchet(read('release/consumer-size-ratchet.json'));
+
+/** Отчёт не меняет входы измерения и не возвращает исключённый dist-файл. */
+function independentReportDestination(output) {
+  const requested = resolve(output);
+  const parent = realpathSync(dirname(requested));
+  let entry;
+  try { entry = lstatSync(requested); }
+  catch (error) { if (error.code !== 'ENOENT') throw error; }
+  // Неразрешимая существующая ссылка отклоняется, а не считается новым файлом.
+  const actual = entry ? realpathSync(requested) : join(parent, basename(requested));
+  const comparable = path => process.platform === 'win32'
+    ? toNamespacedPath(resolve(path)).toLowerCase() : resolve(path);
+  const inside = (directory, candidate) => {
+    const base = comparable(directory), target = comparable(candidate);
+    return target === base || target.startsWith(`${base}${sep}`);
+  };
+  const refuse = () => { throw new Error('measurement report destination обязан быть независимым от inputs, release и dist'); };
+  const directories = ['dist', 'release', 'scripts'].map(name => join(root, name));
+  for (const directory of directories) {
+    const physical = realpathSync(directory);
+    if ([requested, actual].some(path => inside(directory, path) || inside(physical, path))) refuse();
+  }
+  const sameIdentity = (left, right) => left.dev === right.dev && left.ino === right.ino;
+  const directoryIds = directories.map(path => statSync(path, { bigint: true }));
+  // Identity закрывает case aliases и bind-mount aliases существующего parent.
+  for (const targetParent of new Set([parent, dirname(actual)])) {
+    for (let directory = targetParent; ; directory = dirname(directory)) {
+      const identity = statSync(directory, { bigint: true });
+      if (directoryIds.some(protectedId => sameIdentity(identity, protectedId))) refuse();
+      if (dirname(directory) === directory) break;
+    }
+  }
+  const inputs = ['package.json', 'pnpm-lock.yaml'].map(name => join(root, name));
+  if (inputs.some(path => comparable(requested) === comparable(path) || comparable(actual) === comparable(realpathSync(path)))) refuse();
+  if (entry) {
+    const identity = statSync(actual, { bigint: true });
+    // realpath не уникален для hardlinks; shared file не является независимым отчётом.
+    if (!identity.isFile() || identity.nlink > 1n || inputs.some(path => sameIdentity(identity, statSync(path, { bigint: true })))) refuse();
+  }
+  return actual;
+}
+
 const entries = {
   'one-static': oldConsumers.scenarios['one-static'].entry,
   'authored-static': "import { outline } from '@labpics/icons/symbols/time';\nconsole.log(outline);\n",
@@ -177,7 +219,7 @@ const report = {
   },
   policyViolations,
 };
-if (outputFlag >= 0) writeFileSync(outputPath, `${JSON.stringify(report, null, 2)}\n`);
+if (outputFlag >= 0) writeFileSync(independentReportDestination(outputPath), `${JSON.stringify(report, null, 2)}\n`);
 if (process.argv.includes('--update')) {
   if (policyViolations.length) throw new Error(`measurement policy отказала:\n${policyViolations.join('\n')}`);
   parsePackageSizeRatchet(report.candidatePolicies.package);

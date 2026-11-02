@@ -557,3 +557,13 @@ packet import исчезает и release projection исключает helper. 
 Regression соединяет настоящий notification compiler fallback, этот CLI и
 неподменённые `measureArtifact` / `checkPackageSize`; consumer bundler в policy
 fixture подменён, поэтому этот тест не утверждает installed-consumer qualification.
+
+Независимое ревью выявило alias назначения отчёта: запись могла затереть policy
+или восстановить удалённый dist-файл после проверки его отсутствия. Owner теперь
+проверяет назначение перед записью отчёта и policy. Реальные target/parent,
+Windows case/namespace и файловая identity проверяются отдельно: первичный
+[Node fs.realpath](https://nodejs.org/api/fs.html#fsrealpathpath-options-callback),
+прочитанный 2026-11-02, прямо указывает отсутствие case conversion и
+неуникальность pathname при hardlinks. Исполняемый RED принял опасные назначения
+с exit 0 при здоровом outside-report контроле; regression теперь требует отказа
+без изменения всех measurement inputs и outputs.
