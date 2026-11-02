@@ -64,6 +64,7 @@ pnpm add @labpics/icons
 - `dist/ir/author-annulus-types.d.ts`
 - `dist/ir/author-catalog.generated.d.ts`
 - `dist/ir/author-provenance.d.ts`
+- `dist/ir/author-request-runtime.js`
 - `dist/ir/author-source.d.ts`
 - `dist/ir/authored-variation.d.ts`
 - `dist/ir/candidates.d.ts`
@@ -88,10 +89,16 @@ pnpm add @labpics/icons
 - `dist/ir/state-common-types.d.ts`
 - `dist/ir/state-runtime.js`
 - `dist/ir/state-types.d.ts`
+- `dist/ir/symbol-data/alert-circle.js`
+- `dist/ir/symbol-data/checkmark-circle.js`
+- `dist/ir/symbol-data/close-circle.js`
 - `dist/ir/symbol-data/ellipsis-horizontal.js`
 - `dist/ir/symbol-data/ellipsis-vertical.js`
 - `dist/ir/symbol-data/minus-circle.js`
+- `dist/ir/symbol-data/pause-circle.js`
+- `dist/ir/symbol-data/play-circle.js`
 - `dist/ir/symbol-data/plus-circle.js`
+- `dist/ir/symbol-data/question-circle.js`
 - `dist/ir/symbol-runtime.js`
 - `dist/ir/variation-runtime.js`
 - `dist/lottie/accessibility.d.ts`
@@ -1426,14 +1433,26 @@ pnpm add @labpics/icons
 - `dist/symbols/warning.js`
 - `dist/symbols/waveform.d.ts`
 - `dist/symbols/waveform.js`
+- `dist/variations/alert-circle.d.ts`
+- `dist/variations/alert-circle.js`
+- `dist/variations/checkmark-circle.d.ts`
+- `dist/variations/checkmark-circle.js`
+- `dist/variations/close-circle.d.ts`
+- `dist/variations/close-circle.js`
 - `dist/variations/ellipsis-horizontal.d.ts`
 - `dist/variations/ellipsis-horizontal.js`
 - `dist/variations/ellipsis-vertical.d.ts`
 - `dist/variations/ellipsis-vertical.js`
 - `dist/variations/minus-circle.d.ts`
 - `dist/variations/minus-circle.js`
+- `dist/variations/pause-circle.d.ts`
+- `dist/variations/pause-circle.js`
+- `dist/variations/play-circle.d.ts`
+- `dist/variations/play-circle.js`
 - `dist/variations/plus-circle.d.ts`
 - `dist/variations/plus-circle.js`
+- `dist/variations/question-circle.d.ts`
+- `dist/variations/question-circle.js`
 
 ## Транзитивные декларации типов
 
