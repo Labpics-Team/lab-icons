@@ -83,7 +83,7 @@ export function createCompiledCapsuleGlyph<TIcon extends AuthorIconId>(icon: TIc
     if (typeof width !== 'number' || !Number.isFinite(width) || width <= 0) refuse('INVALID_VARIATION', 'Body width обязан быть конечным положительным числом.');
     if (width === 1) return source;
     if (options.modelMode === 'source-only') throw new GlyphModelError('AUTHOR_PARITY_REQUIRED', 'source-only сохраняет точный master.');
-    if (width < geometry.domain.minimum || width > geometry.domain.maximum) refuse('VARIATION_OUTSIDE_DOMAIN', 'Body width нарушает доказанный span/clearance интервал.');
+    if (width < geometry.domain.minimum || width > geometry.domain.maximum) refuse('VARIATION_OUTSIDE_DOMAIN', 'Body width выходит за пересечение геометрического допуска и оптического диапазона авторского стиля.');
     const d = geometry.body.contours.map(contour => {
       const points = contour.points.map((point, index) => [point[0] + (width - 1) * contour.rates[index]!, point[1]] as const);
       const xs = points.map(point => point[0]);

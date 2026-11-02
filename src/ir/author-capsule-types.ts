@@ -34,7 +34,8 @@ export interface AuthorCapsuleVariationDomain {
   readonly maximum: 1;
   readonly minimumInclusive: true;
   readonly maximumInclusive: true;
-  readonly policy: Readonly<{ gridVersion: number; gridSha256: string; minimumGap: number; minimumPositiveSpan: number }>;
+  readonly policy: Readonly<{ gridVersion: number; gridSha256: string; minimumGap: number; minimumPositiveSpan: number;
+    style: Readonly<{ id: string; version: number; minimum: number; sha256: string; evidenceSha256: string }> }>;
   readonly certificate: Readonly<{ method: 'exact-tensor-bernstein-separation'; sha256: string }>;
 }
 export interface AuthorCapsuleVariationCapability {

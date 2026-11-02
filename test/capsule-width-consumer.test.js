@@ -22,12 +22,14 @@ async function consumer(icon, kind, statement) {
 }
 describe('body width uses the actual public generated consumer module',()=>{
   it.each(['mic','mic-circle'])('%s changes real geometry through the small opt-in and shares exact source defaults',async icon=>{
-    const result = await consumer(icon,'variations',"export const source=symbol.glyph();export const varied=symbol.glyph({variation:{bodyWidth:.9}});export const caps=symbol.glyphCapabilities();export const publicKeys=Object.keys(symbol).sort();");
-    const {source,varied,caps,publicKeys}=result.module;
+    const result = await consumer(icon,'variations',"export const source=symbol.glyph();export const varied=symbol.glyph({variation:{bodyWidth:.9}});export const lower=symbol.glyph({variation:{bodyWidth:.8}});export const refused=(()=>{try{symbol.glyph({variation:{bodyWidth:.79}});return null;}catch(error){return error.code;}})();export const caps=symbol.glyphCapabilities();export const publicKeys=Object.keys(symbol).sort();");
+    const {source,varied,lower,refused,caps,publicKeys}=result.module;
     expect(publicKeys).toEqual(['filled','glyph','glyphCapabilities','outline']);
     expect(publicKeys).toEqual(JSON.parse(readFileSync(new URL('../release/export-surface.json',import.meta.url),'utf8'))[`./variations/${icon}`]);
     expect(varied.parts.find(part=>part.id==='microphone-body').d).not.toBe(source.parts.find(part=>part.id==='microphone-body').d);
     expect(varied.svg).not.toBe(source.svg);expect(caps.variation.law).toBe('capsule.width');
+    expect(lower.provenance.variation.parameters.bodyWidth).toBe(.8);
+    expect(caps.variation.domain.minimum).toBe(.8);expect(refused).toBe('VARIATION_OUTSIDE_DOMAIN');
     // request.ts переиспользует маленький AXIS_NAMES из type-проекции;
     // source module в metafile не означает сохранённый IR-каталог в output.
     expect(result.loaded.join('\n')).not.toMatch(/authoring|semantics\/catalog\.json|src\/ir\/index\.ts|author-capsule\.js|path-data\.js/);

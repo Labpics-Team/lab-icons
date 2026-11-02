@@ -29,8 +29,27 @@ const points = segments => segments.flatMap(segment => segment.cmd === 'Z' ? [] 
   ? [[segment.x1, segment.y1], [segment.x2, segment.y2], [segment.x, segment.y]]
   : segment.cmd === 'Q' ? [[segment.x1, segment.y1], [segment.x, segment.y]] : [[segment.x, segment.y]]);
 const span = contour => { const xs = points(contour).map(point => point[0]); return Math.max(...xs) - Math.min(...xs); };
+// Геометрически допустимые, но оптически отклонённые ширины source 10a9946;
+// sheet SHA-256 e00f9cc60fb56a6ac35e94fafc0b5cdc2f7d1c9fdf9b31ec67a8ca4b77b7b3d5.
+const geometricWitnesses = { 'mic/outline': .4493557931633908, 'mic/filled': .18349372043712373,
+  'mic-circle/outline': .2983006804569976 };
 
 describe('source-owned capsule width changes context without shrinking the whole symbol', () => {
+  it.each(Object.keys(geometricWitnesses))('%s refuses the previously admitted optical failure without losing healthy widths', label => {
+    const [icon, variant] = label.split('/'), glyph = glyphs[icon];
+    for (const width of [.8, .9, 1]) expect(glyph({variant,variation:{bodyWidth:width}}).parts).toHaveLength(payloads[icon].source[variant].parts.length);
+    for (const width of [geometricWitnesses[label], .7999999999999999]) {
+      expect(() => glyph({variant,variation:{bodyWidth:width}})).toThrowError(expect.objectContaining({code:'VARIATION_OUTSIDE_DOMAIN'}));
+    }
+    expect(payloads[icon].variation[variant].domain.minimum).toBe(.8);
+    expect(payloads[icon].variation[variant].domain.policy.style).toMatchObject({id:'lab-ui-v2.1-capsule-width',version:1,minimum:.8,
+      evidenceSha256:'e00f9cc60fb56a6ac35e94fafc0b5cdc2f7d1c9fdf9b31ec67a8ca4b77b7b3d5'});
+    const compiled = compileAuthorCapsule(baseline.icons[icon][variant],contracts[label].parts,selected.icons[icon][variant].variation,grid);
+    expect(compiled.evidence.geometricDomain).toEqual({minimum:geometricWitnesses[label],maximum:1});
+    expect(payloads[icon].variation[variant]).not.toHaveProperty('evidence');
+    expect(payloads[icon].variation[variant].domain).not.toHaveProperty('geometricDomain');
+  });
+
   it.each(['mic/outline', 'mic/filled', 'mic-circle/outline'])('%s keeps exact default and preserves command/part semantics', label => {
     const [icon, variant] = label.split('/'), glyph = glyphs[icon], source = glyph({ variant });
     for (const request of [{variant}, {variant,variation:{}}, {variant,variation:{bodyWidth:1}}]) expect(glyph(request)).toBe(source);
@@ -75,6 +94,7 @@ describe('source-owned capsule width changes context without shrinking the whole
     for (const mutate of [
       value => {value.variation.outline.body.contours[0].commands = value.variation.outline.body.contours[0].commands.replace('C','L');},
       value => {value.variation.outline.body.contours[0].points[0][0] += .1;},
+      value => {value.variation.outline.domain.policy.style.minimum = .7;},
       value => {value.source.outline.parts[1].d = value.source.outline.parts[1].d.replace('C','L');},
       value => {value.source.outline.parts[0].d += 'M0 0L1 1Z';},
       value => {value.source.outline.parts[1].fillRule='nonzero';},
@@ -88,6 +108,9 @@ describe('source-owned capsule width changes context without shrinking the whole
     expect(() => compileAuthorCapsule(source,parts,selected.icons.mic.outline.variation,grid)).toThrowError(expect.objectContaining({code:'SOURCE_MISMATCH'}));
     expect(() => compileAuthorCapsule(baseline.icons['mic-circle'].filled,baseline.icons['mic-circle'].filled.sourceContract.parts,
       {law:'capsule.width',parameter:'bodyWidth',bodyPartId:'microphone-body'},grid)).toThrow();
+    const foreignStyle = structuredClone(baseline.icons.mic.outline); foreignStyle.author.version = 'next-author-version';
+    expect(() => compileAuthorCapsule(foreignStyle,contracts['mic/outline'].parts,selected.icons.mic.outline.variation,grid))
+      .toThrowError(expect.objectContaining({code:'STYLE_SOURCE_MISMATCH'}));
   });
 
   it('uses existing sliced export owner and keeps optional type closure', () => {

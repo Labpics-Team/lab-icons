@@ -16,6 +16,18 @@ const { fraction, rational, add, sub, mul, div, cmp, min, max, square, receipt, 
 const zero = rational(0), one = rational(1), half = rational(.5), u = fraction(1n, 1n << 53n), eta = fraction(1n, 1n << 1075n);
 const abs = value => value[0] < 0n ? [-value[0], value[1]] : value;
 const COUNTS = { M: 1, L: 1, C: 3, Q: 2, Z: 0 };
+// Общая граница авторского стиля следует из просмотра, а не из clearance.
+// Область и контрпример: docs/research/capsule-optical-domain-20261102.md.
+const CAPSULE_SOURCE_STYLE = Object.freeze({
+  id: 'lab-ui-v2.1-capsule-width', version: 1, minimum: .8,
+  source: { fileKey: 'LuaiBd4anRi4DMZayKAnY2', version: '2416636003859748575' },
+  evidence: {
+    artifactCommit: '10a994686e34e4d1c6b03af0eeb879e6c55bd029',
+    sha256: 'e00f9cc60fb56a6ac35e94fafc0b5cdc2f7d1c9fdf9b31ec67a8ca4b77b7b3d5',
+    reference: 'docs/research/capsule-optical-domain-20261102.md',
+    bodyWidths: [.8, .9, 1], sizes: [16, 24, 48], dpr: 1,
+  },
+});
 
 function contours(d) {
   let parsed;
@@ -112,6 +124,9 @@ export function compileAuthorCapsule(source, parts, declaration, grid) {
   if (!source || typeof source.rawSvg !== 'string' || !source.author || !Array.isArray(parts)) {
     refuse('SOURCE_MISMATCH', 'Нужен полный authored source record и объявленные части.');
   }
+  if (source.author.fileKey !== CAPSULE_SOURCE_STYLE.source.fileKey || source.author.version !== CAPSULE_SOURCE_STYLE.source.version) {
+    refuse('STYLE_SOURCE_MISMATCH', 'Оптический допуск относится к другому авторскому источнику; требуется его пересмотр.');
+  }
   let entries;
   try { entries = authorPathEntries(source.artifactSvg); } catch { refuse('SOURCE_MISMATCH', 'Artifact SVG не соответствует supported source контракту.'); }
   if (hash(source.rawSvg) !== source.author.masterSha256 || hash(stableJSON(entries)) !== source.author.pathFingerprintSha256 ||
@@ -154,19 +169,25 @@ export function compileAuthorCapsule(source, parts, declaration, grid) {
       xOrder: [...new Map(contour.points.map((point, i) => [point[0], i]))].sort((a, b) => a[0] - b[0]).map(([, i]) => i),
       minimum, error };
   });
-  const minimum = directedNumber(max([zero, ...compiledContours.map(contour => contour.minimum)]), 1);
-  if (!(minimum > 0 && minimum < 1)) refuse('DEFAULT_OUTSIDE_DOMAIN', 'Master не даёт ненулевой width-домен при owner span policy.');
-  const statistics = { cells: 0 }, curves = compiledContours.map(contour => curvePieces(contour, minimum, contour.rates));
+  const geometricMinimum = directedNumber(max([zero, ...compiledContours.map(contour => contour.minimum)]), 1);
+  if (!(geometricMinimum > 0 && geometricMinimum < 1)) refuse('DEFAULT_OUTSIDE_DOMAIN', 'Master не даёт ненулевой width-домен при owner span policy.');
+  // Полный численный интервал сохраняется в build evidence. Consumer получает
+  // его пересечение с общей оптически принятой областью текущего source style.
+  const minimum = Math.max(geometricMinimum, CAPSULE_SOURCE_STYLE.minimum);
+  const statistics = { cells: 0 }, curves = compiledContours.map(contour => curvePieces(contour, geometricMinimum, contour.rates));
   if (curves.length === 2) for (const outer of curves[0]) for (const inner of curves[1]) certifySeparation(outer, inner, gap, statistics);
   for (const [otherIndex, entry] of entries.entries()) if (otherIndex !== index) {
-    for (const contour of contours(entry.d)) for (const other of curvePieces(contour, minimum)) {
+    for (const contour of contours(entry.d)) for (const other of curvePieces(contour, geometricMinimum)) {
       for (const capsule of curves[0]) certifySeparation(capsule, other, gap, statistics);
     }
   }
   const proof = { method: 'exact-tensor-bernstein-separation', parameter: 'shared-width', evaluated: 'materialized-binary64-controls',
+    geometricDomain: { minimum: geometricMinimum, maximum: 1 },
     cells: statistics.cells, coordinateErrorUpper: compiledContours.map(contour => receipt(contour.error)) };
   const domain = { kind: 'bounded-capsule-width', minimum, maximum: 1, minimumInclusive: true, maximumInclusive: true,
-    policy: { gridVersion: grid.version, gridSha256: hash(stableJSON(grid)), minimumGap: gap, minimumPositiveSpan: positiveSpan },
+    policy: { gridVersion: grid.version, gridSha256: hash(stableJSON(grid)), minimumGap: gap, minimumPositiveSpan: positiveSpan,
+      style: { id: CAPSULE_SOURCE_STYLE.id, version: CAPSULE_SOURCE_STYLE.version, minimum: CAPSULE_SOURCE_STYLE.minimum,
+        sha256: hash(stableJSON(CAPSULE_SOURCE_STYLE)), evidenceSha256: CAPSULE_SOURCE_STYLE.evidence.sha256 } },
     certificate: { method: proof.method, sha256: hash(stableJSON(proof)) } };
   const compiled = { version: 1, law: 'capsule.width', source: { masterSha256: source.author.masterSha256,
     pathFingerprintSha256: source.author.pathFingerprintSha256 }, partIds: parts.map(part => part.id),
