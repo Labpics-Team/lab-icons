@@ -6,6 +6,7 @@ import { renderSymbolModule, symbolExportName, symbolModuleDeclaration, symbolRe
 import { expandReleaseExports, runtimeModuleSpecifiers, validateReleaseContract, validateReleaseRuntimeDependencyGraph } from '../scripts/lib/release-contract.js';
 import { authorSymbolPayload, loadAuthorBaseline } from '../scripts/lib/author-baseline.js';
 import { compileAuthorAnatomy } from '../scripts/lib/author-anatomy.js';
+import { createCompiledVariationGlyph } from '../src/ir/authored-variation.js';
 import { createGlyphCompiler } from '../src/ir/compiler.js';
 
 const base = {
@@ -22,6 +23,7 @@ async function consumeSymbol(contents, entry) {
       plugin.onResolve({ filter: /^test-symbol$/ }, () => ({ path: 'symbol', namespace: 'symbol', sideEffects: false }));
       plugin.onLoad({ filter: /.*/, namespace: 'symbol' }, () => ({ contents, loader: 'js' }));
       plugin.onResolve({ filter: /symbol-runtime\.js$/ }, () => ({ path: fileURLToPath(new URL('../src/ir/symbol-runtime.ts', import.meta.url)) }));
+      plugin.onResolve({ filter: /variation-runtime\.js$/ }, () => ({ path: fileURLToPath(new URL('../src/ir/authored-variation.ts', import.meta.url)) }));
     } }],
   });
   return output.outputFiles[0].text;
@@ -63,7 +65,15 @@ function authoredControl(icon) {
     staticIcons: Object.fromEntries(['outline', 'filled'].map(variant =>
       [symbolExportName(icon, variant), sources[variant].artifactSvg])),
   });
-  return authorSymbolPayload(icon, sources, compiler);
+  const payload = authorSymbolPayload(icon, sources, compiler);
+  const variation = Object.fromEntries(['outline', 'filled'].map(variant => [variant, contracts[`${icon}/${variant}`]?.variation]));
+  if (!variation.outline || !variation.filled) return payload;
+  return { ...payload, variation, capabilities: Object.fromEntries(['outline', 'filled'].map(variant => [variant, {
+    ...payload.capabilities[variant], variation: { version: 1, law: variation[variant].law,
+      geometrySha256: variation[variant].geometrySha256, defaults: { dotScale: 1, spacingScale: 1 },
+      domain: variation[variant].domain,
+      targets: { svg: 'supported', webEffect: 'existing-part-gestures', lottie: 'not-exported', sfSymbols: 'not-exported' } },
+  }])) };
 }
 
 describe('замкнутые symbol modules', () => {
@@ -170,6 +180,68 @@ describe('замкнутые symbol modules', () => {
     expect(consumer.glyph()).not.toBe(consumer.glyph({ variant: 'filled' }));
     expect(() => consumer.glyph({ axes: { weight: 1 } })).toThrow(expect.objectContaining({ code: 'AUTHOR_PARITY_REQUIRED' }));
     expect(() => consumer.glyph({ modelMode: 'allow-candidate' })).toThrow(expect.objectContaining({ code: 'AUTHOR_PARITY_REQUIRED' }));
+  });
+
+  it.each(['ellipsis-horizontal', 'ellipsis-vertical'])('%s сохраняет реальную authored variation в generated consumer', async icon => {
+    const input = authoredControl(icon), before = structuredClone(input);
+    const module = renderSymbolModule(input);
+    const consumer = await importSymbol(module);
+    const expectedGlyph = createCompiledVariationGlyph(icon, structuredClone(input.source), structuredClone(input.variation));
+    for (const variant of ['outline', 'filled']) {
+      expect(consumer.glyph({ variant })).toEqual(input.source[variant]);
+      expect(consumer.glyph({ variant, variation: { dotScale: 1.1, spacingScale: 0.9 } }))
+        .toEqual(expectedGlyph({ variant, variation: { dotScale: 1.1, spacingScale: 0.9 } }));
+      expect(consumer.glyphCapabilities(variant)).toEqual(JSON.parse(JSON.stringify(input.capabilities[variant])));
+      expect(Object.isFrozen(consumer.glyphCapabilities(variant).variation.domain)).toBe(true);
+      expect(() => consumer.glyph({ variant, variation: { dotScale: 100, spacingScale: 1 } }))
+        .toThrow(expect.objectContaining({ code: 'VARIATION_OUTSIDE_DOMAIN' }));
+    }
+    expect(consumer.glyphCapabilities().variation.domain).not.toBe(consumer.glyphCapabilities('filled').variation.domain);
+    expect(input).toEqual(before);
+  });
+
+  it.each([
+    ['glyph', 'AUTHOR_IR_SENTINEL', 'AUTHOR_CAPS_SENTINEL'],
+    ['glyphCapabilities', 'AUTHOR_CAPS_SENTINEL', 'AUTHOR_IR_SENTINEL'],
+  ])('variation сохраняет независимый %s consumer', async (name, retained, discarded) => {
+    const input = structuredClone(authoredControl('ellipsis-horizontal'));
+    input.source.outline.consumerSentinel = 'AUTHOR_IR_SENTINEL';
+    input.capabilities.outline.consumerSentinel = 'AUTHOR_CAPS_SENTINEL';
+    const actual = await consumeSymbol(renderSymbolModule(input), `import { ${name} } from "test-symbol"; console.log(${name}());`);
+    expect(actual).toContain(retained);
+    expect(actual).not.toContain(discarded);
+    expect(actual).toContain('convex-linear');
+  });
+
+  it('static variation consumer удаляет domain, runtime и геометрию', async () => {
+    const input = structuredClone(authoredControl('ellipsis-horizontal'));
+    input.staticSvg.outline = 'SVG_STATIC_CONTROL';
+    const actual = await consumeSymbol(renderSymbolModule(input), 'import { outline } from "test-symbol"; console.log(outline);');
+    expect(actual).toContain('SVG_STATIC_CONTROL');
+    for (const discarded of ['convex-linear', 'dotScale', 'geometrySha256', 'VARIATION_OUTSIDE_DOMAIN', 'AUTHOR_PARITY_REQUIRED']) {
+      expect(actual).not.toContain(discarded);
+    }
+  });
+
+  it('разные и отсутствующие variation domains сохраняют исходные данные', async () => {
+    const input = structuredClone(authoredControl('ellipsis-horizontal'));
+    input.capabilities.outline.variation.domain.policy.gridSha256 = 'OTHER_CAPABILITY_DOMAIN';
+    delete input.capabilities.filled.variation.domain;
+    const before = structuredClone(input), module = renderSymbolModule(input);
+    const consumer = await importSymbol(module);
+    expect(consumer.glyphCapabilities()).toEqual(JSON.parse(JSON.stringify(input.capabilities.outline)));
+    expect(consumer.glyphCapabilities('filled').variation).not.toHaveProperty('domain');
+    expect(consumer.glyph({ variation: { dotScale: 1.1 } }).provenance.kind).toBe('authored-variation');
+    expect(input).toEqual(before);
+  });
+
+  it('равные Outline/Filled domains остаются отдельными авторскими объектами', async () => {
+    const input = structuredClone(authoredControl('ellipsis-horizontal'));
+    input.variation.filled.domain = structuredClone(input.variation.outline.domain);
+    input.capabilities.filled.variation.domain = structuredClone(input.variation.outline.domain);
+    const consumer = await importSymbol(renderSymbolModule(input));
+    expect(consumer.glyphCapabilities().variation.domain).toEqual(consumer.glyphCapabilities('filled').variation.domain);
+    expect(consumer.glyphCapabilities().variation.domain).not.toBe(consumer.glyphCapabilities('filled').variation.domain);
   });
 
   it('расходящиеся или отсутствующие metadata не заменяются общей записью', async () => {
