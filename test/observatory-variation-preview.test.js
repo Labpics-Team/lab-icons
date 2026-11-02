@@ -5,6 +5,15 @@ const source = '<svg viewBox="0 0 24 24" width="24" height="24"><path fill="curr
 const modified = '<svg viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M2 1H4V3H2Z"/></svg>';
 
 describe('Observatory читает variation capability пакета', () => {
+  it('ширина корпуса открывается по закону и поддержанному target', () => {
+    const variation = { version: 1, law: 'capsule.width', defaults: { bodyWidth: 1 }, targets: { svg: 'supported' } };
+    expect(authoredVariationCapability({ icon: 'future-capsule', variation })).toBe(variation);
+    const presentation = authoredVariationPresentation(variation);
+    expect(presentation.controls).toEqual([['bodyWidth', 'Ширина корпуса']]);
+    expect(presentation.summary({ bodyWidth: .85 })).toContain('×0.85');
+    expect(presentation.hint).toContain('Высота, подставка и обрамление сохраняются');
+    expect(authoredVariationCapability({ variation: { ...variation, targets: { svg: 'not-exported' } } })).toBeNull();
+  });
   it('показывает только известный SVG-контракт без списка имён', () => {
     const variation = { version: 1, law: 'dots.affine', targets: { svg: 'supported' } };
     expect(authoredVariationCapability({ icon: 'future-family', variation })).toBe(variation);

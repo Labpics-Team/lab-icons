@@ -81,6 +81,7 @@ pnpm add @labpics/icons
 - `dist/ir/annulus-geometry-runtime.js`
 - `dist/ir/annulus-runtime.js`
 - `dist/ir/author-annulus-types.d.ts`
+- `dist/ir/author-capsule-types.d.ts`
 - `dist/ir/author-catalog.generated.d.ts`
 - `dist/ir/author-content-types.d.ts`
 - `dist/ir/author-provenance.d.ts`
@@ -89,6 +90,7 @@ pnpm add @labpics/icons
 - `dist/ir/authored-variation.d.ts`
 - `dist/ir/candidates.d.ts`
 - `dist/ir/candidates.js`
+- `dist/ir/capsule-runtime.js`
 - `dist/ir/catalog.generated.d.ts`
 - `dist/ir/compiler.d.ts`
 - `dist/ir/compiler.js`
@@ -119,6 +121,8 @@ pnpm add @labpics/icons
 - `dist/ir/symbol-data/close-circle.js`
 - `dist/ir/symbol-data/ellipsis-horizontal.js`
 - `dist/ir/symbol-data/ellipsis-vertical.js`
+- `dist/ir/symbol-data/mic-circle.js`
+- `dist/ir/symbol-data/mic.js`
 - `dist/ir/symbol-data/minus-circle.js`
 - `dist/ir/symbol-data/pause-circle.js`
 - `dist/ir/symbol-data/play-circle.js`
@@ -1472,6 +1476,10 @@ pnpm add @labpics/icons
 - `dist/variations/ellipsis-horizontal.js`
 - `dist/variations/ellipsis-vertical.d.ts`
 - `dist/variations/ellipsis-vertical.js`
+- `dist/variations/mic-circle.d.ts`
+- `dist/variations/mic-circle.js`
+- `dist/variations/mic.d.ts`
+- `dist/variations/mic.js`
 - `dist/variations/minus-circle.d.ts`
 - `dist/variations/minus-circle.js`
 - `dist/variations/pause-circle.d.ts`
@@ -1487,6 +1495,7 @@ pnpm add @labpics/icons
 
 - `dist/authoring/design-spec.d.ts`
 - `dist/ir/author-annulus-types.d.ts`
+- `dist/ir/author-capsule-types.d.ts`
 - `dist/ir/author-catalog.generated.d.ts`
 - `dist/ir/author-content-types.d.ts`
 - `dist/ir/author-provenance.d.ts`
