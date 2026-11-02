@@ -1,3 +1,88 @@
+/** Независимый reader исходного SVG: сохраняет controls, subpaths и явный Z. */
+function rawCapsuleContours(d) {
+  if (typeof d !== 'string' || !d.length) throw new TypeError('Нужен authored path.');
+  const tokens = [], expression = /[a-zA-Z]|[-+]?(?:\d*\.\d+|\d+\.?\d*)(?:[eE][-+]?\d+)?/g;
+  let end = 0;
+  for (const match of d.matchAll(expression)) {
+    if (!/^[\s,]*$/.test(d.slice(end, match.index))) throw new TypeError('Некорректный path token.');
+    tokens.push(match[0]); end = match.index + match[0].length;
+  }
+  if (!/^[\s,]*$/.test(d.slice(end))) throw new TypeError('Некорректное окончание path.');
+  const counts = { M: 2, L: 2, C: 6, Q: 4, H: 1, V: 1 }, contours = [];
+  let cursor = 0, command, point = [0, 0], start;
+  while (cursor < tokens.length) {
+    if (/^[a-zA-Z]$/.test(tokens[cursor])) command = tokens[cursor++];
+    const kind = command?.toUpperCase(), relative = command !== kind;
+    if (kind === 'Z') {
+      if (!start || contours.at(-1)?.at(-1)?.cmd === 'Z') throw new TypeError('Лишний Z.');
+      contours.at(-1).push({ cmd: 'Z', values: [] }); point = [...start]; start = null; command = null;
+      continue;
+    }
+    const count = counts[kind];
+    if (!count || cursor + count > tokens.length) throw new TypeError('Неподдержанная либо неполная команда.');
+    const values = tokens.slice(cursor, cursor + count).map(Number); cursor += count;
+    if (!values.every(Number.isFinite)) throw new TypeError('Нужны конечные operands.');
+    if (kind === 'H' || kind === 'V') {
+      const axis = kind === 'H' ? 0 : 1, target = [...point]; target[axis] = values[0] + (relative ? point[axis] : 0);
+      values.splice(0, values.length, ...target);
+    } else if (relative) {
+      for (let i = 0; i < values.length; i++) values[i] += point[i % 2];
+    }
+    if (kind === 'M') {
+      if (start) throw new TypeError('Контур обязан иметь явный Z.');
+      contours.push([]); start = values.slice(-2); command = relative ? 'l' : 'L';
+    } else if (!start) throw new TypeError('Контур начинается с M.');
+    contours.at(-1).push({ cmd: kind === 'H' || kind === 'V' ? 'L' : kind, values }); point = values.slice(-2);
+  }
+  if (start || !contours.length || contours.some(contour => contour.at(-1).cmd !== 'Z')) throw new TypeError('Незамкнутый контур.');
+  return contours;
+}
+
+/** Width law сверяется с raw authored operands, без coefficient packet/compiler parser. */
+export function matchesAuthoredCapsulePath(before, after, width) {
+  try {
+    if (!Number.isFinite(width) || width <= 0 || width > 1) return false;
+    const source = rawCapsuleContours(before), changed = rawCapsuleContours(after);
+    if (source.length < 1 || source.length > 2 || changed.length !== source.length) return false;
+    const spans = source.map(contour => {
+      const xs = contour.flatMap(segment => segment.values.filter((_, index) => index % 2 === 0));
+      const low = Math.min(...xs), high = Math.max(...xs);
+      return { width: high - low, center: (low + high) / 2 };
+    });
+    return source.every((contour, index) => {
+      const original = spans[index], targetWidth = index === 0 ? original.width * width
+        : original.width - spans[0].width * (1 - width);
+      const factor = targetWidth / original.width;
+      return original.width > 0 && targetWidth > 0 && contour.length === changed[index].length && contour.every((segment, part) => {
+        const actual = changed[index][part];
+        return segment.cmd === actual.cmd && segment.values.length === actual.values.length && segment.values.every((value, coordinate) => {
+          const expected = coordinate % 2 ? value : original.center + (value - original.center) * factor;
+          return Math.abs(actual.values[coordinate] - expected) < 1e-10;
+        });
+      });
+    });
+  } catch { return false; }
+}
+
+export function capsuleSvgFrameMatches(observed, viewBox) {
+  const same = (left, right) => Number.isFinite(left) && Number.isFinite(right) && Math.abs(left - right) < 0.0001;
+  return observed?.viewBox?.length === 4 && viewBox.length === 4 && observed.viewBox.every((value, index) => same(value, viewBox[index])) &&
+    observed.preserveAspectRatio === 'xMidYMid meet' && observed.untransformed === true &&
+    same(observed.intrinsicWidth, viewBox[2]) && same(observed.intrinsicHeight, viewBox[3]);
+}
+
+export function capsuleViewportMatches(observed, viewBox, displaySize) {
+  const same = (left, right) => Number.isFinite(left) && Number.isFinite(right) && Math.abs(left - right) < 0.0001;
+  return capsuleSvgFrameMatches(observed, viewBox) &&
+    same(observed.width, displaySize) && same(observed.height, displaySize) &&
+    same(observed.screen?.a, displaySize / viewBox[2]) && same(observed.screen?.d, displaySize / viewBox[3]) &&
+    same(observed.screen?.b, 0) && same(observed.screen?.c, 0);
+}
+
+export function isFreshCapsuleDownload(downloads, previousCount, filename) {
+  return downloads.length === previousCount + 1 && downloads.at(-1)?.filename === filename;
+}
+
 /** Browser getBBox округляет до float; допуск относится к измерению, не к оптике. */
 export function capsuleWidthObservationChecks(before, after, width) {
   const same = (left, right) => Number.isFinite(left) && Number.isFinite(right) && Math.abs(left - right) < 0.0001;
@@ -22,6 +107,7 @@ export function capsuleWidthObservationChecks(before, after, width) {
     }),
     counterWalls: contours && (original.contours.length === 1 || modified.contours[1].width > 0 &&
       same(sourceBox.width - original.contours[1].width, box.width - modified.contours[1].width)),
+    contourCorrespondence: Boolean(original && modified && matchesAuthoredCapsulePath(original.d, modified.d, width)),
   };
 }
 
@@ -509,15 +595,37 @@ export async function runExplorerJourney() {
     fixtures.push(capsuleMeasure); document.body.append(capsuleMeasure);
     const capsuleSnapshot = (svg, partIds) => [...svg.querySelectorAll('path')].map((path, index) => {
       const d = path.getAttribute('d');
-      const contours = d.split(/(?=M)/).map(contour => {
+      const contours = rawCapsuleContours(d).map(contour => {
         const probe = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        probe.setAttribute('d', contour); capsuleMeasure.append(probe);
+        probe.setAttribute('d', contour.map(segment => segment.cmd + segment.values.join(' ')).join('')); capsuleMeasure.append(probe);
         const { x, y, width, height } = probe.getBBox(); probe.remove();
         return { x, y, width, height };
       });
       return { id: path.dataset.part ?? partIds[index], d, contours,
         fillRule: path.getAttribute('fill-rule') ?? svg.getAttribute('fill-rule') ?? 'nonzero' };
     });
+    const capsuleFrame = (svg, live = false) => {
+      const elements = [svg, ...svg.querySelectorAll('*')];
+      if (live) for (let parent = svg.parentElement; parent; parent = parent.parentElement) elements.push(parent);
+      const box = svg.viewBox.baseVal;
+      const untransformed = !svg.querySelector('svg,style,foreignObject,use') && elements.every(element => !element.hasAttribute('transform') &&
+        ['transform', 'translate', 'rotate', 'scale'].every(property => {
+          const value = live ? getComputedStyle(element)[property] : element.style?.getPropertyValue(property);
+          return !value || value === 'none';
+        }));
+      return { viewBox: [box.x, box.y, box.width, box.height],
+        intrinsicWidth: Number(svg.getAttribute('width')), intrinsicHeight: Number(svg.getAttribute('height')),
+        preserveAspectRatio: (svg.getAttribute('preserveAspectRatio') ?? 'xMidYMid meet').trim().replace(/\s+/g, ' '), untransformed,
+        ...(live ? { width: parseFloat(getComputedStyle(svg).width), height: parseFloat(getComputedStyle(svg).height),
+          screen: svg.getScreenCTM() } : {}) };
+    };
+    const capsuleExport = async (id, filename, expectedPaths, viewBox) => {
+      const before = downloads.length;
+      q('export-format').value = 'svg'; q('export').click();
+      check(`${id}/fresh-download`, isFreshCapsuleDownload(downloads, before, filename));
+      const exported = new DOMParser().parseFromString(await downloads.at(-1).blob.text(), 'image/svg+xml').documentElement;
+      check(id, JSON.stringify(paths(exported)) === expectedPaths && capsuleSvgFrameMatches(capsuleFrame(exported), viewBox));
+    };
     for (const [name, variant] of [['mic', 'outline'], ['mic', 'filled'], ['mic-circle', 'outline']]) {
       const id = `${name}/${variant}/capsule-width`;
       await choose(name, variant);
@@ -536,11 +644,14 @@ export async function runExplorerJourney() {
         viewButton('generated').textContent === 'Вариация' && !viewButton('generated').disabled);
       check(`${id}/exact-author-default`, symbol.glyph({ variant, variation: { bodyWidth: 1 } }) === source &&
         JSON.stringify(paths(q('symbol-stage').querySelector(':scope > svg'))) === sourcePaths);
+      check(`${id}/source-viewport`, capsuleSvgFrameMatches(capsuleFrame(master), source.viewBox) &&
+        capsuleViewportMatches(capsuleFrame(q('symbol-stage').querySelector(':scope > svg'), true), source.viewBox, Number(q('display-size').value)));
       const partIds = source.parts.map(part => part.id);
       const original = capsuleSnapshot(q('symbol-stage').querySelector(':scope > svg'), partIds);
       await chooseView('generated');
       check(`${id}/default-variation-view`, q('consumer-import').textContent.includes(`/variations/${name}`) &&
-        JSON.stringify(paths(q('symbol-stage').querySelector(':scope > svg'))) === sourcePaths);
+        JSON.stringify(paths(q('symbol-stage').querySelector(':scope > svg'))) === sourcePaths &&
+        capsuleViewportMatches(capsuleFrame(q('symbol-stage').querySelector(':scope > svg'), true), source.viewBox, Number(q('display-size').value)));
       let modified;
       for (const width of [.9, .8]) {
         await changeVariation('bodyWidth', width);
@@ -553,34 +664,29 @@ export async function runExplorerJourney() {
         const modifiedPaths = JSON.stringify(paths(new DOMParser().parseFromString(modified.svg, 'image/svg+xml').documentElement));
         check(`${id}/${width}/production-package-render`, modified.provenance.variation.parameters.bodyWidth === width &&
           JSON.stringify(paths(shown)) === modifiedPaths &&
-          [...shown.querySelectorAll('[data-part]')].map(part => part.dataset.part).join(',') === partIds.join(','));
-        check(`${id}/${width}/small-size-geometry`, [...q('size-samples').querySelectorAll('.size-sample > svg')]
-          .map(svg => svg.style.width).join(',') === '16px,24px,48px' &&
-          [...q('size-samples').querySelectorAll('.size-sample > svg')].every(svg => JSON.stringify(paths(svg)) === modifiedPaths));
-        q('export-format').value = 'svg'; q('export').click();
-        const exported = downloads.at(-1);
-        check(`${id}/${width}/exports-visible-width`, exported?.filename === `${name}-${variant}-variation.svg` &&
-          JSON.stringify(paths(new DOMParser().parseFromString(await exported.blob.text(), 'image/svg+xml').documentElement)) === modifiedPaths);
+          [...shown.querySelectorAll('[data-part]')].map(part => part.dataset.part).join(',') === partIds.join(',') &&
+          capsuleViewportMatches(capsuleFrame(shown, true), source.viewBox, Number(q('display-size').value)));
+        const samples = [...q('size-samples').querySelectorAll('.size-sample > svg')];
+        check(`${id}/${width}/small-size-geometry`, samples.length === 3 && samples.every((svg, index) =>
+          JSON.stringify(paths(svg)) === modifiedPaths && capsuleViewportMatches(capsuleFrame(svg, true), source.viewBox, [16, 24, 48][index])));
+        await capsuleExport(`${id}/${width}/exports-visible-width`, `${name}-${variant}-variation.svg`, modifiedPaths, source.viewBox);
       }
       const acceptedStage = q('symbol-stage').innerHTML, acceptedSamples = q('size-samples').innerHTML;
       for (const [width, refusal] of [[0, 'INVALID_VARIATION'], [.79, 'VARIATION_OUTSIDE_DOMAIN'], [1.01, 'VARIATION_OUTSIDE_DOMAIN']]) {
         await changeVariation('bodyWidth', width, refusal);
         check(`${id}/${width}/refusal-retains-accepted-width`, q('symbol-stage').innerHTML === acceptedStage &&
           q('size-samples').innerHTML === acceptedSamples && !q('export').disabled);
-        q('export-format').value = 'svg'; q('export').click();
-        check(`${id}/${width}/refusal-exports-accepted-width`, JSON.stringify(paths(new DOMParser()
-          .parseFromString(await downloads.at(-1).blob.text(), 'image/svg+xml').documentElement)) ===
-          JSON.stringify(paths(new DOMParser().parseFromString(modified.svg, 'image/svg+xml').documentElement)));
+        await capsuleExport(`${id}/${width}/refusal-exports-accepted-width`, `${name}-${variant}-variation.svg`,
+          JSON.stringify(paths(new DOMParser().parseFromString(modified.svg, 'image/svg+xml').documentElement)), source.viewBox);
       }
       check(`${id}/motion-is-not-invented`, q('play').disabled && q('gesture').value === '' && caps.variation.targets.webEffect === 'not-exported');
       q('axis-controls').querySelector('[data-variation-reset]').click();
       await wait(() => q('symbol-inspector').getAttribute('aria-busy') === 'false' && q('symbol-stage').dataset.view === 'original', `${id} reset`);
       check(`${id}/reset-restores-exact-author`, variationInput('bodyWidth').value === '1' &&
         variationInput('bodyWidth').getAttribute('aria-invalid') !== 'true' &&
-        JSON.stringify(paths(q('symbol-stage').querySelector(':scope > svg'))) === sourcePaths);
-      q('export-format').value = 'svg'; q('export').click();
-      check(`${id}/reset-export-restores-author`, downloads.at(-1)?.filename === `${name}-${variant}.svg` &&
-        JSON.stringify(paths(new DOMParser().parseFromString(await downloads.at(-1).blob.text(), 'image/svg+xml').documentElement)) === sourcePaths);
+        JSON.stringify(paths(q('symbol-stage').querySelector(':scope > svg'))) === sourcePaths &&
+        capsuleViewportMatches(capsuleFrame(q('symbol-stage').querySelector(':scope > svg'), true), source.viewBox, Number(q('display-size').value)));
+      await capsuleExport(`${id}/reset-export-restores-author`, `${name}-${variant}.svg`, sourcePaths, source.viewBox);
       authority.push({ name, variant, author: source.provenance.author, anatomy: source.provenance.anatomy, variation: modified.provenance.variation });
     }
     capsuleMeasure.remove();
