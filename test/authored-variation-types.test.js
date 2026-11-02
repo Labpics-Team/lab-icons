@@ -31,6 +31,10 @@ it('generated public declarations distinguish named variation from exact source 
     writeFileSync(join(consumer, 'smoke.ts'), [
       "import { glyph, glyphCapabilities } from '@labpics/icons/symbols/ellipsis-horizontal';",
       "import { glyph as ellipseGlyph, glyphCapabilities as ellipseCapabilities } from '@labpics/icons/symbols/ellipse';",
+      "declare module '@labpics/icons/symbols/ellipse' { namespace glyph { let cached: string; } }",
+      "declare module '@labpics/icons/symbols/ellipsis-horizontal' { namespace glyphCapabilities { let cached: string; } }",
+      "ellipseGlyph.cached = 'consumer metadata';",
+      "glyphCapabilities.cached = 'consumer metadata';",
       'type AuthorVariationGlyphRequest = Parameters<typeof glyph>[0];',
       'const typedRequest: AuthorVariationGlyphRequest = { variation: { dotScale: 1.1 } };',
       "const defaultKind: 'source' = glyph().provenance.kind;",

@@ -2,7 +2,6 @@ import type { GlyphIR, IconVariant, SourcePartProvenance } from './compiler.js';
 import type { AuthorSourceGlyph, AuthorSourceCapabilities, AuthorSymbolGlyphRequest } from './author-source.js';
 import type { AuthorSourceProvenance, AuthorAnatomyReceipt } from './author-provenance.js';
 import type { AuthorIconId } from './author-catalog.generated.js';
-import type { AuthorSymbolApi } from './author-symbol.js';
 import { createCompiledGlyph } from './symbol-runtime.js';
 import { assembleGlyphSvg } from './svg-assembly.js';
 import { sha256Hex } from './sha256.js';
@@ -62,15 +61,6 @@ export interface AuthorVariationGlyph<TIcon extends AuthorIconId = AuthorIconId>
 
 export interface AuthorVariationCapabilities<TIcon extends AuthorIconId = AuthorIconId> extends AuthorSourceCapabilities<TIcon> {
   readonly variation: AuthorVariationCapability;
-}
-
-/** Порядок overloads сохраняет exact default и широкую Parameters-проекцию. */
-export interface AuthorVariationSymbolApi<TIcon extends AuthorIconId = AuthorIconId> extends AuthorSymbolApi<TIcon> {
-  readonly glyph: {
-    (request?: AuthorSymbolGlyphRequest): AuthorSourceGlyph<TIcon>;
-    (request: AuthorVariationGlyphRequest): AuthorVariationGlyph<TIcon>;
-  };
-  readonly glyphCapabilities: (variant?: IconVariant) => AuthorVariationCapabilities<TIcon>;
 }
 
 type Point = readonly [number, number];

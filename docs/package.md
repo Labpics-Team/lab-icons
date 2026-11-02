@@ -62,7 +62,6 @@ pnpm add @labpics/icons
 - `dist/ir/author-catalog.generated.d.ts`
 - `dist/ir/author-provenance.d.ts`
 - `dist/ir/author-source.d.ts`
-- `dist/ir/author-symbol.d.ts`
 - `dist/ir/authored-variation.d.ts`
 - `dist/ir/candidates.d.ts`
 - `dist/ir/candidates.js`
@@ -1423,7 +1422,6 @@ pnpm add @labpics/icons
 - `dist/ir/author-catalog.generated.d.ts`
 - `dist/ir/author-provenance.d.ts`
 - `dist/ir/author-source.d.ts`
-- `dist/ir/author-symbol.d.ts`
 - `dist/ir/authored-variation.d.ts`
 - `dist/ir/catalog.generated.d.ts`
 - `dist/ir/compiler.d.ts`

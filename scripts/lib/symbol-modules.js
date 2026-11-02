@@ -29,7 +29,7 @@ export function symbolReleaseProjection(base, iconIds, stateGroupIds = [], varia
     key.includes('*')
       ? (key === './states/*' ? groups : ids).flatMap(id => Object.values(conditions).map(target => target.replace('*', id).slice(2)))
       : Object.values(conditions).map(target => target.slice(2)));
-  const typeDependencies = ['dist/authoring/design-spec.d.ts', 'dist/ir/author-catalog.generated.d.ts', 'dist/ir/author-provenance.d.ts', 'dist/ir/author-source.d.ts', 'dist/ir/author-symbol.d.ts', 'dist/ir/authored-variation.d.ts', 'dist/ir/catalog.generated.d.ts', 'dist/ir/compiler.d.ts', 'dist/ir/request.d.ts', 'dist/ir/lottie-types.d.ts', 'dist/ir/state-types.d.ts'].sort();
+  const typeDependencies = ['dist/authoring/design-spec.d.ts', 'dist/ir/author-catalog.generated.d.ts', 'dist/ir/author-provenance.d.ts', 'dist/ir/author-source.d.ts', 'dist/ir/authored-variation.d.ts', 'dist/ir/catalog.generated.d.ts', 'dist/ir/compiler.d.ts', 'dist/ir/request.d.ts', 'dist/ir/lottie-types.d.ts', 'dist/ir/state-types.d.ts'].sort();
   const runtimeDependencies = ['dist/ir/compiler.js', 'dist/ir/contour-runtime.js', 'dist/ir/request.js', 'dist/ir/symbol-runtime.js', 'dist/ir/lottie-runtime.js'].sort();
   if (variationIconIds.length) runtimeDependencies.push('dist/ir/variation-runtime.js');
   if (groups.length) {
@@ -112,14 +112,15 @@ export function renderSymbolModule({ icon, source, capabilities, staticSvg, vari
 
 export function symbolModuleDeclaration(icon, variation = false) {
   if (!SYMBOL_NAME.test(icon)) throw new TypeError('symbol declaration: невалидное имя');
-  const api = variation ? 'AuthorVariationSymbolApi' : 'AuthorSymbolApi';
   return [
-    `import type { ${api} } from '../ir/${variation ? 'authored-variation' : 'author-symbol'}.js';`,
-    `type Api = ${api}<'${icon}'>;`,
+    "import type { AuthorSourceGlyph, AuthorSourceCapabilities, AuthorSymbolGlyphRequest } from '../ir/author-source.js';",
+    ...(variation ? ["import type { AuthorVariationGlyph, AuthorVariationCapabilities, AuthorVariationGlyphRequest } from '../ir/authored-variation.js';"] : []),
+    "import type { IconVariant } from '../ir/compiler.js';",
     'export declare const outline: string;',
     'export declare const filled: string;',
-    "export declare const glyph: Api['glyph'];",
-    "export declare const glyphCapabilities: Api['glyphCapabilities'];",
+    `export declare function glyph(request?: AuthorSymbolGlyphRequest): AuthorSourceGlyph<'${icon}'>;`,
+    ...(variation ? [`export declare function glyph(request: AuthorVariationGlyphRequest): AuthorVariationGlyph<'${icon}'>;`] : []),
+    `export declare function glyphCapabilities(variant?: IconVariant): ${variation ? 'AuthorVariationCapabilities' : 'AuthorSourceCapabilities'}<'${icon}'>;`,
     '',
   ].join('\n');
 }

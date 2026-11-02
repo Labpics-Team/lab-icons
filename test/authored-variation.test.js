@@ -187,10 +187,10 @@ describe("authored dot geometry: independent variant controls, coupled domain", 
     const positive = symbol("ellipsis-horizontal"), negative = symbol("ellipse");
     const module = renderSymbolModule({ ...positive.payload, capabilities: positive.capabilities, variation: positive.variation });
     expect(module).toContain("../ir/variation-runtime.js");
-    expect(symbolModuleDeclaration("ellipsis-horizontal", true)).toContain("AuthorVariationSymbolApi");
+    expect(symbolModuleDeclaration("ellipsis-horizontal", true)).toContain("AuthorVariationGlyphRequest");
     const ordinary = renderSymbolModule(negative.payload);
     expect(ordinary).not.toContain("variation-runtime");
     expect(ordinary).toContain("createCompiledGlyph");
-    expect(symbolModuleDeclaration("ellipse")).not.toContain("AuthorVariationSymbolApi");
+    expect(symbolModuleDeclaration("ellipse")).not.toContain("AuthorVariationGlyphRequest");
   });
 });
