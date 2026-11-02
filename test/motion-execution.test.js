@@ -269,6 +269,37 @@ describe('публичное исполнение смены знака в об�
     expect(animate).not.toHaveBeenCalled();
   });
 
+  it.each([900, 0])('исполняет source replacement без выдуманной оболочки, duration=%s', duration => {
+    const svg = viewport(), effect = replacement();
+    effect.kind = 'source-replacement';
+    effect.unchangedPartIds = [];
+    effect.options.duration = duration;
+    effect.stages = effect.stages.slice(0, 2).map((stage, index) => ({ ...stage, to: index, duration }));
+    svg.parts = svg.parts.slice(0, 2);
+    const before = svg.parts.map(part => ({ ...part.style }));
+    const controls = executeSymbolEffect(svg, effect);
+    expect(sequence).toHaveBeenCalledWith([
+      [svg.parts[0], { opacity: [0.3, 0] }, { at: 0, duration, ease: 'linear' }],
+      [svg.parts[1], { opacity: [0.7, 1] }, { at: 0, duration, ease: 'linear' }],
+    ], { reducedMotion: duration ? 'user' : 'always' });
+    expect(controls).toEqual([sequence.mock.results[0].value]);
+    expect(svg.parts.map(part => part.style)).toEqual(before);
+    expect(animate).not.toHaveBeenCalled();
+  });
+
+  it.each(['unknown-kind', 'source-shared-part', 'source-path-target', 'source-missing-group'])('отказывает %s до допуска Lab Motion', witness => {
+    const svg = viewport(), effect = replacement();
+    effect.kind = 'source-replacement';
+    effect.unchangedPartIds = [];
+    if (witness === 'unknown-kind') effect.kind = 'unknown-replacement';
+    if (witness === 'source-shared-part') effect.unchangedPartIds = ['status-enclosure'];
+    if (witness === 'source-path-target') svg.parts[0].tagName = 'path';
+    if (witness === 'source-missing-group') effect.stages[0].partId = 'not-mounted';
+    expect(() => executeSymbolEffect(svg, effect)).toThrow(/отдельных групп/);
+    expect(sequence).not.toHaveBeenCalled();
+    expect(animate).not.toHaveBeenCalled();
+  });
+
   it.each(['path-opacity', 'enclosure-animation', 'missing-group'])('отвергает %s до исполнения', witness => {
     const svg = viewport(), effect = replacement();
     if (witness === 'path-opacity') svg.parts[0].tagName = 'path';
@@ -313,3 +344,4 @@ describe('публичное исполнение смены знака в об�
     expect(sequence).not.toHaveBeenCalled();
   });
 });
+

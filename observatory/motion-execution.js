@@ -72,12 +72,13 @@ export function executeSymbolEffect(root, effect, { initialize = false, prepared
     if (effect.version === 1 && effect.kind === 'contour-interpolation') {
       return [contourEffect(effect, byPart, preparedContour, onProgress)];
     }
-    if (effect.version !== 1 || effect.kind !== 'enclosure-replacement' ||
+    if (effect.version !== 1 || !['enclosure-replacement', 'source-replacement'].includes(effect.kind) ||
+        (effect.kind === 'source-replacement' && effect.unchangedPartIds.length !== 0) ||
         !effect.stages.length || effect.stages.some(stage => stage.property !== 'opacity' ||
           !byPart.has(stage.partId) || byPart.get(stage.partId).tagName?.toLowerCase() !== 'g') ||
         effect.unchangedPartIds.some(id => !byPart.has(id)) ||
         effect.stages.some(stage => effect.unchangedPartIds.includes(stage.partId))) {
-      throw new Error('Замена требует отдельных групп и неподвижной оболочки.');
+      throw new Error('Замена требует отдельных групп и доказанной общей геометрии.');
     }
     return [sequence(opacityStages(effect.stages, byPart, effect.options.easing),
       { reducedMotion: effect.options.duration === 0 ? 'always' : 'user' })];
