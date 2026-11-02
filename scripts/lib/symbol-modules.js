@@ -2,6 +2,7 @@ import { compactDataLiteral, compactGeneratedModule, jsonDataLiteral, literalKey
 import { authorVariationCapability } from './author-variation.js';
 import { authorContentVariationCapability } from './author-annulus.js';
 import { cyclePacketExpression, sourcePacketEligible, sourcePacketExpression, sourcePacketRuntimeTargets, translationCyclePacket } from './source-packet.js';
+import { stateRuntimeTargets } from './author-state-groups.js';
 
 const SYMBOL_NAME = /^[a-z][a-z0-9-]*$/;
 const VARIATION_RUNTIME_TARGETS = {
@@ -36,7 +37,7 @@ export function variationRuntimeTargets(laws) {
 
 /** Единственная release-проекция каталога; wildcard раскрывается в точные файлы. */
 export function symbolReleaseProjection(base, iconIds, stateGroupIds = [], variationIconIds = [], variationLaws = ['dots.affine'],
-  compiledSymbolModules = [], stateVariationGroupIds = [], contentVariationIconIds = []) {
+  compiledSymbolModules = [], stateVariationGroupIds = [], contentVariationIconIds = [], stateLaws = ['enclosure.replace']) {
   const ids = [...iconIds].sort();
   const groups = [...stateGroupIds].sort();
   const stateVariations = [...stateVariationGroupIds].sort();
@@ -75,11 +76,14 @@ export function symbolReleaseProjection(base, iconIds, stateGroupIds = [], varia
       : Object.values(conditions).map(target => target.slice(2)));
   const typeDependencies = ['dist/authoring/design-spec.d.ts', 'dist/ir/author-annulus-types.d.ts', 'dist/ir/author-content-types.d.ts', 'dist/ir/author-capsule-types.d.ts', 'dist/ir/author-catalog.generated.d.ts', 'dist/ir/author-provenance.d.ts', 'dist/ir/author-source.d.ts', 'dist/ir/authored-variation.d.ts', 'dist/ir/catalog.generated.d.ts', 'dist/ir/compiler.d.ts', 'dist/ir/glyph-types.d.ts', 'dist/ir/paint-types.d.ts', 'dist/ir/request.d.ts', 'dist/ir/lottie-types.d.ts', 'dist/ir/state-types.d.ts', 'dist/ir/state-common-types.d.ts', 'dist/ir/contour-state-types.d.ts'].sort();
   const runtimeDependencies = ['dist/ir/author-request-runtime.js', 'dist/ir/compiler.js', 'dist/ir/contour-runtime.js', 'dist/ir/request.js', 'dist/ir/symbol-runtime.js', 'dist/ir/lottie-runtime.js'].sort();
+  if (groups.length && stateLaws.includes('source.replace')) {
+    typeDependencies.push('dist/ir/source-state-types.d.ts'); typeDependencies.sort();
+  }
   runtimeDependencies.push(...sourcePacketRuntimeTargets(compiledSymbolModules).map(target => `dist/ir/${target.runtime}`));
   if (variationIconIds.length) runtimeDependencies.push(...variationRuntimeTargets(variationLaws).map(target => `dist/ir/${target.runtime}`),
     ...variationIconIds.map(id => `dist/ir/symbol-data/${id}.js`));
   if (groups.length) {
-    runtimeDependencies.push('dist/ir/state-runtime.js');
+    runtimeDependencies.push(...stateRuntimeTargets(stateLaws).map(target => `dist/ir/${target.runtime}`));
   }
   if (stateVariations.length) {
     runtimeDependencies.push('dist/ir/state-annulus-runtime.js');

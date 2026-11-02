@@ -28,13 +28,15 @@ export function statePackageExpectations(baseline, document, grid) {
         geometrySha256: sha256(JSON.stringify(targets)), gridVersion: grid.version, gridSha256: sha256(JSON.stringify(grid)),
       }];
     }
+    const sourceReplacement = group.law === 'source.replace';
     const member = group.states[group.defaultState];
     const shared = [...baseline.icons[member.icon][member.variant].rawSvg.matchAll(/<path\b[^>]*>/g)]
-      .slice(-group.sharedParts.length).map(([tag], index) => ({ ...group.sharedParts[index],
+      .slice(group.sharedParts.length ? -group.sharedParts.length : Infinity).map(([tag], index) => ({ ...group.sharedParts[index],
         d: /\bd="([^"]+)"/.exec(tag)[1], fillRule: /\bfill-rule="([^"]+)"/.exec(tag)?.[1] ?? 'nonzero',
         paint: { kind: 'fill', fill: 'currentColor' } }));
     return [name, {
-      group: name, defaultState: group.defaultState, enclosurePartId: group.enclosurePartId,
+      ...(sourceReplacement ? { law: 'source.replace' } : {}),
+      group: name, defaultState: group.defaultState, enclosurePartId: sourceReplacement ? null : group.enclosurePartId,
       sharedPartIds: group.sharedParts.map(part => part.id),
       source: document.source,
       specSha256: sha256(stableJSON({ schemaVersion: document.schemaVersion, source: document.source, name, group })),
@@ -57,15 +59,20 @@ export function verifyInstalledStateGroup(group, expected, prepareContourStateEf
   if (expected.law === 'dots.orient') return verifyInstalledContourStateGroup(group, expected, prepareContourStateEffect);
   const require = (condition, message) => { if (!condition) throw new Error(`state artifact: ${message}`); };
   const equal = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+  const suffix = array => expected.sharedPartIds.length ? array.slice(-expected.sharedPartIds.length) : [];
+  const sourceReplacement = expected.law === 'source.replace';
   const paths = svg => [...svg.matchAll(/<path\b[^>]*>/g)].map(([tag]) => ({
     d: /\bd="([^"]+)"/.exec(tag)?.[1], fillRule: /\bfill-rule="([^"]+)"/.exec(tag)?.[1] ?? 'nonzero',
   }));
   const capabilities = group.stateCapabilities();
   require(capabilities.group === expected.group && capabilities.defaultState === expected.defaultState &&
     capabilities.enclosurePartId === expected.enclosurePartId && equal(capabilities.sharedPartIds, expected.sharedPartIds) &&
+    capabilities.transition === (sourceReplacement ? 'source-replacement' : 'enclosure-replacement') &&
     capabilities.morph === 'unavailable', 'capability identity');
   require(equal(capabilities.proof.source, expected.source) && capabilities.proof.specSha256 === expected.specSha256 &&
-    capabilities.proof.sharedPartsSha256 === expected.sharedPartsSha256,
+    capabilities.proof.sharedPartsSha256 === expected.sharedPartsSha256 &&
+    capabilities.proof.law === (sourceReplacement ? 'source.replace' : 'enclosure.replace') &&
+    (!sourceReplacement || capabilities.proof.enclosureSha256 === null),
     'spec/source provenance');
   require(equal(capabilities.states.map(state => state.id), expected.states.map(state => state.id)), 'state census');
   const initial = group.renderStateSvg(expected.defaultState);
@@ -79,12 +86,13 @@ export function verifyInstalledStateGroup(group, expected, prepareContourStateEf
     !/\bopacity=/.test(initial.svg.match(/<svg\b[^>]*>/)?.[0] ?? ''), 'mount frame/groups');
   require([...initial.svg.matchAll(/<path\b[^>]*>/g)].every(([tag]) =>
     /\bfill="currentColor"/.test(tag) && !/\b(?:stroke(?:-[a-z]+)?|opacity)=/.test(tag)), 'mount path paint');
-  require(initial.svg.split(`data-part="${expected.enclosurePartId}"`).length === 2, 'single enclosure');
-  const shared = paths(initial.svg).slice(-expected.sharedPartIds.length);
-  require(equal(shared, expected.states.find(state => state.id === expected.defaultState).paths.slice(-expected.sharedPartIds.length)), 'raw ordered shared suffix');
+  require(sourceReplacement ? !/data-role="container"/.test(initial.svg)
+    : initial.svg.split(`data-part="${expected.enclosurePartId}"`).length === 2, 'single enclosure');
+  const shared = suffix(paths(initial.svg));
+  require(equal(shared, suffix(expected.states.find(state => state.id === expected.defaultState).paths)), 'raw ordered shared suffix');
   require(equal(paths(initial.svg), [...expected.states.flatMap(state => state.paths.slice(0, state.contentPartIds.length)), ...shared]),
     'full mounted ordered geometry');
-  const sharedTags = [...initial.svg.matchAll(/<path\b[^>]*>/g)].slice(-expected.sharedPartIds.length);
+  const sharedTags = suffix([...initial.svg.matchAll(/<path\b[^>]*>/g)]);
   require(sharedTags.every(([tag], index) => tag.includes(`data-part="${expected.sharedPartIds[index]}"`) &&
     tag.includes(`data-role="${expected.sharedPartIds[index] === expected.enclosurePartId ? 'container' : 'content'}"`)),
   'shared anatomy IDs/roles');
@@ -111,6 +119,7 @@ export function verifyInstalledStateGroup(group, expected, prepareContourStateEf
     `${state.id}: mounted anatomy IDs`);
     const effect = group.compileStateEffect(state.id, { duration: 360 });
     require(effect.ok && effect.effect.contract === 'labpics.symbol-state-effect/1' &&
+      effect.effect.kind === (sourceReplacement ? 'source-replacement' : 'enclosure-replacement') &&
       effect.effect.targetState === state.id && equal(effect.effect.unchangedPartIds, expected.sharedPartIds), 'effect contract');
     const stages = expected.states.map(member => ({ partId: member.partId, property: 'opacity',
       to: member.id === state.id ? 1 : 0, at: 0, duration: 360 }));
@@ -124,8 +133,8 @@ export function verifyInstalledStateGroup(group, expected, prepareContourStateEf
     const result = group.exportStateTransition(expected.defaultState, { format, duration: 360 });
     require(!result.ok && result.reason.code === 'FORMAT_UNSUPPORTED', 'format refusal');
   }
-  const filled = group.render(expected.defaultState, { variant: 'filled' });
-  require(!filled.ok && filled.reason.code === 'VARIANT_UNSUPPORTED', 'unsupported variant');
+  const otherVariant = group.render(expected.defaultState, { variant: expected.states[0].variant === 'filled' ? 'outline' : 'filled' });
+  require(!otherVariant.ok && otherVariant.reason.code === 'VARIANT_UNSUPPORTED', 'unsupported variant');
   const unknown = group.compileStateEffect('not-declared', { duration: 360 });
   require(!unknown.ok && unknown.reason.code === 'STATE_UNSUPPORTED', 'unknown state');
 }

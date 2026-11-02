@@ -1,7 +1,12 @@
 import type {
-  StateEffectRequest, StateEffectResult, StateGroupCapabilities, StateRefusal,
-  StateRefusalCode, StateRenderRequest, StateSvgResult, StateTransitionExportRequest,
+  StateEffectRequest, StateGroupCapabilities, StateRefusal,
+  StateRefusalCode, StateRenderRequest, StateSvgResult, StateTransitionExportRequest, SymbolStateEffect,
 } from './types.js';
+import type { SourceStateGroupCapabilities } from './source-types.js';
+
+type ReplacementKind = 'enclosure-replacement' | 'source-replacement';
+type ReplacementResult = Readonly<{ ok: true; effect: Omit<SymbolStateEffect, 'kind'> & Readonly<{ kind: ReplacementKind }> }> | StateRefusal;
+declare const __LAB_ICONS_REPLACEMENT_KIND__: ReplacementKind;
 
 interface CompiledStateIdentity {
   readonly group: string;
@@ -20,9 +25,9 @@ interface CompiledStateRuntime extends CompiledStateIdentity {
 interface CompiledStateCapabilities extends CompiledStateIdentity {
   readonly defaultState: string;
   readonly sharedPartIds: readonly string[];
-  readonly enclosurePartId: string;
+  readonly enclosurePartId: string | null;
   readonly states: StateGroupCapabilities['states'];
-  readonly proof: StateGroupCapabilities['proof'];
+  readonly proof: StateGroupCapabilities['proof'] | SourceStateGroupCapabilities['proof'];
 }
 
 function freezeTree<T>(value: T): T {
@@ -50,7 +55,7 @@ function validate(data: CompiledStateIdentity, byState: ReadonlyMap<string, unkn
     return refuse('INVALID_REQUEST', 'Нужен объект с известными параметрами.');
   }
   const variant = request.variant === undefined ? data.variant : request.variant;
-  if (typeof variant !== 'string' || !['outline', 'filled'].includes(variant)) {
+  if (variant !== 'outline' && variant !== 'filled') {
     return refuse('INVALID_REQUEST', 'Начертание: outline или filled.');
   }
   if (variant !== data.variant) {
@@ -80,7 +85,7 @@ export function createCompiledStateRuntime(input: CompiledStateRuntime) {
     return Object.freeze({ ok: true, svg: data.frame[0] + groups + data.sharedSvg + data.frame[1] });
   }
 
-  function effect(state: string, request: unknown, exported: boolean): StateEffectResult {
+  function effect(state: string, request: unknown, exported: boolean): ReplacementResult {
     const invalid = validate(data, byState, state, request, exported
       ? ['duration', 'reducedMotion', 'variant', 'format'] : ['duration', 'reducedMotion', 'variant']);
     if (invalid) return invalid;
@@ -95,7 +100,8 @@ export function createCompiledStateRuntime(input: CompiledStateRuntime) {
     }
     const duration = parameters.reducedMotion ? 0 : parameters.duration;
     return freezeTree({ ok: true, effect: {
-      contract: 'labpics.symbol-state-effect/1', version: 1, kind: 'enclosure-replacement',
+      contract: 'labpics.symbol-state-effect/1', version: 1,
+      kind: typeof __LAB_ICONS_REPLACEMENT_KIND__ === 'undefined' ? 'enclosure-replacement' : __LAB_ICONS_REPLACEMENT_KIND__,
       group: data.group, variant: data.variant, targetState: state,
       // Все группы остаются mounted. Consumer связывает первый interval с видимой
       // opacity, включая смесь после прерывания; effect не задаёт from или сброс.
@@ -106,10 +112,10 @@ export function createCompiledStateRuntime(input: CompiledStateRuntime) {
     } });
   }
 
-  function compileStateEffect(state: string, request: StateEffectRequest): StateEffectResult {
+  function compileStateEffect(state: string, request: StateEffectRequest): ReplacementResult {
     return effect(state, request, false);
   }
-  function exportStateTransition(state: string, request: StateTransitionExportRequest): StateEffectResult {
+  function exportStateTransition(state: string, request: StateTransitionExportRequest): ReplacementResult {
     return effect(state, request, true);
   }
   return Object.freeze({ render, renderStateSvg, compileStateEffect, exportStateTransition });
@@ -117,9 +123,10 @@ export function createCompiledStateRuntime(input: CompiledStateRuntime) {
 
 /** @internal Сборка уже выделила metadata; потребитель не загружает SVG/эффекты. */
 export function createCompiledStateCapabilities(input: CompiledStateCapabilities) {
-  const capabilities = freezeTree<StateGroupCapabilities>({
+  const capabilities = freezeTree({
     group: input.group, variant: input.variant, defaultState: input.defaultState,
-    transition: 'enclosure-replacement', morph: 'unavailable', enclosurePartId: input.enclosurePartId,
+    transition: typeof __LAB_ICONS_REPLACEMENT_KIND__ === 'undefined' ? 'enclosure-replacement' : __LAB_ICONS_REPLACEMENT_KIND__,
+    morph: 'unavailable', enclosurePartId: input.enclosurePartId,
     sharedPartIds: input.sharedPartIds, states: input.states,
     formats: { static: ['svg'], transition: ['web-effect'] }, proof: input.proof,
   });

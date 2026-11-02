@@ -199,6 +199,123 @@
           "pathFingerprintSha256": "fbb1d6c9b723255c4774cb04c73af98436c30204b95f05ca7bd9feb82a384b32"
         }
       }
+    },
+    "microphone": {
+      "law": "source.replace",
+      "defaultState": "unmuted",
+      "sharedParts": [],
+      "states": {
+        "unmuted": {
+          "icon": "mic",
+          "variant": "outline",
+          "masterSha256": "c526c734a2225a29ec6e71f76d860546f5bccf8475bad6e1842915a75f2a5f9c",
+          "pathFingerprintSha256": "f7451fdcb743aaff3832866caea46af111a8d7ea39283472787996dc212978a6",
+          "contentPartIds": [
+            "unmuted-support",
+            "unmuted-body"
+          ]
+        },
+        "muted": {
+          "icon": "mic-off",
+          "variant": "outline",
+          "masterSha256": "49b06c6d791238d427e83f6f1cac51d88c572ecdfa7eea0148cb08f4d4e5560d",
+          "pathFingerprintSha256": "ba3934fc1d0deb82373b809d1effe481d690eb7ba7c03360ffe1d721e3755c63",
+          "contentPartIds": [
+            "muted-slash",
+            "muted-support-right",
+            "muted-body-right",
+            "muted-support-left",
+            "muted-body-left"
+          ]
+        }
+      }
+    },
+    "microphone-filled": {
+      "law": "source.replace",
+      "defaultState": "unmuted",
+      "sharedParts": [],
+      "states": {
+        "unmuted": {
+          "icon": "mic",
+          "variant": "filled",
+          "masterSha256": "e0efa7ec88dfdd01862ffd1b508de9b0789528046fb1b9d00442b9cdac093029",
+          "pathFingerprintSha256": "1cc371d2b7a2c52310e784e36b9827c4d50a245343b8f477e307fad650a28f6f",
+          "contentPartIds": [
+            "unmuted-support",
+            "unmuted-body"
+          ]
+        },
+        "muted": {
+          "icon": "mic-off",
+          "variant": "filled",
+          "masterSha256": "9a0789b9951e65a3b48da3be15d7baf9daf63c9492e86956b78c5c62bd9f6bd4",
+          "pathFingerprintSha256": "7954c1fda969ec0f0cbe82394a48617c1c41e923a203f200b56da4152725aa52",
+          "contentPartIds": [
+            "muted-slash",
+            "muted-support-right",
+            "muted-body-right",
+            "muted-support-left",
+            "muted-body-left"
+          ]
+        }
+      }
+    },
+    "visibility": {
+      "law": "source.replace",
+      "defaultState": "visible",
+      "sharedParts": [],
+      "states": {
+        "visible": {
+          "icon": "eye",
+          "variant": "outline",
+          "masterSha256": "c8a1c851d21027b51fc86a87fe8e921deb44cef615606074f112bf79c1d29a53",
+          "pathFingerprintSha256": "dad5c066d9156aef9c13026ec71bcac3221472a5270b19cbab9f44b5cb0df240",
+          "contentPartIds": [
+            "visible-iris",
+            "visible-eye"
+          ]
+        },
+        "hidden": {
+          "icon": "eye-off",
+          "variant": "outline",
+          "masterSha256": "a957220da52b3e293e8adb3024f8c9541b231216d1d2a8138dcaa54c47bab011",
+          "pathFingerprintSha256": "a123113e22315071d110c744de254da67838cbd907235b4a5855ee7c413d8eb3",
+          "contentPartIds": [
+            "hidden-eye-right",
+            "hidden-slash",
+            "hidden-iris-right",
+            "hidden-eye-left",
+            "hidden-iris-left"
+          ]
+        }
+      }
+    },
+    "visibility-filled": {
+      "law": "source.replace",
+      "defaultState": "visible",
+      "sharedParts": [],
+      "states": {
+        "visible": {
+          "icon": "eye",
+          "variant": "filled",
+          "masterSha256": "d5e70348e14d7039ad721d6670d1e24ee1d4c84a7105d77523f3fea991ec3543",
+          "pathFingerprintSha256": "96e985adef2fc4f68dc13aad13877c89ea7d91fced6e0dc4353f76055b556722",
+          "contentPartIds": [
+            "visible-eye"
+          ]
+        },
+        "hidden": {
+          "icon": "eye-off",
+          "variant": "filled",
+          "masterSha256": "63568862ef581e75bbdaeca3c1580268dd6b23afc938402e9bf4365b913795ff",
+          "pathFingerprintSha256": "6dfd8345efc7ab63f5162dcd79428d941d78e720516a55bf9efa11390934c334",
+          "contentPartIds": [
+            "hidden-slash",
+            "hidden-eye-right",
+            "hidden-eye-left"
+          ]
+        }
+      }
     }
   }
 }

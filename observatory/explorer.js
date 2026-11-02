@@ -41,11 +41,13 @@ const REPLACEMENT_GESTURE = 'enclosure.replace';
 const stateLabels = Object.freeze({ confirmation: 'Подтверждение', dismissal: 'Закрыть',
   question: 'Вопрос', attention: 'Внимание', increase: 'Добавить', decrease: 'Убрать',
   play: 'Воспроизвести', pause: 'Приостановить',
+  unmuted: 'Микрофон включён', muted: 'Микрофон выключен', visible: 'Видимо', hidden: 'Скрыто',
   aloof: 'Сдержанное выражение', sad: 'Грустное выражение', smile: 'Улыбка' });
 const orientationLabels = Object.freeze({ horizontal: 'Горизонтально', vertical: 'Вертикально' });
 const stateLabel = id => stateLabels[id] ?? orientationLabels[id] ?? id;
 const contourGroup = group => group?.capabilities.transition === 'contour-interpolation';
-const stateGesture = group => contourGroup(group) ? 'dots.orient' : REPLACEMENT_GESTURE;
+const sourceGroup = group => group?.capabilities.transition === 'source-replacement';
+const stateGesture = group => contourGroup(group) ? 'dots.orient' : sourceGroup(group) ? 'source.replace' : REPLACEMENT_GESTURE;
 const replacementViewAvailable = view => view === 'original' ||
   (view === 'generated' && Boolean(state.replacement?.variationModule));
 const replacementMode = () => Boolean(state.replacement && ui.gesture.value === stateGesture(state.replacement) &&
@@ -115,7 +117,7 @@ function inspectorPresentation() {
   }
   const author = member?.author ?? row.original;
   ui['source-status'].textContent = `Lab UI v2.1. Версия ${author.version}. Узел ${author.nodeId}. ` +
-    (active ? contourGroup(group) ? 'Авторские контуры меняют ориентацию; средняя точка остаётся на месте.' : variation ? 'Авторское содержимое; вариативное обрамление сохраняется при замене знака.' : 'Авторский знак; общая оболочка сохраняется при замене.' : state.legacy ? 'Прежняя модель: паритет с новой авторской основой не принят.' : variation
+    (active ? contourGroup(group) ? 'Авторские контуры меняют ориентацию; средняя точка остаётся на месте.' : sourceGroup(group) ? 'Два самостоятельных авторских рисунка. Переход сохраняет видимую смесь при прерывании.' : variation ? 'Авторское содержимое; вариативное обрамление сохраняется при замене знака.' : 'Авторский знак; общая оболочка сохраняется при замене.' : state.legacy ? 'Прежняя модель: паритет с новой авторской основой не принят.' : variation
       ? `${comparison ? 'Красным — исходная форма, синим — изменённая. ' : ''}${authoredVariationPresentation(variationAvailable()).summary(state.variation)} Образцы размеров и SVG относятся к этой форме.`
       : comparison ? `Красным — текущая основа, синим — прежняя ${row.model?.catalogState === 'accepted' ? 'модель' : 'модель на проверке'} при исходных параметрах. Части и образцы размеров относятся к текущему авторскому мастеру. Паритет не принят.` : 'Текущий авторский мастер. Возможности относятся к его закреплённой версии.');
   ui['consumer-import'].textContent = active ? `import { renderStateSvg, compileStateEffect${variation ? ', renderEnclosurePatch' : ''} } from\n  '@labpics/icons/${variation ? 'state-variations' : 'states'}/${group.capabilities.group}';` : state.legacy ? `import { glyph } from '@labpics/icons/ir';\n// Прежняя основа; текущий master: ./symbols/${state.name}` : `import { glyph } from\n  '@labpics/icons/${variation ? 'variations' : 'symbols'}/${state.name}';`;
@@ -144,6 +146,7 @@ function replacementChoices() {
   ui['state-choices'].replaceChildren();
   if (!group || state.legacy) return;
   ui['state-choices'].dataset.transition = group.capabilities.transition;
+  ui['state-choices'].setAttribute('aria-label', sourceGroup(group) ? 'Состояние символа' : 'Знак в общей оболочке');
   ui['state-choices'].setAttribute('aria-label', contourGroup(group) ? 'Ориентация многоточия' : 'Знак в общей оболочке');
   for (const member of group.capabilities.states) {
     const result = group.module.render(member.id, { variant: state.variant });

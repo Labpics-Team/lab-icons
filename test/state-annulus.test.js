@@ -8,7 +8,7 @@ import { build } from 'esbuild';
 import { loadAuthorBaseline, authorSymbolPayload } from '../scripts/lib/author-baseline.js';
 import { compileAuthorAnatomyWithEvidence } from '../scripts/lib/author-anatomy.js';
 import { materializeAuthorAnnulus, projectAuthorAnnulusRuntime } from '../scripts/lib/author-annulus.js';
-import { compileAuthorStateGroups, renderStateGroupModule } from '../scripts/lib/author-state-groups.js';
+import { authorStateLawNames, compileAuthorStateGroups, renderStateGroupModule } from '../scripts/lib/author-state-groups.js';
 import { authorStateVariationGroupNames, compileAuthorStateVariations, renderStateVariationModule } from '../scripts/lib/author-state-variations.js';
 import { createCompiledEnclosureVariation, createCompiledEnclosureVariationCapabilities } from '../src/states/annulus-runtime.js';
 import { createCompiledAnnulusGlyph } from '../src/ir/author-annulus-runtime.js';
@@ -21,6 +21,7 @@ import { authorVariationIconNames, authorVariationLawNames } from '../scripts/li
 import { expandReleaseExports, validateReleaseContract, validateReleaseRuntimeDependencyGraph } from '../scripts/lib/release-contract.js';
 import { bundle } from '../scripts/build-ir.mjs';
 import { measureArtifact } from '../scripts/check-package-size.js';
+import { bundleScenario } from '../scripts/check-consumer-size.js';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const read = path => JSON.parse(readFileSync(new URL(`../${path}`, import.meta.url), 'utf8'));
@@ -189,7 +190,7 @@ describe('authored shared state enclosure: one geometry law and retained state p
     const captured = read('release/contract.json');
     const projected = symbolReleaseProjection(captured, Object.keys(manifest.icons), Object.keys(capturedStates.groups),
       authorVariationIconNames(originalAnatomy), authorVariationLawNames(originalAnatomy), packet,
-      authorStateVariationGroupNames(capturedStates, originalAnatomy), authorContentVariationIconNames(originalAnatomy));
+      authorStateVariationGroupNames(capturedStates, originalAnatomy), authorContentVariationIconNames(originalAnatomy), authorStateLawNames(capturedStates));
     expect(projected).toEqual(captured);
     expect(projected.runtimeDependencies.filter(file => file.endsWith('source-packet-runtime.js'))).toHaveLength(1);
     expect(projected.runtimeDependencies.filter(file => file.endsWith('annulus-geometry-runtime.js'))).toHaveLength(1);
@@ -285,6 +286,17 @@ describe('authored shared state enclosure: one geometry law and retained state p
       expect(measureArtifact(readFileSync(join(out, 'ir/annulus-geometry-runtime.js'))).modules).toEqual(['src/ir/annulus-geometry-runtime.ts']);
       expect(measureArtifact(readFileSync(join(out, 'ir/state-annulus-runtime.js'))).modules).toEqual(['src/states/annulus-runtime.ts']);
       writeFileSync(join(pkg, 'package.json'), JSON.stringify({ name: '@labpics/icons', type: 'module', exports }));
+      const consumerPolicy = read('release/consumer-size-ratchet.json').scenarios;
+      const budgetFailures = [];
+      for (const name of ['status-circle-state-variation', 'playback-circle-state-variation',
+        'status-circle-enclosure-patch', 'playback-circle-enclosure-patch']) {
+        const policy = consumerPolicy[name];
+        const measured = await bundleScenario(policy.entry, { root: pkg });
+        if (measured.bytes > policy.maxBytes || measured.gzipBytes > policy.maxGzipBytes) {
+          budgetFailures.push(`${name}: ${measured.bytes}/${measured.gzipBytes}, limit ${policy.maxBytes}/${policy.maxGzipBytes}`);
+        }
+      }
+      expect(budgetFailures).toEqual([]);
       writeFileSync(join(consumer, 'package.json'), JSON.stringify({ private: true, type: 'module' }));
       writeFileSync(join(consumer, 'consumer.mjs'), [
         "import assert from 'node:assert/strict';",

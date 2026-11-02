@@ -2,10 +2,17 @@ import { createHash } from 'node:crypto';
 import { compactDataLiteral, compactGeneratedModule, jsonDataLiteral, literalKey } from './generated-module.js';
 import { authorPathEntries, sourcePathEntries } from '../../src/core/icon-geometry.js';
 import { exactClosedFillPathKey } from './exact-closed-fill-path.js';
+import { normalizeFigmaSvg } from './figma-import.js';
 import { compileAuthorContourStateGroup, renderContourStateGroupModule, contourStateGroupDeclaration } from './author-contour-states.js';
 
 const NAME = /^[a-z][a-z0-9-]*$/;
 const HASH = /^[a-f0-9]{64}$/;
+const STATE_RUNTIME_TARGETS = {
+  'enclosure.replace': { entry: 'src/states/runtime.ts', runtime: 'state-runtime.js',
+    define: { __LAB_ICONS_REPLACEMENT_KIND__: '"enclosure-replacement"' } },
+  'source.replace': { entry: 'src/states/source-runtime.ts', runtime: 'source-state-runtime.js',
+    define: { __LAB_ICONS_REPLACEMENT_KIND__: '"source-replacement"' } },
+};
 const sha256 = value => createHash('sha256').update(value).digest('hex');
 const stableJSON = value => JSON.stringify(value, (_, item) =>
   item && typeof item === 'object' && !Array.isArray(item)
@@ -58,8 +65,27 @@ export function authorStateGroupNames(document) {
   return names;
 }
 
+export function authorStateLawNames(document) {
+  return [...new Set(authorStateGroupNames(document).map(name => document.groups[name]?.law))].sort();
+}
+
+/** Только новый opt-in загружает свой admission, структура перехода остаётся общей. */
+export function stateRuntimeTargets(laws) {
+  if (!Array.isArray(laws) || laws.some(law => law !== 'dots.orient' && !Object.hasOwn(STATE_RUNTIME_TARGETS, law))) {
+    throw new TypeError('author state: law не имеет runtime target');
+  }
+  return [...new Set(laws)].filter(law => law !== 'dots.orient').sort()
+    .map(law => ({ ...STATE_RUNTIME_TARGETS[law], define: { ...STATE_RUNTIME_TARGETS[law].define } }));
+}
+
+/** Target compiler фиксирует только kind; runtime admission и execution общие. */
+export function stateRuntimeBuildOptions(entry) {
+  const target = Object.values(STATE_RUNTIME_TARGETS).find(item => item.entry === entry);
+  return target ? { define: { ...target.define } } : {};
+}
+
 /**
- * Закон сохраняет равный ordered suffix с последней оболочкой и заменяет prefix.
+ * Оболочка сохраняет равный ordered suffix; source.replace меняет полный рисунок.
  * Все контуры проверяются до выдачи данных. Serializer и glyph compiler передаются
  * от production build; runtime не читает SVG и не доказывает correspondence заново.
  */
@@ -75,12 +101,14 @@ export function compileAuthorStateGroups(baseline, document, { compiler, grid, a
       output[name] = compileAuthorContourStateGroup(baseline, name, group, { compiler, grid, document });
       continue;
     }
-    fields(group, ['law', 'defaultState', 'enclosurePartId', 'sharedParts', 'states'], name);
-    if (group.law !== 'enclosure.replace') refuse('LAW_UNSUPPORTED', `${name}: неизвестный закон`);
-    if (typeof group.enclosurePartId !== 'string' || !NAME.test(group.enclosurePartId) ||
+    const sourceReplacement = group?.law === 'source.replace';
+    fields(group, sourceReplacement ? ['law', 'defaultState', 'sharedParts', 'states']
+      : ['law', 'defaultState', 'enclosurePartId', 'sharedParts', 'states'], name);
+    if (!sourceReplacement && group.law !== 'enclosure.replace') refuse('LAW_UNSUPPORTED', `${name}: неизвестный закон`);
+    if ((!sourceReplacement && (typeof group.enclosurePartId !== 'string' || !NAME.test(group.enclosurePartId))) ||
         typeof group.defaultState !== 'string' || !NAME.test(group.defaultState) || !record(group.states) ||
         Object.keys(group.states).length < 2 || !Object.hasOwn(group.states, group.defaultState) ||
-        !Array.isArray(group.sharedParts) || group.sharedParts.length === 0) {
+        !Array.isArray(group.sharedParts) || (sourceReplacement ? group.sharedParts.length !== 0 : group.sharedParts.length === 0)) {
       refuse('SPEC_INVALID', `${name}: нужны именованные состояния и объявленная начальная поза`);
     }
     const stateNames = Object.keys(group.states).sort();
@@ -93,7 +121,7 @@ export function compileAuthorStateGroups(baseline, document, { compiler, grid, a
       }
       partIds.add(part.id);
     }
-    if (group.sharedParts.at(-1).id !== group.enclosurePartId) {
+    if (!sourceReplacement && group.sharedParts.at(-1).id !== group.enclosurePartId) {
       refuse('SPEC_INVALID', `${name}: enclosurePartId обязан называть последнюю общую часть`);
     }
     const members = new Set();
@@ -129,6 +157,9 @@ export function compileAuthorStateGroups(baseline, document, { compiler, grid, a
       }
       let entries;
       try {
+        if (normalizeFigmaSvg(source.rawSvg, { source: source.master }) !== source.normalizedSvg) {
+          refuse('MASTER_MISMATCH', `${name}.${state}: normalized geometry не происходит из закреплённого raw master`);
+        }
         if (sha256(stableJSON(authorPathEntries(source.normalizedSvg))) !== member.pathFingerprintSha256) {
           refuse('MASTER_MISMATCH', `${name}.${state}: path fingerprint не совпал`);
         }
@@ -148,10 +179,11 @@ export function compileAuthorStateGroups(baseline, document, { compiler, grid, a
         partIds.add(id);
       }
       const glyph = compiler.glyph({ icon: member.icon, variant: member.variant, modelMode: 'source-only' });
-      if (glyph.provenance.kind !== 'source' || glyph.provenance.file !== source.master ||
+      if (glyph.icon !== member.icon || glyph.variant !== member.variant ||
+          glyph.provenance.kind !== 'source' || glyph.provenance.file !== source.master ||
           glyph.composition.kind !== 'layers' || glyph.parts.length !== entries.length ||
           glyph.parts.some((part, index) => part.d !== entries[index].d || part.fillRule !== entries[index].fillRule ||
-            part.paint.kind !== 'fill' || part.zIndex !== index)) {
+            part.paint.kind !== 'fill' || part.paint.fill !== 'currentColor' || part.zIndex !== index)) {
         refuse('COMPILER_MISMATCH', `${name}.${state}: production glyph изменил ordered geometry/paint`);
       }
       if (glyph.parts.some(part => part.topologySignature.split('|').some(contour => !contour.endsWith('Z')))) {
@@ -159,12 +191,12 @@ export function compileAuthorStateGroups(baseline, document, { compiler, grid, a
       }
       // Закрытый source-язык уже проверил literal dimensions и viewBox24.
       if (JSON.stringify(glyph.viewBox) !== '[0,0,24,24]') refuse('COMPILER_MISMATCH', `${name}.${state}: viewBox изменился`);
-      if (variant !== undefined && member.variant !== variant) refuse('ENCLOSURE_MISMATCH', `${name}: нельзя смешивать начертания`);
+      if (variant !== undefined && member.variant !== variant) refuse(sourceReplacement ? 'VARIANT_MISMATCH' : 'ENCLOSURE_MISMATCH', `${name}: нельзя смешивать начертания`);
       variant = member.variant;
       const enclosure = glyph.parts.at(-1);
-      const enclosureContract = { ...fillPart(enclosure),
+      const enclosureContract = sourceReplacement ? null : { ...fillPart(enclosure),
         viewBox: glyph.viewBox, dimensions: [24, 24], placement: 'after-content' };
-      if (referenceEnclosure !== undefined && !sameFillPart(enclosureContract, referenceEnclosure)) {
+      if (!sourceReplacement && referenceEnclosure !== undefined && !sameFillPart(enclosureContract, referenceEnclosure)) {
         refuse('ENCLOSURE_MISMATCH', `${name}.${state}: оболочка/paint/рамка не равна`);
       }
       const shared = glyph.parts.slice(member.contentPartIds.length)
@@ -216,8 +248,8 @@ export function compileAuthorStateGroups(baseline, document, { compiler, grid, a
     }
     output[name] = {
       schemaVersion: 2, group: name, variant, defaultState: group.defaultState,
-      frame, sharedSvg, sharedPartIds: group.sharedParts.map(part => part.id), enclosurePartId: group.enclosurePartId, states,
-      proof: { law: group.law, source: { ...document.source }, enclosureSha256: sha256(enclosureIdentity),
+      frame, sharedSvg, sharedPartIds: group.sharedParts.map(part => part.id), enclosurePartId: sourceReplacement ? null : group.enclosurePartId, states,
+      proof: { law: group.law, source: { ...document.source }, enclosureSha256: sourceReplacement ? null : sha256(enclosureIdentity),
         sharedPartsSha256: sha256(reference),
         specSha256: sha256(stableJSON({ schemaVersion: document.schemaVersion, source: document.source, name, group })) },
     };
@@ -238,6 +270,12 @@ export function renderStateGroupModule(payload) {
   if (typeof payload.defaultState !== 'string' || !payload.states.some(state => state.id === payload.defaultState)) {
     refuse('SPEC_INVALID', 'defaultState обязан принадлежать compiled states');
   }
+  const sourceReplacement = payload.proof?.law === 'source.replace';
+  if (sourceReplacement && (payload.enclosurePartId !== null || payload.sharedSvg !== '' ||
+      !Array.isArray(payload.sharedPartIds) || payload.sharedPartIds.length !== 0 ||
+      payload.states.some(state => state.staticSharedSvg !== undefined))) {
+    refuse('SPEC_INVALID', 'source.replace не обещает общую геометрию или оболочку');
+  }
   const identity = { group: payload.group, variant: payload.variant };
   const runtime = { ...identity, defaultState: payload.defaultState,
     frame: payload.frame, sharedSvg: payload.sharedSvg, sharedPartIds: payload.sharedPartIds,
@@ -254,7 +292,7 @@ export function renderStateGroupModule(payload) {
       return encoded === undefined ? [] : [`${literalKey(key, compact)}:${encoded}`];
     }).join(',')}}`;
     return [
-    "import{createCompiledStateRuntime as r,createCompiledStateCapabilities as c}from'../ir/state-runtime.js';",
+    `import{createCompiledStateRuntime as r,createCompiledStateCapabilities as c}from'../ir/${sourceReplacement ? 'source-state-runtime' : 'state-runtime'}.js';`,
     `const p=${serialize(payload.sharedPartIds)};`,
     `const g=/* @__PURE__ */r(${record(runtime)});`,
     `export const stateCapabilities=/* @__PURE__ */c(${record(capabilities)});`,
@@ -272,14 +310,22 @@ export function stateGroupDeclaration(document, name) {
   if (!authorStateGroupNames(document).includes(name)) refuse('SPEC_INVALID', 'неизвестная группа');
   if (document.groups[name].law === 'dots.orient') return contourStateGroupDeclaration(document, name);
   const states = Object.keys(document.groups[name].states).sort();
+  const sourceReplacement = document.groups[name].law === 'source.replace';
+  const result = sourceReplacement ? 'SourceStateEffectResult' : 'StateEffectResult';
+  const capabilities = sourceReplacement ? 'SourceStateGroupCapabilities' : 'StateGroupCapabilities';
+  const variant = JSON.stringify(Object.values(document.groups[name].states)[0].variant);
+  const request = sourceReplacement ? `SourceStateRenderRequest<${variant}>` : 'StateRenderRequest';
+  const effectRequest = sourceReplacement ? `SourceStateEffectRequest<${variant}>` : 'StateEffectRequest';
+  const exportRequest = sourceReplacement ? `SourceStateTransitionExportRequest<${variant}>` : 'StateTransitionExportRequest';
+  const effectResult = sourceReplacement ? `${result}<${variant}>` : result;
   return [
-    "import type { StateRenderRequest, StateEffectRequest, StateTransitionExportRequest, StateSvgResult, StateEffectResult, StateGroupCapabilities } from '../ir/state-types.js';",
+    `import type { ${sourceReplacement ? 'Source' : ''}StateRenderRequest, ${sourceReplacement ? 'Source' : ''}StateEffectRequest, ${sourceReplacement ? 'Source' : ''}StateTransitionExportRequest, StateSvgResult, ${result}, ${capabilities} } from '../ir/${sourceReplacement ? 'source-state-types' : 'state-types'}.js';`,
     `export type State = ${states.map(state => JSON.stringify(state)).join(' | ')};`,
-    'export declare function render(state?: State, options?: StateRenderRequest): StateSvgResult;',
-    'export declare function renderStateSvg(state?: State, options?: StateRenderRequest): StateSvgResult;',
-    'export declare function compileStateEffect(state: State, request: StateEffectRequest): StateEffectResult;',
-    'export declare function exportStateTransition(state: State, request: StateTransitionExportRequest): StateEffectResult;',
-    'export declare function stateCapabilities(): StateGroupCapabilities<State>;',
+    `export declare function render(state?: State, options?: ${request}): StateSvgResult;`,
+    `export declare function renderStateSvg(state?: State, options?: ${request}): StateSvgResult;`,
+    `export declare function compileStateEffect(state: State, request: ${effectRequest}): ${effectResult};`,
+    `export declare function exportStateTransition(state: State, request: ${exportRequest}): ${effectResult};`,
+    `export declare function stateCapabilities(): ${capabilities}<State${sourceReplacement ? ', ' + variant : ''}>;`,
     '',
   ].join('\n');
 }

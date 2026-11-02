@@ -20,7 +20,8 @@ import { sourcePacketRuntimeTargets } from './lib/source-packet.js';
 import { compileAuthorAnatomyWithEvidence } from './lib/author-anatomy.js';
 import { authorVariationIconNames, authorVariationLawNames } from './lib/author-variation.js';
 import { renderLottieSymbolModule, lottieSymbolDeclaration } from './lib/lottie-geometry.js';
-import { compileAuthorStateGroups, renderStateGroupModule, stateGroupDeclaration } from './lib/author-state-groups.js';
+import { authorStateLawNames, compileAuthorStateGroups, renderStateGroupModule, stateGroupDeclaration,
+  stateRuntimeTargets, stateRuntimeBuildOptions } from './lib/author-state-groups.js';
 import { authorStateVariationGroupNames, compileAuthorStateVariations, renderStateVariationModule,
   stateVariationDeclaration } from './lib/author-state-variations.js';
 
@@ -95,6 +96,7 @@ export async function bundle(root, staging, entry, target, external = []) {
     logLevel: 'info', minify: false, minifyWhitespace: true,
     platform: 'browser', sourcemap: false, write: false, metafile: true,
     target: 'es2022', treeShaking: true,
+    ...stateRuntimeBuildOptions(entry),
   });
   // В provenance входят модули с оставленным кодом; pure reexport с нулём
   // bytes не становится фиктивным включённым модулем.
@@ -111,6 +113,7 @@ async function compileIrTargets({ root, staging }) {
   try {
     const authorSpec = read(root, 'semantics/author-anatomy.json');
     const stateSpec = read(root, 'semantics/author-state-groups.json');
+    const stateLaws = authorStateLawNames(stateSpec);
     const stateVariationNames = authorStateVariationGroupNames(stateSpec, authorSpec);
     const contentVariationNames = authorContentVariationIconNames(authorSpec);
     const variationLaws = authorVariationLawNames(authorSpec);
@@ -137,7 +140,7 @@ async function compileIrTargets({ root, staging }) {
       bundle(root, staging, 'src/ir/candidates.ts', 'ir/candidates.js', ['./index.js']),
       bundle(root, staging, 'src/motion/index.ts', 'motion/index.js', ['../ir/contour-runtime.js']),
       bundle(root, staging, 'src/lottie/runtime.ts', 'ir/lottie-runtime.js', ['../motion/index.js']),
-      bundle(root, staging, 'src/states/runtime.ts', 'ir/state-runtime.js'),
+      ...stateRuntimeTargets(stateLaws).map(target => bundle(root, staging, target.entry, `ir/${target.runtime}`)),
       // Serializer остаётся build-only: runtime групп потребляет проверенные строки.
       bundle(root, declarations, 'src/ir/svg-assembly.ts', 'svg-assembly.mjs'),
     ]);
@@ -151,6 +154,10 @@ async function compileIrTargets({ root, staging }) {
     writeFileSync(join(staging, 'motion/index.d.ts'), readFileSync(join(declarations, 'motion/index.d.ts'), 'utf8')
       .replaceAll('../states/contour-types.js', '../ir/contour-state-types.js'));
     copyFileSync(join(declarations, 'lottie/types.d.ts'), join(staging, 'ir/lottie-types.d.ts'));
+    if (stateLaws.includes('source.replace')) {
+      writeFileSync(join(staging, 'ir/source-state-types.d.ts'), readFileSync(join(declarations, 'states/source-types.d.ts'), 'utf8')
+        .replaceAll('./types.js', './state-types.js'));
+    }
     copyFileSync(join(declarations, 'authoring/index.d.ts'), join(staging, 'authoring/index.d.ts'));
     copyFileSync(join(declarations, 'authoring/design-spec.d.ts'), join(staging, 'authoring/design-spec.d.ts'));
     for (const [source, target] of [['types', 'state-types'], ['common-types', 'state-common-types'], ['contour-types', 'contour-state-types']]) {

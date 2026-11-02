@@ -1938,6 +1938,20 @@
     "renderStateSvg",
     "stateCapabilities"
   ],
+  "./states/microphone": [
+    "compileStateEffect",
+    "exportStateTransition",
+    "render",
+    "renderStateSvg",
+    "stateCapabilities"
+  ],
+  "./states/microphone-filled": [
+    "compileStateEffect",
+    "exportStateTransition",
+    "render",
+    "renderStateSvg",
+    "stateCapabilities"
+  ],
   "./states/playback-circle": [
     "compileStateEffect",
     "exportStateTransition",
@@ -1946,6 +1960,20 @@
     "stateCapabilities"
   ],
   "./states/status-circle": [
+    "compileStateEffect",
+    "exportStateTransition",
+    "render",
+    "renderStateSvg",
+    "stateCapabilities"
+  ],
+  "./states/visibility": [
+    "compileStateEffect",
+    "exportStateTransition",
+    "render",
+    "renderStateSvg",
+    "stateCapabilities"
+  ],
+  "./states/visibility-filled": [
     "compileStateEffect",
     "exportStateTransition",
     "render",
