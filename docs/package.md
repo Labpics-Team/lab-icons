@@ -62,6 +62,7 @@ pnpm add @labpics/icons
 - `dist/ir/author-catalog.generated.d.ts`
 - `dist/ir/author-provenance.d.ts`
 - `dist/ir/author-source.d.ts`
+- `dist/ir/authored-variation.d.ts`
 - `dist/ir/candidates.d.ts`
 - `dist/ir/candidates.js`
 - `dist/ir/catalog.generated.d.ts`
@@ -80,6 +81,7 @@ pnpm add @labpics/icons
 - `dist/ir/state-runtime.js`
 - `dist/ir/state-types.d.ts`
 - `dist/ir/symbol-runtime.js`
+- `dist/ir/variation-runtime.js`
 - `dist/lottie/accessibility.d.ts`
 - `dist/lottie/accessibility.js`
 - `dist/lottie/actions.d.ts`
@@ -1415,6 +1417,7 @@ pnpm add @labpics/icons
 - `dist/ir/author-catalog.generated.d.ts`
 - `dist/ir/author-provenance.d.ts`
 - `dist/ir/author-source.d.ts`
+- `dist/ir/authored-variation.d.ts`
 - `dist/ir/catalog.generated.d.ts`
 - `dist/ir/compiler.d.ts`
 - `dist/ir/lottie-types.d.ts`
