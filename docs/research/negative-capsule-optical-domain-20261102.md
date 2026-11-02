@@ -93,7 +93,7 @@ source ray winding проверяет один endpoint внутренней п�
 исходный implementation commit `285dd6ead3788d0ba88d2fe58a0c7696732e93f8`.
 Его пять source/test hashes совпадают с интегрированным
 `4fdeb0cbb83927bcd89d8bf0c538bc36f8797fa1`. Все четыре геометрических минимума,
-публичный диапазон `0.8…1`, 12 SVG и оба optical PNG сохранены. Receipt
+публичный диапазон `0.8…1`, SVG из `records` и optical PNG из `images` сохранены. Receipt
 фиксирует 55 focused PASS и оставляет независимый гейт открытым; полный CI
 и установленный consumer нового source требуют отдельного результата.
 
