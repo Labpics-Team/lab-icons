@@ -3,6 +3,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { join, posix } from 'node:path';
 import { describe, expect, it } from 'vitest';
+import { build } from 'esbuild';
 import { loadAuthorBaseline } from '../scripts/lib/author-baseline.js';
 import { compileAuthorStateGroups, authorStateGroupNames, renderStateGroupModule, stateGroupDeclaration } from '../scripts/lib/author-state-groups.js';
 import { buildSourceVariantContractFromSvg } from '../scripts/lib/icon-catalog.js';
@@ -12,12 +13,13 @@ import { normalizeFigmaSvg } from '../scripts/lib/figma-import.js';
 import { authorPathEntries } from '../src/core/icon-geometry.js';
 import { createGlyphCompiler } from '../src/ir/compiler.js';
 import { assembleGlyphLayers, assembleGlyphFrame } from '../src/ir/svg-assembly.js';
-import { createCompiledStateGroup } from '../src/states/runtime.js';
 import { statePackageExpectations, verifyInstalledStateGroup } from '../scripts/lib/state-artifact-consumer.js';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const read = file => JSON.parse(readFileSync(new URL(file, new URL('..', import.meta.url)), 'utf8'));
-const document = read('semantics/author-state-groups.json');
+const capturedDocument = read('semantics/author-state-groups.json');
+const document = { ...capturedDocument, groups: Object.fromEntries(Object.entries(capturedDocument.groups)
+  .filter(([, group]) => group.law === 'enclosure.replace')) };
 const spec = document.groups['status-circle'];
 const manifest = read('semantics/figma-baseline.json');
 const groupNames = Object.keys(document.groups).sort();
@@ -48,8 +50,22 @@ const compile = (source = baseline, input = document, owner = compilerFor(source
   compileAuthorStateGroups(source, input, { compiler: owner, assembleGlyphLayers, assembleGlyphFrame });
 const payloads = compile();
 const payload = payloads['status-circle'];
-const group = createCompiledStateGroup(payload);
 const stateNames = Object.keys(spec.states).sort();
+
+async function emittedStateGroup(payload) {
+  const result = await build({ stdin: { contents: renderStateGroupModule(payload), loader: 'js',
+    resolveDir: join(root, 'scripts/lib') }, bundle: true, write: false, minify: true,
+    platform: 'browser', format: 'esm', target: 'es2022', logLevel: 'silent',
+    plugins: [{ name: 'emitted-state-control', setup(plugin) {
+      plugin.onResolve({ filter: /state-runtime\.js$/ }, () => ({ path: join(root, 'src/states/runtime.ts') }));
+    } }],
+  });
+  return import(`data:text/javascript;base64,${Buffer.from(result.outputFiles[0].text).toString('base64')}`);
+}
+
+const generatedGroups = Object.fromEntries(await Promise.all(groupNames.map(async name =>
+  [name, await emittedStateGroup(payloads[name])])));
+const group = generatedGroups['status-circle'];
 
 // Ожидание читает оригинальные raw path tags; production reader/serializer не участвуют.
 const rawPaths = svg => [...svg.matchAll(/<path\b[^>]*>/g)].map(([tag]) => ({
@@ -101,28 +117,31 @@ function authoredCubicContours(d) {
 }
 
 describe('exact shared contours: настоящий build/runtime путь без изменения masters', () => {
-  it('байты трёх буквальных payload/module/proof сохраняются', () => {
+  it('байты трёх авторских payload/proof сохраняются при новой module проекции', () => {
     // SHA получены до исправления на a85395d; не регенерировать из нового key.
     expect(Object.fromEntries(groupNames.map(name => [name, {
-      payload: sha256(JSON.stringify(payloads[name])), module: sha256(renderStateGroupModule(payloads[name])),
+      payload: sha256(JSON.stringify(payloads[name])),
       proof: sha256(JSON.stringify(payloads[name].proof)),
     }]))).toEqual({
       'expression-face': {
         payload: 'b9ee497d047cac1f3621143fb649daf8cc872e3be00d94dea6eac9fb5e024b49',
-        module: '1e4236845e7142a2a900de9a2f2235ba9f0a8f4535cc72e4201a17804982a52b',
         proof: '6a0c0f72df5b43a1671844e85995756b84aac82fbbc8090431763a7b25f4d89c',
       },
       'playback-circle': {
         payload: '7cced098e81dc69a1a2bfed24604c84f00322e3553e5b54bc1729b2da88c0d6e',
-        module: 'a334e7e6f1d55ccd5893dab3f796eaf92c1ea2446ab4bca13648a799321bf593',
         proof: '9ee269bd3d3a6a6facb237e87a904e9facae848daa433c4f9c2e5db48629b68e',
       },
       'status-circle': {
         payload: 'b3611800148803d54aedefdf293a4b22b380139e7f0a406cfdad0339c5486d7d',
-        module: '2683e8515aa68827bf979941c00d773352d4ccd763ae88a1e257954bf721b6e3',
         proof: 'f8b42ed4c8cbdb1e665c63fba7e519f36559c26179ad0e5ba69eea87e9189738',
       },
     });
+  });
+
+  it.each(groupNames)('%s production compiler → emitted module сохраняет полную consumer semantics', name => {
+    const generated = generatedGroups[name];
+    const expected = statePackageExpectations(baseline, document)[name];
+    expect(() => verifyInstalledStateGroup(generated, expected)).not.toThrow();
   });
 
   it('back/down совпадают восемью directed cubic edges независимо от production key', () => {
@@ -139,10 +158,10 @@ describe('exact shared contours: настоящий build/runtime путь бе�
     expect(d[1]).toEqual([0, 3, 2, 1].map(index => reverse(b[1][index])));
   });
 
-  it('back/down проходят production compile и raw static oracle; mount использует defaultState', () => {
+  it('back/down проходят production compile и raw static oracle; mount использует defaultState', async () => {
     const input = directionDocument();
     const payload = compile(baseline, input)['direction-witness'];
-    const group = createCompiledStateGroup(payload);
+    const group = await emittedStateGroup(payload);
     const expected = statePackageExpectations(baseline, input)['direction-witness'];
     expect(() => verifyInstalledStateGroup(group, expected)).not.toThrow();
     for (const state of ['back', 'down']) {
@@ -168,19 +187,19 @@ describe('exact shared contours: настоящий build/runtime путь бе�
     expect(() => compile(source, input)).toThrow(expect.objectContaining({ code: 'ENCLOSURE_MISMATCH' }));
   });
 
-  it('общая content часть suffix допускает exact spelling и сохраняет raw static SVG', () => {
+  it('общая content часть suffix допускает exact spelling и сохраняет raw static SVG', async () => {
     const source = structuredClone(baseline), input = structuredClone(document);
     repin(source, input, 'smile', svg => {
       let index = 0;
       return svg.replace(/<path\b[^>]*>/g, tag => index++ === 1
         ? tag.replace(/\bd="([^"]+)"/, (_, d) => `d="${d.replaceAll(' ', '  ')}"`) : tag);
     }, 'expression-face');
-    const compiled = createCompiledStateGroup(compile(source, input)['expression-face']);
+    const compiled = await emittedStateGroup(compile(source, input)['expression-face']);
     expect(rawPaths(compiled.render('smile').svg)).toEqual(rawPaths(source.icons.smile.outline.rawSvg));
     expect(() => verifyInstalledStateGroup(compiled, statePackageExpectations(source, input)['expression-face'])).not.toThrow();
   });
 
-  it('absolute H/V и L сохраняют authored static suffix; relative alias остаётся unproved', () => {
+  it('absolute H/V и L сохраняют authored static suffix; relative alias остаётся unproved', async () => {
     const source = structuredClone(baseline), input = directionDocument();
     const replaceRing = d => svg => {
       let index = 0;
@@ -188,7 +207,7 @@ describe('exact shared contours: настоящий build/runtime путь бе�
     };
     repin(source, input, 'back', replaceRing('M0 0L10 0L10 10L0 10Z'), 'direction-witness');
     repin(source, input, 'down', replaceRing('M0 0H10V10H0Z'), 'direction-witness');
-    const compiled = createCompiledStateGroup(compile(source, input)['direction-witness']);
+    const compiled = await emittedStateGroup(compile(source, input)['direction-witness']);
     expect(() => verifyInstalledStateGroup(compiled, statePackageExpectations(source, input)['direction-witness'])).not.toThrow();
     expect(rawPaths(compiled.render('back').svg).at(-1).d).toBe('M0 0L10 0L10 10L0 10Z');
     expect(rawPaths(compiled.render('down').svg).at(-1).d).toBe('M0 0H10V10H0Z');
@@ -223,7 +242,7 @@ describe('exact shared contours: настоящий build/runtime путь бе�
 
 describe.each(groupNames)('%s: точные author masters и единая оболочка', name => {
   const spec = document.groups[name];
-  const group = createCompiledStateGroup(payloads[name]);
+  const group = generatedGroups[name];
   const stateNames = Object.keys(spec.states).sort();
 
   it.each(stateNames)('%s static SVG сохраняет каждый d, rule и порядок оригинала', state => {
@@ -372,11 +391,11 @@ describe('enclosure.replace: необъявленный общий рисуно�
     expect(() => compile(source, input)).toThrow(expect.objectContaining({ code: 'SHARED_PART_UNDECLARED' }));
   });
 
-  it('настоящий угол и near-collinear decimal corner сохраняют исходные static paths', () => {
+  it('настоящий угол и near-collinear decimal corner сохраняют исходные static paths', async () => {
     for (const corner of ['5.1', '5.00000000000000000000001']) {
       const { source, input } = witness('first', ['aloof', 'sad']);
       repin(source, input, 'sad', svg => svg.replace(`d="${square}"`, `d="M10 5L10.5 ${corner}L11 5L11 6L10 6Z"`), 'expression-face');
-      const compiled = createCompiledStateGroup(compile(source, input)['expression-face']);
+      const compiled = await emittedStateGroup(compile(source, input)['expression-face']);
       expect(rawPaths(compiled.render('sad').svg)).toEqual(rawPaths(source.icons.sad.outline.rawSvg));
     }
   });
@@ -393,9 +412,9 @@ describe('enclosure.replace: необъявленный общий рисуно�
     expect(() => compile(source, input)).not.toThrow();
   });
 
-  it('различные prefix parts и authored повтор внутри одной группы сохраняют static путь', () => {
+  it('различные prefix parts и authored повтор внутри одной группы сохраняют static путь', async () => {
     const { source, input } = witness('middle', []);
-    const compiled = createCompiledStateGroup(compile(source, input)['expression-face']);
+    const compiled = await emittedStateGroup(compile(source, input)['expression-face']);
     for (const state of ['aloof', 'sad', 'smile']) {
       expect(rawPaths(compiled.render(state).svg)).toEqual(rawPaths(source.icons[state].outline.rawSvg));
     }
@@ -408,7 +427,7 @@ describe('enclosure.replace: необъявленный общий рисуно�
 describe('expression-face: общие глаза не входят в изменяемую opacity группу', () => {
   const name = 'expression-face';
   const faceSpec = document.groups[name];
-  const face = createCompiledStateGroup(payloads[name]);
+  const face = generatedGroups[name];
   const mutatePath = (svg, index, change) => {
     let cursor = 0;
     return svg.replace(/<path\b[^>]*>/g, tag => cursor++ === index ? change(tag) : tag);
@@ -519,7 +538,7 @@ describe('enclosure.replace: adversarial admission и compatibility', () => {
   });
 
   it('состояния разных предметных групп не превращаются в общий enum', () => {
-    const playback = createCompiledStateGroup(payloads['playback-circle']);
+    const playback = generatedGroups['playback-circle'];
     for (const state of ['confirmation', 'stop']) {
       expect(playback.render(state)).toMatchObject({ ok: false, reason: { code: 'STATE_UNSUPPORTED' } });
       expect(playback.compileStateEffect(state, { duration: 300 })).toMatchObject({

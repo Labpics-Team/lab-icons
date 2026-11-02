@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { compactDataLiteral, compactGeneratedModule, jsonDataLiteral, literalKey } from './generated-module.js';
 import { authorPathEntries, sourcePathEntries } from '../../src/core/icon-geometry.js';
 import { exactClosedFillPathKey } from './exact-closed-fill-path.js';
 
@@ -221,18 +222,45 @@ export function compileAuthorStateGroups(baseline, document, { compiler, assembl
 
 /** Конечный module хранит общие части один раз и не импортирует geometry/authoring. */
 export function renderStateGroupModule(payload) {
-  if (!NAME.test(payload?.group)) refuse('SPEC_INVALID', 'невалидный compiled group');
-  return [
+  if (typeof payload?.group !== 'string' || !NAME.test(payload.group)) refuse('SPEC_INVALID', 'невалидный compiled group');
+  if (!Array.isArray(payload.states) || !payload.states.length || payload.states.some(state =>
+    typeof state?.id !== 'string' || !NAME.test(state.id) ||
+    typeof state?.partId !== 'string' || !NAME.test(state.partId) || typeof state?.contentSvg !== 'string' ||
+    (state.staticSharedSvg !== undefined && typeof state.staticSharedSvg !== 'string'))) {
+    refuse('SPEC_INVALID', 'state projection требует объявленные IDs, SVG и строковый optional override');
+  }
+  if (typeof payload.defaultState !== 'string' || !payload.states.some(state => state.id === payload.defaultState)) {
+    refuse('SPEC_INVALID', 'defaultState обязан принадлежать compiled states');
+  }
+  const identity = { group: payload.group, variant: payload.variant };
+  const runtime = { ...identity, defaultState: payload.defaultState,
+    frame: payload.frame, sharedSvg: payload.sharedSvg, sharedPartIds: payload.sharedPartIds,
+    states: payload.states.map(({ id, partId, contentSvg, staticSharedSvg }) =>
+      staticSharedSvg === undefined ? [id, partId, contentSvg] : [id, partId, contentSvg, staticSharedSvg]) };
+  const capabilities = { ...identity, defaultState: payload.defaultState,
+    enclosurePartId: payload.enclosurePartId, sharedPartIds: payload.sharedPartIds,
+    states: payload.states.map(({ contentSvg: _, staticSharedSvg: _static, ...state }) => state),
+    proof: payload.proof };
+  const emit = compact => {
+    const serialize = compact ? compactDataLiteral : jsonDataLiteral;
+    const record = value => `{${Object.entries(value).flatMap(([key, value]) => {
+      const encoded = key === 'sharedPartIds' ? 'sharedPartIds' : serialize(value);
+      return encoded === undefined ? [] : [`${literalKey(key, compact)}:${encoded}`];
+    }).join(',')}}`;
+    return [
     '/** GENERATED: проверенная общая оболочка и независимые авторские состояния. */',
-    "import { createCompiledStateGroup } from '../ir/state-runtime.js';",
-    `const group = /* @__PURE__ */ createCompiledStateGroup(${JSON.stringify(payload)});`,
+    "import { createCompiledStateRuntime, createCompiledStateCapabilities } from '../ir/state-runtime.js';",
+    `const sharedPartIds = ${serialize(payload.sharedPartIds)};`,
+    `const group = /* @__PURE__ */ createCompiledStateRuntime(${record(runtime)});`,
+    `export const stateCapabilities = /* @__PURE__ */ createCompiledStateCapabilities(${record(capabilities)});`,
     'export function render(state, options) { return group.render(state, options); }',
     'export function renderStateSvg(state, options) { return group.renderStateSvg(state, options); }',
     'export function compileStateEffect(state, request) { return group.compileStateEffect(state, request); }',
     'export function exportStateTransition(state, request) { return group.exportStateTransition(state, request); }',
-    'export function stateCapabilities() { return group.stateCapabilities(); }',
     '',
   ].join('\n');
+  };
+  return compactGeneratedModule([emit(false), emit(true)]);
 }
 
 export function stateGroupDeclaration(document, name) {
