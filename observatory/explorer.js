@@ -1,6 +1,7 @@
 import { compileSymbolEffect } from './package/motion/index.js';
 import { renderGlyphSvg } from './package/ir/render.js';
 import { downloadFile } from './download.js';
+import { authoredVariationCapability, renderVariationComparison } from './variation-preview.js';
 let execution;
 const motionExecutor = () => execution ??= import('./motion-execution.js');
 let recordedModels;
@@ -24,7 +25,16 @@ function loadMessage(message = '') {
   loadStatus.textContent = message;
   loadStatus.hidden = !message;
 }
-const state = { data: null, name: 'time', variant: 'outline', view: 'original', viewLoading: false, limit: 48, revision: 0, viewRevision: 0, motionRevision: 0, pendingMotion: null, loaded: false, legacy: false, modelModule: null, abort: null, module: null, capabilities: null, glyph: null, axes: {}, original: '', effect: null, animations: [], frame: null, playhead: null, replacement: null };
+const state = { data: null, name: 'time', variant: 'outline', view: 'original', viewLoading: false, limit: 48, revision: 0, viewRevision: 0, motionRevision: 0, pendingMotion: null, loaded: false, legacy: false, modelModule: null, abort: null, module: null, capabilities: null, glyph: null, axes: {}, variation: {}, original: '', effect: null, animations: [], frame: null, playhead: null, replacement: null };
+const variationAvailable = () => authoredVariationCapability(state.module?.glyphCapabilities(state.variant));
+const variationView = () => Boolean(variationAvailable() && state.view !== 'original' && !state.legacy);
+function updateVariationStatus() {
+  if (!variationAvailable()) return;
+  const refused = ui['axis-controls'].querySelector('[data-variation-error]');
+  ui['axis-status'].textContent = refused?.dataset.variationError ?? (['overlay', 'difference'].includes(state.view)
+    ? 'Красным — исходная форма, синим — изменённая.'
+    : 'Множители меняют размер точек и расстояние между ними.');
+}
 const REPLACEMENT_GESTURE = 'enclosure.replace';
 const stateLabels = Object.freeze({ confirmation: 'Подтверждение', dismissal: 'Закрыть',
   question: 'Вопрос', attention: 'Внимание', increase: 'Добавить', decrease: 'Убрать',
@@ -56,11 +66,16 @@ function inspectorPresentation() {
   const member = active ? replacementMember() : null;
   const row = selectedRow(), caps = state.capabilities;
   const comparison = ['overlay', 'difference'].includes(state.view);
+  const variation = variationView();
   const name = member?.icon ?? state.name;
   const variant = state.variant === 'filled' ? 'заливка' : 'контурное начертание';
-  const viewLabel = state.legacy ? 'Прежняя модель' : comparison ? `${state.view === 'overlay' ? 'Наложение' : 'Разница'} с прежней моделью` : '';
+  const viewLabel = state.legacy ? 'Прежняя модель' : variation ? comparison
+    ? `${state.view === 'overlay' ? 'Наложение' : 'Разница'} с авторской формой` : 'Вариация авторской формы'
+    : comparison ? `${state.view === 'overlay' ? 'Наложение' : 'Разница'} с прежней моделью` : '';
   ui['symbol-name'].textContent = name;
-  ui['model-status'].textContent = active ? 'Авторские состояния' : viewLabel || (caps.modelState === 'accepted' ? 'Модель принята' : caps.modelState === 'candidate' ? 'Модель на проверке' : 'Авторский SVG');
+  ui['model-status'].textContent = active ? 'Авторские состояния' : variation
+    ? comparison ? state.view === 'overlay' ? 'Наложение' : 'Разница' : 'Авторская вариация'
+    : viewLabel || (caps.modelState === 'accepted' ? 'Модель принята' : caps.modelState === 'candidate' ? 'Модель на проверке' : 'Авторский SVG');
   ui['symbol-stage'].setAttribute('aria-label', active ? `Символ ${name}: ${stateLabel(member.id)}` : `Символ ${name}: ${variant}${viewLabel ? `. ${viewLabel}` : ''}`);
   ui['state-choice-label'].textContent = active ? stateLabel(member.id) : '';
   for (const button of ui['state-choices'].querySelectorAll('button')) {
@@ -68,7 +83,9 @@ function inspectorPresentation() {
   }
   const author = member?.author ?? row.original;
   ui['source-status'].textContent = `Lab UI v2.1. Версия ${author.version}. Узел ${author.nodeId}. ` +
-    (active ? 'Авторский знак; общая оболочка сохраняется при замене.' : state.legacy ? 'Прежняя модель: паритет с новой авторской основой не принят.' : comparison ? `Красным — текущая основа, синим — прежняя ${row.model?.catalogState === 'accepted' ? 'модель' : 'модель на проверке'} при исходных параметрах. Части и образцы размеров относятся к текущему авторскому мастеру. Паритет не принят.` : 'Текущий авторский мастер. Возможности относятся к его закреплённой версии.');
+    (active ? 'Авторский знак; общая оболочка сохраняется при замене.' : state.legacy ? 'Прежняя модель: паритет с новой авторской основой не принят.' : variation
+      ? `${comparison ? 'Красным — исходная форма, синим — изменённая. ' : ''}Размер точки ×${state.variation.dotScale}; расстояние ×${state.variation.spacingScale}. Образцы размеров и SVG относятся к этой форме.`
+      : comparison ? `Красным — текущая основа, синим — прежняя ${row.model?.catalogState === 'accepted' ? 'модель' : 'модель на проверке'} при исходных параметрах. Части и образцы размеров относятся к текущему авторскому мастеру. Паритет не принят.` : 'Текущий авторский мастер. Возможности относятся к его закреплённой версии.');
   ui['consumer-import'].textContent = active ? `import { renderStateSvg, compileStateEffect } from\n  '@labpics/icons/states/${group.capabilities.group}';` : state.legacy ? `import { glyph } from '@labpics/icons/ir';\n// Прежняя основа; текущий master: ./symbols/${state.name}` : `import { glyph } from\n  '@labpics/icons/symbols/${state.name}';`;
   const parts = active ? [...member.contentPartIds, ...group.capabilities.sharedPartIds].map(id => ({ id, role: id === group.capabilities.enclosurePartId ? 'container' : 'content' })) : state.glyph.parts;
   ui.parts.replaceChildren(...parts.map(part => {
@@ -82,9 +99,10 @@ function inspectorPresentation() {
     if (!result.ok) throw new Error(`${result.reason.code}: ${result.reason.message}`);
     stateSamples(result.svg);
   } else {
-    const productionSvg = state.legacy || motionAdmission(state.glyph, caps, caps.motion.gestures[0]?.id)?.ok;
+    const productionSvg = state.legacy || variation || motionAdmission(state.glyph, caps, caps.motion.gestures[0]?.id)?.ok;
     stateSamples(size => productionSvg ? renderGlyphSvg(state.glyph, { instanceId: `sample-${state.revision}-${state.viewRevision}-${size}` }) : state.original);
   }
+  updateVariationStatus();
 }
 
 function replacementChoices() {
@@ -175,7 +193,7 @@ function motionAdmission(glyph = state.glyph, caps = state.capabilities, gesture
 }
 
 function motionView() {
-  return (state.view === 'original' && !state.legacy) || (state.view === 'generated' && state.legacy);
+  return (state.view === 'original' && !state.legacy) || state.view === 'generated';
 }
 
 function selectedGesture() {
@@ -214,12 +232,14 @@ function updateMotionControls() {
 function viewAvailable(view, row = selectedRow()) {
   if (!row) return false;
   if (view === 'original') return true;
+  if (variationAvailable()) return ['generated', 'overlay', 'difference'].includes(view);
   if (view === 'generated') return Boolean(row.views.generated && row.model?.catalogState === 'accepted');
   return ['overlay', 'difference'].includes(view) && Boolean(row.views[view]);
 }
 
 function updateViewControls() {
   for (const button of document.querySelectorAll('[data-view]')) {
+    if (button.dataset.view === 'generated') button.textContent = variationAvailable() ? 'Вариация' : 'Модель';
     button.setAttribute('aria-pressed', String(button.dataset.view === state.view));
     button.disabled = !state.loaded || !viewAvailable(button.dataset.view);
   }
@@ -248,7 +268,7 @@ function clearInspector(message) {
   updateViewControls();
 }
 
-async function renderView(view = state.view) {
+async function renderView(view = state.view, { preserveProgress = false, variation: requestedVariation = state.variation } = {}) {
   if (!state.loaded) return;
   const revision = state.revision;
   const row = selectedRow();
@@ -258,14 +278,16 @@ async function renderView(view = state.view) {
     return;
   }
   const viewRevision = ++state.viewRevision;
-  stop();
+  const previousProgress = stop();
   state.viewLoading = true;
   loadMessage();
   inspectorBusy(true);
   updateMotionControls();
   try {
     let glyph = state.glyph, capabilities = state.capabilities, modelModule = state.modelModule;
-    const legacy = view === 'generated';
+    const variation = variationAvailable();
+    const modified = variation && view !== 'original';
+    const legacy = view === 'generated' && !variation;
     const axes = legacy ? state.axes : {};
     if (legacy && !state.legacy) {
       modelModule = await recordedCompiler();
@@ -274,20 +296,24 @@ async function renderView(view = state.view) {
       if (glyph.provenance.kind !== 'model' || glyph.provenance.state !== 'accepted') throw new Error('Для прежней основы нет принятой модели. Кандидат доступен только для сравнения.');
       capabilities = modelModule.glyphCapabilities(state.name, state.variant);
     } else if (!legacy) {
-      glyph = state.module.glyph({ variant: state.variant });
+      glyph = state.module.glyph({ variant: state.variant, ...(modified && { variation: requestedVariation }) });
       capabilities = state.module.glyphCapabilities(state.variant);
     }
     const annotatedSource = !legacy && motionAdmission(glyph, capabilities, capabilities.motion.gestures[0]?.id)?.ok;
-    const productionSvg = legacy || annotatedSource;
+    const productionSvg = legacy || modified || annotatedSource;
     let svg = productionSvg ? renderGlyphSvg(glyph, { instanceId: `stage-${revision}-${viewRevision}` }) : state.original;
-    if (['overlay', 'difference'].includes(view)) {
+    if (modified && ['overlay', 'difference'].includes(view)) {
+      const source = state.module.glyph({ variant: state.variant, modelMode: 'source-only' });
+      svg = renderVariationComparison(renderGlyphSvg(source, { instanceId: `source-${revision}-${viewRevision}` }),
+        renderGlyphSvg(glyph, { instanceId: `modified-${revision}-${viewRevision}` }), glyph.viewBox, view, `compare-${revision}-${viewRevision}`);
+    } else if (['overlay', 'difference'].includes(view)) {
       const response = await fetch(row.views[view], { signal: state.abort.signal });
       if (!response.ok) throw new Error(`Изображение недоступно: HTTP ${response.status}`);
       svg = await response.text();
     }
     if (revision !== state.revision || viewRevision !== state.viewRevision) return;
     const changedControls = capabilities !== state.capabilities || legacy !== state.legacy;
-    Object.assign(state, { view, glyph, capabilities, modelModule, legacy, axes, viewLoading: false });
+    Object.assign(state, { view, glyph, capabilities, modelModule, legacy, axes, variation: requestedVariation, viewLoading: false });
     ui['symbol-stage'].dataset.view = view;
     ui.pause.textContent = 'Пауза';
     if (changedControls) controls();
@@ -299,12 +325,15 @@ async function renderView(view = state.view) {
     ui['symbol-stage'].innerHTML = svg;
     for (const image of ui['symbol-stage'].querySelectorAll('svg')) image.setAttribute('aria-hidden', 'true');
     // Значение неподвижного мастера задаёт семантика, а не имя иконки.
-    ui.progress.value = String(motionAdmission()?.ok ? selectedGesture()?.restProgress ?? 0 : 0);
+    ui.progress.value = String(motionAdmission()?.ok ? preserveProgress ? previousProgress : selectedGesture()?.restProgress ?? 0 : 0);
+    if (preserveProgress && motionAdmission()?.ok && motionView()) await seekProgress(previousProgress);
+    if (revision !== state.revision || viewRevision !== state.viewRevision) return;
     inspectorPresentation();
     updateViewControls();
     inspectorBusy(false);
     updateMotionControls();
     displayStyle();
+    return { ok: true };
   } catch (error) {
     if (error.name === 'AbortError' || revision !== state.revision || viewRevision !== state.viewRevision) return;
     state.viewLoading = false;
@@ -313,6 +342,7 @@ async function renderView(view = state.view) {
     updateMotionControls();
     ui['source-status'].textContent = error.message;
     loadMessage(error.message);
+    return { ok: false, error };
   }
 }
 
@@ -345,7 +375,60 @@ function controls() {
     label.append(title, input, value);
     return label;
   }));
-  ui['axis-status'].textContent = caps.supportedAxes.length ? '' : 'Для этого варианта оси пока не приняты.';
+  const variation = variationAvailable();
+  if (variation) {
+    state.variation = { ...variation.defaults, ...state.variation };
+    for (const [name, text] of [['dotScale', 'Размер точки'], ['spacingScale', 'Расстояние между точками']]) {
+      const label = document.createElement('label');
+      label.className = 'variation-control';
+      const title = document.createElement('span');
+      title.textContent = text;
+      const input = document.createElement('input');
+      input.type = 'number'; input.step = 'any'; input.min = '0';
+      input.dataset.variation = name;
+      input.value = String(state.variation[name]);
+      input.setAttribute('aria-describedby', 'axis-status');
+      let inputRevision = 0;
+      input.addEventListener('input', async () => {
+        const revision = state.revision;
+        const requestRevision = ++inputRevision;
+        try {
+          const requested = { ...state.variation, [name]: input.valueAsNumber };
+          state.module.glyph({ variant: state.variant, variation: requested });
+          const result = await renderView('generated', { preserveProgress: true, variation: requested });
+          if (revision !== state.revision || requestRevision !== inputRevision || !result) return;
+          if (!result.ok) throw result.error;
+          input.setCustomValidity(''); input.removeAttribute('aria-invalid');
+          delete input.dataset.variationError;
+          updateVariationStatus();
+        } catch (error) {
+          if (revision !== state.revision || requestRevision !== inputRevision) return;
+          input.setCustomValidity(error.message); input.setAttribute('aria-invalid', 'true');
+          input.dataset.variationError = `${error.code ?? 'INVALID_VARIATION'}: ${error.message}`;
+          ui['axis-status'].textContent = input.dataset.variationError;
+        }
+      });
+      const unit = document.createElement('span'); unit.textContent = '×';
+      label.append(title, input, unit);
+      ui['axis-controls'].append(label);
+    }
+    const reset = document.createElement('button');
+    reset.type = 'button'; reset.className = 'variation-reset'; reset.dataset.variationReset = '';
+    reset.textContent = 'Вернуть авторскую форму';
+    reset.addEventListener('click', async () => {
+      const result = await renderView('original', { preserveProgress: true, variation: { ...variation.defaults } });
+      if (!result?.ok) return;
+      for (const input of ui['axis-controls'].querySelectorAll('[data-variation]')) {
+        input.value = String(state.variation[input.dataset.variation]);
+        input.setCustomValidity(''); input.removeAttribute('aria-invalid');
+        delete input.dataset.variationError;
+      }
+      updateVariationStatus();
+    });
+    ui['axis-controls'].append(reset);
+  }
+  ui['axis-status'].textContent = variation ? 'Положительные множители изменяют форму точек и расстояние между ними.'
+    : caps.supportedAxes.length ? '' : 'Для этого варианта оси пока не приняты.';
   const selectedGesture = ui.gesture.value;
   ui.gesture.replaceChildren(...(state.replacement && !state.legacy ? [new Option('Смена знака', REPLACEMENT_GESTURE)] : []),
     ...caps.motion.gestures.map((gesture) => new Option(gesture.id, gesture.id)));
@@ -359,6 +442,7 @@ async function select(name, { reveal = false } = {}) {
   state.name = name;
   state.variant = ui.variant.value;
   state.axes = {};
+  state.variation = {};
   state.view = 'original';
   state.viewLoading = false;
   state.legacy = false;
@@ -529,7 +613,7 @@ displayColor.addEventListener('input', displayStyle);
 ui.variant.addEventListener('change', () => select(state.name));
 ui['more-symbols'].addEventListener('click', () => { state.limit += 48; grid(); });
 ui.gesture.addEventListener('change', () => state.replacement ? renderView(state.view) : updateMotionControls());
-for (const button of document.querySelectorAll('[data-view]')) button.addEventListener('click', () => renderView(button.dataset.view));
+for (const button of document.querySelectorAll('[data-view]')) button.addEventListener('click', () => renderView(button.dataset.view, { preserveProgress: Boolean(variationAvailable()) }));
 ui.play.addEventListener('click', () => replacementMode() ? replaceState(state.replacement.target) : advance(1, { repeatCycle: true }));
 ui.reverse.addEventListener('click', () => replacementMode() ? replaceState(state.replacement.previous) : advance(0));
 ui.pause.addEventListener('click', () => {
@@ -564,8 +648,7 @@ ui.pause.addEventListener('click', () => {
   }
   updateMotionControls();
 });
-ui.progress.addEventListener('input', async () => {
-  const to = Number(ui.progress.value);
+async function seekProgress(to) {
   stop();
   const motionRevision = state.motionRevision;
   const result = effect(to, to, { duration: 0 });
@@ -577,7 +660,8 @@ ui.progress.addEventListener('input', async () => {
       ui.progress.value = String(to);
     } catch (error) { if (motionRevision === state.motionRevision) ui['motion-status'].textContent = error.message; }
   }
-});
+}
+ui.progress.addEventListener('input', () => seekProgress(Number(ui.progress.value)));
 ui['reduce-motion'].checked = reducedPreference.matches;
 function reduceCurrentMotion() {
   if (replacementMode()) {
@@ -604,23 +688,25 @@ ui.export.addEventListener('click', async () => {
     if (!result.ok) { ui['export-status'].textContent = `${result.reason.code}: ${result.reason.message}`; return; }
     content = format === 'svg' ? result.svg : JSON.stringify(result.effect, null, 2);
   }
-  else if (format === 'svg') content = legacyExport ? state.glyph.svg : state.original;
+  else if (format === 'svg') content = legacyExport ? state.glyph.svg : variationView()
+    ? renderGlyphSvg(state.glyph, { instanceId: 'export' }) : state.original;
   else if (format === 'effect') {
     if (!motionView()) { ui['export-status'].textContent = 'Выберите авторский вид или прежнюю модель для экспорта её жеста.'; return; }
     const result = effect(0, 1);
     if (!result.ok) { ui['export-status'].textContent = result.reason.message; return; }
     content = JSON.stringify(result.effect, null, 2);
   } else if (format === 'lottie') {
-    if (state.legacy || state.view !== 'original') { ui['export-status'].textContent = 'Lottie экспортирует текущий авторский вид.'; return; }
+    if (state.legacy || state.view !== 'original' && !variationView()) { ui['export-status'].textContent = 'Lottie экспортирует текущий авторский вид.'; return; }
     ui.export.disabled = true;
     ui['export-status'].textContent = 'Подготавливаем Lottie…';
     try {
       const target = await import(`./package/lottie/${state.name}.js`);
-      if (state.revision !== revision || state.viewRevision !== viewRevision || state.viewLoading || state.view !== 'original' || state.legacy) return;
+      if (state.revision !== revision || state.viewRevision !== viewRevision || state.viewLoading || state.legacy) return;
       const gesture = ui.gesture.value;
       const result = target.exportLottie({ variant: state.variant, color: displayColor.value,
+        ...(variationView() ? { variation: state.variation } : {}),
         ...(gesture ? { gesture, duration: 1000, from: 0, to: 1, reducedMotion: ui['reduce-motion'].checked } : {}) });
-      if (!result.ok) { ui['export-status'].textContent = `Lottie: ${result.reason.message}`; return; }
+      if (!result.ok) { ui['export-status'].textContent = `Lottie: ${result.reason.code}: ${result.reason.message}`; return; }
       content = JSON.stringify(result.animation);
     } catch (error) {
       if (state.revision === revision) ui['export-status'].textContent = `Lottie не подготовлен: ${error.message}`;
@@ -630,7 +716,7 @@ ui.export.addEventListener('click', async () => {
     }
   } else { ui['export-status'].textContent = 'SF Symbols: для этого варианта нет проверенного адаптера.'; return; }
   downloadFile(content, format === 'svg' ? 'image/svg+xml' : 'application/json',
-    `${group ? `${group.capabilities.group}-${group.target}` : state.name}-${state.variant}${legacyExport ? '-recorded-model' : ''}.${format === 'svg' ? 'svg' : format === 'lottie' ? 'lottie.json' : 'effect.json'}`);
+    `${group ? `${group.capabilities.group}-${group.target}` : state.name}-${state.variant}${legacyExport ? '-recorded-model' : variationView() ? '-variation' : ''}.${format === 'svg' ? 'svg' : format === 'lottie' ? 'lottie.json' : 'effect.json'}`);
   ui['export-status'].textContent = 'Файл подготовлен.';
 });
 

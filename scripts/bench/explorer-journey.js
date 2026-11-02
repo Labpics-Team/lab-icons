@@ -267,6 +267,178 @@ export async function runExplorerJourney() {
     await choose('ellipsis-vertical', 'outline');
     check('vertical-menu-does-not-inherit-loading', q('play').disabled && q('gesture').value === '');
 
+    const viewButton = view => document.querySelector(`[data-view="${view}"]`);
+    const chooseView = async view => {
+      viewButton(view).click();
+      await wait(() => q('symbol-inspector').getAttribute('aria-busy') === 'false' &&
+        q('symbol-stage').dataset.view === view, `variation view ${view}`);
+    };
+    const variationInput = name => q('axis-controls').querySelector(`[data-variation="${name}"]`);
+    const changeVariation = async (name, value, refusal) => {
+      const input = variationInput(name);
+      if (!input) throw new Error(`explorer journey: missing variation input ${name}`);
+      input.value = String(value);
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      await wait(() => refusal ? variationInput(name)?.getAttribute('aria-invalid') === 'true' &&
+        q('axis-status').textContent.includes(refusal) : q('symbol-inspector').getAttribute('aria-busy') === 'false' &&
+        q('symbol-stage').dataset.view === 'generated' && variationInput(name)?.getAttribute('aria-invalid') !== 'true',
+      `variation ${name}=${value}${refusal ? ` refusal ${refusal}` : ''}`);
+      await frame();
+      await frame();
+    };
+    const visibleDots = () => [...q('symbol-stage').querySelectorAll(':scope > svg [data-role="content"]')]
+      .map(dot => Number(getComputedStyle(dot).opacity));
+    for (const name of ['ellipsis-horizontal', 'ellipsis-vertical']) for (const variant of ['outline', 'filled']) {
+      const id = `${name}/${variant}/variation`;
+      await choose(name, variant);
+      const symbol = await import(`./package/symbols/${name}.js`);
+      const source = symbol.glyph({ variant });
+      const caps = symbol.glyphCapabilities(variant);
+      const row = data.rows.find(item => item.name === name && item.variant === variant);
+      const masterResponse = await originalFetch(row.views.master);
+      if (!masterResponse.ok) throw new Error(`explorer journey: variation master HTTP ${masterResponse.status}`);
+      const master = new DOMParser().parseFromString(await masterResponse.text(), 'image/svg+xml').documentElement;
+      const sourcePaths = JSON.stringify(paths(master));
+      check(`${id}/actual-capability-controls`, caps.variation?.law === 'dots.affine' &&
+        caps.variation.targets.svg === 'supported' &&
+        [...q('axis-controls').querySelectorAll('[data-variation]')].map(input => input.dataset.variation).join(',') === 'dotScale,spacingScale' &&
+        [...q('axis-controls').querySelectorAll('[data-variation]')].every(input => input.type === 'number' && input.value === '1') &&
+        viewButton('generated').textContent === 'Вариация' && !viewButton('generated').disabled);
+      check(`${id}/exact-default-master`, symbol.glyph({ variant, variation: caps.variation.defaults }) === source &&
+        JSON.stringify(paths(q('symbol-stage').querySelector(':scope > svg'))) === sourcePaths);
+
+      await chooseView('generated');
+      check(`${id}/default-view-preserves-master`, JSON.stringify(paths(q('symbol-stage').querySelector(':scope > svg'))) === sourcePaths);
+      let retainedPhase = 0, retainedOpacity;
+      if (name === 'ellipsis-horizontal') {
+        setReduced(false);
+        await setProgress(0.37);
+        retainedPhase = Number(q('progress').value);
+        retainedOpacity = visibleDots();
+        check(`${id}/source-phase-witness`, retainedPhase === 0.37 && retainedOpacity.length === 3 &&
+          retainedOpacity.some(value => value < 0.8) && new Set(retainedOpacity).size > 1);
+      }
+      await changeVariation('dotScale', 1.1);
+      await changeVariation('spacingScale', 0.9);
+      const parameters = { dotScale: 1.1, spacingScale: 0.9 };
+      const modified = symbol.glyph({ variant, variation: parameters });
+      const modifiedPaths = JSON.stringify(paths(new DOMParser().parseFromString(modified.svg, 'image/svg+xml').documentElement));
+      check(`${id}/production-geometry`, modified.provenance.kind === 'authored-variation' && modifiedPaths !== sourcePaths &&
+        JSON.stringify(paths(q('symbol-stage').querySelector(':scope > svg'))) === modifiedPaths &&
+        JSON.stringify(source.parts.map(part => part.d)) === JSON.stringify(paths(master).map(part => part.d)));
+      check(`${id}/production-size-samples`, [...q('size-samples').querySelectorAll('.size-sample > svg')]
+        .map(svg => svg.style.width).join(',') === '16px,24px,48px' &&
+        [...q('size-samples').querySelectorAll('.size-sample > svg')].every(svg => JSON.stringify(paths(svg)) === modifiedPaths));
+      if (retainedOpacity) check(`${id}/geometry-edit-retains-visible-phase`, Number(q('progress').value) === retainedPhase &&
+        q('pause').disabled && retainedOpacity.every((value, index) => Math.abs(value - visibleDots()[index]) < 0.000001),
+      { phase: retainedPhase, before: retainedOpacity, after: visibleDots() });
+      else check(`${id}/menu-variation-refuses-loading`, q('play').disabled && q('gesture').value === '');
+
+      for (const view of ['overlay', 'difference']) {
+        await chooseView(view);
+        const comparison = q('symbol-stage').querySelector(':scope > svg');
+        const originalLayer = comparison.querySelector(':scope > [data-comparison="source"]');
+        const modifiedLayer = comparison.querySelector(':scope > [data-comparison="modified"]');
+        const nested = [...comparison.querySelectorAll('svg')];
+        check(`${id}/${view}/production-layers`, comparison.dataset.variationComparison === view &&
+          JSON.stringify(paths(originalLayer)) === sourcePaths && JSON.stringify(paths(modifiedLayer)) === modifiedPaths);
+        check(`${id}/${view}/authored-viewport-scaling`, nested.length >= 2 && nested.every(svg =>
+          Math.abs(parseFloat(getComputedStyle(svg).width) - modified.viewBox[2]) < 0.001 &&
+          Math.abs(parseFloat(getComputedStyle(svg).height) - modified.viewBox[3]) < 0.001));
+        check(`${id}/${view}/meaningful-colors`, getComputedStyle(originalLayer).color === 'rgb(185, 70, 60)' &&
+          getComputedStyle(modifiedLayer).color === 'rgb(67, 132, 201)');
+        if (view === 'difference') {
+          const masks = [...comparison.querySelectorAll('mask')];
+          const ids = [...document.querySelectorAll('[id]')].map(element => element.id);
+          check(`${id}/difference/directed-luminance-masks`, masks.length === 2 && masks.every(mask =>
+            getComputedStyle(mask).maskType === 'luminance' && mask.getAttribute('maskUnits') === 'userSpaceOnUse') &&
+            new Set(ids).size === ids.length &&
+            [originalLayer, modifiedLayer].every(layer => masks.some(mask => layer.getAttribute('mask') === `url(#${mask.id})`)));
+        }
+        check(`${id}/${view}/samples-remain-modified`, [...q('size-samples').querySelectorAll('.size-sample > svg')]
+          .every(svg => JSON.stringify(paths(svg)) === modifiedPaths));
+      }
+      q('export-format').value = 'svg'; q('export').click();
+      const svgDownload = downloads.at(-1);
+      check(`${id}/svg-export-real-modified`, svgDownload?.filename === `${name}-${variant}-variation.svg` &&
+        JSON.stringify(paths(new DOMParser().parseFromString(await svgDownload.blob.text(), 'image/svg+xml').documentElement)) === modifiedPaths);
+      const beforeLottie = downloads.length;
+      q('export-format').value = 'lottie'; q('export').click();
+      await wait(() => q('export-status').textContent.includes('VARIATION_UNSUPPORTED'), `${id} Lottie refusal`);
+      check(`${id}/nondefault-lottie-refusal`, downloads.length === beforeLottie);
+
+      await chooseView('generated');
+      const acceptedStage = q('symbol-stage').innerHTML;
+      const acceptedSamples = q('size-samples').innerHTML;
+      const acceptedSourceStatus = q('source-status').textContent;
+      for (const [axis, value, refusal] of [['dotScale', 0, 'INVALID_VARIATION'], ['spacingScale', 3, 'VARIATION_OUTSIDE_DOMAIN']]) {
+        await changeVariation(axis, value, refusal);
+        check(`${id}/${refusal}/retains-accepted-projection`, q('symbol-stage').innerHTML === acceptedStage &&
+          q('size-samples').innerHTML === acceptedSamples && q('source-status').textContent === acceptedSourceStatus && !q('export').disabled);
+        q('export-format').value = 'svg'; q('export').click();
+        const acceptedDownload = downloads.at(-1);
+        check(`${id}/${refusal}/exports-accepted-geometry`, JSON.stringify(paths(new DOMParser()
+          .parseFromString(await acceptedDownload.blob.text(), 'image/svg+xml').documentElement)) === modifiedPaths);
+      }
+      if (retainedOpacity) {
+        q('play').click();
+        await wait(() => Number(q('progress').value) > 0.45 && Number(q('progress').value) < 0.85, `${id} running refusal witness`);
+        const runningPhase = Number(q('progress').value);
+        await changeVariation('dotScale', 0, 'INVALID_VARIATION');
+        check(`${id}/invalid-draft-retains-running-motion`, !q('pause').disabled && q('pause').textContent === 'Пауза' &&
+          Number(q('progress').value) > runningPhase && JSON.stringify(paths(q('symbol-stage').querySelector(':scope > svg'))) === modifiedPaths);
+        q('pause').click();
+        await setProgress(retainedPhase);
+        q('gesture').value = `${name}.idle`;
+        q('gesture').dispatchEvent(new Event('change', { bubbles: true }));
+        q('play').click(); setReduced(true);
+        await wait(() => Number(q('progress').value) === 1 && visibleDots().every(value => value === 1), `${id} modified reduced terminal`);
+        check(`${id}/modified-reduced-motion-terminal`, JSON.stringify(paths(q('symbol-stage').querySelector(':scope > svg'))) === modifiedPaths);
+        setReduced(false);
+        q('gesture').value = `${name}.activity`;
+        q('gesture').dispatchEvent(new Event('change', { bubbles: true }));
+        await setProgress(retainedPhase);
+      }
+      const rapidInput = variationInput('dotScale');
+      rapidInput.value = '1.15';
+      rapidInput.dispatchEvent(new Event('input', { bubbles: true }));
+      rapidInput.value = '0';
+      rapidInput.dispatchEvent(new Event('input', { bubbles: true }));
+      await wait(() => q('symbol-inspector').getAttribute('aria-busy') === 'false', `${id} rapid draft completion`);
+      await frame();
+      const rapidAccepted = symbol.glyph({ variant, variation: { dotScale: 1.15, spacingScale: 0.9 } });
+      const rapidPaths = JSON.stringify(paths(new DOMParser().parseFromString(rapidAccepted.svg, 'image/svg+xml').documentElement));
+      check(`${id}/late-valid-completion-retains-new-invalid-draft`, variationInput('dotScale').value === '0' &&
+        variationInput('dotScale').getAttribute('aria-invalid') === 'true' && q('axis-status').textContent.includes('INVALID_VARIATION') &&
+        JSON.stringify(paths(q('symbol-stage').querySelector(':scope > svg'))) === rapidPaths);
+      await changeVariation('spacingScale', 0.95);
+      const otherFieldAccepted = symbol.glyph({ variant, variation: { dotScale: 1.15, spacingScale: 0.95 } });
+      const otherFieldPaths = JSON.stringify(paths(new DOMParser().parseFromString(otherFieldAccepted.svg, 'image/svg+xml').documentElement));
+      check(`${id}/other-field-edit-retains-invalid-draft`, variationInput('dotScale').value === '0' &&
+        variationInput('dotScale').getAttribute('aria-invalid') === 'true' && q('axis-status').textContent.includes('INVALID_VARIATION') &&
+        variationInput('spacingScale').value === '0.95' && JSON.stringify(paths(q('symbol-stage').querySelector(':scope > svg'))) === otherFieldPaths);
+      q('axis-controls').querySelector('[data-variation-reset]').click();
+      await wait(() => q('symbol-inspector').getAttribute('aria-busy') === 'false' && q('symbol-stage').dataset.view === 'original', `${id} reset`);
+      check(`${id}/reset-restores-author`, JSON.stringify(paths(q('symbol-stage').querySelector(':scope > svg'))) === sourcePaths &&
+        [...q('axis-controls').querySelectorAll('[data-variation]')].every(input => input.value === '1' && input.getAttribute('aria-invalid') !== 'true'));
+      if (retainedOpacity) {
+        check(`${id}/reset-retains-phase`, Number(q('progress').value) === retainedPhase &&
+          retainedOpacity.every((value, index) => Math.abs(value - visibleDots()[index]) < 0.000001));
+        q('gesture').value = `${name}.idle`;
+        q('gesture').dispatchEvent(new Event('change', { bubbles: true }));
+        q('play').click(); setReduced(true);
+        await wait(() => Number(q('progress').value) === 1 && visibleDots().every(value => value === 1), `${id} reduced terminal`);
+        check(`${id}/reduced-motion-author-terminal`, JSON.stringify(paths(q('symbol-stage').querySelector(':scope > svg'))) === sourcePaths);
+      }
+      authority.push({ name, variant, author: source.provenance.author, anatomy: source.provenance.anatomy, variation: modified.provenance.variation });
+    }
+    for (const name of ['chatbubble-ellipses', 'ellipse']) {
+      await choose(name, 'outline');
+      const symbol = await import(`./package/symbols/${name}.js`);
+      check(`${name}/no-invented-variation-controls`, !symbol.glyphCapabilities('outline').variation &&
+        q('axis-controls').querySelectorAll('[data-variation]').length === 0 && viewButton('generated').textContent === 'Модель');
+    }
+
     for (const [name, variant, halfway] of [
       ['volume-high', 'outline', [1, 0.5, 0]],
       ['volume-high', 'filled', [1, 0.5, 0]],

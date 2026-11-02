@@ -18,9 +18,9 @@ export function stateExplorerGroups(spec) {
 /** Runtime presence задаёт package contract; semantic spec задаёт точное членство. */
 export function symbolExplorerBrowserFiles(contract, iconIds, stateGroups) {
   const stateFiles = stateGroups.map(({ group }) => `dist/states/${group}.js`);
-  const files = ['dist/ir/request.js', 'dist/ir/symbol-runtime.js', 'dist/ir/render.js', 'dist/motion/index.js', 'dist/ir/lottie-runtime.js', 'dist/authoring/index.js',
+  const files = [...new Set([...contract.runtimeDependencies, 'dist/ir/render.js', 'dist/motion/index.js', 'dist/authoring/index.js',
     ...iconIds.flatMap(name => [`dist/symbols/${name}.js`, `dist/lottie/${name}.js`]),
-    ...contract.files.filter(file => file === 'dist/ir/state-runtime.js'), ...stateFiles];
+    ...stateFiles])];
   for (const file of files) {
     if (!contract.files.includes(file)) throw new Error(`symbol explorer: ${file} не принадлежит package contract`);
   }
@@ -33,7 +33,7 @@ export function symbolExplorerBrowserFiles(contract, iconIds, stateGroups) {
 /** Observatory использует уже проверенные изображения и production package. */
 export function writeSymbolExplorer({ repo, outDir, report, visuals, canvas, iconSvg, comparisonVisual, packageDir = join(repo, 'dist') }) {
   mkdirSync(outDir, { recursive: true });
-  for (const name of ['index.html', 'explorer.css', 'explorer.js', 'authoring.html', 'authoring.js', 'download.js']) {
+  for (const name of ['index.html', 'explorer.css', 'explorer.js', 'variation-preview.js', 'authoring.html', 'authoring.js', 'download.js']) {
     copyFileSync(join(repo, 'observatory', name), join(outDir, name));
   }
   const starter = authoringTutorialMaterial(readFileSync(join(repo, 'docs/authoring.md'), 'utf8'), join(packageDir, 'authoring/index.js'));

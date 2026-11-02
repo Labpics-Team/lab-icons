@@ -41,4 +41,22 @@ describe('browser-проекция принятых symbol capabilities', () => 
     expect(() => symbolExplorerBrowserFiles(contract, ['fixture'], []))
       .toThrow(/dist\/states\/status-circle\.js не имеет semantic group/);
   });
+
+  it('variation и будущий private runtime приходят из владельца package contract', () => {
+    const contract = symbolReleaseProjection(base, ['fixture'], [], ['fixture']);
+    const futureRuntime = 'dist/ir/fixture-source-runtime.js';
+    contract.runtimeDependencies.push(futureRuntime);
+    contract.files.push(futureRuntime);
+    const files = symbolExplorerBrowserFiles(contract, ['fixture'], []);
+    expect(files.filter(file => file === 'dist/ir/variation-runtime.js')).toHaveLength(1);
+    expect(files.filter(file => file === futureRuntime)).toHaveLength(1);
+    expect(files).not.toContain('dist/ir/authored-variation.d.ts');
+  });
+
+  it('private runtime вне package files отклоняется до записи browser-проекции', () => {
+    const contract = symbolReleaseProjection(base, ['fixture']);
+    contract.runtimeDependencies.push('dist/ir/unpublished.js');
+    expect(() => symbolExplorerBrowserFiles(contract, ['fixture'], []))
+      .toThrow(/dist\/ir\/unpublished\.js не принадлежит package contract/);
+  });
 });
