@@ -36,3 +36,10 @@ CI в данном срезе не запускались.
 и [declaration merging](https://www.typescriptlang.org/docs/handbook/declaration-merging.html).
 Пакетные потолки сохранены; оставшиеся runtime превышения требуют отдельного
 исправления и проверки exact packed artifact.
+
+Тот же контрпример выявлен у `ParsedGlyphRequest` в IR после переноса его
+variant/modelMode/axes в inherited `SymbolOptions`. Собственные объявления
+восстановлены; общий тип значений осей сохранён. Installed-layout regression
+проверяет законное расширение и девять точных отрицательных диагностик в обоих
+resolution modes. Входы этого harness включают новые source-файлы рабочего
+дерева, как настоящий compiler, без зависимости от предварительного staging.

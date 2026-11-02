@@ -25,7 +25,8 @@ const write = (file, text) => { mkdirSync(dirname(file), { recursive: true }); w
 /** Узкий installed-layout consumer без обращения к истории при обычном regression. */
 export async function checkGlyphTypeBoundary({ baseline = null } = {}) {
   if (baseline !== null && !/^[a-f0-9]{40}$/.test(baseline)) throw new TypeError('Нужен полный baseline SHA.');
-  const snapshotFiles = git(['ls-files', 'src']).trim().split('\n').filter(file => file.endsWith('.ts'));
+  const snapshotFiles = git(['ls-files', '--cached', '--others', '--exclude-standard', 'src'])
+    .trim().split('\n').filter(file => file.endsWith('.ts'));
   const baselineFiles = baseline === null ? [] : git(['ls-tree', '-r', '--name-only', baseline, '--', 'src'])
     .trim().split('\n').filter(file => file.endsWith('.ts'));
   const readSnapshot = (file, before) => before ? git(['show', `${baseline}:${file}`]) : readFileSync(join(root, file), 'utf8');
@@ -93,6 +94,15 @@ export async function checkGlyphTypeBoundary({ baseline = null } = {}) {
   ].join('\n');
   const motionAugmentationNegative = motionAugmentation.replaceAll('readonly icon: string; readonly gesture: string;',
     "icon: string; readonly gesture: 'specific-gesture';");
+  const requestAugmentation = [
+    "import { parseGlyphRequest, type IconId, type IconVariant, type ModelMode, type AxisName } from '@labpics/icons/ir';",
+    "declare module '@labpics/icons/ir' { interface ParsedGlyphRequest<TIcon extends string = IconId> {",
+    "readonly consumerRequestTag?: 'request'; readonly variant: IconVariant; readonly modelMode: ModelMode; readonly axes: Readonly<Partial<Record<AxisName, number>>>; } }",
+    "const parsed = parseGlyphRequest({icon: 'ellipse'}); const tag: 'request' | undefined = parsed.consumerRequestTag;",
+  ].join('\n');
+  const requestAugmentationNegative = requestAugmentation.replace(
+    'readonly variant: IconVariant; readonly modelMode: ModelMode; readonly axes: Readonly<Partial<Record<AxisName, number>>>;',
+    "variant: 'filled'; modelMode: 'source-only'; axes: never;");
   const augmentation = [
     "import { glyph, glyphCapabilities, type IconId } from '@labpics/icons/ir';",
     "import { buildDirectionalArrow } from '@labpics/icons/ir/recipes';",
@@ -162,7 +172,9 @@ export async function checkGlyphTypeBoundary({ baseline = null } = {}) {
         consumers[mode] = { positive: diagnostics(consumer, mode, positive), negative: diagnostics(consumer, mode, negative),
           augmentation: diagnostics(consumer, mode, augmentation), augmentationNegative: diagnostics(consumer, mode, augmentationNegative),
           motionAugmentation: diagnostics(consumer, mode, motionAugmentation),
-          motionAugmentationNegative: diagnostics(consumer, mode, motionAugmentationNegative) };
+          motionAugmentationNegative: diagnostics(consumer, mode, motionAugmentationNegative),
+          requestAugmentation: diagnostics(consumer, mode, requestAugmentation),
+          requestAugmentationNegative: diagnostics(consumer, mode, requestAugmentationNegative) };
         assert.deepEqual(consumers[mode].positive.codes, [], consumers[mode].positive.output);
         assert.deepEqual(consumers[mode].negative.codes, [2322, 2322, 2345, 2339, 2345, 2345], consumers[mode].negative.output);
         assert.deepEqual(consumers[mode].augmentation.codes, [], consumers[mode].augmentation.output);
@@ -170,6 +182,9 @@ export async function checkGlyphTypeBoundary({ baseline = null } = {}) {
         assert.deepEqual(consumers[mode].motionAugmentation.codes, [], consumers[mode].motionAugmentation.output);
         assert.deepEqual([...consumers[mode].motionAugmentationNegative.codes].sort(),
           [2687, 2687, 2687, 2687, 2687, 2687, 2717, 2717, 2717], consumers[mode].motionAugmentationNegative.output);
+        assert.deepEqual(consumers[mode].requestAugmentation.codes, [], consumers[mode].requestAugmentation.output);
+        assert.deepEqual([...consumers[mode].requestAugmentationNegative.codes].sort(),
+          [2687, 2687, 2687, 2687, 2687, 2687, 2717, 2717, 2717], consumers[mode].requestAugmentationNegative.output);
       }
       observations[label] = { artifacts: Object.fromEntries(Object.entries(emitted).map(([file, text]) => [file, measure(text)])),
         closures: Object.fromEntries(Object.entries({ source: ['symbols/ellipse.d.ts'], variation: ['variations/ellipsis-horizontal.d.ts'],
