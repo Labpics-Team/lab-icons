@@ -84,6 +84,15 @@ export async function checkGlyphTypeBoundary({ baseline = null } = {}) {
     'exactDots(request);',
     "glyphCapabilities('foreign');",
   ].join('\n');
+  const motionAugmentation = [
+    "import type { SymbolEffect, SymbolSequenceEffect, SymbolTranslationEffect } from '@labpics/icons/motion';",
+    "declare module '@labpics/icons/motion' {",
+    ...['SymbolEffect', 'SymbolSequenceEffect', 'SymbolTranslationEffect'].map(name =>
+      `interface ${name} { readonly consumerTag?: string; readonly icon: string; readonly gesture: string; }`),
+    '}',
+  ].join('\n');
+  const motionAugmentationNegative = motionAugmentation.replaceAll('readonly icon: string; readonly gesture: string;',
+    "icon: string; readonly gesture: 'specific-gesture';");
   const augmentation = [
     "import { glyph, glyphCapabilities, type IconId } from '@labpics/icons/ir';",
     "import { buildDirectionalArrow } from '@labpics/icons/ir/recipes';",
@@ -137,7 +146,8 @@ export async function checkGlyphTypeBoundary({ baseline = null } = {}) {
       execFileSync(process.execPath, [compiler, '--ignoreConfig', '--declaration', '--emitDeclarationOnly', '--stripInternal',
         '--strict', '--noUncheckedIndexedAccess', '--isolatedModules', '--resolveJsonModule', '--skipLibCheck', '--lib', 'ES2022,DOM',
         '--target', 'ES2022', '--module', 'ESNext', '--moduleResolution', 'bundler', '--rootDir', join(sourceRoot, 'src'), '--outDir', out,
-        join(sourceRoot, 'src/ir/index.ts'), join(sourceRoot, 'src/ir/authored-variation.ts')], { cwd: root, stdio: 'pipe', windowsHide: true });
+        join(sourceRoot, 'src/ir/index.ts'), join(sourceRoot, 'src/ir/authored-variation.ts'),
+        join(sourceRoot, 'src/motion/index.ts')], { cwd: root, stdio: 'pipe', windowsHide: true });
       const emitter = before ? oldDeclarations : { symbolModuleDeclaration, variationModuleDeclaration };
       for (const name of names) write(join(out, 'symbols', `${name}.d.ts`), emitter.symbolModuleDeclaration(name));
       write(join(out, 'variations/ellipsis-horizontal.d.ts'), emitter.variationModuleDeclaration('ellipsis-horizontal'));
@@ -145,15 +155,21 @@ export async function checkGlyphTypeBoundary({ baseline = null } = {}) {
       write(join(consumer, 'package.json'), JSON.stringify({ private: true, type: 'module' }));
       write(join(pkg, 'package.json'), JSON.stringify({ name: '@labpics/icons', type: 'module', exports: {
         './ir': { types: './dist/ir/index.d.ts' }, './ir/recipes': { types: './dist/ir/recipes.d.ts' },
+        './motion': { types: './dist/motion/index.d.ts' },
         './symbols/*': { types: './dist/symbols/*.d.ts' }, './variations/*': { types: './dist/variations/*.d.ts' } } }));
       const emitted = files(out), consumers = {};
       for (const mode of ['Bundler', 'NodeNext']) {
         consumers[mode] = { positive: diagnostics(consumer, mode, positive), negative: diagnostics(consumer, mode, negative),
-          augmentation: diagnostics(consumer, mode, augmentation), augmentationNegative: diagnostics(consumer, mode, augmentationNegative) };
+          augmentation: diagnostics(consumer, mode, augmentation), augmentationNegative: diagnostics(consumer, mode, augmentationNegative),
+          motionAugmentation: diagnostics(consumer, mode, motionAugmentation),
+          motionAugmentationNegative: diagnostics(consumer, mode, motionAugmentationNegative) };
         assert.deepEqual(consumers[mode].positive.codes, [], consumers[mode].positive.output);
         assert.deepEqual(consumers[mode].negative.codes, [2322, 2322, 2345, 2339, 2345, 2345], consumers[mode].negative.output);
         assert.deepEqual(consumers[mode].augmentation.codes, [], consumers[mode].augmentation.output);
         assert.deepEqual(consumers[mode].augmentationNegative.codes, [2322, 2322, 2322, 2322], consumers[mode].augmentationNegative.output);
+        assert.deepEqual(consumers[mode].motionAugmentation.codes, [], consumers[mode].motionAugmentation.output);
+        assert.deepEqual([...consumers[mode].motionAugmentationNegative.codes].sort(),
+          [2687, 2687, 2687, 2687, 2687, 2687, 2717, 2717, 2717], consumers[mode].motionAugmentationNegative.output);
       }
       observations[label] = { artifacts: Object.fromEntries(Object.entries(emitted).map(([file, text]) => [file, measure(text)])),
         closures: Object.fromEntries(Object.entries({ source: ['symbols/ellipse.d.ts'], variation: ['variations/ellipsis-horizontal.d.ts'],

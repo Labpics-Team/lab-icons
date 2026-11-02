@@ -34,22 +34,18 @@ export interface SymbolEffectTarget {
   ];
 }
 
-interface EffectEnvelope {
+export interface SymbolEffect {
+  readonly version: 1;
   readonly icon: string;
   readonly variant: GlyphIR['variant'];
   readonly gesture: string;
   readonly from: number;
   readonly to: number;
+  readonly targets: readonly SymbolEffectTarget[];
   readonly unchangedPartIds: readonly string[];
   /** Форма может выходить за viewBox при движении. */
   readonly viewport: Readonly<{ overflow: 'visible' }>;
   readonly options: Readonly<{ duration: number; easing: 'linear'; fill: 'both' }>;
-}
-
-/** Вращение частей через внешний исполнитель. */
-export interface SymbolEffect extends EffectEnvelope {
-  readonly version: 1;
-  readonly targets: readonly SymbolEffectTarget[];
 }
 
 export interface SymbolOpacityStage {
@@ -62,11 +58,18 @@ export interface SymbolOpacityStage {
   readonly duration: number;
 }
 
-/** Стадии для sequence внешнего исполнителя. */
-export interface SymbolSequenceEffect extends EffectEnvelope {
+export interface SymbolSequenceEffect {
   readonly version: 2;
+  readonly icon: string;
+  readonly variant: GlyphIR['variant'];
+  readonly gesture: string;
+  readonly from: number;
+  readonly to: number;
   readonly targets: readonly Readonly<{ partId: string; property: 'opacity'; from: number; to: number }>[];
   readonly stages: readonly SymbolOpacityStage[];
+  readonly unchangedPartIds: readonly string[];
+  readonly viewport: Readonly<{ overflow: 'visible' }>;
+  readonly options: Readonly<{ duration: number; easing: 'linear'; fill: 'both' }>;
 }
 
 export interface SymbolTranslationStage {
@@ -78,11 +81,18 @@ export interface SymbolTranslationStage {
   readonly duration: number;
 }
 
-/** Перемещение в исходном viewBox. */
-export interface SymbolTranslationEffect extends EffectEnvelope {
+export interface SymbolTranslationEffect {
   readonly version: 3;
+  readonly icon: string;
+  readonly variant: GlyphIR['variant'];
+  readonly gesture: string;
+  readonly from: number;
+  readonly to: number;
   readonly targets: readonly Readonly<{ partId: string; property: 'x' | 'y'; unit: 'viewBox'; from: number; to: number }>[];
   readonly stages: readonly SymbolTranslationStage[];
+  readonly unchangedPartIds: readonly string[];
+  readonly viewport: Readonly<{ overflow: 'visible' }>;
+  readonly options: Readonly<{ duration: number; easing: 'linear'; fill: 'both' }>;
 }
 
 export type SymbolEffectResult =
