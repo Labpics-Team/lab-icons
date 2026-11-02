@@ -30,13 +30,17 @@ function freezeTree<T>(value: T): T {
   return value;
 }
 
+function stableJSON(value: unknown): string {
+  return JSON.stringify(value, (_key, item: unknown) => item && typeof item === 'object' && !Array.isArray(item)
+    ? Object.fromEntries(Object.keys(item).sort().map(key => [key, (item as Record<string, unknown>)[key]])) : item);
+}
+
 /** @internal Новый opt-in не меняет source-only и прежний annulus runtime. */
 export function createCompiledContentGlyph<TIcon extends AuthorIconId>(icon: TIcon,
   sources: Readonly<Record<'outline' | 'filled', AuthorSourceGlyph<TIcon>>>, input: CompiledAuthorContentVariation):
   (request?: AuthorSymbolGlyphRequest | AuthorContentVariationGlyphRequest) => AuthorSourceGlyph<TIcon> | AuthorContentVariationGlyph<TIcon> {
   const { packetSha256, ...packet } = input;
-  const serialized = JSON.stringify(packet, (_key, value: unknown) => value && typeof value === 'object' && !Array.isArray(value)
-    ? Object.fromEntries(Object.keys(value).sort().map(key => [key, (value as Record<string, unknown>)[key]])) : value);
+  const serialized = stableJSON(packet);
   if (sha256Hex(serialized) !== packetSha256) {
     throw new AuthoredContentVariationError('VARIATION_SOURCE_MISMATCH', 'Content packet изменился после build admission.');
   }
@@ -46,6 +50,8 @@ export function createCompiledContentGlyph<TIcon extends AuthorIconId>(icon: TIc
       source.variant !== 'outline' || source.composition.kind !== 'layers' || !source.provenance.anatomy ||
       geometry.source.masterSha256 !== source.provenance.author.masterSha256 ||
       geometry.source.pathFingerprintSha256 !== source.provenance.author.pathFingerprintSha256 ||
+      geometry.source.pathFingerprintSha256 !== sha256Hex(stableJSON(source.parts.map((part, index) =>
+        ({ index, d: part.d, fillRule: part.fillRule })))) ||
       !ring || ring.id !== enclosure.id || ring.role !== 'container' || !ring.d.startsWith(enclosure.outerD) ||
       geometry.content.center.some((value, axis) => value !== enclosure.center[axis]) ||
       geometry.partIds.length !== source.parts.length || geometry.content.parts.length !== source.parts.length - 1 ||
