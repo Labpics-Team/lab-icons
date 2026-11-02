@@ -268,7 +268,7 @@ function clearInspector(message) {
   updateViewControls();
 }
 
-async function renderView(view = state.view, { preserveProgress = false, variation: requestedVariation = state.variation } = {}) {
+async function renderView(view = state.view, { preserveProgress = false, variation: requestedVariation = state.variation, resetVariation = false } = {}) {
   if (!state.loaded) return;
   const revision = state.revision;
   const row = selectedRow();
@@ -324,6 +324,15 @@ async function renderView(view = state.view, { preserveProgress = false, variati
     }
     ui['symbol-stage'].innerHTML = svg;
     for (const image of ui['symbol-stage'].querySelectorAll('svg')) image.setAttribute('aria-hidden', 'true');
+    // Сброс полей подтверждается вместе с формой, до ожидания её motion-позы.
+    if (resetVariation) {
+      for (const input of ui['axis-controls'].querySelectorAll('[data-variation]')) {
+        input.value = String(state.variation[input.dataset.variation]);
+        input.setCustomValidity(''); input.removeAttribute('aria-invalid');
+        delete input.dataset.variationError;
+      }
+      updateVariationStatus();
+    }
     // Значение неподвижного мастера задаёт семантика, а не имя иконки.
     ui.progress.value = String(motionAdmission()?.ok ? preserveProgress ? previousProgress : selectedGesture()?.restProgress ?? 0 : 0);
     if (preserveProgress && motionAdmission()?.ok && motionView()) await seekProgress(previousProgress);
@@ -415,16 +424,9 @@ function controls() {
     const reset = document.createElement('button');
     reset.type = 'button'; reset.className = 'variation-reset'; reset.dataset.variationReset = '';
     reset.textContent = 'Вернуть авторскую форму';
-    reset.addEventListener('click', async () => {
-      const result = await renderView('original', { preserveProgress: true, variation: { ...variation.defaults } });
-      if (!result?.ok) return;
-      for (const input of ui['axis-controls'].querySelectorAll('[data-variation]')) {
-        input.value = String(state.variation[input.dataset.variation]);
-        input.setCustomValidity(''); input.removeAttribute('aria-invalid');
-        delete input.dataset.variationError;
-      }
-      updateVariationStatus();
-    });
+    reset.addEventListener('click', () => renderView('original', {
+      preserveProgress: true, variation: { ...variation.defaults }, resetVariation: true,
+    }));
     ui['axis-controls'].append(reset);
   }
   ui['axis-status'].textContent = variation ? 'Положительные множители изменяют форму точек и расстояние между ними.'

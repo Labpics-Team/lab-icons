@@ -418,6 +418,15 @@ export async function runExplorerJourney() {
         variationInput('dotScale').getAttribute('aria-invalid') === 'true' && q('axis-status').textContent.includes('INVALID_VARIATION') &&
         variationInput('spacingScale').value === '0.95' && JSON.stringify(paths(q('symbol-stage').querySelector(':scope > svg'))) === otherFieldPaths);
       q('axis-controls').querySelector('[data-variation-reset]').click();
+      variationInput('dotScale').value = '0';
+      variationInput('dotScale').dispatchEvent(new Event('input', { bubbles: true }));
+      await wait(() => q('symbol-inspector').getAttribute('aria-busy') === 'false', `${id} reset newer invalid draft`);
+      await frame();
+      check(`${id}/reset-completion-retains-newer-invalid-draft`, q('symbol-stage').dataset.view === 'original' &&
+        JSON.stringify(paths(q('symbol-stage').querySelector(':scope > svg'))) === sourcePaths &&
+        variationInput('dotScale').value === '0' && variationInput('dotScale').getAttribute('aria-invalid') === 'true' &&
+        variationInput('spacingScale').value === '1' && q('axis-status').textContent.includes('INVALID_VARIATION'));
+      q('axis-controls').querySelector('[data-variation-reset]').click();
       await wait(() => q('symbol-inspector').getAttribute('aria-busy') === 'false' && q('symbol-stage').dataset.view === 'original', `${id} reset`);
       check(`${id}/reset-restores-author`, JSON.stringify(paths(q('symbol-stage').querySelector(':scope > svg'))) === sourcePaths &&
         [...q('axis-controls').querySelectorAll('[data-variation]')].every(input => input.value === '1' && input.getAttribute('aria-invalid') !== 'true'));
