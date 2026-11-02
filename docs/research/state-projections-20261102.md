@@ -14,8 +14,8 @@
 Кандидат разделяет данные на две проекции: общий render/effect runtime и
 capabilities. Runtime получает закрытые tuples
 `[id, partId, contentSvg, staticSharedSvg?]`; metadata сохраняет named records.
-Общие `sharedPartIds` передаются прямой локальной ссылкой. Публичные пять
-экспортов, исходные compiled payload/proof и SVG не меняются. Build проверяет
+Общие `sharedPartIds` передаются прямой локальной ссылкой. Публичный API,
+исходные compiled payload/proof и SVG не меняются. Build проверяет
 типы полей перед tuple-эмиссией; runtime не разбирает пути и не восстанавливает
 анатомию. Импорт только effect сохраняет SVG этой группы, а импорт только
 state render сохраняет effect runtime: это явная цена двух проекций.
@@ -60,7 +60,7 @@ bounded module/consumer control, а не удалённая BENCH-квалифи
 | capabilities | 12960 / 5491 | 4167 / 1847 |
 | state render | 12955 / 5491 | 9096 / 3794 |
 | effect | 12996 / 5502 | 9137 / 3802 |
-| пять экспортов | 13240 / 5552 | 13356 / 5556 |
+| полный публичный API | 13240 / 5552 | 13356 / 5556 |
 
 Consumer экономит данные, но этот выигрыш не закрывает отдельный обязательный
 ceiling конечного модуля. Увеличения лимитов и нового CI-пути нет.
@@ -68,7 +68,7 @@ ceiling конечного модуля. Увеличения лимитов и 
 ## Проверенные свойства
 
 `test/state-projections.test.js`: **19 PASS**. Проверены штатное удаление чужой
-проекции, пять экспортов, обе SVG-композиции, shared-array identity,
+проекции, полный публичный API, обе SVG-композиции, shared-array identity,
 замороженные receipts, пустой optional override, tuple slots,
 11 malformed source packets, точные Unicode-строки и собственный JSON
 `__proto__`, а также отказы и reduced motion.
