@@ -77,6 +77,10 @@ pnpm add @labpics/icons
 - `dist/content-variations/plus-circle.js`
 - `dist/content-variations/question-circle.d.ts`
 - `dist/content-variations/question-circle.js`
+- `dist/gestures/mic-circle.d.ts`
+- `dist/gestures/mic-circle.js`
+- `dist/gestures/mic.d.ts`
+- `dist/gestures/mic.js`
 - `dist/gestures/refresh.d.ts`
 - `dist/gestures/refresh.js`
 - `dist/gestures/reload.d.ts`
@@ -88,6 +92,7 @@ pnpm add @labpics/icons
 - `dist/ir/annulus-geometry-runtime.js`
 - `dist/ir/annulus-runtime.js`
 - `dist/ir/author-annulus-types.d.ts`
+- `dist/ir/author-capsule-motion-types.d.ts`
 - `dist/ir/author-capsule-types.d.ts`
 - `dist/ir/author-catalog.generated.d.ts`
 - `dist/ir/author-content-types.d.ts`
@@ -97,6 +102,7 @@ pnpm add @labpics/icons
 - `dist/ir/authored-variation.d.ts`
 - `dist/ir/candidates.d.ts`
 - `dist/ir/candidates.js`
+- `dist/ir/capsule-motion-runtime.js`
 - `dist/ir/capsule-runtime.js`
 - `dist/ir/catalog.generated.d.ts`
 - `dist/ir/compiler.d.ts`
@@ -1514,6 +1520,7 @@ pnpm add @labpics/icons
 
 - `dist/authoring/design-spec.d.ts`
 - `dist/ir/author-annulus-types.d.ts`
+- `dist/ir/author-capsule-motion-types.d.ts`
 - `dist/ir/author-capsule-types.d.ts`
 - `dist/ir/author-catalog.generated.d.ts`
 - `dist/ir/author-content-types.d.ts`
