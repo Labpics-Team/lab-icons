@@ -244,19 +244,18 @@ export function renderStateGroupModule(payload) {
   const emit = compact => {
     const serialize = compact ? compactDataLiteral : jsonDataLiteral;
     const record = value => `{${Object.entries(value).flatMap(([key, value]) => {
-      const encoded = key === 'sharedPartIds' ? 'sharedPartIds' : serialize(value);
+      const encoded = key === 'sharedPartIds' ? 'p' : serialize(value);
       return encoded === undefined ? [] : [`${literalKey(key, compact)}:${encoded}`];
     }).join(',')}}`;
     return [
-    '/** GENERATED: проверенная общая оболочка и независимые авторские состояния. */',
-    "import { createCompiledStateRuntime, createCompiledStateCapabilities } from '../ir/state-runtime.js';",
-    `const sharedPartIds = ${serialize(payload.sharedPartIds)};`,
-    `const group = /* @__PURE__ */ createCompiledStateRuntime(${record(runtime)});`,
-    `export const stateCapabilities = /* @__PURE__ */ createCompiledStateCapabilities(${record(capabilities)});`,
-    'export function render(state, options) { return group.render(state, options); }',
-    'export function renderStateSvg(state, options) { return group.renderStateSvg(state, options); }',
-    'export function compileStateEffect(state, request) { return group.compileStateEffect(state, request); }',
-    'export function exportStateTransition(state, request) { return group.exportStateTransition(state, request); }',
+    "import{createCompiledStateRuntime as r,createCompiledStateCapabilities as c}from'../ir/state-runtime.js';",
+    `const p=${serialize(payload.sharedPartIds)};`,
+    `const g=/* @__PURE__ */r(${record(runtime)});`,
+    `export const stateCapabilities=/* @__PURE__ */c(${record(capabilities)});`,
+    'export function render(s,o){return g.render(s,o)}',
+    'export function renderStateSvg(s,o){return g.renderStateSvg(s,o)}',
+    'export function compileStateEffect(s,o){return g.compileStateEffect(s,o)}',
+    'export function exportStateTransition(s,o){return g.exportStateTransition(s,o)}',
     '',
   ].join('\n');
   };
