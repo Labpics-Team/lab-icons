@@ -83,6 +83,36 @@ export function isFreshCapsuleDownload(downloads, previousCount, filename) {
   return downloads.length === previousCount + 1 && downloads.at(-1)?.filename === filename;
 }
 
+/** Compound наблюдается как одна заливка с полным упорядоченным набором contours. */
+export function capsuleSemanticObservations(paths, anatomy) {
+  const { kind, partIds, roles } = anatomy;
+  if (!Array.isArray(partIds) || !partIds.length || new Set(partIds).size !== partIds.length ||
+      !Array.isArray(roles) || roles.length !== partIds.length) throw new TypeError('Нужна полная анатомия capsule.');
+  if (kind === 'layers') {
+    if (paths.length !== partIds.length) throw new TypeError('Число слоёв не соответствует анатомии.');
+    return paths.map((path, index) => {
+      if (path.partIds !== null || path.roles !== null || path.partId !== null && path.partId !== partIds[index] ||
+          path.role !== null && path.role !== roles[index]) throw new TypeError('Изменена адресация слоя.');
+      return { id: partIds[index], role: roles[index], d: path.d, contours: path.contours, fillRule: path.fillRule };
+    });
+  }
+  if (kind !== 'compound' || paths.length !== 1 || roles[0] !== 'container' || roles.slice(1).some(role => role !== 'counter')) {
+    throw new TypeError('Нужна одна compound capsule с container/counter.');
+  }
+  const path = paths[0], split = value => value.trim().split(/\s+/);
+  if (path.partId !== null || path.role !== null || path.fillRule !== 'evenodd' ||
+      path.partIds !== null && JSON.stringify(split(path.partIds)) !== JSON.stringify(partIds) ||
+      path.roles !== null && JSON.stringify(split(path.roles)) !== JSON.stringify(roles)) {
+    throw new TypeError('Изменены порядок, роли или общая заливка compound capsule.');
+  }
+  const contours = rawCapsuleContours(path.d);
+  if (contours.length !== partIds.length || path.contours.length !== contours.length) {
+    throw new TypeError('Compound обязан покрывать каждый contour ровно один раз.');
+  }
+  return contours.map((contour, index) => ({ id: partIds[index], role: roles[index], fillRule: path.fillRule,
+    d: contour.map(segment => segment.cmd + segment.values.join(' ')).join(''), contours: [path.contours[index]] }));
+}
+
 /** Browser getBBox округляет до float; допуск относится к измерению, не к оптике. */
 export function capsuleWidthObservationChecks(before, after, width) {
   const same = (left, right) => Number.isFinite(left) && Number.isFinite(right) && Math.abs(left - right) < 0.0001;
@@ -91,7 +121,7 @@ export function capsuleWidthObservationChecks(before, after, width) {
   const identity = before.length >= 2 && before.length === after.length &&
     before.filter(part => part.id === 'microphone-body').length === 1 &&
     after.filter(part => part.id === 'microphone-body').length === 1 &&
-    before.every((part, index) => part.id === after[index].id && part.fillRule === after[index].fillRule);
+    before.every((part, index) => part.id === after[index].id && part.role === after[index].role && part.fillRule === after[index].fillRule);
   const contours = Boolean(original && modified && original.contours.length > 0 &&
     original.contours.length <= 2 && original.contours.length === modified.contours.length);
   const sourceBox = original?.contours[0], box = modified?.contours[0];
@@ -593,7 +623,7 @@ export async function runExplorerJourney() {
     capsuleMeasure.setAttribute('aria-hidden', 'true');
     capsuleMeasure.style.cssText = 'position:absolute;left:0;top:0;visibility:hidden;pointer-events:none';
     fixtures.push(capsuleMeasure); document.body.append(capsuleMeasure);
-    const capsuleSnapshot = (svg, partIds) => [...svg.querySelectorAll('path')].map((path, index) => {
+    const capsuleSnapshot = (svg, anatomy) => capsuleSemanticObservations([...svg.querySelectorAll('path')].map(path => {
       const d = path.getAttribute('d');
       const contours = rawCapsuleContours(d).map(contour => {
         const probe = document.createElementNS('http://www.w3.org/2000/svg', 'path');
@@ -601,9 +631,10 @@ export async function runExplorerJourney() {
         const { x, y, width, height } = probe.getBBox(); probe.remove();
         return { x, y, width, height };
       });
-      return { id: path.dataset.part ?? partIds[index], d, contours,
+      return { partId: path.getAttribute('data-part'), partIds: path.getAttribute('data-parts'),
+        role: path.getAttribute('data-role'), roles: path.getAttribute('data-roles'), d, contours,
         fillRule: path.getAttribute('fill-rule') ?? svg.getAttribute('fill-rule') ?? 'nonzero' };
-    });
+    }), anatomy);
     const capsuleFrame = (svg, live = false) => {
       const elements = [svg, ...svg.querySelectorAll('*')];
       if (live) for (let parent = svg.parentElement; parent; parent = parent.parentElement) elements.push(parent);
@@ -626,7 +657,7 @@ export async function runExplorerJourney() {
       const exported = new DOMParser().parseFromString(await downloads.at(-1).blob.text(), 'image/svg+xml').documentElement;
       check(id, JSON.stringify(paths(exported)) === expectedPaths && capsuleSvgFrameMatches(capsuleFrame(exported), viewBox));
     };
-    for (const [name, variant] of [['mic', 'outline'], ['mic', 'filled'], ['mic-circle', 'outline']]) {
+    for (const [name, variant] of [['mic', 'outline'], ['mic', 'filled'], ['mic-circle', 'outline'], ['mic-circle', 'filled']]) {
       const id = `${name}/${variant}/capsule-width`;
       await choose(name, variant);
       const sourceModule = await import(`./package/symbols/${name}.js`);
@@ -647,7 +678,8 @@ export async function runExplorerJourney() {
       check(`${id}/source-viewport`, capsuleSvgFrameMatches(capsuleFrame(master), source.viewBox) &&
         capsuleViewportMatches(capsuleFrame(q('symbol-stage').querySelector(':scope > svg'), true), source.viewBox, Number(q('display-size').value)));
       const partIds = source.parts.map(part => part.id);
-      const original = capsuleSnapshot(q('symbol-stage').querySelector(':scope > svg'), partIds);
+      const anatomy = { kind: source.composition.kind, partIds, roles: source.parts.map(part => part.role) };
+      const original = capsuleSnapshot(q('symbol-stage').querySelector(':scope > svg'), anatomy);
       await chooseView('generated');
       check(`${id}/default-variation-view`, q('consumer-import').textContent.includes(`/variations/${name}`) &&
         JSON.stringify(paths(q('symbol-stage').querySelector(':scope > svg'))) === sourcePaths &&
@@ -657,14 +689,16 @@ export async function runExplorerJourney() {
         await changeVariation('bodyWidth', width);
         const shown = q('symbol-stage').querySelector(':scope > svg');
         modified = symbol.glyph({ variant, variation: { bodyWidth: width } });
-        const observed = capsuleSnapshot(shown, partIds);
+        const observed = capsuleSnapshot(shown, anatomy);
         const geometry = capsuleWidthObservationChecks(original, observed, width);
         for (const [property, passed] of Object.entries(geometry)) check(`${id}/${width}/${property}`, passed,
           property === 'bodyWidth' ? { before: original, after: observed, width } : undefined);
         const modifiedPaths = JSON.stringify(paths(new DOMParser().parseFromString(modified.svg, 'image/svg+xml').documentElement));
         check(`${id}/${width}/production-package-render`, modified.provenance.variation.parameters.bodyWidth === width &&
           JSON.stringify(paths(shown)) === modifiedPaths &&
-          [...shown.querySelectorAll('[data-part]')].map(part => part.dataset.part).join(',') === partIds.join(',') &&
+          (anatomy.kind === 'compound' ? shown.querySelector('path')?.dataset.parts === partIds.join(' ') &&
+            shown.querySelector('path')?.dataset.roles === anatomy.roles.join(' ')
+            : [...shown.querySelectorAll('[data-part]')].map(part => part.dataset.part).join(',') === partIds.join(',') ) &&
           capsuleViewportMatches(capsuleFrame(shown, true), source.viewBox, Number(q('display-size').value)));
         const samples = [...q('size-samples').querySelectorAll('.size-sample > svg')];
         check(`${id}/${width}/small-size-geometry`, samples.length === 3 && samples.every((svg, index) =>
@@ -690,14 +724,6 @@ export async function runExplorerJourney() {
       authority.push({ name, variant, author: source.provenance.author, anatomy: source.provenance.anatomy, variation: modified.provenance.variation });
     }
     capsuleMeasure.remove();
-    await choose('mic-circle', 'filled');
-    const filledMicrophone = await import('./package/variations/mic-circle.js');
-    let filledWidthRefusal;
-    try { filledMicrophone.glyph({ variant: 'filled', variation: { bodyWidth: .9 } }); }
-    catch (error) { filledWidthRefusal = error.code; }
-    check('mic-circle/filled/no-invented-body-width', !filledMicrophone.glyphCapabilities('filled').variation &&
-      q('axis-controls').querySelectorAll('[data-variation]').length === 0 && filledWidthRefusal === 'AUTHOR_VARIATION_UNSUPPORTED');
-
     for (const [name, variant, halfway] of [
       ['volume-high', 'outline', [1, 0.5, 0]],
       ['volume-high', 'filled', [1, 0.5, 0]],

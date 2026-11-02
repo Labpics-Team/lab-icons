@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { capsuleWidthObservationChecks, capsuleViewportMatches, capsuleSvgFrameMatches,
-  isFreshCapsuleDownload, matchesAuthoredCapsulePath } from '../scripts/bench/explorer-journey.js';
+  isFreshCapsuleDownload, matchesAuthoredCapsulePath, capsuleSemanticObservations } from '../scripts/bench/explorer-journey.js';
 
 const outer = 'M12 1.5C15 1.5 17 3 17 6L17 12C17 15 15 16.8 12 16.8C9 16.8 7 15 7 12L7 6C7 3 9 1.5 12 1.5Z';
 const counter = 'M12 3.3C10 3.3 8.8 4.5 8.8 6L8.8 12C8.8 14 10 15 12 15C14 15 15.2 14 15.2 12L15.2 6C15.2 4.5 14 3.3 12 3.3Z';
@@ -21,6 +21,47 @@ const narrowed = () => {
   body.contours[1].x = 9.3; body.contours[1].width = 5.4;
   return parts;
 };
+
+const negativeAnatomy = { kind: 'compound',
+  partIds: ['microphone-enclosure', 'microphone-support', 'microphone-body'], roles: ['container', 'counter', 'counter'] };
+const compoundPath = (body = outer) => ({ partId: null, role: null,
+  partIds: negativeAnatomy.partIds.join(' '), roles: negativeAnatomy.roles.join(' '),
+  d: 'M0 0L24 0L24 24L0 24Z' + 'M4 11C4 20 20 20 20 11Z' + body, fillRule: 'evenodd',
+  contours: [{ x: 0, y: 0, width: 24, height: 24 }, { x: 4, y: 11, width: 16, height: 9 },
+    { x: body === outer ? 7 : 7.5, y: 1.5, width: body === outer ? 10 : 9, height: 15.3 }] });
+
+describe('compound negative capsule observation retains one fill and every semantic contour', () => {
+  it('accepts healthy narrowing with unchanged container/support and a single negative body', () => {
+    const before = capsuleSemanticObservations([compoundPath()], negativeAnatomy);
+    const after = capsuleSemanticObservations([compoundPath(narrowOuter)], negativeAnatomy);
+    expect(before.map(part => part.id)).toEqual(negativeAnatomy.partIds);
+    expect(before.map(part => part.role)).toEqual(negativeAnatomy.roles);
+    expect(Object.values(capsuleWidthObservationChecks(before, after, .9))).toEqual(Array(7).fill(true));
+    const rawMaster = compoundPath(); rawMaster.partIds = rawMaster.roles = null;
+    expect(capsuleSemanticObservations([rawMaster], negativeAnatomy)).toEqual(before);
+  });
+
+  it.each([
+    ['wrong parity', path => { path.fillRule = 'nonzero'; }],
+    ['reordered targets', path => { path.partIds = 'microphone-body microphone-support microphone-enclosure'; }],
+    ['positive body replaces knockout', path => { path.roles = 'container counter content'; }],
+    ['lost body contour', path => { path.d = path.d.slice(0, path.d.indexOf(outer)); path.contours.pop(); }],
+    ['extra unaddressed contour', path => { path.d += 'M1 1L2 1L2 2Z'; }],
+    ['invented independently painted part', path => { path.partId = 'microphone-body'; }],
+  ])('refuses %s before comparing width', (_, mutate) => {
+    const path = compoundPath(); mutate(path);
+    expect(() => capsuleSemanticObservations([path], negativeAnatomy)).toThrow(TypeError);
+  });
+
+  it('requires one painted compound, complete identities and the same counter roles after narrowing', () => {
+    expect(() => capsuleSemanticObservations([compoundPath(), compoundPath()], negativeAnatomy)).toThrow(TypeError);
+    expect(() => capsuleSemanticObservations([compoundPath()], { ...negativeAnatomy, partIds: ['body', 'body', 'body'] })).toThrow(TypeError);
+    const before = capsuleSemanticObservations([compoundPath()], negativeAnatomy);
+    const after = capsuleSemanticObservations([compoundPath(narrowOuter)], negativeAnatomy);
+    after[2].role = 'content';
+    expect(capsuleWidthObservationChecks(before, after, .9).identity).toBe(false);
+  });
+});
 
 describe('browser observation separates body width from whole-symbol scaling', () => {
   it('accepts narrowed body, fixed height, fixed counter side walls and untouched neighboring parts', () => {
