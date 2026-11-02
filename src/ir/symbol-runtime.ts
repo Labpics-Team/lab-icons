@@ -1,5 +1,5 @@
 import { GlyphModelError, parseSymbolOptions, parseSymbolVariant } from './request.js';
-import type { GlyphCapabilities, GlyphIR, GlyphRequest, IconId, IconVariant } from './compiler.js';
+import type { GlyphCapabilities, GlyphIR, GlyphRequest, IconId, IconVariant } from './glyph-types.js';
 
 export type SymbolGlyphRequest = Omit<GlyphRequest, 'icon'>;
 

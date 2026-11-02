@@ -1,4 +1,4 @@
-import type { AxisContract, AxisName, IconVariant, ModelMode } from './compiler.js';
+import type { AxisContract, AxisName, IconVariant, ModelMode } from './glyph-types.js';
 import { AXIS_NAMES } from './catalog.generated.js';
 
 export type GlyphModelErrorCode = 'CANDIDATES_REQUIRED' | 'AUTHOR_PARITY_REQUIRED' | 'AUTHOR_VARIATION_UNSUPPORTED';

@@ -6,7 +6,7 @@ import {
   type RecipeResult,
   type RecipeStrokePaint,
 } from '../ir/recipes.js';
-import type { DesignSpecGlyphProvenance, GlyphIR, GlyphPart } from '../ir/compiler.js';
+import type { DesignSpecGlyphProvenance, GlyphIR, GlyphPart } from '../ir/glyph-types.js';
 import { assembleGlyphSvg } from '../ir/svg-assembly.js';
 import { sha256Hex } from '../ir/sha256.js';
 // @ts-ignore — существующий zero-IO geometry owner пока JS-only.

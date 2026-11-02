@@ -1,4 +1,4 @@
-import type { GlyphCapabilities, GlyphIR, GlyphRequest, SourceGlyphProvenance } from './compiler.js';
+import type { GlyphCapabilities, GlyphIR, GlyphRequest, SourceGlyphProvenance } from './glyph-types.js';
 import type { AuthorIconId } from './author-catalog.generated.js';
 import type { AuthorSourceProvenance } from './author-provenance.js';
 

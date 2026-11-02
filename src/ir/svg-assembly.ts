@@ -1,4 +1,4 @@
-import type { GlyphPart, GlyphComposition } from './compiler.js';
+import type { GlyphPart, GlyphComposition } from './glyph-types.js';
 import { sha256Hex } from './sha256.js';
 
 function escapeAttribute(value: string): string {

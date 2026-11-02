@@ -30,7 +30,7 @@ export function symbolReleaseProjection(base, iconIds, stateGroupIds = [], varia
     key.includes('*')
       ? (key === './states/*' ? groups : key === './variations/*' ? [...variationIconIds].sort() : ids).flatMap(id => Object.values(conditions).map(target => target.replace('*', id).slice(2)))
       : Object.values(conditions).map(target => target.slice(2)));
-  const typeDependencies = ['dist/authoring/design-spec.d.ts', 'dist/ir/author-catalog.generated.d.ts', 'dist/ir/author-provenance.d.ts', 'dist/ir/author-source.d.ts', 'dist/ir/authored-variation.d.ts', 'dist/ir/catalog.generated.d.ts', 'dist/ir/compiler.d.ts', 'dist/ir/request.d.ts', 'dist/ir/lottie-types.d.ts', 'dist/ir/state-types.d.ts', 'dist/ir/state-common-types.d.ts', 'dist/ir/contour-state-types.d.ts'].sort();
+  const typeDependencies = ['dist/authoring/design-spec.d.ts', 'dist/ir/author-catalog.generated.d.ts', 'dist/ir/author-provenance.d.ts', 'dist/ir/author-source.d.ts', 'dist/ir/authored-variation.d.ts', 'dist/ir/catalog.generated.d.ts', 'dist/ir/compiler.d.ts', 'dist/ir/glyph-types.d.ts', 'dist/ir/paint-types.d.ts', 'dist/ir/request.d.ts', 'dist/ir/lottie-types.d.ts', 'dist/ir/state-types.d.ts', 'dist/ir/state-common-types.d.ts', 'dist/ir/contour-state-types.d.ts'].sort();
   const runtimeDependencies = ['dist/ir/compiler.js', 'dist/ir/contour-runtime.js', 'dist/ir/request.js', 'dist/ir/symbol-runtime.js', 'dist/ir/lottie-runtime.js'].sort();
   if (variationIconIds.length) runtimeDependencies.push('dist/ir/variation-runtime.js',
     ...variationIconIds.map(id => `dist/ir/symbol-data/${id}.js`));
@@ -134,11 +134,10 @@ export function symbolModuleDeclaration(icon) {
   if (!SYMBOL_NAME.test(icon)) throw new TypeError('symbol declaration: невалидное имя');
   return [
     "import type { AuthorSourceGlyph, AuthorSourceCapabilities, AuthorSymbolGlyphRequest } from '../ir/author-source.js';",
-    "import type { IconVariant } from '../ir/compiler.js';",
     'export declare const outline: string;',
     'export declare const filled: string;',
     `export declare function glyph(request?: AuthorSymbolGlyphRequest): AuthorSourceGlyph<'${icon}'>;`,
-    `export declare function glyphCapabilities(variant?: IconVariant): AuthorSourceCapabilities<'${icon}'>;`,
+    `export declare function glyphCapabilities(variant?: AuthorSourceCapabilities['variant']): AuthorSourceCapabilities<'${icon}'>;`,
     '',
   ].join('\n');
 }
@@ -189,11 +188,10 @@ export function variationModuleDeclaration(icon) {
   return [
     "import type { AuthorSourceGlyph, AuthorSymbolGlyphRequest } from '../ir/author-source.js';",
     "import type { AuthorVariationGlyph, AuthorVariationCapabilities, AuthorVariationGlyphRequest } from '../ir/authored-variation.js';",
-    "import type { IconVariant } from '../ir/compiler.js';",
     'export declare const outline: string;',
     'export declare const filled: string;',
     `export declare function glyph(request?: AuthorSymbolGlyphRequest): AuthorSourceGlyph<'${icon}'>;`,
     `export declare function glyph(request: AuthorVariationGlyphRequest): AuthorVariationGlyph<'${icon}'>;`,
-    `export declare function glyphCapabilities(variant?: IconVariant): AuthorVariationCapabilities<'${icon}'>;`, '',
+    `export declare function glyphCapabilities(variant?: AuthorVariationCapabilities['variant']): AuthorVariationCapabilities<'${icon}'>;`, '',
   ].join('\n');
 }

@@ -1,4 +1,4 @@
-import type { IconVariant } from '../ir/compiler.js';
+import type { IconVariant } from '../ir/glyph-types.js';
 
 export type LottieRefusalCode = 'INVALID_REQUEST' | 'AUTHOR_SOURCE_REQUIRED' | 'COMPOSITION_UNSUPPORTED' |
   'PAINT_UNSUPPORTED' | 'PATH_INVALID' | 'ARC_UNSUPPORTED' | 'OPEN_CONTOUR_UNSUPPORTED' |

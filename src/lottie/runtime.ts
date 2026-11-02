@@ -1,5 +1,5 @@
 import { compileSymbolEffect } from '../motion/index.js';
-import type { GlyphIR, GlyphCapabilities, IconVariant } from '../ir/compiler.js';
+import type { GlyphIR, GlyphCapabilities, IconVariant } from '../ir/glyph-types.js';
 import type { LottieAnimation, LottieCapabilities, LottieExportRequest, LottieExportResult, LottieRefusalCode } from './types.js';
 type Point = [number, number];
 interface Contour { v: Point[]; i: Point[]; o: Point[]; c: true }

@@ -4,11 +4,6 @@
  * все данные попадают в браузер как статические импорты сборщика.
  */
 
-import {
-  type CatalogAxisName,
-  type CatalogIconId,
-} from './catalog.generated.js';
-
 // Чистые внутренние JS-модули подключаются через типизированную границу.
 // Их нестрогие типы не передаются потребителю публичного API.
 // @ts-expect-error — Внутренний JS-модуль не имеет отдельной декларации типов.
@@ -21,150 +16,24 @@ import { sampleMotionGesture as sampleMotionGestureCore } from '../core/motion-s
 import {
   buildCalendarNumberGeometry as buildCalendarNumberRecipe,
   type CalendarNumberInput,
-  type RecipeFillPaint,
-  type RecipeStrokePaint,
 } from './recipes.js';
 import { sha256Hex } from './sha256.js';
 import { assembleGlyphSvg as assembleSvg } from './svg-assembly.js';
 import { GlyphModelError, parseSymbolOptions, parseSymbolVariant as parseVariant } from './request.js';
-import type { AuthorAnatomyReceipt, AuthorSourceProvenance } from './author-provenance.js';
-import type { AuthorVariationCapability, AuthorVariationPartProvenance, AuthorVariationProvenance } from './authored-variation.js';
+import type { AuthorAnatomyReceipt } from './author-provenance.js';
+import type * as IR from './glyph-types.js';
+export type { IconId, AxisName, IconVariant, ModelMode, ModelState, FillRule, PartRole, GlyphRequest, SourcePartProvenance, ModelPartProvenance, RecipePartProvenance, PartProvenance, GlyphPart, SourceGlyphProvenance, ModelGlyphProvenance, RecipeGlyphProvenance, DesignSpecGlyphProvenance, GlyphProvenance, GlyphIR, GlyphComposition, GlyphCapabilities, AxisContract, MotionCapabilityState, MotionGestureRotationTrackContract, MotionGestureOpacityTrackContract, MotionGestureTranslationTrackContract, MotionGestureTrackContract, MotionGestureContract, MotionGestureRotationSample, MotionGestureSample, MotionRotationTrackContract, MotionTrackContract, MotionCapabilities } from './glyph-types.js';
 export { GlyphModelError } from './request.js';
 export type { GlyphModelErrorCode } from './request.js';
 
-export type IconId = CatalogIconId;
-export type AxisName = CatalogAxisName;
-export type IconVariant = 'outline' | 'filled';
-export type ModelMode = 'accepted-only' | 'allow-candidate' | 'source-only';
-export type ModelState = 'accepted' | 'candidate';
-export type FillRule = 'nonzero' | 'evenodd';
-export type PartRole =
-  | 'body'
-  | 'content'
-  | 'ink'
-  | 'counter'
-  | 'container'
-  | 'control'
-  | 'detail'
-  | 'decorator'
-  | 'unclassified';
-
-export interface GlyphRequest<TIcon extends string = IconId> {
+export interface ParsedGlyphRequest<TIcon extends string = IR.IconId> {
   readonly icon: TIcon;
-  readonly variant?: IconVariant;
-  readonly modelMode?: ModelMode;
-  readonly axes?: Readonly<Partial<Record<AxisName, number>>>;
+  readonly variant: IR.IconVariant;
+  readonly modelMode: IR.ModelMode;
+  readonly axes: Readonly<Partial<Record<IR.AxisName, number>>>;
 }
 
-export interface ParsedGlyphRequest<TIcon extends string = IconId> {
-  readonly icon: TIcon;
-  readonly variant: IconVariant;
-  readonly modelMode: ModelMode;
-  readonly axes: Readonly<Partial<Record<AxisName, number>>>;
-}
-
-export interface SourcePartProvenance {
-  readonly kind: 'source';
-  readonly identity: 'geometry-derived' | 'declared';
-  readonly file: string;
-  /** Fingerprint авторского source-path до build-оптимизации. */
-  readonly sourceFingerprint: `sha256:${string}`;
-  /** Fingerprint реально установленного root export после deterministic SVGO. */
-  readonly artifactFingerprint: `sha256:${string}`;
-}
-
-export interface ModelPartProvenance {
-  readonly kind: 'model';
-  readonly identity: 'declared';
-  readonly declaration: IconId;
-  readonly state: ModelState;
-}
-
-export interface RecipePartProvenance {
-  readonly kind: 'recipe';
-  readonly identity: 'declared';
-  readonly recipe: string;
-  readonly sourceDependency?: IconId;
-}
-
-export type PartProvenance = SourcePartProvenance | ModelPartProvenance | RecipePartProvenance | AuthorVariationPartProvenance;
-
-export interface GlyphPart {
-  readonly id: string;
-  readonly role: PartRole;
-  readonly zIndex: number;
-  readonly d: string;
-  /** null означает: часть имеет смысл только внутри GlyphIR.composition. */
-  readonly fillRule: FillRule | null;
-  readonly paint: RecipeFillPaint | RecipeStrokePaint;
-  /** Нормализованный якорь в долях viewBox, а не экранные пиксели. */
-  readonly anchor: readonly [number, number];
-  readonly anchorSource: 'declared' | 'geometry-bbox-center';
-  readonly topologySignature: string;
-  readonly morphGroup: string | null;
-  readonly provenance: PartProvenance;
-}
-
-export interface SourceGlyphProvenance {
-  readonly kind: 'source';
-  readonly file: string;
-  readonly author?: AuthorSourceProvenance;
-  readonly anatomy?: AuthorAnatomyReceipt;
-}
-
-export interface ModelGlyphProvenance {
-  readonly kind: 'model';
-  readonly declaration: IconId;
-  readonly archetype: string;
-  readonly state: ModelState;
-  /** Эффективные значения только реально поддержанных моделью осей. */
-  readonly axes: Readonly<Partial<Record<AxisName, number>>>;
-}
-
-export interface RecipeGlyphProvenance {
-  readonly kind: 'recipe';
-  readonly recipe: string;
-  readonly state: 'candidate';
-  readonly sourceDependencies: readonly IconId[];
-  readonly axes: Readonly<{ opsz: number }>;
-  readonly context: Readonly<{
-    day: number;
-    epochMilliseconds: number;
-    timeZone: string;
-  }>;
-}
-
-export interface DesignSpecGlyphProvenance {
-  readonly kind: 'design-spec';
-  readonly specVersion: 1;
-  readonly specSha256: `sha256:${string}`;
-  readonly state: 'candidate';
-}
-
-export type GlyphProvenance = SourceGlyphProvenance | ModelGlyphProvenance | RecipeGlyphProvenance | DesignSpecGlyphProvenance | AuthorVariationProvenance;
-
-export interface GlyphIR<TIcon extends string = IconId> {
-  readonly icon: TIcon;
-  readonly variant: IconVariant;
-  readonly viewBox: readonly [number, number, number, number];
-  readonly parts: readonly GlyphPart[];
-  /** Удобная сборка геометрии; способ paint задаёт composition, не порядок parts. */
-  readonly d: string;
-  readonly svg: string;
-  readonly composition: GlyphComposition;
-  readonly provenance: GlyphProvenance;
-}
-
-export type GlyphComposition =
-  | Readonly<{ kind: 'layers' }>
-  | Readonly<{ kind: 'compound'; fillRule: FillRule }>
-  | Readonly<{
-      kind: 'mask-subtract';
-      basePartIds: readonly string[];
-      subtractPartIds: readonly string[];
-    }>;
-
-function cloneGlyphComposition(composition: GlyphComposition): GlyphComposition {
+function cloneGlyphComposition(composition: IR.GlyphComposition): IR.GlyphComposition {
   if (composition.kind === 'layers') {
     return Object.freeze({ kind: 'layers' });
   }
@@ -178,110 +47,10 @@ function cloneGlyphComposition(composition: GlyphComposition): GlyphComposition 
   });
 }
 
-export interface GlyphCapabilities<TIcon extends string = IconId> {
-  readonly icon: TIcon;
-  readonly variant: IconVariant;
-  readonly modelState: ModelState | null;
-  readonly supportedAxes: readonly AxisName[];
-  readonly axes: Readonly<Partial<Record<AxisName, AxisContract>>>;
-  readonly motion: MotionCapabilities;
-  readonly author?: AuthorSourceProvenance;
-  readonly anatomy?: AuthorAnatomyReceipt;
-  readonly variation?: AuthorVariationCapability;
-}
-
-export interface AxisContract {
-  readonly kind: 'continuous';
-  readonly min: number;
-  readonly default: number;
-  readonly max: number;
-  readonly lifecycle: string;
-}
-
-export type MotionCapabilityState =
-  | 'source-only'
-  | 'candidate'
-  | 'semantic-parts'
-  | 'anchored-parts'
-  | 'gesture-ready';
-
-export interface MotionGestureRotationTrackContract {
-  readonly partId: string;
-  readonly kind: 'rotate';
-  readonly anchor: readonly [number, number];
-  readonly from: number;
-  readonly to: number;
-  readonly unit: 'degrees';
-  readonly interpolation: 'linear';
-}
-
-export interface MotionGestureOpacityTrackContract {
-  readonly partId: string;
-  readonly kind: 'opacity';
-  readonly unit: 'fraction';
-  readonly interpolation: 'linear';
-  readonly stops: readonly Readonly<{ at: number; value: number }>[];
-}
-
-export interface MotionGestureTranslationTrackContract {
-  readonly partId: string;
-  readonly kind: 'translate';
-  readonly axis: 'x' | 'y';
-  readonly unit: 'viewBox';
-  readonly interpolation: 'linear';
-  readonly stops: readonly Readonly<{ at: number; value: number }>[];
-}
-
-export type MotionGestureTrackContract = MotionGestureRotationTrackContract | MotionGestureOpacityTrackContract | MotionGestureTranslationTrackContract;
-
-export interface MotionGestureContract {
-  readonly id: string;
-  readonly kind: string;
-  readonly partIds: readonly string[];
-  readonly meaning: string;
-  readonly progress: 'normalized-0-to-1';
-  /** Поза неподвижного мастера; отсутствие сохраняет прежний прогресс 0. */
-  readonly restProgress?: number;
-  readonly tracks: readonly MotionGestureTrackContract[];
-}
-
-export interface MotionGestureRotationSample {
-  readonly partId: string;
-  readonly kind: 'rotate';
-  readonly anchor: readonly [number, number];
-  readonly rotation: number;
-}
-
-export type MotionGestureSample = MotionGestureRotationSample |
-  Readonly<{ partId: string; kind: 'opacity'; opacity: number }> |
-  Readonly<{ partId: string; kind: 'translate'; axis: 'x' | 'y'; unit: 'viewBox'; translation: number }>;
-
-export interface MotionRotationTrackContract {
-  readonly id: string;
-  readonly kind: 'rotate';
-  readonly partIds: readonly string[];
-  readonly anchor: readonly [number, number];
-}
-
-export type MotionTrackContract = MotionRotationTrackContract |
-  Readonly<{ id: string; kind: 'opacity'; partIds: readonly string[] }> |
-  Readonly<{ id: string; kind: 'translate'; partIds: readonly string[]; axis: 'x' | 'y'; unit: 'viewBox' }>;
-
-export interface MotionCapabilities {
-  readonly state: MotionCapabilityState;
-  readonly partIds: readonly string[];
-  readonly tracks: readonly MotionTrackContract[];
-  readonly gestures: readonly MotionGestureContract[];
-  readonly adapters: Readonly<{
-    readonly lottie: 'not-exported' | 'lottie-web-svg-5.13';
-    readonly sfSymbols: 'not-exported';
-  }>;
-}
-
 export function sampleMotionGesture(
-  gesture: MotionGestureContract,
+  gesture: IR.MotionGestureContract,
   progress: number,
-): readonly MotionGestureSample[] {
+): readonly IR.MotionGestureSample[] {
   return sampleMotionGestureCore(gesture, progress);
 }
 
@@ -291,7 +60,7 @@ export interface IconDesignContract {
     readonly viewBox: readonly [number, number, number, number];
     readonly declarationUnits: 'fraction-of-canvas';
   }>;
-  readonly variants: readonly IconVariant[];
+  readonly variants: readonly IR.IconVariant[];
   readonly source: Readonly<{
     readonly paint: 'currentColor';
     readonly geometry: 'path-only';
@@ -303,7 +72,7 @@ export interface IconDesignContract {
     readonly opticalCenterBias: number;
     readonly angleScale: readonly number[];
   }>;
-  readonly axes: Readonly<Record<AxisName, AxisContract>>;
+  readonly axes: Readonly<Record<IR.AxisName, IR.AxisContract>>;
   readonly lifecycle: Readonly<{
     readonly sourceOnly: 'exact-source-fallback';
     readonly candidate: 'research-only';
@@ -325,11 +94,11 @@ export interface IconDesignContract {
 interface SourcePartContract {
   readonly id: string;
   readonly identity: 'geometry-derived' | 'declared';
-  readonly role: PartRole;
+  readonly role: IR.PartRole;
   readonly anchor?: readonly [number, number];
   readonly anchorSource?: 'declared';
   readonly zIndex: number;
-  readonly fillRule: FillRule;
+  readonly fillRule: IR.FillRule;
   readonly topologySignature: string;
   readonly sourceFingerprint: `sha256:${string}`;
   readonly artifactFingerprint: `sha256:${string}`;
@@ -339,13 +108,13 @@ interface SourceVariantContract {
   readonly file: string;
   readonly parts: readonly SourcePartContract[];
   readonly anatomy?: AuthorAnatomyReceipt;
-  readonly gestures?: readonly MotionGestureContract[];
+  readonly gestures?: readonly IR.MotionGestureContract[];
 }
 
 interface ModelPartContract {
   readonly id: string;
   readonly identity: 'declared';
-  readonly role: PartRole;
+  readonly role: IR.PartRole;
   readonly zIndex: number;
   readonly anchor: readonly [number, number];
   readonly anchorSource: string;
@@ -354,20 +123,20 @@ interface ModelPartContract {
 }
 
 interface ModelVariantContract {
-  readonly state: ModelState;
-  readonly supportedAxes: readonly AxisName[];
-  readonly composition: GlyphComposition;
+  readonly state: IR.ModelState;
+  readonly supportedAxes: readonly IR.AxisName[];
+  readonly composition: IR.GlyphComposition;
   readonly parts: readonly ModelPartContract[];
 }
 
 interface ModelContract {
-  readonly declaration: IconId;
+  readonly declaration: IR.IconId;
   readonly archetype: string;
-  readonly variants: Readonly<Partial<Record<IconVariant, ModelVariantContract>>>;
+  readonly variants: Readonly<Partial<Record<IR.IconVariant, ModelVariantContract>>>;
 }
 
 interface IconContract {
-  readonly source: Readonly<Record<IconVariant, SourceVariantContract>>;
+  readonly source: Readonly<Record<IR.IconVariant, SourceVariantContract>>;
   readonly model: ModelContract | null;
 }
 
@@ -375,13 +144,13 @@ interface CatalogContract {
   readonly canvas: {
     readonly viewBox: readonly [number, number, number, number];
   };
-  readonly axes: Readonly<Record<AxisName, AxisContract>>;
-  readonly icons: Readonly<Record<IconId, IconContract>>;
+  readonly axes: Readonly<Record<IR.AxisName, IR.AxisContract>>;
+  readonly icons: Readonly<Record<IR.IconId, IconContract>>;
 }
 
 interface BuiltPart {
   readonly id: string;
-  readonly role: PartRole;
+  readonly role: IR.PartRole;
   readonly d: string;
   readonly zIndex: number;
   readonly anchor: readonly [number, number];
@@ -392,7 +161,7 @@ interface BuiltPart {
 interface RenderedPathEntry {
   readonly index: number;
   readonly d: string;
-  readonly fillRule: FillRule;
+  readonly fillRule: IR.FillRule;
 }
 
 interface PathBounds {
@@ -402,22 +171,34 @@ interface PathBounds {
   readonly maxY: number;
 }
 
-
 export interface CalendarNumberGlyphInput extends Omit<CalendarNumberInput, 'aperture'> {
-  readonly variant?: IconVariant;
+  readonly variant?: IR.IconVariant;
 }
 
+/** Контракт значений runtime; constructor и его входные данные остаются внутренними. */
+export interface GlyphCompiler {
+  readonly glyph: (request: IR.GlyphRequest) => IR.GlyphIR;
+  readonly glyphCapabilities: (iconValue: unknown, variantValue?: unknown) => IR.GlyphCapabilities;
+  readonly parseGlyphRequest: (value: unknown) => ParsedGlyphRequest;
+  readonly parseIconId: (value: unknown) => IR.IconId;
+  readonly isIconId: (value: unknown) => value is IR.IconId;
+  readonly calendarNumberGlyph: (input: CalendarNumberGlyphInput) => IR.GlyphIR;
+  readonly iconIds: readonly IR.IconId[];
+  readonly axisNames: readonly IR.AxisName[];
+  readonly axisContracts: Readonly<Record<IR.AxisName, IR.AxisContract>>;
+  readonly iconDesignContract: IconDesignContract;
+}
 
 /** @internal Данные задаёт компилятор сборки, а не потребитель. */
 export function createGlyphCompiler({ catalog: catalogJson, anatomy: anatomyJson, grid: gridJson, staticIcons }: { catalog: unknown; anatomy: unknown; grid: unknown; staticIcons: Readonly<Record<string, unknown>> }) {
   const catalog = catalogJson as unknown as CatalogContract;
   const anatomy = anatomyJson as unknown as {
     readonly glyphs: Readonly<Record<string, Readonly<{
-      readonly status?: Readonly<Partial<Record<IconVariant, string>>>;
+      readonly status?: Readonly<Partial<Record<IR.IconVariant, string>>>;
       readonly motion?: Readonly<{
         readonly state?: string;
-        readonly gestures?: readonly Readonly<Omit<MotionGestureContract, 'tracks'> & {
-          readonly tracks: readonly MotionGestureRotationTrackContract[];
+        readonly gestures?: readonly Readonly<Omit<IR.MotionGestureContract, 'tracks'> & {
+          readonly tracks: readonly IR.MotionGestureRotationTrackContract[];
         }>[];
       }>;
       readonly parts?: readonly Readonly<{
@@ -438,7 +219,7 @@ export function createGlyphCompiler({ catalog: catalogJson, anatomy: anatomyJson
   const candidateGlyphs = new Map<string, AnatomyGlyph>();
   const registeredCandidateVariants = new Set<string>();
 
-  type CandidateVariantRegistration = `${string}/${IconVariant}`;
+  type CandidateVariantRegistration = `${string}/${IR.IconVariant}`;
 
   /**
    * Реестр candidate-деклараций; вызывается ТОЛЬКО субпатом ./ir/candidates.
@@ -485,18 +266,18 @@ export function createGlyphCompiler({ catalog: catalogJson, anatomy: anatomyJson
 
   const REQUEST_KEYS = new Set(['icon', 'variant', 'modelMode', 'axes']);
 
-  const ICON_IDS = Object.keys(catalog.icons).sort() as IconId[];
-  const AXIS_NAMES = Object.keys(catalog.axes).sort() as AxisName[];
+  const ICON_IDS = Object.keys(catalog.icons).sort() as IR.IconId[];
+  const AXIS_NAMES = Object.keys(catalog.axes).sort() as IR.AxisName[];
 
   // `readonly` в .d.ts не защищает runtime-массив. Публичные перечисления —
   // capability contract, поэтому отдаём отдельные frozen snapshots.
-  const iconIds: readonly IconId[] = Object.freeze([...ICON_IDS]);
-  const axisNames: readonly AxisName[] = Object.freeze([...AXIS_NAMES]);
-  const axisContracts: Readonly<Record<AxisName, AxisContract>> = Object.freeze(
+  const iconIds: readonly IR.IconId[] = Object.freeze([...ICON_IDS]);
+  const axisNames: readonly IR.AxisName[] = Object.freeze([...AXIS_NAMES]);
+  const axisContracts: Readonly<Record<IR.AxisName, IR.AxisContract>> = Object.freeze(
     Object.fromEntries(AXIS_NAMES.map((name) => [
       name,
       Object.freeze({ ...catalog.axes[name] }),
-    ])) as Record<AxisName, AxisContract>,
+    ])) as Record<IR.AxisName, IR.AxisContract>,
   );
 
   const motionAdapters = Object.freeze({
@@ -550,11 +331,11 @@ export function createGlyphCompiler({ catalog: catalogJson, anatomy: anatomyJson
     return value !== null && typeof value === 'object' && !Array.isArray(value);
   }
 
-  function isIconId(value: unknown): value is IconId {
+  function isIconId(value: unknown): value is IR.IconId {
     return typeof value === 'string' && Object.hasOwn(catalog.icons, value);
   }
 
-  function parseIconId(value: unknown): IconId {
+  function parseIconId(value: unknown): IR.IconId {
     if (!isIconId(value)) {
       throw new TypeError(`@labpics/icons/ir: неизвестная иконка «${String(value)}»`);
     }
@@ -581,12 +362,12 @@ export function createGlyphCompiler({ catalog: catalogJson, anatomy: anatomyJson
     });
   }
 
-  function exportName(icon: IconId, variant: IconVariant): string {
+  function exportName(icon: IR.IconId, variant: IR.IconVariant): string {
     const camel = icon.replace(/-([a-z0-9])/g, (_, char: string) => char.toUpperCase());
     return `${camel}${variant === 'outline' ? 'Outline' : 'Filled'}`;
   }
 
-  function sourceSvg(icon: IconId, variant: IconVariant): string {
+  function sourceSvg(icon: IR.IconId, variant: IR.IconVariant): string {
     const name = exportName(icon, variant);
     const value = (staticIcons as Readonly<Record<string, unknown>>)[name];
     if (typeof value !== 'string') {
@@ -611,10 +392,10 @@ export function createGlyphCompiler({ catalog: catalogJson, anatomy: anatomyJson
   }
 
   function sourceParts(
-    icon: IconId,
-    variant: IconVariant,
+    icon: IR.IconId,
+    variant: IR.IconVariant,
     contract: SourceVariantContract,
-  ): readonly GlyphPart[] {
+  ): readonly IR.GlyphPart[] {
     const entries = sourcePathEntries(sourceSvg(icon, variant)) as RenderedPathEntry[];
     if (entries.length !== contract.parts.length) {
       throw new Error(
@@ -623,7 +404,7 @@ export function createGlyphCompiler({ catalog: catalogJson, anatomy: anatomyJson
       );
     }
 
-    return Object.freeze(entries.map((entry, index): GlyphPart => {
+    return Object.freeze(entries.map((entry, index): IR.GlyphPart => {
       const part = contract.parts[index];
       if (!part || part.zIndex !== index || entry.index !== index) {
         throw new Error(`@labpics/icons/ir: нарушен z-order source ${icon}/${variant}`);
@@ -666,17 +447,17 @@ export function createGlyphCompiler({ catalog: catalogJson, anatomy: anatomyJson
 
   function effectiveAxes(
     model: ModelVariantContract,
-    requested: Readonly<Partial<Record<AxisName, number>>>,
-  ): Readonly<Partial<Record<AxisName, number>>> {
+    requested: Readonly<Partial<Record<IR.AxisName, number>>>,
+  ): Readonly<Partial<Record<IR.AxisName, number>>> {
     const supported = new Set(model.supportedAxes);
-    for (const name of Object.keys(requested) as AxisName[]) {
+    for (const name of Object.keys(requested) as IR.AxisName[]) {
       if (!supported.has(name)) {
         throw new RangeError(
           `@labpics/icons/ir: модель не поддерживает ось ${name}`,
         );
       }
     }
-    const resolved: Partial<Record<AxisName, number>> = {};
+    const resolved: Partial<Record<IR.AxisName, number>> = {};
     for (const name of model.supportedAxes) {
       resolved[name] = requested[name] ?? catalog.axes[name].default;
     }
@@ -684,13 +465,13 @@ export function createGlyphCompiler({ catalog: catalogJson, anatomy: anatomyJson
   }
 
   function modelParts(
-    icon: IconId,
-    variant: IconVariant,
+    icon: IR.IconId,
+    variant: IR.IconVariant,
     contract: ModelContract,
     model: ModelVariantContract,
-    composition: GlyphComposition,
-    axes: Readonly<Partial<Record<AxisName, number>>>,
-  ): readonly GlyphPart[] {
+    composition: IR.GlyphComposition,
+    axes: Readonly<Partial<Record<IR.AxisName, number>>>,
+  ): readonly IR.GlyphPart[] {
     const declaration = anatomyGlyph(contract.declaration);
     if (!declaration) {
       throw new GlyphModelError(
@@ -704,12 +485,12 @@ export function createGlyphCompiler({ catalog: catalogJson, anatomy: anatomyJson
       grid,
       axes,
       anatomyLibrary(),
-    ) as Partial<Record<IconVariant, BuiltPart[]>>;
+    ) as Partial<Record<IR.IconVariant, BuiltPart[]>>;
     const parts = generated[variant];
     if (!parts || parts.length !== model.parts.length) {
       throw new Error(`@labpics/icons/ir: drift модели ${icon}/${variant}`);
     }
-    return Object.freeze(model.parts.map((part, index): GlyphPart => {
+    return Object.freeze(model.parts.map((part, index): IR.GlyphPart => {
       const built = parts[index];
       if (
         !built ||
@@ -756,14 +537,14 @@ export function createGlyphCompiler({ catalog: catalogJson, anatomy: anatomyJson
     }));
   }
 
-  function modelAllowed(model: ModelVariantContract, mode: ModelMode): boolean {
+  function modelAllowed(model: ModelVariantContract, mode: IR.ModelMode): boolean {
     if (mode === 'source-only') return false;
     if (model.state === 'accepted') return true;
     return mode === 'allow-candidate';
   }
 
   /** Состояние модели читается без её построения и без побочных эффектов. */
-  function motionCapabilities(icon: IconId, variant: IconVariant, model?: ModelVariantContract): MotionCapabilities {
+  function motionCapabilities(icon: IR.IconId, variant: IR.IconVariant, model?: ModelVariantContract): IR.MotionCapabilities {
     if (!model) {
       const source = catalog.icons[icon].source[variant];
       if (source.anatomy && source.gestures?.length) {
@@ -781,7 +562,7 @@ export function createGlyphCompiler({ catalog: catalogJson, anatomy: anatomyJson
           partIds: Object.freeze(source.parts.map(part => part.id)),
           tracks: Object.freeze([...new Map(gestures.flatMap(gesture => gesture.tracks.map(track => {
             const id = track.kind === 'translate' ? `translate.${track.axis}.${track.partId}` : `${track.kind}.${track.partId}`;
-            const capability: MotionTrackContract = Object.freeze(track.kind === 'rotate' ? {
+            const capability: IR.MotionTrackContract = Object.freeze(track.kind === 'rotate' ? {
               id, kind: 'rotate', partIds: Object.freeze([track.partId]), anchor: track.anchor,
             } : track.kind === 'translate' ? { id, kind: 'translate', partIds: Object.freeze([track.partId]), axis: track.axis, unit: track.unit }
               : { id, kind: 'opacity', partIds: Object.freeze([track.partId]) });
@@ -865,7 +646,7 @@ export function createGlyphCompiler({ catalog: catalogJson, anatomy: anatomyJson
   function glyphCapabilities(
     iconValue: unknown,
     variantValue: unknown = 'outline',
-  ): GlyphCapabilities {
+  ): IR.GlyphCapabilities {
     const icon = parseIconId(iconValue);
     const variant = parseVariant(variantValue);
     const model = catalog.icons[icon].model?.variants[variant];
@@ -890,16 +671,16 @@ export function createGlyphCompiler({ catalog: catalogJson, anatomy: anatomyJson
    * запрос без осей получает точный source fallback; оси никогда не теряются
    * молча и в таком случае приводят к ошибке.
    */
-  function glyph(request: GlyphRequest): GlyphIR;
-  function glyph(request: unknown): GlyphIR {
+  function glyph(request: IR.GlyphRequest): IR.GlyphIR;
+  function glyph(request: unknown): IR.GlyphIR {
     const parsed = parseGlyphRequest(request);
     const iconContract = catalog.icons[parsed.icon];
     const modelContract = iconContract.model;
     const model = modelContract?.variants[parsed.variant];
 
-    let parts: readonly GlyphPart[];
-    let provenance: GlyphProvenance;
-    let composition: GlyphComposition;
+    let parts: readonly IR.GlyphPart[];
+    let provenance: IR.GlyphProvenance;
+    let composition: IR.GlyphComposition;
 
     if (modelContract && model && modelAllowed(model, parsed.modelMode)) {
       // INV-06: гейт по состоянию модели, не по наличию декларации — mixed-иконки
@@ -966,13 +747,13 @@ export function createGlyphCompiler({ catalog: catalogJson, anatomy: anatomyJson
 
   const CALENDAR_SHELL_CONTRACT = Object.freeze({
     outline: Object.freeze({
-      dependency: 'calendar-number' as IconId,
+      dependency: 'calendar-number' as IR.IconId,
       // Geometry fingerprint из canonical catalog: любое редактирование shell
       // требует осознанно перепривязать recipe вместо выбора «самого большого» path.
       sourcePartId: 'source-c18fd85190d3',
     }),
     filled: Object.freeze({
-      dependency: 'calendar-clear' as IconId,
+      dependency: 'calendar-clear' as IR.IconId,
       sourcePartId: 'source-87d6cad16173',
     }),
   });
@@ -981,7 +762,7 @@ export function createGlyphCompiler({ catalog: catalogJson, anatomy: anatomyJson
    * Динамический calendar-number: точная shell-геометрия корпуса + собственные
    * tabular digits. Функция ничего не планирует и не читает часы сама.
    */
-  function calendarNumberGlyph(input: CalendarNumberGlyphInput): GlyphIR {
+  function calendarNumberGlyph(input: CalendarNumberGlyphInput): IR.GlyphIR {
     if (!isRecord(input)) throw new TypeError('@labpics/icons/ir: calendar input обязан быть объектом');
     const allowed = new Set(['date', 'timeZone', 'opsz', 'variant']);
     const unknown = Object.keys(input).filter((key) => !allowed.has(key));
@@ -1009,7 +790,7 @@ export function createGlyphCompiler({ catalog: catalogJson, anatomy: anatomyJson
       throw new Error(`@labpics/icons/ir: shell contract ${dependency}/${variant} дрейфует`);
     }
 
-    const shell: GlyphPart = Object.freeze({
+    const shell: IR.GlyphPart = Object.freeze({
       id: 'calendar.shell',
       role: 'container',
       zIndex: 0,
@@ -1028,7 +809,7 @@ export function createGlyphCompiler({ catalog: catalogJson, anatomy: anatomyJson
       }),
     });
 
-    const digitParts: GlyphPart[] = number.parts.map((part) => Object.freeze({
+    const digitParts: IR.GlyphPart[] = number.parts.map((part) => Object.freeze({
       id: part.id,
       role: 'content',
       zIndex: part.slot === 'tens' ? 1 : 2,
@@ -1058,7 +839,7 @@ export function createGlyphCompiler({ catalog: catalogJson, anatomy: anatomyJson
       }),
     }));
     const parts = Object.freeze([shell, ...digitParts]);
-    const composition: GlyphComposition = variant === 'outline'
+    const composition: IR.GlyphComposition = variant === 'outline'
       ? Object.freeze({ kind: 'layers' })
       : Object.freeze({
           kind: 'mask-subtract',
@@ -1094,5 +875,5 @@ export function createGlyphCompiler({ catalog: catalogJson, anatomy: anatomyJson
     });
   }
 
-  return Object.freeze({ glyph, glyphCapabilities, parseGlyphRequest, parseIconId, isIconId, registerCandidateAnatomy, calendarNumberGlyph, iconIds, axisNames, axisContracts, iconDesignContract });
+  return Object.freeze({ glyph, glyphCapabilities, parseGlyphRequest, parseIconId, isIconId, registerCandidateAnatomy, calendarNumberGlyph, iconIds, axisNames, axisContracts, iconDesignContract }) satisfies GlyphCompiler;
 }

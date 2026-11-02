@@ -1,4 +1,4 @@
-import type { GlyphCapabilities, GlyphIR, MotionGestureOpacityTrackContract, MotionGestureTranslationTrackContract } from '../ir/compiler.js';
+import type { GlyphCapabilities, GlyphIR, MotionGestureOpacityTrackContract, MotionGestureTranslationTrackContract } from '../ir/glyph-types.js';
 import { sampleOpacityTrack, sampleTranslationTrack, validateMotionGesture } from '../core/motion-sampler.js';
 import type { PreparedContourStateEffect, SymbolContourStateEffect } from '../states/contour-types.js';
 import { prepareContourStateEffect as prepareContourPacket } from '../ir/contour-runtime.js';

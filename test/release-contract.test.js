@@ -31,26 +31,28 @@ const DECLARATIONS = Object.freeze({
   'dist/ir/catalog.generated.d.ts': "export type CatalogIconId = 'fixture';\n",
   'dist/ir/author-catalog.generated.d.ts': "export type AuthorIconId = 'fixture';\n",
   'dist/ir/author-provenance.d.ts': "export interface AuthorSourceProvenance { readonly kind: 'figma' }\n",
-  'dist/ir/author-source.d.ts': "import type { AuthorIconId } from './author-catalog.generated.js';\nimport type { GlyphIR } from './compiler.js';\nexport type { AuthorSourceProvenance } from './author-provenance.js';\nexport type AuthorSourceGlyph = GlyphIR & { readonly icon: AuthorIconId };\n",
+  'dist/ir/author-source.d.ts': "import type { AuthorIconId } from './author-catalog.generated.js';\nimport type { GlyphIR } from './glyph-types.js';\nexport type { AuthorSourceProvenance } from './author-provenance.js';\nexport type AuthorSourceGlyph = GlyphIR & { readonly icon: AuthorIconId };\n",
   'dist/ir/index.d.ts':
     `import type { CatalogIconId } from './catalog.generated.js';\n` +
     `export type { RecipeResult } from './recipes.js';\n` +
     `export type { GlyphIR } from './compiler.js';\n` +
     'export declare const iconIds: readonly CatalogIconId[];\n',
-  'dist/ir/compiler.d.ts': "import type { GlyphModelErrorCode } from './request.js';\nimport type { AuthorVariationProvenance } from './authored-variation.js';\nexport interface GlyphIR { readonly code: GlyphModelErrorCode; readonly variation?: AuthorVariationProvenance }\n",
+  'dist/ir/compiler.d.ts': "import type { GlyphModelErrorCode } from './request.js';\nexport type { GlyphIR } from './glyph-types.js';\nexport interface GlyphCompiler { readonly code: GlyphModelErrorCode }\n",
+  'dist/ir/glyph-types.d.ts': "import type { AuthorVariationProvenance } from './authored-variation.js';\nimport type { RecipeFillPaint } from './paint-types.js';\nexport interface GlyphIR { readonly paint: RecipeFillPaint; readonly variation?: AuthorVariationProvenance }\n",
+  'dist/ir/paint-types.d.ts': "export interface RecipeFillPaint { readonly kind: 'fill' }\n",
   'dist/ir/authored-variation.d.ts': "export interface AuthorVariationProvenance { readonly kind: 'authored-variation' }\n",
   'dist/ir/request.d.ts': "export type GlyphModelErrorCode = 'CANDIDATES_REQUIRED';\n",
-  'dist/ir/render.d.ts': "import type { GlyphIR } from './compiler.js';\nexport declare function renderGlyphSvg(glyph: GlyphIR): string;\n",
+  'dist/ir/render.d.ts': "import type { GlyphIR } from './glyph-types.js';\nexport declare function renderGlyphSvg(glyph: GlyphIR): string;\n",
   'dist/authoring/index.d.ts': "export { compileDesignSpec } from './design-spec.js';\n",
-  'dist/authoring/design-spec.d.ts': "import type { GlyphIR } from '../ir/compiler.js';\nexport declare function compileDesignSpec(spec: unknown): GlyphIR;\n",
+  'dist/authoring/design-spec.d.ts': "import type { GlyphIR } from '../ir/glyph-types.js';\nexport declare function compileDesignSpec(spec: unknown): GlyphIR;\n",
   'dist/motion/index.d.ts': "import type { GlyphIR } from '../ir/index.js';\nimport type { StateRefusal } from '../ir/state-types.js';\nimport type { PreparedContourStateEffect } from '../ir/contour-state-types.js';\nexport declare function compileSymbolEffect(glyph: GlyphIR): StateRefusal | PreparedContourStateEffect;\n",
   'dist/ir/state-types.d.ts': "export type { StateRefusal } from './state-common-types.js';\n",
   'dist/ir/state-common-types.d.ts': "export interface StateRefusal { readonly ok: false }\n",
   'dist/ir/contour-state-types.d.ts': "import type { StateRefusal } from './state-common-types.js';\nexport type PreparedContourStateEffect = StateRefusal | { readonly ok: true };\n",
   'dist/symbols/fixture.d.ts': "import type { AuthorSourceGlyph } from '../ir/author-source.js';\nexport declare function glyph(): AuthorSourceGlyph;\n",
   'dist/lottie/fixture.d.ts': "import type { LottieExportResult } from '../ir/lottie-types.js';\nexport declare function exportLottie(): LottieExportResult;\n",
-  'dist/ir/lottie-types.d.ts': "import type { GlyphIR } from './compiler.js';\nexport interface LottieExportResult { readonly glyph: GlyphIR }\n",
-  'dist/ir/recipes.d.ts': 'export interface RecipeResult { readonly kind: string }\n',
+  'dist/ir/lottie-types.d.ts': "import type { GlyphIR } from './glyph-types.js';\nexport interface LottieExportResult { readonly glyph: GlyphIR }\n",
+  'dist/ir/recipes.d.ts': "export type { RecipeFillPaint } from './paint-types.js';\nexport interface RecipeResult { readonly kind: string }\n",
   'dist/ir/candidates.d.ts': 'export declare function registerCandidates(): void;\n',
 });
 
