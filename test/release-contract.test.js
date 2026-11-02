@@ -38,9 +38,10 @@ const DECLARATIONS = Object.freeze({
     `export type { GlyphIR } from './compiler.js';\n` +
     'export declare const iconIds: readonly CatalogIconId[];\n',
   'dist/ir/compiler.d.ts': "import type { GlyphModelErrorCode } from './request.js';\nexport type { GlyphIR } from './glyph-types.js';\nexport interface GlyphCompiler { readonly code: GlyphModelErrorCode }\n",
-  'dist/ir/glyph-types.d.ts': "import type { AuthorVariationProvenance } from './authored-variation.js';\nimport type { RecipeFillPaint } from './paint-types.js';\nexport interface GlyphIR { readonly paint: RecipeFillPaint; readonly variation?: AuthorVariationProvenance }\n",
+  'dist/ir/glyph-types.d.ts': "import type { AuthorVariationProvenance } from './authored-variation.js';\nimport type { AuthorAnnulusVariationProvenance } from './author-annulus-types.js';\nimport type { RecipeFillPaint } from './paint-types.js';\nexport interface GlyphIR { readonly paint: RecipeFillPaint; readonly variation?: AuthorVariationProvenance | AuthorAnnulusVariationProvenance }\n",
   'dist/ir/paint-types.d.ts': "export interface RecipeFillPaint { readonly kind: 'fill' }\n",
   'dist/ir/authored-variation.d.ts': "export interface AuthorVariationProvenance { readonly kind: 'authored-variation' }\n",
+  'dist/ir/author-annulus-types.d.ts': "import type { AuthorSourceProvenance } from './author-provenance.js';\nexport interface AuthorAnnulusVariationProvenance { readonly author: AuthorSourceProvenance }\n",
   'dist/ir/request.d.ts': "export type GlyphModelErrorCode = 'CANDIDATES_REQUIRED';\n",
   'dist/ir/render.d.ts': "import type { GlyphIR } from './glyph-types.js';\nexport declare function renderGlyphSvg(glyph: GlyphIR): string;\n",
   'dist/authoring/index.d.ts': "export { compileDesignSpec } from './design-spec.js';\n",
