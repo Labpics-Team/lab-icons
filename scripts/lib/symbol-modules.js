@@ -1,3 +1,5 @@
+import { compactDataLiteral, compactGeneratedModule, literalKey } from './generated-module.js';
+
 const SYMBOL_NAME = /^[a-z][a-z0-9-]*$/;
 
 /** Единственная release-проекция каталога; wildcard раскрывается в точные файлы. */
@@ -53,11 +55,12 @@ export function symbolExportName(icon, variant) {
 }
 
 /** Build-only ссылки заменяют только названные поля проверенной JSON-проекции. */
-function renderJSONRecord(value, references) {
-  if (!references.size) return JSON.stringify(value);
+function renderJSONRecord(value, references, compact = false) {
+  const serialize = compact ? compactDataLiteral : JSON.stringify;
+  if (!references.size) return serialize(value);
   return `{${Object.entries(value).flatMap(([key, item]) => {
-    const encoded = references.get(key) ?? JSON.stringify(item);
-    return encoded === undefined ? [] : [`${JSON.stringify(key)}:${encoded}`];
+    const encoded = references.get(key) ?? serialize(item);
+    return encoded === undefined ? [] : [`${compact ? literalKey(key) : JSON.stringify(key)}:${encoded}`];
   }).join(',')}}`;
 }
 
@@ -66,10 +69,10 @@ export function renderSymbolModule({ icon, source, capabilities, staticSvg, vari
   if (!SYMBOL_NAME.test(icon)) throw new TypeError('symbol module: невалидное имя');
   const json = value => JSON.stringify(value);
   const record = value => value !== null && typeof value === 'object' && !Array.isArray(value);
-  const shared = [], sources = {}, capabilityReferences = new Map();
+  const shared = [], references = {};
   for (const variant of ['outline', 'filled']) {
     const provenance = source[variant]?.provenance, capability = capabilities[variant];
-    const provenanceReferences = new Map(), receiptReferences = new Map();
+    references[variant] = new Map();
     for (const field of ['author', 'anatomy']) {
       const left = provenance?.[field], right = capability?.[field];
       // Независимые авторские варианты не объединяются даже при равных receipts.
@@ -78,29 +81,35 @@ export function renderSymbolModule({ icon, source, capabilities, staticSvg, vari
       const encoded = json(left);
       if (encoded !== json(right)) continue;
       const name = `${variant}${field === 'author' ? 'Author' : 'Anatomy'}`;
-      shared.push(`const ${name} = ${encoded};`);
-      provenanceReferences.set(field, name);
-      receiptReferences.set(field, name);
+      shared.push({ name, value: left });
+      references[variant].set(field, name);
     }
-    sources[variant] = renderJSONRecord(source[variant], provenanceReferences.size
-      ? new Map([['provenance', renderJSONRecord(provenance, provenanceReferences)]]) : new Map());
-    if (receiptReferences.size) capabilityReferences.set(variant, renderJSONRecord(capability, receiptReferences));
   }
-  const lines = [
+  const emit = compact => {
+    const serialize = compact ? compactDataLiteral : json;
+    const sources = {}, capabilityReferences = new Map();
+    for (const variant of ['outline', 'filled']) {
+      const metadata = references[variant];
+      sources[variant] = renderJSONRecord(source[variant], metadata.size
+        ? new Map([['provenance', renderJSONRecord(source[variant].provenance, metadata, compact)]]) : new Map(), compact);
+      if (metadata.size) capabilityReferences.set(variant, renderJSONRecord(capabilities[variant], metadata, compact));
+    }
+    return [
     '/** GENERATED: проверенные текущие авторские masters одного символа. */',
     variation ? "import { createCompiledCapabilities } from '../ir/symbol-runtime.js';" :
       "import { createCompiledGlyph, createCompiledCapabilities } from '../ir/symbol-runtime.js';",
     ...(variation ? ["import { createCompiledVariationGlyph } from '../ir/variation-runtime.js';"] : []),
     `export const outline = ${json(staticSvg.outline)};`,
     `export const filled = ${json(staticSvg.filled)};`,
-    ...shared,
+    ...shared.map(({ name, value }) => `const ${name} = ${serialize(value)};`),
     `const outlineSource = ${sources.outline};`,
     `const filledSource = ${sources.filled};`,
     `export const glyph = /* @__PURE__ */ ${variation ? 'createCompiledVariationGlyph' : 'createCompiledGlyph'}(${json(icon)}, { outline: outlineSource, filled: filledSource }${variation ? `, ${json(variation)}` : ''});`,
-    `export const glyphCapabilities = /* @__PURE__ */ createCompiledCapabilities(${renderJSONRecord(capabilities, capabilityReferences)});`,
+    `export const glyphCapabilities = /* @__PURE__ */ createCompiledCapabilities(${renderJSONRecord(capabilities, capabilityReferences, compact)});`,
     '',
-  ];
-  return lines.join('\n');
+    ].join('\n');
+  };
+  return compactGeneratedModule([emit(false), emit(true)]);
 }
 
 export function symbolModuleDeclaration(icon, variation = false) {

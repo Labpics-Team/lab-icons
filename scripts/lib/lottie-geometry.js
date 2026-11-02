@@ -1,4 +1,5 @@
 import { parsePathData } from '../../src/core/path-data.js';
+import { compactDataLiteral, compactGeneratedModule } from './generated-module.js';
 
 export class LottieGeometryError extends Error {
   constructor(code, message) { super(message); this.name = 'LottieGeometryError'; this.code = code; }
@@ -87,14 +88,17 @@ export function compileLottieGeometry(glyph) {
 
 export function renderLottieSymbolModule(icon, variants) {
   if (!/^[a-z][a-z0-9-]*$/.test(icon)) throw new TypeError('lottie module: невалидное имя');
-  return [
+  const lines = [
     '/** GENERATED: target-contours одного авторского символа; path parser остаётся в сборке. */',
     `import { glyph, glyphCapabilities } from '../symbols/${icon}.js';`,
     "import { createLottieSymbol } from '../ir/lottie-runtime.js';",
     `const symbol = /* @__PURE__ */ createLottieSymbol({ glyph, glyphCapabilities }, ${JSON.stringify(variants)});`,
     'export function exportLottie(request) { return symbol.exportLottie(request); }',
     'export function lottieCapabilities(variant) { return symbol.lottieCapabilities(variant); }', '',
-  ].join('\n');
+  ];
+  const compact = [...lines];
+  compact[3] = `const symbol = /* @__PURE__ */ createLottieSymbol({ glyph, glyphCapabilities }, ${compactDataLiteral(variants)});`;
+  return compactGeneratedModule([lines.join('\n'), compact.join('\n')]);
 }
 
 export function lottieSymbolDeclaration() {
