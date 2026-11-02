@@ -12,6 +12,8 @@ import { buildGlyphParts as buildAnatomyParts, topologySignature as computeTopol
 import { sourcePathEntries } from '../core/icon-geometry.js';
 // @ts-expect-error — см. комментарий выше; функция чистая и bundleable.
 import { parsePathData, pathBBox } from '../core/path-data.js';
+// @ts-expect-error — build-only JS helper использует тот же canonical parser.
+import { closedSourceContourLiterals } from '../core/source-contours.js';
 import { sampleMotionGesture as sampleMotionGestureCore } from '../core/motion-sampler.js';
 import {
   buildCalendarNumberGeometry as buildCalendarNumberRecipe,
@@ -98,7 +100,8 @@ interface SourcePartContract {
   readonly anchor?: readonly [number, number];
   readonly anchorSource?: 'declared';
   readonly zIndex: number;
-  readonly fillRule: IR.FillRule;
+  readonly fillRule: IR.FillRule | null;
+  readonly contourIndices?: readonly number[];
   readonly topologySignature: string;
   readonly sourceFingerprint: `sha256:${string}`;
   readonly artifactFingerprint: `sha256:${string}`;
@@ -109,6 +112,7 @@ interface SourceVariantContract {
   readonly parts: readonly SourcePartContract[];
   readonly anatomy?: AuthorAnatomyReceipt;
   readonly gestures?: readonly IR.MotionGestureContract[];
+  readonly composition?: Readonly<{ kind: 'compound'; fillRule: IR.FillRule }>;
 }
 
 interface ModelPartContract {
@@ -394,7 +398,22 @@ function sourceParts(
   contract: SourceVariantContract,
 ): readonly IR.GlyphPart[] {
   const { catalog } = context as unknown as GlyphCompilerState;
-  const entries = sourcePathEntries(sourceSvg(context, icon, variant)) as RenderedPathEntry[];
+  const parents = sourcePathEntries(sourceSvg(context, icon, variant)) as RenderedPathEntry[];
+  let entries: readonly Readonly<{ index: number; d: string; fillRule: IR.FillRule | null }>[] = parents;
+  if (contract.composition) {
+    if (contract.composition.kind !== 'compound' || contract.composition.fillRule !== 'evenodd' ||
+        parents.length !== 1 || parents[0]!.fillRule !== contract.composition.fillRule || !contract.anatomy ||
+        sha256Hex(JSON.stringify(parents.map(entry => ({ d: entry.d, fillRule: entry.fillRule, index: entry.index })))) !==
+          contract.anatomy.pathFingerprintSha256) {
+      throw new Error(`@labpics/icons/ir: drift compound parent ${icon}/${variant}`);
+    }
+    const literals = closedSourceContourLiterals(parents[0]!.d) as string[];
+    if (contract.parts.length !== literals.length || contract.parts.some((part, index) =>
+        part.contourIndices?.length !== 1 || part.contourIndices[0] !== index || part.fillRule !== null)) {
+      throw new Error(`@labpics/icons/ir: drift compound contour coverage ${icon}/${variant}`);
+    }
+    entries = literals.map((d, index) => ({ index, d, fillRule: null }));
+  }
   if (entries.length !== contract.parts.length) {
     throw new Error(
       `@labpics/icons/ir: drift source ${icon}/${variant}: ` +
@@ -751,7 +770,7 @@ export function compileGlyph(context: GlyphCompilerSession, request: IR.GlyphReq
       kind: 'source', file: source.file,
       ...(source.anatomy && { anatomy: Object.freeze({ ...source.anatomy }) }),
     });
-    composition = cloneGlyphComposition({ kind: 'layers' });
+    composition = cloneGlyphComposition(source.composition ?? { kind: 'layers' });
   }
 
   const d = parts.map((part) => part.d).join('');

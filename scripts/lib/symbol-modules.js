@@ -334,7 +334,7 @@ export function variationModuleDeclaration(icon, law = 'dots.affine', variants) 
       "import type { AuthorCapsuleVariationGlyph, AuthorCapsuleVariationCapabilities, AuthorCapsuleVariationGlyphRequest } from '../ir/author-capsule-types.js';",
       'export declare const outline: string;', 'export declare const filled: string;',
       `export declare function glyph(request?: AuthorSymbolGlyphRequest): AuthorSourceGlyph<'${icon}'>;`,
-      `export declare function glyph(request: AuthorCapsuleVariationGlyphRequest<${admitted}>): AuthorCapsuleVariationGlyph<'${icon}', ${admitted}>;`,
+      `export declare function glyph<TVariant extends ${admitted} = 'outline'>(request: AuthorCapsuleVariationGlyphRequest<TVariant>): AuthorCapsuleVariationGlyph<'${icon}', TVariant>;`,
       `export declare function glyphCapabilities(variant?: 'outline'): AuthorCapsuleVariationCapabilities<'${icon}', 'outline'>;`,
       `export declare function glyphCapabilities(variant: 'filled'): ${variants.includes('filled') ? `AuthorCapsuleVariationCapabilities<'${icon}', 'filled'>` : `AuthorSourceCapabilities<'${icon}'> & Readonly<{variant:'filled'}>`};`,
       `export declare function glyphCapabilities(variant: 'outline' | 'filled'): AuthorCapsuleVariationCapabilities<'${icon}', 'outline'> | ${variants.includes('filled') ? `AuthorCapsuleVariationCapabilities<'${icon}', 'filled'>` : `AuthorSourceCapabilities<'${icon}'> & Readonly<{variant:'filled'}>`};`, '',

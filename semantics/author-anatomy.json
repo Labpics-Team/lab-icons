@@ -38,6 +38,18 @@
         ],
         "gesture": null,
         "variation": { "law": "capsule.width", "parameter": "bodyWidth", "bodyPartId": "microphone-body" }
+      },
+      "filled": {
+        "masterSha256": "a2b2c05074d1a8b791e1a31962c7c57658184cf7b16b737efedbed2cf792d8a7",
+        "pathFingerprintSha256": "2ab6c70b6036f654a3ef5f332a2a283509dadab0ccabd01f324a0ab3b7950ed9",
+        "composition": { "kind": "compound", "fillRule": "evenodd" },
+        "parts": [
+          { "pathIndex": 0, "contourIndices": [0], "id": "microphone-enclosure", "role": "container" },
+          { "pathIndex": 0, "contourIndices": [1], "id": "microphone-support", "role": "counter" },
+          { "pathIndex": 0, "contourIndices": [2], "id": "microphone-body", "role": "counter" }
+        ],
+        "gesture": null,
+        "variation": { "law": "capsule.width", "parameter": "bodyWidth", "bodyPartId": "microphone-body" }
       }
     },
     "reload": {

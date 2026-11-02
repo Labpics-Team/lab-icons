@@ -3,6 +3,7 @@ import { iconGeometry } from '../../src/core/icon-geometry.js';
 import { validateMotionGesture } from '../../src/core/motion-sampler.js';
 import { compileAuthorVariation } from './author-variation.js';
 import { compileAuthorCapsule, projectAuthorCapsuleRuntime } from './author-capsule.js';
+import { projectAuthorSourceContours } from './author-source-contours.js';
 import { compileAuthorAnnulus, projectAuthorAnnulusRuntime, compileAuthorContentVariation,
   projectAuthorContentVariationRuntime } from './author-annulus.js';
 import defaultGrid from '../../semantics/grid.json' with { type: 'json' };
@@ -272,6 +273,7 @@ function compileAuthorAnatomyResult(baseline, document, grid) {
       const declaration = variants[variant];
       const label = `${icon}/${variant}`;
       fields(declaration, ['masterSha256', 'pathFingerprintSha256', 'parts', 'gesture',
+        ...(Object.hasOwn(declaration, 'composition') ? ['composition'] : []),
         ...(Object.hasOwn(declaration, 'variation') ? ['variation'] : []),
         ...(Object.hasOwn(declaration, 'contentVariation') ? ['contentVariation'] : [])], label);
       const source = baseline.icons[icon][variant];
@@ -280,19 +282,21 @@ function compileAuthorAnatomyResult(baseline, document, grid) {
           declaration.pathFingerprintSha256 !== source.author.pathFingerprintSha256) {
         refuse('MASTER_MISMATCH', `${label}: raw master и path receipt не совпадают`);
       }
+      const compound = Object.hasOwn(declaration, 'composition');
       if (!Array.isArray(declaration.parts) ||
-          declaration.parts.length !== source.sourceContract.parts.length || !declaration.parts.length) {
+          !compound && declaration.parts.length !== source.sourceContract.parts.length || !declaration.parts.length) {
         refuse('PARTS_INVALID', `${label}: каждая авторская path обязана иметь ровно одну часть`);
       }
       const ids = new Set();
       const byIndex = new Map();
       for (const part of declaration.parts) {
         const anchored = part?.role === 'control';
-        fields(part, anchored ? ['pathIndex', 'id', 'role', 'anchor', 'anchorMeaning'] : ['pathIndex', 'id', 'role'], `${label}.part`);
+        fields(part, compound ? ['pathIndex', 'contourIndices', 'id', 'role'] : anchored
+          ? ['pathIndex', 'id', 'role', 'anchor', 'anchorMeaning'] : ['pathIndex', 'id', 'role'], `${label}.part`);
         if (!Number.isSafeInteger(part.pathIndex) || part.pathIndex < 0 ||
-            part.pathIndex >= source.sourceContract.parts.length || byIndex.has(part.pathIndex) ||
+            part.pathIndex >= source.sourceContract.parts.length || !compound && byIndex.has(part.pathIndex) ||
             typeof part.id !== 'string' || !NAME.test(part.id) || ids.has(part.id) ||
-            !['control', 'content', 'container'].includes(part.role) || anchored && (part.anchorMeaning !== 'canvas-center' ||
+            !(compound ? ['counter', 'container'] : ['control', 'content', 'container']).includes(part.role) || anchored && (part.anchorMeaning !== 'canvas-center' ||
             !Array.isArray(part.anchor) || part.anchor.length !== 2 ||
             part.anchor.some(value => !Number.isFinite(value) || value < 0 || value > 1) ||
             part.anchor[0] !== 0.5 || part.anchor[1] !== 0.5)) {
@@ -301,12 +305,16 @@ function compileAuthorAnatomyResult(baseline, document, grid) {
         ids.add(part.id);
         byIndex.set(part.pathIndex, part);
       }
-      const parts = source.sourceContract.parts.map((part, index) => {
+      const parts = compound ? projectAuthorSourceContours(source, declaration.parts, declaration.composition, refuse)
+        : source.sourceContract.parts.map((part, index) => {
         const annotation = byIndex.get(index);
         if (!annotation || part.zIndex !== index) refuse('PARTS_INVALID', `${label}: нарушено покрытие или z-order`);
         return { ...part, id: annotation.id, identity: 'declared', role: annotation.role,
           ...(annotation.anchor && { anchor: [...annotation.anchor], anchorSource: 'declared' }) };
       });
+      if (compound && (declaration.gesture !== null || declaration.variation?.law !== 'capsule.width' || declaration.contentVariation)) {
+        refuse('LAW_COMPOSITION_UNSUPPORTED', `${label}: compound contours не получают независимые layer effects`);
+      }
       // Семантический закон не угадывается по форме. Source receipt выводится
       // из одного author spec, а полный annulus proof не входит в runtime contract.
       let variation;
@@ -318,7 +326,7 @@ function compileAuthorAnatomyResult(baseline, document, grid) {
         variation = projectAuthorAnnulusRuntime(compiled);
         evidence[label] = compiled;
       } else if (declaration.variation?.law === 'capsule.width') {
-        const compiled = compileAuthorCapsule(source, parts, declaration.variation, grid);
+        const compiled = compileAuthorCapsule(source, parts, declaration.variation, grid, declaration.composition);
         variation = projectAuthorCapsuleRuntime(compiled);
         capsuleEvidence[label] = compiled.evidence;
       } else if (declaration.variation) {
@@ -350,6 +358,7 @@ function compileAuthorAnatomyResult(baseline, document, grid) {
       output[label] = {
         ...source.sourceContract,
         parts,
+        ...(compound && { composition: { ...declaration.composition } }),
         anatomy: { version: 1, annotationSha256, masterSha256: declaration.masterSha256,
           pathFingerprintSha256: declaration.pathFingerprintSha256 },
         gestures,

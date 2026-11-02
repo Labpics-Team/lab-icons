@@ -36,6 +36,16 @@ export function assembleGlyphLayers(parts: readonly GlyphPart[]): string {
   return parts.map(part => pathForPart(part)).join('');
 }
 
+/** Одна заливка общих contours; отдельный импорт не удерживает mask lowering. */
+export function assembleGlyphCompound(parts: readonly GlyphPart[], fillRule: 'nonzero' | 'evenodd'): string {
+  if (parts.some(part => part.paint.kind !== 'fill')) {
+    throw new Error('@labpics/icons/ir: compound composition пока допускает только fill outlines');
+  }
+  return `<path data-parts="${escapeAttribute(parts.map(part => part.id).join(' '))}" ` +
+    `data-roles="${escapeAttribute(parts.map(part => part.role).join(' '))}" fill="currentColor" ` +
+    `fill-rule="${fillRule}" d="${escapeAttribute(parts.map(part => part.d).join(''))}"/>`;
+}
+
 /** Рамка готовится при сборке; state runtime получает только строки. */
 export function assembleGlyphFrame(
   viewBox: readonly [number, number, number, number],
@@ -58,16 +68,7 @@ export function assembleGlyphSvg(
   if (composition.kind === 'layers') {
     paths = assembleGlyphLayers(parts);
   } else if (composition.kind === 'compound') {
-    paths = (() => {
-        if (parts.some((part) => part.paint.kind !== 'fill')) {
-          throw new Error('@labpics/icons/ir: compound composition пока допускает только fill outlines');
-        }
-        const ids = parts.map((part) => part.id).join(' ');
-        const roles = parts.map((part) => part.role).join(' ');
-        return `<path data-parts="${escapeAttribute(ids)}" ` +
-          `data-roles="${escapeAttribute(roles)}" fill="currentColor" ` +
-          `fill-rule="${composition.fillRule}" d="${escapeAttribute(parts.map((part) => part.d).join(''))}"/>`;
-      })();
+    paths = assembleGlyphCompound(parts, composition.fillRule);
   } else {
     const byId = new Map(parts.map((part) => [part.id, part]));
     const ids = [...composition.basePartIds, ...composition.subtractPartIds];

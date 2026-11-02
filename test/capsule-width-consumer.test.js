@@ -44,4 +44,19 @@ describe('body width uses the actual public generated consumer module',()=>{
     }
     expect(svg.module.svg).toBe(inputs.mic.staticSvg.outline);
   });
+  it('Filled negative anatomy reaches the generated module and keeps one compound path', async () => {
+    const result = await consumer('mic-circle', 'variations', "export const source=symbol.glyph({variant:'filled'});export const defaultSame=source===symbol.glyph({variant:'filled',variation:{bodyWidth:1}});export const varied=symbol.glyph({variant:'filled',variation:{bodyWidth:.8}});export const caps=symbol.glyphCapabilities('filled');export const staticSvg=symbol.filled;");
+    const { source, varied, defaultSame, caps, staticSvg } = result.module;
+    expect(defaultSame).toBe(true); expect(source.composition).toEqual({ kind: 'compound', fillRule: 'evenodd' });
+    expect(source.parts.map(part => part.role)).toEqual(['container', 'counter', 'counter']);
+    expect(source.parts.map(part => part.fillRule)).toEqual([null, null, null]);
+    expect(source.parts.map(part => part.d).join('')).toBe(source.d);
+    expect(varied.parts[0]).toBe(source.parts[0]); expect(varied.parts[1]).toBe(source.parts[1]);
+    expect(varied.parts[2].d).not.toBe(source.parts[2].d);
+    expect(varied.svg.match(/<path\b/g)).toHaveLength(1); expect(varied.svg).toContain('data-parts="microphone-enclosure microphone-support microphone-body"');
+    expect(varied.svg).toContain('data-roles="container counter counter"'); expect(varied.svg).toContain(`d="${varied.d}"`);
+    expect(caps.variation.law).toBe('capsule.width'); expect(staticSvg).toBe(inputs['mic-circle'].staticSvg.filled);
+    expect(source.parts[2]).not.toHaveProperty('contourIndices');
+    expect(result.loaded.join('\n')).not.toMatch(/source-contours|author-curve-certificate|path-data/);
+  });
 });

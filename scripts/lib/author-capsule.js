@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { authorPathEntries, iconGeometry } from '../../src/core/icon-geometry.js';
-import { parsePathData } from '../../src/core/path-data.js';
+import { closedSourceContourLiterals } from '../../src/core/source-contours.js';
+import { createAuthorCurveCertificate } from './author-curve-certificate.js';
 import { projectedContourAreas } from '../../src/core/annulus-content-geometry.js';
 import { createAuthorExactArithmetic } from './author-exact-arithmetic.js';
 
@@ -11,11 +12,9 @@ export class AuthorCapsuleError extends Error {
   constructor(code, message) { super(`author-capsule: ${message}`); this.name = 'AuthorCapsuleError'; this.code = code; }
 }
 const refuse = (code, message) => { throw new AuthorCapsuleError(code, message); };
-const { fraction, rational, add, sub, mul, div, cmp, min, max, square, receipt, directedNumber } =
+const { fraction, rational, add, sub, mul, div, max, receipt, directedNumber } =
   createAuthorExactArithmetic(() => refuse('VARIATION_UNREPRESENTABLE', 'Не представим конечный сертификат ширины.'));
-const zero = rational(0), one = rational(1), half = rational(.5), u = fraction(1n, 1n << 53n), eta = fraction(1n, 1n << 1075n);
-const abs = value => value[0] < 0n ? [-value[0], value[1]] : value;
-const COUNTS = { M: 1, L: 1, C: 3, Q: 2, Z: 0 };
+const zero = rational(0), one = rational(1), u = fraction(1n, 1n << 53n), eta = fraction(1n, 1n << 1075n);
 // Общая граница авторского стиля следует из просмотра, а не из clearance.
 // Область и контрпример: docs/research/capsule-optical-domain-20261102.md.
 const CAPSULE_SOURCE_STYLE = Object.freeze({
@@ -28,95 +27,22 @@ const CAPSULE_SOURCE_STYLE = Object.freeze({
     bodyWidths: [.8, .9, 1], sizes: [16, 24, 48], dpr: 1,
   },
 });
+// Filled counter имеет другую оптику; положительный master её не удостоверяет.
+const NEGATIVE_CAPSULE_SOURCE_STYLE = Object.freeze({
+  id: 'lab-ui-v2.1-negative-capsule-width', version: 1, minimum: .8,
+  source: CAPSULE_SOURCE_STYLE.source,
+  evidence: { reference: 'docs/research/negative-capsule-optical-domain-20261102.md',
+    sha256: '709df0aa064be9525a1dfd5a48d0f8145df5924a7963b859cc3f04c510b4aa0e',
+    darkSha256: '21c957bc6be1f9e7a8d2eba7155a0a2a9657817eaff5c13c6b18d6c32b71d314',
+    bodyWidths: [.8, .9, 1], sizes: [16, 24, 48], dpr: 1 },
+});
 
-function contours(d) {
-  let parsed;
-  try { parsed = parsePathData(d); } catch { refuse('TOPOLOGY_UNSUPPORTED', 'Нужен корректный закрытый body path.'); }
-  const output = [];
-  for (const segment of parsed) {
-    if (!Object.hasOwn(COUNTS, segment.cmd)) refuse('TOPOLOGY_UNSUPPORTED', 'Capsule width не поддерживает дуги или нераскрытые команды.');
-    if (segment.cmd === 'M') output.push({ commands: '', points: [] });
-    const contour = output.at(-1);
-    if (!contour || contour.commands.endsWith('Z')) refuse('TOPOLOGY_UNSUPPORTED', 'Нарушен порядок закрытых contours.');
-    contour.commands += segment.cmd;
-    if (segment.cmd !== 'Z') {
-      if (segment.cmd === 'C' || segment.cmd === 'Q') contour.points.push([segment.x1, segment.y1]);
-      if (segment.cmd === 'C') contour.points.push([segment.x2, segment.y2]);
-      contour.points.push([segment.x, segment.y]);
-    }
-  }
-  if (!output.length || output.some(contour => !contour.commands.endsWith('Z') ||
-      contour.points.some(point => point.some(value => !Number.isFinite(value))))) {
-    refuse('TOPOLOGY_UNSUPPORTED', 'Нужны конечные M/L/C/Q/Z closed contours.');
-  }
-  return output;
-}
-
+const { contours, coordinateError, curvePieces, certifySeparation, certifyKnockouts } = createAuthorCurveCertificate(refuse);
 const bounds = points => [0, 1].map(axis => [Math.min(...points.map(point => point[axis])), Math.max(...points.map(point => point[axis]))]);
 
-/** Ошибка x + (width - 1)*rate, включая gradual underflow всех трёх операций. */
-function coordinateError(x, rate) {
-  const R = rational(Math.abs(rate)), X = rational(Math.abs(x));
-  const subtraction = add(u, eta);
-  const multiplication = add(mul(R, subtraction), add(mul(u, mul(R, add(one, subtraction))), eta));
-  return add(multiplication, add(mul(u, add(X, add(R, multiplication))), eta));
-}
-
-function curvePieces(contour, minimum, rates = contour.points.map(() => 0)) {
-  let index = 0, previous, first;
-  const controls = contour.points.map((point, i) => ({ point, rate: rates[i] }));
-  const result = [];
-  const piece = values => ({ error: max(values.map(value => coordinateError(value.point[0], value.rate))),
-    ends: [minimum, 1].map(width => values.map(value => [
-      add(rational(value.point[0]), mul(sub(rational(width), one), rational(value.rate))), rational(value.point[1]),
-    ])) });
-  for (const command of contour.commands) {
-    const next = controls.slice(index, index + COUNTS[command]); index += COUNTS[command];
-    if (command === 'M') first = previous = next[0];
-    else if (command === 'Z') { result.push(piece([previous, first])); previous = first; }
-    else { result.push(piece([previous, ...next])); previous = next.at(-1); }
-  }
-  return result;
-}
-
-function splitCurve(curve) {
-  const pairs = curve.ends.map(points => {
-    const levels = [points];
-    while (levels.at(-1).length > 1) {
-      const previous = levels.at(-1);
-      levels.push(previous.slice(1).map((point, i) => point.map((value, axis) => mul(add(previous[i][axis], value), half))));
-    }
-    return [levels.map(level => level[0]), levels.map(level => level.at(-1)).reverse()];
-  });
-  return [0, 1].map(side => ({ error: curve.error, ends: pairs.map(pair => pair[side]) }));
-}
-
-/** Tensor Bernstein hull: один и тот же width для обеих границ, не два независимых fit. */
-function separationSquared(left, right) {
-  const differences = left.ends.flatMap((points, end) => points.flatMap(point => right.ends[end].map(other =>
-    point.map((value, axis) => sub(value, other[axis])))));
-  return [0, 1].map(axis => {
-    const values = differences.map(point => point[axis]), error = axis === 0 ? add(left.error, right.error) : zero;
-    const low = sub(min(values), error), high = add(max(values), error);
-    return low[0] > 0n ? low : high[0] < 0n ? abs(high) : zero;
-  }).map(square).reduce(add);
-}
-
-function certifySeparation(left, right, minimumGap, statistics) {
-  const pending = [[left, right, 0]], required = square(rational(minimumGap));
-  while (pending.length) {
-    const [a, b, depth] = pending.pop(); statistics.cells++;
-    if (cmp(separationSquared(a, b), required) >= 0) continue;
-    if (depth >= 24 || statistics.cells > 250000) {
-      refuse('CLEARANCE_UNPROVEN', 'Build certificate не отделяет body от другой границы на всём width-интервале.');
-    }
-    const chosen = depth % 2 === 0 ? a : b;
-    for (const child of splitCurve(chosen)) pending.push(depth % 2 === 0 ? [child, b, depth + 1] : [a, child, depth + 1]);
-  }
-}
-
 /** Аннотация выбирает смысл body; координаты и ограничение выводятся из master. */
-export function compileAuthorCapsule(source, parts, declaration, grid) {
+export function compileAuthorCapsule(source, parts, declaration, grid, composition = { kind: 'layers' }) {
+  const negative = composition?.kind === 'compound', style = negative ? NEGATIVE_CAPSULE_SOURCE_STYLE : CAPSULE_SOURCE_STYLE;
   if (!declaration || Object.keys(declaration).sort().join(',') !== 'bodyPartId,law,parameter' ||
       declaration.law !== 'capsule.width' || declaration.parameter !== 'bodyWidth') {
     refuse('LAW_UNSUPPORTED', 'Нужны capsule.width/bodyWidth и объявленный bodyPartId.');
@@ -124,23 +50,38 @@ export function compileAuthorCapsule(source, parts, declaration, grid) {
   if (!source || typeof source.rawSvg !== 'string' || !source.author || !Array.isArray(parts)) {
     refuse('SOURCE_MISMATCH', 'Нужен полный authored source record и объявленные части.');
   }
-  if (source.author.fileKey !== CAPSULE_SOURCE_STYLE.source.fileKey || source.author.version !== CAPSULE_SOURCE_STYLE.source.version) {
+  if (source.author.fileKey !== style.source.fileKey || source.author.version !== style.source.version) {
     refuse('STYLE_SOURCE_MISMATCH', 'Оптический допуск относится к другому авторскому источнику; требуется его пересмотр.');
   }
-  let entries;
-  try { entries = authorPathEntries(source.artifactSvg); } catch { refuse('SOURCE_MISMATCH', 'Artifact SVG не соответствует supported source контракту.'); }
-  if (hash(source.rawSvg) !== source.author.masterSha256 || hash(stableJSON(entries)) !== source.author.pathFingerprintSha256 ||
-      entries.length !== parts.length || parts.some((part, index) => part.identity !== 'declared' || part.zIndex !== index) ||
+  let parents, entries;
+  try { parents = authorPathEntries(source.artifactSvg); } catch { refuse('SOURCE_MISMATCH', 'Artifact SVG не соответствует supported source контракту.'); }
+  if (hash(source.rawSvg) !== source.author.masterSha256 || hash(stableJSON(parents)) !== source.author.pathFingerprintSha256 ||
+      !negative && parents.length !== parts.length || parts.some((part, index) => part.identity !== 'declared' || part.zIndex !== index) ||
       new Set(parts.map(part => part.id)).size !== parts.length) {
     refuse('SOURCE_MISMATCH', 'Body anatomy не соответствует полному authored master.');
   }
+  if (negative) {
+    if (Object.keys(composition).sort().join(',') !== 'fillRule,kind' || composition.fillRule !== 'evenodd' ||
+        parents.length !== 1 || parents[0].fillRule !== 'evenodd' || parts[0]?.role !== 'container' ||
+        parts.slice(1).some(part => part.role !== 'counter') || parts.some((part, index) => part.fillRule !== null ||
+          part.contourIndices?.length !== 1 || part.contourIndices[0] !== index)) {
+      refuse('COMPOSITION_UNPROVEN', 'Negative capsule требует полного ordered contour договора одного evenodd parent.');
+    }
+    let fragments;
+    try { fragments = closedSourceContourLiterals(parents[0].d); } catch { refuse('COMPOSITION_UNPROVEN', 'Нужны закрытые absolute-M contours.'); }
+    if (fragments.length !== parts.length) refuse('SOURCE_MISMATCH', 'Contour anatomy не покрывает parent source.');
+    entries = fragments.map((d, index) => ({ index, d, fillRule: null }));
+  } else {
+    if (composition?.kind !== 'layers') refuse('COMPOSITION_UNPROVEN', 'Capsule не поддерживает эту composition.');
+    entries = parents;
+  }
   const index = parts.findIndex(part => part.id === declaration.bodyPartId), body = parts[index];
-  if (!body || body.role !== 'content' || entries.length < 2 || entries.length > 16) {
+  if (!body || body.role !== (negative ? 'counter' : 'content') || entries.length < 2 || entries.length > 16 || negative && index === 0) {
     refuse('PARTS_UNSUPPORTED', 'Body обязан быть отдельной declared content частью.');
   }
   const shape = contours(entries[index].d);
-  if (shape.length > 2 || shape.some(contour => !contour.commands.includes('C')) ||
-      shape.length === 2 && entries[index].fillRule !== 'evenodd' || shape.length === 1 && entries[index].fillRule !== 'nonzero') {
+  if (shape.length > (negative ? 1 : 2) || shape.some(contour => !contour.commands.includes('C')) ||
+      !negative && (shape.length === 2 && entries[index].fillRule !== 'evenodd' || shape.length === 1 && entries[index].fillRule !== 'nonzero')) {
     refuse('TOPOLOGY_UNSUPPORTED', 'Нужен positive capsule либо capsule с одним самостоятельным evenodd counter.');
   }
   const dimensions = shape.map(contour => bounds(contour.points));
@@ -153,7 +94,7 @@ export function compileAuthorCapsule(source, parts, declaration, grid) {
     refuse('TOPOLOGY_UNSUPPORTED', 'Counter требует противоположный winding, сохраняемый положительным x-span.');
   }
   const canvas = iconGeometry(source.artifactSvg).viewBox, size = Math.min(canvas.width, canvas.height);
-  const gap = size * grid.ratios.clearanceMin, positiveSpan = size * 2 * grid.ratios.strokeWidth.capRadius;
+  const gap = size * grid.ratios.clearanceMin, positiveSpan = negative ? gap : size * 2 * grid.ratios.strokeWidth.capRadius;
   if (![gap, positiveSpan].every(value => Number.isFinite(value) && value > 0)) refuse('POLICY_INVALID', 'Нужны owner minimum gap и terminal diameter.');
   const outerWidth = dimensions[0][0][1] - dimensions[0][0][0];
   const compiledContours = shape.map((contour, contourIndex) => {
@@ -173,7 +114,9 @@ export function compileAuthorCapsule(source, parts, declaration, grid) {
   if (!(geometricMinimum > 0 && geometricMinimum < 1)) refuse('DEFAULT_OUTSIDE_DOMAIN', 'Master не даёт ненулевой width-домен при owner span policy.');
   // Полный численный интервал сохраняется в build evidence. Consumer получает
   // его пересечение с общей оптически принятой областью текущего source style.
-  const minimum = Math.max(geometricMinimum, CAPSULE_SOURCE_STYLE.minimum);
+  const minimum = Math.max(geometricMinimum, style.minimum);
+  const anatomyStatistics = { cells: 0 };
+  const anatomyCertificate = negative ? certifyKnockouts(entries.map(entry => contours(entry.d)[0]), anatomyStatistics) : undefined;
   const statistics = { cells: 0 }, curves = compiledContours.map(contour => curvePieces(contour, geometricMinimum, contour.rates));
   if (curves.length === 2) for (const outer of curves[0]) for (const inner of curves[1]) certifySeparation(outer, inner, gap, statistics);
   for (const [otherIndex, entry] of entries.entries()) if (otherIndex !== index) {
@@ -183,11 +126,12 @@ export function compileAuthorCapsule(source, parts, declaration, grid) {
   }
   const proof = { method: 'exact-tensor-bernstein-separation', parameter: 'shared-width', evaluated: 'materialized-binary64-controls',
     geometricDomain: { minimum: geometricMinimum, maximum: 1 },
-    cells: statistics.cells, coordinateErrorUpper: compiledContours.map(contour => receipt(contour.error)) };
+    cells: statistics.cells, coordinateErrorUpper: compiledContours.map(contour => receipt(contour.error)),
+    ...(anatomyCertificate && { anatomyCertificate }) };
   const domain = { kind: 'bounded-capsule-width', minimum, maximum: 1, minimumInclusive: true, maximumInclusive: true,
     policy: { gridVersion: grid.version, gridSha256: hash(stableJSON(grid)), minimumGap: gap, minimumPositiveSpan: positiveSpan,
-      style: { id: CAPSULE_SOURCE_STYLE.id, version: CAPSULE_SOURCE_STYLE.version, minimum: CAPSULE_SOURCE_STYLE.minimum,
-        sha256: hash(stableJSON(CAPSULE_SOURCE_STYLE)), evidenceSha256: CAPSULE_SOURCE_STYLE.evidence.sha256 } },
+      style: { id: style.id, version: style.version, minimum: style.minimum,
+        sha256: hash(stableJSON(style)), evidenceSha256: style.evidence.sha256 } },
     certificate: { method: proof.method, sha256: hash(stableJSON(proof)) } };
   const compiled = { version: 1, law: 'capsule.width', source: { masterSha256: source.author.masterSha256,
     pathFingerprintSha256: source.author.pathFingerprintSha256 }, partIds: parts.map(part => part.id),

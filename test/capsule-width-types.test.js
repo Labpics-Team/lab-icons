@@ -18,7 +18,7 @@ it('packed declaration paths preserve admitted body variants and reject coordina
     for (const directory of ['symbols','variations']) mkdirSync(join(out,directory));
     for (const icon of ['mic','mic-circle']) {
       writeFileSync(join(out,'symbols',`${icon}.d.ts`),symbolModuleDeclaration(icon));
-      writeFileSync(join(out,'variations',`${icon}.d.ts`),variationModuleDeclaration(icon,'capsule.width',icon==='mic' ? ['outline','filled'] : ['outline']));
+      writeFileSync(join(out,'variations',`${icon}.d.ts`),variationModuleDeclaration(icon,'capsule.width',['outline','filled']));
     }
     writeFileSync(join(pkg,'package.json'),JSON.stringify({name:'@labpics/icons',type:'module',exports:{
       './symbols/*':{types:'./dist/symbols/*.d.ts'},'./variations/*':{types:'./dist/variations/*.d.ts'}}}));
@@ -30,23 +30,21 @@ it('packed declaration paths preserve admitted body variants and reject coordina
       "const exact:'source'=mic().provenance.kind;",
       "const filled=mic({variant:'filled',variation:{bodyWidth:.9}});",
       "const outline:'outline'=circled({variation:{bodyWidth:.9}}).variant;",
+      "const negative:'filled'=circled({variant:'filled',variation:{bodyWidth:.9}}).variant;",
+      "const negativeLaw:'capsule.width'=circleCaps('filled').variation.law;",
       "const law:'capsule.width'=micCaps('filled').variation.law;",
       "const domain:'bounded-capsule-width'=circleCaps().variation.domain.kind;",
       "declare const variant:'outline'|'filled'; const capability=circleCaps(variant);",
       "if(capability.variant==='outline'){const law:'capsule.width'=capability.variation.law;}",
-      '// @ts-expect-error: compound Filled capsule не имеет отдельной variation.',
-      "circled({variant:'filled',variation:{bodyWidth:1}});",
       '// @ts-expect-error: другая variation law не принимается.',
       "mic({variation:{dotScale:.9}});",
       '// @ts-expect-error: ordinary import не принимает opt-in body geometry.',
       "source({variation:{bodyWidth:.9}});",
       '// @ts-expect-error: coordinate overrides остаются у compiler.',
       "mic({variation:{center:[12,12]}});",
-      '// @ts-expect-error: unsupported Filled не обещает variation capability.',
-      "circleCaps('filled').variation;",
       '// @ts-expect-error: изменение ширины не объявляется exact authored source.',
       "const fake:'source'=mic({variation:{bodyWidth:.9}}).provenance.kind;",
-      'void[exact,filled,outline,law,domain,capability];',
+      'void[exact,filled,outline,negative,negativeLaw,law,domain,capability];',
     ].join('\n');
     const negative = positive.replace(/^\/\/ @ts-expect-error:.*\n/gm,'');
     const diagnostics = (source,mode) => {
@@ -59,7 +57,7 @@ it('packed declaration paths preserve admitted body variants and reject coordina
     for (const mode of ['Bundler','NodeNext']) {
       expect(diagnostics(positive,mode),mode).toBe('');
       expect([...diagnostics(negative,mode).matchAll(/error TS(\d+):/g)].map(match=>Number(match[1])))
-        .toEqual([2769,2769,2322,2769,2339,2322]);
+        .toEqual([2769,2322,2769,2322]);
     }
   } finally {
     // В fixture нет junction/symlink; удаляется только собственный абсолютный tmp.

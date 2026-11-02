@@ -50,10 +50,10 @@ describe('source-owned capsule width changes context without shrinking the whole
     expect(payloads[icon].variation[variant].domain).not.toHaveProperty('geometricDomain');
   });
 
-  it.each(['mic/outline', 'mic/filled', 'mic-circle/outline'])('%s keeps exact default and preserves command/part semantics', label => {
+  it.each(['mic/outline', 'mic/filled', 'mic-circle/outline', 'mic-circle/filled'])('%s keeps exact default and preserves command/part semantics', label => {
     const [icon, variant] = label.split('/'), glyph = glyphs[icon], source = glyph({ variant });
     for (const request of [{variant}, {variant,variation:{}}, {variant,variation:{bodyWidth:1}}]) expect(glyph(request)).toBe(source);
-    expect(source.parts.map(part => part.d)).toEqual(authorPathEntries(baseline.icons[icon][variant].artifactSvg).map(entry => entry.d));
+    expect(source.parts.map(part => part.d).join('')).toBe(authorPathEntries(baseline.icons[icon][variant].artifactSvg).map(entry => entry.d).join(''));
     const bodyIndex = source.parts.findIndex(part => part.id === 'microphone-body');
     for (const width of [.8, .9, (1 + payloads[icon].variation[variant].domain.minimum) / 2, payloads[icon].variation[variant].domain.minimum]) {
       const varied = glyph({ variant, variation: { bodyWidth: width } });
@@ -69,16 +69,28 @@ describe('source-owned capsule width changes context without shrinking the whole
         expect(span(after[1])).toBeGreaterThanOrEqual(payloads[icon].variation[variant].domain.policy.minimumGap);
       }
       expect(pathBBox(varied.parts[bodyIndex].d).maxY).toBe(pathBBox(source.parts[bodyIndex].d).maxY);
-      expect(varied.svg).toContain(`d="${varied.parts[bodyIndex].d}"`);
+      expect(varied.svg).toContain(`d="${source.composition.kind === 'compound' ? varied.d : varied.parts[bodyIndex].d}"`);
       expect(varied.provenance).toMatchObject({kind:'authored-variation',variation:{law:'capsule.width',parameters:{bodyWidth:width}}});
       expect(varied.provenance.author).toBe(source.provenance.author);
     }
   });
 
-  it('keeps independent Filled circle static and refuses foreign axes, parameters, size and exports', () => {
+  it('preserves negative Filled holes and refuses foreign axes, parameters, size and exports', () => {
     const glyph = glyphs['mic-circle'];
     expect(glyph({variant:'filled'})).toBe(payloads['mic-circle'].source.filled);
-    for (const variation of [{}, {bodyWidth:1}, {bodyWidth:.9}]) expect(() => glyph({variant:'filled',variation})).toThrowError(expect.objectContaining({code:'AUTHOR_VARIATION_UNSUPPORTED'}));
+    const source = glyph({ variant: 'filled' }), variedFilled = glyph({ variant: 'filled', variation: { bodyWidth: .9 } });
+    for (const variation of [{}, {bodyWidth:1}]) expect(glyph({variant:'filled',variation})).toBe(source);
+    expect(source.composition).toEqual({ kind: 'compound', fillRule: 'evenodd' });
+    expect(source.parts.map(part => part.fillRule)).toEqual([null, null, null]);
+    expect(source.parts.map(part => part.role)).toEqual(['container', 'counter', 'counter']);
+    expect(variedFilled.parts[0]).toBe(source.parts[0]); expect(variedFilled.parts[1]).toBe(source.parts[1]);
+    expect(variedFilled.composition).toBe(source.composition);
+    expect(variedFilled.svg.match(/<path\b/g)).toHaveLength(1);
+    expect(variedFilled.svg).toContain('fill-rule="evenodd"'); expect(variedFilled.svg).not.toMatch(/mask|data-part=/);
+    expect(variedFilled.parts[2].d).not.toBe(source.parts[2].d);
+    expect(source.parts[2]).not.toHaveProperty('contourIndices');
+    expect(payloads['mic-circle'].variation.filled.domain.policy.minimumPositiveSpan).toBe(payloads['mic-circle'].variation.filled.domain.policy.minimumGap);
+    expect(payloads['mic-circle'].variation.filled.domain.policy.style.id).toBe('lab-ui-v2.1-negative-capsule-width');
     for (const value of [0, -1, NaN, Infinity, '0.9']) expect(() => glyph({variation:{bodyWidth:value}})).toThrowError(expect.objectContaining({code:'INVALID_VARIATION'}));
     for (const value of [{radius:1}, {contentScale:.9}, {[Symbol('bodyWidth')]:.9}]) expect(() => glyph({variation:value})).toThrowError(expect.objectContaining({code:'INVALID_VARIATION'}));
     for (const value of [payloads['mic-circle'].variation.outline.domain.minimum / 2, 1.1]) expect(() => glyph({variation:{bodyWidth:value}})).toThrowError(expect.objectContaining({code:'VARIATION_OUTSIDE_DOMAIN'}));
@@ -127,7 +139,7 @@ describe('source-owned capsule width changes context without shrinking the whole
     const removed = symbolReleaseProjection(read('release/contract.json'), names, [], [], []);
     expect(removed.files).toContain('dist/ir/author-capsule-types.d.ts');
     expect(removed.runtimeDependencies).not.toContain('dist/ir/capsule-runtime.js');
-    expect(variationModuleDeclaration('mic-circle','capsule.width',['outline'])).toContain("GlyphRequest<'outline'>");
+    expect(variationModuleDeclaration('mic-circle','capsule.width',['outline', 'filled'])).toContain("TVariant extends 'outline' | 'filled' = 'outline'");
     expect(authorVariationIconNames(selected)).toEqual(names);
     expect(authorVariationLawNames(selected)).toEqual(['capsule.width']);
   });

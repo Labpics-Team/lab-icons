@@ -6,7 +6,7 @@ import type { AuthorCapsuleVariationDomain, AuthorCapsuleVariationGlyph, AuthorC
 import { createCompiledGlyph } from './symbol-runtime.js';
 import { parseCompiledGlyphOptions } from './author-request-runtime.js';
 import { GlyphModelError } from './request.js';
-import { assembleGlyphFrame, assembleGlyphLayers } from './svg-assembly.js';
+import { assembleGlyphFrame, assembleGlyphLayers, assembleGlyphCompound } from './svg-assembly.js';
 import { sha256Hex } from './sha256.js';
 import { projectedContourAreas } from '../core/annulus-content-geometry.js';
 
@@ -51,15 +51,21 @@ export function createCompiledCapsuleGlyph<TIcon extends AuthorIconId>(icon: TIc
     if (!geometry) continue;
     const { packetSha256, ...packet } = geometry, { geometrySha256, ...program } = packet;
     const source = sources[variant], body = source.parts[geometry.body.index];
+    const compound = source.composition.kind === 'compound';
+    const parentEntries = compound
+      ? [{ index: 0, d: source.parts.map(part => part.d).join(''), fillRule: source.composition.fillRule }]
+      : source.parts.map((part, index) => ({ index, d: part.d, fillRule: part.fillRule }));
     if (packetSha256 !== sha256Hex(stableJSON(packet)) || geometrySha256 !== sha256Hex(stableJSON(program)) ||
         geometry.version !== 1 || geometry.law !== 'capsule.width' ||
-        source.icon !== icon || source.variant !== variant || source.composition.kind !== 'layers' || !source.provenance.anatomy ||
+        source.icon !== icon || source.variant !== variant || !['layers', 'compound'].includes(source.composition.kind) ||
+        compound && (source.composition.fillRule !== 'evenodd' || source.parts[0]?.role !== 'container' ||
+          source.parts.slice(1).some(part => part.role !== 'counter') || source.parts.some(part => part.fillRule !== null)) || !source.provenance.anatomy ||
         geometry.source.masterSha256 !== source.provenance.author.masterSha256 ||
         geometry.source.pathFingerprintSha256 !== source.provenance.author.pathFingerprintSha256 ||
-        geometry.source.pathFingerprintSha256 !== sha256Hex(stableJSON(source.parts.map((part, index) => ({ index, d: part.d, fillRule: part.fillRule })))) ||
+        geometry.source.pathFingerprintSha256 !== sha256Hex(stableJSON(parentEntries)) ||
         geometry.partIds.length !== source.parts.length || source.parts.some((part, index) => part.id !== geometry.partIds[index] ||
           part.zIndex !== index || part.provenance.kind !== 'source' || part.provenance.identity !== 'declared') ||
-        !body || body.id !== geometry.body.id || body.role !== 'content' ||
+        !body || body.id !== geometry.body.id || body.role !== (compound ? 'counter' : 'content') || compound && geometry.body.index === 0 ||
         geometry.body.sourceLiteralSha256 !== sha256Hex(`${body.fillRule}\0${body.d}`) ||
         geometry.body.contours.length < 1 || geometry.body.contours.length > 2 || geometry.body.contours.some(contour =>
           !/^M[LCQ]+Z$/.test(contour.commands) || [...contour.commands].reduce((count, command) => count + COUNTS[command]!, 0) !== contour.points.length ||
@@ -103,7 +109,9 @@ export function createCompiledCapsuleGlyph<TIcon extends AuthorIconId>(icon: TIc
       provenance: { kind: 'authored-variation' as const, identity: 'declared' as const, source: part.provenance as SourcePartProvenance,
         variation: receipt, fingerprintBasis: 'literal-path' as const, artifactFingerprint: `sha256:${sha256Hex(`${part.fillRule}\0${d}`)}` as const } } : part);
     const [start, end] = assembleGlyphFrame(source.viewBox);
-    return freezeTree({ ...source, parts, d: parts.map(part => part.d).join(''), svg: start + assembleGlyphLayers(parts) + end,
+    const svg = start + (source.composition.kind === 'compound'
+      ? assembleGlyphCompound(parts, source.composition.fillRule) : assembleGlyphLayers(parts)) + end;
+    return freezeTree({ ...source, parts, d: parts.map(part => part.d).join(''), svg,
       provenance: { kind: 'authored-variation', file: source.provenance.file, author: source.provenance.author,
         anatomy: source.provenance.anatomy!, variation: receipt } });
   };
