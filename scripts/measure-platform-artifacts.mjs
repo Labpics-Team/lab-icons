@@ -96,6 +96,17 @@ const entries = {
   'microphone-state-filled': "import { renderStateSvg, compileStateEffect } from '@labpics/icons/states/microphone-filled';\nconsole.log(renderStateSvg('muted'), compileStateEffect('unmuted', { duration: 180 }));\n",
   'visibility-state-outline': "import { renderStateSvg, compileStateEffect } from '@labpics/icons/states/visibility';\nconsole.log(renderStateSvg('hidden'), compileStateEffect('visible', { duration: 180 }));\n",
   'visibility-state-filled': "import { renderStateSvg, compileStateEffect } from '@labpics/icons/states/visibility-filled';\nconsole.log(renderStateSvg('hidden'), compileStateEffect('visible', { duration: 180 }));\n",
+  ...Object.fromEntries(['reload', 'refresh', 'timer'].flatMap(icon => {
+    const gesture = icon === 'timer' ? 'timer.advance' : `${icon}.cycle`;
+    const entry = `@labpics/icons/gestures/${icon}`;
+    return [
+      [`gesture-${icon}-svg`, `import { renderMotionSvg } from '${entry}';\nconsole.log(renderMotionSvg());\n`],
+      [`gesture-${icon}-effect`, `import { compileMotionEffect } from '${entry}';\nconsole.log(compileMotionEffect('${gesture}', { duration: 400 }));\n`],
+      [`gesture-${icon}-combined`, `import { renderMotionSvg, compileMotionEffect } from '${entry}';\nconsole.log(renderMotionSvg(), compileMotionEffect('${gesture}', { duration: 400 }));\n`],
+    ];
+  })),
+  ...Object.fromEntries(['reload', 'refresh'].map(icon => [`gesture-${icon}-ir-reference`,
+    `import { glyph, glyphCapabilities } from '@labpics/icons/symbols/${icon}';\nimport { renderGlyphSvg } from '@labpics/icons/ir/render';\nimport { compileSymbolEffect } from '@labpics/icons/motion';\nconst value = glyph();\nconsole.log(renderGlyphSvg(value), compileSymbolEffect(value, glyphCapabilities(), '${icon}.cycle', { duration: 400 }));\n`])),
 };
 const artifacts = {};
 const artifactMeasurements = {};
