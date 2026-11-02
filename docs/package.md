@@ -50,6 +50,7 @@ pnpm add @labpics/icons
 | `@labpics/icons/states/*` | `./dist/states/*.js` | `./dist/states/*.d.ts` |
 | `@labpics/icons/variations/*` | `./dist/variations/*.js` | `./dist/variations/*.d.ts` |
 | `@labpics/icons/state-variations/*` | `./dist/state-variations/*.js` | `./dist/state-variations/*.d.ts` |
+| `@labpics/icons/content-variations/*` | `./dist/content-variations/*.js` | `./dist/content-variations/*.d.ts` |
 
 ## Файлы контракта поставки
 
@@ -59,12 +60,29 @@ pnpm add @labpics/icons
 - `dist/authoring/design-spec.d.ts`
 - `dist/authoring/index.d.ts`
 - `dist/authoring/index.js`
+- `dist/content-variations/alert-circle.d.ts`
+- `dist/content-variations/alert-circle.js`
+- `dist/content-variations/checkmark-circle.d.ts`
+- `dist/content-variations/checkmark-circle.js`
+- `dist/content-variations/close-circle.d.ts`
+- `dist/content-variations/close-circle.js`
+- `dist/content-variations/minus-circle.d.ts`
+- `dist/content-variations/minus-circle.js`
+- `dist/content-variations/pause-circle.d.ts`
+- `dist/content-variations/pause-circle.js`
+- `dist/content-variations/play-circle.d.ts`
+- `dist/content-variations/play-circle.js`
+- `dist/content-variations/plus-circle.d.ts`
+- `dist/content-variations/plus-circle.js`
+- `dist/content-variations/question-circle.d.ts`
+- `dist/content-variations/question-circle.js`
 - `dist/index.d.ts`
 - `dist/index.js`
 - `dist/ir/annulus-geometry-runtime.js`
 - `dist/ir/annulus-runtime.js`
 - `dist/ir/author-annulus-types.d.ts`
 - `dist/ir/author-catalog.generated.d.ts`
+- `dist/ir/author-content-types.d.ts`
 - `dist/ir/author-provenance.d.ts`
 - `dist/ir/author-request-runtime.js`
 - `dist/ir/author-source.d.ts`
@@ -74,6 +92,8 @@ pnpm add @labpics/icons
 - `dist/ir/catalog.generated.d.ts`
 - `dist/ir/compiler.d.ts`
 - `dist/ir/compiler.js`
+- `dist/ir/content-geometry-runtime.js`
+- `dist/ir/content-runtime.js`
 - `dist/ir/contour-runtime.js`
 - `dist/ir/contour-state-types.d.ts`
 - `dist/ir/glyph-types.d.ts`
@@ -1468,6 +1488,7 @@ pnpm add @labpics/icons
 - `dist/authoring/design-spec.d.ts`
 - `dist/ir/author-annulus-types.d.ts`
 - `dist/ir/author-catalog.generated.d.ts`
+- `dist/ir/author-content-types.d.ts`
 - `dist/ir/author-provenance.d.ts`
 - `dist/ir/author-source.d.ts`
 - `dist/ir/authored-variation.d.ts`
