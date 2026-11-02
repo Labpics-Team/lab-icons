@@ -1,8 +1,26 @@
+const presentations = Object.freeze({
+  'dots.affine': Object.freeze({
+    controls: Object.freeze([['dotScale', 'Размер точки'], ['spacingScale', 'Расстояние между точками']]),
+    hint: 'Множители меняют размер точек и расстояние между ними.',
+    summary: values => `Размер точки ×${values.dotScale}; расстояние ×${values.spacingScale}.`,
+  }),
+  'annulus.counter-scale': Object.freeze({
+    controls: Object.freeze([['enclosureEmphasis', 'Толщина обрамления']]),
+    hint: 'Меняется внутренний просвет. Наружный контур и знак сохраняются.',
+    summary: values => `Толщина обрамления ×${values.enclosureEmphasis}. Наружный контур и знак сохраняются.`,
+  }),
+});
+
 /** UI читает допущенную возможность; интерпретация геометрии остаётся в пакете. */
 export function authoredVariationCapability(capabilities) {
   const variation = capabilities?.variation;
-  return variation?.version === 1 && variation.law === 'dots.affine' && variation.targets?.svg === 'supported'
+  return variation?.version === 1 && Object.hasOwn(presentations, variation.law) && variation.targets?.svg === 'supported'
     ? variation : null;
+}
+
+/** Подписи относятся к семантическому закону, а не к имени отдельной иконки. */
+export function authoredVariationPresentation(variation) {
+  return presentations[variation.law];
 }
 
 /** Сравниваются готовые production SVG в общей исходной системе координат. */

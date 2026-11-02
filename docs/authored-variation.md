@@ -1,4 +1,10 @@
-# Авторские точки: размер и расстояние
+# Авторская вариативность
+
+Геометрический закон подключается через `variations/<имя>`. Поддержка относится
+к конкретному начертанию и объявленным параметрам. Эти законы сохраняют авторские
+masters; они не объявляют глобальные оси веса, optical sizing или StyleProfile.
+
+## Точки: размер и расстояние
 
 `variations/ellipsis-horizontal` и `variations/ellipsis-vertical` сохраняют независимые
 Outline/Filled masters Figma `2416636003859748575`. Два множителя меняют настоящие
@@ -77,6 +83,46 @@ SVG и GlyphIR содержат изменённую геометрию. Lottie/
 controls в `scripts/check-package-artifact.js`. Они не удостоверяют визуальное
 качество 16/24/48 или browser-производительность. Математическое основание и
 исключённые circle replacements: [исследование](research/authored-cubic-family-20261102.md).
+
+## Обрамление: внутренний просвет
+
+`variations/plus-circle` и `variations/minus-circle` поддерживают
+`enclosureEmphasis` в Outline. Множитель меняет толщину кольца через внутреннюю
+контрформу. Наружный контур, содержимое, порядок и IDs частей сохраняются.
+
+```ts
+import { glyph, glyphCapabilities } from '@labpics/icons/variations/plus-circle';
+import { renderGlyphSvg } from '@labpics/icons/ir/render';
+
+const symbol = glyph({ variant: 'outline', variation: { enclosureEmphasis: 1.2 } });
+const svg = renderGlyphSvg(symbol, { instanceId: 'increase' });
+const capability = glyphCapabilities('outline').variation;
+console.log(capability.law, capability.domain);
+```
+
+Значение 1 и пустой запрос variation возвращают тот же frozen master, что
+`symbols/plus-circle`; default не пересериализуется. Filled остаётся независимой
+авторской формой: `glyphCapabilities('filled')` не содержит variation, а запрос
+этого параметра получает `AUTHOR_VARIATION_UNSUPPORTED`. `source-only` принимает
+только точный default. Неизвестные, неположительные и нечисловые параметры
+получают `INVALID_VARIATION`.
+
+Компилятор проверяет winding, замкнутость, общий центр, вложенность контуров и
+расстояние до содержимого. Он выдаёт компактные controls и доказанную область
+`radial-bernstein`; runtime проверяет фактически вычисленный binary64 scale.
+Выход за область получает `VARIATION_OUTSIDE_DOMAIN`, схлопывание Number-геометрии
+— `VARIATION_UNREPRESENTABLE`. Повторный разбор path и построение сертификата
+при запросе не нужны.
+
+Эта область гарантирует геометрические ограничения. Визуальная приёмка всего
+диапазона, особенно почти исчезающей стенки у нижней границы, остаётся открытой.
+Исходная авторская форма сохраняется точно; произвольное допустимое значение
+не обещает улучшенную оптику. [Геометрическое основание](research/author-annulus-20261102.md)
+содержит источник, контрпримеры и пределы доказательства.
+
+Закон не добавляет жест, morph или Lottie-экспорт. Observatory показывает текущий
+SVG, наложение и разницу. Групповые переходы `states/status-circle` относятся
+к авторскому default; изменённое обрамление не подменяется им при анимации.
 
 ## Поворот многоточия
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { authoredVariationCapability, renderVariationComparison } from '../observatory/variation-preview.js';
+import { authoredVariationCapability, authoredVariationPresentation, renderVariationComparison } from '../observatory/variation-preview.js';
 
 const source = '<svg viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M1 1H3V3H1Z"/></svg>';
 const modified = '<svg viewBox="0 0 24 24" width="24" height="24"><path fill="currentColor" d="M2 1H4V3H2Z"/></svg>';
@@ -12,6 +12,16 @@ describe('Observatory читает variation capability пакета', () => {
       { variation: { ...variation, law: 'unknown' } }, { variation: { ...variation, targets: { svg: 'not-exported' } } }]) {
       expect(authoredVariationCapability(capabilities)).toBeNull();
     }
+  });
+  it('обрамление имеет собственный смысл и не получает controls многоточия', () => {
+    const variation = { version: 1, law: 'annulus.counter-scale', defaults: { enclosureEmphasis: 1 }, targets: { svg: 'supported' } };
+    expect(authoredVariationCapability({ variation })).toBe(variation);
+    const presentation = authoredVariationPresentation(variation);
+    expect(presentation.controls).toEqual([['enclosureEmphasis', 'Толщина обрамления']]);
+    expect(presentation.summary({ enclosureEmphasis: 1.2 })).toContain('×1.2');
+    expect(presentation.summary({ enclosureEmphasis: 1.2 })).not.toContain('undefined');
+    expect(presentation.hint).toContain('Наружный контур и знак сохраняются');
+    expect(authoredVariationCapability({ variation: { ...variation, targets: { svg: 'not-exported' } } })).toBeNull();
   });
 });
 

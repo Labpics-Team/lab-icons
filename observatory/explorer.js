@@ -1,7 +1,7 @@
 import { compileSymbolEffect, prepareContourStateEffect } from './package/motion/index.js';
 import { renderGlyphSvg } from './package/ir/render.js';
 import { downloadFile } from './download.js';
-import { authoredVariationCapability, renderVariationComparison } from './variation-preview.js';
+import { authoredVariationCapability, authoredVariationPresentation, renderVariationComparison } from './variation-preview.js';
 let execution;
 const motionExecutor = () => execution ??= import('./motion-execution.js');
 let recordedModels;
@@ -29,11 +29,12 @@ const state = { data: null, name: 'time', variant: 'outline', view: 'original', 
 const variationAvailable = () => authoredVariationCapability(state.module?.glyphCapabilities(state.variant));
 const variationView = () => Boolean(variationAvailable() && state.view !== 'original' && !state.legacy);
 function updateVariationStatus() {
-  if (!variationAvailable()) return;
+  const variation = variationAvailable();
+  if (!variation) return;
   const refused = ui['axis-controls'].querySelector('[data-variation-error]');
   ui['axis-status'].textContent = refused?.dataset.variationError ?? (['overlay', 'difference'].includes(state.view)
     ? 'Красным — исходная форма, синим — изменённая.'
-    : 'Множители меняют размер точек и расстояние между ними.');
+    : authoredVariationPresentation(variation).hint);
 }
 const REPLACEMENT_GESTURE = 'enclosure.replace';
 const stateLabels = Object.freeze({ confirmation: 'Подтверждение', dismissal: 'Закрыть',
@@ -87,7 +88,7 @@ function inspectorPresentation() {
   const author = member?.author ?? row.original;
   ui['source-status'].textContent = `Lab UI v2.1. Версия ${author.version}. Узел ${author.nodeId}. ` +
     (active ? contourGroup(group) ? 'Авторские контуры меняют ориентацию; средняя точка остаётся на месте.' : 'Авторский знак; общая оболочка сохраняется при замене.' : state.legacy ? 'Прежняя модель: паритет с новой авторской основой не принят.' : variation
-      ? `${comparison ? 'Красным — исходная форма, синим — изменённая. ' : ''}Размер точки ×${state.variation.dotScale}; расстояние ×${state.variation.spacingScale}. Образцы размеров и SVG относятся к этой форме.`
+      ? `${comparison ? 'Красным — исходная форма, синим — изменённая. ' : ''}${authoredVariationPresentation(variationAvailable()).summary(state.variation)} Образцы размеров и SVG относятся к этой форме.`
       : comparison ? `Красным — текущая основа, синим — прежняя ${row.model?.catalogState === 'accepted' ? 'модель' : 'модель на проверке'} при исходных параметрах. Части и образцы размеров относятся к текущему авторскому мастеру. Паритет не принят.` : 'Текущий авторский мастер. Возможности относятся к его закреплённой версии.');
   ui['consumer-import'].textContent = active ? `import { renderStateSvg, compileStateEffect } from\n  '@labpics/icons/states/${group.capabilities.group}';` : state.legacy ? `import { glyph } from '@labpics/icons/ir';\n// Прежняя основа; текущий master: ./symbols/${state.name}` : `import { glyph } from\n  '@labpics/icons/${variation ? 'variations' : 'symbols'}/${state.name}';`;
   const parts = active ? (contourGroup(group) ? group.capabilities.partIds : [...member.contentPartIds, ...group.capabilities.sharedPartIds])
@@ -321,12 +322,12 @@ async function renderView(view = state.view, { preserveProgress = false, variati
     }
     if (revision !== state.revision || viewRevision !== state.viewRevision) return;
     const changedControls = capabilities !== state.capabilities || legacy !== state.legacy;
-    const changedContourView = contourGroup(state.replacement) && (view === 'original') !== (state.view === 'original');
+    const changedStateView = state.replacement && (view === 'original') !== (state.view === 'original');
     Object.assign(state, { view, glyph, capabilities, modelModule, legacy, axes, variation: requestedVariation, viewLoading: false });
     ui['symbol-stage'].dataset.view = view;
     ui.pause.textContent = 'Пауза';
     if (changedControls) controls();
-    else if (changedContourView) motionChoices();
+    else if (changedStateView) motionChoices();
     if (replacementMode()) {
       const result = state.replacement.module.renderStateSvg(state.replacement.target, { variant: state.variant });
       if (!result.ok) throw new Error(`${result.reason.code}: ${result.reason.message}`);
@@ -403,7 +404,7 @@ function controls() {
   const variation = variationAvailable();
   if (variation) {
     state.variation = { ...variation.defaults, ...state.variation };
-    for (const [name, text] of [['dotScale', 'Размер точки'], ['spacingScale', 'Расстояние между точками']]) {
+    for (const [name, text] of authoredVariationPresentation(variation).controls) {
       const label = document.createElement('label');
       label.className = 'variation-control';
       const title = document.createElement('span');
@@ -449,7 +450,7 @@ function controls() {
     }));
     ui['axis-controls'].append(reset);
   }
-  ui['axis-status'].textContent = variation ? 'Положительные множители изменяют форму точек и расстояние между ними.'
+  ui['axis-status'].textContent = variation ? authoredVariationPresentation(variation).hint
     : caps.supportedAxes.length ? '' : 'Для этого варианта оси пока не приняты.';
   motionChoices();
 }
@@ -458,9 +459,9 @@ function motionChoices() {
   const selectedGesture = ui.gesture.value;
   const gestures = state.capabilities.motion.gestures.map(gesture => new Option(gesture.id, gesture.id));
   const contour = contourGroup(state.replacement);
-  const stateOptions = state.replacement && !state.legacy && (!contour || state.view === 'original')
+  const stateOptions = state.replacement && !state.legacy && state.view === 'original'
     ? [new Option(contour ? 'Ориентация' : 'Смена знака', stateGesture(state.replacement))] : [];
-  // Ориентация доказана для авторских endpoints; вариация сохраняет свои жесты.
+  // Групповые переходы доказаны для masters; вариация сохраняет свои жесты.
   ui.gesture.replaceChildren(...(contour ? [...gestures, ...stateOptions] : [...stateOptions, ...gestures]));
   if (!ui.gesture.options.length) ui.gesture.add(new Option('Нет принятого жеста', ''));
   else if ([...ui.gesture.options].some(option => option.value === selectedGesture)) ui.gesture.value = selectedGesture;

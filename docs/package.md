@@ -60,6 +60,8 @@ pnpm add @labpics/icons
 - `dist/authoring/index.js`
 - `dist/index.d.ts`
 - `dist/index.js`
+- `dist/ir/annulus-runtime.js`
+- `dist/ir/author-annulus-types.d.ts`
 - `dist/ir/author-catalog.generated.d.ts`
 - `dist/ir/author-provenance.d.ts`
 - `dist/ir/author-source.d.ts`
@@ -71,10 +73,12 @@ pnpm add @labpics/icons
 - `dist/ir/compiler.js`
 - `dist/ir/contour-runtime.js`
 - `dist/ir/contour-state-types.d.ts`
+- `dist/ir/glyph-types.d.ts`
 - `dist/ir/index.d.ts`
 - `dist/ir/index.js`
 - `dist/ir/lottie-runtime.js`
 - `dist/ir/lottie-types.d.ts`
+- `dist/ir/paint-types.d.ts`
 - `dist/ir/recipes.d.ts`
 - `dist/ir/recipes.js`
 - `dist/ir/render.d.ts`
@@ -86,6 +90,8 @@ pnpm add @labpics/icons
 - `dist/ir/state-types.d.ts`
 - `dist/ir/symbol-data/ellipsis-horizontal.js`
 - `dist/ir/symbol-data/ellipsis-vertical.js`
+- `dist/ir/symbol-data/minus-circle.js`
+- `dist/ir/symbol-data/plus-circle.js`
 - `dist/ir/symbol-runtime.js`
 - `dist/ir/variation-runtime.js`
 - `dist/lottie/accessibility.d.ts`
@@ -1424,10 +1430,15 @@ pnpm add @labpics/icons
 - `dist/variations/ellipsis-horizontal.js`
 - `dist/variations/ellipsis-vertical.d.ts`
 - `dist/variations/ellipsis-vertical.js`
+- `dist/variations/minus-circle.d.ts`
+- `dist/variations/minus-circle.js`
+- `dist/variations/plus-circle.d.ts`
+- `dist/variations/plus-circle.js`
 
 ## Транзитивные декларации типов
 
 - `dist/authoring/design-spec.d.ts`
+- `dist/ir/author-annulus-types.d.ts`
 - `dist/ir/author-catalog.generated.d.ts`
 - `dist/ir/author-provenance.d.ts`
 - `dist/ir/author-source.d.ts`
@@ -1435,7 +1446,9 @@ pnpm add @labpics/icons
 - `dist/ir/catalog.generated.d.ts`
 - `dist/ir/compiler.d.ts`
 - `dist/ir/contour-state-types.d.ts`
+- `dist/ir/glyph-types.d.ts`
 - `dist/ir/lottie-types.d.ts`
+- `dist/ir/paint-types.d.ts`
 - `dist/ir/request.d.ts`
 - `dist/ir/state-common-types.d.ts`
 - `dist/ir/state-types.d.ts`
