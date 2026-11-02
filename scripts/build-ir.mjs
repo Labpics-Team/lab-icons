@@ -100,11 +100,12 @@ async function compileIrTargets({ root, staging }) {
       bundle(root, staging, 'src/ir/request.ts', 'ir/request.js'),
       bundle(root, staging, 'src/ir/symbol-runtime.ts', 'ir/symbol-runtime.js', ['./request.js']),
       bundle(root, staging, 'src/ir/authored-variation.ts', 'ir/variation-runtime.js', ['./request.js', './symbol-runtime.js']),
+      bundle(root, staging, 'src/ir/contour-runtime.ts', 'ir/contour-runtime.js'),
       bundle(root, staging, 'src/ir/recipes.ts', 'ir/recipes.js'),
       bundle(root, staging, 'src/ir/render.ts', 'ir/render.js'),
       bundle(root, staging, 'src/authoring/index.ts', 'authoring/index.js'),
       bundle(root, staging, 'src/ir/candidates.ts', 'ir/candidates.js', ['./index.js']),
-      bundle(root, staging, 'src/motion/index.ts', 'motion/index.js'),
+      bundle(root, staging, 'src/motion/index.ts', 'motion/index.js', ['../ir/contour-runtime.js']),
       bundle(root, staging, 'src/lottie/runtime.ts', 'ir/lottie-runtime.js', ['../motion/index.js']),
       bundle(root, staging, 'src/states/runtime.ts', 'ir/state-runtime.js'),
       // Serializer остаётся build-only: runtime групп потребляет проверенные строки.
@@ -116,7 +117,9 @@ async function compileIrTargets({ root, staging }) {
     if (failedBundle) throw failedBundle.reason;
     execFileSync(process.execPath, [join(root, 'node_modules/typescript/bin/tsc'), '-p', join(root, 'tsconfig.build.json'), '--outDir', declarations], { cwd: root, stdio: 'inherit' });
     for (const file of REQUIRED_DECLARATIONS) copyFileSync(join(declarations, 'ir', file), join(staging, 'ir', file));
-    copyFileSync(join(declarations, 'motion/index.d.ts'), join(staging, 'motion/index.d.ts'));
+    // Source state-types публикуется под прежним IR specifier того же владельца.
+    writeFileSync(join(staging, 'motion/index.d.ts'), readFileSync(join(declarations, 'motion/index.d.ts'), 'utf8')
+      .replaceAll('../states/types.js', '../ir/state-types.js'));
     copyFileSync(join(declarations, 'lottie/types.d.ts'), join(staging, 'ir/lottie-types.d.ts'));
     copyFileSync(join(declarations, 'authoring/index.d.ts'), join(staging, 'authoring/index.d.ts'));
     copyFileSync(join(declarations, 'authoring/design-spec.d.ts'), join(staging, 'authoring/design-spec.d.ts'));
@@ -168,7 +171,7 @@ async function compileIrTargets({ root, staging }) {
     }
     const stateSpec = read(root, 'semantics/author-state-groups.json');
     const assembly = await import(pathToFileURL(join(declarations, 'svg-assembly.mjs')).href);
-    const stateGroups = compileAuthorStateGroups(author, stateSpec, { compiler, ...assembly });
+    const stateGroups = compileAuthorStateGroups(author, stateSpec, { compiler, grid, ...assembly });
     for (const [name, payload] of Object.entries(stateGroups)) {
       writeFileSync(join(staging, 'states', `${name}.js`), renderStateGroupModule(payload));
       writeFileSync(join(staging, 'states', `${name}.d.ts`), stateGroupDeclaration(stateSpec, name));

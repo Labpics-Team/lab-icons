@@ -1,5 +1,13 @@
 import type { GlyphCapabilities, GlyphIR, MotionGestureOpacityTrackContract, MotionGestureTranslationTrackContract } from '../ir/compiler.js';
 import { sampleOpacityTrack, sampleTranslationTrack, validateMotionGesture } from '../core/motion-sampler.js';
+import type { PreparedContourStateEffect, SymbolContourStateEffect } from '../states/types.js';
+import { prepareContourStateEffect as prepareContourPacket } from '../ir/contour-runtime.js';
+
+export type { SymbolContourStateEffect, PreparedContourStateEffect, ContourStatePoseResult } from '../states/types.js';
+/** Подготовка переносимых данных контура без каталога, DOM и часов. */
+export function prepareContourStateEffect(effect: SymbolContourStateEffect): PreparedContourStateEffect {
+  return prepareContourPacket(effect);
+}
 
 export type SymbolEffectRefusalCode =
   | 'INVALID_REQUEST'

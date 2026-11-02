@@ -64,3 +64,66 @@ SVG и GlyphIR содержат изменённую геометрию. Lottie/
 controls в `scripts/check-package-artifact.js`. Они не удостоверяют визуальное
 качество 16/24/48 или browser-производительность. Математическое основание и
 исключённые circle replacements: [исследование](research/authored-cubic-family-20261102.md).
+
+## Поворот многоточия
+
+`states/ellipsis-orientation-outline` и `states/ellipsis-orientation-filled`
+соединяют горизонтальное и вертикальное многоточия внутри одного начертания.
+Каждая исходная команда и её численные параметры имеют явное соответствие;
+переход меняет `d` крайних точек. Средняя точка сохраняется буквально.
+
+```ts
+import { compileStateEffect, renderStateSvg } from '@labpics/icons/states/ellipsis-orientation-filled';
+import { prepareContourStateEffect } from '@labpics/icons/motion';
+import { value } from '@labpics/motion';
+
+// SVG содержит data-part для адресации существующих paths.
+const initial = renderStateSvg('horizontal');
+if (!initial.ok) throw new Error(initial.reason.code);
+container.innerHTML = initial.svg;
+
+const result = compileStateEffect('vertical', { duration: 300, from: 0 });
+if (!result.ok) throw new Error(result.reason.code);
+const prepared = prepareContourStateEffect(result.effect);
+if (!prepared.ok) throw new Error(prepared.reason.code);
+const paths = new Map([...container.querySelectorAll<SVGPathElement>('path[data-part]')]
+  .map(path => [path.dataset.part!, path]));
+const progress = value(result.effect.from);
+const unsubscribe = progress.subscribe(p => {
+  const pose = prepared.sample(p);
+  if (!pose.ok) throw new Error(pose.reason.code);
+  for (const part of pose.parts) paths.get(part.partId)!.setAttribute('d', part.d);
+});
+progress.animate(result.effect.to, {
+  duration: result.effect.options.duration,
+  ease: 'linear',
+});
+// При удалении компонента: unsubscribe(); progress.dispose();
+```
+
+`from` и аргумент `sample()` — положение в общем семействе: 0 соответствует
+горизонтальному состоянию, 1 вертикальному. Для разворота исполнитель читает
+`progress.get()`, составляет новый эффект с этим `from` и анимирует ту же шкалу
+к новому `to`. Готовый sampler остаётся тем же для всего интервала. Прерывание,
+часы и освобождение подписки принадлежат публичному Motion API.
+
+`prepareContourStateEffect()` один раз копирует и проверяет переносимый пакет:
+фиксированные `MCCCCZ`, конечные пары чисел, замкнутость и численное совпадение
+точных строк концов с векторами. JSON-перенос и отдельная установленная копия
+пакета поддержаны. Проверка представления не удостоверяет авторство внешних
+данных; авторские receipts и геометрическое доказательство проверяет build compiler.
+В кадре sampler только интерполирует числа и записывает строку. При 0/1 он
+возвращает исходные `d` без форматирования.
+
+Для перехода принят exact default: variation отсутствует, пуста либо содержит
+множители 1. Отличные от 1 положительные множители возвращают
+`VARIATION_UNSUPPORTED`; ошибочные параметры — `INVALID_REQUEST`.
+Безопасность отдельных конечных форм не доказывает зазор при их сближении.
+`stateCapabilities().proof` содержит точные рациональные границы для всех пар
+точек и бюджета округления. Lottie, dotLottie и SF Symbols transition возвращают
+`FORMAT_UNSUPPORTED`. Горизонтальные activity/idle и отсутствие loading у
+вертикального меню сохраняются.
+
+Тест `test/authored-contour-states.test.js` проверяет исходные строки, перенос,
+обратный ход, отказы и опасную промежуточную форму. Приёмка браузерного
+исполнения, размеров 16/24/48 и оптического качества проводится отдельно.

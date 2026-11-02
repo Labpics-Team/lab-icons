@@ -68,6 +68,7 @@ pnpm add @labpics/icons
 - `dist/ir/catalog.generated.d.ts`
 - `dist/ir/compiler.d.ts`
 - `dist/ir/compiler.js`
+- `dist/ir/contour-runtime.js`
 - `dist/ir/index.d.ts`
 - `dist/ir/index.js`
 - `dist/ir/lottie-runtime.js`
@@ -744,6 +745,10 @@ pnpm add @labpics/icons
 - `dist/lottie/waveform.js`
 - `dist/motion/index.d.ts`
 - `dist/motion/index.js`
+- `dist/states/ellipsis-orientation-filled.d.ts`
+- `dist/states/ellipsis-orientation-filled.js`
+- `dist/states/ellipsis-orientation-outline.d.ts`
+- `dist/states/ellipsis-orientation-outline.js`
 - `dist/states/expression-face.d.ts`
 - `dist/states/expression-face.js`
 - `dist/states/playback-circle.d.ts`

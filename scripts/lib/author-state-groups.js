@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { authorPathEntries, sourcePathEntries } from '../../src/core/icon-geometry.js';
 import { exactClosedFillPathKey } from './exact-closed-fill-path.js';
+import { compileAuthorContourStateGroup, renderContourStateGroupModule, contourStateGroupDeclaration } from './author-contour-states.js';
 
 const NAME = /^[a-z][a-z0-9-]*$/;
 const HASH = /^[a-f0-9]{64}$/;
@@ -61,7 +62,7 @@ export function authorStateGroupNames(document) {
  * Все контуры проверяются до выдачи данных. Serializer и glyph compiler передаются
  * от production build; runtime не читает SVG и не доказывает correspondence заново.
  */
-export function compileAuthorStateGroups(baseline, document, { compiler, assembleGlyphLayers, assembleGlyphFrame }) {
+export function compileAuthorStateGroups(baseline, document, { compiler, grid, assembleGlyphLayers, assembleGlyphFrame }) {
   const names = authorStateGroupNames(document);
   if (baseline?.source?.fileKey !== document.source.fileKey || baseline.source.version !== document.source.version) {
     refuse('SOURCE_MISMATCH', 'группа относится к другому файлу или версии Figma');
@@ -69,6 +70,10 @@ export function compileAuthorStateGroups(baseline, document, { compiler, assembl
   const output = {};
   for (const name of names) {
     const group = document.groups[name];
+    if (group?.law === 'dots.orient') {
+      output[name] = compileAuthorContourStateGroup(baseline, name, group, { compiler, grid, document });
+      continue;
+    }
     fields(group, ['law', 'defaultState', 'enclosurePartId', 'sharedParts', 'states'], name);
     if (group.law !== 'enclosure.replace') refuse('LAW_UNSUPPORTED', `${name}: неизвестный закон`);
     if (typeof group.enclosurePartId !== 'string' || !NAME.test(group.enclosurePartId) ||
@@ -221,6 +226,7 @@ export function compileAuthorStateGroups(baseline, document, { compiler, assembl
 
 /** Конечный module хранит общие части один раз и не импортирует geometry/authoring. */
 export function renderStateGroupModule(payload) {
+  if (payload?.kind === 'contour-interpolation') return renderContourStateGroupModule(payload);
   if (!NAME.test(payload?.group)) refuse('SPEC_INVALID', 'невалидный compiled group');
   return [
     '/** GENERATED: проверенная общая оболочка и независимые авторские состояния. */',
@@ -237,6 +243,7 @@ export function renderStateGroupModule(payload) {
 
 export function stateGroupDeclaration(document, name) {
   if (!authorStateGroupNames(document).includes(name)) refuse('SPEC_INVALID', 'неизвестная группа');
+  if (document.groups[name].law === 'dots.orient') return contourStateGroupDeclaration(document, name);
   const states = Object.keys(document.groups[name].states).sort();
   return [
     "import type { StateRenderRequest, StateEffectRequest, StateTransitionExportRequest, StateSvgResult, StateEffectResult, StateGroupCapabilities } from '../ir/state-types.js';",
