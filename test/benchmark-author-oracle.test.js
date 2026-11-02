@@ -7,7 +7,7 @@ import { createGlyphCompiler } from '../src/ir/compiler.js';
 import { createCompiledGlyph, createCompiledCapabilities } from '../src/ir/symbol-runtime.js';
 import { compileSymbolEffect } from '../src/motion/index.js';
 import { authorPackageExpectations } from '../scripts/check-package-artifact.js';
-import { expectedAuthorMotionRefusal, inspectAuthorSvg, observeAuthorGlyph, sha256, stableJSON, validateAuthorAdmission, validateAuthorObservation, validateRetainedPair } from '../scripts/bench/author-oracle.js';
+import { expectedAuthorMotionRefusal, expectedAuthorObservation, inspectAuthorSvg, observeAuthorGlyph, sha256, stableJSON, validateAuthorAdmission, validateAuthorObservation, validateRetainedPair } from '../scripts/bench/author-oracle.js';
 
 const root = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">';
 const paths = [
@@ -21,6 +21,71 @@ const expected = { icon: 'test', variant: 'outline', master: 'master.svg', autho
 const observe = (entries = paths, rendered = svg(entries, true)) => ({ ...inspectAuthorSvg(rendered, { ir: true }), icon: 'test', variant: 'outline', sourceFile: 'master.svg', compositionKind: 'layers', author, staticArtifactSha256: sha256(artifact), parts: entries });
 
 describe('benchmark author oracle и сохранённый output', () => {
+  it('compound source oracle сохраняет один evenodd parent и три авторских counter contours', () => {
+    const rootPath = new URL('..', import.meta.url);
+    const read = path => JSON.parse(readFileSync(new URL(path, rootPath), 'utf8'));
+    const captured = read('semantics/figma-baseline.json');
+    const baseline = loadAuthorBaseline(fileURLToPath(rootPath), { manifest: { ...captured,
+      counts: { families: 1, variants: 2 }, icons: { 'mic-circle': captured.icons['mic-circle'] } } });
+    const annotations = read('semantics/author-anatomy.json');
+    const contract = compileAuthorAnatomy(baseline, { ...annotations,
+      icons: { 'mic-circle': annotations.icons['mic-circle'] } })['mic-circle/filled'];
+    const record = baseline.icons['mic-circle'].filled;
+    const compiler = createGlyphCompiler({ catalog: { canvas: { viewBox: [0, 0, 24, 24] },
+      axes: read('semantics/catalog.json').axes, icons: { 'mic-circle': { model: null,
+        source: { outline: baseline.icons['mic-circle'].outline.sourceContract, filled: contract } } } },
+      anatomy: { version: 1, glyphs: {} }, grid: read('semantics/grid.json'),
+      staticIcons: { micCircleOutline: baseline.icons['mic-circle'].outline.artifactSvg, micCircleFilled: record.artifactSvg } });
+    const glyph = authorSymbolPayload('mic-circle', {
+      outline: baseline.icons['mic-circle'].outline, filled: { ...record, sourceContract: contract },
+    }, compiler).source.filled;
+    const source = inspectAuthorSvg(record.artifactSvg);
+    expect(source.paths).toHaveLength(1);
+    expect(glyph.parts).toHaveLength(3);
+    expect(glyph.parts.map(part => part.fillRule)).toEqual([null, null, null]);
+    const expected = { icon: 'mic-circle', variant: 'filled', master: record.master,
+      author: record.author, anatomy: contract.anatomy, composition: contract.composition,
+      artifactSha256: sha256(record.artifactSvg), pathFingerprintSha256: record.author.pathFingerprintSha256,
+      partsSha256: sha256(stableJSON(contract.parts.map(part => ({ id: part.id, role: part.role,
+        zIndex: part.zIndex, fillRule: part.fillRule, d: source.paths[0].d.slice(...part.sourceSpan) })))) };
+    expect(expectedAuthorObservation('mic-circle', 'filled', record, contract)).toMatchObject(expected);
+    expect(() => validateAuthorObservation(observeAuthorGlyph(glyph, record.artifactSvg), expected)).not.toThrow();
+    const observed = observeAuthorGlyph(glyph, record.artifactSvg);
+    expect(observed.complexity.paths).toBe(1);
+    expect(observed.metadata).toEqual(contract.parts.map(({ id, role }) => ({ id, role })));
+    for (const mutate of [
+      value => { value.parts = value.parts.slice(0, 2); },
+      value => { value.parts = [...value.parts].reverse(); },
+      value => { value.parts = value.parts.map((part, index) => index === 2 ? { ...part, role: 'content' } : part); },
+      value => { value.composition = { kind: 'layers' }; },
+      value => { value.composition = { kind: 'compound', fillRule: 'nonzero' }; },
+      value => { value.provenance = { ...value.provenance, author: { ...value.provenance.author, version: 'stale' } }; },
+    ]) {
+      const changed = { ...glyph, parts: [...glyph.parts], provenance: { ...glyph.provenance } };
+      mutate(changed);
+      expect(() => validateAuthorObservation(observeAuthorGlyph(changed, record.artifactSvg), expected)).toThrow();
+    }
+    for (const changedSvg of [
+      glyph.svg.replace('data-parts="microphone-enclosure microphone-support microphone-body"', 'data-parts="microphone-enclosure microphone-body microphone-support"'),
+      glyph.svg.replace('data-roles="container counter counter"', 'data-roles="container counter content"'),
+      glyph.svg.replace('fill-rule="evenodd"', 'fill-rule="nonzero"'),
+      glyph.svg.replace(glyph.parts[2].d, ''),
+      glyph.svg.replace('<path ', '<path opacity="0.5" '),
+      glyph.svg.replace('<path ', '<path transform="translate(1)" '),
+      svg(glyph.parts.map(part => ({ ...part, fillRule: 'evenodd' })), true),
+    ]) expect(() => validateAuthorObservation(observeAuthorGlyph(glyph, record.artifactSvg, changedSvg), expected)).toThrow();
+    for (const alter of [
+      value => { value.parts[1].sourceSpan[0]++; },
+      value => { value.parts[2].sourceSpan[1]--; },
+      value => { value.parts[1].contourIndices = [2]; },
+      value => { value.parts[2].role = 'content'; },
+      value => { value.parts[1].sourceSpan = [0, 3]; },
+    ]) {
+      const changed = structuredClone(contract);
+      alter(changed);
+      expect(() => expectedAuthorObservation('mic-circle', 'filled', record, changed)).toThrow();
+    }
+  });
   it.each([
     ['alert-circle', 'outline', 'SEMANTIC_MOTION_UNAVAILABLE'],
     ['alert-circle', 'filled', 'SEMANTIC_MOTION_UNAVAILABLE'],
@@ -60,6 +125,7 @@ describe('benchmark author oracle и сохранённый output', () => {
     const observation = observeAuthorGlyph(glyph, record.artifactSvg);
     const original = inspectAuthorSvg(record.artifactSvg);
     const expected = { icon, variant, master: record.master, author: record.author, anatomy: record.sourceContract.anatomy, artifactSha256: sha256(record.artifactSvg), pathFingerprintSha256: record.author.pathFingerprintSha256, partsSha256: sha256(stableJSON(record.sourceContract.parts.map((part, index) => ({ id: part.id, role: part.role, zIndex: part.zIndex, fillRule: part.fillRule, d: original.paths[index].d })))) };
+    expect(expectedAuthorObservation(icon, variant, record, record.sourceContract)).toMatchObject(expected);
     expect(() => validateAuthorObservation(observation, expected)).not.toThrow();
     const changedAfterMeasurement = { ...glyph, svg: glyph.svg.replace('data-role="control"', 'data-role="content"') };
     expect(observeAuthorGlyph(changedAfterMeasurement, record.artifactSvg, glyph.svg)).toEqual(observation);
@@ -100,6 +166,7 @@ describe('benchmark author oracle и сохранённый output', () => {
       const original = inspectAuthorSvg(record.artifactSvg);
       const actual = symbol.glyph({ variant });
       const expected = { icon: 'time', variant, master: record.master, author: record.author, artifactSha256: sha256(record.artifactSvg), pathFingerprintSha256: record.normalizedSource.pathFingerprintSha256, partsSha256: sha256(stableJSON(record.sourceContract.parts.map((part, index) => ({ id: part.id, role: part.role, zIndex: part.zIndex, fillRule: part.fillRule, d: original.paths[index].d })))) };
+      expect(expectedAuthorObservation('time', variant, record, record.sourceContract)).toMatchObject(expected);
       const observation = { ...inspectAuthorSvg(actual.svg, { ir: true }), icon: actual.icon, variant: actual.variant, sourceFile: actual.provenance.file, compositionKind: actual.composition.kind, author: actual.provenance.author, staticArtifactSha256: sha256(record.artifactSvg), parts: actual.parts.map(({ id, role, zIndex, fillRule, d }) => ({ id, role, zIndex, fillRule, d })) };
       expect(() => validateAuthorObservation(observation, expected)).not.toThrow();
       expect(() => validateAuthorAdmission(actual, symbol.glyphCapabilities(variant), record, record.sourceContract)).not.toThrow();

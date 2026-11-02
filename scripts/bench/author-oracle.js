@@ -13,9 +13,16 @@ export function stableJSON(value) {
 }
 
 /** XML parser снимает только объявленные IR metadata; geometry language остаётся закрытым. */
-export function inspectAuthorSvg(svg, { ir = false, expectedMetadata } = {}) {
+export function inspectAuthorSvg(svg, { ir = false, expectedMetadata, composition } = {}) {
   if (expectedMetadata !== undefined && (!ir || !Array.isArray(expectedMetadata))) {
     throw new TypeError('benchmark oracle: expected metadata требует IR и упорядоченный список частей');
+  }
+  const compound = composition?.kind === 'compound';
+  if (composition !== undefined && (compound
+    ? !ir || composition.fillRule !== 'evenodd' || Object.keys(composition).sort().join(',') !== 'fillRule,kind' ||
+      !expectedMetadata?.length
+    : composition.kind !== 'layers' || Object.keys(composition).join(',') !== 'kind')) {
+    throw new TypeError('benchmark oracle: нужна объявленная source composition и metadata общего parent');
   }
   const metadata = [];
   const parsed = optimize(svg, { multipass: false, plugins: [{
@@ -23,8 +30,20 @@ export function inspectAuthorSvg(svg, { ir = false, expectedMetadata } = {}) {
     fn: () => ({ element: { enter(node) {
       if (node.name !== 'svg' && node.name !== 'path') throw new Error(`benchmark oracle: <${node.name}> вне source layers`);
       if (node.name === 'path' && ir) {
+        if (compound) {
+          if (metadata.length || node.attributes['data-part'] !== undefined || node.attributes['data-role'] !== undefined ||
+              node.attributes['data-parts'] !== expectedMetadata.map(part => part.id).join(' ') ||
+              node.attributes['data-roles'] !== expectedMetadata.map(part => part.role).join(' ')) {
+            throw new Error('benchmark oracle: compound parent утратил ordered contour metadata или стал независимыми слоями');
+          }
+          metadata.push(...expectedMetadata.map(({ id, role }) => ({ id, role })));
+          delete node.attributes['data-parts'];
+          delete node.attributes['data-roles'];
+          return;
+        }
         const expected = expectedMetadata?.[metadata.length];
-        if (!node.attributes['data-part'] || (expectedMetadata === undefined
+        if (node.attributes['data-parts'] !== undefined || node.attributes['data-roles'] !== undefined ||
+            !node.attributes['data-part'] || (expectedMetadata === undefined
           ? node.attributes['data-role'] !== 'unclassified'
           : !expected || node.attributes['data-part'] !== expected.id || node.attributes['data-role'] !== expected.role)) {
           throw new Error('benchmark oracle: источник имеет выдуманную semantic anatomy или другую part identity');
@@ -39,6 +58,9 @@ export function inspectAuthorSvg(svg, { ir = false, expectedMetadata } = {}) {
     throw new Error('benchmark oracle: неполная semantic anatomy');
   }
   const paths = sourcePathEntries(parsed);
+  if (compound && (paths.length !== 1 || paths[0].fillRule !== composition.fillRule)) {
+    throw new Error('benchmark oracle: compound source требует один точный evenodd fill owner');
+  }
   return {
     svgSha256: sha256(svg),
     pathFingerprintSha256: sha256(stableJSON(paths)),
@@ -48,19 +70,67 @@ export function inspectAuthorSvg(svg, { ir = false, expectedMetadata } = {}) {
   };
 }
 
+/** Parts следуют независимому author contract; DOM path не становится contour. */
+export function expectedAuthorObservation(icon, variant, record, contract) {
+  const source = inspectAuthorSvg(record.artifactSvg);
+  if (source.pathFingerprintSha256 !== record.normalizedSource.pathFingerprintSha256) {
+    throw new Error(`${icon}/${variant}: author fingerprint не совпадает с manifest`);
+  }
+  const composition = contract.composition ?? { kind: 'layers' };
+  let parts;
+  if (composition.kind === 'compound') {
+    if (composition.fillRule !== 'evenodd' || source.paths.length !== 1 || source.paths[0].fillRule !== 'evenodd' ||
+        contract.parts.length < 2 || new Set(contract.parts.map(part => part.id)).size !== contract.parts.length) {
+      throw new Error('benchmark oracle: source compound не соответствует одному evenodd parent');
+    }
+    const parent = source.paths[0].d;
+    let cursor = 0;
+    parts = contract.parts.map((part, index) => {
+      const span = part.sourceSpan;
+      if (!Array.isArray(span) || span.length !== 2 || span.some(value => !Number.isSafeInteger(value)) ||
+          span[0] !== cursor || span[1] <= span[0] || span[1] > parent.length ||
+          stableJSON(part.contourIndices) !== stableJSON([index]) || part.zIndex !== index || part.fillRule !== null ||
+          part.role !== (index === 0 ? 'container' : 'counter')) {
+        throw new Error('benchmark oracle: source compound теряет ordered contour coverage');
+      }
+      const d = parent.slice(span[0], span[1]), segments = parsePathData(d);
+      if (!/^[\t\n\r ]*M/.test(d) || /m/.test(d) || segments.length < 2 || segments[0].cmd !== 'M' ||
+          segments.at(-1).cmd !== 'Z' || segments.filter(segment => segment.cmd === 'M' || segment.cmd === 'Z').length !== 2) {
+        throw new Error('benchmark oracle: source compound span не является целым замкнутым contour');
+      }
+      cursor = span[1];
+      return { id: part.id, role: part.role, zIndex: part.zIndex, fillRule: part.fillRule, d };
+    });
+    if (cursor !== parent.length) throw new Error('benchmark oracle: source compound не покрывает весь parent');
+  } else {
+    if (composition.kind !== 'layers' || source.paths.length !== contract.parts.length) {
+      throw new Error('benchmark oracle: source layers утратили независимые path owners');
+    }
+    parts = contract.parts.map((part, index) => {
+      if (part.fillRule !== source.paths[index].fillRule) throw new Error('benchmark oracle: source layer изменил fill rule');
+      return { id: part.id, role: part.role, zIndex: part.zIndex, fillRule: part.fillRule, d: source.paths[index].d };
+    });
+  }
+  return { icon, variant, master: record.master, author: record.author, anatomy: contract.anatomy ?? null, composition,
+    artifactSha256: sha256(record.artifactSvg), pathFingerprintSha256: source.pathFingerprintSha256,
+    priorGeometryFingerprint: record.normalizedSource.priorGeometryFingerprint, partsSha256: sha256(stableJSON(parts)) };
+}
+
 /** Снимает фактический packet после измерения; допуск задаёт независимый manifest. */
 export function observeAuthorGlyph(glyph, staticSvg, renderedSvg = glyph.svg) {
   const parts = glyph.parts.map(({ id, role, zIndex, fillRule, d }) => ({ id, role, zIndex, fillRule, d }));
   return { icon: glyph.icon, variant: glyph.variant, sourceFile: glyph.provenance.file,
-    compositionKind: glyph.composition.kind, author: glyph.provenance.author, anatomy: glyph.provenance.anatomy ?? null,
+    compositionKind: glyph.composition.kind, composition: glyph.composition, author: glyph.provenance.author, anatomy: glyph.provenance.anatomy ?? null,
     staticArtifactSha256: sha256(staticSvg), parts,
-    ...inspectAuthorSvg(renderedSvg, { ir: true, expectedMetadata: parts.map(({ id, role }) => ({ id, role })) }) };
+    ...inspectAuthorSvg(renderedSvg, { ir: true, composition: glyph.composition, expectedMetadata: parts.map(({ id, role }) => ({ id, role })) }) };
 }
 
 /** Неравенство сохраняется как confound, но неподтверждённый новый рисунок всегда RED. */
 export function validateAuthorObservation(observation, expected) {
+  const composition = expected.composition ?? { kind: 'layers' };
   if (observation.icon !== expected.icon || observation.variant !== expected.variant ||
-      observation.sourceFile !== expected.master || observation.compositionKind !== 'layers') {
+      observation.sourceFile !== expected.master || observation.compositionKind !== composition.kind ||
+      stableJSON(observation.composition ?? { kind: observation.compositionKind }) !== stableJSON(composition)) {
     throw new Error('benchmark oracle: source identity или layer composition изменена');
   }
   if (observation.author?.pathFingerprintSha256 !== expected.pathFingerprintSha256 ||

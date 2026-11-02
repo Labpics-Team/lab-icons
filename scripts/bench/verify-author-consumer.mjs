@@ -5,7 +5,7 @@ import { pathToFileURL } from 'node:url';
 import { loadAuthorBaseline } from '../lib/author-baseline.js';
 import { compileAuthorAnatomy } from '../lib/author-anatomy.js';
 import { assertRemoteBenchmark } from './measurement.js';
-import { expectedAuthorEffect, expectedAuthorMotionRefusal, inspectAuthorSvg, sha256, stableJSON, validateAuthorAdmission, validateAuthorObservation } from './author-oracle.js';
+import { expectedAuthorEffect, expectedAuthorMotionRefusal, expectedAuthorObservation, observeAuthorGlyph, sha256, stableJSON, validateAuthorAdmission, validateAuthorObservation } from './author-oracle.js';
 
 assertRemoteBenchmark();
 const request = JSON.parse(readFileSync(process.argv[2], 'utf8'));
@@ -14,7 +14,6 @@ const contracts = compileAuthorAnatomy(baseline, JSON.parse(readFileSync(join(re
 const manifestBytes = readFileSync(join(request.sourceRoot, 'semantics/figma-baseline.json'));
 const { compileSymbolEffect } = await import(pathToFileURL(join(request.packageRoot, 'dist/motion/index.js')).href);
 const report = { version: 1, source: baseline.source, manifestSha256: sha256(manifestBytes), expectedCounts: baseline.counts, completed: 0, icons: {} };
-const compactParts = glyph => glyph.parts.map(part => ({ id: part.id, role: part.role, zIndex: part.zIndex, fillRule: part.fillRule, d: part.d }));
 try {
   for (const [icon, variants] of Object.entries(baseline.icons)) {
     const module = await import(pathToFileURL(join(request.packageRoot, `dist/symbols/${icon}.js`)).href);
@@ -22,21 +21,11 @@ try {
     for (const variant of ['outline', 'filled']) {
       const record = variants[variant];
       const contract = contracts[`${icon}/${variant}`] ?? record.sourceContract;
-      const sourceSvg = inspectAuthorSvg(record.artifactSvg);
-      if (sourceSvg.pathFingerprintSha256 !== record.normalizedSource.pathFingerprintSha256) throw new Error(`${icon}/${variant}: author fingerprint не совпадает с manifest`);
+      const expected = expectedAuthorObservation(icon, variant, record, contract);
       const glyph = module.glyph({ variant });
       if (glyph.provenance.kind !== 'source') throw new Error(`${icon}/${variant}: source выдаётся за модель`);
-      const observed = inspectAuthorSvg(glyph.svg, { ir: true, expectedMetadata: contract.parts.map(({ id, role }) => ({ id, role })) });
-      const expected = {
-        icon, variant, master: record.master,
-        author: record.author,
-        anatomy: contract.anatomy ?? null,
-        artifactSha256: sha256(record.artifactSvg),
-        pathFingerprintSha256: record.normalizedSource.pathFingerprintSha256,
-        priorGeometryFingerprint: record.normalizedSource.priorGeometryFingerprint,
-        partsSha256: sha256(stableJSON(contract.parts.map((part, index) => ({ id: part.id, role: part.role, zIndex: part.zIndex, fillRule: part.fillRule, d: sourceSvg.paths[index].d })))),
-      };
-      validateAuthorObservation({ ...observed, icon: glyph.icon, variant: glyph.variant, sourceFile: glyph.provenance.file, compositionKind: glyph.composition.kind, author: glyph.provenance.author, anatomy: glyph.provenance.anatomy ?? null, staticArtifactSha256: sha256(module[variant]), parts: compactParts(glyph) }, expected);
+      const observed = observeAuthorGlyph(glyph, module[variant]);
+      validateAuthorObservation(observed, expected);
       const caps = module.glyphCapabilities(variant);
       if (caps.icon !== icon || caps.variant !== variant) throw new Error(`${icon}/${variant}: capabilities другого symbol`);
       validateAuthorAdmission(glyph, caps, record, contract, { kind: 'package', svg: record.normalizedSvg, compositionKind: 'layers' });
