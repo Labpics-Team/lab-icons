@@ -67,7 +67,7 @@ export function matchesAuthoredCapsulePath(before, after, width) {
 export function capsuleSvgFrameMatches(observed, viewBox) {
   const same = (left, right) => Number.isFinite(left) && Number.isFinite(right) && Math.abs(left - right) < 0.0001;
   return observed?.viewBox?.length === 4 && viewBox.length === 4 && observed.viewBox.every((value, index) => same(value, viewBox[index])) &&
-    observed.preserveAspectRatio === 'xMidYMid meet' && observed.untransformed === true &&
+    observed.preserveAspectRatio === 'xMidYMid meet' && observed.untransformed === true && observed.directPathsOnly === true &&
     same(observed.intrinsicWidth, viewBox[2]) && same(observed.intrinsicHeight, viewBox[3]);
 }
 
@@ -661,6 +661,9 @@ export async function runExplorerJourney() {
           return !value || value === 'none';
         }));
       return { viewBox: [box.x, box.y, box.width, box.height],
+        // Canonical capsule output целиком состоит из адресованных непосредственных paths.
+        directPathsOnly: svg.children.length > 0 && [...svg.querySelectorAll('*')].every(element =>
+          element.localName === 'path' && element.parentElement === svg && element.children.length === 0),
         intrinsicWidth: Number(svg.getAttribute('width')), intrinsicHeight: Number(svg.getAttribute('height')),
         preserveAspectRatio: (svg.getAttribute('preserveAspectRatio') ?? 'xMidYMid meet').trim().replace(/\s+/g, ' '), untransformed,
         ...(live ? { width: parseFloat(getComputedStyle(svg).width), height: parseFloat(getComputedStyle(svg).height),

@@ -166,7 +166,8 @@ describe('raw authored contour correspondence rejects equal-bbox impostors', () 
 });
 
 const viewport = () => ({ viewBox: [0, 0, 24, 24], intrinsicWidth: 24, intrinsicHeight: 24,
-  preserveAspectRatio: 'xMidYMid meet', untransformed: true, width: 48, height: 48, screen: { a: 2, b: 0, c: 0, d: 2 } });
+  preserveAspectRatio: 'xMidYMid meet', untransformed: true, directPathsOnly: true,
+  width: 48, height: 48, screen: { a: 2, b: 0, c: 0, d: 2 } });
 describe('rendered viewport and export receipts are independent required observations', () => {
   it('admits the true 24-unit frame rendered at the requested size', () => {
     expect(capsuleViewportMatches(viewport(), [0, 0, 24, 24], 48)).toBe(true);
@@ -175,6 +176,7 @@ describe('rendered viewport and export receipts are independent required observa
 
   it.each([
     ['48-unit viewBox with correct d', value => { value.viewBox = [0, 0, 48, 48]; }],
+    ['unaddressed painted SVG shape', value => { value.directPathsOnly = false; }],
     ['changed intrinsic export dimensions', value => { value.intrinsicWidth = 48; }],
     ['ancestor transform', value => { value.untransformed = false; }],
     ['hidden screen scaling', value => { value.screen.a = value.screen.d = 1; }],
