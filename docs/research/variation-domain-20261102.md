@@ -44,7 +44,7 @@ static tree shaking, precise refusal и расходящихся/отсутст�
 ```sh
 node scripts/bench/variation-domain.mjs \
   633f963f5503e183f468c0d3763a24ec55c94afb \
-  /tmp/variation-domain-repeat.json \
+  - \
   docs/research/variation-domain-20261102.json
 ```
 

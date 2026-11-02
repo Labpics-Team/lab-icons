@@ -104,7 +104,7 @@ const report = { baseline, head: execFileSync('git', ['rev-parse', 'HEAD'], { cw
     fflate: JSON.parse(readFileSync(new URL('../../node_modules/fflate/package.json', import.meta.url), 'utf8')).version,
     brotli: process.versions.brotli, gzip: { level: 9, mtime: 0 }, brotliQuality: 11, target: 'es2022' }, rows };
 const output = process.argv[3];
-if (output) writeFileSync(output, `${JSON.stringify(report, null, 2)}\n`);
+if (output && output !== '-') writeFileSync(output, `${JSON.stringify(report, null, 2)}\n`);
 for (const row of rows) console.log(JSON.stringify({ icon: row.icon, module: row.module,
   consumers: Object.fromEntries(Object.entries(row.consumers).map(([name, value]) => [name, {
     baseline: [value.baseline.bytes, value.baseline.gzipBytes, value.baseline.brotliBytes],
