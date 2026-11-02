@@ -26,7 +26,7 @@ import { authorStateVariationGroupNames, compileAuthorStateVariations, renderSta
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const TARGETS = ['ir', 'symbols', 'variations', 'content-variations', 'motion', 'lottie', 'authoring', 'states', 'state-variations'];
-const REQUIRED_DECLARATIONS = ['author-annulus-types.d.ts', 'author-content-types.d.ts', 'author-catalog.generated.d.ts', 'author-provenance.d.ts', 'author-source.d.ts', 'authored-variation.d.ts', 'candidates.d.ts', 'catalog.generated.d.ts', 'compiler.d.ts', 'glyph-types.d.ts', 'index.d.ts', 'paint-types.d.ts', 'recipes.d.ts', 'render.d.ts', 'request.d.ts'];
+const REQUIRED_DECLARATIONS = ['author-annulus-types.d.ts', 'author-content-types.d.ts', 'author-capsule-types.d.ts', 'author-catalog.generated.d.ts', 'author-provenance.d.ts', 'author-source.d.ts', 'authored-variation.d.ts', 'candidates.d.ts', 'catalog.generated.d.ts', 'compiler.d.ts', 'glyph-types.d.ts', 'index.d.ts', 'paint-types.d.ts', 'recipes.d.ts', 'render.d.ts', 'request.d.ts'];
 const read = (root, file) => JSON.parse(readFileSync(join(root, file), 'utf8'));
 
 /** Только локальный checkout и его OS namespace: неизвестный или живой PID сохраняется. */
@@ -198,7 +198,8 @@ async function compileIrTargets({ root, staging }) {
       if (modules.variation) {
         writeFileSync(join(staging, 'ir/symbol-data', `${icon}.js`), modules.data);
         writeFileSync(join(staging, 'variations', `${icon}.js`), modules.variation);
-        writeFileSync(join(staging, 'variations', `${icon}.d.ts`), variationModuleDeclaration(icon, variation.outline.law));
+        writeFileSync(join(staging, 'variations', `${icon}.d.ts`), variationModuleDeclaration(icon, variation.outline.law,
+          ['outline', 'filled'].filter(variant => variation[variant])));
       }
       if (modules.contentVariation) {
         writeFileSync(join(staging, 'content-variations', `${icon}.js`), modules.contentVariation);

@@ -39,6 +39,8 @@ export function authorVariationCapability(compiled) {
     defaults = { dotScale: 1, spacingScale: 1 }; webEffect = 'existing-part-gestures';
   } else if (compiled?.law === 'annulus.counter-scale') {
     defaults = { enclosureEmphasis: 1 }; webEffect = 'existing-part-gestures';
+  } else if (compiled?.law === 'capsule.width') {
+    defaults = { bodyWidth: 1 }; webEffect = 'not-exported';
   } else refuse('LAW_UNSUPPORTED', 'Для этого compiled law нет публичной capability.');
   return { version: 1, law: compiled.law, geometrySha256: compiled.geometrySha256, defaults, domain: compiled.domain,
     targets: { svg: 'supported', webEffect, lottie: 'not-exported', sfSymbols: 'not-exported' } };

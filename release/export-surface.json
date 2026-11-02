@@ -3962,6 +3962,18 @@
     "glyphCapabilities",
     "outline"
   ],
+  "./variations/mic": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./variations/mic-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
   "./variations/minus-circle": [
     "filled",
     "glyph",

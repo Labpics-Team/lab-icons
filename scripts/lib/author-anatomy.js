@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { iconGeometry } from '../../src/core/icon-geometry.js';
 import { validateMotionGesture } from '../../src/core/motion-sampler.js';
 import { compileAuthorVariation } from './author-variation.js';
+import { compileAuthorCapsule, projectAuthorCapsuleRuntime } from './author-capsule.js';
 import { compileAuthorAnnulus, projectAuthorAnnulusRuntime, compileAuthorContentVariation,
   projectAuthorContentVariationRuntime } from './author-annulus.js';
 import defaultGrid from '../../semantics/grid.json' with { type: 'json' };
@@ -257,7 +258,7 @@ function compileAuthorAnatomyResult(baseline, document, grid) {
     refuse('SOURCE_MISMATCH', 'анатомия относится к другому файлу или версии Figma');
   }
 
-  const output = {}, evidence = {}, contentEvidence = {};
+  const output = {}, evidence = {}, contentEvidence = {}, capsuleEvidence = {};
   for (const icon of Object.keys(document.icons).sort()) {
     if (!NAME.test(icon) || !Object.hasOwn(baseline.icons, icon)) {
       refuse('ANNOTATION_INVALID', `нет авторского семейства ${icon}`);
@@ -316,6 +317,10 @@ function compileAuthorAnatomyResult(baseline, document, grid) {
             pathFingerprintSha256: declaration.pathFingerprintSha256 } }, grid);
         variation = projectAuthorAnnulusRuntime(compiled);
         evidence[label] = compiled;
+      } else if (declaration.variation?.law === 'capsule.width') {
+        const compiled = compileAuthorCapsule(source, parts, declaration.variation, grid);
+        variation = projectAuthorCapsuleRuntime(compiled);
+        capsuleEvidence[label] = compiled.evidence;
       } else if (declaration.variation) {
         variation = compileAuthorVariation(source, parts, declaration.variation, grid);
       }
@@ -353,7 +358,7 @@ function compileAuthorAnatomyResult(baseline, document, grid) {
       };
     }
   }
-  return freezeTree({ contracts: output, evidence, contentEvidence });
+  return freezeTree({ contracts: output, evidence, contentEvidence, capsuleEvidence });
 }
 
 /** Существующие build consumers сохраняют прежнюю форму source contracts. */

@@ -7,6 +7,7 @@ const SYMBOL_NAME = /^[a-z][a-z0-9-]*$/;
 const VARIATION_RUNTIME_TARGETS = {
   'dots.affine': { entry: 'src/ir/authored-variation.ts', runtime: 'variation-runtime.js', factory: 'createCompiledVariationGlyph' },
   'annulus.counter-scale': { entry: 'src/ir/author-annulus-runtime.ts', runtime: 'annulus-runtime.js', factory: 'createCompiledAnnulusGlyph' },
+  'capsule.width': { entry: 'src/ir/author-capsule-runtime.ts', runtime: 'capsule-runtime.js', factory: 'createCompiledCapsuleGlyph' },
 };
 
 /** Отдельный opt-in оставляет content operands за границей старых потребителей. */
@@ -72,7 +73,7 @@ export function symbolReleaseProjection(base, iconIds, stateGroupIds = [], varia
     key.includes('*')
       ? (key === './states/*' ? groups : key === './state-variations/*' ? stateVariations : key === './content-variations/*' ? contentVariations : key === './variations/*' ? [...variationIconIds].sort() : ids).flatMap(id => Object.values(conditions).map(target => target.replace('*', id).slice(2)))
       : Object.values(conditions).map(target => target.slice(2)));
-  const typeDependencies = ['dist/authoring/design-spec.d.ts', 'dist/ir/author-annulus-types.d.ts', 'dist/ir/author-content-types.d.ts', 'dist/ir/author-catalog.generated.d.ts', 'dist/ir/author-provenance.d.ts', 'dist/ir/author-source.d.ts', 'dist/ir/authored-variation.d.ts', 'dist/ir/catalog.generated.d.ts', 'dist/ir/compiler.d.ts', 'dist/ir/glyph-types.d.ts', 'dist/ir/paint-types.d.ts', 'dist/ir/request.d.ts', 'dist/ir/lottie-types.d.ts', 'dist/ir/state-types.d.ts', 'dist/ir/state-common-types.d.ts', 'dist/ir/contour-state-types.d.ts'].sort();
+  const typeDependencies = ['dist/authoring/design-spec.d.ts', 'dist/ir/author-annulus-types.d.ts', 'dist/ir/author-content-types.d.ts', 'dist/ir/author-capsule-types.d.ts', 'dist/ir/author-catalog.generated.d.ts', 'dist/ir/author-provenance.d.ts', 'dist/ir/author-source.d.ts', 'dist/ir/authored-variation.d.ts', 'dist/ir/catalog.generated.d.ts', 'dist/ir/compiler.d.ts', 'dist/ir/glyph-types.d.ts', 'dist/ir/paint-types.d.ts', 'dist/ir/request.d.ts', 'dist/ir/lottie-types.d.ts', 'dist/ir/state-types.d.ts', 'dist/ir/state-common-types.d.ts', 'dist/ir/contour-state-types.d.ts'].sort();
   const runtimeDependencies = ['dist/ir/author-request-runtime.js', 'dist/ir/compiler.js', 'dist/ir/contour-runtime.js', 'dist/ir/request.js', 'dist/ir/symbol-runtime.js', 'dist/ir/lottie-runtime.js'].sort();
   runtimeDependencies.push(...sourcePacketRuntimeTargets(compiledSymbolModules).map(target => `dist/ir/${target.runtime}`));
   if (variationIconIds.length) runtimeDependencies.push(...variationRuntimeTargets(variationLaws).map(target => `dist/ir/${target.runtime}`),
@@ -319,9 +320,26 @@ export function contentVariationModuleDeclaration(icon) {
   ].join('\n');
 }
 
-export function variationModuleDeclaration(icon, law = 'dots.affine') {
+export function variationModuleDeclaration(icon, law = 'dots.affine', variants) {
   if (!SYMBOL_NAME.test(icon)) throw new TypeError('variation declaration: невалидное имя');
   variationRuntimeTargets([law]);
+  if (law === 'capsule.width') {
+    if (!Array.isArray(variants) || !variants.includes('outline') || new Set(variants).size !== variants.length ||
+        variants.some(variant => !['outline', 'filled'].includes(variant))) {
+      throw new TypeError('capsule declaration: невалидные admitted variants');
+    }
+    const admitted = variants.map(variant => `'${variant}'`).join(' | ');
+    return [
+      "import type { AuthorSourceGlyph, AuthorSourceCapabilities, AuthorSymbolGlyphRequest } from '../ir/author-source.js';",
+      "import type { AuthorCapsuleVariationGlyph, AuthorCapsuleVariationCapabilities, AuthorCapsuleVariationGlyphRequest } from '../ir/author-capsule-types.js';",
+      'export declare const outline: string;', 'export declare const filled: string;',
+      `export declare function glyph(request?: AuthorSymbolGlyphRequest): AuthorSourceGlyph<'${icon}'>;`,
+      `export declare function glyph(request: AuthorCapsuleVariationGlyphRequest<${admitted}>): AuthorCapsuleVariationGlyph<'${icon}', ${admitted}>;`,
+      `export declare function glyphCapabilities(variant?: 'outline'): AuthorCapsuleVariationCapabilities<'${icon}', 'outline'>;`,
+      `export declare function glyphCapabilities(variant: 'filled'): ${variants.includes('filled') ? `AuthorCapsuleVariationCapabilities<'${icon}', 'filled'>` : `AuthorSourceCapabilities<'${icon}'> & Readonly<{variant:'filled'}>`};`,
+      `export declare function glyphCapabilities(variant: 'outline' | 'filled'): AuthorCapsuleVariationCapabilities<'${icon}', 'outline'> | ${variants.includes('filled') ? `AuthorCapsuleVariationCapabilities<'${icon}', 'filled'>` : `AuthorSourceCapabilities<'${icon}'> & Readonly<{variant:'filled'}>`};`, '',
+    ].join('\n');
+  }
   if (law === 'annulus.counter-scale') {
     const supported = `AuthorAnnulusVariationCapabilities<'${icon}'>`;
     const source = `AuthorSourceCapabilities<'${icon}'> & Readonly<{ variant: 'filled' }>`;

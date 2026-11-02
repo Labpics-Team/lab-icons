@@ -5,6 +5,41 @@
     "version": "2416636003859748575"
   },
   "icons": {
+    "mic": {
+      "outline": {
+        "masterSha256": "c526c734a2225a29ec6e71f76d860546f5bccf8475bad6e1842915a75f2a5f9c",
+        "pathFingerprintSha256": "f7451fdcb743aaff3832866caea46af111a8d7ea39283472787996dc212978a6",
+        "parts": [
+          { "pathIndex": 0, "id": "microphone-support", "role": "content" },
+          { "pathIndex": 1, "id": "microphone-body", "role": "content" }
+        ],
+        "gesture": null,
+        "variation": { "law": "capsule.width", "parameter": "bodyWidth", "bodyPartId": "microphone-body" }
+      },
+      "filled": {
+        "masterSha256": "e0efa7ec88dfdd01862ffd1b508de9b0789528046fb1b9d00442b9cdac093029",
+        "pathFingerprintSha256": "1cc371d2b7a2c52310e784e36b9827c4d50a245343b8f477e307fad650a28f6f",
+        "parts": [
+          { "pathIndex": 0, "id": "microphone-support", "role": "content" },
+          { "pathIndex": 1, "id": "microphone-body", "role": "content" }
+        ],
+        "gesture": null,
+        "variation": { "law": "capsule.width", "parameter": "bodyWidth", "bodyPartId": "microphone-body" }
+      }
+    },
+    "mic-circle": {
+      "outline": {
+        "masterSha256": "86a0ac827fea4a8294c35332ec606f1f9b992f28e28660af12c72eddce3c2d32",
+        "pathFingerprintSha256": "04e69ba05e75395f552b6828dc12caf853f452bab30c81aa572392468efc2cc6",
+        "parts": [
+          { "pathIndex": 0, "id": "microphone-support", "role": "content" },
+          { "pathIndex": 1, "id": "microphone-body", "role": "content" },
+          { "pathIndex": 2, "id": "microphone-enclosure", "role": "container" }
+        ],
+        "gesture": null,
+        "variation": { "law": "capsule.width", "parameter": "bodyWidth", "bodyPartId": "microphone-body" }
+      }
+    },
     "reload": {
       "outline": {
         "masterSha256": "9a6784d21805bb7374a37a62fab427be8a49b985bdb5ffc04876bfb3ed93bd80",

@@ -1,7 +1,6 @@
 import type { CompiledAnnulusGeometry } from './annulus-geometry-runtime.js';
 import { materializeCompiledAnnulus, AuthoredAnnulusVariationError } from './annulus-geometry-runtime.js';
 import type { AuthorContentVariationDomain, AuthoredContentVariation } from './author-content-types.js';
-// @ts-expect-error — Общая чистая JS-операция имеет единственного build/runtime owner.
 import { contentScaleParameters, admitJointContentScale, materializeProjectedContent } from '../core/annulus-content-geometry.js';
 
 type Point = readonly [number, number];

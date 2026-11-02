@@ -68,6 +68,10 @@ export function authorPackageExpectations(baseline, annotations) {
         variationExpected = { ...variationExpected, enclosurePartId: enclosure.id, enclosureOuterD: enclosure.outerD,
           nondefault: { enclosureEmphasis: emphasisForScale(scale) },
           outsideDomain: { enclosureEmphasis: emphasisForScale(domain.scale.minimum / 2) } };
+      } else if (variation?.law === 'capsule.width') {
+        variationExpected = { ...variationExpected, bodyPartId: variation.body.id,
+          nondefault: { bodyWidth: (variation.domain.minimum + 1) / 2 },
+          outsideDomain: { bodyWidth: variation.domain.minimum / 2 } };
       }
       return [variant, {
         master: record.master, author: record.author, svg: record.artifactSvg,

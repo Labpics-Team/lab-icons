@@ -20,6 +20,10 @@ export function verifyInstalledAuthorVariation({ icon, variant, expected, family
       outsideDomain = policy.outsideDomain;
       foreign = { dotScale: 1.1 };
       require(variant === 'outline' && nondefault?.enclosureEmphasis !== 1, 'authored annulus missing nondefault witness');
+    } else if (policy.law === 'capsule.width') {
+      defaults = { bodyWidth: 1 }; nondefault = policy.nondefault; outsideDomain = policy.outsideDomain;
+      foreign = { dotScale: 1.1 };
+      require(nondefault?.bodyWidth > policy.domain.minimum && nondefault.bodyWidth < 1, 'authored body missing nondefault witness');
     } else {
       throw new Error(`unsupported authored variation law: ${policy.law}: ${icon}/${variant}`);
     }
@@ -40,6 +44,12 @@ export function verifyInstalledAuthorVariation({ icon, variant, expected, family
       varied.parts.every(part => varied.svg.includes('d="' + part.d + '"')), 'authored variation lost parts/SVG');
     if (policy.law === 'dots.affine') {
       require(varied.parts.every((part, index) => part.d !== current.parts[index].d), 'authored variation changed-part contract');
+    } else if (policy.law === 'capsule.width') {
+      const bodyIndex = current.parts.findIndex(part => part.id === policy.bodyPartId);
+      require(bodyIndex >= 0 && current.parts[bodyIndex].role === 'content' &&
+        varied.parts.every((part, index) => index === bodyIndex
+          ? part.d !== current.parts[index].d && equal(part.anchor, current.parts[index].anchor)
+          : part === current.parts[index]), 'authored variation changed-part contract');
     } else {
       const enclosureIndex = current.parts.findIndex(part => part.id === policy.enclosurePartId);
       require(enclosureIndex >= 0 && current.parts[enclosureIndex].role === 'container' &&
@@ -67,6 +77,7 @@ export function verifyInstalledAuthorVariation({ icon, variant, expected, family
       let variation;
       if (familyVariation.law === 'annulus.counter-scale') variation = familyVariation.nondefault;
       else if (familyVariation.law === 'dots.affine') variation = { dotScale: 1.1, spacingScale: 0.9 };
+      else if (familyVariation.law === 'capsule.width') variation = familyVariation.nondefault;
       else throw new Error(`unsupported authored variation law: ${familyVariation.law}: ${icon}/${variant}`);
       require(variable.glyph({ variant }) === current, 'unsupported authored variation default differs');
       const variableCapabilities = variable.glyphCapabilities(variant);

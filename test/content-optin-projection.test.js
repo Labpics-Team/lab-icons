@@ -16,7 +16,10 @@ const root = fileURLToPath(new URL('..', import.meta.url)), anchor = '749706af0a
 const read = file => JSON.parse(readFileSync(join(root, file), 'utf8'));
 const names = ['alert-circle', 'checkmark-circle', 'close-circle', 'minus-circle', 'pause-circle', 'play-circle', 'plus-circle', 'question-circle'];
 const dots = ['ellipsis-horizontal', 'ellipsis-vertical'], inputs = await authoredSymbolPayloads([...names, ...dots]);
-const anatomy = read('semantics/author-anatomy.json');
+const fullAnatomy = read('semantics/author-anatomy.json');
+// Этот differential fixture проверяет прежние content/dots imports; новые laws
+// имеют отдельные native consumers и не расширяют его объявленный corpus.
+const anatomy = { ...fullAnatomy, icons: Object.fromEntries([...names, ...dots].map(icon => [icon, fullAnatomy.icons[icon]])) };
 const fixture = mkdtempSync(join(root, '.content-optin-native-')), pkg = join(fixture, 'node_modules/@labpics/icons'), out = join(pkg, 'dist');
 for (const directory of ['ir/symbol-data', 'symbols', 'variations', 'content-variations']) mkdirSync(join(out, directory), { recursive: true });
 
