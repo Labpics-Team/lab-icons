@@ -12,6 +12,8 @@ export function compiledAuthorSymbolPayload(icon, sources, compiler) {
   const payload = authorSymbolPayload(icon, sources, compiler);
   const projected = Object.fromEntries(['outline', 'filled'].map(variant => [variant, sources[variant].sourceContract.variation]));
   const variation = projected.outline || projected.filled ? projected : undefined;
+  const content = sources.outline.sourceContract.contentVariation;
+  const contentVariation = content ? { outline: content } : undefined;
   const targets = Object.fromEntries(['outline', 'filled'].map(variant => [variant, compileLottieGeometry(payload.source[variant])]));
   const capabilities = Object.fromEntries(['outline', 'filled'].map(variant => {
     const capability = payload.capabilities[variant], law = variation?.[variant];
@@ -19,7 +21,7 @@ export function compiledAuthorSymbolPayload(icon, sources, compiler) {
       motion: { ...capability.motion, adapters: { ...capability.motion.adapters,
         lottie: targets[variant].ok && capability.motion.state === 'gesture-ready' ? 'lottie-web-svg-5.13' : 'not-exported' } } }];
   }));
-  return { ...payload, capabilities, variation, targets };
+  return { ...payload, capabilities, variation, targets, ...(contentVariation && { contentVariation }) };
 }
 
 /** Production projection выбирает имена; никакой ручной census возможностей. */

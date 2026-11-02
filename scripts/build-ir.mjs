@@ -12,7 +12,8 @@ import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { validateReleaseTypeDependencyGraph, validateReleaseRuntimeDependencyGraph } from './lib/release-contract.js';
 import { recoverOwnedDirectory, replaceOwnedDirectory } from './lib/owned-directory.js';
-import { renderSymbolModules, symbolExportName, symbolModuleDeclaration, variationModuleDeclaration, variationRuntimeTargets } from './lib/symbol-modules.js';
+import { renderSymbolModules, symbolExportName, symbolModuleDeclaration, variationModuleDeclaration, variationRuntimeTargets,
+  authorContentVariationIconNames, contentVariationModuleDeclaration, contentVariationRuntimeTargets } from './lib/symbol-modules.js';
 import { loadAuthorBaseline } from './lib/author-baseline.js';
 import { compiledAuthorSymbolPayload } from './lib/authored-symbol-payload.js';
 import { sourcePacketRuntimeTargets } from './lib/source-packet.js';
@@ -24,8 +25,8 @@ import { authorStateVariationGroupNames, compileAuthorStateVariations, renderSta
   stateVariationDeclaration } from './lib/author-state-variations.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const TARGETS = ['ir', 'symbols', 'variations', 'motion', 'lottie', 'authoring', 'states', 'state-variations'];
-const REQUIRED_DECLARATIONS = ['author-annulus-types.d.ts', 'author-catalog.generated.d.ts', 'author-provenance.d.ts', 'author-source.d.ts', 'authored-variation.d.ts', 'candidates.d.ts', 'catalog.generated.d.ts', 'compiler.d.ts', 'glyph-types.d.ts', 'index.d.ts', 'paint-types.d.ts', 'recipes.d.ts', 'render.d.ts', 'request.d.ts'];
+const TARGETS = ['ir', 'symbols', 'variations', 'content-variations', 'motion', 'lottie', 'authoring', 'states', 'state-variations'];
+const REQUIRED_DECLARATIONS = ['author-annulus-types.d.ts', 'author-content-types.d.ts', 'author-catalog.generated.d.ts', 'author-provenance.d.ts', 'author-source.d.ts', 'authored-variation.d.ts', 'candidates.d.ts', 'catalog.generated.d.ts', 'compiler.d.ts', 'glyph-types.d.ts', 'index.d.ts', 'paint-types.d.ts', 'recipes.d.ts', 'render.d.ts', 'request.d.ts'];
 const read = (root, file) => JSON.parse(readFileSync(join(root, file), 'utf8'));
 
 /** Только локальный checkout и его OS namespace: неизвестный или живой PID сохраняется. */
@@ -111,6 +112,7 @@ async function compileIrTargets({ root, staging }) {
     const authorSpec = read(root, 'semantics/author-anatomy.json');
     const stateSpec = read(root, 'semantics/author-state-groups.json');
     const stateVariationNames = authorStateVariationGroupNames(stateSpec, authorSpec);
+    const contentVariationNames = authorContentVariationIconNames(authorSpec);
     const variationLaws = authorVariationLawNames(authorSpec);
     for (const name of TARGETS) mkdirSync(join(staging, name));
     mkdirSync(join(staging, 'ir/symbol-data'));
@@ -122,7 +124,9 @@ async function compileIrTargets({ root, staging }) {
       bundle(root, staging, 'src/ir/symbol-runtime.ts', 'ir/symbol-runtime.js', ['./request.js', './author-request-runtime.js']),
       ...variationRuntimeTargets(variationLaws).map(target =>
         bundle(root, staging, target.entry, `ir/${target.runtime}`, ['./request.js', './symbol-runtime.js', './author-request-runtime.js', './annulus-geometry-runtime.js'])),
-      ...(variationLaws.includes('annulus.counter-scale') || stateVariationNames.length
+      ...contentVariationRuntimeTargets(contentVariationNames).map(target =>
+        bundle(root, staging, target.entry, `ir/${target.runtime}`, ['./request.js', './symbol-runtime.js', './author-request-runtime.js', './content-geometry-runtime.js', './annulus-geometry-runtime.js'])),
+      ...(variationLaws.includes('annulus.counter-scale') || stateVariationNames.length || contentVariationNames.length
         ? [bundle(root, staging, 'src/ir/annulus-geometry-runtime.ts', 'ir/annulus-geometry-runtime.js')] : []),
       ...(stateVariationNames.length
         ? [bundle(root, staging, 'src/states/annulus-runtime.ts', 'ir/state-annulus-runtime.js', ['../ir/annulus-geometry-runtime.js'])] : []),
@@ -186,6 +190,7 @@ async function compileIrTargets({ root, staging }) {
       const payload = compiledAuthorSymbolPayload(icon, authorSources[icon], compiler);
       const { variation, targets } = payload;
       if (variationNames.has(icon) !== !!variation) throw new Error(`build-ir: ${icon}: compiled variation не совпадает с author spec`);
+      if (contentVariationNames.includes(icon) !== !!payload.contentVariation) throw new Error(`build-ir: ${icon}: compiled content variation не совпадает с author spec`);
       const modules = renderSymbolModules(payload);
       compiledModules.push(modules);
       writeFileSync(join(staging, 'symbols', `${icon}.js`), modules.symbol);
@@ -194,6 +199,10 @@ async function compileIrTargets({ root, staging }) {
         writeFileSync(join(staging, 'ir/symbol-data', `${icon}.js`), modules.data);
         writeFileSync(join(staging, 'variations', `${icon}.js`), modules.variation);
         writeFileSync(join(staging, 'variations', `${icon}.d.ts`), variationModuleDeclaration(icon, variation.outline.law));
+      }
+      if (modules.contentVariation) {
+        writeFileSync(join(staging, 'content-variations', `${icon}.js`), modules.contentVariation);
+        writeFileSync(join(staging, 'content-variations', `${icon}.d.ts`), contentVariationModuleDeclaration(icon));
       }
       writeFileSync(join(staging, 'lottie', `${icon}.js`), renderLottieSymbolModule(icon, targets));
       writeFileSync(join(staging, 'lottie', `${icon}.d.ts`), lottieSymbolDeclaration());

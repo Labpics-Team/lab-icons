@@ -713,6 +713,14 @@
           "law": "annulus.counter-scale",
           "parameter": "enclosureEmphasis",
           "enclosurePartId": "confirmation-enclosure"
+        },
+        "contentVariation": {
+          "law": "annulus.content-counter-scale",
+          "parameters": [
+            "contentScale",
+            "enclosureEmphasis"
+          ],
+          "enclosurePartId": "confirmation-enclosure"
         }
       }
     },
@@ -891,6 +899,14 @@
           "law": "annulus.counter-scale",
           "parameter": "enclosureEmphasis",
           "enclosurePartId": "status-enclosure"
+        },
+        "contentVariation": {
+          "law": "annulus.content-counter-scale",
+          "parameters": [
+            "contentScale",
+            "enclosureEmphasis"
+          ],
+          "enclosurePartId": "status-enclosure"
         }
       }
     },
@@ -914,6 +930,14 @@
         "variation": {
           "law": "annulus.counter-scale",
           "parameter": "enclosureEmphasis",
+          "enclosurePartId": "status-enclosure"
+        },
+        "contentVariation": {
+          "law": "annulus.content-counter-scale",
+          "parameters": [
+            "contentScale",
+            "enclosureEmphasis"
+          ],
           "enclosurePartId": "status-enclosure"
         }
       }
@@ -993,6 +1017,14 @@
           "law": "annulus.counter-scale",
           "parameter": "enclosureEmphasis",
           "enclosurePartId": "status-enclosure"
+        },
+        "contentVariation": {
+          "law": "annulus.content-counter-scale",
+          "parameters": [
+            "contentScale",
+            "enclosureEmphasis"
+          ],
+          "enclosurePartId": "status-enclosure"
         }
       }
     },
@@ -1021,6 +1053,14 @@
         "variation": {
           "law": "annulus.counter-scale",
           "parameter": "enclosureEmphasis",
+          "enclosurePartId": "status-enclosure"
+        },
+        "contentVariation": {
+          "law": "annulus.content-counter-scale",
+          "parameters": [
+            "contentScale",
+            "enclosureEmphasis"
+          ],
           "enclosurePartId": "status-enclosure"
         }
       }
@@ -1051,6 +1091,14 @@
           "law": "annulus.counter-scale",
           "parameter": "enclosureEmphasis",
           "enclosurePartId": "status-enclosure"
+        },
+        "contentVariation": {
+          "law": "annulus.content-counter-scale",
+          "parameters": [
+            "contentScale",
+            "enclosureEmphasis"
+          ],
+          "enclosurePartId": "status-enclosure"
         }
       }
     },
@@ -1074,6 +1122,14 @@
         "variation": {
           "law": "annulus.counter-scale",
           "parameter": "enclosureEmphasis",
+          "enclosurePartId": "playback-enclosure"
+        },
+        "contentVariation": {
+          "law": "annulus.content-counter-scale",
+          "parameters": [
+            "contentScale",
+            "enclosureEmphasis"
+          ],
           "enclosurePartId": "playback-enclosure"
         }
       }
@@ -1103,6 +1159,14 @@
         "variation": {
           "law": "annulus.counter-scale",
           "parameter": "enclosureEmphasis",
+          "enclosurePartId": "playback-enclosure"
+        },
+        "contentVariation": {
+          "law": "annulus.content-counter-scale",
+          "parameters": [
+            "contentScale",
+            "enclosureEmphasis"
+          ],
           "enclosurePartId": "playback-enclosure"
         }
       }

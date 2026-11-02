@@ -485,6 +485,54 @@
     "parseDesignSpec",
     "renderGlyphSvg"
   ],
+  "./content-variations/alert-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./content-variations/checkmark-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./content-variations/close-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./content-variations/minus-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./content-variations/pause-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./content-variations/play-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./content-variations/plus-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./content-variations/question-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
   "./ir": [
     "GlyphModelError",
     "axisContracts",

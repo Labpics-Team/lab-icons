@@ -1,5 +1,6 @@
 import { compactDataLiteral, compactGeneratedModule, jsonDataLiteral, literalKey } from './generated-module.js';
 import { authorVariationCapability } from './author-variation.js';
+import { authorContentVariationCapability } from './author-annulus.js';
 import { cyclePacketExpression, sourcePacketEligible, sourcePacketExpression, sourcePacketRuntimeTargets, translationCyclePacket } from './source-packet.js';
 
 const SYMBOL_NAME = /^[a-z][a-z0-9-]*$/;
@@ -7,6 +8,22 @@ const VARIATION_RUNTIME_TARGETS = {
   'dots.affine': { entry: 'src/ir/authored-variation.ts', runtime: 'variation-runtime.js', factory: 'createCompiledVariationGlyph' },
   'annulus.counter-scale': { entry: 'src/ir/author-annulus-runtime.ts', runtime: 'annulus-runtime.js', factory: 'createCompiledAnnulusGlyph' },
 };
+
+/** Отдельный opt-in оставляет content operands за границей старых потребителей. */
+export function authorContentVariationIconNames(anatomy) {
+  return Object.entries(anatomy.icons ?? {}).filter(([, variants]) => variants.outline?.contentVariation)
+    .map(([icon]) => icon).sort();
+}
+
+export function contentVariationRuntimeTargets(names) {
+  if (!Array.isArray(names) || names.some(name => !SYMBOL_NAME.test(name))) {
+    throw new TypeError('content variation: невалидные имена');
+  }
+  return names.length ? [
+    { entry: 'src/ir/author-content-runtime.ts', runtime: 'content-runtime.js' },
+    { entry: 'src/ir/content-geometry-runtime.ts', runtime: 'content-geometry-runtime.js' },
+  ] : [];
+}
 
 /** Размещение law runtime принадлежит target compiler, не каталогу или caller. */
 export function variationRuntimeTargets(laws) {
@@ -18,10 +35,14 @@ export function variationRuntimeTargets(laws) {
 
 /** Единственная release-проекция каталога; wildcard раскрывается в точные файлы. */
 export function symbolReleaseProjection(base, iconIds, stateGroupIds = [], variationIconIds = [], variationLaws = ['dots.affine'],
-  compiledSymbolModules = [], stateVariationGroupIds = []) {
+  compiledSymbolModules = [], stateVariationGroupIds = [], contentVariationIconIds = []) {
   const ids = [...iconIds].sort();
   const groups = [...stateGroupIds].sort();
   const stateVariations = [...stateVariationGroupIds].sort();
+  const contentVariations = [...contentVariationIconIds].sort();
+  if (new Set(contentVariations).size !== contentVariations.length || contentVariations.some(id => !variationIconIds.includes(id))) {
+    throw new TypeError('content variation projection: символ должен иметь авторский variation допуск');
+  }
   if (new Set(stateVariations).size !== stateVariations.length || stateVariations.some(id => !groups.includes(id))) {
     throw new TypeError('state variation projection: группа должна принадлежать state каталогу');
   }
@@ -45,10 +66,11 @@ export function symbolReleaseProjection(base, iconIds, stateGroupIds = [], varia
     ...(groups.length ? { './states/*': { types: './dist/states/*.d.ts', import: './dist/states/*.js' } } : {}),
     ...(variationIconIds.length ? { './variations/*': { types: './dist/variations/*.d.ts', import: './dist/variations/*.js' } } : {}),
     ...(stateVariations.length ? { './state-variations/*': { types: './dist/state-variations/*.d.ts', import: './dist/state-variations/*.js' } } : {}),
+    ...(contentVariations.length ? { './content-variations/*': { types: './dist/content-variations/*.d.ts', import: './dist/content-variations/*.js' } } : {}),
   };
   const publicFiles = Object.entries(exports).flatMap(([key, conditions]) =>
     key.includes('*')
-      ? (key === './states/*' ? groups : key === './state-variations/*' ? stateVariations : key === './variations/*' ? [...variationIconIds].sort() : ids).flatMap(id => Object.values(conditions).map(target => target.replace('*', id).slice(2)))
+      ? (key === './states/*' ? groups : key === './state-variations/*' ? stateVariations : key === './content-variations/*' ? contentVariations : key === './variations/*' ? [...variationIconIds].sort() : ids).flatMap(id => Object.values(conditions).map(target => target.replace('*', id).slice(2)))
       : Object.values(conditions).map(target => target.slice(2)));
   const typeDependencies = ['dist/authoring/design-spec.d.ts', 'dist/ir/author-annulus-types.d.ts', 'dist/ir/author-catalog.generated.d.ts', 'dist/ir/author-provenance.d.ts', 'dist/ir/author-source.d.ts', 'dist/ir/authored-variation.d.ts', 'dist/ir/catalog.generated.d.ts', 'dist/ir/compiler.d.ts', 'dist/ir/glyph-types.d.ts', 'dist/ir/paint-types.d.ts', 'dist/ir/request.d.ts', 'dist/ir/lottie-types.d.ts', 'dist/ir/state-types.d.ts', 'dist/ir/state-common-types.d.ts', 'dist/ir/contour-state-types.d.ts'].sort();
   const runtimeDependencies = ['dist/ir/author-request-runtime.js', 'dist/ir/compiler.js', 'dist/ir/contour-runtime.js', 'dist/ir/request.js', 'dist/ir/symbol-runtime.js', 'dist/ir/lottie-runtime.js'].sort();
@@ -62,7 +84,11 @@ export function symbolReleaseProjection(base, iconIds, stateGroupIds = [], varia
     runtimeDependencies.push('dist/ir/state-annulus-runtime.js');
     typeDependencies.push('dist/ir/state-annulus-types.d.ts'); typeDependencies.sort();
   }
-  if (variationIconIds.length && variationLaws.includes('annulus.counter-scale') || stateVariations.length) {
+  if (contentVariations.length) {
+    runtimeDependencies.push(...contentVariationRuntimeTargets(contentVariations).map(target => `dist/ir/${target.runtime}`));
+    typeDependencies.push('dist/ir/author-content-types.d.ts'); typeDependencies.sort();
+  }
+  if (variationIconIds.length && variationLaws.includes('annulus.counter-scale') || stateVariations.length || contentVariations.length) {
     runtimeDependencies.push('dist/ir/annulus-geometry-runtime.js');
   }
   runtimeDependencies.sort();
@@ -205,6 +231,7 @@ export function symbolModuleDeclaration(icon) {
 export function renderSymbolModules(input) {
   const { icon, source, staticSvg, variation } = input;
   const capabilities = sourceCapabilities(input.capabilities);
+  if (input.contentVariation && !variation) throw new TypeError('content variation: отсутствует авторский annulus variation допуск');
   if (!variation) return { symbol: renderSymbolModule({ icon, source, staticSvg, capabilities }) };
   const law = variation.outline?.law;
   const target = variationRuntimeTargets([law])[0];
@@ -244,8 +271,53 @@ export function renderSymbolModules(input) {
     // оставляет чтения/spread данных в аргументе удалённой внешней фабрики.
     `export const glyphCapabilities = /* @__PURE__ */ createCompiledCapabilities(/* @__PURE__ */ (() => ({${['outline', 'filled'].map(variant =>
       `${variant}: ${caps[variant].variation ? `{ ...${variant}Capabilities, variation: ${(compact ? compactDataLiteral : jsonDataLiteral)(caps[variant].variation)} }` : `${variant}Capabilities`}`).join(',')}}))());`, ''].join('\n');
-  return { symbol: base, data: compactGeneratedModule([emitData(false), emitData(true), emitData(false, true), emitData(true, true)]),
+  const modules = { symbol: base, data: compactGeneratedModule([emitData(false), emitData(true), emitData(false, true), emitData(true, true)]),
     variation: compactGeneratedModule([variable(false), variable(true)]) };
+  if (input.contentVariation) {
+    modules.contentVariation = renderContentVariationModule(input);
+  }
+  return modules;
+}
+
+/** Использует прежние exact source records; новую геометрию несёт только этот модуль. */
+function renderContentVariationModule(input) {
+  const { icon, contentVariation, variation } = input, compiled = contentVariation.outline;
+  if (Object.keys(contentVariation).some(variant => variant !== 'outline') || !compiled ||
+      compiled.law !== 'annulus.content-counter-scale' || variation?.outline?.law !== 'annulus.counter-scale' ||
+      compiled.source.masterSha256 !== variation.outline.source.masterSha256 ||
+      compiled.source.pathFingerprintSha256 !== variation.outline.source.pathFingerprintSha256) {
+    throw new TypeError('content variation: нужен доказанный Outline content/annulus packet того же master');
+  }
+  const capability = authorContentVariationCapability(compiled);
+  const emit = compact => {
+    const literal = compact ? compactDataLiteral : jsonDataLiteral;
+    return [
+      `import { outline, filled, outlineSource, filledSource, outlineCapabilities, filledCapabilities } from '../ir/symbol-data/${icon}.js';`,
+      "import { createCompiledContentGlyph } from '../ir/content-runtime.js';",
+      "import { createCompiledCapabilities } from '../ir/symbol-runtime.js';",
+      'export { outline, filled };',
+      `export const glyph = /* @__PURE__ */ createCompiledContentGlyph(${jsonDataLiteral(icon)}, { outline: outlineSource, filled: filledSource }, ${literal(compiled)});`,
+      `export const glyphCapabilities = /* @__PURE__ */ createCompiledCapabilities(/* @__PURE__ */ (() => ({ outline: { ...outlineCapabilities, variation: ${literal(capability)} }, filled: filledCapabilities }))());`,
+      '',
+    ].join('\n');
+  };
+  return compactGeneratedModule([emit(false), emit(true)]);
+}
+
+export function contentVariationModuleDeclaration(icon) {
+  if (!SYMBOL_NAME.test(icon)) throw new TypeError('content variation declaration: невалидное имя');
+  const supported = `AuthorContentVariationCapabilities<'${icon}'>`;
+  const source = `AuthorSourceCapabilities<'${icon}'> & Readonly<{ variant: 'filled' }>`;
+  return [
+    "import type { AuthorSourceGlyph, AuthorSourceCapabilities, AuthorSymbolGlyphRequest } from '../ir/author-source.js';",
+    "import type { AuthorContentVariationGlyph, AuthorContentVariationCapabilities, AuthorContentVariationGlyphRequest } from '../ir/author-content-types.js';",
+    'export declare const outline: string;', 'export declare const filled: string;',
+    `export declare function glyph(request?: AuthorSymbolGlyphRequest): AuthorSourceGlyph<'${icon}'>;`,
+    `export declare function glyph(request: AuthorContentVariationGlyphRequest): AuthorContentVariationGlyph<'${icon}'>;`,
+    `export declare function glyphCapabilities(variant?: 'outline'): ${supported};`,
+    `export declare function glyphCapabilities(variant: 'filled'): ${source};`,
+    `export declare function glyphCapabilities(variant: 'outline' | 'filled'): ${supported} | (${source});`, '',
+  ].join('\n');
 }
 
 export function variationModuleDeclaration(icon, law = 'dots.affine') {

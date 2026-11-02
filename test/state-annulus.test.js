@@ -15,7 +15,7 @@ import { createCompiledAnnulusGlyph } from '../src/ir/author-annulus-runtime.js'
 import { createGlyphCompiler } from '../src/ir/compiler.js';
 import { assembleGlyphLayers, assembleGlyphFrame } from '../src/ir/svg-assembly.js';
 import { renderSymbolModules, symbolExportName } from '../scripts/lib/symbol-modules.js';
-import { symbolReleaseProjection } from '../scripts/lib/symbol-modules.js';
+import { symbolReleaseProjection, authorContentVariationIconNames } from '../scripts/lib/symbol-modules.js';
 import { authoredSymbolPayloads } from '../scripts/lib/authored-symbol-payload.js';
 import { authorVariationIconNames, authorVariationLawNames } from '../scripts/lib/author-variation.js';
 import { expandReleaseExports, validateReleaseContract, validateReleaseRuntimeDependencyGraph } from '../scripts/lib/release-contract.js';
@@ -189,7 +189,7 @@ describe('authored shared state enclosure: one geometry law and retained state p
     const captured = read('release/contract.json');
     const projected = symbolReleaseProjection(captured, Object.keys(manifest.icons), Object.keys(capturedStates.groups),
       authorVariationIconNames(originalAnatomy), authorVariationLawNames(originalAnatomy), packet,
-      authorStateVariationGroupNames(capturedStates, originalAnatomy));
+      authorStateVariationGroupNames(capturedStates, originalAnatomy), authorContentVariationIconNames(originalAnatomy));
     expect(projected).toEqual(captured);
     expect(projected.runtimeDependencies.filter(file => file.endsWith('source-packet-runtime.js'))).toHaveLength(1);
     expect(projected.runtimeDependencies.filter(file => file.endsWith('annulus-geometry-runtime.js'))).toHaveLength(1);

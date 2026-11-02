@@ -6,6 +6,7 @@ import type { AuthorAnatomyReceipt, AuthorSourceProvenance } from './author-prov
 
 import type { AuthorVariationCapability, AuthorVariationPartProvenance, AuthorVariationProvenance } from './authored-variation.js';
 import type { AuthorAnnulusVariationCapability, AuthorAnnulusVariationPartProvenance, AuthorAnnulusVariationProvenance } from './author-annulus-types.js';
+import type { AuthorContentVariationCapability, AuthorContentVariationPartProvenance, AuthorContentVariationProvenance } from './author-content-types.js';
 
 import type { RecipeFillPaint, RecipeStrokePaint } from './paint-types.js';
 
@@ -71,7 +72,7 @@ export interface RecipePartProvenance {
   readonly sourceDependency?: IconId;
 }
 
-export type PartProvenance = SourcePartProvenance | ModelPartProvenance | RecipePartProvenance | AuthorVariationPartProvenance | AuthorAnnulusVariationPartProvenance;
+export type PartProvenance = SourcePartProvenance | ModelPartProvenance | RecipePartProvenance | AuthorVariationPartProvenance | AuthorAnnulusVariationPartProvenance | AuthorContentVariationPartProvenance;
 
 export interface GlyphPart {
   readonly id: string;
@@ -125,7 +126,7 @@ export interface DesignSpecGlyphProvenance {
   readonly state: 'candidate';
 }
 
-export type GlyphProvenance = SourceGlyphProvenance | ModelGlyphProvenance | RecipeGlyphProvenance | DesignSpecGlyphProvenance | AuthorVariationProvenance | AuthorAnnulusVariationProvenance;
+export type GlyphProvenance = SourceGlyphProvenance | ModelGlyphProvenance | RecipeGlyphProvenance | DesignSpecGlyphProvenance | AuthorVariationProvenance | AuthorAnnulusVariationProvenance | AuthorContentVariationProvenance;
 
 export interface GlyphIR<TIcon extends string = IconId> {
   readonly icon: TIcon;
@@ -157,7 +158,7 @@ export interface GlyphCapabilities<TIcon extends string = IconId> {
   readonly motion: MotionCapabilities;
   readonly author?: AuthorSourceProvenance;
   readonly anatomy?: AuthorAnatomyReceipt;
-  readonly variation?: AuthorVariationCapability | AuthorAnnulusVariationCapability;
+  readonly variation?: AuthorVariationCapability | AuthorAnnulusVariationCapability | AuthorContentVariationCapability;
 }
 
 export interface AxisContract {

@@ -1,7 +1,7 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { renderSymbolModules, symbolReleaseProjection } from './lib/symbol-modules.js';
+import { renderSymbolModules, symbolReleaseProjection, authorContentVariationIconNames } from './lib/symbol-modules.js';
 import { authoredSymbolPayloads } from './lib/authored-symbol-payload.js';
 import { authorIconNames, renderAuthorTypeProjection } from './lib/author-baseline.js';
 import { authorStateGroupNames } from './lib/author-state-groups.js';
@@ -19,7 +19,7 @@ const variationNames = authorVariationIconNames(authorSpec);
 const payloads = await authoredSymbolPayloads(names);
 const modules = Object.values(payloads).map(renderSymbolModules);
 const contract = symbolReleaseProjection(read('release/contract.json'), names, groups, variationNames, authorVariationLawNames(authorSpec),
-  modules, authorStateVariationGroupNames(stateSpec, authorSpec));
+  modules, authorStateVariationGroupNames(stateSpec, authorSpec), authorContentVariationIconNames(authorSpec));
 writeFileSync(join(root, 'src/ir/author-catalog.generated.ts'), renderAuthorTypeProjection(author));
 writeFileSync(join(root, 'release/contract.json'), `${JSON.stringify(contract, null, 1)}\n`);
 const pkg = read('package.json');

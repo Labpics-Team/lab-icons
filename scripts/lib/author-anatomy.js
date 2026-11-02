@@ -2,7 +2,8 @@ import { createHash } from 'node:crypto';
 import { iconGeometry } from '../../src/core/icon-geometry.js';
 import { validateMotionGesture } from '../../src/core/motion-sampler.js';
 import { compileAuthorVariation } from './author-variation.js';
-import { compileAuthorAnnulus, projectAuthorAnnulusRuntime } from './author-annulus.js';
+import { compileAuthorAnnulus, projectAuthorAnnulusRuntime, compileAuthorContentVariation,
+  projectAuthorContentVariationRuntime } from './author-annulus.js';
 import defaultGrid from '../../semantics/grid.json' with { type: 'json' };
 
 const NAME = /^[a-z][a-z0-9-]*$/;
@@ -256,7 +257,7 @@ function compileAuthorAnatomyResult(baseline, document, grid) {
     refuse('SOURCE_MISMATCH', 'анатомия относится к другому файлу или версии Figma');
   }
 
-  const output = {}, evidence = {};
+  const output = {}, evidence = {}, contentEvidence = {};
   for (const icon of Object.keys(document.icons).sort()) {
     if (!NAME.test(icon) || !Object.hasOwn(baseline.icons, icon)) {
       refuse('ANNOTATION_INVALID', `нет авторского семейства ${icon}`);
@@ -270,7 +271,8 @@ function compileAuthorAnatomyResult(baseline, document, grid) {
       const declaration = variants[variant];
       const label = `${icon}/${variant}`;
       fields(declaration, ['masterSha256', 'pathFingerprintSha256', 'parts', 'gesture',
-        ...(Object.hasOwn(declaration, 'variation') ? ['variation'] : [])], label);
+        ...(Object.hasOwn(declaration, 'variation') ? ['variation'] : []),
+        ...(Object.hasOwn(declaration, 'contentVariation') ? ['contentVariation'] : [])], label);
       const source = baseline.icons[icon][variant];
       if (!HASH.test(declaration.masterSha256) || !HASH.test(declaration.pathFingerprintSha256) ||
           declaration.masterSha256 !== source.author.masterSha256 ||
@@ -321,9 +323,24 @@ function compileAuthorAnatomyResult(baseline, document, grid) {
         refuse('LAW_UNSUPPORTED', `${label}: static parts требуют явного геометрического закона и grid policy`);
       }
       const gestures = declaration.gesture === null ? [] : compileLaw(icon, variant, declaration.gesture, parts, source);
+      let contentVariation;
+      if (declaration.contentVariation) {
+        fields(declaration.contentVariation, ['law', 'parameters', 'enclosurePartId'], `${label}.contentVariation`);
+        if (!variation || variation.law !== 'annulus.counter-scale' || !evidence[label]) {
+          refuse('LAW_UNSUPPORTED', `${label}: contentScale требует уже доказанное авторское обрамление`);
+        }
+        const compiled = compileAuthorContentVariation(source, parts, { ...declaration.contentVariation, variant,
+          source: { ...document.source, masterSha256: declaration.masterSha256,
+            pathFingerprintSha256: declaration.pathFingerprintSha256 } }, grid, evidence[label]);
+        contentVariation = projectAuthorContentVariationRuntime(compiled);
+        contentEvidence[label] = compiled;
+      }
+      // Новый opt-in имеет собственный receipt; прежняя анатомия и её consumers
+      // не меняются из-за добавления отдельно поставляемой деформации.
+      const { contentVariation: _contentVariation, ...legacyDeclaration } = declaration;
       const annotationSha256 = createHash('sha256').update(stableJSON({
         schemaVersion: document.schemaVersion, source: document.source, icon, variant,
-        declaration, gestures, ...(variation && { variation }),
+        declaration: legacyDeclaration, gestures, ...(variation && { variation }),
       })).digest('hex');
       output[label] = {
         ...source.sourceContract,
@@ -332,10 +349,11 @@ function compileAuthorAnatomyResult(baseline, document, grid) {
           pathFingerprintSha256: declaration.pathFingerprintSha256 },
         gestures,
         ...(variation && { variation }),
+        ...(contentVariation && { contentVariation }),
       };
     }
   }
-  return freezeTree({ contracts: output, evidence });
+  return freezeTree({ contracts: output, evidence, contentEvidence });
 }
 
 /** Существующие build consumers сохраняют прежнюю форму source contracts. */

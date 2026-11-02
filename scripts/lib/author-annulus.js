@@ -3,6 +3,8 @@ import { authorPathEntries, sourcePathEntries, iconGeometry } from '../../src/co
 import { parsePathData } from '../../src/core/path-data.js';
 import { normalizeFigmaSvg } from './figma-import.js';
 import { createAuthorExactArithmetic } from './author-exact-arithmetic.js';
+import { contentScaleParameters, admitJointContentScale, materializeProjectedContent,
+  projectedContourAreas } from '../../src/core/annulus-content-geometry.js';
 
 const NUMBER = /[+-]?(?:\d*\.\d+|\d+\.?)(?:[eE][+-]?\d+)?/g;
 const NAME = /^[a-z][a-z0-9-]*$/;
@@ -244,4 +246,136 @@ export function materializeAuthorAnnulus(compiled, variation = {}) {
     parts: compiled.defaults.parts.map((part, index) => index === enclosure.index ? { ...part, d } : part),
     provenance: { kind: 'authored-variation', author: compiled.source,
       variation: { law: compiled.law, geometrySha256: compiled.geometrySha256, parameters: { enclosureEmphasis: emphasis }, scale } } });
+}
+
+/** Совместный закон остаётся у annulus owner; старый packet не получает новых operands. */
+export function compileAuthorContentVariation(source, parts, declaration, grid, calibrated) {
+  if (!fields(declaration, ['law', 'parameters', 'variant', 'enclosurePartId', 'source']) ||
+      declaration.law !== 'annulus.content-counter-scale' ||
+      JSON.stringify(declaration.parameters) !== JSON.stringify(['contentScale', 'enclosureEmphasis'])) {
+    refuse('LAW_UNSUPPORTED', 'Нужен объявленный совместный content/counter-scale.');
+  }
+  const annulus = compileAuthorAnnulus(source, parts, { law: 'annulus.counter-scale', parameter: 'enclosureEmphasis',
+    variant: declaration.variant, enclosurePartId: declaration.enclosurePartId, source: declaration.source }, grid);
+  if (calibrated && calibrated.geometrySha256 !== annulus.geometrySha256) {
+    refuse('SOURCE_MISMATCH', 'Content и enclosure обязаны использовать один calibrated master.');
+  }
+  const center = annulus.enclosure.center, entries = sourcePathEntries(source.artifactSvg).slice(0, -1);
+  const contentParts = entries.map((entry, index) => {
+    const segments = parsePathData(entry.d);
+    if (!segments.length || segments[0].cmd !== 'M' || segments.at(-1).cmd !== 'Z' ||
+        segments.some(segment => !['M', 'L', 'C', 'Q', 'Z'].includes(segment.cmd))) {
+      refuse('TOPOLOGY_UNSUPPORTED', 'Content требует закрытую affine M/L/C/Q/Z программу.');
+    }
+    let open = false;
+    for (const segment of segments) {
+      if (segment.cmd === 'M') { if (open) refuse('TOPOLOGY_UNSUPPORTED', 'Незамкнутый content contour.'); open = true; }
+      else if (!open) refuse('TOPOLOGY_UNSUPPORTED', 'Content команда вне contour.');
+      else if (segment.cmd === 'Z') open = false;
+    }
+    const points = segments.flatMap(segment => segment.cmd === 'Z' ? [] : segment.cmd === 'C'
+      ? [[segment.x1, segment.y1], [segment.x2, segment.y2], [segment.x, segment.y]]
+      : segment.cmd === 'Q' ? [[segment.x1, segment.y1], [segment.x, segment.y]] : [[segment.x, segment.y]]);
+    const commands = segments.map(segment => segment.cmd).join('');
+    const winding = projectedContourAreas(commands, points, center).map(area => Math.sign(area));
+    if (winding.some(sign => !sign)) refuse('TOPOLOGY_UNSUPPORTED', 'Content contour имеет нулевую signed area.');
+    const coordinateOrder = [0, 1].map(axis => [...new Map(points.map((point, pointIndex) => [point[axis], pointIndex]))]
+      .sort((a, b) => a[0] - b[0]).map(([, pointIndex]) => pointIndex));
+    return { id: parts[index].id, index, commands, points, coordinateOrder, winding,
+      sourceLiteralSha256: hash(`${entry.fillRule}\0${entry.d}`) };
+  });
+  const proof = annulus.domain.proof;
+  const fromReceipt = value => fraction(BigInt(value.numerator), BigInt(value.denominator));
+  const innerLower = fromReceipt(proof.innerLower), innerUpper = fromReceipt(proof.innerUpper);
+  const outerLower = fromReceipt(proof.outerLower), contentUpper = fromReceipt(proof.contentUpper);
+  const gap = fromReceipt(proof.minimumGap);
+  const one = [1n, 1n], u = rational(Number.EPSILON / 2), sqrt2 = rational(directedRoot([2n, 1n], 1));
+  // Абсолютная half-ulp граница покрывает gradual underflow каждой операции.
+  const eta = fraction(1n, 1n << 1075n), maximumAnnulusScale = rational(annulus.domain.scale.maximum);
+  const ringUnderflowError = mul(sqrt2, mul(eta, add(mul(maximumAnnulusScale, square(add(one, u))), add(rational(2), u))));
+  const annulusError = add(fromReceipt(proof.euclideanErrorUpper), ringUnderflowError);
+  // s*H применим только к общему C. Никакой centroid или fitting здесь нет.
+  const maximumContentScale = directedNumber(div(sub(outerLower, annulusError), contentUpper), -1);
+  const S = rational(maximumContentScale);
+  const D = max(contentParts.flatMap(part => part.points.flatMap(point => point.map((value, axis) => {
+    const delta = sub(rational(value), rational(center[axis])); return delta[0] < 0n ? [-delta[0], delta[1]] : delta;
+  }))));
+  const A = max(center.map(value => rational(Math.abs(value)))), subtractionError = add(mul(u, D), eta);
+  const displacement = add(D, subtractionError), multiplicationError = add(mul(u, mul(S, displacement)), eta);
+  const additionError = add(mul(u, add(A, add(mul(S, displacement), multiplicationError))), eta);
+  const coordinateError = add(add(mul(S, subtractionError), multiplicationError), additionError);
+  const contentError = mul(sqrt2, coordinateError);
+  const separations = contentParts.flatMap(part => part.coordinateOrder.flatMap((order, axis) =>
+    order.slice(1).map((index, position) => sub(rational(part.points[index][axis]), rational(part.points[order[position]][axis])))));
+  const minimumSeparation = min(separations);
+  const minimumContentScale = directedNumber(div(mul(rational(4), coordinateError), minimumSeparation), 1);
+  const rate = directedNumber(div(contentUpper, innerLower), 1);
+  // runtime считает a-rate*s: добавляем верхнюю границу error обеих операций.
+  const product = mul(rational(rate), S), productError = add(mul(u, product), eta);
+  const evaluationError = add(productError, add(mul(u, add(maximumAnnulusScale, add(product, productError))), eta));
+  const minimum = directedNumber(add(div(add(add(gap, annulusError), contentError), innerLower), evaluationError), 1);
+  const minimumAnnulusScale = directedNumber(div(add(gap, annulusError), innerLower), 1);
+  const domain = { kind: 'joint-radial-bernstein', evaluated: 'actual-binary64-scales',
+    positive: ['contentScale', 'enclosureEmphasis'],
+    contentScale: { minimum: minimumContentScale, minimumInclusive: true,
+      maximum: maximumContentScale, maximumInclusive: true },
+    enclosureScale: { minimum: minimumAnnulusScale, minimumInclusive: true,
+      maximum: annulus.domain.scale.maximum, maximumInclusive: false },
+    clearance: { contentScale: rate, minimum, comparison: 'enclosureScale-contentScale*rate>=minimum' },
+    policy: annulus.domain.policy,
+    proof: { ...proof, contentCoordinateErrorUpper: receipt(coordinateError), contentEuclideanErrorUpper: receipt(contentError),
+      minimumCoordinateSeparation: receipt(minimumSeparation), evaluationErrorUpper: receipt(evaluationError),
+      jointAnnulusEuclideanErrorUpper: receipt(annulusError), halfSubnormalUlp: receipt(eta),
+      pivot: 'proven-enclosure-center', content: 'all-declared-content-control-hulls', topology: 'positive-affine-closed-commands-and-winding' } };
+  admitJointContentScale(domain, 1, 1, refuse);
+  const compiled = { version: 1, law: declaration.law, variant: 'outline', source: annulus.source,
+    annulusGeometrySha256: annulus.geometrySha256, viewBox: annulus.viewBox, domain, defaults: annulus.defaults,
+    enclosure: annulus.enclosure, content: { center, parts: contentParts },
+    declarationSha256: hash(stableJSON(declaration)) };
+  return freeze({ ...compiled, geometrySha256: hash(stableJSON(compiled)) });
+}
+
+/** Полный certificate остаётся build-only; обе старые проекции сохраняют прежние bytes. */
+export function projectAuthorContentVariationRuntime(compiled) {
+  if (compiled?.version !== 1 || compiled.law !== 'annulus.content-counter-scale' || compiled.variant !== 'outline') {
+    refuse('LAW_UNSUPPORTED', 'Нужен скомпилированный Outline content annulus.');
+  }
+  const { enclosure, domain, source } = compiled;
+  const packet = { version: 1, law: compiled.law, geometrySha256: compiled.geometrySha256,
+    annulusGeometrySha256: compiled.annulusGeometrySha256,
+    source: { masterSha256: source.masterSha256, pathFingerprintSha256: source.pathFingerprintSha256 },
+    partIds: compiled.defaults.parts.map(part => part.id),
+    enclosure: { id: enclosure.id, index: enclosure.index, outerD: enclosure.outerD,
+      innerPoints: enclosure.innerPoints.slice(0, -1), center: enclosure.center,
+      outerRadius: enclosure.outerRadius, referenceInnerRadius: enclosure.referenceInnerRadius,
+      referenceThickness: enclosure.referenceThickness }, content: compiled.content,
+    domain: { kind: domain.kind, evaluated: domain.evaluated, positive: domain.positive,
+      contentScale: domain.contentScale, enclosureScale: domain.enclosureScale, clearance: domain.clearance } };
+  return freeze({ ...packet, packetSha256: hash(stableJSON(packet)) });
+}
+
+export function authorContentVariationCapability(compiled) {
+  return freeze({ version: 1, law: 'annulus.content-counter-scale', geometrySha256: compiled.geometrySha256,
+    defaults: { contentScale: 1, enclosureEmphasis: 1 }, domain: compiled.domain,
+    targets: { svg: 'supported', webEffect: 'existing-part-gestures', lottie: 'not-exported', sfSymbols: 'not-exported' } });
+}
+
+/** Probe использует поставляемый content materializer; default сохраняет точные SVG. */
+export function materializeAuthorContentVariation(compiled, variation = {}) {
+  const parameters = contentScaleParameters(variation, refuse), { contentScale, enclosureEmphasis } = parameters;
+  if (contentScale === 1 && enclosureEmphasis === 1) return compiled.defaults;
+  const enclosure = compiled.enclosure, scale = enclosureEmphasis === 1 ? 1
+    : (enclosure.outerRadius - enclosureEmphasis * enclosure.referenceThickness) / enclosure.referenceInnerRadius;
+  admitJointContentScale(compiled.domain, contentScale, scale, refuse);
+  const projected = contentScale === 1 ? [] : materializeProjectedContent(compiled.content, contentScale, refuse);
+  const ring = enclosureEmphasis === 1 ? compiled.defaults : materializeAuthorAnnulus({ ...compiled,
+    domain: { scale: compiled.domain.enclosureScale } }, { enclosureEmphasis });
+  const changes = new Map(projected.map(part => [part.index, part.d]));
+  if (enclosureEmphasis !== 1) changes.set(enclosure.index, ring.parts[enclosure.index].d);
+  const parts = compiled.defaults.parts.map((part, index) => changes.has(index) ? { ...part, d: changes.get(index) } : part);
+  const replace = svg => compiled.defaults.parts.reduce((value, part, index) =>
+    changes.has(index) ? value.replace(`d="${part.d}"`, `d="${changes.get(index)}"`) : value, svg);
+  return freeze({ rawSvg: replace(compiled.defaults.rawSvg), artifactSvg: replace(compiled.defaults.artifactSvg), parts,
+    provenance: { kind: 'authored-variation', author: compiled.source,
+      variation: { version: 1, law: compiled.law, geometrySha256: compiled.geometrySha256, parameters, scale } } });
 }

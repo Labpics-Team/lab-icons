@@ -248,3 +248,70 @@ progress.animate(result.effect.to, {
 Тест `test/authored-contour-states.test.js` проверяет исходные строки, перенос,
 обратный ход, отказы и опасную промежуточную форму. Приёмка браузерного
 исполнения, размеров 16/24/48 и оптического качества проводится отдельно.
+
+## Содержание внутри круглого обрамления
+
+`content-variations/<icon>` совместно изменяет всё содержание и внутренний
+контур кольца. Входы доступны для `plus-circle`, `minus-circle`,
+`checkmark-circle`, `close-circle`, `question-circle`, `alert-circle`,
+`play-circle` и `pause-circle` в Outline.
+
+```ts
+import { glyph, glyphCapabilities } from '@labpics/icons/content-variations/question-circle';
+
+const exact = glyph();
+const presentation = glyph({
+  variation: { contentScale: 0.9, enclosureEmphasis: 1.1 },
+});
+const domain = glyphCapabilities().variation.domain;
+```
+
+`contentScale` масштабирует все content-части вокруг проверенного центра
+обрамления: точку и стержень вопроса, обе полосы паузы и весь знак остальных
+участников. Их взаимное расположение, команды, замыкание и направление обхода
+сохраняются. Внешний контур кольца остаётся авторским. `enclosureEmphasis`
+изменяет только внутренний контур кольца по прежнему annulus закону.
+`presentation` содержит готовые `d`, `svg` и якоря частей; пересчитывайте его
+один раз по событию изменения профиля. Движение использует существующий Motion API.
+
+Оба множителя по умолчанию равны 1. Запрос без variation и явный `1/1`
+возвращают тот же точный source-объект. Обычный Filled доступен без variation;
+любая его variation, включая `1/1`, возвращает `AUTHOR_VARIATION_UNSUPPORTED`.
+`source-only` с отличным от default запросом возвращает `AUTHOR_PARITY_REQUIRED`.
+
+Допуск совместный: два параметра могут пройти отдельно и не пройти вместе.
+Например, `plus-circle` принимает `contentScale: 1.3` и
+`enclosureEmphasis: 2.2` отдельно. Их сочетание возвращает
+`VARIATION_OUTSIDE_DOMAIN`. `domain.clearance` проверяет фактический binary64
+масштаб внутреннего контура относительно масштаба содержания. Build compiler
+выводит достаточную радиальную границу кривой кольца из Bernstein coefficients,
+границу всего содержания из control hull и бюджет округления обеих деформаций
+и самого сравнения, включая gradual underflow. Каждый master имеет свой допуск.
+Слишком малый множитель, схлопнувшийся контур или потеря различимости controls
+возвращают `VARIATION_UNREPRESENTABLE`. Нечисловые, неположительные и неизвестные
+параметры возвращают `INVALID_VARIATION`. Значения автоматически не подгоняются.
+
+Масштаб содержания меняет его размер, толщину и внутренние промежутки вместе.
+Это полезная деформация конкретной анатомии, с отдельной оптической приёмкой
+соседних кнопок. Полные `opsz` и независимая ось веса требуют своей калибровки:
+[OpenType 1.9.1](https://learn.microsoft.com/en-us/typography/opentype/spec/dvaraxistag_opsz)
+описывает изменение дизайна для размера, а
+[IBM](https://www.ibm.com/design/language/iconography/ui-icons/usage/)
+отдельно требует оптического выравнивания и соответствия размера контексту.
+Одинаковый bbox не определяет такой профиль.
+
+Отдельный import сохраняет прежние `symbols/<icon>` и `variations/<icon>`:
+их runtime, данные, capabilities и лимиты остаются прежними. Новый вход
+поставляет подготовленную программу допустимых path-команд и controls;
+runtime не разбирает произвольный SVG и не ищет семантические части.
+Build связывает программу с объявленной анатомией и master receipts,
+а загрузка проверяет source и целостность packet. Affine преобразование всех
+точек и controls соответствует
+[SVG 2](https://www.w3.org/TR/SVG2/coords.html) и
+[FontTools TransformPen](https://fonttools.readthedocs.io/en/latest/pens/transformPen.html).
+
+`test/authored-content-geometry.test.js` сверяет raw H/V/C/L operands и
+материализованный binary64 зазор независимым Fraction oracle.
+`test/content-optin-projection.test.js` исполняет все восемь публичных входов
+и сравнивает прежние emitted bytes. `test/content-optin-types.test.js`
+проверяет positive и negative consumer в Bundler и NodeNext.
