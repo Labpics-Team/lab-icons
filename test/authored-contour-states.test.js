@@ -235,6 +235,7 @@ describe('переносимый prepared sampler', () => {
       const name = groupName('filled');
       writeFileSync(join(directory, 'states', `${name}.js`), renderStateGroupModule(payloads[name]));
       const native = await import(pathToFileURL(join(directory, 'states', `${name}.js`)).href);
+      expect(Object.keys(native).sort()).toEqual(read('release/export-surface.json')[`./states/${name}`]);
       const independent = await import(pathToFileURL(join(directory, 'ir/contour-runtime.js')).href);
       const transported = JSON.parse(JSON.stringify(native.compileStateEffect('vertical', { duration: 300 }).effect));
       expect(independent.prepareContourStateEffect(transported).sample(0.37)).toEqual(prepareContourStateEffect(effect).sample(0.37));

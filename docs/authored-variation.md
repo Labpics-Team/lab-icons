@@ -1,11 +1,11 @@
 # Авторские точки: размер и расстояние
 
-`symbols/ellipsis-horizontal` и `symbols/ellipsis-vertical` сохраняют независимые
+`variations/ellipsis-horizontal` и `variations/ellipsis-vertical` сохраняют независимые
 Outline/Filled masters Figma `2416636003859748575`. Два множителя меняют настоящие
 кубические контуры каждой точки:
 
 ```ts
-import { glyph, glyphCapabilities } from '@labpics/icons/symbols/ellipsis-horizontal';
+import { glyph, glyphCapabilities } from '@labpics/icons/variations/ellipsis-horizontal';
 import { renderGlyphSvg } from '@labpics/icons/ir/render';
 
 const symbol = glyph({
@@ -27,6 +27,19 @@ raw master и path receipts и компилирует только три сам
 контура `MCCCCZ`. Он сохраняет все исходные operands, включая разные экстремумы
 Filled dots. Runtime получает готовые точки, pivots и коэффициенты; он не разбирает
 `d` и не ищет предполагаемые части. Потребитель задаёт только размер и расстояние.
+
+Обычный `symbols/<id>` возвращает точный source glyph и source capabilities.
+Он не загружает variation domain или геометрический runtime; запрос `variation`
+возвращает `AUTHOR_VARIATION_UNSUPPORTED`. Вариативность выбирается явным
+синхронным импортом `variations/<id>`. Default в обоих путях — один frozen
+source объект, с теми же author/anatomy receipts. Общие данные компилируются
+в закрытый модуль одного символа; потребитель использует только публичные пути.
+
+Возможности проверяются для запрошенного начертания через
+`glyphCapabilities('outline' | 'filled')`. Наличие family entrypoint само по
+себе не является обещанием поддержки всех начертаний или осей. Текущие dots
+имеют доказанные независимые формы обоих начертаний; это условие их закона,
+не универсальное правило для будущих семейств.
 
 Область `domain` — пересечение линейных неравенств по двум положительным
 множителям. Каждое имеет вид

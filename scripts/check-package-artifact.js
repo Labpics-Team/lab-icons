@@ -602,17 +602,20 @@ export function checkPackageArtifact({
         `    const renderedRoles = [...current.svg.matchAll(/<path\\b[^>]*\\bdata-role="([^"]+)"/g)].map(match => match[1]);\n` +
         `    if (JSON.stringify(renderedParts) !== JSON.stringify(expected.parts.map(part => part.id)) || JSON.stringify(renderedRoles) !== JSON.stringify(expected.parts.map(part => part.role))) throw new Error('current rendered anatomy differs: ' + icon + '/' + variant);\n` +
         `    const capabilities = symbol.glyphCapabilities(variant);\n` +
+        `    if (Object.hasOwn(capabilities, 'variation')) throw new Error('source symbol advertised opt-in variation: ' + icon + '/' + variant);\n` +
         `    if (capabilities.icon !== icon || capabilities.variant !== variant || capabilities.modelState !== null || capabilities.supportedAxes.length || Object.keys(capabilities.axes).length || JSON.stringify(capabilities.motion) !== JSON.stringify(expected.motion) || JSON.stringify(capabilities.anatomy ?? null) !== JSON.stringify(expected.anatomy) || JSON.stringify(capabilities.author) !== JSON.stringify(expected.author)) throw new Error('current source inherited stale admission: ' + icon + '/' + variant);\n` +
         `    const foreignMotion = compileSymbolEffect(current, capabilities, 'time.advance', { duration: 360 });\n` +
         `    if (foreignMotion.ok || foreignMotion.reason.code !== (expected.motion.state === 'gesture-ready' ? 'GESTURE_UNSUPPORTED' : 'SEMANTIC_MOTION_UNAVAILABLE')) throw new Error('current motion did not refuse precisely: ' + icon + '/' + variant);\n` +
         `    if (expected.variation) {\n` +
-        `      if (capabilities.variation?.geometrySha256 !== expected.variation.geometrySha256 || JSON.stringify(capabilities.variation.domain) !== JSON.stringify(expected.variation.domain)) throw new Error('current authored variation policy differs: ' + icon + '/' + variant);\n` +
-        `      if (symbol.glyph({ variant, variation: { dotScale: 1, spacingScale: 1 } }) !== current) throw new Error('authored variation identity roundtripped');\n` +
-        `      const varied = symbol.glyph({ variant, variation: { dotScale: 1.1, spacingScale: 0.9 } });\n` +
+        `      const variable = await import('@labpics/icons/variations/' + icon); const variableCapabilities = variable.glyphCapabilities(variant);\n` +
+        `      if (variable.glyph({ variant }) !== current || variableCapabilities.author !== capabilities.author || variableCapabilities.anatomy !== capabilities.anatomy) throw new Error('opt-in variation duplicated authored source: ' + icon + '/' + variant);\n` +
+        `      if (variableCapabilities.variation?.geometrySha256 !== expected.variation.geometrySha256 || JSON.stringify(variableCapabilities.variation.domain) !== JSON.stringify(expected.variation.domain)) throw new Error('current authored variation policy differs: ' + icon + '/' + variant);\n` +
+        `      if (variable.glyph({ variant, variation: { dotScale: 1, spacingScale: 1 } }) !== current) throw new Error('authored variation identity roundtripped');\n` +
+        `      const varied = variable.glyph({ variant, variation: { dotScale: 1.1, spacingScale: 0.9 } });\n` +
         `      if (varied.provenance.kind !== 'authored-variation' || varied.d === current.d || varied.svg === current.svg || varied.provenance.variation.geometrySha256 !== expected.variation.geometrySha256 || JSON.stringify(varied.provenance.author) !== JSON.stringify(expected.author)) throw new Error('authored variation not materialized: ' + icon + '/' + variant);\n` +
         `      if (JSON.stringify(varied.parts.map(part => [part.id, part.fillRule, part.topologySignature])) !== JSON.stringify(current.parts.map(part => [part.id, part.fillRule, part.topologySignature])) || varied.parts.some((part, index) => part.d === current.parts[index].d || !varied.svg.includes('d="' + part.d + '"'))) throw new Error('authored variation lost parts/SVG: ' + icon + '/' + variant);\n` +
-        `      for (const [gesture] of Object.entries(expected.effects)) if (!compileSymbolEffect(varied, capabilities, gesture, { duration: 360 }).ok) throw new Error('authored variation lost opacity gesture');\n` +
-        `      let outside = false; try { symbol.glyph({ variant, variation: { dotScale: 3, spacingScale: 0.5 } }); } catch (error) { outside = error.code === 'VARIATION_OUTSIDE_DOMAIN'; }\n` +
+        `      for (const [gesture] of Object.entries(expected.effects)) if (!compileSymbolEffect(varied, variableCapabilities, gesture, { duration: 360 }).ok) throw new Error('authored variation lost opacity gesture');\n` +
+        `      let outside = false; try { variable.glyph({ variant, variation: { dotScale: 3, spacingScale: 0.5 } }); } catch (error) { outside = error.code === 'VARIATION_OUTSIDE_DOMAIN'; }\n` +
         `      if (!outside) throw new Error('authored variation admitted overlapping controls');\n` +
         `      const lottie = await import('@labpics/icons/lottie/' + icon); const refusedTarget = lottie.exportLottie({ variant, variation: { dotScale: 1.1 } });\n` +
         `      if (refusedTarget.ok || refusedTarget.reason.code !== 'VARIATION_UNSUPPORTED') throw new Error('Lottie silently exported default geometry for variation');\n` +
@@ -657,8 +660,9 @@ export function checkPackageArtifact({
         `import { buildDirectionalArrow, type RecipeResult } from '@labpics/icons/ir/recipes';\n` +
         `import { glyph as symbolGlyph, glyphCapabilities as symbolCapabilities } from '@labpics/icons/symbols/time';\n` +
         `import { glyph as addedGlyph, glyphCapabilities as addedCapabilities } from '@labpics/icons/symbols/align-bottom';\n` +
-        `import { glyph as activityGlyph, glyphCapabilities as activityCapabilities } from '@labpics/icons/symbols/ellipsis-horizontal';\n` +
-        `import { glyph as verticalGlyph } from '@labpics/icons/symbols/ellipsis-vertical';\n` +
+        `import { glyph as activityGlyph, glyphCapabilities as activityCapabilities } from '@labpics/icons/variations/ellipsis-horizontal';\n` +
+        `import { glyph as verticalGlyph } from '@labpics/icons/variations/ellipsis-vertical';\n` +
+        `import { glyph as sourceActivityGlyph } from '@labpics/icons/symbols/ellipsis-horizontal';\n` +
         `import { glyph as ellipseGlyph } from '@labpics/icons/symbols/ellipse';\n` +
         `import { exportLottie as exportActivityLottie } from '@labpics/icons/lottie/ellipsis-horizontal';\n` +
         `import { compileSymbolEffect, type SymbolEffectResult, type SymbolOpacityStage } from '@labpics/icons/motion';\n` +
@@ -676,6 +680,8 @@ export function checkPackageArtifact({
         `ellipseGlyph(typedVariationRequest);\n` +
         `// @ts-expect-error: геометрия ellipse не получает triad variation по сходству.\n` +
         `ellipseGlyph({ variation: { dotScale: 1.1 } });\n` +
+        `// @ts-expect-error: обычный source импорт не принимает opt-in variation.\n` +
+        `sourceActivityGlyph(typedVariationRequest);\n` +
         `// @ts-expect-error: runtime не принимает controls или raw path.\n` +
         `activityGlyph({ variation: { d: 'M0 0Z' } });\n` +
         `// @ts-expect-error: target с авторскими contours не объявляет variation export.\n` +

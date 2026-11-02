@@ -15,6 +15,17 @@ export class AuthorVariationError extends Error {
 }
 const refuse = (code, message) => { throw new AuthorVariationError(code, message); };
 
+/** Имена opt-in outputs выводятся из того же author spec, что компилирует закон. */
+export function authorVariationIconNames(spec) {
+  if (!spec?.icons || typeof spec.icons !== 'object' || Array.isArray(spec.icons)) refuse('LAW_UNSUPPORTED', 'Нужен author anatomy spec.');
+  return Object.entries(spec.icons).filter(([icon, variants]) => {
+    const present = ['outline', 'filled'].map(variant => !!variants?.[variant]?.variation);
+    const dots = Object.values(variants ?? {}).some(declaration => declaration?.variation?.law === 'dots.affine');
+    if (dots && present[0] !== present[1]) refuse('LAW_UNSUPPORTED', `${icon}: текущий dots.affine требует обеих независимых авторских форм.`);
+    return present.some(Boolean);
+  }).map(([icon]) => icon).sort();
+}
+
 /** Части и их смысл принадлежат закреплённому master, не path-вводу потребителя. */
 export function compileAuthorVariation(source, parts, declaration, grid) {
   if (!declaration || Object.keys(declaration).sort().join(',') !== 'axis,law' ||

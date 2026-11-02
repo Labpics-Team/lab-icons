@@ -41,6 +41,8 @@
   "dist/ir/state-common-types.d.ts",
   "dist/ir/state-runtime.js",
   "dist/ir/state-types.d.ts",
+  "dist/ir/symbol-data/ellipsis-horizontal.js",
+  "dist/ir/symbol-data/ellipsis-vertical.js",
   "dist/ir/symbol-runtime.js",
   "dist/ir/variation-runtime.js",
   "dist/lottie/accessibility.d.ts",
@@ -1374,7 +1376,11 @@
   "dist/symbols/warning.d.ts",
   "dist/symbols/warning.js",
   "dist/symbols/waveform.d.ts",
-  "dist/symbols/waveform.js"
+  "dist/symbols/waveform.js",
+  "dist/variations/ellipsis-horizontal.d.ts",
+  "dist/variations/ellipsis-horizontal.js",
+  "dist/variations/ellipsis-vertical.d.ts",
+  "dist/variations/ellipsis-vertical.js"
  ],
  "typeDependencies": [
   "dist/authoring/design-spec.d.ts",
@@ -1396,6 +1402,8 @@
   "dist/ir/lottie-runtime.js",
   "dist/ir/request.js",
   "dist/ir/state-runtime.js",
+  "dist/ir/symbol-data/ellipsis-horizontal.js",
+  "dist/ir/symbol-data/ellipsis-vertical.js",
   "dist/ir/symbol-runtime.js",
   "dist/ir/variation-runtime.js"
  ],
@@ -1439,6 +1447,10 @@
   "./states/*": {
    "types": "./dist/states/*.d.ts",
    "import": "./dist/states/*.js"
+  },
+  "./variations/*": {
+   "types": "./dist/variations/*.d.ts",
+   "import": "./dist/variations/*.js"
   }
  }
 }

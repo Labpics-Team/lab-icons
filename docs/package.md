@@ -48,6 +48,7 @@ pnpm add @labpics/icons
 | `@labpics/icons/symbols/*` | `./dist/symbols/*.js` | `./dist/symbols/*.d.ts` |
 | `@labpics/icons/lottie/*` | `./dist/lottie/*.js` | `./dist/lottie/*.d.ts` |
 | `@labpics/icons/states/*` | `./dist/states/*.js` | `./dist/states/*.d.ts` |
+| `@labpics/icons/variations/*` | `./dist/variations/*.js` | `./dist/variations/*.d.ts` |
 
 ## Файлы контракта поставки
 
@@ -83,6 +84,8 @@ pnpm add @labpics/icons
 - `dist/ir/state-common-types.d.ts`
 - `dist/ir/state-runtime.js`
 - `dist/ir/state-types.d.ts`
+- `dist/ir/symbol-data/ellipsis-horizontal.js`
+- `dist/ir/symbol-data/ellipsis-vertical.js`
 - `dist/ir/symbol-runtime.js`
 - `dist/ir/variation-runtime.js`
 - `dist/lottie/accessibility.d.ts`
@@ -1417,6 +1420,10 @@ pnpm add @labpics/icons
 - `dist/symbols/warning.js`
 - `dist/symbols/waveform.d.ts`
 - `dist/symbols/waveform.js`
+- `dist/variations/ellipsis-horizontal.d.ts`
+- `dist/variations/ellipsis-horizontal.js`
+- `dist/variations/ellipsis-vertical.d.ts`
+- `dist/variations/ellipsis-vertical.js`
 
 ## Транзитивные декларации типов
 

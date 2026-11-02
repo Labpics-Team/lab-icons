@@ -26,6 +26,10 @@ const entries = {
   'full-ir-opt-in': "import { glyph } from '@labpics/icons/ir';\nconsole.log(glyph({ icon: 'alert' }));\n",
   'full-catalog': oldConsumers.scenarios['full-catalog'].entry,
   'recipes-only': oldConsumers.scenarios['recipes-only'].entry,
+  'source-ellipsis-horizontal': "import { glyph } from '@labpics/icons/symbols/ellipsis-horizontal';\nconsole.log(glyph());\n",
+  'varied-ellipsis-horizontal': "import { glyph } from '@labpics/icons/variations/ellipsis-horizontal';\nconsole.log(glyph({ variation: { dotScale: 1.1, spacingScale: 0.9 } }));\n",
+  'source-ellipsis-vertical': "import { glyph } from '@labpics/icons/symbols/ellipsis-vertical';\nconsole.log(glyph());\n",
+  'varied-ellipsis-vertical': "import { glyph } from '@labpics/icons/variations/ellipsis-vertical';\nconsole.log(glyph({ variation: { dotScale: 1.1, spacingScale: 0.9 } }));\n",
 };
 const artifacts = {};
 const artifactMeasurements = {};
@@ -38,7 +42,7 @@ for (const file of contract.files) {
   const old = previous.artifacts[file];
   const forbiddenNeedles = [...new Set([
     ...(old?.forbiddenNeedles ?? []), 'sourceMappingURL',
-    ...(/^dist\/(symbols|states)\//.test(file) ? ['semantics/catalog.json', 'anatomy.runtime.json'] : []),
+    ...(/^dist\/(symbols|states|variations)\//.test(file) ? ['semantics/catalog.json', 'anatomy.runtime.json'] : []),
   ])];
   artifactMeasurements[file] = {
     ...measured,

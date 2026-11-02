@@ -1848,7 +1848,22 @@
     "lottieCapabilities"
   ],
   "./motion": [
-    "compileSymbolEffect"
+    "compileSymbolEffect",
+    "prepareContourStateEffect"
+  ],
+  "./states/ellipsis-orientation-filled": [
+    "compileStateEffect",
+    "exportStateTransition",
+    "render",
+    "renderStateSvg",
+    "stateCapabilities"
+  ],
+  "./states/ellipsis-orientation-outline": [
+    "compileStateEffect",
+    "exportStateTransition",
+    "render",
+    "renderStateSvg",
+    "stateCapabilities"
   ],
   "./states/expression-face": [
     "compileStateEffect",
@@ -3846,6 +3861,18 @@
     "outline"
   ],
   "./symbols/waveform": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./variations/ellipsis-horizontal": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./variations/ellipsis-vertical": [
     "filled",
     "glyph",
     "glyphCapabilities",

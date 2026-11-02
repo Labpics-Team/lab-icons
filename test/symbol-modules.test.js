@@ -2,10 +2,11 @@ import { describe, expect, it } from 'vitest';
 import { build } from 'esbuild';
 import { fileURLToPath } from 'node:url';
 import { readFileSync } from 'node:fs';
-import { renderSymbolModule, symbolExportName, symbolModuleDeclaration, symbolReleaseProjection } from '../scripts/lib/symbol-modules.js';
+import { renderSymbolModule, renderSymbolModules, symbolExportName, symbolModuleDeclaration, symbolReleaseProjection } from '../scripts/lib/symbol-modules.js';
 import { expandReleaseExports, runtimeModuleSpecifiers, validateReleaseContract, validateReleaseRuntimeDependencyGraph } from '../scripts/lib/release-contract.js';
 import { authorSymbolPayload, loadAuthorBaseline } from '../scripts/lib/author-baseline.js';
 import { compileAuthorAnatomy } from '../scripts/lib/author-anatomy.js';
+import { authorVariationIconNames } from '../scripts/lib/author-variation.js';
 import { createCompiledVariationGlyph } from '../src/ir/authored-variation.js';
 import { createGlyphCompiler } from '../src/ir/compiler.js';
 
@@ -15,13 +16,17 @@ const base = {
   exports: Object.fromEntries([['.', 'index'], ['./ir', 'ir/index'], ['./ir/recipes', 'ir/recipes'], ['./ir/candidates', 'ir/candidates']].map(([key, file]) => [key, { types: `./dist/${file}.d.ts`, import: `./dist/${file}.js` }])),
 };
 
-async function consumeSymbol(contents, entry) {
+async function consumeSymbol(contents, entry, projections = {}) {
   const output = await build({
     stdin: { contents: entry, loader: 'js' },
     bundle: true, write: false, minify: true, platform: 'browser', format: 'esm', logLevel: 'silent',
     plugins: [{ name: 'single-symbol-control', setup(plugin) {
       plugin.onResolve({ filter: /^test-symbol$/ }, () => ({ path: 'symbol', namespace: 'symbol', sideEffects: false }));
       plugin.onLoad({ filter: /.*/, namespace: 'symbol' }, () => ({ contents, loader: 'js' }));
+      plugin.onResolve({ filter: /^test-variation$/ }, () => ({ path: 'variation', namespace: 'variation' }));
+      plugin.onLoad({ filter: /.*/, namespace: 'variation' }, () => ({ contents: projections.variation, loader: 'js' }));
+      plugin.onResolve({ filter: /symbol-data\/[a-z0-9-]+\.js$/ }, () => ({ path: 'data', namespace: 'symbol-data', sideEffects: false }));
+      plugin.onLoad({ filter: /.*/, namespace: 'symbol-data' }, () => ({ contents: projections.data, loader: 'js' }));
       plugin.onResolve({ filter: /symbol-runtime\.js$/ }, () => ({ path: fileURLToPath(new URL('../src/ir/symbol-runtime.ts', import.meta.url)) }));
       plugin.onResolve({ filter: /variation-runtime\.js$/ }, () => ({ path: fileURLToPath(new URL('../src/ir/authored-variation.ts', import.meta.url)) }));
     } }],
@@ -43,6 +48,13 @@ function metadataControl() {
 
 async function importSymbol(contents) {
   const bundled = await consumeSymbol(contents, 'export { glyph, glyphCapabilities, outline, filled } from "test-symbol";');
+  return import(`data:text/javascript;base64,${Buffer.from(bundled).toString('base64')}`);
+}
+
+async function importVariationSymbol(input) {
+  const projections = renderSymbolModules(input);
+  const bundled = await consumeSymbol(projections.symbol, 'export { glyph, glyphCapabilities, outline, filled } from "test-variation"; ' +
+    'export { glyph as sourceGlyph, glyphCapabilities as sourceCapabilities } from "test-symbol";', projections);
   return import(`data:text/javascript;base64,${Buffer.from(bundled).toString('base64')}`);
 }
 
@@ -86,6 +98,20 @@ describe('замкнутые symbol modules', () => {
     expect(contract.files.some(file => file.includes('*'))).toBe(false);
     expect(() => symbolReleaseProjection(base, ['time', 'time'])).toThrow();
     expect(() => symbolReleaseProjection(base, ['../escape'])).toThrow();
+    const variable = symbolReleaseProjection(base, ['time', 'alert'], [], ['alert']);
+    expect(validateReleaseContract(variable)).toEqual([]);
+    expect(expandReleaseExports(variable)['./variations/alert']).toEqual({ types: './dist/variations/alert.d.ts', import: './dist/variations/alert.js' });
+    expect(variable.runtimeDependencies).toContain('dist/ir/symbol-data/alert.js');
+    expect(variable.runtimeDependencies).not.toContain('dist/ir/symbol-data/time.js');
+    expect(() => symbolReleaseProjection(base, ['alert'], [], ['time'])).toThrow();
+  });
+
+  it('variation outputs происходят из author spec; обе формы требуются текущему dots law', () => {
+    expect(authorVariationIconNames({ icons: { plain: { outline: {}, filled: {} },
+      proven: { outline: { variation: { law: 'dots.affine' } }, filled: { variation: { law: 'dots.affine' } } } } })).toEqual(['proven']);
+    expect(() => authorVariationIconNames({ icons: { partial: { outline: { variation: { law: 'dots.affine' } }, filled: {} } } }))
+      .toThrow(expect.objectContaining({ code: 'LAW_UNSUPPORTED' }));
+    expect(authorVariationIconNames({ icons: { next: { outline: { variation: { law: 'future-law' } }, filled: {} } } })).toEqual(['next']);
   });
 
   it('source-only module не импортирует ни compiler, ни геометрию соседнего символа', () => {
@@ -184,11 +210,13 @@ describe('замкнутые symbol modules', () => {
 
   it.each(['ellipsis-horizontal', 'ellipsis-vertical'])('%s сохраняет реальную authored variation в generated consumer', async icon => {
     const input = authoredControl(icon), before = structuredClone(input);
-    const module = renderSymbolModule(input);
-    const consumer = await importSymbol(module);
+    const consumer = await importVariationSymbol(input);
     const expectedGlyph = createCompiledVariationGlyph(icon, structuredClone(input.source), structuredClone(input.variation));
     for (const variant of ['outline', 'filled']) {
       expect(consumer.glyph({ variant })).toEqual(input.source[variant]);
+      expect(consumer.glyph({ variant })).toBe(consumer.sourceGlyph({ variant }));
+      expect(consumer.glyphCapabilities(variant).author).toBe(consumer.sourceCapabilities(variant).author);
+      expect(consumer.sourceCapabilities(variant)).not.toHaveProperty('variation');
       expect(consumer.glyph({ variant, variation: { dotScale: 1.1, spacingScale: 0.9 } }))
         .toEqual(expectedGlyph({ variant, variation: { dotScale: 1.1, spacingScale: 0.9 } }));
       expect(consumer.glyphCapabilities(variant)).toEqual(JSON.parse(JSON.stringify(input.capabilities[variant])));
@@ -207,31 +235,37 @@ describe('замкнутые symbol modules', () => {
     const input = structuredClone(authoredControl('ellipsis-horizontal'));
     input.source.outline.consumerSentinel = 'AUTHOR_IR_SENTINEL';
     input.capabilities.outline.consumerSentinel = 'AUTHOR_CAPS_SENTINEL';
-    const actual = await consumeSymbol(renderSymbolModule(input), `import { ${name} } from "test-symbol"; console.log(${name}());`);
+    const projections = renderSymbolModules(input);
+    const actual = await consumeSymbol(projections.symbol, `import { ${name} } from "test-variation"; console.log(${name}());`, projections);
     expect(actual).toContain(retained);
     expect(actual).not.toContain(discarded);
     expect(actual).toContain('convex-linear');
+    if (name === 'glyph') {
+      expect(actual).toContain('VARIATION_UNREPRESENTABLE');
+      expect(actual).toContain('Uint32Array');
+    } else {
+      expect(actual).not.toContain('VARIATION_UNREPRESENTABLE');
+      expect(actual).not.toContain('Uint32Array');
+    }
   });
 
   it('static variation consumer удаляет domain, runtime и геометрию', async () => {
     const input = structuredClone(authoredControl('ellipsis-horizontal'));
     input.staticSvg.outline = 'SVG_STATIC_CONTROL';
-    const actual = await consumeSymbol(renderSymbolModule(input), 'import { outline } from "test-symbol"; console.log(outline);');
+    const projections = renderSymbolModules(input);
+    const actual = await consumeSymbol(projections.symbol, 'import { outline } from "test-variation"; console.log(outline);', projections);
     expect(actual).toContain('SVG_STATIC_CONTROL');
     for (const discarded of ['convex-linear', 'dotScale', 'geometrySha256', 'VARIATION_OUTSIDE_DOMAIN', 'AUTHOR_PARITY_REQUIRED']) {
       expect(actual).not.toContain(discarded);
     }
   });
 
-  it('разные и отсутствующие variation domains сохраняют исходные данные', async () => {
+  it('разные и отсутствующие capability domains не публикуются как доказанная variation', () => {
     const input = structuredClone(authoredControl('ellipsis-horizontal'));
     input.capabilities.outline.variation.domain.policy.gridSha256 = 'OTHER_CAPABILITY_DOMAIN';
     delete input.capabilities.filled.variation.domain;
-    const before = structuredClone(input), module = renderSymbolModule(input);
-    const consumer = await importSymbol(module);
-    expect(consumer.glyphCapabilities()).toEqual(JSON.parse(JSON.stringify(input.capabilities.outline)));
-    expect(consumer.glyphCapabilities('filled').variation).not.toHaveProperty('domain');
-    expect(consumer.glyph({ variation: { dotScale: 1.1 } }).provenance.kind).toBe('authored-variation');
+    const before = structuredClone(input);
+    expect(() => renderSymbolModules(input)).toThrow(/compiled domain и capability не совпадают/);
     expect(input).toEqual(before);
   });
 
@@ -239,9 +273,29 @@ describe('замкнутые symbol modules', () => {
     const input = structuredClone(authoredControl('ellipsis-horizontal'));
     input.variation.filled.domain = structuredClone(input.variation.outline.domain);
     input.capabilities.filled.variation.domain = structuredClone(input.variation.outline.domain);
-    const consumer = await importSymbol(renderSymbolModule(input));
+    const consumer = await importVariationSymbol(input);
     expect(consumer.glyphCapabilities().variation.domain).toEqual(consumer.glyphCapabilities('filled').variation.domain);
     expect(consumer.glyphCapabilities().variation.domain).not.toBe(consumer.glyphCapabilities('filled').variation.domain);
+  });
+
+  it.each(['ellipsis-horizontal', 'ellipsis-vertical'])('%s ordinary source consumer исключает variation и сохраняет точный отказ', async icon => {
+    const input = structuredClone(authoredControl(icon));
+    input.capabilities.outline.consumerSentinel = 'AUTHOR_CAPS_SENTINEL';
+    const projections = renderSymbolModules(input);
+    const actual = await consumeSymbol(projections.symbol, 'export { glyph } from "test-symbol";', projections);
+    for (const marker of ['convex-linear', 'VARIATION_OUTSIDE_DOMAIN', 'geometrySha256', 'AUTHOR_CAPS_SENTINEL']) expect(actual).not.toContain(marker);
+    const consumer = await import(`data:text/javascript;base64,${Buffer.from(actual).toString('base64')}`);
+    expect(consumer.glyph()).toEqual(input.source.outline);
+    expect(() => consumer.glyph({ variation: { dotScale: 1.1 } })).toThrow(expect.objectContaining({ code: 'AUTHOR_VARIATION_UNSUPPORTED' }));
+    expect(projections.data).not.toContain('convex-linear');
+    expect(projections.symbol).not.toContain('variation-runtime');
+  });
+
+  it.each(['ellipsis-horizontal', 'ellipsis-vertical'])('%s opt-in export surface содержит только публичный symbol API', async icon => {
+    const projections = renderSymbolModules(authoredControl(icon));
+    const bundled = await consumeSymbol(projections.symbol, 'export * from "test-variation";', projections);
+    const consumer = await import(`data:text/javascript;base64,${Buffer.from(bundled).toString('base64')}`);
+    expect(Object.keys(consumer).sort()).toEqual(['filled', 'glyph', 'glyphCapabilities', 'outline']);
   });
 
   it('расходящиеся или отсутствующие metadata не заменяются общей записью', async () => {

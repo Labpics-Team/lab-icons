@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { loadAuthorBaseline, authorSymbolPayload } from "../scripts/lib/author-baseline.js";
 import { compileAuthorAnatomy } from "../scripts/lib/author-anatomy.js";
 import { compileAuthorVariation } from "../scripts/lib/author-variation.js";
-import { renderSymbolModule, symbolModuleDeclaration, symbolExportName } from "../scripts/lib/symbol-modules.js";
+import { renderSymbolModule, renderSymbolModules, variationModuleDeclaration, symbolModuleDeclaration, symbolExportName } from "../scripts/lib/symbol-modules.js";
 import { createGlyphCompiler } from "../src/ir/compiler.js";
 import { createCompiledGlyph, createCompiledCapabilities } from "../src/ir/symbol-runtime.js";
 import { createCompiledVariationGlyph } from "../src/ir/authored-variation.js";
@@ -185,9 +185,12 @@ describe("authored dot geometry: independent variant controls, coupled domain", 
   });
   it("slices implementation and types to eligible symbols and leaves ordinary modules unchanged", () => {
     const positive = symbol("ellipsis-horizontal"), negative = symbol("ellipse");
-    const module = renderSymbolModule({ ...positive.payload, capabilities: positive.capabilities, variation: positive.variation });
-    expect(module).toContain("../ir/variation-runtime.js");
-    expect(symbolModuleDeclaration("ellipsis-horizontal", true)).toContain("AuthorVariationGlyphRequest");
+    const modules = renderSymbolModules({ ...positive.payload, capabilities: positive.capabilities, variation: positive.variation });
+    expect(modules.variation).toContain("../ir/variation-runtime.js");
+    expect(modules.symbol).not.toContain("variation-runtime");
+    expect(modules.data).not.toContain("convex-linear");
+    expect(variationModuleDeclaration("ellipsis-horizontal")).toContain("AuthorVariationGlyphRequest");
+    expect(symbolModuleDeclaration("ellipsis-horizontal")).not.toContain("AuthorVariationGlyphRequest");
     const ordinary = renderSymbolModule(negative.payload);
     expect(ordinary).not.toContain("variation-runtime");
     expect(ordinary).toContain("createCompiledGlyph");
