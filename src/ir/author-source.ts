@@ -5,7 +5,7 @@ import type { AuthorSourceProvenance } from './author-provenance.js';
 export type { AuthorIconId } from './author-catalog.generated.js';
 export type { AuthorAnatomyReceipt, AuthorSourceProvenance } from './author-provenance.js';
 
-export type AuthorSymbolGlyphRequest = Omit<GlyphRequest<AuthorIconId>, 'icon'>;
+export type AuthorSymbolGlyphRequest = Omit<GlyphRequest<AuthorIconId>, 'icon'> & Readonly<{ variation?: never }>;
 
 export interface AuthorSourceGlyph<TIcon extends AuthorIconId = AuthorIconId> extends GlyphIR<TIcon> {
   readonly provenance: SourceGlyphProvenance & Readonly<{ author: AuthorSourceProvenance }>;

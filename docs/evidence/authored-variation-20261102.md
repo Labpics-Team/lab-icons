@@ -35,3 +35,12 @@ Lottie runtime с `strict`, `noUncheckedIndexedAccess`, ES2022 и bundler resolu
 16/24/48, benchmark, независимое review immutable commit, remote CI, merge и
 runtime release. Эти проверки остаются у основного delivery-среза и self-hosted
 runner. Budgets, workflows и исходные masters не изменены.
+
+После интеграции найден отдельный declaration-контрпример: обычные symbol
+declarations получили повторение `variation?: never` и выросли на 34 bytes каждая
+(`component`: 484 при прежнем потолке 450). Ограничение перенесено в общий
+`AuthorSymbolGlyphRequest`; variation request исключает это поле перед собственным
+объявлением. Публичная перегрузка сохраняет тот же контракт. Узкий реальный
+TypeScript consumer прошёл положительные случаи и три точных отрицательных
+диагностики; `component`, `time`, `ellipse` снова имеют 450/440/446 bytes, равные
+прежним потолкам. Runtime не менялся. Полный packed type/size gate остаётся открыт.

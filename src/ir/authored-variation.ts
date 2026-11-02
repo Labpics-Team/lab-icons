@@ -12,7 +12,7 @@ export interface AuthoredDotVariation {
   readonly spacingScale?: number;
 }
 
-export type AuthorVariationGlyphRequest = AuthorSymbolGlyphRequest & Readonly<{ variation?: AuthoredDotVariation }>;
+export type AuthorVariationGlyphRequest = Omit<AuthorSymbolGlyphRequest, 'variation'> & Readonly<{ variation?: AuthoredDotVariation }>;
 
 export interface AuthorVariationReceipt {
   readonly version: 1;

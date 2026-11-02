@@ -120,7 +120,7 @@ export function symbolModuleDeclaration(icon, variation = false) {
     "import type { IconVariant } from '../ir/compiler.js';",
     'export declare const outline: string;',
     'export declare const filled: string;',
-    `export declare function glyph(request?: AuthorSymbolGlyphRequest & Readonly<{ variation?: never }>): AuthorSourceGlyph<'${icon}'>;`,
+    `export declare function glyph(request?: AuthorSymbolGlyphRequest): AuthorSourceGlyph<'${icon}'>;`,
     ...(variation ? [`export declare function glyph(request: AuthorVariationGlyphRequest): AuthorVariationGlyph<'${icon}'>;`] : []),
     `export declare function glyphCapabilities(variant?: IconVariant): ${variation ? 'AuthorVariationCapabilities' : 'AuthorSourceCapabilities'}<'${icon}'>;`,
     '',
