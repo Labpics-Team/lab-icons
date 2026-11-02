@@ -19,7 +19,8 @@ export function parseEffectRequest(request: SymbolEffectRequest): ParsedEffectRe
     return Object.freeze({ ok: false, reason: Object.freeze({ code: 'INVALID_REQUEST',
       message: 'Нужны конечная длительность ≥0 и поддержанные параметры эффекта.' }) });
   }
-  const from = request.from ?? 0, to = request.to ?? 1;
+  const from = request.from === undefined ? 0 : request.from;
+  const to = request.to === undefined ? 1 : request.to;
   if (![from, to].every(value => Number.isFinite(value) && value >= 0 && value <= 1)) {
     return Object.freeze({ ok: false, reason: Object.freeze({ code: 'INVALID_REQUEST',
       message: 'Прогресс from и to обязан принадлежать [0,1].' }) });

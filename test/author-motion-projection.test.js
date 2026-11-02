@@ -134,9 +134,17 @@ describe('авторский motion target без стоимости полно�
     }
     expect(module.compileMotionEffect('time.advance', { duration: 600 })).toMatchObject({ ok: false, reason: { code: 'GESTURE_UNSUPPORTED' } });
     for (const request of [null, [], {}, { duration: -1 }, { duration: Infinity }, { duration: 600, from: NaN },
+      { duration: 600, from: null }, { duration: 600, to: null },
       { duration: 600, to: 1.01 }, { duration: 600, reducedMotion: 'yes' }, { duration: 600, loop: true }, { duration: 600, variant: 'other' }]) {
       expect(module.compileMotionEffect('timer.advance', request)).toMatchObject({ ok: false, reason: { code: 'INVALID_REQUEST' } });
     }
+    for (const key of ['from', 'to']) {
+      const request = JSON.parse(`{"duration":600,"${key}":null}`);
+      expect(compileSymbolEffect(rich.timer.source.outline, rich.timer.capabilities.outline,
+        'timer.advance', request)).toMatchObject({ ok: false, reason: { code: 'INVALID_REQUEST' } });
+    }
+    expect(module.compileMotionEffect('timer.advance', { duration: 600, from: undefined, to: undefined }))
+      .toEqual(module.compileMotionEffect('timer.advance', { duration: 600 }));
   });
 
   it.each([
