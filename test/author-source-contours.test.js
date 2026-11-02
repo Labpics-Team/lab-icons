@@ -25,6 +25,19 @@ const declaration = {
 };
 const document = () => ({ ...all, icons: { 'mic-circle': { filled: structuredClone(declaration) } } });
 const hash = value => createHash('sha256').update(value).digest('hex');
+const sourceCompiler = input => createGlyphCompiler({ catalog: { canvas: { viewBox: [0, 0, 24, 24] }, axes: read('semantics/catalog.json').axes,
+  icons: { 'mic-circle': { model: null, source: { outline: baseline.icons['mic-circle'].outline.sourceContract, filled: input } } } },
+  anatomy: { version: 1, glyphs: {} }, grid: read('semantics/grid.json'),
+  staticIcons: Object.fromEntries(['outline', 'filled'].map(variant => [symbolExportName('mic-circle', variant), baseline.icons['mic-circle'][variant].artifactSvg])) });
+const sourceGlyph = contract => sourceCompiler(contract).glyph({ icon: 'mic-circle', variant: 'filled', modelMode: 'source-only' });
+const contractWithSpans = () => {
+  const contract = structuredClone(compileAuthorAnatomy(baseline, document())['mic-circle/filled']);
+  let offset = 0;
+  closedSourceContourLiterals(authorPathEntries(master.artifactSvg)[0].d).forEach((literal, index) => {
+    contract.parts[index].sourceSpan = [offset, offset += literal.length];
+  });
+  return contract;
+};
 
 describe('source contour anatomy preserves the single authored evenodd fill owner', () => {
   it('binds ordered closed contour coverage without inventing independent layers', () => {
@@ -64,11 +77,7 @@ describe('source contour anatomy preserves the single authored evenodd fill owne
   });
   it('projects literal source parts once and refuses detached compiler parent or contour contracts', () => {
     const contract = compileAuthorAnatomy(baseline, document())['mic-circle/filled'];
-    const compiler = input => createGlyphCompiler({ catalog: { canvas: { viewBox: [0, 0, 24, 24] }, axes: read('semantics/catalog.json').axes,
-      icons: { 'mic-circle': { model: null, source: { outline: baseline.icons['mic-circle'].outline.sourceContract, filled: input } } } },
-      anatomy: { version: 1, glyphs: {} }, grid: read('semantics/grid.json'),
-      staticIcons: Object.fromEntries(['outline', 'filled'].map(variant => [symbolExportName('mic-circle', variant), baseline.icons['mic-circle'][variant].artifactSvg])) });
-    const glyph = compiler(contract).glyph({ icon: 'mic-circle', variant: 'filled', modelMode: 'source-only' });
+    const glyph = sourceGlyph(contract);
     expect(glyph.composition).toEqual(contract.composition);
     expect(glyph.d).toBe(authorPathEntries(master.artifactSvg)[0].d);
     expect(glyph.parts.map(part => part.d).join('')).toBe(glyph.d);
@@ -78,7 +87,47 @@ describe('source contour anatomy preserves the single authored evenodd fill owne
       value => { value.composition.fillRule = 'nonzero'; }, value => { value.anatomy.pathFingerprintSha256 = 'b'.repeat(64); },
       value => { value.parts[2].artifactFingerprint = `sha256:${'a'.repeat(64)}`; }]) {
       const invalid = structuredClone(contract); mutate(invalid);
-      expect(() => compiler(invalid).glyph({ icon: 'mic-circle', variant: 'filled', modelMode: 'source-only' })).toThrow();
+      expect(() => sourceGlyph(invalid)).toThrow();
     }
+  });
+  it('emits exhaustive source spans at build time without copying contour geometry into the contract', () => {
+    const contract = compileAuthorAnatomy(baseline, document())['mic-circle/filled'];
+    const parent = authorPathEntries(master.artifactSvg)[0].d;
+    const glyph = sourceGlyph(contract);
+    expect(contract.parts.map(part => part.sourceSpan)).toEqual(contractWithSpans().parts.map(part => part.sourceSpan));
+    expect(contract.parts.map(part => parent.slice(...part.sourceSpan))).toEqual(glyph.parts.map(part => part.d));
+    expect(contract.parts.some(part => Object.hasOwn(part, 'd'))).toBe(false);
+    expect(glyph.parts.some(part => Object.hasOwn(part, 'sourceSpan'))).toBe(false);
+  });
+  it('uses indexed span operands without letting an array iterator substitute foreign ranges', () => {
+    const contract = contractWithSpans(), expected = sourceGlyph(contract);
+    let iterations = 0;
+    contract.parts[1].sourceSpan[Symbol.iterator] = function* () { iterations++; yield 0; yield 1; };
+    const actual = sourceGlyph(contract);
+    expect(iterations).toBe(0);
+    expect(actual.parts.map(part => part.d)).toEqual(expected.parts.map(part => part.d));
+    expect(actual.svg).toBe(expected.svg);
+  });
+  it.each([
+    ['missing', value => { delete value.parts[1].sourceSpan; }],
+    ['scalar', value => { value.parts[1].sourceSpan = 1; }],
+    ['extra endpoint', value => { value.parts[1].sourceSpan.push(1); }],
+    ['fractional', value => { value.parts[1].sourceSpan[0] += .5; }],
+    ['unsafe integer', value => { value.parts[1].sourceSpan[1] = Number.MAX_SAFE_INTEGER + 1; }],
+    ['negative', value => { value.parts[0].sourceSpan[0] = -1; }],
+    ['first offset', value => { value.parts[0].sourceSpan[0] = 1; }],
+    ['gap', value => { value.parts[1].sourceSpan[0]++; }],
+    ['overlap', value => { value.parts[1].sourceSpan[0]--; }],
+    ['reordered', value => { [value.parts[0].sourceSpan, value.parts[1].sourceSpan] = [value.parts[1].sourceSpan, value.parts[0].sourceSpan]; }],
+    ['collapsed', value => { value.parts[1].sourceSpan[1] = value.parts[1].sourceSpan[0]; }],
+    ['reversed', value => { value.parts[1].sourceSpan.reverse(); }],
+    ['uncovered tail', value => { value.parts[2].sourceSpan[1]--; }],
+    ['outside parent', value => { value.parts[2].sourceSpan[1]++; }],
+    ['open contour boundary', value => { value.parts[0].sourceSpan[1]--; value.parts[1].sourceSpan[0]--; }],
+  ])('refuses %s in a precompiled source projection while the untouched real master stays valid', (_, mutate) => {
+    const valid = contractWithSpans();
+    expect(() => sourceGlyph(valid)).not.toThrow();
+    const invalid = structuredClone(valid); mutate(invalid);
+    expect(() => sourceGlyph(invalid)).toThrow();
   });
 });

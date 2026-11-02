@@ -4,7 +4,7 @@ import type { AuthorSourceProvenance, AuthorAnatomyReceipt } from './author-prov
 import type { AuthorIconId } from './author-catalog.generated.js';
 import { createCompiledGlyph } from './symbol-runtime.js';
 import { parseCompiledGlyphOptions } from './author-request-runtime.js';
-import { assembleGlyphSvg } from './svg-assembly.js';
+import { assembleGlyphFrame, assembleGlyphLayers } from './svg-assembly.js';
 import { sha256Hex } from './sha256.js';
 import { GlyphModelError } from './request.js';
 
@@ -175,8 +175,9 @@ export function createCompiledVariationGlyph<TIcon extends AuthorIconId>(
         source: part.provenance as SourcePartProvenance, variation: receipt,
         artifactFingerprint: `sha256:${sha256Hex(`${part.fillRule}\0${JSON.stringify(segments)}`)}` as const } };
     });
+    const [start, end] = assembleGlyphFrame(source.viewBox);
     return freezeTree({ ...source, parts, d: parts.map(part => part.d).join(''),
-      svg: assembleGlyphSvg(source.viewBox, parts, source.composition),
+      svg: start + assembleGlyphLayers(parts) + end,
       provenance: { kind: 'authored-variation', file: source.provenance.file,
         author: source.provenance.author, anatomy: source.provenance.anatomy!, variation: receipt } });
   };

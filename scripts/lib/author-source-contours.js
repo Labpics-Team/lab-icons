@@ -24,7 +24,12 @@ export function projectAuthorSourceContours(source, declarations, composition, r
     refuse('PARTS_INVALID', 'Каждый contour одного parent должен покрываться ровно один раз в авторском порядке.');
   }
   const fingerprint = d => `sha256:${createHash('sha256').update(`null\0${JSON.stringify(parsePathData(d))}`).digest('hex')}`;
-  return declarations.map((part, index) => ({ ...source.sourceContract.parts[0], id: part.id, identity: 'declared', role: part.role,
-    zIndex: index, fillRule: null, contourIndices: [...part.contourIndices], topologySignature: topologySignature(literals[index]),
-    sourceFingerprint: fingerprint(raw[index]), artifactFingerprint: fingerprint(literals[index]) }));
+  let offset = 0;
+  return declarations.map((part, index) => {
+    const sourceSpan = [offset, offset += literals[index].length];
+    return { ...source.sourceContract.parts[0], id: part.id, identity: 'declared', role: part.role,
+      zIndex: index, fillRule: null, contourIndices: [...part.contourIndices], sourceSpan,
+      topologySignature: topologySignature(literals[index]),
+      sourceFingerprint: fingerprint(raw[index]), artifactFingerprint: fingerprint(literals[index]) };
+  });
 }

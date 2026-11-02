@@ -12,8 +12,6 @@ import { buildGlyphParts as buildAnatomyParts, topologySignature as computeTopol
 import { sourcePathEntries } from '../core/icon-geometry.js';
 // @ts-expect-error — см. комментарий выше; функция чистая и bundleable.
 import { parsePathData, pathBBox } from '../core/path-data.js';
-// @ts-expect-error — build-only JS helper использует тот же canonical parser.
-import { closedSourceContourLiterals } from '../core/source-contours.js';
 import { sampleMotionGesture as sampleMotionGestureCore } from '../core/motion-sampler.js';
 import {
   buildCalendarNumberGeometry as buildCalendarNumberRecipe,
@@ -102,6 +100,7 @@ interface SourcePartContract {
   readonly zIndex: number;
   readonly fillRule: IR.FillRule | null;
   readonly contourIndices?: readonly number[];
+  readonly sourceSpan?: readonly [number, number];
   readonly topologySignature: string;
   readonly sourceFingerprint: `sha256:${string}`;
   readonly artifactFingerprint: `sha256:${string}`;
@@ -407,12 +406,26 @@ function sourceParts(
           contract.anatomy.pathFingerprintSha256) {
       throw new Error(`@labpics/icons/ir: drift compound parent ${icon}/${variant}`);
     }
-    const literals = closedSourceContourLiterals(parents[0]!.d) as string[];
-    if (contract.parts.length !== literals.length || contract.parts.some((part, index) =>
-        part.contourIndices?.length !== 1 || part.contourIndices[0] !== index || part.fillRule !== null)) {
+    const parent = parents[0]!.d;
+    let offset = 0;
+    // Диапазоны назначены build compiler; здесь проверяется полное покрытие,
+    // а не восстанавливаются границы и смысл частей по конечному path.
+    entries = contract.parts.map((part, index) => {
+      const span = part.sourceSpan;
+      if (!Array.isArray(span) || span.length !== 2) {
+        throw new Error(`@labpics/icons/ir: drift compound contour coverage ${icon}/${variant}`);
+      }
+      const start = span[0], end = span[1];
+      if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end) || start !== offset || end <= start || end > parent.length ||
+          part.contourIndices?.length !== 1 || part.contourIndices[0] !== index || part.fillRule !== null) {
+        throw new Error(`@labpics/icons/ir: drift compound contour coverage ${icon}/${variant}`);
+      }
+      offset = end;
+      return { index, d: parent.slice(start, end), fillRule: null };
+    });
+    if (offset !== parent.length) {
       throw new Error(`@labpics/icons/ir: drift compound contour coverage ${icon}/${variant}`);
     }
-    entries = literals.map((d, index) => ({ index, d, fillRule: null }));
   }
   if (entries.length !== contract.parts.length) {
     throw new Error(
@@ -431,9 +444,15 @@ function sourceParts(
         `@labpics/icons/ir: drift fill-rule ${icon}/${variant}/${part.id}`,
       );
     }
+    const segments = parsePathData(entry.d) as readonly Readonly<{ cmd: string }>[];
+    if (contract.composition && (!/^[\t\n\r ]*M/.test(entry.d) || /m/.test(entry.d) || segments.length < 2 ||
+        segments.some((segment, position) => position === 0 ? segment.cmd !== 'M'
+          : position === segments.length - 1 ? segment.cmd !== 'Z' : segment.cmd === 'M' || segment.cmd === 'Z'))) {
+      throw new Error(`@labpics/icons/ir: drift compound contour boundary ${icon}/${variant}/${part.id}`);
+    }
     const topologySignature = computeTopologySignature(entry.d) as string;
     const artifactFingerprint = `sha256:${sha256Hex(
-      `${entry.fillRule}\0${JSON.stringify(parsePathData(entry.d))}`,
+      `${entry.fillRule}\0${JSON.stringify(segments)}`,
     )}` as const;
     if (artifactFingerprint !== part.artifactFingerprint) {
       throw new Error(`@labpics/icons/ir: fingerprint drift ${icon}/${variant}/${part.id}`);

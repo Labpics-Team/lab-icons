@@ -8,6 +8,7 @@ import { renderSymbolModule, renderSymbolModules, variationModuleDeclaration, sy
 import { createGlyphCompiler } from "../src/ir/compiler.js";
 import { createCompiledGlyph, createCompiledCapabilities } from "../src/ir/symbol-runtime.js";
 import { createCompiledVariationGlyph } from "../src/ir/authored-variation.js";
+import { assembleGlyphSvg } from "../src/ir/svg-assembly.js";
 import { compileSymbolEffect } from "../src/motion/index.js";
 import { compileLottieGeometry } from "../scripts/lib/lottie-geometry.js";
 import { createLottieSymbol } from "../src/lottie/runtime.js";
@@ -72,6 +73,15 @@ const measure = (d) => {
   return { width: b.maxX - b.minX, height: b.maxY - b.minY, x: (b.minX + b.maxX) / 2, y: (b.minY + b.maxY) / 2 };
 };
 describe("authored dot geometry: independent variant controls, coupled domain", () => {
+  it.each(["ellipsis-horizontal", "ellipsis-vertical"])("%s preserves the canonical SVG when lowering only admitted layers", (icon) => {
+    const module = symbol(icon);
+    for (const variant of ["outline", "filled"]) {
+      for (const variation of [{ dotScale: .9, spacingScale: 1 }, { dotScale: 1, spacingScale: .9 }]) {
+        const glyph = module.glyph({ variant, variation });
+        expect(glyph.svg).toBe(assembleGlyphSvg(glyph.viewBox, glyph.parts, glyph.composition));
+      }
+    }
+  });
   it.each(["ellipsis-horizontal", "ellipsis-vertical"])("%s keeps exact identity and author details in both variants", (icon) => {
     const module = symbol(icon);
     for (const variant of ["outline", "filled"]) {
