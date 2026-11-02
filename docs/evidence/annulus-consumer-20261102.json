@@ -1,0 +1,345 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-11-02T10:30:05.915Z",
+  "producerSource": "354974c500b62b6f433ea584e8e9939bbce36b05",
+  "uiCommit": "d8427978b2fb9189ec285e7c90ed5f12649b59cb",
+  "run": {
+    "id": "41428611526",
+    "url": "https://github.com/Labpics-Team/labui/actions/runs/41428611526",
+    "job": "125221236646",
+    "conclusion": "failure"
+  },
+  "browser": {
+    "outcome": "passed",
+    "observationCount": 168,
+    "observationNames": [
+      "outline:forward-complete",
+      "outline:interrupt-reverse",
+      "outline:no-preference:real-button",
+      "filled:forward-complete",
+      "filled:interrupt-reverse",
+      "filled:no-preference:real-button",
+      "status-circle:no-preference:trusted-activation",
+      "status-circle:attention:no-preference",
+      "status-circle:confirmation:no-preference",
+      "status-circle:decrease:no-preference",
+      "status-circle:dismissal:no-preference",
+      "status-circle:increase:no-preference",
+      "status-circle:question:no-preference",
+      "status-circle:paused-reverse-newer-state",
+      "status-circle:no-preference:public-refusals",
+      "expression-face:no-preference:trusted-activation",
+      "expression-face:aloof:no-preference",
+      "expression-face:sad:no-preference",
+      "expression-face:smile:no-preference",
+      "expression-face:paused-reverse-newer-state",
+      "expression-face:no-preference:author-size-samples",
+      "expression-face:no-preference:public-refusals",
+      "notifications/outline:no-preference:trusted-occurrences",
+      "notifications/outline:six-stops-reverse-newer-partial",
+      "notifications/outline:no-preference:refusals",
+      "notifications/filled:no-preference:trusted-occurrences",
+      "notifications/filled:six-stops-reverse-newer-partial",
+      "notifications/filled:no-preference:refusals",
+      "notifications-unread/outline:no-preference:trusted-occurrences",
+      "notifications-unread/outline:six-stops-reverse-newer-partial",
+      "notifications-unread/outline:no-preference:refusals",
+      "notifications-unread/filled:no-preference:trusted-occurrences",
+      "notifications-unread/filled:six-stops-reverse-newer-partial",
+      "notifications-unread/filled:no-preference:refusals",
+      "ellipsis/outline:interrupt-reverse-new-target",
+      "ellipsis/outline:no-preference:public-contour",
+      "ellipsis/filled:interrupt-reverse-new-target",
+      "ellipsis/filled:no-preference:public-contour",
+      "ellipsis-horizontal/outline:no-preference:varied-loading-cycle",
+      "ellipsis-horizontal/outline:no-preference:authored-variation",
+      "ellipsis-horizontal/filled:no-preference:varied-loading-cycle",
+      "ellipsis-horizontal/filled:no-preference:authored-variation",
+      "ellipsis-vertical/outline:no-preference:authored-variation",
+      "ellipsis-vertical/filled:no-preference:authored-variation",
+      "alert-circle/outline:no-preference:annulus-variation",
+      "alert-circle/filled:no-preference:annulus-source",
+      "checkmark-circle/outline:no-preference:annulus-variation",
+      "checkmark-circle/outline:annulus-confirmation-interrupt-reverse-newer-state",
+      "checkmark-circle/outline:no-preference:annulus-confirmation-native",
+      "checkmark-circle/filled:no-preference:annulus-source",
+      "close-circle/outline:no-preference:annulus-variation",
+      "close-circle/filled:no-preference:annulus-source",
+      "minus-circle/outline:no-preference:annulus-variation",
+      "minus-circle/filled:no-preference:annulus-source",
+      "pause-circle/outline:no-preference:annulus-variation",
+      "pause-circle/filled:no-preference:annulus-source",
+      "play-circle/outline:no-preference:annulus-variation",
+      "play-circle/filled:no-preference:annulus-source",
+      "plus-circle/outline:no-preference:annulus-variation",
+      "plus-circle/filled:no-preference:annulus-source",
+      "question-circle/outline:no-preference:annulus-variation",
+      "question-circle/filled:no-preference:annulus-source",
+      "status-circle:no-preference:dispose",
+      "expression-face:no-preference:dispose",
+      "notifications/outline:no-preference:dispose",
+      "notifications/filled:no-preference:dispose",
+      "notifications-unread/outline:no-preference:dispose",
+      "notifications-unread/filled:no-preference:dispose",
+      "ellipsis/outline:no-preference:dispose",
+      "ellipsis/filled:no-preference:dispose",
+      "alert-circle/outline:no-preference:dispose",
+      "alert-circle/filled:no-preference:dispose",
+      "checkmark-circle/outline:no-preference:dispose",
+      "checkmark-circle/filled:no-preference:dispose",
+      "close-circle/outline:no-preference:dispose",
+      "close-circle/filled:no-preference:dispose",
+      "minus-circle/outline:no-preference:dispose",
+      "minus-circle/filled:no-preference:dispose",
+      "pause-circle/outline:no-preference:dispose",
+      "pause-circle/filled:no-preference:dispose",
+      "play-circle/outline:no-preference:dispose",
+      "play-circle/filled:no-preference:dispose",
+      "plus-circle/outline:no-preference:dispose",
+      "plus-circle/filled:no-preference:dispose",
+      "question-circle/outline:no-preference:dispose",
+      "question-circle/filled:no-preference:dispose",
+      "outline:reduced-motion",
+      "outline:reduce:real-button",
+      "filled:reduced-motion",
+      "filled:reduce:real-button",
+      "status-circle:reduce:trusted-activation",
+      "status-circle:attention:reduce",
+      "status-circle:confirmation:reduce",
+      "status-circle:decrease:reduce",
+      "status-circle:dismissal:reduce",
+      "status-circle:increase:reduce",
+      "status-circle:question:reduce",
+      "status-circle:reduce:public-refusals",
+      "expression-face:reduce:trusted-activation",
+      "expression-face:aloof:reduce",
+      "expression-face:sad:reduce",
+      "expression-face:smile:reduce",
+      "expression-face:reduce:author-size-samples",
+      "expression-face:reduce:public-refusals",
+      "notifications/outline:reduce:trusted-occurrences",
+      "notifications/outline:reduced-terminal-phase",
+      "notifications/outline:reduce:refusals",
+      "notifications/filled:reduce:trusted-occurrences",
+      "notifications/filled:reduced-terminal-phase",
+      "notifications/filled:reduce:refusals",
+      "notifications-unread/outline:reduce:trusted-occurrences",
+      "notifications-unread/outline:reduced-terminal-phase",
+      "notifications-unread/outline:reduce:refusals",
+      "notifications-unread/filled:reduce:trusted-occurrences",
+      "notifications-unread/filled:reduced-terminal-phase",
+      "notifications-unread/filled:reduce:refusals",
+      "ellipsis/outline:reduced-motion",
+      "ellipsis/outline:reduce:public-contour",
+      "ellipsis/filled:reduced-motion",
+      "ellipsis/filled:reduce:public-contour",
+      "ellipsis-horizontal/outline:reduce:varied-loading-cycle",
+      "ellipsis-horizontal/outline:reduce:authored-variation",
+      "ellipsis-horizontal/filled:reduce:varied-loading-cycle",
+      "ellipsis-horizontal/filled:reduce:authored-variation",
+      "ellipsis-vertical/outline:reduce:authored-variation",
+      "ellipsis-vertical/filled:reduce:authored-variation",
+      "alert-circle/outline:reduce:annulus-variation",
+      "alert-circle/filled:reduce:annulus-source",
+      "checkmark-circle/outline:reduce:annulus-variation",
+      "checkmark-circle/outline:annulus-confirmation-reduced-motion",
+      "checkmark-circle/outline:reduce:annulus-confirmation-native",
+      "checkmark-circle/filled:reduce:annulus-source",
+      "close-circle/outline:reduce:annulus-variation",
+      "close-circle/filled:reduce:annulus-source",
+      "minus-circle/outline:reduce:annulus-variation",
+      "minus-circle/filled:reduce:annulus-source",
+      "pause-circle/outline:reduce:annulus-variation",
+      "pause-circle/filled:reduce:annulus-source",
+      "play-circle/outline:reduce:annulus-variation",
+      "play-circle/filled:reduce:annulus-source",
+      "plus-circle/outline:reduce:annulus-variation",
+      "plus-circle/filled:reduce:annulus-source",
+      "question-circle/outline:reduce:annulus-variation",
+      "question-circle/filled:reduce:annulus-source",
+      "status-circle:reduce:dispose",
+      "expression-face:reduce:dispose",
+      "notifications/outline:reduce:dispose",
+      "notifications/filled:reduce:dispose",
+      "notifications-unread/outline:reduce:dispose",
+      "notifications-unread/filled:reduce:dispose",
+      "ellipsis/outline:reduce:dispose",
+      "ellipsis/filled:reduce:dispose",
+      "alert-circle/outline:reduce:dispose",
+      "alert-circle/filled:reduce:dispose",
+      "checkmark-circle/outline:reduce:dispose",
+      "checkmark-circle/filled:reduce:dispose",
+      "close-circle/outline:reduce:dispose",
+      "close-circle/filled:reduce:dispose",
+      "minus-circle/outline:reduce:dispose",
+      "minus-circle/filled:reduce:dispose",
+      "pause-circle/outline:reduce:dispose",
+      "pause-circle/filled:reduce:dispose",
+      "play-circle/outline:reduce:dispose",
+      "play-circle/filled:reduce:dispose",
+      "plus-circle/outline:reduce:dispose",
+      "plus-circle/filled:reduce:dispose",
+      "question-circle/outline:reduce:dispose",
+      "question-circle/filled:reduce:dispose"
+    ]
+  },
+  "types": {
+    "outcome": "passed",
+    "compilerVersion": "5.7.3",
+    "fixtureSha256": "bd68839a1709f5bcd419843995dda03124e8b60063eed4578a7280ff75e8c17e",
+    "resolution": "NodeNext",
+    "negativeControls": 7
+  },
+  "runner": {
+    "node": "v22.19.0",
+    "platform": "linux",
+    "architecture": "x64",
+    "runId": "41428611526",
+    "runAttempt": "1",
+    "environment": "self-hosted",
+    "name": "labpics-ci-runner-tv24m",
+    "os": "Linux",
+    "browser": "140.0.7339.186"
+  },
+  "subjectSha256": "0754a040ac94a89e13ef1bc05a2233065d2dada9cfcea672c7b2fa82bf4b3ef7",
+  "harness": {
+    "commit": "d8427978b2fb9189ec285e7c90ed5f12649b59cb",
+    "sourceSha256": "e3257b222cc328ef123a218326a7e3f0ca9ba56c0dfadd7c9454284f94a9960e",
+    "dirty": false,
+    "diffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "files": [
+      {
+        "file": "apps/docs/tests/icons-packed.mjs",
+        "sha256": "e3257b222cc328ef123a218326a7e3f0ca9ba56c0dfadd7c9454284f94a9960e"
+      },
+      {
+        "file": "apps/docs/tests/icons-notification-consumer.mjs",
+        "sha256": "4ce6cd44017ddc959bf6faec4d2d4ef55d59f10116ea759647b7ae0d716a7ce7"
+      },
+      {
+        "file": "apps/docs/tests/icons-authored-dots-consumer.mjs",
+        "sha256": "ede151c3e98a61f4c2d042a10381de82caf58324e44ede03e221735c54b1b105"
+      },
+      {
+        "file": "apps/docs/tests/icons-annulus-consumer.mjs",
+        "sha256": "7cfa3a3d658e23dda3f61b65d46a51108f1dcab6ee5d5982b55fa1853758cc33"
+      }
+    ]
+  },
+  "archives": [
+    {
+      "key": "icons",
+      "inputName": "labpics-icons-0.3.0.tgz",
+      "archiveSha256": "3f4b0a6d14065313d858ba01644276ac00dfd7d66b830ffa0de58dd5d8d56678",
+      "archiveBytes": 1853227,
+      "integrity": "sha512-9ykYkJcjrbDHZ7YXj6VTrUz9BPdXJDh7NYW8IHTJeJsU2upzWSXt+nw7QXMO5xAIydSNFczG4GxRjXj5r0BQYg==",
+      "snapshot": "archives/icons.tgz"
+    },
+    {
+      "key": "uiCore",
+      "inputName": "labpics-ui-core-0.0.0.tgz",
+      "archiveSha256": "ae386863e6597b06b1a2d4db7fab25d76e9e7c256b9cd316caea378b020eabe8",
+      "archiveBytes": 747591,
+      "integrity": "sha512-wa+IJPuzDOvKSVX+2IyUZ0b1MaPBQGi4hqLhuedxarUsXMdNZEpn3DDWyxtPTHgq9DI6d8UP4ftFL5gxc62d9Q==",
+      "snapshot": "archives/uiCore.tgz"
+    },
+    {
+      "key": "uiShadow",
+      "inputName": "labpics-ui-shadow-0.0.0.tgz",
+      "archiveSha256": "96d5c575d6dc9ffc8c7071a314fd0cb36981cc33d6966a551cff2315850fde52",
+      "archiveBytes": 28635,
+      "integrity": "sha512-zqqHWplkl2t/hZpVl5+KpWbqTtrubiGW80FMzIkLvU1FQhR86J4Rf7SuW1HSm5i0ABUMKK3dzDfU9sePdMqHig==",
+      "snapshot": "archives/uiShadow.tgz"
+    }
+  ],
+  "measurement": {
+    "sha256": "a8ae787d5bca6b59ab477c89699e2a748e598ee5a82ba89393f8f262841c30a4",
+    "bytes": 773562,
+    "artifactCount": 1398,
+    "consumerCount": 14,
+    "consumers": {
+      "one-static": {
+        "bytes": 637,
+        "gzipBytes": 394,
+        "brotliBytes": 353,
+        "modules": [
+          "<stdin>",
+          "dist/index.js"
+        ]
+      },
+      "authored-static": {
+        "bytes": 1155,
+        "gzipBytes": 583,
+        "brotliBytes": 512,
+        "modules": [
+          "<stdin>",
+          "dist/ir/author-request-runtime.js",
+          "dist/ir/request.js",
+          "dist/ir/symbol-runtime.js",
+          "dist/symbols/time.js"
+        ]
+      },
+      "glyph-one": {
+        "bytes": 11182,
+        "gzipBytes": 3158,
+        "brotliBytes": 2626,
+        "modules": [
+          "<stdin>",
+          "dist/ir/author-request-runtime.js",
+          "dist/ir/request.js",
+          "dist/ir/symbol-runtime.js",
+          "dist/symbols/alert.js"
+        ]
+      },
+      "authored-time": {
+        "bytes": 8380,
+        "gzipBytes": 3098,
+        "brotliBytes": 2645,
+        "modules": [
+          "<stdin>",
+          "dist/ir/author-request-runtime.js",
+          "dist/ir/request.js",
+          "dist/ir/symbol-runtime.js",
+          "dist/symbols/time.js"
+        ]
+      },
+      "status-circle-state": {
+        "bytes": 9196,
+        "gzipBytes": 3821,
+        "brotliBytes": 3110,
+        "modules": [
+          "<stdin>",
+          "dist/ir/state-runtime.js",
+          "dist/states/status-circle.js"
+        ]
+      }
+    },
+    "policyViolations": [
+      "dist/symbols/notifications-unread.js: budget 30360 B / 5034 B gzip; measured 21576 B / 5463 B gzip",
+      "dist/symbols/notifications.js: budget 23951 B / 4165 B gzip; measured 16660 B / 4584 B gzip"
+    ]
+  },
+  "receipt": {
+    "sha256": "8b478e1c94a85cf97d13f7ef1278aae1d9687ac38b4b13cace5ade398be17ce9",
+    "bytes": 1077715
+  },
+  "visuals": [
+    {
+      "path": "result/no-preference.png",
+      "sha256": "060dbf5aa35af8bf2f01b25b9df1e1f91a076421def09f75813d155f14dc1398",
+      "width": 640,
+      "height": 6033
+    },
+    {
+      "path": "result/reduce.png",
+      "sha256": "66fa771d543ae9bf05d0e004b87c64ea7cbbc66ab766f17bd6255b0c32f5a672",
+      "width": 640,
+      "height": 6033
+    }
+  ],
+  "limitations": [
+    "Source-pack install is not npm publication.",
+    "Browser outcome passed; whole workflow failed package-size policy.",
+    "This run does not establish whole-corpus optical acceptance, unsaved Figma parity, native Windows/macOS admission, or BENCH-01 confidence qualification."
+  ]
+}
