@@ -5,6 +5,7 @@ import {
   lowerDesignSpec,
   renderGlyphSvg,
   type DesignSpec,
+  type DesignGeometry,
   type DesignSpecErrorCode,
 } from '../src/authoring/index.js';
 import type { GlyphIR } from '../src/ir/compiler.js';
@@ -54,6 +55,67 @@ function expectRefusal(action: () => unknown, code: DesignSpecErrorCode, at?: st
     if (at) expect((error as DesignSpecError).at).toBe(at);
   }
 }
+
+function pivotSpec(geometry: DesignGeometry): DesignSpec {
+  return {
+    version: 1,
+    anchors: [
+      { id: 'center', kind: 'canvas', at: 'center' },
+      { id: 'tip', kind: 'polar', from: 'center', angle: -90, distance: 0.2 },
+    ],
+    parts: [{ id: 'hand', role: 'control', geometry, paint: { kind: 'stroke', width: 0.02 } }],
+    composition: { kind: 'layers' },
+    decorators: [],
+    negativeSpace: [],
+  };
+}
+
+describe('именованный pivot публичного DesignSpec', () => {
+  it.each([
+    { kind: 'line', from: 'center', to: 'tip' },
+    { kind: 'capsule', from: 'center', to: 'tip', radius: 0.02 },
+    { kind: 'arc', center: 'center', radius: 0.2, startAngle: 0, endAngle: 90, direction: 'cw' },
+  ] satisfies DesignGeometry[])('сохраняет declared pivot %j без изменения контура', geometry => {
+    const spec = pivotSpec(geometry);
+    const previous = compileDesignSpec(spec, { icon: 'pivot-study' });
+    const declared = { ...spec, parts: [{ ...spec.parts[0]!, anchor: 'center' }] };
+    const glyph = compileDesignSpec(declared, { icon: 'pivot-study' });
+    expect(glyph.parts[0]?.anchor).toEqual([0.5, 0.5]);
+    expect(glyph.parts[0]?.anchorSource).toBe('declared');
+    expect(previous.parts[0]?.anchorSource).toBe('geometry-bbox-center');
+    expect(previous.parts[0]?.anchor).not.toEqual(glyph.parts[0]?.anchor);
+    expect(glyph.svg).toBe(previous.svg);
+    expect(glyph.d).toBe(previous.d);
+    expect(glyph.parts[0]?.topologySignature).toBe(previous.parts[0]?.topologySignature);
+    expect(glyph.designSpec.topologyKey).toBe(previous.designSpec.topologyKey);
+    expect(glyph.provenance.specSha256).not.toBe(previous.provenance.specSha256);
+    expect(Object.isFrozen(glyph.parts[0]?.anchor)).toBe(true);
+  });
+
+  it('сохраняет именованную связь при lowering и смене size/variant', () => {
+    const spec = pivotSpec({ kind: 'line', from: 'center', to: 'tip' });
+    const declared = { ...spec, parts: [{ ...spec.parts[0]!, anchor: 'tip', morphGroup: 'hand-turn' }] };
+    const lowered = lowerDesignSpec(declared);
+    expect(lowered.parts[0]?.anchor).toBe('tip');
+    for (const variant of ['outline', 'filled'] as const) {
+      for (const size of [16, 24, 48]) {
+        const glyph = compileDesignSpec(declared, { icon: 'pivot-study', variant, size });
+        expect(glyph.parts[0]?.anchor).toEqual([lowered.anchors.tip!.x, lowered.anchors.tip!.y]);
+        expect(glyph.parts[0]?.morphGroup).toBe('hand-turn');
+      }
+    }
+  });
+
+  it('отказывает неизвестной ссылке без подмены bbox pivot', () => {
+    const spec = pivotSpec({ kind: 'line', from: 'center', to: 'tip' });
+    expectRefusal(() => compileDesignSpec({ ...spec, parts: [{ ...spec.parts[0]!, anchor: 'missing' }] }, { icon: 'pivot-study' }), 'UNKNOWN_REFERENCE', 'parts.hand.anchor');
+  });
+
+  it.each([null, [0.5, 0.5], { x: 0.5, y: 0.5 }, '', 'Center'].map(anchor => ({ anchor })))('отказывает недопустимому anchor $anchor', ({ anchor }) => {
+    const spec = pivotSpec({ kind: 'line', from: 'center', to: 'tip' });
+    expectRefusal(() => compileDesignSpec({ ...spec, parts: [{ ...spec.parts[0]!, anchor }] }, { icon: 'pivot-study' }), 'INVALID_VALUE', 'parts[0].anchor');
+  });
+});
 
 describe('публичный DesignSpec → GlyphIR → SVG', () => {
   it('строит новый layers-знак с независимой семантической анатомией и реальным paint', () => {
