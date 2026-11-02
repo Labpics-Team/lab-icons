@@ -268,7 +268,7 @@ function clearInspector(message) {
   updateViewControls();
 }
 
-async function renderView(view = state.view, { preserveProgress = false, variation: requestedVariation = state.variation, resetVariation = false } = {}) {
+async function renderView(view = state.view, { preserveProgress = false, variation: requestedVariation = state.variation, resetVariation = false, onVariationAccepted = null } = {}) {
   if (!state.loaded) return;
   const revision = state.revision;
   const row = selectedRow();
@@ -333,6 +333,7 @@ async function renderView(view = state.view, { preserveProgress = false, variati
       }
       updateVariationStatus();
     }
+    onVariationAccepted?.();
     // Значение неподвижного мастера задаёт семантика, а не имя иконки.
     ui.progress.value = String(motionAdmission()?.ok ? preserveProgress ? previousProgress : selectedGesture()?.restProgress ?? 0 : 0);
     if (preserveProgress && motionAdmission()?.ok && motionView()) await seekProgress(previousProgress);
@@ -404,12 +405,16 @@ function controls() {
         try {
           const requested = { ...state.variation, [name]: input.valueAsNumber };
           state.module.glyph({ variant: state.variant, variation: requested });
-          const result = await renderView('generated', { preserveProgress: true, variation: requested });
+          const result = await renderView('generated', { preserveProgress: true, variation: requested,
+            onVariationAccepted() {
+              if (revision !== state.revision || requestRevision !== inputRevision) return;
+              input.setCustomValidity(''); input.removeAttribute('aria-invalid');
+              delete input.dataset.variationError;
+              updateVariationStatus();
+            },
+          });
           if (revision !== state.revision || requestRevision !== inputRevision || !result) return;
           if (!result.ok) throw result.error;
-          input.setCustomValidity(''); input.removeAttribute('aria-invalid');
-          delete input.dataset.variationError;
-          updateVariationStatus();
         } catch (error) {
           if (revision !== state.revision || requestRevision !== inputRevision) return;
           input.setCustomValidity(error.message); input.setAttribute('aria-invalid', 'true');

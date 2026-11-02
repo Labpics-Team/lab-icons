@@ -399,6 +399,19 @@ export async function runExplorerJourney() {
         q('gesture').dispatchEvent(new Event('change', { bubbles: true }));
         await setProgress(retainedPhase);
       }
+      variationInput('dotScale').value = '1.15';
+      variationInput('dotScale').dispatchEvent(new Event('input', { bubbles: true }));
+      variationInput('spacingScale').value = '0.95';
+      variationInput('spacingScale').dispatchEvent(new Event('input', { bubbles: true }));
+      await wait(() => q('symbol-inspector').getAttribute('aria-busy') === 'false', `${id} overlapping accepted corrections`);
+      await frame();
+      const corrections = symbol.glyph({ variant, variation: { dotScale: 1.15, spacingScale: 0.95 } });
+      check(`${id}/accepted-field-correction-survives-later-render`,
+        [...q('axis-controls').querySelectorAll('[data-variation]')].every(input => input.getAttribute('aria-invalid') !== 'true') &&
+        !q('axis-status').textContent.includes('INVALID_VARIATION') &&
+        JSON.stringify(paths(q('symbol-stage').querySelector(':scope > svg'))) ===
+          JSON.stringify(paths(new DOMParser().parseFromString(corrections.svg, 'image/svg+xml').documentElement)));
+      await changeVariation('spacingScale', 0.9);
       const rapidInput = variationInput('dotScale');
       rapidInput.value = '1.15';
       rapidInput.dispatchEvent(new Event('input', { bubbles: true }));
