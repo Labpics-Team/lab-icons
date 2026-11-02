@@ -14,7 +14,7 @@ export function parseDocumentation(source, { blockSeparator = '\n', maskVersionI
   });
   function text(token, inlinePrefix = '') {
     if (token.type === 'table') {
-      return [token.header, ...token.rows].map((row) => row.map(text).join(' ')).join(blockSeparator);
+      return [token.header, ...token.rows].map((row) => row.map(cell => text(cell)).join(' ')).join(blockSeparator);
     }
     const children = token.tokens ?? token.items;
     const block = ['paragraph', 'heading', 'list', 'list_item', 'code', 'blockquote'].includes(token.type);

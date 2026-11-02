@@ -63,6 +63,8 @@ describe('Согласованность документации', () => {
     expect(manualCorpusCountErrors('В текущем пакете `660` SVG.')).toHaveLength(1);
     expect(manualCorpusCountErrors('# Version\n\n`999` files.')).toHaveLength(1);
     expect(manualCorpusCountErrors('Версия\n\n`999` файлов.')).toHaveLength(1);
+    expect(manualCorpusCountErrors('| Source | Version |\n| --- | --- |\n| Figma | Version: `2416636003859748575` files source. |')).toEqual([]);
+    expect(manualCorpusCountErrors('| Source | Count |\n| --- | --- |\n| Figma | Version: `2416636003859748575` files source; `999` files. |')).toHaveLength(1);
   });
 
   it('отделяет датированные результаты исследования от текущих ручных счётчиков', ({ root }) => {
