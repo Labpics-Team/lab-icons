@@ -1,5 +1,6 @@
 import { compactDataLiteral, compactGeneratedModule, jsonDataLiteral, literalKey } from './generated-module.js';
 import { authorVariationCapability } from './author-variation.js';
+import { cyclePacketExpression, sourcePacketEligible, sourcePacketExpression, sourcePacketRuntimeTargets, translationCyclePacket } from './source-packet.js';
 
 const SYMBOL_NAME = /^[a-z][a-z0-9-]*$/;
 const VARIATION_RUNTIME_TARGETS = {
@@ -16,7 +17,7 @@ export function variationRuntimeTargets(laws) {
 }
 
 /** Единственная release-проекция каталога; wildcard раскрывается в точные файлы. */
-export function symbolReleaseProjection(base, iconIds, stateGroupIds = [], variationIconIds = [], variationLaws = ['dots.affine']) {
+export function symbolReleaseProjection(base, iconIds, stateGroupIds = [], variationIconIds = [], variationLaws = ['dots.affine'], compiledSymbolModules = []) {
   const ids = [...iconIds].sort();
   const groups = [...stateGroupIds].sort();
   if (new Set(variationIconIds).size !== variationIconIds.length || variationIconIds.some(id => !ids.includes(id))) {
@@ -45,6 +46,7 @@ export function symbolReleaseProjection(base, iconIds, stateGroupIds = [], varia
       : Object.values(conditions).map(target => target.slice(2)));
   const typeDependencies = ['dist/authoring/design-spec.d.ts', 'dist/ir/author-annulus-types.d.ts', 'dist/ir/author-catalog.generated.d.ts', 'dist/ir/author-provenance.d.ts', 'dist/ir/author-source.d.ts', 'dist/ir/authored-variation.d.ts', 'dist/ir/catalog.generated.d.ts', 'dist/ir/compiler.d.ts', 'dist/ir/glyph-types.d.ts', 'dist/ir/paint-types.d.ts', 'dist/ir/request.d.ts', 'dist/ir/lottie-types.d.ts', 'dist/ir/state-types.d.ts', 'dist/ir/state-common-types.d.ts', 'dist/ir/contour-state-types.d.ts'].sort();
   const runtimeDependencies = ['dist/ir/author-request-runtime.js', 'dist/ir/compiler.js', 'dist/ir/contour-runtime.js', 'dist/ir/request.js', 'dist/ir/symbol-runtime.js', 'dist/ir/lottie-runtime.js'].sort();
+  runtimeDependencies.push(...sourcePacketRuntimeTargets(compiledSymbolModules).map(target => `dist/ir/${target.runtime}`));
   if (variationIconIds.length) runtimeDependencies.push(...variationRuntimeTargets(variationLaws).map(target => `dist/ir/${target.runtime}`),
     ...variationIconIds.map(id => `dist/ir/symbol-data/${id}.js`));
   if (groups.length) {
@@ -101,7 +103,7 @@ function pathStringExpression(value, references) {
 }
 
 /** Общий build-only источник записей и ссылок: размещение не меняет authored данные. */
-function sourceRecords({ source, capabilities, staticSvg }, compact, sharePaths = false) {
+function sourceRecords({ source, capabilities, staticSvg }, compact, sharePaths = false, packet = false) {
   const json = jsonDataLiteral;
   const serialize = compact ? compactDataLiteral : json;
   const record = value => value !== null && typeof value === 'object' && !Array.isArray(value);
@@ -140,9 +142,12 @@ function sourceRecords({ source, capabilities, staticSvg }, compact, sharePaths 
     const rendered = renderJSONRecord(shape, sourceReferences, compact);
     // PURE закрывает string expressions целиком: caps/static не удерживают
     // geometry из-за потенциального coercion в неиспользуемом source record.
-    sources[variant] = geometry.length ? `/* @__PURE__ */ (() => (${rendered}))()` : rendered;
-    capabilityRecords[variant] = renderJSONRecord(capabilities[variant], metadata, compact);
-    if (metadata.size) capabilityReferences.set(variant, capabilityRecords[variant]);
+    sources[variant] = packet ? sourcePacketExpression(shape, geometry, metadata, pathStringExpression)
+      : geometry.length ? `/* @__PURE__ */ (() => (${rendered}))()` : rendered;
+    const capabilityMetadata = new Map(metadata);
+    if (packet) capabilityMetadata.set('motion', cyclePacketExpression(translationCyclePacket(capabilities[variant].motion)));
+    capabilityRecords[variant] = renderJSONRecord(capabilities[variant], capabilityMetadata, compact);
+    if (capabilityMetadata.size) capabilityReferences.set(variant, capabilityRecords[variant]);
   }
   return { shared, paths, sources, capabilityRecords, capabilities: renderJSONRecord(capabilities, capabilityReferences, compact),
     static: ['outline', 'filled'].map(variant => `export const ${variant} = ${json(staticSvg[variant])};`) };
@@ -152,11 +157,12 @@ function sourceRecords({ source, capabilities, staticSvg }, compact, sharePaths 
 export function renderSymbolModule(input) {
   if (!SYMBOL_NAME.test(input.icon)) throw new TypeError('symbol module: невалидное имя');
   input = { ...input, capabilities: sourceCapabilities(input.capabilities) };
-  const emit = (compact, sharePaths = false) => {
-    const records = sourceRecords(input, compact, sharePaths);
+  const emit = (compact, sharePaths = false, packet = false) => {
+    const records = sourceRecords(input, compact, sharePaths, packet);
     return [
-    '/** GENERATED: проверенные текущие авторские masters одного символа. */',
+    packet ? '/** GENERATED */' : '/** GENERATED: проверенные текущие авторские masters одного символа. */',
     "import { createCompiledGlyph, createCompiledCapabilities } from '../ir/symbol-runtime.js';",
+    ...(packet ? ["import { materializeSourceV1, materializeTranslationCycleV1 } from '../ir/source-packet-runtime.js';"] : []),
     ...records.paths, ...records.static, ...records.shared,
     `const outlineSource = ${records.sources.outline};`,
     `const filledSource = ${records.sources.filled};`,
@@ -165,7 +171,9 @@ export function renderSymbolModule(input) {
     '',
     ].join('\n');
   };
-  return compactGeneratedModule([emit(false), emit(true), emit(false, true), emit(true, true)]);
+  const packet = ['outline', 'filled'].every(variant => sourcePacketEligible(input.source[variant], input.icon, variant) &&
+    translationCyclePacket(input.capabilities[variant]?.motion));
+  return compactGeneratedModule([emit(false), emit(true), emit(false, true), emit(true, true), ...(packet ? [emit(true, true, true)] : [])]);
 }
 
 export function symbolModuleDeclaration(icon) {
