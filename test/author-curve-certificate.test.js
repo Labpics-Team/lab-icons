@@ -25,4 +25,8 @@ describe('evenodd counter admission uses containment, simplicity and distinct bo
     const altered = structuredClone(source); altered[0].points[1] = [13, 8];
     expect(() => proof.certifyKnockouts(altered, { cells: 0 })).toThrowError(expect.objectContaining({ code: 'COMPOSITION_UNPROVEN' }));
   });
+  it('refuses a fifth closing edge instead of certifying it as four cubic quadrants', () => {
+    const altered = structuredClone(source); altered[0].points.at(-1)[0] -= .5;
+    expect(() => proof.certifyKnockouts(altered, { cells: 0 })).toThrowError(expect.objectContaining({ code: 'COMPOSITION_UNPROVEN' }));
+  });
 });

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "base": "504fb6ab91aa989975b29fd7412bd06df627398f",
-  "sourceSnapshotSha256": "f82fe105a1afa006c269c666d01f1dc1eb3a601434d05ff58c0e331fd829c8d9",
+  "sourceSnapshotSha256": "09ebc350a185cdc0cac4b56c80126c6b7516f307fe5a699b24c9751f80ed6b4f",
   "files": [
     {
       "file": "scripts/lib/author-anatomy.js",
@@ -13,7 +13,7 @@
     },
     {
       "file": "scripts/lib/author-curve-certificate.js",
-      "sha256": "271b681580eadfe4dc0a17b7579835a66a63b71adc5f7c7373f0a2ebc576bc9a"
+      "sha256": "f8a49f70c5b8ec4b68743d18d0df7c88f0a71b4720255cfd9fd755ebfcb97685"
     },
     {
       "file": "scripts/lib/author-source-contours.js",

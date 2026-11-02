@@ -132,7 +132,10 @@ export function createAuthorCurveCertificate(refuse) {
   }
   function certifyKnockouts(shape, statistics) {
     const enclosure = shape[0], enclosing = certifySimpleContour(enclosure, statistics);
-    if (enclosure.commands !== 'MCCCCZ') refuse('COMPOSITION_UNPROVEN', 'Knockouts требуют одну четырёхкривую монотонную оболочку.');
+    if (enclosure.commands !== 'MCCCCZ' || enclosing.length !== 4 || enclosing.some(curve => curve.ends[0].length !== 4) ||
+        !samePoint(enclosing[3].ends[0].at(-1), enclosing[0].ends[0][0])) {
+      refuse('COMPOSITION_UNPROVEN', 'Knockouts требуют ровно четыре монотонные cubic стороны без дополнительного closing edge.');
+    }
     const vertices = enclosing.map(curve => curve.ends[0][0]);
     const [top, right, bottom, left] = vertices;
     if (cmp(top[0], bottom[0]) || cmp(right[1], left[1]) || cmp(top[1], right[1]) >= 0 || cmp(bottom[1], right[1]) <= 0 ||

@@ -11,6 +11,7 @@ import { renderSymbolModules, variationModuleDeclaration, symbolReleaseProjectio
 import { authorVariationIconNames, authorVariationLawNames } from '../scripts/lib/author-variation.js';
 import { compileSymbolEffect } from '../src/motion/index.js';
 import { fileURLToPath } from 'node:url';
+import { createHash } from 'node:crypto';
 
 const read = file => JSON.parse(readFileSync(new URL(`../${file}`, import.meta.url), 'utf8'));
 const names = ['mic', 'mic-circle'], manifest = read('semantics/figma-baseline.json');
@@ -35,6 +36,16 @@ const geometricWitnesses = { 'mic/outline': .4493557931633908, 'mic/filled': .18
   'mic-circle/outline': .2983006804569976 };
 
 describe('source-owned capsule width changes context without shrinking the whole symbol', () => {
+  it('keeps all reviewed supported optical SVGs and their compiled geometry receipts unchanged', () => {
+    const evidence = read('docs/research/negative-capsule-optical-domain-20261102.json');
+    for (const record of evidence.records.filter(record => record.supported)) {
+      const value = glyphs[record.icon]({ variant: record.variant, variation: { bodyWidth: record.bodyWidth } });
+      expect(createHash('sha256').update(value.svg).digest('hex')).toBe(record.svgSha256);
+      expect(payloads[record.icon].variation[record.variant].geometrySha256).toBe(record.geometrySha256);
+    }
+    expect(createHash('sha256').update(readFileSync(new URL('../docs/research/negative-capsule-width-light-20261102.png', import.meta.url))).digest('hex'))
+      .toBe(payloads['mic-circle'].variation.filled.domain.policy.style.evidenceSha256);
+  });
   it.each(Object.keys(geometricWitnesses))('%s refuses the previously admitted optical failure without losing healthy widths', label => {
     const [icon, variant] = label.split('/'), glyph = glyphs[icon];
     for (const width of [.8, .9, 1]) expect(glyph({variant,variation:{bodyWidth:width}}).parts).toHaveLength(payloads[icon].source[variant].parts.length);
