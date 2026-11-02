@@ -12,4 +12,3 @@ export interface RecipeFillPaint {
   readonly kind: 'fill';
   readonly fill: 'currentColor';
 }
-

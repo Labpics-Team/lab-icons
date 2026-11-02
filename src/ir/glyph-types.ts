@@ -238,4 +238,3 @@ export interface MotionCapabilities {
     readonly sfSymbols: 'not-exported';
   }>;
 }
-
