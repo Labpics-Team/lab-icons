@@ -1,13 +1,13 @@
-/** Данные Glyph IR доступны compiler, motion и экспортёрам без функций компиляции. */
+/** Glyph IR для compiler, motion и экспортёров; без функций. */
 
 import type { CatalogAxisName, CatalogIconId } from './catalog.generated.js';
 
 import type { AuthorAnatomyReceipt, AuthorSourceProvenance } from './author-provenance.js';
 
-import type { AuthorVariationCapability, AuthorVariationPartProvenance, AuthorVariationProvenance } from './authored-variation.js';
-import type { AuthorAnnulusVariationCapability, AuthorAnnulusVariationPartProvenance, AuthorAnnulusVariationProvenance } from './author-annulus-types.js';
-import type { AuthorContentVariationCapability, AuthorContentVariationPartProvenance, AuthorContentVariationProvenance } from './author-content-types.js';
-import type { AuthorCapsuleVariationCapability, AuthorCapsuleVariationPartProvenance, AuthorCapsuleVariationProvenance } from './author-capsule-types.js';
+import type * as Dots from './authored-variation.js';
+import type * as Annulus from './author-annulus-types.js';
+import type * as Content from './author-content-types.js';
+import type * as Capsule from './author-capsule-types.js';
 
 import type { RecipeFillPaint, RecipeStrokePaint } from './paint-types.js';
 
@@ -53,9 +53,9 @@ export interface SourcePartProvenance {
   readonly kind: 'source';
   readonly identity: 'geometry-derived' | 'declared';
   readonly file: string;
-  /** Fingerprint авторского source-path до build-оптимизации. */
+  /** Fingerprint авторского path до build-оптимизации. */
   readonly sourceFingerprint: `sha256:${string}`;
-  /** Fingerprint реально установленного root export после deterministic SVGO. */
+  /** Fingerprint установленного root export после deterministic SVGO. */
   readonly artifactFingerprint: `sha256:${string}`;
 }
 
@@ -73,17 +73,17 @@ export interface RecipePartProvenance {
   readonly sourceDependency?: IconId;
 }
 
-export type PartProvenance = SourcePartProvenance | ModelPartProvenance | RecipePartProvenance | AuthorVariationPartProvenance | AuthorAnnulusVariationPartProvenance | AuthorContentVariationPartProvenance | AuthorCapsuleVariationPartProvenance;
+export type PartProvenance = SourcePartProvenance | ModelPartProvenance | RecipePartProvenance | Dots.AuthorVariationPartProvenance | Annulus.AuthorAnnulusVariationPartProvenance | Content.AuthorContentVariationPartProvenance | Capsule.AuthorCapsuleVariationPartProvenance;
 
 export interface GlyphPart {
   readonly id: string;
   readonly role: PartRole;
   readonly zIndex: number;
   readonly d: string;
-  /** null означает: часть имеет смысл только внутри GlyphIR.composition. */
+  /** null: часть существует только внутри GlyphIR.composition. */
   readonly fillRule: FillRule | null;
   readonly paint: RecipeFillPaint | RecipeStrokePaint;
-  /** Нормализованный якорь в долях viewBox, а не экранные пиксели. */
+  /** Якорь в долях viewBox; не пиксели. */
   readonly anchor: readonly [number, number];
   readonly anchorSource: 'declared' | 'geometry-bbox-center';
   readonly topologySignature: string;
@@ -103,7 +103,7 @@ export interface ModelGlyphProvenance {
   readonly declaration: IconId;
   readonly archetype: string;
   readonly state: ModelState;
-  /** Эффективные значения только реально поддержанных моделью осей. */
+  /** Эффективные значения поддержанных моделью осей. */
   readonly axes: AxisValues;
 }
 
@@ -127,14 +127,14 @@ export interface DesignSpecGlyphProvenance {
   readonly state: 'candidate';
 }
 
-export type GlyphProvenance = SourceGlyphProvenance | ModelGlyphProvenance | RecipeGlyphProvenance | DesignSpecGlyphProvenance | AuthorVariationProvenance | AuthorAnnulusVariationProvenance | AuthorContentVariationProvenance | AuthorCapsuleVariationProvenance;
+export type GlyphProvenance = SourceGlyphProvenance | ModelGlyphProvenance | RecipeGlyphProvenance | DesignSpecGlyphProvenance | Dots.AuthorVariationProvenance | Annulus.AuthorAnnulusVariationProvenance | Content.AuthorContentVariationProvenance | Capsule.AuthorCapsuleVariationProvenance;
 
 export interface GlyphIR<TIcon extends string = IconId> {
   readonly icon: TIcon;
   readonly variant: IconVariant;
   readonly viewBox: readonly [number, number, number, number];
   readonly parts: readonly GlyphPart[];
-  /** Удобная сборка геометрии; способ paint задаёт composition, не порядок parts. */
+  /** Сборка; paint задаёт composition, не порядок parts. */
   readonly d: string;
   readonly svg: string;
   readonly composition: GlyphComposition;
@@ -159,7 +159,7 @@ export interface GlyphCapabilities<TIcon extends string = IconId> {
   readonly motion: MotionCapabilities;
   readonly author?: AuthorSourceProvenance;
   readonly anatomy?: AuthorAnatomyReceipt;
-  readonly variation?: AuthorVariationCapability | AuthorAnnulusVariationCapability | AuthorContentVariationCapability | AuthorCapsuleVariationCapability;
+  readonly variation?: Dots.AuthorVariationCapability | Annulus.AuthorAnnulusVariationCapability | Content.AuthorContentVariationCapability | Capsule.AuthorCapsuleVariationCapability;
 }
 
 export interface AxisContract {
@@ -212,7 +212,7 @@ export interface MotionGestureContract {
   readonly partIds: readonly string[];
   readonly meaning: string;
   readonly progress: 'normalized-0-to-1';
-  /** Поза неподвижного мастера; отсутствие сохраняет прежний прогресс 0. */
+  /** Поза статичного мастера; по умолчанию 0. */
   readonly restProgress?: number;
   readonly tracks: readonly MotionGestureTrackContract[];
 }

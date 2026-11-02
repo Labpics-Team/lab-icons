@@ -75,3 +75,34 @@ package file projection. Проверки выполнены через уста
 Dependency install, полный build, pack, browser и тяжёлые benchmark здесь не запускались.
 Ранее отвергнутый эксперимент сохранён в
 [отдельном JSON](glyph-type-boundary-rejected-20261102.json).
+
+## Размер общей декларации после content и capsule
+
+На baseline `581575438c00c78c1878ed7d4f580ead43d93fb5` настоящий type emit
+`glyph-types.d.ts` дал 9290 raw / 2364 gzip байта при прежних ceilings
+8762 / 2302. Четыре группы импортов теперь используют штатный
+`import type * as`: исходные именованные interfaces остаются у своих владельцев,
+новых типов, helpers и exports нет. Восемь комментариев сокращены с сохранением
+ограничений: source/artifact fingerprints, composition, якорь, поддержанные оси
+и неподвижная поза. Комментарии не удаляются сборкой.
+
+Фактическая декларация после правки: **8750 raw / 2238 gzip**. Полная closure
+Glyph IR сохраняет те же десять файлов, включая content и capsule; её сумма
+сжатых по отдельности файлов уменьшается с 32927 / 10435 до 32387 / 10309.
+Другие emitted declarations побайтно совпали. После раскрытия private namespace
+квалификаторов и исключения комментариев/import строк тела публичных типов
+совпали; все import targets сохранились.
+
+Изолированный installed-layout consumer прошёл четыре существующих теста:
+capsule-width, content-optin, authored-annulus и authored-variation types.
+Проверены strict Bundler/NodeNext с `skipLibCheck: false`, положительные вызовы,
+точные отрицательные диагностики, Parameters/ReturnType и расширение interfaces
+и function namespaces. Fixture имеет собственные зависимости без junctions;
+исходная логика тестов не менялась.
+
+Проверенный контроль с короткими named aliases дал 9381 / 2406 и отвергнут:
+raw/gzip выросли. Namespace imports отдельно дали 9011 / 2357; их сочетание
+с ясными короткими комментариями укладывается в оба прежних лимита.
+[JSON](glyph-declaration-budget-20261102.json) содержит размеры, хеши,
+точную среду и границы проверки. Это узкий type emit, без полного build,
+pack/install, runtime и CI; shipping artifact остаётся обязанностью self-hosted CI.
