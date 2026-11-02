@@ -35,6 +35,12 @@ export async function verifyLottieConsumer({ browser, prepared, origin, outdir, 
         return [{ ...common, request }, ...annotation.gesture.law === 'confirmation.presence' ? [
           { ...common, request: { ...request, from: 1, to: 0 } },
           { ...common, request: { ...request, from: 1, to: 0, reducedMotion: true } },
+        ] : annotation.gesture.law === 'notification.ring' ? [
+          { ...common, request: { ...request, from: 1, to: 0 } },
+          { ...common, request: { ...request, from: 0.13, to: 0.87 } },
+          { ...common, request: { ...request, from: 0.87, to: 0.13 } },
+          { ...common, request: { ...request, from: 0.87, to: 0.13, reducedMotion: true } },
+          { ...common, request: { ...request, from: 0.37, to: 0.37 } },
         ] : []];
       })];
   }));

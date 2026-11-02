@@ -42,13 +42,14 @@ export function referenceLottieOpacity(declaration, id, gesture, progress) {
   return a[1] + (b[1] - a[1]) * (progress - a[0]) / (b[0] - a[0]);
 }
 export function referenceLottieGestures(name, declaration) {
-  if (!declaration) return [];
-  const law = declaration.gesture.law;
+  if (!declaration || declaration.gesture === null) return [];
+  const law = declaration.gesture?.law;
   if (law === 'cycle.clockwise') return [`${name}.cycle`];
   if (law === 'signal.levels') return [`${name}.level`];
   if (law === 'activity.triad') return [`${name}.activity`, `${name}.idle`];
   if (law === 'direction.nudge') return [`${name}.nudge`];
   if (law === 'confirmation.presence') return [`${name}.presence`];
+  if (law === 'notification.ring') return [`${name}.ring`];
   throw new Error(`${name}: raw law не имеет независимого oracle`);
 }
 export function referenceLottieEmptyPose(declaration, rawPartIds, gesture, progress) {
@@ -64,6 +65,30 @@ export function referenceNudgeTranslation(declaration, id, gesture, progress, vi
   const horizontal = law.direction === 'left' || law.direction === 'right';
   const amount = (horizontal ? viewBox[2] : viewBox[3]) / 8 * pulse;
   return horizontal ? [law.direction === 'left' ? -amount : amount, 0] : [0, law.direction === 'up' ? -amount : amount];
+}
+/** SVG2 getBBox даёт ширину raw path в user coordinates. Producer bounds,
+ * motion stops и control-point hull не участвуют в независимой калибровке. */
+export function referenceNotificationTranslation(declaration, id, gesture, progress, rawPath) {
+  const law = declaration?.gesture;
+  if (!gesture || law?.law !== 'notification.ring' || law.partId !== id) return [0, 0];
+  assert(law.purpose === 'incoming-notification', 'raw notification.ring имеет неизвестный смысл');
+  const width = rawPath.getBBox().width;
+  assert(Number.isFinite(width) && width > 0, 'raw clapper имеет невалидную ширину');
+  assert(Number.isFinite(progress) && progress >= 0 && progress <= 1, 'raw ring progress выходит за [0,1]');
+  const values = [0, 1, -1, 0.5, -0.5, 0];
+  if (progress === 1) return [0, 0];
+  const interval = progress * 5, index = Math.floor(interval), fraction = interval - index;
+  const displacement = width / 4 * (values[index] + (values[index + 1] - values[index]) * fraction);
+  return [displacement, 0];
+}
+function translationStops(declaration) {
+  const law = declaration?.gesture?.law;
+  return law === 'notification.ring' ? [0.2, 0.4, 0.6, 0.8] : law === 'direction.nudge' ? [0.5] : [];
+}
+function referenceTranslation(declaration, id, gesture, progress, viewBox, rawPath) {
+  return declaration?.gesture?.law === 'notification.ring'
+    ? referenceNotificationTranslation(declaration, id, gesture, progress, rawPath)
+    : referenceNudgeTranslation(declaration, id, gesture, progress, viewBox);
 }
 export function referenceLottieTiming(request) {
   const from = request.gesture ? request.from ?? 0 : 0, to = request.gesture ? request.to ?? 1 : 0;
@@ -87,14 +112,15 @@ function referenceFrame(testCase) {
     const values = canonicalCubicPath(path.getAttribute('d')).match(/[-+]?(?:\d*\.\d+|\d+\.?\d*)(?:[eE][-+]?\d+)?/g).map(Number);
     const points = Array.from({ length: values.length / 2 }, (_, index) => values.slice(index * 2, index * 2 + 2));
     const part = testCase.annotation?.parts.find(item => item.pathIndex === index);
-    if (testCase.request.gesture && testCase.annotation?.gesture.law === 'cycle.clockwise' && testCase.annotation.gesture.partId === part?.id) {
+    if (testCase.request.gesture && testCase.annotation?.gesture?.law === 'cycle.clockwise' && testCase.annotation.gesture.partId === part?.id) {
       const pivot = [viewBox[0] + part.anchor[0] * viewBox[2], viewBox[1] + part.anchor[1] * viewBox[3]];
       const radius = Math.max(...points.map(point => Math.hypot(point[0] - pivot[0], point[1] - pivot[1])));
       minX = Math.min(minX, pivot[0] - radius); minY = Math.min(minY, pivot[1] - radius);
       maxX = Math.max(maxX, pivot[0] + radius); maxY = Math.max(maxY, pivot[1] + radius);
     } else {
-      const phases = time.terminalFrame ? [time.from, time.to, ...(Math.min(time.from, time.to) < 0.5 && Math.max(time.from, time.to) > 0.5 ? [0.5] : [])] : [time.to];
-      const offsets = phases.map(progress => referenceNudgeTranslation(testCase.annotation, part?.id, testCase.request.gesture, progress, viewBox));
+      const phases = time.terminalFrame ? [time.from, time.to, ...translationStops(testCase.annotation).filter(progress =>
+        progress > Math.min(time.from, time.to) && progress < Math.max(time.from, time.to))] : [time.to];
+      const offsets = phases.map(progress => referenceTranslation(testCase.annotation, part?.id, testCase.request.gesture, progress, viewBox, path));
       for (const point of points) for (const translation of offsets) {
         minX = Math.min(minX, point[0] + translation[0]); minY = Math.min(minY, point[1] + translation[1]);
         maxX = Math.max(maxX, point[0] + translation[0]); maxY = Math.max(maxY, point[1] + translation[1]);
@@ -117,10 +143,10 @@ function referenceSvg(testCase, frame, progress, canonical = false) {
     path.setAttribute('fill', testCase.request.color ?? '#000000');
     const part = testCase.annotation?.parts.find(item => item.pathIndex === index);
     path.setAttribute('opacity', String(referenceLottieOpacity(testCase.annotation, part?.id, testCase.request.gesture, progress)));
-    if (testCase.annotation?.gesture.law === 'cycle.clockwise' && testCase.annotation.gesture.partId === part?.id && testCase.request.gesture) {
+    if (testCase.annotation?.gesture?.law === 'cycle.clockwise' && testCase.annotation.gesture.partId === part?.id && testCase.request.gesture) {
       path.setAttribute('transform', `rotate(${progress * 360} ${viewBox[0] + part.anchor[0] * viewBox[2]} ${viewBox[1] + part.anchor[1] * viewBox[3]})`);
-    } else if (testCase.annotation?.gesture.law === 'direction.nudge' && testCase.annotation.gesture.partId === part?.id && testCase.request.gesture) {
-      const translation = referenceNudgeTranslation(testCase.annotation, part.id, testCase.request.gesture, progress, viewBox);
+    } else if (translationStops(testCase.annotation).length && testCase.annotation.gesture.partId === part?.id && testCase.request.gesture) {
+      const translation = referenceTranslation(testCase.annotation, part.id, testCase.request.gesture, progress, viewBox, sourcePath);
       path.setAttribute('transform', `translate(${translation[0]} ${translation[1]})`);
     }
     root.append(path);
@@ -200,9 +226,9 @@ export async function runLottieRenderCases(create, testCases, { controls = true,
         player.addEventListener('DOMLoaded', () => { clearTimeout(timer); resolve(); });
         player.addEventListener('data_failed', () => { clearTimeout(timer); reject(new Error('Lottie data_failed')); });
       });
-      const phases = testCase.annotation?.gesture.law === 'direction.nudge' ? [0, 0.25, 0.5, 0.75, 1] : [0, 0.5, 1];
-      if (testCase.annotation?.gesture.law === 'direction.nudge' && expectedTime.from !== expectedTime.to) {
-        const peak = (0.5 - expectedTime.from) / (expectedTime.to - expectedTime.from);
+      const phases = testCase.annotation?.gesture?.law === 'direction.nudge' ? [0, 0.25, 0.5, 0.75, 1] : [0, 0.5, 1];
+      for (const stop of translationStops(testCase.annotation)) {
+        const peak = (stop - expectedTime.from) / (expectedTime.to - expectedTime.from);
         if (peak > 0 && peak < 1) phases.push(peak);
       }
       for (const t of [...new Set(phases.map(fraction => expectedTime.terminalFrame * fraction))].sort((a, b) => a - b)) {
@@ -267,7 +293,8 @@ async function runLottieNegativeControls(create, testCases) {
   const rotating = testCases.find(item => item.name === 'reload' && item.request.variant === 'outline' && item.request.gesture === 'reload.cycle');
   const countershape = testCases.find(item => item.name === 'chatbubble-ellipses' && item.request.variant === 'outline' && !item.request.gesture);
   const nudging = testCases.find(item => item.name === 'arrow-forward' && item.request.variant === 'outline' && item.request.gesture === 'arrow-forward.nudge');
-  assert(rotating && countershape && nudging, 'Нужны реальные cycle, countershape и nudge controls.');
+  const ringing = testCases.find(item => item.name === 'notifications' && item.request.variant === 'outline' && item.request.gesture === 'notifications.ring');
+  assert(rotating && countershape && nudging && ringing, 'Нужны реальные cycle, countershape, nudge и ring controls.');
   const cycle = { ...rotating, request: { ...rotating.request, duration: 1000, frameRate: 60, from: 0.17, to: 0.73 } };
   const reverse = { ...cycle, request: { ...cycle.request, from: 0.73, to: 0.17 } };
   const reduced = { ...reverse, request: { ...reverse.request, reducedMotion: true } };
@@ -285,6 +312,19 @@ async function runLottieNegativeControls(create, testCases) {
     ['nudge-axis', nudge, animation => { const position = animation.layers.find(layer => layer.ks.p.a).ks.p; for (const keyframe of position.k) [keyframe.s[0], keyframe.s[1]] = [keyframe.s[1], keyframe.s[0]]; }, /raster mismatches/],
     ['nudge-interior-peak', nudge, animation => { const position = animation.layers.find(layer => layer.ks.p.a).ks.p; position.k.splice(1, position.k.length - 2); }, /raster mismatches/],
     ['nudge-canvas-crop', nudge, animation => { animation.w = Math.floor(animation.w / 2); }, /raster mismatches/],
+    ['ring-idle-clapper', ringing, animation => {
+      const layer = animation.layers.find(layer => layer.ks.p.a);
+      layer.ks.p = { a: 0, k: layer.ks.p.k[0].s.slice() };
+    }, /raster mismatches/],
+    ['ring-wrong-part', ringing, animation => {
+      const moving = animation.layers.find(layer => layer.ks.p.a), enclosure = animation.layers.find(layer => !layer.ks.p.a);
+      enclosure.ks.p = moving.ks.p;
+      moving.ks.p = { a: 0, k: moving.ks.p.k[0].s.slice() };
+    }, /raster mismatches/],
+    ['ring-interior-extrema', ringing, animation => {
+      const position = animation.layers.find(layer => layer.ks.p.a).ks.p;
+      position.k.splice(1, position.k.length - 2);
+    }, /raster mismatches/],
   ];
   const receipt = [];
   for (const [id, testCase, mutate, expectedFailure] of mutants) {

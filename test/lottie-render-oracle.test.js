@@ -1,24 +1,27 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { canonicalCubicPath, compareLottiePixels, referenceLottieTiming, referenceLottieOpacity, referenceLottieGestures, referenceLottieEmptyPose, referenceNudgeTranslation } from '../scripts/bench/lottie-render.js';
+import { canonicalCubicPath, compareLottiePixels, referenceLottieTiming, referenceLottieOpacity, referenceLottieGestures, referenceLottieEmptyPose, referenceNudgeTranslation, referenceNotificationTranslation } from '../scripts/bench/lottie-render.js';
 
 describe('независимый raw author oracle Lottie', () => {
   it('каждая принятая raw law имеет точный consumer gesture, неизвестная получает отказ', () => {
     const annotations = JSON.parse(readFileSync(new URL('../semantics/author-anatomy.json', import.meta.url), 'utf8'));
     for (const [name, variants] of Object.entries(annotations.icons)) {
       for (const declaration of Object.values(variants)) {
-        expect(referenceLottieGestures(name, declaration).length).toBeGreaterThan(0);
+        if (declaration.gesture === null) expect(referenceLottieGestures(name, declaration)).toEqual([]);
+        else expect(referenceLottieGestures(name, declaration).length).toBeGreaterThan(0);
       }
     }
     expect(() => referenceLottieGestures('future', { gesture: { law: 'unknown' } })).toThrow('не имеет независимого oracle');
     expect(referenceLottieGestures('source-only', undefined)).toEqual([]);
+    expect(referenceLottieGestures('anatomy-only', { gesture: null })).toEqual([]);
+    expect(() => referenceLottieGestures('malformed', {})).toThrow('не имеет независимого oracle');
   });
   it('presence изменяет только confirmation mark в прямой, обратной и reduced конечной позе', () => {
     const annotations = JSON.parse(readFileSync(new URL('../semantics/author-anatomy.json', import.meta.url), 'utf8'));
     let variants = 0;
     for (const [name, declarations] of Object.entries(annotations.icons)) {
       for (const declaration of Object.values(declarations)) {
-        if (declaration.gesture.law !== 'confirmation.presence') continue;
+        if (declaration.gesture?.law !== 'confirmation.presence') continue;
         variants++;
         expect(referenceLottieGestures(name, declaration)).toEqual([`${name}.presence`]);
         for (const progress of [0, 0.25, 0.5, 0.75, 1]) {
@@ -87,6 +90,25 @@ describe('независимый raw author oracle Lottie', () => {
     expect(referenceNudgeTranslation(annotation('right'), 'other-part', 'test.nudge', 0.5, viewport)).toEqual([0, 0]);
     expect(referenceNudgeTranslation(annotation('right'), 'body', undefined, 0.5, viewport)).toEqual([0, 0]);
     expect(() => referenceNudgeTranslation(annotation('logical-start'), 'body', 'test.nudge', 0.5, viewport)).toThrow('неизвестное направление');
+  });
+  it('ring получает независимую ширину raw clapper и проверяет каждую пятую и интерполяцию', () => {
+    const declaration = { gesture: { law: 'notification.ring', purpose: 'incoming-notification', partId: 'clapper' } };
+    const rawPath = { getBBox: () => ({ width: 8 }) };
+    expect(referenceLottieGestures('notifications', declaration)).toEqual(['notifications.ring']);
+    for (const [progress, displacement] of [[0, 0], [0.1, 1], [0.2, 2], [0.3, 0], [0.4, -2],
+      [0.5, -0.5], [0.6, 1], [0.7, 0], [0.8, -1], [0.9, -0.5], [1, 0]]) {
+      expect(referenceNotificationTranslation(declaration, 'clapper', 'notifications.ring', progress, rawPath)[0]).toBeCloseTo(displacement, 12);
+    }
+    expect(referenceNotificationTranslation(declaration, 'bell', 'notifications.ring', 0.2, null)).toEqual([0, 0]);
+    expect(referenceNotificationTranslation(declaration, 'clapper', undefined, 0.2, null)).toEqual([0, 0]);
+    expect(referenceNotificationTranslation({ gesture: null }, 'clapper', undefined, 0.2, null)).toEqual([0, 0]);
+    expect(referenceNotificationTranslation(declaration, 'clapper', 'notifications.ring', 0.2, { getBBox: () => ({ width: 4 }) })).toEqual([1, 0]);
+    for (const width of [0, -1, NaN, Infinity]) {
+      expect(() => referenceNotificationTranslation(declaration, 'clapper', 'notifications.ring', 0.2,
+        { getBBox: () => ({ width }) })).toThrow('невалидную ширину');
+    }
+    expect(() => referenceNotificationTranslation({ gesture: { ...declaration.gesture, purpose: 'generic-spin' } },
+      'clapper', 'notifications.ring', 0.2, rawPath)).toThrow('неизвестный смысл');
   });
   it('отвергает иной RGB при сохранённой форме', () => {
     expect(compareLottiePixels(new Uint8ClampedArray([18, 52, 0, 255]), new Uint8ClampedArray([18, 52, 86, 255])).pass).toBe(false);
