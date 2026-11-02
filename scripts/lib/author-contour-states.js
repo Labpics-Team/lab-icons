@@ -9,6 +9,7 @@ const stableJSON = value => JSON.stringify(value, (_, item) => item && typeof it
 const TOPOLOGY = ['M', 'C', 'C', 'C', 'C', 'Z'];
 const DOTS = ['dot-leading', 'dot-middle', 'dot-trailing'];
 const NAME = /^[a-z][a-z0-9-]*$/;
+const NUMBER = /[+-]?(?:\d*\.\d+|\d+\.?)(?:[eE][+-]?\d+)?/g;
 export class AuthorContourStateError extends Error {
   constructor(code, message) { super(`author-contour-states: ${message}`); this.name = 'AuthorContourStateError'; this.code = code; }
 }
@@ -50,6 +51,10 @@ function upperRoot(value) {
 const quotient = value => ({ numerator: value[0].toString(), denominator: value[1].toString() });
 
 function contour(part, entry) {
+  // Общий parser нормализует relative и неявные команды; packet хранит точную строку.
+  if (entry.d.length > 4096 || entry.d.replace(NUMBER, '').replace(/[,\t\n\r ]/g, '') !== TOPOLOGY.join('')) {
+    refuse('CORRESPONDENCE_UNAVAILABLE', 'Нужны буквальные MCCCCZ в ограниченной точной строке контура.');
+  }
   const segments = parsePathData(entry.d);
   if (segments.map(item => item.cmd).join('') !== TOPOLOGY.join('') || part.fillRule !== 'nonzero' ||
       part.paint.kind !== 'fill' || part.provenance.kind !== 'source' || part.provenance.identity !== 'declared') {
@@ -111,6 +116,13 @@ export function compileAuthorContourStateGroup(baseline, name, group, { compiler
         glyph.parts.some((part, index) => part.id !== DOTS[index] || part.role !== 'content' || part.zIndex !== index ||
           part.d !== entries[index].d || part.fillRule !== entries[index].fillRule)) {
       refuse('MASTER_MISMATCH', 'Авторские части, закреплённые хэши и заливка не совпадают.');
+    }
+    const rawPaths = [...source.rawSvg.matchAll(/<path\b[^>]*>/g)].map(([tag]) => {
+      const value = /(?:^|\s)d\s*=\s*(?:"([^"]*)"|'([^']*)')/.exec(tag);
+      return value?.[1] ?? value?.[2];
+    });
+    if (rawPaths.length !== entries.length || rawPaths.some((d, index) => d !== entries[index].d)) {
+      refuse('CORRESPONDENCE_UNAVAILABLE', 'Точные raw endpoints не должны нормализоваться перед передачей.');
     }
     members[state] = glyph;
     contours[state] = glyph.parts.map((part, index) => contour(part, entries[index]));

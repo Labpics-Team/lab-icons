@@ -161,6 +161,13 @@ runtime сохраняет исходные строки без пересери
 identity registry не нужны. Structural sampler не делает author-admission claim
 для внешнего JSON; авторскую семантику проверяет `compileAuthorStateGroups`.
 
+Общий source reader нормализует начальное `m`, а path parser разворачивает
+неявные команды. Для точных endpoints compiler дополнительно сверяет строки
+с raw path tags и принимает только буквальные абсолютные `MCCCCZ` длиной до
+4096 символов. Иначе он возвращает `CORRESPONDENCE_UNAVAILABLE` до выдачи
+скомпилированного пакета. Вход, проходящий `dots.affine`, но требующий такой
+нормализации, закреплён как отдельный RED.
+
 Renderer, effects и capabilities получают отдельные build projections; код
 вызова только одной операции не удерживает две другие. Packet допускает JSON
 и дублированную установку пакета. Lottie/SF transition пока явно отвергаются.

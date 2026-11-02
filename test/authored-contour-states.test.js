@@ -62,7 +62,8 @@ function witness(variant, change) {
     member.rawSvg = replace(member.rawSvg); member.artifactSvg = replace(member.artifactSvg);
     member.author.masterSha256 = spec.groups[groupName(variant)].states[state].masterSha256 = sha(member.rawSvg);
     member.author.pathFingerprintSha256 = spec.groups[groupName(variant)].states[state].pathFingerprintSha256 = sha(stableJSON(authorPathEntries(member.artifactSvg)));
-    glyph.parts.forEach((part, index) => { part.d = changed[index]; }); glyph.svg = member.artifactSvg;
+    const parsedEntries = authorPathEntries(member.artifactSvg);
+    glyph.parts.forEach((part, index) => { part.d = parsedEntries[index].d; }); glyph.svg = member.artifactSvg;
     glyphs[icon] = glyph;
   }
   return { source, spec, owner: { glyph: request => request.variant === variant ? glyphs[request.icon] : compiler.glyph(request) } };
@@ -160,6 +161,20 @@ describe('authored dots.orient: независимые masters и весь ин�
     const p = .01511, collapsed = h.slice(0, 8).map((value, index) => (1 - p) * value + p * v[index]);
     expect(new Set([0, 1, 2, 3].map(index => collapsed.slice(index * 2, index * 2 + 2).join(','))).size).toBe(1);
     expect(() => compile(w.source, w.spec, w.owner)).toThrow(expect.objectContaining({ code: 'INTERVAL_UNSAFE' }));
+  });
+  it('не нормализует authored endpoint в представление, которое транспорт не поддерживает', () => {
+    const normalizedByParser = [d => d.replace(/^M/, 'm'), d => {
+      let index = 0; return d.replace(/C/g, token => ++index === 2 ? ' ' : token);
+    }, d => ' '.repeat(4096) + d];
+    for (const change of normalizedByParser) {
+      const w = witness('outline', change);
+      for (const state of ['horizontal', 'vertical']) {
+        const icon = `ellipsis-${state}`;
+        expect(() => compileAuthorVariation(w.source.icons[icon].outline, contracts[`${icon}/outline`].parts,
+          { law: 'dots.affine', axis: state === 'horizontal' ? 'x' : 'y' }, grid)).not.toThrow();
+      }
+      expect(() => compile(w.source, w.spec, w.owner)).toThrow(expect.objectContaining({ code: 'CORRESPONDENCE_UNAVAILABLE' }));
+    }
   });
   it('default-only domain, malformed requests и неподдержанные форматы дают явный отказ', () => {
     const group = runtime(payloads[groupName('outline')]);
