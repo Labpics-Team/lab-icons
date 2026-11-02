@@ -37,6 +37,34 @@
    "maxBytes": 13175,
    "maxGzipBytes": 5515
   },
+  "status-circle-enclosure-patch": {
+   "entry": "import { renderEnclosurePatch } from '@labpics/icons/state-variations/status-circle';\nconsole.log(renderEnclosurePatch({ variation: { enclosureEmphasis: 1.1 } }));\n",
+   "baselineBytes": 4808,
+   "baselineGzipBytes": 1936,
+   "maxBytes": 4808,
+   "maxGzipBytes": 1936
+  },
+  "playback-circle-enclosure-patch": {
+   "entry": "import { renderEnclosurePatch } from '@labpics/icons/state-variations/playback-circle';\nconsole.log(renderEnclosurePatch({ variation: { enclosureEmphasis: 1.1 } }));\n",
+   "baselineBytes": 4812,
+   "baselineGzipBytes": 1935,
+   "maxBytes": 4812,
+   "maxGzipBytes": 1935
+  },
+  "status-circle-state-variation": {
+   "entry": "import { renderStateSvg, compileStateEffect, renderEnclosurePatch } from '@labpics/icons/state-variations/status-circle';\nconsole.log(renderStateSvg('question'), compileStateEffect('confirmation', { duration: 180 }), renderEnclosurePatch({ variation: { enclosureEmphasis: 1.1 } }));\n",
+   "baselineBytes": 13990,
+   "baselineGzipBytes": 5282,
+   "maxBytes": 13990,
+   "maxGzipBytes": 5282
+  },
+  "playback-circle-state-variation": {
+   "entry": "import { renderStateSvg, compileStateEffect, renderEnclosurePatch } from '@labpics/icons/state-variations/playback-circle';\nconsole.log(renderStateSvg('play'), compileStateEffect('pause', { duration: 180 }), renderEnclosurePatch({ variation: { enclosureEmphasis: 1.1 } }));\n",
+   "baselineBytes": 10512,
+   "baselineGzipBytes": 3828,
+   "maxBytes": 10512,
+   "maxGzipBytes": 3828
+  },
   "recorded-model-axis": {
    "entry": "import { glyph } from '@labpics/icons/ir';\nconsole.log(glyph({ icon: 'chevron-forward', axes: { weight: 1.1, opsz: 32 } }));\n",
    "baselineBytes": 840088,
