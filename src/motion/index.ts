@@ -4,7 +4,7 @@ import type { PreparedContourStateEffect, SymbolContourStateEffect } from '../st
 import { prepareContourStateEffect as prepareContourPacket } from '../ir/contour-runtime.js';
 
 export type { SymbolContourStateEffect, PreparedContourStateEffect, ContourStatePoseResult } from '../states/contour-types.js';
-/** Подготовка переносимых данных контура без каталога, DOM и часов. */
+/** Подготовка контура без каталога и часов. */
 export function prepareContourStateEffect(effect: SymbolContourStateEffect): PreparedContourStateEffect {
   return prepareContourPacket(effect);
 }
@@ -34,44 +34,39 @@ export interface SymbolEffectTarget {
   ];
 }
 
-/** Данные эффекта; исполнитель и его часы принадлежат потребителю. */
-export interface SymbolEffect {
-  readonly version: 1;
+interface EffectEnvelope {
   readonly icon: string;
   readonly variant: GlyphIR['variant'];
   readonly gesture: string;
   readonly from: number;
   readonly to: number;
-  readonly targets: readonly SymbolEffectTarget[];
   readonly unchangedPartIds: readonly string[];
-  /** Вращение authored silhouette может выходить за статический viewBox. */
+  /** Форма может выходить за viewBox при движении. */
   readonly viewport: Readonly<{ overflow: 'visible' }>;
   readonly options: Readonly<{ duration: number; easing: 'linear'; fill: 'both' }>;
+}
+
+/** Вращение частей через внешний исполнитель. */
+export interface SymbolEffect extends EffectEnvelope {
+  readonly version: 1;
+  readonly targets: readonly SymbolEffectTarget[];
 }
 
 export interface SymbolOpacityStage {
   readonly partId: string;
   readonly property: 'opacity';
-  /** Скалярная цель; первый этап подхватывает фактическую позу исполнителя. */
+  /** Первый этап подхватывает текущую позу. */
   readonly to: number;
-  /** Миллисекунды относительно начала этого эффекта. */
+  /** От начала эффекта, мс. */
   readonly at: number;
   readonly duration: number;
 }
 
-/** Стадии передаются публичному sequence; библиотека не владеет его часами. */
-export interface SymbolSequenceEffect {
+/** Стадии для sequence внешнего исполнителя. */
+export interface SymbolSequenceEffect extends EffectEnvelope {
   readonly version: 2;
-  readonly icon: string;
-  readonly variant: GlyphIR['variant'];
-  readonly gesture: string;
-  readonly from: number;
-  readonly to: number;
   readonly targets: readonly Readonly<{ partId: string; property: 'opacity'; from: number; to: number }>[];
   readonly stages: readonly SymbolOpacityStage[];
-  readonly unchangedPartIds: readonly string[];
-  readonly viewport: Readonly<{ overflow: 'visible' }>;
-  readonly options: Readonly<{ duration: number; easing: 'linear'; fill: 'both' }>;
 }
 
 export interface SymbolTranslationStage {
@@ -83,19 +78,11 @@ export interface SymbolTranslationStage {
   readonly duration: number;
 }
 
-/** Неподвижные контуры перемещаются в системе координат исходного SVG. */
-export interface SymbolTranslationEffect {
+/** Перемещение в исходном viewBox. */
+export interface SymbolTranslationEffect extends EffectEnvelope {
   readonly version: 3;
-  readonly icon: string;
-  readonly variant: GlyphIR['variant'];
-  readonly gesture: string;
-  readonly from: number;
-  readonly to: number;
   readonly targets: readonly Readonly<{ partId: string; property: 'x' | 'y'; unit: 'viewBox'; from: number; to: number }>[];
   readonly stages: readonly SymbolTranslationStage[];
-  readonly unchangedPartIds: readonly string[];
-  readonly viewport: Readonly<{ overflow: 'visible' }>;
-  readonly options: Readonly<{ duration: number; easing: 'linear'; fill: 'both' }>;
 }
 
 export type SymbolEffectResult =

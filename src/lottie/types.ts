@@ -6,7 +6,7 @@ export type LottieRefusalCode = 'INVALID_REQUEST' | 'AUTHOR_SOURCE_REQUIRED' | '
 
 export interface LottieExportRequest {
   readonly variant?: IconVariant;
-  /** Без gesture экспортируется неподвижный авторский master. */
+  /** Без жеста — точный master. */
   readonly gesture?: string;
   readonly duration?: number;
   readonly from?: number;

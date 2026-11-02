@@ -141,7 +141,7 @@ export interface DesignPart {
   readonly role: PartRole;
   readonly geometry: DesignGeometry;
   readonly paint: DesignPaint;
-  /** Именованный pivot части в normalized canvas; ссылка на DesignAnchor. */
+  /** ID опоры в anchors. */
   readonly anchor?: string;
   readonly morphGroup?: string;
 }
@@ -192,7 +192,7 @@ export interface LoweredDesignPart extends RecipePart {
 export interface CompileDesignSpecOptions<TIcon extends string = string> {
   readonly icon: TIcon;
   readonly variant?: 'outline' | 'filled';
-  /** Размер SVG в пикселях; геометрия остаётся в normalized canvas. */
+  /** Размер SVG в px. */
   readonly size?: number;
 }
 
@@ -955,7 +955,7 @@ function canonicalSpecJson(value: unknown): string {
   return JSON.stringify(value);
 }
 
-/** Компилирует самостоятельный авторский знак в тот же IR, что потребляет renderer. */
+/** DesignSpec → GlyphIR. */
 export function compileDesignSpec<TIcon extends string>(
   value: unknown,
   options: CompileDesignSpecOptions<TIcon>,
