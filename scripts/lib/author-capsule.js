@@ -37,7 +37,7 @@ const NEGATIVE_CAPSULE_SOURCE_STYLE = Object.freeze({
     bodyWidths: [.8, .9, 1], sizes: [16, 24, 48], dpr: 1 },
 });
 
-const { contours, coordinateError, curvePieces, certifySeparation, certifyKnockouts, certifyMaterializedContour,
+const { contours, coordinateError, curvePieces, certifySeparation, certifyKnockouts, certifyMaterializedContour, certifySourceContainment,
   simpleContourCertificateVersion } = createAuthorCurveCertificate(refuse);
 const bounds = points => [0, 1].map(axis => [Math.min(...points.map(point => point[axis])), Math.max(...points.map(point => point[axis]))]);
 
@@ -122,6 +122,7 @@ export function compileAuthorCapsule(source, parts, declaration, grid, compositi
   const selfContours = compiledContours.map(contour => certifyMaterializedContour(contour, geometricMinimum, contour.rates, selfStatistics));
   const statistics = { cells: 0 }, curves = compiledContours.map(contour => curvePieces(contour, geometricMinimum, contour.rates));
   if (curves.length === 2) for (const outer of curves[0]) for (const inner of curves[1]) certifySeparation(outer, inner, gap, statistics);
+  const containmentCertificate = shape.length === 2 ? certifySourceContainment(shape[0], shape[1], { cells: 0 }) : undefined;
   for (const [otherIndex, entry] of entries.entries()) if (otherIndex !== index) {
     for (const contour of contours(entry.d)) for (const other of curvePieces(contour, geometricMinimum)) {
       for (const capsule of curves[0]) certifySeparation(capsule, other, gap, statistics);
@@ -133,7 +134,14 @@ export function compileAuthorCapsule(source, parts, declaration, grid, compositi
     selfSimplicityCertificate: { version: simpleContourCertificateVersion, method: 'materialized-simple-closed-contours',
       geometricDomain: { minimum: geometricMinimum, maximum: 1 },
       cells: selfStatistics.cells, contours: selfContours },
-    ...(anatomyCertificate && { anatomyCertificate }) };
+    ...(anatomyCertificate && { anatomyCertificate }),
+    // Точные controls непрерывны по width. При фиксированной ширине линейный
+    // мост к округлённым controls остаётся в тех же границах ошибки; общие programs
+    // совпадают и на мосте. Простота и разделение доказаны для обоих этапов,
+    // поэтому source winding сохраняется без предположения о непрерывности binary64.
+    ...(containmentCertificate && { containmentCertificate: { ...containmentCertificate,
+      geometricDomain: { minimum: geometricMinimum, maximum: 1 },
+      transfer: 'ideal-affine-width-then-bounded-materialization-bridge' } }) };
   const domain = { kind: 'bounded-capsule-width', minimum, maximum: 1, minimumInclusive: true, maximumInclusive: true,
     policy: { gridVersion: grid.version, gridSha256: hash(stableJSON(grid)), minimumGap: gap, minimumPositiveSpan: positiveSpan,
       style: { id: style.id, version: style.version, minimum: style.minimum,

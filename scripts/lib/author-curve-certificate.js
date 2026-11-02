@@ -197,6 +197,47 @@ export function createAuthorCurveCertificate(refuse) {
     }
     return pieces;
   }
+  /** Точный winding исходного контура: нижний Y endpoint включён, верхний исключён. */
+  function sourceRayWinding(pieces, point, statistics) {
+    let winding = 0;
+    const side = x => {
+      const order = cmp(x, point[0]);
+      if (!order) refuse('COMPOSITION_UNPROVEN', 'Source endpoint лежит на границе внешнего contour.');
+      return order > 0;
+    };
+    for (const piece of pieces) {
+      const controls = piece.ends[0], first = controls[0], last = controls.at(-1), direction = cmp(last[1], first[1]);
+      if (!direction && controls.every(control => cmp(control[1], first[1]) === 0)) continue;
+      if (!direction || !controls.slice(1).every((control, i) => direction * cmp(control[1], controls[i][1]) >= 0)) {
+        refuse('COMPOSITION_UNPROVEN', 'Source containment требует монотонные Y controls внешней границы.');
+      }
+      const low = direction > 0 ? first : last, high = direction > 0 ? last : first;
+      if (cmp(point[1], low[1]) < 0 || cmp(point[1], high[1]) >= 0) continue;
+      if (cmp(point[1], low[1]) === 0) { if (side(low[0])) winding += direction; continue; }
+      let curve = piece, depth = 0;
+      while (true) {
+        statistics.cells++;
+        const xs = curve.ends[0].map(control => control[0]);
+        if (cmp(min(xs), point[0]) > 0) { winding += direction; break; }
+        if (cmp(max(xs), point[0]) < 0) break;
+        if (depth >= 24 || statistics.cells > 250000) {
+          refuse('COMPOSITION_UNPROVEN', 'Build certificate не отделяет точное пересечение луча от source endpoint.');
+        }
+        const [left, right] = splitCurve(curve), midpoint = left.ends[0].at(-1), order = cmp(point[1], midpoint[1]);
+        if (!order) { if (side(midpoint[0])) winding += direction; break; }
+        curve = direction * order < 0 ? left : right; depth++;
+      }
+    }
+    return winding;
+  }
+  /** Простые непересекающиеся границы и один внутренний endpoint доказывают контрформу. */
+  function certifySourceContainment(outer, inner, statistics) {
+    const enclosing = certifySimpleContour(outer, statistics), enclosed = certifySimpleContour(inner, statistics);
+    for (const a of enclosing) for (const b of enclosed) certifySeparation(a, b, 0, statistics, true);
+    const winding = sourceRayWinding(enclosing, enclosed[0].ends[0][0], statistics);
+    if (Math.abs(winding) !== 1) refuse('COMPOSITION_UNPROVEN', 'Внутренний contour не находится внутри внешнего source contour.');
+    return { version: 1, method: 'simple-disjoint-contours-exact-ray-winding', sourceWinding: winding, cells: statistics.cells };
+  }
   function certifyKnockouts(shape, statistics) {
     const enclosure = shape[0], enclosing = certifySimpleContour(enclosure, statistics);
     if (enclosure.commands !== 'MCCCCZ' || enclosing.length !== 4 || enclosing.some(curve => curve.ends[0].length !== 4) ||
@@ -240,6 +281,6 @@ export function createAuthorCurveCertificate(refuse) {
     }
     return { version: SIMPLE_CONTOUR_CERTIFICATE_VERSION, method: 'simple-disjoint-knockouts-in-inscribed-polygon', cells: statistics.cells };
   }
-  return { contours, coordinateError, curvePieces, certifySeparation, certifyKnockouts, certifyMaterializedContour,
+  return { contours, coordinateError, curvePieces, certifySeparation, certifyKnockouts, certifyMaterializedContour, certifySourceContainment,
     simpleContourCertificateVersion: SIMPLE_CONTOUR_CERTIFICATE_VERSION };
 }

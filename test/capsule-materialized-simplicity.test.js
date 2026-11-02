@@ -27,16 +27,34 @@ function compile(body) {
     masterSha256: hash(svg), pathFingerprintSha256: hash(stableJSON(authorPathEntries(svg))) } }, parts,
   { law: 'capsule.width', parameter: 'bodyWidth', bodyPartId: 'body' }, grid, { kind: 'compound', fillRule: 'evenodd' });
 }
-function compilePositive(body) {
+function compilePositive(body, fillRule = 'nonzero') {
   const support = 'M20 20L21 20L21 21L20 21Z';
-  const svg = `<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="${body}"/><path fill="currentColor" d="${support}"/></svg>`;
+  const svg = `<svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" fill-rule="${fillRule}" d="${body}"/><path fill="currentColor" d="${support}"/></svg>`;
   return compileAuthorCapsule({ rawSvg: svg, artifactSvg: svg, author: { fileKey: 'LuaiBd4anRi4DMZayKAnY2', version: '2416636003859748575',
     masterSha256: hash(svg), pathFingerprintSha256: hash(stableJSON(authorPathEntries(svg))) } },
-  ['body', 'support'].map((id, zIndex) => ({ id, identity: 'declared', zIndex, role: 'content', fillRule: 'nonzero' })),
+  ['body', 'support'].map((id, zIndex) => ({ id, identity: 'declared', zIndex, role: 'content', fillRule: id === 'body' ? fillRule : 'nonzero' })),
   { law: 'capsule.width', parameter: 'bodyWidth', bodyPartId: 'body' }, grid);
 }
 
 describe('capsule width certifies the materialized contour, including binary64 perturbations', () => {
+  it('refuses an outside-U island although bounds, opposite winding and all-width separation agree', () => {
+    const outer = 'M2 2C3 2 4 2 5 2L5 15L9 15L9 2L12 2L12 20L2 20Z';
+    const inner = 'M6 5L6 9L8 9C8 8 8 6 8 5Z';
+    expect(() => compilePositive(outer + inner, 'evenodd')).toThrowError(expect.objectContaining({ code: 'COMPOSITION_UNPROVEN' }));
+  });
+  it('keeps a legal counter inside the U lower bridge', () => {
+    const outer = 'M2 2C3 2 4 2 5 2L5 15L9 15L9 2L12 2L12 20L2 20Z';
+    const inner = 'M6 16L6 19L8 19C8 18 8 17 8 16Z';
+    const compiled = compilePositive(outer + inner, 'evenodd');
+    expect(compiled.domain.minimum).toBe(.8799992000000006);
+    expect(compiled.evidence.containmentCertificate).toMatchObject({ sourceWinding: 1,
+      geometricDomain: compiled.evidence.geometricDomain, transfer: 'ideal-affine-width-then-bounded-materialization-bridge' });
+  });
+  it('refuses the legal counter translated outside the U without changing its own geometry', () => {
+    const outer = 'M2 2C3 2 4 2 5 2L5 15L9 15L9 2L12 2L12 20L2 20Z';
+    const inner = 'M6 6L6 9L8 9C8 8 8 7 8 6Z';
+    expect(() => compilePositive(outer + inner, 'evenodd')).toThrowError(expect.objectContaining({ code: 'COMPOSITION_UNPROVEN' }));
+  });
   it('rejects the independently reproduced Q/C crossing although the source is simple', () => {
     expect(() => certificate.certifyKnockouts([certificate.contours(fragments[0])[0], certificate.contours(fragments[1])[0],
       certificate.contours(witness)[0]], { cells: 0 })).not.toThrow();

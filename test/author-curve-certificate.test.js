@@ -8,6 +8,30 @@ const proof = createAuthorCurveCertificate((code, message) => { throw Object.ass
 const svg = readFileSync(new URL('../masters/figma/2416636003859748575/Filled/mic-circle.svg', import.meta.url), 'utf8');
 const source = proof.contours(authorPathEntries(normalizeFigmaSvg(svg))[0].d);
 const shape = d => proof.contours(d)[0];
+describe('source containment uses exact curved ray crossings', () => {
+  const enclosing = shape('M10 0C15.5 0 20 4.5 20 10C20 15.5 15.5 20 10 20C4.5 20 0 15.5 0 10C0 4.5 4.5 0 10 0Z');
+  it.each([
+    'M9 10L9 12L11 12L11 10Z',
+    'M15.125 5.125L15.125 6.125L16.125 6.125L16.125 5.125Z',
+  ])('keeps contained controls at a shared ray endpoint or interior curved root: %s', d => {
+    expect(proof.certifySourceContainment(enclosing, shape(d), { cells: 0 }))
+      .toMatchObject({ version: 1, method: 'simple-disjoint-contours-exact-ray-winding', sourceWinding: 1 });
+  });
+  it('keeps clockwise outer authorship with the opposite exact winding', () => {
+    const reverse = shape('M10 0C4.5 0 0 4.5 0 10C0 15.5 4.5 20 10 20C15.5 20 20 15.5 20 10C20 4.5 15.5 0 10 0Z');
+    expect(proof.certifySourceContainment(reverse, shape('M9 10L9 12L11 12L11 10Z'), { cells: 0 }).sourceWinding).toBe(-1);
+  });
+  it.each([0, 20])('does not count tangential lower/upper extrema as an interior at Y=%s', y => {
+    expect(() => proof.certifySourceContainment(enclosing, shape(`M-2 ${y}L-2 ${y + 1}L-1 ${y + 1}L-1 ${y}Z`), { cells: 0 }))
+      .toThrowError(expect.objectContaining({ code: 'COMPOSITION_UNPROVEN' }));
+  });
+  it('refuses a simple outer beyond the monotone-Y proof language', () => {
+    const nonmonotoneY = shape('M0 0C3 3 6 -3 10 0L10 20L0 20Z');
+    expect(() => proof.certifySourceContainment(nonmonotoneY, shape('M2 5L2 7L4 7L4 5Z'), { cells: 0 }))
+      .toThrowError(expect.objectContaining({ code: 'COMPOSITION_UNPROVEN' }));
+  });
+});
+
 describe('evenodd counter admission uses containment, simplicity and distinct boundaries', () => {
   it('admits actual author enclosure/support/body without deriving holes from winding', () => {
     const evidence = proof.certifyKnockouts(source, { cells: 0 });
