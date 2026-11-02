@@ -1,5 +1,7 @@
-import type { AxisContract, AxisName, IconVariant, ModelMode } from './glyph-types.js';
+import type { AxisContract, AxisName, IconVariant, SymbolOptions } from './glyph-types.js';
 import { AXIS_NAMES } from './catalog.generated.js';
+
+export type { SymbolOptions };
 
 export type GlyphModelErrorCode = 'CANDIDATES_REQUIRED' | 'AUTHOR_PARITY_REQUIRED' | 'AUTHOR_VARIATION_UNSUPPORTED';
 
@@ -11,12 +13,6 @@ export class GlyphModelError extends Error {
     this.name = 'GlyphModelError';
     this.code = code;
   }
-}
-
-export interface SymbolOptions {
-  readonly variant: IconVariant;
-  readonly modelMode: ModelMode;
-  readonly axes: Readonly<Partial<Record<AxisName, number>>>;
 }
 
 export function parseSymbolVariant(value: unknown): IconVariant {

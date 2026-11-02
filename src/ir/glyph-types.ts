@@ -32,11 +32,19 @@ export type PartRole =
   | 'decorator'
   | 'unclassified';
 
+export type AxisValues = Readonly<Partial<Record<AxisName, number>>>;
+
+export interface SymbolOptions {
+  readonly variant: IconVariant;
+  readonly modelMode: ModelMode;
+  readonly axes: AxisValues;
+}
+
 export interface GlyphRequest<TIcon extends string = IconId> {
   readonly icon: TIcon;
   readonly variant?: IconVariant;
   readonly modelMode?: ModelMode;
-  readonly axes?: Readonly<Partial<Record<AxisName, number>>>;
+  readonly axes?: AxisValues;
 }
 
 export interface SourcePartProvenance {
@@ -94,7 +102,7 @@ export interface ModelGlyphProvenance {
   readonly archetype: string;
   readonly state: ModelState;
   /** Эффективные значения только реально поддержанных моделью осей. */
-  readonly axes: Readonly<Partial<Record<AxisName, number>>>;
+  readonly axes: AxisValues;
 }
 
 export interface RecipeGlyphProvenance {

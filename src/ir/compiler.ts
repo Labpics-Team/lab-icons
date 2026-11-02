@@ -26,11 +26,8 @@ export type { IconId, AxisName, IconVariant, ModelMode, ModelState, FillRule, Pa
 export { GlyphModelError } from './request.js';
 export type { GlyphModelErrorCode } from './request.js';
 
-export interface ParsedGlyphRequest<TIcon extends string = IR.IconId> {
+export interface ParsedGlyphRequest<TIcon extends string = IR.IconId> extends IR.SymbolOptions {
   readonly icon: TIcon;
-  readonly variant: IR.IconVariant;
-  readonly modelMode: IR.ModelMode;
-  readonly axes: Readonly<Partial<Record<IR.AxisName, number>>>;
 }
 
 function cloneGlyphComposition(composition: IR.GlyphComposition): IR.GlyphComposition {
