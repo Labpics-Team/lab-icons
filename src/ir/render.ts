@@ -1,7 +1,7 @@
 import type { GlyphIR } from './glyph-types.js';
 
 export interface GlyphSvgInstance {
-  /** Уникальный в документе идентификатор задаёт владелец mounted instance. */
+  /** Владелец экземпляра задаёт уникальный в документе ID. */
   readonly instanceId: string;
 }
 
