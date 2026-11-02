@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { canonicalCubicPath, compareLottiePixels, referenceLottieTiming, referenceLottieOpacity, referenceLottieGestures, referenceLottieEmptyPose, referenceNudgeTranslation, referenceNotificationTranslation } from '../scripts/bench/lottie-render.js';
+import { canonicalCubicPath, compareLottiePixels, referenceLottieTiming, referenceLottieOpacity, referenceLottieGestures, referenceLottieEmptyPose, referenceNudgeTranslation, referenceNotificationTranslation, measureRawNotificationWidth } from '../scripts/bench/lottie-render.js';
 
 describe('независимый raw author oracle Lottie', () => {
   it('каждая принятая raw law имеет точный consumer gesture, неизвестная получает отказ', () => {
@@ -93,22 +93,52 @@ describe('независимый raw author oracle Lottie', () => {
   });
   it('ring получает независимую ширину raw clapper и проверяет каждую пятую и интерполяцию', () => {
     const declaration = { gesture: { law: 'notification.ring', purpose: 'incoming-notification', partId: 'clapper' } };
-    const rawPath = { getBBox: () => ({ width: 8 }) };
+    const rawWidth = 8;
     expect(referenceLottieGestures('notifications', declaration)).toEqual(['notifications.ring']);
     for (const [progress, displacement] of [[0, 0], [0.1, 1], [0.2, 2], [0.3, 0], [0.4, -2],
       [0.5, -0.5], [0.6, 1], [0.7, 0], [0.8, -1], [0.9, -0.5], [1, 0]]) {
-      expect(referenceNotificationTranslation(declaration, 'clapper', 'notifications.ring', progress, rawPath)[0]).toBeCloseTo(displacement, 12);
+      expect(referenceNotificationTranslation(declaration, 'clapper', 'notifications.ring', progress, rawWidth)[0]).toBeCloseTo(displacement, 12);
     }
     expect(referenceNotificationTranslation(declaration, 'bell', 'notifications.ring', 0.2, null)).toEqual([0, 0]);
     expect(referenceNotificationTranslation(declaration, 'clapper', undefined, 0.2, null)).toEqual([0, 0]);
     expect(referenceNotificationTranslation({ gesture: null }, 'clapper', undefined, 0.2, null)).toEqual([0, 0]);
-    expect(referenceNotificationTranslation(declaration, 'clapper', 'notifications.ring', 0.2, { getBBox: () => ({ width: 4 }) })).toEqual([1, 0]);
+    expect(referenceNotificationTranslation(declaration, 'clapper', 'notifications.ring', 0.2, 4)).toEqual([1, 0]);
     for (const width of [0, -1, NaN, Infinity]) {
-      expect(() => referenceNotificationTranslation(declaration, 'clapper', 'notifications.ring', 0.2,
-        { getBBox: () => ({ width }) })).toThrow('невалидную ширину');
+      expect(() => referenceNotificationTranslation(declaration, 'clapper', 'notifications.ring', 0.2, width)).toThrow('невалидную ширину');
     }
     expect(() => referenceNotificationTranslation({ gesture: { ...declaration.gesture, purpose: 'generic-spin' } },
-      'clapper', 'notifications.ring', 0.2, rawPath)).toThrow('неизвестный смысл');
+      'clapper', 'notifications.ring', 0.2, rawWidth)).toThrow('неизвестный смысл');
+  });
+  it('raw bbox измеряется на connected clone и surface удаляется при успехе и отказе', () => {
+    const declaration = { gesture: { law: 'notification.ring', partId: 'clapper' }, parts: [{ id: 'clapper', pathIndex: 1 }] };
+    const source = { documentElement: { identity: 'author-master' } };
+    for (const outcome of [8, 0, NaN, new Error('bbox unavailable'), 'append failure']) {
+      const events = []; let connected = false;
+      const path = { getBBox: () => {
+        events.push('bbox');
+        if (!connected) return { width: 0 };
+        if (outcome instanceof Error) throw outcome;
+        return { width: outcome };
+      } };
+      const surface = { style: {}, setAttribute: () => {}, querySelectorAll: () => [null, path],
+        remove: () => { events.push('remove'); connected = false; } };
+      const documentOwner = { importNode: (node, deep) => {
+        expect(node).toBe(source.documentElement); expect(deep).toBe(true); return surface;
+      }, body: { append: node => {
+        expect(node).toBe(surface); events.push('append');
+        if (outcome === 'append failure') throw new Error(outcome);
+        connected = true;
+      } } };
+      expect(path.getBBox().width).toBe(0); events.length = 0;
+      if (outcome === 8) expect(measureRawNotificationWidth(declaration, source, documentOwner)).toBe(8);
+      else expect(() => measureRawNotificationWidth(declaration, source, documentOwner)).toThrow(
+        outcome instanceof Error ? 'bbox unavailable' : outcome === 'append failure' ? outcome : 'невалидную ширину');
+      expect(events).toEqual(outcome === 'append failure' ? ['append', 'remove'] : ['append', 'bbox', 'remove']);
+      expect(connected).toBe(false);
+      expect(surface.style.cssText).toContain('visibility:hidden');
+      expect(surface.style.cssText).not.toContain('display:none');
+      expect(source.documentElement).toEqual({ identity: 'author-master' });
+    }
   });
   it('отвергает иной RGB при сохранённой форме', () => {
     expect(compareLottiePixels(new Uint8ClampedArray([18, 52, 0, 255]), new Uint8ClampedArray([18, 52, 86, 255])).pass).toBe(false);

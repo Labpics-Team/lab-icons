@@ -66,13 +66,30 @@ export function referenceNudgeTranslation(declaration, id, gesture, progress, vi
   const amount = (horizontal ? viewBox[2] : viewBox[3]) / 8 * pulse;
   return horizontal ? [law.direction === 'left' ? -amount : amount, 0] : [0, law.direction === 'up' ? -amount : amount];
 }
-/** SVG2 getBBox даёт ширину raw path в user coordinates. Producer bounds,
- * motion stops и control-point hull не участвуют в независимой калибровке. */
-export function referenceNotificationTranslation(declaration, id, gesture, progress, rawPath) {
+/** SVG2 bbox измеряется на connected raw surface; Chromium 140 не создаёт
+ * LayoutObject для detached XML. Один вызов на testcase, без producer bounds. */
+export function measureRawNotificationWidth(declaration, source, documentOwner = document) {
+  const law = declaration?.gesture;
+  assert(law?.law === 'notification.ring', 'raw measurement требует notification.ring');
+  const part = declaration.parts.find(item => item.id === law.partId);
+  assert(part && Number.isInteger(part.pathIndex) && part.pathIndex >= 0, 'raw clapper не объявлен');
+  const surface = documentOwner.importNode(source.documentElement, true);
+  surface.setAttribute('aria-hidden', 'true');
+  surface.style.cssText = 'position:absolute;left:-10000px;top:0;visibility:hidden;pointer-events:none';
+  try {
+    documentOwner.body.append(surface);
+    const rawPath = surface.querySelectorAll('path')[part.pathIndex];
+    assert(rawPath, 'raw clapper отсутствует в master');
+    const width = rawPath.getBBox().width;
+    assert(Number.isFinite(width) && width > 0, 'raw clapper имеет невалидную ширину');
+    return width;
+  } finally { surface.remove(); }
+}
+/** Motion stops и control-point hull не участвуют в независимой калибровке. */
+export function referenceNotificationTranslation(declaration, id, gesture, progress, width) {
   const law = declaration?.gesture;
   if (!gesture || law?.law !== 'notification.ring' || law.partId !== id) return [0, 0];
   assert(law.purpose === 'incoming-notification', 'raw notification.ring имеет неизвестный смысл');
-  const width = rawPath.getBBox().width;
   assert(Number.isFinite(width) && width > 0, 'raw clapper имеет невалидную ширину');
   assert(Number.isFinite(progress) && progress >= 0 && progress <= 1, 'raw ring progress выходит за [0,1]');
   const values = [0, 1, -1, 0.5, -0.5, 0];
@@ -85,9 +102,9 @@ function translationStops(declaration) {
   const law = declaration?.gesture?.law;
   return law === 'notification.ring' ? [0.2, 0.4, 0.6, 0.8] : law === 'direction.nudge' ? [0.5] : [];
 }
-function referenceTranslation(declaration, id, gesture, progress, viewBox, rawPath) {
+function referenceTranslation(declaration, id, gesture, progress, viewBox, notificationWidth) {
   return declaration?.gesture?.law === 'notification.ring'
-    ? referenceNotificationTranslation(declaration, id, gesture, progress, rawPath)
+    ? referenceNotificationTranslation(declaration, id, gesture, progress, notificationWidth)
     : referenceNudgeTranslation(declaration, id, gesture, progress, viewBox);
 }
 export function referenceLottieTiming(request) {
@@ -102,10 +119,12 @@ function rawSource(testCase) {
   assert(!source.querySelector('parsererror'), `${testCase.name}: raw SVG не прочитан`);
   const viewBox = source.documentElement.getAttribute('viewBox').trim().split(/[\s,]+/).map(Number);
   assert(viewBox.length === 4 && viewBox.every(Number.isFinite) && viewBox[2] > 0 && viewBox[3] > 0, 'raw viewBox невалиден');
-  return { source, viewBox };
+  const notificationWidth = testCase.request.gesture && testCase.annotation?.gesture?.law === 'notification.ring'
+    ? measureRawNotificationWidth(testCase.annotation, source) : undefined;
+  return { source, viewBox, notificationWidth };
 }
-function referenceFrame(testCase) {
-  const { source, viewBox } = rawSource(testCase);
+function referenceFrame(testCase, raw) {
+  const { source, viewBox, notificationWidth } = raw;
   const time = referenceLottieTiming(testCase.request);
   let minX = viewBox[0], minY = viewBox[1], maxX = minX + viewBox[2], maxY = minY + viewBox[3];
   for (const [index, path] of [...source.querySelectorAll('path')].entries()) {
@@ -120,7 +139,7 @@ function referenceFrame(testCase) {
     } else {
       const phases = time.terminalFrame ? [time.from, time.to, ...translationStops(testCase.annotation).filter(progress =>
         progress > Math.min(time.from, time.to) && progress < Math.max(time.from, time.to))] : [time.to];
-      const offsets = phases.map(progress => referenceTranslation(testCase.annotation, part?.id, testCase.request.gesture, progress, viewBox, path));
+      const offsets = phases.map(progress => referenceTranslation(testCase.annotation, part?.id, testCase.request.gesture, progress, viewBox, notificationWidth));
       for (const point of points) for (const translation of offsets) {
         minX = Math.min(minX, point[0] + translation[0]); minY = Math.min(minY, point[1] + translation[1]);
         maxX = Math.max(maxX, point[0] + translation[0]); maxY = Math.max(maxY, point[1] + translation[1]);
@@ -130,8 +149,8 @@ function referenceFrame(testCase) {
   // Область наблюдения принадлежит raw master. Cropped target не обрезает oracle.
   return [Math.floor(minX), Math.floor(minY), Math.ceil(maxX) - Math.floor(minX), Math.ceil(maxY) - Math.floor(minY)];
 }
-function referenceSvg(testCase, frame, progress, canonical = false) {
-  const { source, viewBox } = rawSource(testCase);
+function referenceSvg(testCase, raw, frame, progress, canonical = false) {
+  const { source, viewBox, notificationWidth } = raw;
   const svg = document.createElementNS(NS, 'svg');
   svg.setAttribute('viewBox', frame.join(' '));
   const root = document.createElementNS(NS, 'g');
@@ -146,7 +165,7 @@ function referenceSvg(testCase, frame, progress, canonical = false) {
     if (testCase.annotation?.gesture?.law === 'cycle.clockwise' && testCase.annotation.gesture.partId === part?.id && testCase.request.gesture) {
       path.setAttribute('transform', `rotate(${progress * 360} ${viewBox[0] + part.anchor[0] * viewBox[2]} ${viewBox[1] + part.anchor[1] * viewBox[3]})`);
     } else if (translationStops(testCase.annotation).length && testCase.annotation.gesture.partId === part?.id && testCase.request.gesture) {
-      const translation = referenceTranslation(testCase.annotation, part.id, testCase.request.gesture, progress, viewBox, sourcePath);
+      const translation = referenceTranslation(testCase.annotation, part.id, testCase.request.gesture, progress, viewBox, notificationWidth);
       path.setAttribute('transform', `translate(${translation[0]} ${translation[1]})`);
     }
     root.append(path);
@@ -209,7 +228,7 @@ export async function runLottieRenderCases(create, testCases, { controls = true,
     const exported = create(testCase.name, testCase.request);
     assert(exported.ok, `${testCase.name}: ${exported.reason?.code}`);
     const animation = exported.animation, before = JSON.stringify(animation), meta = animation.meta.labIcons;
-    const expectedTime = referenceLottieTiming(testCase.request), frame = referenceFrame(testCase), rawViewBox = rawSource(testCase).viewBox;
+    const expectedTime = referenceLottieTiming(testCase.request), raw = rawSource(testCase), frame = referenceFrame(testCase, raw), rawViewBox = raw.viewBox;
     assert(meta.masterSha256 === testCase.masterSha256, `${testCase.name}: master identity drift`);
     assert(JSON.stringify(meta.logicalViewBox) === JSON.stringify(rawViewBox), `${testCase.name}: raw viewBox drift`);
     assert(meta.terminalFrame === expectedTime.terminalFrame && meta.from === expectedTime.from && meta.to === expectedTime.to, `${testCase.name}: request timing drift`);
@@ -235,9 +254,9 @@ export async function runLottieRenderCases(create, testCases, { controls = true,
         player.goToAndStop(t, true);
         const fraction = expectedTime.terminalFrame ? t / expectedTime.terminalFrame : 1;
         const progress = testCase.request.gesture ? expectedTime.from + (expectedTime.to - expectedTime.from) * fraction : 0;
-        const reference = referenceSvg(testCase, frame, progress);
-        const canonicalReference = referenceSvg(testCase, frame, progress, true);
-        const rawPartIds = [...rawSource(testCase).source.querySelectorAll('path')].map((_, index) =>
+        const reference = referenceSvg(testCase, raw, frame, progress);
+        const canonicalReference = referenceSvg(testCase, raw, frame, progress, true);
+        const rawPartIds = [...raw.source.querySelectorAll('path')].map((_, index) =>
           testCase.annotation?.parts.find(part => part.pathIndex === index)?.id);
         const expectedEmpty = referenceLottieEmptyPose(testCase.annotation, rawPartIds, testCase.request.gesture, progress);
         const rendered = container.querySelector('svg'); assert(rendered, 'SVG player ничего не нарисовал');
@@ -275,7 +294,7 @@ export async function runLottieRenderCases(create, testCases, { controls = true,
         sample.style.height = `${animation.h * size / meta.logicalViewBox[3]}px`;
         sample.setAttribute('aria-label', `${size}px Lottie`); container.append(sample);
       }
-      const authored = referenceSvg(testCase, [-meta.offset[0], -meta.offset[1], animation.w, animation.h], testCase.request.gesture ? expectedTime.to : 0);
+      const authored = referenceSvg(testCase, raw, [-meta.offset[0], -meta.offset[1], animation.w, animation.h], testCase.request.gesture ? expectedTime.to : 0);
       authored.style.width = `${animation.w * 2}px`; authored.style.height = `${animation.h * 2}px`;
       authored.setAttribute('aria-label', '48px author SVG'); container.append(authored);
     } finally { if (player.renderer) player.destroy(); }
