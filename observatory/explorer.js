@@ -255,7 +255,9 @@ function updateMotionControls() {
     const moving = state.animations.some(control => ['running', 'paused'].includes(control.state));
     ui.pause.disabled = !ready || (!moving && !state.pendingMotion);
     ui.pause.textContent = (state.pendingMotion?.paused ?? state.replacement.paused) ? 'Продолжить' : 'Пауза';
-    ui['motion-status'].textContent = ready ? contourGroup(state.replacement)
+    ui['motion-status'].textContent = ready ? sourceGroup(state.replacement)
+      ? 'Выберите состояние. Переход можно развернуть, приостановить или прервать.'
+      : contourGroup(state.replacement)
       ? 'Выберите ориентацию. Переход можно развернуть, приостановить или прервать.'
       : 'Оболочка остаётся на месте. Выберите другой знак, разверните или прервите замену.' : 'Подготавливаем авторские состояния.';
     for (const button of ui['state-choices'].querySelectorAll('button')) button.disabled = !ready;
