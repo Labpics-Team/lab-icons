@@ -60,6 +60,30 @@
     "sourceMappingURL"
    ]
   },
+  "dist/ir/annulus-runtime.js": {
+   "baselineBytes": 8777,
+   "baselineGzipBytes": 3827,
+   "maxBytes": 8777,
+   "maxGzipBytes": 3827,
+   "allowedModules": [
+    "src/ir/author-annulus-runtime.ts",
+    "src/ir/sha256.ts",
+    "src/ir/svg-assembly.ts"
+   ],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ]
+  },
+  "dist/ir/author-annulus-types.d.ts": {
+   "baselineBytes": 3011,
+   "baselineGzipBytes": 985,
+   "maxBytes": 3011,
+   "maxGzipBytes": 985,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ]
+  },
   "dist/ir/author-catalog.generated.d.ts": {
    "baselineBytes": 5072,
    "baselineGzipBytes": 1631,
@@ -80,11 +104,33 @@
     "sourceMappingURL"
    ]
   },
+  "dist/ir/author-request-runtime.js": {
+   "baselineBytes": 798,
+   "baselineGzipBytes": 489,
+   "maxBytes": 798,
+   "maxGzipBytes": 489,
+   "allowedModules": [
+    "src/ir/author-request-runtime.ts"
+   ],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ]
+  },
   "dist/ir/author-source.d.ts": {
    "baselineBytes": 983,
    "baselineGzipBytes": 345,
    "maxBytes": 983,
    "maxGzipBytes": 345,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ]
+  },
+  "dist/ir/authored-variation.d.ts": {
+   "baselineBytes": 3177,
+   "baselineGzipBytes": 1073,
+   "maxBytes": 3177,
+   "maxGzipBytes": 1073,
    "allowedModules": [],
    "forbiddenNeedles": [
     "sourceMappingURL"
@@ -156,6 +202,39 @@
     "sourceMappingURL"
    ]
   },
+  "dist/ir/contour-runtime.js": {
+   "baselineBytes": 10619,
+   "baselineGzipBytes": 4081,
+   "maxBytes": 10619,
+   "maxGzipBytes": 4081,
+   "allowedModules": [
+    "src/ir/contour-runtime.ts",
+    "src/ir/sha256.ts"
+   ],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ]
+  },
+  "dist/ir/contour-state-types.d.ts": {
+   "baselineBytes": 3953,
+   "baselineGzipBytes": 1257,
+   "maxBytes": 3953,
+   "maxGzipBytes": 1257,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ]
+  },
+  "dist/ir/glyph-types.d.ts": {
+   "baselineBytes": 8762,
+   "baselineGzipBytes": 2302,
+   "maxBytes": 8762,
+   "maxGzipBytes": 2302,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ]
+  },
   "dist/ir/index.d.ts": {
    "baselineBytes": 4898,
    "baselineGzipBytes": 1495,
@@ -199,6 +278,16 @@
    "baselineGzipBytes": 926,
    "maxBytes": 2113,
    "maxGzipBytes": 926,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ]
+  },
+  "dist/ir/paint-types.d.ts": {
+   "baselineBytes": 443,
+   "baselineGzipBytes": 264,
+   "maxBytes": 443,
+   "maxGzipBytes": 264,
    "allowedModules": [],
    "forbiddenNeedles": [
     "sourceMappingURL"
@@ -277,6 +366,16 @@
     "sourceMappingURL"
    ]
   },
+  "dist/ir/state-common-types.d.ts": {
+   "baselineBytes": 523,
+   "baselineGzipBytes": 283,
+   "maxBytes": 523,
+   "maxGzipBytes": 283,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ]
+  },
   "dist/ir/state-runtime.js": {
    "baselineBytes": 4936,
    "baselineGzipBytes": 1845,
@@ -299,6 +398,106 @@
     "sourceMappingURL"
    ]
   },
+  "dist/ir/symbol-data/alert-circle.js": {
+   "baselineBytes": 13775,
+   "baselineGzipBytes": 2680,
+   "maxBytes": 13775,
+   "maxGzipBytes": 2680,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ]
+  },
+  "dist/ir/symbol-data/checkmark-circle.js": {
+   "baselineBytes": 13451,
+   "baselineGzipBytes": 2969,
+   "maxBytes": 13451,
+   "maxGzipBytes": 2969,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ]
+  },
+  "dist/ir/symbol-data/close-circle.js": {
+   "baselineBytes": 12388,
+   "baselineGzipBytes": 2531,
+   "maxBytes": 12388,
+   "maxGzipBytes": 2531,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ]
+  },
+  "dist/ir/symbol-data/ellipsis-horizontal.js": {
+   "baselineBytes": 15959,
+   "baselineGzipBytes": 2646,
+   "maxBytes": 15959,
+   "maxGzipBytes": 2646,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ]
+  },
+  "dist/ir/symbol-data/ellipsis-vertical.js": {
+   "baselineBytes": 12124,
+   "baselineGzipBytes": 2154,
+   "maxBytes": 12124,
+   "maxGzipBytes": 2154,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ]
+  },
+  "dist/ir/symbol-data/minus-circle.js": {
+   "baselineBytes": 9055,
+   "baselineGzipBytes": 2083,
+   "maxBytes": 9055,
+   "maxGzipBytes": 2083,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ]
+  },
+  "dist/ir/symbol-data/pause-circle.js": {
+   "baselineBytes": 11453,
+   "baselineGzipBytes": 2332,
+   "maxBytes": 11453,
+   "maxGzipBytes": 2332,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ]
+  },
+  "dist/ir/symbol-data/play-circle.js": {
+   "baselineBytes": 9989,
+   "baselineGzipBytes": 2846,
+   "maxBytes": 9989,
+   "maxGzipBytes": 2846,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ]
+  },
+  "dist/ir/symbol-data/plus-circle.js": {
+   "baselineBytes": 11411,
+   "baselineGzipBytes": 2380,
+   "maxBytes": 11411,
+   "maxGzipBytes": 2380,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ]
+  },
+  "dist/ir/symbol-data/question-circle.js": {
+   "baselineBytes": 11641,
+   "baselineGzipBytes": 3121,
+   "maxBytes": 11641,
+   "maxGzipBytes": 3121,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ]
+  },
   "dist/ir/symbol-runtime.js": {
    "baselineBytes": 1160,
    "baselineGzipBytes": 638,
@@ -306,6 +505,20 @@
    "maxGzipBytes": 638,
    "allowedModules": [
     "src/ir/symbol-runtime.ts"
+   ],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ]
+  },
+  "dist/ir/variation-runtime.js": {
+   "baselineBytes": 10737,
+   "baselineGzipBytes": 4427,
+   "maxBytes": 10737,
+   "maxGzipBytes": 4427,
+   "allowedModules": [
+    "src/ir/authored-variation.ts",
+    "src/ir/sha256.ts",
+    "src/ir/svg-assembly.ts"
    ],
    "forbiddenNeedles": [
     "sourceMappingURL"
@@ -6932,6 +7145,54 @@
    ],
    "forbiddenNeedles": [
     "sourceMappingURL"
+   ]
+  },
+  "dist/states/ellipsis-orientation-filled.d.ts": {
+   "baselineBytes": 777,
+   "baselineGzipBytes": 266,
+   "maxBytes": 777,
+   "maxGzipBytes": 266,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL",
+    "semantics/catalog.json",
+    "anatomy.runtime.json"
+   ]
+  },
+  "dist/states/ellipsis-orientation-filled.js": {
+   "baselineBytes": 9334,
+   "baselineGzipBytes": 2544,
+   "maxBytes": 9334,
+   "maxGzipBytes": 2544,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL",
+    "semantics/catalog.json",
+    "anatomy.runtime.json"
+   ]
+  },
+  "dist/states/ellipsis-orientation-outline.d.ts": {
+   "baselineBytes": 777,
+   "baselineGzipBytes": 266,
+   "maxBytes": 777,
+   "maxGzipBytes": 266,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL",
+    "semantics/catalog.json",
+    "anatomy.runtime.json"
+   ]
+  },
+  "dist/states/ellipsis-orientation-outline.js": {
+   "baselineBytes": 9670,
+   "baselineGzipBytes": 2787,
+   "maxBytes": 9670,
+   "maxGzipBytes": 2787,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL",
+    "semantics/catalog.json",
+    "anatomy.runtime.json"
    ]
   },
   "dist/states/expression-face.d.ts": {
@@ -14926,24 +15187,244 @@
     "anatomy.runtime.json"
    ]
   },
-  "dist/ir/state-common-types.d.ts": {
-   "baselineBytes": 523,
-   "baselineGzipBytes": 283,
-   "maxBytes": 523,
-   "maxGzipBytes": 283,
+  "dist/variations/alert-circle.d.ts": {
+   "baselineBytes": 1028,
+   "baselineGzipBytes": 293,
+   "maxBytes": 1028,
+   "maxGzipBytes": 293,
    "allowedModules": [],
    "forbiddenNeedles": [
-    "sourceMappingURL"
+    "sourceMappingURL",
+    "semantics/catalog.json",
+    "anatomy.runtime.json"
    ]
   },
-  "dist/ir/contour-state-types.d.ts": {
-   "baselineBytes": 3953,
-   "baselineGzipBytes": 1257,
-   "maxBytes": 3953,
-   "maxGzipBytes": 1257,
+  "dist/variations/alert-circle.js": {
+   "baselineBytes": 2160,
+   "baselineGzipBytes": 942,
+   "maxBytes": 2160,
+   "maxGzipBytes": 942,
    "allowedModules": [],
    "forbiddenNeedles": [
-    "sourceMappingURL"
+    "sourceMappingURL",
+    "semantics/catalog.json",
+    "anatomy.runtime.json"
+   ]
+  },
+  "dist/variations/checkmark-circle.d.ts": {
+   "baselineBytes": 1052,
+   "baselineGzipBytes": 296,
+   "maxBytes": 1052,
+   "maxGzipBytes": 296,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL",
+    "semantics/catalog.json",
+    "anatomy.runtime.json"
+   ]
+  },
+  "dist/variations/checkmark-circle.js": {
+   "baselineBytes": 2167,
+   "baselineGzipBytes": 941,
+   "maxBytes": 2167,
+   "maxGzipBytes": 941,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL",
+    "semantics/catalog.json",
+    "anatomy.runtime.json"
+   ]
+  },
+  "dist/variations/close-circle.d.ts": {
+   "baselineBytes": 1028,
+   "baselineGzipBytes": 293,
+   "maxBytes": 1028,
+   "maxGzipBytes": 293,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL",
+    "semantics/catalog.json",
+    "anatomy.runtime.json"
+   ]
+  },
+  "dist/variations/close-circle.js": {
+   "baselineBytes": 2142,
+   "baselineGzipBytes": 938,
+   "maxBytes": 2142,
+   "maxGzipBytes": 938,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL",
+    "semantics/catalog.json",
+    "anatomy.runtime.json"
+   ]
+  },
+  "dist/variations/ellipsis-horizontal.d.ts": {
+   "baselineBytes": 665,
+   "baselineGzipBytes": 247,
+   "maxBytes": 665,
+   "maxGzipBytes": 247,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL",
+    "semantics/catalog.json",
+    "anatomy.runtime.json"
+   ]
+  },
+  "dist/variations/ellipsis-horizontal.js": {
+   "baselineBytes": 9530,
+   "baselineGzipBytes": 1619,
+   "maxBytes": 9530,
+   "maxGzipBytes": 1619,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL",
+    "semantics/catalog.json",
+    "anatomy.runtime.json"
+   ]
+  },
+  "dist/variations/ellipsis-vertical.d.ts": {
+   "baselineBytes": 659,
+   "baselineGzipBytes": 246,
+   "maxBytes": 659,
+   "maxGzipBytes": 246,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL",
+    "semantics/catalog.json",
+    "anatomy.runtime.json"
+   ]
+  },
+  "dist/variations/ellipsis-vertical.js": {
+   "baselineBytes": 9205,
+   "baselineGzipBytes": 1581,
+   "maxBytes": 9205,
+   "maxGzipBytes": 1581,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL",
+    "semantics/catalog.json",
+    "anatomy.runtime.json"
+   ]
+  },
+  "dist/variations/minus-circle.d.ts": {
+   "baselineBytes": 1028,
+   "baselineGzipBytes": 293,
+   "maxBytes": 1028,
+   "maxGzipBytes": 293,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL",
+    "semantics/catalog.json",
+    "anatomy.runtime.json"
+   ]
+  },
+  "dist/variations/minus-circle.js": {
+   "baselineBytes": 2143,
+   "baselineGzipBytes": 936,
+   "maxBytes": 2143,
+   "maxGzipBytes": 936,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL",
+    "semantics/catalog.json",
+    "anatomy.runtime.json"
+   ]
+  },
+  "dist/variations/pause-circle.d.ts": {
+   "baselineBytes": 1028,
+   "baselineGzipBytes": 293,
+   "maxBytes": 1028,
+   "maxGzipBytes": 293,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL",
+    "semantics/catalog.json",
+    "anatomy.runtime.json"
+   ]
+  },
+  "dist/variations/pause-circle.js": {
+   "baselineBytes": 2168,
+   "baselineGzipBytes": 944,
+   "maxBytes": 2168,
+   "maxGzipBytes": 944,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL",
+    "semantics/catalog.json",
+    "anatomy.runtime.json"
+   ]
+  },
+  "dist/variations/play-circle.d.ts": {
+   "baselineBytes": 1022,
+   "baselineGzipBytes": 293,
+   "maxBytes": 1022,
+   "maxGzipBytes": 293,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL",
+    "semantics/catalog.json",
+    "anatomy.runtime.json"
+   ]
+  },
+  "dist/variations/play-circle.js": {
+   "baselineBytes": 2141,
+   "baselineGzipBytes": 927,
+   "maxBytes": 2141,
+   "maxGzipBytes": 927,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL",
+    "semantics/catalog.json",
+    "anatomy.runtime.json"
+   ]
+  },
+  "dist/variations/plus-circle.d.ts": {
+   "baselineBytes": 1022,
+   "baselineGzipBytes": 292,
+   "maxBytes": 1022,
+   "maxGzipBytes": 292,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL",
+    "semantics/catalog.json",
+    "anatomy.runtime.json"
+   ]
+  },
+  "dist/variations/plus-circle.js": {
+   "baselineBytes": 2141,
+   "baselineGzipBytes": 936,
+   "maxBytes": 2141,
+   "maxGzipBytes": 936,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL",
+    "semantics/catalog.json",
+    "anatomy.runtime.json"
+   ]
+  },
+  "dist/variations/question-circle.d.ts": {
+   "baselineBytes": 1046,
+   "baselineGzipBytes": 293,
+   "maxBytes": 1046,
+   "maxGzipBytes": 293,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL",
+    "semantics/catalog.json",
+    "anatomy.runtime.json"
+   ]
+  },
+  "dist/variations/question-circle.js": {
+   "baselineBytes": 2164,
+   "baselineGzipBytes": 942,
+   "maxBytes": 2164,
+   "maxGzipBytes": 942,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL",
+    "semantics/catalog.json",
+    "anatomy.runtime.json"
    ]
   }
  }

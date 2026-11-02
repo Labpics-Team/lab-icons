@@ -96,9 +96,11 @@ INCOMPLETE`; это не BENCH-01 PASS. Наблюдённый FAIL byte budget 
 численно проверяется у обеих стрелок первого экземпляра; число 10000 не
 обещает независимую оптическую приёмку каждой маски. Новое движение не имеет
 старого API-baseline: результат характеризует исполнение, а не speedup.
-Current source symbols должны точно отказать axes/candidate
-(`AUTHOR_PARITY_REQUIRED`) и motion (`SEMANTIC_MOTION_UNAVAILABLE`). Принятые
-recorded axes/gesture не выдаются за current Figma parity.
+Current source symbols отказывают неподдержанным axes/candidate
+(`AUTHOR_PARITY_REQUIRED`). Движение доступно для принятых авторских жестов:
+чужой gesture получает `GESTURE_UNSUPPORTED`, а вариант без готового motion
+контракта — `SEMANTIC_MOTION_UNAVAILABLE`. Принятые recorded axes/gesture
+не выдаются за current Figma parity.
 
 CDP rate 4 — синтетическое замедление CPU, а не измерение на конкретном слабом
 устройстве. Viewport 1280×800: большие сцены содержат offscreen DOM. rAF
