@@ -163,7 +163,8 @@ export function compileSymbolEffect(
   const author = authorBacked ? glyph.provenance.author : undefined;
   const variationReady = glyph.provenance.kind !== 'authored-variation' ||
     glyph.provenance.variation.version === 1 && capabilities.variation?.version === 1 &&
-    (glyph.provenance.variation.law === 'dots.affine' || glyph.provenance.variation.law === 'annulus.counter-scale') &&
+    (glyph.provenance.variation.law === 'dots.affine' || glyph.provenance.variation.law === 'annulus.counter-scale' ||
+     glyph.provenance.variation.law === 'annulus.content-counter-scale') &&
     capabilities.variation.law === glyph.provenance.variation.law &&
     capabilities.variation.targets?.webEffect === 'existing-part-gestures' &&
     glyph.provenance.variation.geometrySha256 === capabilities.variation.geometrySha256;
