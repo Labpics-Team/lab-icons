@@ -138,9 +138,50 @@ const result = compileSymbolEffect(symbol, glyphCapabilities(), 'checkmark-circl
 if (!result.ok) throw new Error(result.reason.code);
 ```
 
-Новый жест, morph или Lottie-экспорт этим не создаётся. Observatory показывает
-текущий SVG, наложение и разницу. Групповые переходы `states/status-circle`
-относятся к авторскому default; изменённое обрамление не подменяется им при анимации.
+Observatory показывает текущий SVG, наложение и разницу. Обычный
+`states/status-circle` сохраняет авторский default. Общую оболочку группы
+можно изменять отдельно, сохраняя уже смонтированные состояния.
+
+## Общее обрамление при смене состояния
+
+`state-variations/status-circle` и `state-variations/playback-circle` добавляют
+`renderEnclosurePatch` и `enclosureVariationCapabilities`. Они переэкспортируют
+те же state-функции, что соответствующий `states/<имя>`, без копии данных
+состояний. Обычный state-импорт не загружает материализатор обрамления.
+
+```ts
+import {
+  renderStateSvg, renderEnclosurePatch, compileStateEffect,
+} from '@labpics/icons/state-variations/status-circle';
+
+const initial = renderStateSvg('confirmation');
+const presentation = renderEnclosurePatch({
+  variation: { enclosureEmphasis: 1.2 },
+});
+const transition = compileStateEffect('dismissal', { duration: 240 });
+```
+
+`initial.svg` служит для первого mount. После успешного `presentation` готовый
+`patch` адресует общую часть через `partId` и содержит SVG-атрибут `d`.
+Потребитель проверяет `contract`, `version`, `group` и `variant`, находит эту
+объявленную часть и применяет атрибут. Он сохраняет остальные nodes, их opacity
+и активный переход; повторный mount всего `initial.svg` сбросил бы видимую смесь.
+Геометрия меняется один раз по событию. Исполнитель движения связывает стандартные
+opacity-стадии `transition.effect` с текущей видимой позой, включая прерывание.
+
+Default patch возвращает точную строку авторского обрамления и тот же frozen
+объект. Для nondefault компилятор пересекает геометрические допуски **всех**
+участников. Поэтому запрос, допустимый для отдельного checkmark-circle, может
+получить `VARIATION_OUTSIDE_DOMAIN` в status-circle. Нечисловые и неизвестные
+параметры получают `INVALID_REQUEST`, Filled — `VARIANT_UNSUPPORTED`, схлопнувшаяся
+геометрия — `POSE_UNREPRESENTABLE`. При отказе patch отсутствует; текущий рисунок
+остаётся пригоден для следующего запроса.
+
+Оболочка остаётся неподвижной в каждом opacity-переходе. `reducedMotion` передаётся
+существующему `compileStateEffect`. Изменённый SVG экспортируется из текущей
+презентации; обычные `render` и `renderStateSvg` сохраняют exact source-результат.
+Новые morph, Lottie и SF Symbols adapters этим срезом не заявляются.
+[Основание и ограничения](research/state-annulus-20261102.md).
 
 ## Поворот многоточия
 

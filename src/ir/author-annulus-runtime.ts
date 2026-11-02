@@ -2,12 +2,15 @@ import type { AuthorIconId } from './author-catalog.generated.js';
 import type { AuthorSourceGlyph, AuthorSymbolGlyphRequest } from './author-source.js';
 import type { SourcePartProvenance } from './glyph-types.js';
 import type { AuthorAnnulusVariationDomain, AuthorAnnulusVariationGlyph, AuthorAnnulusVariationGlyphRequest,
-  AuthorAnnulusVariationReceipt, AuthoredAnnulusVariation } from './author-annulus-types.js';
+  AuthorAnnulusVariationReceipt } from './author-annulus-types.js';
 import { createCompiledGlyph } from './symbol-runtime.js';
 import { parseCompiledGlyphOptions } from './author-request-runtime.js';
 import { GlyphModelError } from './request.js';
 import { assembleGlyphFrame, assembleGlyphLayers } from './svg-assembly.js';
 import { sha256Hex } from './sha256.js';
+import { AuthoredAnnulusVariationError, annulusEmphasisParameter, representableAnnulusQuarters,
+  materializeCompiledAnnulus } from './annulus-geometry-runtime.js';
+export { AuthoredAnnulusVariationError } from './annulus-geometry-runtime.js';
 
 type Point = readonly [number, number];
 /** @internal Только build-проекция проверенного master, не произвольный path. */
@@ -22,46 +25,11 @@ export interface CompiledAuthorAnnulus {
   readonly domain: AuthorAnnulusVariationDomain;
 }
 
-/** Машинный контракт ошибок совпадает с остальными авторскими вариациями. */
-export class AuthoredAnnulusVariationError extends RangeError {
-  readonly code: 'INVALID_VARIATION' | 'VARIATION_OUTSIDE_DOMAIN' | 'VARIATION_UNREPRESENTABLE' | 'VARIATION_SOURCE_MISMATCH';
-  constructor(code: AuthoredAnnulusVariationError['code'], message: string) {
-    super(message); this.name = 'AuthoredAnnulusVariationError'; this.code = code;
-  }
-}
-
 function freezeTree<T>(value: T): T {
   if (value !== null && typeof value === 'object' && !Object.isFrozen(value)) {
     Object.values(value).forEach(freezeTree); Object.freeze(value);
   }
   return value;
-}
-
-function emphasisParameter(value: unknown): number {
-  if (!value || typeof value !== 'object' || Object.getPrototypeOf(value) !== Object.prototype ||
-      Object.keys(value).some(key => key !== 'enclosureEmphasis')) {
-    throw new AuthoredAnnulusVariationError('INVALID_VARIATION', 'Нужен только enclosureEmphasis.');
-  }
-  const requested = (value as AuthoredAnnulusVariation).enclosureEmphasis;
-  const emphasis = requested === undefined ? 1 : requested;
-  if (typeof emphasis !== 'number' || !Number.isFinite(emphasis) || emphasis <= 0) {
-    throw new AuthoredAnnulusVariationError('INVALID_VARIATION', 'enclosureEmphasis обязан быть конечным положительным числом.');
-  }
-  return emphasis;
-}
-
-/** Положительная affine формула сохраняет монотонность; округление может
- * схлопнуть quarter. Проверяем готовые operands, без повторного proof/parser. */
-function representableQuarters(points: readonly Point[]): boolean {
-  if (points.some(point => point.some(value => !Number.isFinite(value)))) return false;
-  for (let quarter = 0; quarter < 4; quarter++) {
-    const sequence = [0, 1, 2, 3].map(index => points[(quarter * 3 + index) % 12]!);
-    for (const axis of [0, 1] as const) {
-      const sign = Math.sign(sequence[3]![axis] - sequence[0]![axis]);
-      if (!sign || sequence.slice(1).some((point, index) => sign * (point[axis] - sequence[index]![axis]) < 0)) return false;
-    }
-  }
-  return true;
 }
 
 /** @internal Частичный admission сохраняет независимую Filled форму без закона. */
@@ -80,7 +48,7 @@ export function createCompiledAnnulusGlyph<TIcon extends AuthorIconId>(
         item.id !== geometry.partIds[index] || item.provenance.kind !== 'source' || item.provenance.identity !== 'declared' ||
         item.role !== (index === enclosure.index ? 'container' : 'content')) ||
       !part || part.id !== enclosure.id || typeof enclosure.outerD !== 'string' || !part.d.startsWith(enclosure.outerD) ||
-      enclosure.innerPoints.length !== 12 || !representableQuarters(enclosure.innerPoints)) {
+      enclosure.innerPoints.length !== 12 || !representableAnnulusQuarters(enclosure.innerPoints)) {
     throw new AuthoredAnnulusVariationError('VARIATION_SOURCE_MISMATCH', 'Скомпилированное обрамление принадлежит другому master или набору частей.');
   }
   const [frameStart, frameEnd] = assembleGlyphFrame(source.viewBox);
@@ -94,26 +62,11 @@ export function createCompiledAnnulusGlyph<TIcon extends AuthorIconId>(
     if (selected.variant !== 'outline') {
       throw new GlyphModelError('AUTHOR_VARIATION_UNSUPPORTED', 'Независимая Filled форма не поддерживает этот закон обрамления.');
     }
-    const emphasis = emphasisParameter(variation);
+    const emphasis = annulusEmphasisParameter(variation);
     // Exact default возвращает общий source объект, без генерации и хеша.
     if (emphasis === 1) return selected;
     if (options.modelMode === 'source-only') throw new GlyphModelError('AUTHOR_PARITY_REQUIRED', 'source-only сохраняет точный master.');
-    const scale = (enclosure.outerRadius - emphasis * enclosure.referenceThickness) / enclosure.referenceInnerRadius;
-    if (!Number.isFinite(scale) || scale <= 0) {
-      throw new AuthoredAnnulusVariationError('VARIATION_UNREPRESENTABLE', 'Контрформа обрамления схлопнулась.');
-    }
-    if (scale < geometry.domain.scale.minimum || scale >= geometry.domain.scale.maximum) {
-      throw new AuthoredAnnulusVariationError('VARIATION_OUTSIDE_DOMAIN', 'Контрформа выходит за доказанный radial domain.');
-    }
-    const points = enclosure.innerPoints.map(point => point.map((value, axis) =>
-      enclosure.center[axis]! + scale * (value - enclosure.center[axis]!)) as unknown as Point);
-    if (!representableQuarters(points)) {
-      throw new AuthoredAnnulusVariationError('VARIATION_UNREPRESENTABLE', 'Материализованные controls разрушили cardinal topology.');
-    }
-    const at = (index: number) => points[index % 12]!;
-    const innerD = `M${at(0).join(' ')}${[0, 1, 2, 3].map(index =>
-      `C${[at(1 + index * 3), at(2 + index * 3), at(3 + index * 3)].flat().join(' ')}`).join('')}Z`;
-    const d = enclosure.outerD + innerD;
+    const { d, scale } = materializeCompiledAnnulus(geometry, emphasis);
     const receipt: AuthorAnnulusVariationReceipt = { version: 1, law: geometry.law,
       geometrySha256: geometry.geometrySha256, parameters: { enclosureEmphasis: emphasis }, scale };
     const parts = source.parts.map((item, index) => index === enclosure.index ? { ...item, d,

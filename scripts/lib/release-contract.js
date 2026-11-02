@@ -29,6 +29,7 @@ const EXPORT_CONDITIONS = Object.freeze({
   './lottie/*': ['types', 'import'],
   './states/*': ['types', 'import'],
   './variations/*': ['types', 'import'],
+  './state-variations/*': ['types', 'import'],
 });
 export const STRICT_SEMVER = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*)(?:\.(?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*))*))?(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$/;
 
@@ -172,7 +173,7 @@ export function validateReleaseContract(contract) {
   }
 
   // Группы опциональны для корпуса без state spec; остальные entrypoints обязательны.
-  const exportKeys = [...EXPORT_KEYS, ...['./states/*', './variations/*'].filter(key => Object.hasOwn(contract.exports ?? {}, key))];
+  const exportKeys = [...EXPORT_KEYS, ...['./states/*', './variations/*', './state-variations/*'].filter(key => Object.hasOwn(contract.exports ?? {}, key))];
   if (validateExactKeys(contract.exports, exportKeys, 'release exports', errors)) {
     const files = new Set(Array.isArray(contract.files) ? contract.files : []);
     const referenced = new Set();
@@ -185,7 +186,7 @@ export function validateReleaseContract(contract) {
       )) {
         continue;
       }
-      if (['./symbols/*', './lottie/*', './states/*', './variations/*'].includes(subpath)) {
+      if (['./symbols/*', './lottie/*', './states/*', './variations/*', './state-variations/*'].includes(subpath)) {
         const directory = subpath.slice(2, -2);
         if (conditions.types !== `./dist/${directory}/*.d.ts` || conditions.import !== `./dist/${directory}/*.js`) {
           errors.push(`release ${directory} wildcard обязан указывать только на dist/${directory}/<name>`);
@@ -212,7 +213,7 @@ export function validateReleaseContract(contract) {
     }
     const expanded = expandReleaseExports(contract);
     const symbols = Object.entries(expanded).filter(([subpath]) =>
-      ['./symbols/', './lottie/', './states/', './variations/'].some(prefix => subpath.startsWith(prefix)));
+      ['./symbols/', './lottie/', './states/', './variations/', './state-variations/'].some(prefix => subpath.startsWith(prefix)));
     if (Object.hasOwn(contract.exports, './states/*') && !symbols.some(([subpath]) => subpath.startsWith('./states/'))) {
       errors.push('release states wildcard не имеет точных group outputs');
     }
@@ -222,6 +223,14 @@ export function validateReleaseContract(contract) {
     for (const [subpath] of symbols.filter(([key]) => key.startsWith('./variations/'))) {
       if (!Object.hasOwn(expanded, subpath.replace('./variations/', './symbols/'))) {
         errors.push(`release variation не имеет source symbol: ${subpath}`);
+      }
+    }
+    if (Object.hasOwn(contract.exports, './state-variations/*') && !symbols.some(([subpath]) => subpath.startsWith('./state-variations/'))) {
+      errors.push('release state-variations wildcard не имеет точных proven group outputs');
+    }
+    for (const [subpath] of symbols.filter(([key]) => key.startsWith('./state-variations/'))) {
+      if (!Object.hasOwn(expanded, subpath.replace('./state-variations/', './states/'))) {
+        errors.push(`release state variation не имеет source state group: ${subpath}`);
       }
     }
     if (symbols.length === 0) errors.push('release symbols wildcard не имеет точных symbol outputs');
@@ -253,7 +262,7 @@ export function expandReleaseExports(contract) {
   const result = {};
   for (const [subpath, conditions] of Object.entries(contract?.exports ?? {})) {
     if (!subpath.includes('*')) { result[subpath] = conditions; continue; }
-    if (!['./symbols/*', './lottie/*', './states/*', './variations/*'].includes(subpath)) continue;
+    if (!['./symbols/*', './lottie/*', './states/*', './variations/*', './state-variations/*'].includes(subpath)) continue;
     const directory = subpath.slice(2, -2);
     if (conditions?.import !== `./dist/${directory}/*.js`) continue;
     for (const file of contract.files ?? []) {

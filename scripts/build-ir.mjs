@@ -14,13 +14,15 @@ import { validateReleaseTypeDependencyGraph, validateReleaseRuntimeDependencyGra
 import { recoverOwnedDirectory, replaceOwnedDirectory } from './lib/owned-directory.js';
 import { renderSymbolModules, symbolExportName, symbolModuleDeclaration, variationModuleDeclaration, variationRuntimeTargets } from './lib/symbol-modules.js';
 import { authorSymbolPayload, loadAuthorBaseline } from './lib/author-baseline.js';
-import { compileAuthorAnatomy } from './lib/author-anatomy.js';
+import { compileAuthorAnatomyWithEvidence } from './lib/author-anatomy.js';
 import { authorVariationIconNames, authorVariationLawNames, authorVariationCapability } from './lib/author-variation.js';
 import { compileLottieGeometry, renderLottieSymbolModule, lottieSymbolDeclaration } from './lib/lottie-geometry.js';
 import { compileAuthorStateGroups, renderStateGroupModule, stateGroupDeclaration } from './lib/author-state-groups.js';
+import { authorStateVariationGroupNames, compileAuthorStateVariations, renderStateVariationModule,
+  stateVariationDeclaration } from './lib/author-state-variations.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const TARGETS = ['ir', 'symbols', 'variations', 'motion', 'lottie', 'authoring', 'states'];
+const TARGETS = ['ir', 'symbols', 'variations', 'motion', 'lottie', 'authoring', 'states', 'state-variations'];
 const REQUIRED_DECLARATIONS = ['author-annulus-types.d.ts', 'author-catalog.generated.d.ts', 'author-provenance.d.ts', 'author-source.d.ts', 'authored-variation.d.ts', 'candidates.d.ts', 'catalog.generated.d.ts', 'compiler.d.ts', 'glyph-types.d.ts', 'index.d.ts', 'paint-types.d.ts', 'recipes.d.ts', 'render.d.ts', 'request.d.ts'];
 const read = (root, file) => JSON.parse(readFileSync(join(root, file), 'utf8'));
 
@@ -105,6 +107,9 @@ async function compileIrTargets({ root, staging }) {
   const declarations = mkdtempSync(join(tmpdir(), 'lab-icons-ir-dts-'));
   try {
     const authorSpec = read(root, 'semantics/author-anatomy.json');
+    const stateSpec = read(root, 'semantics/author-state-groups.json');
+    const stateVariationNames = authorStateVariationGroupNames(stateSpec, authorSpec);
+    const variationLaws = authorVariationLawNames(authorSpec);
     for (const name of TARGETS) mkdirSync(join(staging, name));
     mkdirSync(join(staging, 'ir/symbol-data'));
     const bundles = await Promise.allSettled([
@@ -113,8 +118,12 @@ async function compileIrTargets({ root, staging }) {
       bundle(root, staging, 'src/ir/request.ts', 'ir/request.js'),
       bundle(root, staging, 'src/ir/author-request-runtime.ts', 'ir/author-request-runtime.js', ['./request.js']),
       bundle(root, staging, 'src/ir/symbol-runtime.ts', 'ir/symbol-runtime.js', ['./request.js', './author-request-runtime.js']),
-      ...variationRuntimeTargets(authorVariationLawNames(authorSpec)).map(target =>
-        bundle(root, staging, target.entry, `ir/${target.runtime}`, ['./request.js', './symbol-runtime.js', './author-request-runtime.js'])),
+      ...variationRuntimeTargets(variationLaws).map(target =>
+        bundle(root, staging, target.entry, `ir/${target.runtime}`, ['./request.js', './symbol-runtime.js', './author-request-runtime.js', './annulus-geometry-runtime.js'])),
+      ...(variationLaws.includes('annulus.counter-scale') || stateVariationNames.length
+        ? [bundle(root, staging, 'src/ir/annulus-geometry-runtime.ts', 'ir/annulus-geometry-runtime.js')] : []),
+      ...(stateVariationNames.length
+        ? [bundle(root, staging, 'src/states/annulus-runtime.ts', 'ir/state-annulus-runtime.js', ['../ir/annulus-geometry-runtime.js'])] : []),
       bundle(root, staging, 'src/ir/contour-runtime.ts', 'ir/contour-runtime.js'),
       bundle(root, staging, 'src/ir/recipes.ts', 'ir/recipes.js'),
       bundle(root, staging, 'src/ir/render.ts', 'ir/render.js'),
@@ -142,12 +151,14 @@ async function compileIrTargets({ root, staging }) {
       writeFileSync(join(staging, 'ir', `${target}.d.ts`), readFileSync(join(declarations, 'states', `${source}.d.ts`), 'utf8')
         .replaceAll('./common-types.js', './state-common-types.js'));
     }
+    if (stateVariationNames.length) copyFileSync(join(declarations, 'states/annulus-types.d.ts'), join(staging, 'ir/state-annulus-types.d.ts'));
 
     const catalog = read(root, 'semantics/catalog.json');
     const grid = read(root, 'semantics/grid.json');
     const author = loadAuthorBaseline(root);
     const variationNames = new Set(authorVariationIconNames(authorSpec));
-    const annotatedSources = compileAuthorAnatomy(author, authorSpec, grid);
+    const annotations = compileAuthorAnatomyWithEvidence(author, authorSpec, grid);
+    const annotatedSources = annotations.contracts;
     const authorSources = Object.fromEntries(Object.entries(author.icons).map(([icon, variants]) => [icon,
       Object.fromEntries(Object.entries(variants).map(([variant, item]) => [variant, {
         ...item, sourceContract: annotatedSources[`${icon}/${variant}`] ?? item.sourceContract,
@@ -192,12 +203,19 @@ async function compileIrTargets({ root, staging }) {
       writeFileSync(join(staging, 'lottie', `${icon}.js`), renderLottieSymbolModule(icon, targets));
       writeFileSync(join(staging, 'lottie', `${icon}.d.ts`), lottieSymbolDeclaration());
     }
-    const stateSpec = read(root, 'semantics/author-state-groups.json');
     const assembly = await import(pathToFileURL(join(declarations, 'svg-assembly.mjs')).href);
     const stateGroups = compileAuthorStateGroups(author, stateSpec, { compiler, grid, ...assembly });
     for (const [name, payload] of Object.entries(stateGroups)) {
       writeFileSync(join(staging, 'states', `${name}.js`), renderStateGroupModule(payload));
       writeFileSync(join(staging, 'states', `${name}.d.ts`), stateGroupDeclaration(stateSpec, name));
+    }
+    const stateVariations = compileAuthorStateVariations(stateGroups, author, stateSpec, authorSpec, annotations, grid);
+    if (JSON.stringify(Object.keys(stateVariations).sort()) !== JSON.stringify(stateVariationNames)) {
+      throw new Error('build-ir: state variation admission не совпал с author declarations');
+    }
+    for (const [name, payload] of Object.entries(stateVariations)) {
+      writeFileSync(join(staging, 'state-variations', `${name}.js`), renderStateVariationModule(payload));
+      writeFileSync(join(staging, 'state-variations', `${name}.d.ts`), stateVariationDeclaration(stateSpec, name));
     }
     return names.length;
   } finally {

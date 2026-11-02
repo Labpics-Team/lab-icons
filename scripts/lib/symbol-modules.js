@@ -16,9 +16,14 @@ export function variationRuntimeTargets(laws) {
 }
 
 /** Единственная release-проекция каталога; wildcard раскрывается в точные файлы. */
-export function symbolReleaseProjection(base, iconIds, stateGroupIds = [], variationIconIds = [], variationLaws = ['dots.affine']) {
+export function symbolReleaseProjection(base, iconIds, stateGroupIds = [], variationIconIds = [], variationLaws = ['dots.affine'],
+  compiledSymbolModules = [], stateVariationGroupIds = []) {
   const ids = [...iconIds].sort();
   const groups = [...stateGroupIds].sort();
+  const stateVariations = [...stateVariationGroupIds].sort();
+  if (new Set(stateVariations).size !== stateVariations.length || stateVariations.some(id => !groups.includes(id))) {
+    throw new TypeError('state variation projection: группа должна принадлежать state каталогу');
+  }
   if (new Set(variationIconIds).size !== variationIconIds.length || variationIconIds.some(id => !ids.includes(id))) {
     throw new TypeError('symbol module projection: variation должна принадлежать авторскому каталогу');
   }
@@ -38,10 +43,11 @@ export function symbolReleaseProjection(base, iconIds, stateGroupIds = [], varia
     './lottie/*': { types: './dist/lottie/*.d.ts', import: './dist/lottie/*.js' },
     ...(groups.length ? { './states/*': { types: './dist/states/*.d.ts', import: './dist/states/*.js' } } : {}),
     ...(variationIconIds.length ? { './variations/*': { types: './dist/variations/*.d.ts', import: './dist/variations/*.js' } } : {}),
+    ...(stateVariations.length ? { './state-variations/*': { types: './dist/state-variations/*.d.ts', import: './dist/state-variations/*.js' } } : {}),
   };
   const publicFiles = Object.entries(exports).flatMap(([key, conditions]) =>
     key.includes('*')
-      ? (key === './states/*' ? groups : key === './variations/*' ? [...variationIconIds].sort() : ids).flatMap(id => Object.values(conditions).map(target => target.replace('*', id).slice(2)))
+      ? (key === './states/*' ? groups : key === './state-variations/*' ? stateVariations : key === './variations/*' ? [...variationIconIds].sort() : ids).flatMap(id => Object.values(conditions).map(target => target.replace('*', id).slice(2)))
       : Object.values(conditions).map(target => target.slice(2)));
   const typeDependencies = ['dist/authoring/design-spec.d.ts', 'dist/ir/author-annulus-types.d.ts', 'dist/ir/author-catalog.generated.d.ts', 'dist/ir/author-provenance.d.ts', 'dist/ir/author-source.d.ts', 'dist/ir/authored-variation.d.ts', 'dist/ir/catalog.generated.d.ts', 'dist/ir/compiler.d.ts', 'dist/ir/glyph-types.d.ts', 'dist/ir/paint-types.d.ts', 'dist/ir/request.d.ts', 'dist/ir/lottie-types.d.ts', 'dist/ir/state-types.d.ts', 'dist/ir/state-common-types.d.ts', 'dist/ir/contour-state-types.d.ts'].sort();
   const runtimeDependencies = ['dist/ir/author-request-runtime.js', 'dist/ir/compiler.js', 'dist/ir/contour-runtime.js', 'dist/ir/request.js', 'dist/ir/symbol-runtime.js', 'dist/ir/lottie-runtime.js'].sort();
@@ -49,6 +55,13 @@ export function symbolReleaseProjection(base, iconIds, stateGroupIds = [], varia
     ...variationIconIds.map(id => `dist/ir/symbol-data/${id}.js`));
   if (groups.length) {
     runtimeDependencies.push('dist/ir/state-runtime.js');
+  }
+  if (stateVariations.length) {
+    runtimeDependencies.push('dist/ir/state-annulus-runtime.js');
+    typeDependencies.push('dist/ir/state-annulus-types.d.ts'); typeDependencies.sort();
+  }
+  if (variationIconIds.length && variationLaws.includes('annulus.counter-scale') || stateVariations.length) {
+    runtimeDependencies.push('dist/ir/annulus-geometry-runtime.js');
   }
   runtimeDependencies.sort();
   return {

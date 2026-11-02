@@ -49,6 +49,7 @@ pnpm add @labpics/icons
 | `@labpics/icons/lottie/*` | `./dist/lottie/*.js` | `./dist/lottie/*.d.ts` |
 | `@labpics/icons/states/*` | `./dist/states/*.js` | `./dist/states/*.d.ts` |
 | `@labpics/icons/variations/*` | `./dist/variations/*.js` | `./dist/variations/*.d.ts` |
+| `@labpics/icons/state-variations/*` | `./dist/state-variations/*.js` | `./dist/state-variations/*.d.ts` |
 
 ## Файлы контракта поставки
 
@@ -60,6 +61,7 @@ pnpm add @labpics/icons
 - `dist/authoring/index.js`
 - `dist/index.d.ts`
 - `dist/index.js`
+- `dist/ir/annulus-geometry-runtime.js`
 - `dist/ir/annulus-runtime.js`
 - `dist/ir/author-annulus-types.d.ts`
 - `dist/ir/author-catalog.generated.d.ts`
@@ -86,6 +88,8 @@ pnpm add @labpics/icons
 - `dist/ir/render.js`
 - `dist/ir/request.d.ts`
 - `dist/ir/request.js`
+- `dist/ir/state-annulus-runtime.js`
+- `dist/ir/state-annulus-types.d.ts`
 - `dist/ir/state-common-types.d.ts`
 - `dist/ir/state-runtime.js`
 - `dist/ir/state-types.d.ts`
@@ -763,6 +767,10 @@ pnpm add @labpics/icons
 - `dist/lottie/waveform.js`
 - `dist/motion/index.d.ts`
 - `dist/motion/index.js`
+- `dist/state-variations/playback-circle.d.ts`
+- `dist/state-variations/playback-circle.js`
+- `dist/state-variations/status-circle.d.ts`
+- `dist/state-variations/status-circle.js`
 - `dist/states/ellipsis-orientation-filled.d.ts`
 - `dist/states/ellipsis-orientation-filled.js`
 - `dist/states/ellipsis-orientation-outline.d.ts`
@@ -1469,5 +1477,6 @@ pnpm add @labpics/icons
 - `dist/ir/lottie-types.d.ts`
 - `dist/ir/paint-types.d.ts`
 - `dist/ir/request.d.ts`
+- `dist/ir/state-annulus-types.d.ts`
 - `dist/ir/state-common-types.d.ts`
 - `dist/ir/state-types.d.ts`

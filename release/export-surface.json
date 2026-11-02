@@ -1851,6 +1851,24 @@
     "compileSymbolEffect",
     "prepareContourStateEffect"
   ],
+  "./state-variations/playback-circle": [
+    "compileStateEffect",
+    "enclosureVariationCapabilities",
+    "exportStateTransition",
+    "render",
+    "renderEnclosurePatch",
+    "renderStateSvg",
+    "stateCapabilities"
+  ],
+  "./state-variations/status-circle": [
+    "compileStateEffect",
+    "enclosureVariationCapabilities",
+    "exportStateTransition",
+    "render",
+    "renderEnclosurePatch",
+    "renderStateSvg",
+    "stateCapabilities"
+  ],
   "./states/ellipsis-orientation-filled": [
     "compileStateEffect",
     "exportStateTransition",

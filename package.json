@@ -59,6 +59,10 @@
     "./variations/*": {
       "types": "./dist/variations/*.d.ts",
       "import": "./dist/variations/*.js"
+    },
+    "./state-variations/*": {
+      "types": "./dist/state-variations/*.d.ts",
+      "import": "./dist/state-variations/*.js"
     }
   },
   "sideEffects": false,
@@ -68,6 +72,7 @@
     "dist/authoring/index.js",
     "dist/index.d.ts",
     "dist/index.js",
+    "dist/ir/annulus-geometry-runtime.js",
     "dist/ir/annulus-runtime.js",
     "dist/ir/author-annulus-types.d.ts",
     "dist/ir/author-catalog.generated.d.ts",
@@ -94,6 +99,8 @@
     "dist/ir/render.js",
     "dist/ir/request.d.ts",
     "dist/ir/request.js",
+    "dist/ir/state-annulus-runtime.js",
+    "dist/ir/state-annulus-types.d.ts",
     "dist/ir/state-common-types.d.ts",
     "dist/ir/state-runtime.js",
     "dist/ir/state-types.d.ts",
@@ -771,6 +778,10 @@
     "dist/lottie/waveform.js",
     "dist/motion/index.d.ts",
     "dist/motion/index.js",
+    "dist/state-variations/playback-circle.d.ts",
+    "dist/state-variations/playback-circle.js",
+    "dist/state-variations/status-circle.d.ts",
+    "dist/state-variations/status-circle.js",
     "dist/states/ellipsis-orientation-filled.d.ts",
     "dist/states/ellipsis-orientation-filled.js",
     "dist/states/ellipsis-orientation-outline.d.ts",
