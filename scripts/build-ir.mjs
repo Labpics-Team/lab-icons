@@ -81,13 +81,23 @@ function retainStaticArtifacts(output, staging) {
   }
 }
 
-async function bundle(root, staging, entry, target, external = []) {
-  await build({
+export async function bundle(root, staging, entry, target, external = []) {
+  // Сжатие пробелов сохраняет имена возвращаемых публичных функций без __name.
+  const compiled = await build({
+    absWorkingDir: root,
     entryPoints: [join(root, entry)], outfile: join(staging, target),
     bundle: true, charset: 'utf8', external, format: 'esm', legalComments: 'none',
-    logLevel: 'info', minify: false, platform: 'browser', sourcemap: false,
+    logLevel: 'info', minify: false, minifyWhitespace: true,
+    platform: 'browser', sourcemap: false, write: false, metafile: true,
     target: 'es2022', treeShaking: true,
   });
+  // В provenance входят модули с оставленным кодом; pure reexport с нулём
+  // bytes не становится фиктивным включённым модулем.
+  const output = compiled.outputFiles[0];
+  const modules = Object.entries(Object.values(compiled.metafile.outputs)[0].inputs)
+    .filter(([, input]) => input.bytesInOutput > 0).map(([name]) => name).sort();
+  const headers = modules.map(name => `// ${name}\n`).join('');
+  writeFileSync(output.path, headers + output.text);
 }
 
 async function compileIrTargets({ root, staging }) {
@@ -101,9 +111,10 @@ async function compileIrTargets({ root, staging }) {
       bundle(root, staging, 'src/ir/index.ts', 'ir/index.js', ['@labpics/icons', './compiler.js']),
       bundle(root, staging, 'src/ir/compiler.ts', 'ir/compiler.js', ['./request.js']),
       bundle(root, staging, 'src/ir/request.ts', 'ir/request.js'),
-      bundle(root, staging, 'src/ir/symbol-runtime.ts', 'ir/symbol-runtime.js', ['./request.js']),
+      bundle(root, staging, 'src/ir/author-request-runtime.ts', 'ir/author-request-runtime.js', ['./request.js']),
+      bundle(root, staging, 'src/ir/symbol-runtime.ts', 'ir/symbol-runtime.js', ['./request.js', './author-request-runtime.js']),
       ...variationRuntimeTargets(authorVariationLawNames(authorSpec)).map(target =>
-        bundle(root, staging, target.entry, `ir/${target.runtime}`, ['./request.js', './symbol-runtime.js'])),
+        bundle(root, staging, target.entry, `ir/${target.runtime}`, ['./request.js', './symbol-runtime.js', './author-request-runtime.js'])),
       bundle(root, staging, 'src/ir/contour-runtime.ts', 'ir/contour-runtime.js'),
       bundle(root, staging, 'src/ir/recipes.ts', 'ir/recipes.js'),
       bundle(root, staging, 'src/ir/render.ts', 'ir/render.js'),

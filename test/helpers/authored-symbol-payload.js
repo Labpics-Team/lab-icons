@@ -16,7 +16,8 @@ export async function authoredSymbolPayloads(names) {
     icons: Object.fromEntries(names.map(icon => [icon, captured.icons[icon]])) };
   const author = loadAuthorBaseline(root, { manifest }), grid = read('semantics/grid.json');
   const contracts = compileAuthorAnatomy(author, { ...annotations,
-    icons: Object.fromEntries(names.map(icon => [icon, annotations.icons[icon]])) }, grid);
+    icons: Object.fromEntries(names.filter(icon => Object.hasOwn(annotations.icons, icon))
+      .map(icon => [icon, annotations.icons[icon]])) }, grid);
   const sources = Object.fromEntries(names.map(icon => [icon, Object.fromEntries(['outline', 'filled'].map(variant =>
     [variant, { ...author.icons[icon][variant], sourceContract: contracts[`${icon}/${variant}`] ?? author.icons[icon][variant].sourceContract }]))]));
   const bundle = await build({ stdin: { contents: 'export { createGlyphCompiler } from "./src/ir/compiler.ts";', resolveDir: root },

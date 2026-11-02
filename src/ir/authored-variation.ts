@@ -2,7 +2,8 @@ import type { GlyphIR, IconVariant, SourcePartProvenance } from './glyph-types.j
 import type { AuthorSourceGlyph, AuthorSourceCapabilities, AuthorSymbolGlyphRequest } from './author-source.js';
 import type { AuthorSourceProvenance, AuthorAnatomyReceipt } from './author-provenance.js';
 import type { AuthorIconId } from './author-catalog.generated.js';
-import { createCompiledGlyph, parseCompiledGlyphOptions } from './symbol-runtime.js';
+import { createCompiledGlyph } from './symbol-runtime.js';
+import { parseCompiledGlyphOptions } from './author-request-runtime.js';
 import { assembleGlyphSvg } from './svg-assembly.js';
 import { sha256Hex } from './sha256.js';
 import { GlyphModelError } from './request.js';

@@ -342,7 +342,8 @@ describe('замкнутые symbol modules', () => {
     const files = Object.fromEntries(contract.files.filter(file => file.endsWith('.js')).map(file => [file, 'export const value=1;']));
     files['dist/ir/index.js'] = 'import "./compiler.js";export const value=1;';
     files['dist/ir/compiler.js'] = 'import "./request.js";export const value=1;';
-    files['dist/ir/symbol-runtime.js'] = 'import "./request.js";export const value=1;';
+    files['dist/ir/symbol-runtime.js'] = 'import "./request.js";import "./author-request-runtime.js";export const value=1;';
+    files['dist/ir/author-request-runtime.js'] = 'import "./request.js";export const value=1;';
     files['dist/symbols/alert.js'] = 'import "../ir/symbol-runtime.js";export const value=1;';
     files['dist/lottie/alert.js'] = 'import "../ir/lottie-runtime.js";export const value=1;';
     files['dist/motion/index.js'] = 'import "../ir/contour-runtime.js";export const value=1;';

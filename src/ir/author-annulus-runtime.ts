@@ -3,7 +3,8 @@ import type { AuthorSourceGlyph, AuthorSymbolGlyphRequest } from './author-sourc
 import type { SourcePartProvenance } from './glyph-types.js';
 import type { AuthorAnnulusVariationDomain, AuthorAnnulusVariationGlyph, AuthorAnnulusVariationGlyphRequest,
   AuthorAnnulusVariationReceipt, AuthoredAnnulusVariation } from './author-annulus-types.js';
-import { createCompiledGlyph, parseCompiledGlyphOptions } from './symbol-runtime.js';
+import { createCompiledGlyph } from './symbol-runtime.js';
+import { parseCompiledGlyphOptions } from './author-request-runtime.js';
 import { GlyphModelError } from './request.js';
 import { assembleGlyphFrame, assembleGlyphLayers } from './svg-assembly.js';
 import { sha256Hex } from './sha256.js';
