@@ -51,6 +51,7 @@ pnpm add @labpics/icons
 | `@labpics/icons/variations/*` | `./dist/variations/*.js` | `./dist/variations/*.d.ts` |
 | `@labpics/icons/state-variations/*` | `./dist/state-variations/*.js` | `./dist/state-variations/*.d.ts` |
 | `@labpics/icons/content-variations/*` | `./dist/content-variations/*.js` | `./dist/content-variations/*.d.ts` |
+| `@labpics/icons/gestures/*` | `./dist/gestures/*.js` | `./dist/gestures/*.d.ts` |
 
 ## Файлы контракта поставки
 
@@ -76,6 +77,12 @@ pnpm add @labpics/icons
 - `dist/content-variations/plus-circle.js`
 - `dist/content-variations/question-circle.d.ts`
 - `dist/content-variations/question-circle.js`
+- `dist/gestures/refresh.d.ts`
+- `dist/gestures/refresh.js`
+- `dist/gestures/reload.d.ts`
+- `dist/gestures/reload.js`
+- `dist/gestures/timer.d.ts`
+- `dist/gestures/timer.js`
 - `dist/index.d.ts`
 - `dist/index.js`
 - `dist/ir/annulus-geometry-runtime.js`
@@ -98,6 +105,8 @@ pnpm add @labpics/icons
 - `dist/ir/content-runtime.js`
 - `dist/ir/contour-runtime.js`
 - `dist/ir/contour-state-types.d.ts`
+- `dist/ir/gesture-runtime.js`
+- `dist/ir/gesture-types.d.ts`
 - `dist/ir/glyph-types.d.ts`
 - `dist/ir/index.d.ts`
 - `dist/ir/index.js`
@@ -1514,6 +1523,7 @@ pnpm add @labpics/icons
 - `dist/ir/catalog.generated.d.ts`
 - `dist/ir/compiler.d.ts`
 - `dist/ir/contour-state-types.d.ts`
+- `dist/ir/gesture-types.d.ts`
 - `dist/ir/glyph-types.d.ts`
 - `dist/ir/lottie-types.d.ts`
 - `dist/ir/paint-types.d.ts`
