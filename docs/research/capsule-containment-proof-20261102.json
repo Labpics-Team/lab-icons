@@ -1,0 +1,523 @@
+{
+  "schemaVersion": 1,
+  "base": "bc7865560278aa4cbc0b005a109245fbb3117496",
+  "head": "285dd6ead3788d0ba88d2fe58a0c7696732e93f8",
+  "sourceSnapshotSha256": "b2ff52b8ca47765b983472c5dda4a57f593909e2ac5a68087c0af6005e90da32",
+  "files": [
+    {
+      "file": "scripts/lib/author-capsule.js",
+      "sha256": "97f9a7f84b31b67e0ea758473d7e254071d11706cfcac7f8a1de743536815c4f"
+    },
+    {
+      "file": "scripts/lib/author-curve-certificate.js",
+      "sha256": "fd7ac2f856f261ab2ec34736e6962a8503616dcb3e16a40f3fdc0f0269badffd"
+    },
+    {
+      "file": "test/capsule-materialized-simplicity.test.js",
+      "sha256": "6a1696921d76486bb6b6e470803acaf107b2879d650580b20793e0a3888f3ee0"
+    },
+    {
+      "file": "test/author-curve-certificate.test.js",
+      "sha256": "c7ead816c468334a78713e3781225a2aba8cd9001c293bdaf67081cf18ecba3d"
+    },
+    {
+      "file": "test/authored-capsule-width.test.js",
+      "sha256": "1de5445480f83b48d7133f5fc65f279170f72fe1415dc98e9d2130c1ef47fb6f"
+    }
+  ],
+  "independentWitnessSha256": "7e0b838ebfdc3a03484f73ae723169fde393c339bcfbb848e9967031d143e422",
+  "independentGate": "pending",
+  "opticalTransfer": "literal-svg-sha256-only",
+  "masters": {
+    "mic/outline": {
+      "kind": "figma",
+      "fileKey": "LuaiBd4anRi4DMZayKAnY2",
+      "version": "2416636003859748575",
+      "nodeId": "6431:3962",
+      "nodeSha256": "b3efbc520078bd97f7f8b30862cc7748ae5c0d8e313325b445ab3f343ab6f451",
+      "masterSha256": "c526c734a2225a29ec6e71f76d860546f5bccf8475bad6e1842915a75f2a5f9c",
+      "normalizedSha256": "a7de0b228a6ba888b23603eaa6a7c38bcb78aad85c7df6d97a4a0e2e72c5bcbc",
+      "pathFingerprintSha256": "f7451fdcb743aaff3832866caea46af111a8d7ea39283472787996dc212978a6"
+    },
+    "mic/filled": {
+      "kind": "figma",
+      "fileKey": "LuaiBd4anRi4DMZayKAnY2",
+      "version": "2416636003859748575",
+      "nodeId": "6413:283",
+      "nodeSha256": "a33b3a4efa176985878d0aee71483e54b93515c3bb6dabcfb9d609c531171ac9",
+      "masterSha256": "e0efa7ec88dfdd01862ffd1b508de9b0789528046fb1b9d00442b9cdac093029",
+      "normalizedSha256": "6d4849fa7b7ad9996ec9ef1e1797910f4eef3a7e016439b62a643f9d5303b8c6",
+      "pathFingerprintSha256": "1cc371d2b7a2c52310e784e36b9827c4d50a245343b8f477e307fad650a28f6f"
+    },
+    "mic-circle/outline": {
+      "kind": "figma",
+      "fileKey": "LuaiBd4anRi4DMZayKAnY2",
+      "version": "2416636003859748575",
+      "nodeId": "6431:3896",
+      "nodeSha256": "be2c0ad0e597d1942428d8f71f6e66ccde7bc3859e1b97c3a1fe734114821c08",
+      "masterSha256": "86a0ac827fea4a8294c35332ec606f1f9b992f28e28660af12c72eddce3c2d32",
+      "normalizedSha256": "77faeaddf66365184e131199497d16110ab88b7a5be672777fdaa759451e18fa",
+      "pathFingerprintSha256": "04e69ba05e75395f552b6828dc12caf853f452bab30c81aa572392468efc2cc6"
+    },
+    "mic-circle/filled": {
+      "kind": "figma",
+      "fileKey": "LuaiBd4anRi4DMZayKAnY2",
+      "version": "2416636003859748575",
+      "nodeId": "6413:30",
+      "nodeSha256": "0002a377d96882ffb2f794bed38ae52e1fca2bf6f71ebfebeb41a0ae58c7aea5",
+      "masterSha256": "a2b2c05074d1a8b791e1a31962c7c57658184cf7b16b737efedbed2cf792d8a7",
+      "normalizedSha256": "48cca8f6ea5bc172684c861fc3935234229075425a489ad5c951aced02d15907",
+      "pathFingerprintSha256": "2ab6c70b6036f654a3ef5f332a2a283509dadab0ccabd01f324a0ab3b7950ed9"
+    }
+  },
+  "images": [
+    {
+      "theme": "light",
+      "file": "docs/research/negative-capsule-width-light-20261102.png",
+      "sha256": "709df0aa064be9525a1dfd5a48d0f8145df5924a7963b859cc3f04c510b4aa0e"
+    },
+    {
+      "theme": "dark",
+      "file": "docs/research/negative-capsule-width-dark-20261102.png",
+      "sha256": "21c957bc6be1f9e7a8d2eba7155a0a2a9657817eaff5c13c6b18d6c32b71d314"
+    }
+  ],
+  "verification": {
+    "red": {
+      "witness": "GEO-CONTAINMENT-01 outside-U island",
+      "baseline": "bc7865560278aa4cbc0b005a109245fbb3117496",
+      "observed": "expected throw, no error; baseline admitted .8799992000000006 through 1"
+    },
+    "green": {
+      "files": 5,
+      "tests": 55,
+      "durationSeconds": 17.35,
+      "environment": "Windows controller; single-worker focused Vitest 4.1.12, no full build/pack/bench",
+      "include": [
+        "capsule-materialized-simplicity.test.js",
+        "authored-capsule-width.test.js",
+        "author-curve-certificate.test.js",
+        "author-source-contours.test.js",
+        "capsule-width-consumer.test.js"
+      ]
+    }
+  },
+  "decision": {
+    "method": "exact source ray winding, then ideal width and bounded materialization homotopies",
+    "rejectedAlternative": "Strict convex endpoint polygon rejects two real Outline author transition turns.",
+    "sources": [
+      {
+        "url": "https://www.w3.org/TR/SVG2/painting.html#FillRuleProperty",
+        "version": "SVG2 section 13.4.2",
+        "readAt": "2026-11-02"
+      },
+      {
+        "url": "https://doc.cgal.org/latest/Boolean_set_operations_2/index.html",
+        "version": "CGAL 6.2.1",
+        "readAt": "2026-11-02"
+      },
+      {
+        "url": "https://jeffe.cs.illinois.edu/teaching/comptop/2023/notes/02-winding-number.html",
+        "version": "2023 notes",
+        "readAt": "2026-11-02"
+      },
+      {
+        "url": "https://www.math.ntnu.no/emner/TMA4175/2011v/continuousLogs2.pdf",
+        "version": "2011 lecture notes, Theorems 1 and 2",
+        "readAt": "2026-11-02"
+      }
+    ]
+  },
+  "buildProofs": {
+    "mic/outline": {
+      "method": "exact-tensor-bernstein-separation",
+      "parameter": "shared-width",
+      "evaluated": "materialized-binary64-controls",
+      "geometricDomain": {
+        "minimum": 0.4493557931633908,
+        "maximum": 1
+      },
+      "cells": 700,
+      "coordinateErrorUpper": [
+        {
+          "numerator": "2025807578446831038511233647740563042757667586914524842414726061556999769925184870475665339362057812128087786785273652489670334621370004042848012523805529638267601653971616564647388755808913165554692848835385802875645852579015574974664569121201882888390784701885078817100624515318888180277702188778955017368496953310040635324391742764963631432430117375055",
+          "denominator": "577756298062692634882899796320514825754569701436275375467883216895815138273904148947370775875738379270397749529435460924064103319004651876830131274380548720588597872393444873405265091429549226291371123473288851713585905064826579939194634093737504859185768962010552087157267774632410684258267121287728707126733386345748295699714571521040271552753678267463143641875218432"
+        },
+        {
+          "numerator": "122262725809832116821680376649658065332632897667414563391912115725964549825012832246319811538185140294587480596452039321117688312352552630917279720129758119794994832695374591914043259318650789965515114842080294590619930533179988047136587487385787664124405261680916748629481520303701706176927241645942444227024252631113992607510178580585592912728602356945855",
+          "denominator": "36976403076012328632505586964512948848292460891921624029944525881332168849529865532631729656047256273305455969883869499140102612416297720117128401560355118117670263833180471897936965851491150482647751902290486509669497924148901116108456581999200310987889213568675333578065137576474283792529095762414637256110936726127890924781732577346577379376235409117641193080013979648"
+        }
+      ],
+      "selfSimplicityCertificate": {
+        "version": 2,
+        "method": "materialized-simple-closed-contours",
+        "geometricDomain": {
+          "minimum": 0.4493557931633908,
+          "maximum": 1
+        },
+        "cells": 63,
+        "contours": [
+          {
+            "segments": 12,
+            "adjacentPairs": 12
+          },
+          {
+            "segments": 6,
+            "adjacentPairs": 6
+          }
+        ]
+      },
+      "containmentCertificate": {
+        "version": 1,
+        "method": "simple-disjoint-contours-exact-ray-winding",
+        "sourceWinding": 1,
+        "cells": 154,
+        "geometricDomain": {
+          "minimum": 0.4493557931633908,
+          "maximum": 1
+        },
+        "transfer": "ideal-affine-width-then-bounded-materialization-bridge"
+      }
+    },
+    "mic/filled": {
+      "method": "exact-tensor-bernstein-separation",
+      "parameter": "shared-width",
+      "evaluated": "materialized-binary64-controls",
+      "geometricDomain": {
+        "minimum": 0.18349372043712373,
+        "maximum": 1
+      },
+      "cells": 315,
+      "coordinateErrorUpper": [
+        {
+          "numerator": "64902681692490642729696339857605370654798506521518967404026697284460420997358538443513462913909184031958417132128075779621386638713275922730264331440965774283156011864459727798027679942666348971511132221476282764747848232529071050445430754724264525446601817227697583910093840642071930206307717749193055603682404098267946945379648077403332033776773758113651",
+          "denominator": "18488201538006164316252793482256474424146230445960812014972262940666084424764932766315864828023628136652727984941934749570051306208148860058564200780177559058835131916590235948968482925745575241323875951145243254834748962074450558054228290999600155493944606784337666789032568788237141896264547881207318628055468363063945462390866288673288689688117704558820596540006989824"
+        }
+      ],
+      "selfSimplicityCertificate": {
+        "version": 2,
+        "method": "materialized-simple-closed-contours",
+        "geometricDomain": {
+          "minimum": 0.18349372043712373,
+          "maximum": 1
+        },
+        "cells": 9,
+        "contours": [
+          {
+            "segments": 6,
+            "adjacentPairs": 6
+          }
+        ]
+      }
+    },
+    "mic-circle/outline": {
+      "method": "exact-tensor-bernstein-separation",
+      "parameter": "shared-width",
+      "evaluated": "materialized-binary64-controls",
+      "geometricDomain": {
+        "minimum": 0.2983006804569976,
+        "maximum": 1
+      },
+      "cells": 642,
+      "coordinateErrorUpper": [
+        {
+          "numerator": "24700887510416681731134126439140892758456094066798329017381751459549938914541033745859756795791904403998040242862610217404870611992785239503798902861185558686374799414884359577611082045681409618776055304400924058439400546992392207170848539732035722513062204425382559874432700665085365693970194580783957031904015579209699168679477508140113789814136891184817",
+          "denominator": "9244100769003082158126396741128237212073115222980406007486131470333042212382466383157932414011814068326363992470967374785025653104074430029282100390088779529417565958295117974484241462872787620661937975572621627417374481037225279027114145499800077746972303392168833394516284394118570948132273940603659314027734181531972731195433144336644344844058852279410298270003494912"
+        }
+      ],
+      "selfSimplicityCertificate": {
+        "version": 2,
+        "method": "materialized-simple-closed-contours",
+        "geometricDomain": {
+          "minimum": 0.2983006804569976,
+          "maximum": 1
+        },
+        "cells": 9,
+        "contours": [
+          {
+            "segments": 6,
+            "adjacentPairs": 6
+          }
+        ]
+      }
+    },
+    "mic-circle/filled": {
+      "method": "exact-tensor-bernstein-separation",
+      "parameter": "shared-width",
+      "evaluated": "materialized-binary64-controls",
+      "geometricDomain": {
+        "minimum": 0.13187260978504647,
+        "maximum": 1
+      },
+      "cells": 473,
+      "coordinateErrorUpper": [
+        {
+          "numerator": "12383762628587070522851110423522017433383960204914384632896493773100715810052750907452201050167158605871173582931564586301731858417846437807968103384643666693217710642884402579204584839652671575468017267419537188188327801449348089944445560212842985975436222157339910284710681336303115941318577483129899091304284093613656949682237201997455528061069393730837",
+          "denominator": "4622050384501541079063198370564118606036557611490203003743065735166521106191233191578966207005907034163181996235483687392512826552037215014641050195044389764708782979147558987242120731436393810330968987786310813708687240518612639513557072749900038873486151696084416697258142197059285474066136970301829657013867090765986365597716572168322172422029426139705149135001747456"
+        }
+      ],
+      "selfSimplicityCertificate": {
+        "version": 2,
+        "method": "materialized-simple-closed-contours",
+        "geometricDomain": {
+          "minimum": 0.13187260978504647,
+          "maximum": 1
+        },
+        "cells": 9,
+        "contours": [
+          {
+            "segments": 6,
+            "adjacentPairs": 6
+          }
+        ]
+      },
+      "anatomyCertificate": {
+        "version": 2,
+        "method": "simple-disjoint-knockouts-in-inscribed-polygon",
+        "cells": 827
+      }
+    }
+  },
+  "records": [
+    {
+      "icon": "mic",
+      "variant": "outline",
+      "bodyWidth": 1,
+      "file": "mic-outline-1.svg",
+      "supported": true,
+      "svgSha256": "a2bfad73d51e0894e367f3976a6046474b9fe08bbc72ee391d76c8c17b79bcb8",
+      "geometrySha256": "750429696036f405efebc4cb0ef8f98e7935699274471a9daf602bf079615889",
+      "source": {
+        "kind": "figma",
+        "fileKey": "LuaiBd4anRi4DMZayKAnY2",
+        "version": "2416636003859748575",
+        "nodeId": "6431:3962",
+        "nodeSha256": "b3efbc520078bd97f7f8b30862cc7748ae5c0d8e313325b445ab3f343ab6f451",
+        "masterSha256": "c526c734a2225a29ec6e71f76d860546f5bccf8475bad6e1842915a75f2a5f9c",
+        "normalizedSha256": "a7de0b228a6ba888b23603eaa6a7c38bcb78aad85c7df6d97a4a0e2e72c5bcbc",
+        "pathFingerprintSha256": "f7451fdcb743aaff3832866caea46af111a8d7ea39283472787996dc212978a6"
+      },
+      "previousGeometrySha256": "64333a90bb02778e4bb1edf9689b1b455c3556f3839c14c4ab4b9b15fe93bef2"
+    },
+    {
+      "icon": "mic",
+      "variant": "outline",
+      "bodyWidth": 0.9,
+      "file": "mic-outline-0.9.svg",
+      "supported": true,
+      "svgSha256": "228bf1bb02d7c4c39a12e715d4506dd6274cbc7a7674fa7d51cabfe82428a4d2",
+      "geometrySha256": "750429696036f405efebc4cb0ef8f98e7935699274471a9daf602bf079615889",
+      "source": {
+        "kind": "figma",
+        "fileKey": "LuaiBd4anRi4DMZayKAnY2",
+        "version": "2416636003859748575",
+        "nodeId": "6431:3962",
+        "nodeSha256": "b3efbc520078bd97f7f8b30862cc7748ae5c0d8e313325b445ab3f343ab6f451",
+        "masterSha256": "c526c734a2225a29ec6e71f76d860546f5bccf8475bad6e1842915a75f2a5f9c",
+        "normalizedSha256": "a7de0b228a6ba888b23603eaa6a7c38bcb78aad85c7df6d97a4a0e2e72c5bcbc",
+        "pathFingerprintSha256": "f7451fdcb743aaff3832866caea46af111a8d7ea39283472787996dc212978a6"
+      },
+      "previousGeometrySha256": "64333a90bb02778e4bb1edf9689b1b455c3556f3839c14c4ab4b9b15fe93bef2"
+    },
+    {
+      "icon": "mic",
+      "variant": "outline",
+      "bodyWidth": 0.8,
+      "file": "mic-outline-0.8.svg",
+      "supported": true,
+      "svgSha256": "950cc52f095f9891db1f91c0a4f0959ec1a78d6c4b4701b90de0e45d4bbb609b",
+      "geometrySha256": "750429696036f405efebc4cb0ef8f98e7935699274471a9daf602bf079615889",
+      "source": {
+        "kind": "figma",
+        "fileKey": "LuaiBd4anRi4DMZayKAnY2",
+        "version": "2416636003859748575",
+        "nodeId": "6431:3962",
+        "nodeSha256": "b3efbc520078bd97f7f8b30862cc7748ae5c0d8e313325b445ab3f343ab6f451",
+        "masterSha256": "c526c734a2225a29ec6e71f76d860546f5bccf8475bad6e1842915a75f2a5f9c",
+        "normalizedSha256": "a7de0b228a6ba888b23603eaa6a7c38bcb78aad85c7df6d97a4a0e2e72c5bcbc",
+        "pathFingerprintSha256": "f7451fdcb743aaff3832866caea46af111a8d7ea39283472787996dc212978a6"
+      },
+      "previousGeometrySha256": "64333a90bb02778e4bb1edf9689b1b455c3556f3839c14c4ab4b9b15fe93bef2"
+    },
+    {
+      "icon": "mic",
+      "variant": "filled",
+      "bodyWidth": 1,
+      "file": "mic-filled-1.svg",
+      "supported": true,
+      "svgSha256": "7d4e9ce2f1dfc5ba59c10ae0700ea37d0c814afe1cf4cb0c3f83508d10a9af72",
+      "geometrySha256": "1e311b55848f277f1f4957a2138bd80df4b7860723a7e84b721a43f73a51fdae",
+      "source": {
+        "kind": "figma",
+        "fileKey": "LuaiBd4anRi4DMZayKAnY2",
+        "version": "2416636003859748575",
+        "nodeId": "6413:283",
+        "nodeSha256": "a33b3a4efa176985878d0aee71483e54b93515c3bb6dabcfb9d609c531171ac9",
+        "masterSha256": "e0efa7ec88dfdd01862ffd1b508de9b0789528046fb1b9d00442b9cdac093029",
+        "normalizedSha256": "6d4849fa7b7ad9996ec9ef1e1797910f4eef3a7e016439b62a643f9d5303b8c6",
+        "pathFingerprintSha256": "1cc371d2b7a2c52310e784e36b9827c4d50a245343b8f477e307fad650a28f6f"
+      },
+      "previousGeometrySha256": "e8755f6b980b2eeae811655c8c9f25bc737dcec5ec380593af5b2ddbcd36b145"
+    },
+    {
+      "icon": "mic",
+      "variant": "filled",
+      "bodyWidth": 0.9,
+      "file": "mic-filled-0.9.svg",
+      "supported": true,
+      "svgSha256": "7d14f7d4a3a66e8f1ee4219f6d75a6d569e3bc6fa8a5008293df5e6a7355fab4",
+      "geometrySha256": "1e311b55848f277f1f4957a2138bd80df4b7860723a7e84b721a43f73a51fdae",
+      "source": {
+        "kind": "figma",
+        "fileKey": "LuaiBd4anRi4DMZayKAnY2",
+        "version": "2416636003859748575",
+        "nodeId": "6413:283",
+        "nodeSha256": "a33b3a4efa176985878d0aee71483e54b93515c3bb6dabcfb9d609c531171ac9",
+        "masterSha256": "e0efa7ec88dfdd01862ffd1b508de9b0789528046fb1b9d00442b9cdac093029",
+        "normalizedSha256": "6d4849fa7b7ad9996ec9ef1e1797910f4eef3a7e016439b62a643f9d5303b8c6",
+        "pathFingerprintSha256": "1cc371d2b7a2c52310e784e36b9827c4d50a245343b8f477e307fad650a28f6f"
+      },
+      "previousGeometrySha256": "e8755f6b980b2eeae811655c8c9f25bc737dcec5ec380593af5b2ddbcd36b145"
+    },
+    {
+      "icon": "mic",
+      "variant": "filled",
+      "bodyWidth": 0.8,
+      "file": "mic-filled-0.8.svg",
+      "supported": true,
+      "svgSha256": "490d8241b8f3b4fae4761438957e01eef48d77e2158612e7045c2f08c9e9f0cd",
+      "geometrySha256": "1e311b55848f277f1f4957a2138bd80df4b7860723a7e84b721a43f73a51fdae",
+      "source": {
+        "kind": "figma",
+        "fileKey": "LuaiBd4anRi4DMZayKAnY2",
+        "version": "2416636003859748575",
+        "nodeId": "6413:283",
+        "nodeSha256": "a33b3a4efa176985878d0aee71483e54b93515c3bb6dabcfb9d609c531171ac9",
+        "masterSha256": "e0efa7ec88dfdd01862ffd1b508de9b0789528046fb1b9d00442b9cdac093029",
+        "normalizedSha256": "6d4849fa7b7ad9996ec9ef1e1797910f4eef3a7e016439b62a643f9d5303b8c6",
+        "pathFingerprintSha256": "1cc371d2b7a2c52310e784e36b9827c4d50a245343b8f477e307fad650a28f6f"
+      },
+      "previousGeometrySha256": "e8755f6b980b2eeae811655c8c9f25bc737dcec5ec380593af5b2ddbcd36b145"
+    },
+    {
+      "icon": "mic-circle",
+      "variant": "outline",
+      "bodyWidth": 1,
+      "file": "mic-circle-outline-1.svg",
+      "supported": true,
+      "svgSha256": "dfb2de75c07e2189f71d719e0edeed228524aa7d2e52ebb8fc76fca17af60321",
+      "geometrySha256": "e8a74c93dadc9b73a2e0b025a46cd7f93f10a973ea87099f73be0bcfcf6ff0d2",
+      "source": {
+        "kind": "figma",
+        "fileKey": "LuaiBd4anRi4DMZayKAnY2",
+        "version": "2416636003859748575",
+        "nodeId": "6431:3896",
+        "nodeSha256": "be2c0ad0e597d1942428d8f71f6e66ccde7bc3859e1b97c3a1fe734114821c08",
+        "masterSha256": "86a0ac827fea4a8294c35332ec606f1f9b992f28e28660af12c72eddce3c2d32",
+        "normalizedSha256": "77faeaddf66365184e131199497d16110ab88b7a5be672777fdaa759451e18fa",
+        "pathFingerprintSha256": "04e69ba05e75395f552b6828dc12caf853f452bab30c81aa572392468efc2cc6"
+      },
+      "previousGeometrySha256": "0ea85d3b0ef3dfeca0cd04c90198b84503d6c94813a1de1807dda4a9c3288996"
+    },
+    {
+      "icon": "mic-circle",
+      "variant": "outline",
+      "bodyWidth": 0.9,
+      "file": "mic-circle-outline-0.9.svg",
+      "supported": true,
+      "svgSha256": "cd8cd303971555d5be1cbf4c85f6b6739aa83dfd7a2c8fd3bcc7aafdcc934216",
+      "geometrySha256": "e8a74c93dadc9b73a2e0b025a46cd7f93f10a973ea87099f73be0bcfcf6ff0d2",
+      "source": {
+        "kind": "figma",
+        "fileKey": "LuaiBd4anRi4DMZayKAnY2",
+        "version": "2416636003859748575",
+        "nodeId": "6431:3896",
+        "nodeSha256": "be2c0ad0e597d1942428d8f71f6e66ccde7bc3859e1b97c3a1fe734114821c08",
+        "masterSha256": "86a0ac827fea4a8294c35332ec606f1f9b992f28e28660af12c72eddce3c2d32",
+        "normalizedSha256": "77faeaddf66365184e131199497d16110ab88b7a5be672777fdaa759451e18fa",
+        "pathFingerprintSha256": "04e69ba05e75395f552b6828dc12caf853f452bab30c81aa572392468efc2cc6"
+      },
+      "previousGeometrySha256": "0ea85d3b0ef3dfeca0cd04c90198b84503d6c94813a1de1807dda4a9c3288996"
+    },
+    {
+      "icon": "mic-circle",
+      "variant": "outline",
+      "bodyWidth": 0.8,
+      "file": "mic-circle-outline-0.8.svg",
+      "supported": true,
+      "svgSha256": "ee143713393e1b5f97860ff84fa4a00e998fb39655e69d3ecd3c60814a0f9279",
+      "geometrySha256": "e8a74c93dadc9b73a2e0b025a46cd7f93f10a973ea87099f73be0bcfcf6ff0d2",
+      "source": {
+        "kind": "figma",
+        "fileKey": "LuaiBd4anRi4DMZayKAnY2",
+        "version": "2416636003859748575",
+        "nodeId": "6431:3896",
+        "nodeSha256": "be2c0ad0e597d1942428d8f71f6e66ccde7bc3859e1b97c3a1fe734114821c08",
+        "masterSha256": "86a0ac827fea4a8294c35332ec606f1f9b992f28e28660af12c72eddce3c2d32",
+        "normalizedSha256": "77faeaddf66365184e131199497d16110ab88b7a5be672777fdaa759451e18fa",
+        "pathFingerprintSha256": "04e69ba05e75395f552b6828dc12caf853f452bab30c81aa572392468efc2cc6"
+      },
+      "previousGeometrySha256": "0ea85d3b0ef3dfeca0cd04c90198b84503d6c94813a1de1807dda4a9c3288996"
+    },
+    {
+      "icon": "mic-circle",
+      "variant": "filled",
+      "bodyWidth": 1,
+      "file": "mic-circle-filled-1.svg",
+      "supported": true,
+      "svgSha256": "12348dfd53052ade18c0ae8c2d8aa3e23307ce3fb0ac2ca9364b48442b970c4a",
+      "geometrySha256": "4a58bfe827594aa45743b8c2f143bd3b23064d620aa03efe061ff2ede9afeb3b",
+      "source": {
+        "kind": "figma",
+        "fileKey": "LuaiBd4anRi4DMZayKAnY2",
+        "version": "2416636003859748575",
+        "nodeId": "6413:30",
+        "nodeSha256": "0002a377d96882ffb2f794bed38ae52e1fca2bf6f71ebfebeb41a0ae58c7aea5",
+        "masterSha256": "a2b2c05074d1a8b791e1a31962c7c57658184cf7b16b737efedbed2cf792d8a7",
+        "normalizedSha256": "48cca8f6ea5bc172684c861fc3935234229075425a489ad5c951aced02d15907",
+        "pathFingerprintSha256": "2ab6c70b6036f654a3ef5f332a2a283509dadab0ccabd01f324a0ab3b7950ed9"
+      },
+      "previousGeometrySha256": "7eaceddc63436bb673fd47983033a2e3ebcb096911411ef08c004a17c77622b7"
+    },
+    {
+      "icon": "mic-circle",
+      "variant": "filled",
+      "bodyWidth": 0.9,
+      "file": "mic-circle-filled-0.9.svg",
+      "supported": true,
+      "svgSha256": "b39766e0b8c1a894d9d5c7ada9d331567b5d52b5292026aeeb1b99f663d5d206",
+      "geometrySha256": "4a58bfe827594aa45743b8c2f143bd3b23064d620aa03efe061ff2ede9afeb3b",
+      "source": {
+        "kind": "figma",
+        "fileKey": "LuaiBd4anRi4DMZayKAnY2",
+        "version": "2416636003859748575",
+        "nodeId": "6413:30",
+        "nodeSha256": "0002a377d96882ffb2f794bed38ae52e1fca2bf6f71ebfebeb41a0ae58c7aea5",
+        "masterSha256": "a2b2c05074d1a8b791e1a31962c7c57658184cf7b16b737efedbed2cf792d8a7",
+        "normalizedSha256": "48cca8f6ea5bc172684c861fc3935234229075425a489ad5c951aced02d15907",
+        "pathFingerprintSha256": "2ab6c70b6036f654a3ef5f332a2a283509dadab0ccabd01f324a0ab3b7950ed9"
+      },
+      "previousGeometrySha256": "7eaceddc63436bb673fd47983033a2e3ebcb096911411ef08c004a17c77622b7"
+    },
+    {
+      "icon": "mic-circle",
+      "variant": "filled",
+      "bodyWidth": 0.8,
+      "file": "mic-circle-filled-0.8.svg",
+      "supported": true,
+      "svgSha256": "1b3f1fd4fde41f2a2430afa05fb29b6cc3190e3a4f0474def1e885d990fd22b7",
+      "geometrySha256": "4a58bfe827594aa45743b8c2f143bd3b23064d620aa03efe061ff2ede9afeb3b",
+      "source": {
+        "kind": "figma",
+        "fileKey": "LuaiBd4anRi4DMZayKAnY2",
+        "version": "2416636003859748575",
+        "nodeId": "6413:30",
+        "nodeSha256": "0002a377d96882ffb2f794bed38ae52e1fca2bf6f71ebfebeb41a0ae58c7aea5",
+        "masterSha256": "a2b2c05074d1a8b791e1a31962c7c57658184cf7b16b737efedbed2cf792d8a7",
+        "normalizedSha256": "48cca8f6ea5bc172684c861fc3935234229075425a489ad5c951aced02d15907",
+        "pathFingerprintSha256": "2ab6c70b6036f654a3ef5f332a2a283509dadab0ccabd01f324a0ab3b7950ed9"
+      },
+      "previousGeometrySha256": "7eaceddc63436bb673fd47983033a2e3ebcb096911411ef08c004a17c77622b7"
+    }
+  ]
+}
