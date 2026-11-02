@@ -28,7 +28,7 @@ try {
       validateAuthorObservation(observed, expected);
       const caps = module.glyphCapabilities(variant);
       if (caps.icon !== icon || caps.variant !== variant) throw new Error(`${icon}/${variant}: capabilities другого symbol`);
-      validateAuthorAdmission(glyph, caps, record, contract, { kind: 'package', svg: record.normalizedSvg, compositionKind: 'layers' });
+      validateAuthorAdmission(glyph, caps, record, contract, { kind: 'package', svg: record.normalizedSvg, compositionKind: expected.composition.kind });
       if (module.glyph({ variant, modelMode: 'source-only' }) !== glyph) throw new Error(`${icon}/${variant}: source-only не сохраняет immutable default`);
       const refusals = [];
       for (const query of [{ variant, axes: { weight: 1.1 } }, { variant, modelMode: 'allow-candidate' }]) {
