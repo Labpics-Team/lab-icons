@@ -38,8 +38,10 @@ export function createAuthorCurveCertificate(refuse) {
   }
   function curvePieces(contour, minimum, rates = contour.points.map(() => 0)) {
     let index = 0, previous, first;
-    const controls = contour.points.map((point, i) => ({ point, rate: rates[i] })), result = [];
-    const piece = values => ({ error: max(values.map(value => coordinateError(value.point[0], value.rate))),
+    const controls = contour.points.map((point, i) => ({ point, rate: rates[i], error: coordinateError(point[0], rates[i]),
+      program: { x: point[0], y: point[1], rate: rates[i] } })), result = [];
+    const piece = values => ({ error: max(values.map(value => value.error)),
+      errors: values.map(value => value.error), programs: values.map(value => value.program),
       ends: [minimum, 1].map(width => values.map(value => [
         add(rational(value.point[0]), mul(sub(rational(width), one), rational(value.rate))), rational(value.point[1]),
       ])) });
@@ -90,6 +92,66 @@ export function createAuthorCurveCertificate(refuse) {
   const difference = (a, b) => a.map((value, axis) => sub(value, b[axis]));
   const samePoint = (a, b) => a.every((value, axis) => cmp(value, b[axis]) === 0);
   const sign = value => value[0] > 0n ? 1 : value[0] < 0n ? -1 : 0;
+  const sameXProgram = (a, b) => a.x === b.x && a.rate === b.rate;
+  const samePointProgram = (a, b) => sameXProgram(a, b) && a.y === b.y;
+  /** Общая endpoint expression отменяется до interval widening. */
+  function materializedProjectionRange(curve, index, other, otherIndex, direction) {
+    const commonX = sameXProgram(curve.programs[index], other.programs[otherIndex]);
+    const error = commonX ? zero : mul(abs(direction[0]), add(curve.errors[index], other.errors[otherIndex]));
+    const projected = curve.ends.map((points, end) => dot(difference(points[index], other.ends[end][otherIndex]), direction));
+    return [sub(min(projected), error), add(max(projected), error)];
+  }
+  function materializedInjective(curve) {
+    return [[one, zero], [[-one[0], one[1]], zero], [zero, one], [zero, [-one[0], one[1]]]].some(direction =>
+      curve.programs.slice(1).every((_, index) => cmp(materializedProjectionRange(curve, index + 1, curve, index, direction)[0], zero) >= 0) &&
+      cmp(materializedProjectionRange(curve, curve.programs.length - 1, curve, 0, direction)[0], zero) > 0);
+  }
+  function materializedJoinedOnlyAtEndpoint(a, b) {
+    const endpoint = a.programs.length - 1;
+    if (!samePointProgram(a.programs[endpoint], b.programs[0])) return false;
+    const accepts = direction => {
+      const left = a.programs.slice(0, -1).map((_, index) => materializedProjectionRange(a, index, a, endpoint, direction));
+      const right = b.programs.slice(1).map((_, index) => materializedProjectionRange(b, index + 1, a, endpoint, direction));
+      return [1, -1].some(directionSign => {
+        const lhs = left.map(([low, high]) => directionSign === 1 ? [low, high] : [[-high[0], high[1]], [-low[0], low[1]]]);
+        const rhs = right.map(([low, high]) => directionSign === 1 ? [low, high] : [[-high[0], high[1]], [-low[0], low[1]]]);
+        // Одна открытая кривая может лежать на separating line. Другая
+        // обязана лежать строго по её сторону; injectivity исключает
+        // повторное посещение общего endpoint первой кривой.
+        return lhs.every(([, high]) => cmp(high, zero) <= 0) && rhs.every(([low]) => cmp(low, zero) >= 0) &&
+          (lhs.some(([, high]) => cmp(high, zero) < 0) || rhs.some(([low]) => cmp(low, zero) > 0));
+      });
+    };
+    if ([[one, zero], [zero, one]].some(accepts)) return true;
+    const vectors = a.ends.flatMap((points, end) => [
+      ...points.slice(0, -1).map(point => difference(point, points.at(-1))),
+      ...b.ends[end].slice(1).map(point => difference(point, points.at(-1))),
+    ]);
+    const edges = vectors.map(point => [point[1], [-point[0][0], point[0][1]]]);
+    return [...edges, ...edges.flatMap(left => edges.flatMap(right => [
+      left.map((value, axis) => add(value, right[axis])), left.map((value, axis) => sub(value, right[axis])),
+    ]))].some(accepts);
+  }
+  /** Простота всех materialized width poses, а не только exact source. */
+  function certifyMaterializedContour(contour, minimum, rates, statistics) {
+    const pieces = curvePieces(contour, minimum, rates).filter(curve =>
+      !curve.programs.every(program => samePointProgram(program, curve.programs[0])));
+    if (pieces.length < 3) refuse('TOPOLOGY_UNSUPPORTED', 'Нужен самостоятельный materialized closed contour.');
+    for (const [index, curve] of pieces.entries()) {
+      if (!materializedInjective(curve)) {
+        refuse('SELF_INTERSECTION_UNPROVEN', 'Materialized Bézier не имеет доказанной инъективной проекции на всём width-интервале.');
+      }
+      for (let other = index + 1; other < pieces.length; other++) {
+        if (other === index + 1 || index === 0 && other === pieces.length - 1) {
+          const [a, b] = other === index + 1 ? [curve, pieces[other]] : [pieces[other], curve];
+          if (!materializedJoinedOnlyAtEndpoint(a, b)) {
+            refuse('SELF_INTERSECTION_UNPROVEN', 'Соседние materialized curves не имеют доказанного единственного общего endpoint.');
+          }
+        } else certifySeparation(curve, pieces[other], 0, statistics, true);
+      }
+    }
+    return { segments: pieces.length, adjacentPairs: pieces.length };
+  }
   function joinedOnlyAtEndpoint(a, b) {
     const common = a.at(-1);
     if (!samePoint(common, b[0])) return false;
@@ -173,5 +235,5 @@ export function createAuthorCurveCertificate(refuse) {
     }
     return { method: 'simple-disjoint-knockouts-in-inscribed-polygon', cells: statistics.cells };
   }
-  return { contours, coordinateError, curvePieces, certifySeparation, certifyKnockouts };
+  return { contours, coordinateError, curvePieces, certifySeparation, certifyKnockouts, certifyMaterializedContour };
 }

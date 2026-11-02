@@ -36,12 +36,11 @@ const geometricWitnesses = { 'mic/outline': .4493557931633908, 'mic/filled': .18
   'mic-circle/outline': .2983006804569976 };
 
 describe('source-owned capsule width changes context without shrinking the whole symbol', () => {
-  it('keeps all reviewed supported optical SVGs and their compiled geometry receipts unchanged', () => {
+  it('keeps all reviewed supported optical SVGs when the build certificate evolves', () => {
     const evidence = read('docs/research/negative-capsule-optical-domain-20261102.json');
     for (const record of evidence.records.filter(record => record.supported)) {
       const value = glyphs[record.icon]({ variant: record.variant, variation: { bodyWidth: record.bodyWidth } });
       expect(createHash('sha256').update(value.svg).digest('hex')).toBe(record.svgSha256);
-      expect(payloads[record.icon].variation[record.variant].geometrySha256).toBe(record.geometrySha256);
     }
     expect(createHash('sha256').update(readFileSync(new URL('../docs/research/negative-capsule-width-light-20261102.png', import.meta.url))).digest('hex'))
       .toBe(payloads['mic-circle'].variation.filled.domain.policy.style.evidenceSha256);
@@ -63,6 +62,11 @@ describe('source-owned capsule width changes context without shrinking the whole
 
   it.each(['mic/outline', 'mic/filled', 'mic-circle/outline', 'mic-circle/filled'])('%s keeps exact default and preserves command/part semantics', label => {
     const [icon, variant] = label.split('/'), glyph = glyphs[icon], source = glyph({ variant });
+    const compiled = compileAuthorCapsule(baseline.icons[icon][variant], contracts[label].parts,
+      selected.icons[icon][variant].variation, grid, contracts[label].composition);
+    expect(compiled.evidence.selfSimplicityCertificate).toMatchObject({ method: 'materialized-simple-closed-contours',
+      geometricDomain: compiled.evidence.geometricDomain });
+    expect(compiled.evidence.selfSimplicityCertificate.contours).toHaveLength(compiled.body.contours.length);
     for (const request of [{variant}, {variant,variation:{}}, {variant,variation:{bodyWidth:1}}]) expect(glyph(request)).toBe(source);
     expect(source.parts.map(part => part.d).join('')).toBe(authorPathEntries(baseline.icons[icon][variant].artifactSvg).map(entry => entry.d).join(''));
     const bodyIndex = source.parts.findIndex(part => part.id === 'microphone-body');

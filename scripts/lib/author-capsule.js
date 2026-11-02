@@ -37,7 +37,7 @@ const NEGATIVE_CAPSULE_SOURCE_STYLE = Object.freeze({
     bodyWidths: [.8, .9, 1], sizes: [16, 24, 48], dpr: 1 },
 });
 
-const { contours, coordinateError, curvePieces, certifySeparation, certifyKnockouts } = createAuthorCurveCertificate(refuse);
+const { contours, coordinateError, curvePieces, certifySeparation, certifyKnockouts, certifyMaterializedContour } = createAuthorCurveCertificate(refuse);
 const bounds = points => [0, 1].map(axis => [Math.min(...points.map(point => point[axis])), Math.max(...points.map(point => point[axis]))]);
 
 /** Аннотация выбирает смысл body; координаты и ограничение выводятся из master. */
@@ -117,6 +117,8 @@ export function compileAuthorCapsule(source, parts, declaration, grid, compositi
   const minimum = Math.max(geometricMinimum, style.minimum);
   const anatomyStatistics = { cells: 0 };
   const anatomyCertificate = negative ? certifyKnockouts(entries.map(entry => contours(entry.d)[0]), anatomyStatistics) : undefined;
+  const selfStatistics = { cells: 0 };
+  const selfContours = compiledContours.map(contour => certifyMaterializedContour(contour, geometricMinimum, contour.rates, selfStatistics));
   const statistics = { cells: 0 }, curves = compiledContours.map(contour => curvePieces(contour, geometricMinimum, contour.rates));
   if (curves.length === 2) for (const outer of curves[0]) for (const inner of curves[1]) certifySeparation(outer, inner, gap, statistics);
   for (const [otherIndex, entry] of entries.entries()) if (otherIndex !== index) {
@@ -127,6 +129,9 @@ export function compileAuthorCapsule(source, parts, declaration, grid, compositi
   const proof = { method: 'exact-tensor-bernstein-separation', parameter: 'shared-width', evaluated: 'materialized-binary64-controls',
     geometricDomain: { minimum: geometricMinimum, maximum: 1 },
     cells: statistics.cells, coordinateErrorUpper: compiledContours.map(contour => receipt(contour.error)),
+    selfSimplicityCertificate: { method: 'materialized-simple-closed-contours',
+      geometricDomain: { minimum: geometricMinimum, maximum: 1 },
+      cells: selfStatistics.cells, contours: selfContours },
     ...(anatomyCertificate && { anatomyCertificate }) };
   const domain = { kind: 'bounded-capsule-width', minimum, maximum: 1, minimumInclusive: true, maximumInclusive: true,
     policy: { gridVersion: grid.version, gridSha256: hash(stableJSON(grid)), minimumGap: gap, minimumPositiveSpan: positiveSpan,
