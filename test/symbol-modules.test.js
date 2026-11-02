@@ -28,6 +28,7 @@ async function consumeSymbol(contents, entry, projections = {}) {
       plugin.onResolve({ filter: /symbol-data\/[a-z0-9-]+\.js$/ }, () => ({ path: 'data', namespace: 'symbol-data', sideEffects: false }));
       plugin.onLoad({ filter: /.*/, namespace: 'symbol-data' }, () => ({ contents: projections.data, loader: 'js' }));
       plugin.onResolve({ filter: /symbol-runtime\.js$/ }, () => ({ path: fileURLToPath(new URL('../src/ir/symbol-runtime.ts', import.meta.url)) }));
+      plugin.onResolve({ filter: /source-packet-runtime\.js$/ }, () => ({ path: fileURLToPath(new URL('../src/ir/source-packet-runtime.ts', import.meta.url)) }));
       plugin.onResolve({ filter: /variation-runtime\.js$/ }, () => ({ path: fileURLToPath(new URL('../src/ir/authored-variation.ts', import.meta.url)) }));
     } }],
   });

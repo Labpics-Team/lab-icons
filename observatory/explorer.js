@@ -2,6 +2,7 @@ import { compileSymbolEffect, prepareContourStateEffect } from './package/motion
 import { renderGlyphSvg } from './package/ir/render.js';
 import { downloadFile } from './download.js';
 import { authoredVariationCapability, authoredVariationPresentation, renderVariationComparison } from './variation-preview.js';
+import { applyEnclosurePatch, visibleStateSvg } from './geometry-patch.js';
 let execution;
 const motionExecutor = () => execution ??= import('./motion-execution.js');
 let recordedModels;
@@ -45,9 +46,36 @@ const orientationLabels = Object.freeze({ horizontal: 'Горизонтальн�
 const stateLabel = id => stateLabels[id] ?? orientationLabels[id] ?? id;
 const contourGroup = group => group?.capabilities.transition === 'contour-interpolation';
 const stateGesture = group => contourGroup(group) ? 'dots.orient' : REPLACEMENT_GESTURE;
+const replacementViewAvailable = view => view === 'original' ||
+  (view === 'generated' && Boolean(state.replacement?.variationModule));
 const replacementMode = () => Boolean(state.replacement && ui.gesture.value === stateGesture(state.replacement) &&
-  state.view === 'original' && !state.legacy);
+  replacementViewAvailable(state.view) && !state.legacy);
 const replacementMember = () => state.replacement?.capabilities.states.find(member => member.id === state.replacement.target);
+
+function enclosurePatch(view = state.view, variation = state.variation) {
+  const group = state.replacement;
+  if (!group?.variationModule) return null;
+  const result = group.variationModule.renderEnclosurePatch({ variant: state.variant,
+    variation: view === 'original' ? { enclosureEmphasis: 1 } : variation });
+  if (!result.ok) throw Object.assign(new Error(result.reason.message), { code: result.reason.code });
+  return result.patch;
+}
+
+function patchStateImages(root, patch) {
+  if (!patch) return;
+  for (const svg of root.querySelectorAll('svg')) {
+    applyEnclosurePatch(svg, patch, state.replacement.capabilities);
+  }
+}
+
+function resetVariationControls() {
+  for (const input of ui['axis-controls'].querySelectorAll('[data-variation]')) {
+    input.value = String(state.variation[input.dataset.variation]);
+    input.setCustomValidity(''); input.removeAttribute('aria-invalid');
+    delete input.dataset.variationError;
+  }
+  updateVariationStatus();
+}
 
 function stateSamples(svg) {
   ui['size-samples'].replaceChildren(...[16, 24, 48].map(size => {
@@ -87,10 +115,10 @@ function inspectorPresentation() {
   }
   const author = member?.author ?? row.original;
   ui['source-status'].textContent = `Lab UI v2.1. Версия ${author.version}. Узел ${author.nodeId}. ` +
-    (active ? contourGroup(group) ? 'Авторские контуры меняют ориентацию; средняя точка остаётся на месте.' : 'Авторский знак; общая оболочка сохраняется при замене.' : state.legacy ? 'Прежняя модель: паритет с новой авторской основой не принят.' : variation
+    (active ? contourGroup(group) ? 'Авторские контуры меняют ориентацию; средняя точка остаётся на месте.' : variation ? 'Авторское содержимое; вариативное обрамление сохраняется при замене знака.' : 'Авторский знак; общая оболочка сохраняется при замене.' : state.legacy ? 'Прежняя модель: паритет с новой авторской основой не принят.' : variation
       ? `${comparison ? 'Красным — исходная форма, синим — изменённая. ' : ''}${authoredVariationPresentation(variationAvailable()).summary(state.variation)} Образцы размеров и SVG относятся к этой форме.`
       : comparison ? `Красным — текущая основа, синим — прежняя ${row.model?.catalogState === 'accepted' ? 'модель' : 'модель на проверке'} при исходных параметрах. Части и образцы размеров относятся к текущему авторскому мастеру. Паритет не принят.` : 'Текущий авторский мастер. Возможности относятся к его закреплённой версии.');
-  ui['consumer-import'].textContent = active ? `import { renderStateSvg, compileStateEffect } from\n  '@labpics/icons/states/${group.capabilities.group}';` : state.legacy ? `import { glyph } from '@labpics/icons/ir';\n// Прежняя основа; текущий master: ./symbols/${state.name}` : `import { glyph } from\n  '@labpics/icons/${variation ? 'variations' : 'symbols'}/${state.name}';`;
+  ui['consumer-import'].textContent = active ? `import { renderStateSvg, compileStateEffect${variation ? ', renderEnclosurePatch' : ''} } from\n  '@labpics/icons/${variation ? 'state-variations' : 'states'}/${group.capabilities.group}';` : state.legacy ? `import { glyph } from '@labpics/icons/ir';\n// Прежняя основа; текущий master: ./symbols/${state.name}` : `import { glyph } from\n  '@labpics/icons/${variation ? 'variations' : 'symbols'}/${state.name}';`;
   const parts = active ? (contourGroup(group) ? group.capabilities.partIds : [...member.contentPartIds, ...group.capabilities.sharedPartIds])
     .map(id => ({ id, role: id === group.capabilities.enclosurePartId ? 'container' : 'content' })) : state.glyph.parts;
   ui.parts.replaceChildren(...parts.map(part => {
@@ -103,6 +131,7 @@ function inspectorPresentation() {
     const result = group.module.render(member.id, { variant: state.variant });
     if (!result.ok) throw new Error(`${result.reason.code}: ${result.reason.message}`);
     stateSamples(result.svg);
+    patchStateImages(ui['size-samples'], enclosurePatch());
   } else {
     const productionSvg = state.legacy || variation || motionAdmission(state.glyph, caps, caps.motion.gestures[0]?.id)?.ok;
     stateSamples(size => productionSvg ? renderGlyphSvg(state.glyph, { instanceId: `sample-${state.revision}-${state.viewRevision}-${size}` }) : state.original);
@@ -126,6 +155,7 @@ function replacementChoices() {
     button.setAttribute('aria-pressed', String(member.id === group.target));
     button.title = stateLabel(member.id);
     button.innerHTML = result.svg;
+    patchStateImages(button, enclosurePatch());
     button.querySelector('svg').setAttribute('aria-hidden', 'true');
     button.addEventListener('click', () => replaceState(member.id));
     ui['state-choices'].append(button);
@@ -286,6 +316,24 @@ async function renderView(view = state.view, { preserveProgress = false, variati
     loadMessage(ui['source-status'].textContent);
     return;
   }
+  // Изменение presentation не меняет clock, revisions или mounted mixture.
+  // Refusal вычисляется до единственной записи общей геометрии.
+  if (replacementMode() && state.replacement.variationModule && replacementViewAvailable(view) &&
+      ui['symbol-stage'].querySelector('g[data-state]')) {
+    try {
+      const patch = enclosurePatch(view, requestedVariation);
+      applyEnclosurePatch(ui['symbol-stage'], patch, state.replacement.capabilities);
+      Object.assign(state, { view, variation: requestedVariation });
+      ui['symbol-stage'].dataset.view = view;
+      patchStateImages(ui['state-choices'], patch);
+      if (resetVariation) resetVariationControls();
+      onVariationAccepted?.();
+      inspectorPresentation(); updateViewControls(); updateMotionControls(); displayStyle();
+      return { ok: true };
+    } catch (error) {
+      return { ok: false, error };
+    }
+  }
   const viewRevision = ++state.viewRevision;
   const previousProgress = stop();
   state.viewLoading = true;
@@ -322,7 +370,7 @@ async function renderView(view = state.view, { preserveProgress = false, variati
     }
     if (revision !== state.revision || viewRevision !== state.viewRevision) return;
     const changedControls = capabilities !== state.capabilities || legacy !== state.legacy;
-    const changedStateView = state.replacement && (view === 'original') !== (state.view === 'original');
+    const changedStateView = state.replacement && replacementViewAvailable(view) !== replacementViewAvailable(state.view);
     Object.assign(state, { view, glyph, capabilities, modelModule, legacy, axes, variation: requestedVariation, viewLoading: false });
     ui['symbol-stage'].dataset.view = view;
     ui.pause.textContent = 'Пауза';
@@ -339,15 +387,11 @@ async function renderView(view = state.view, { preserveProgress = false, variati
       }
     }
     ui['symbol-stage'].innerHTML = svg;
+    if (replacementMode()) patchStateImages(ui['symbol-stage'], enclosurePatch());
     for (const image of ui['symbol-stage'].querySelectorAll('svg')) image.setAttribute('aria-hidden', 'true');
     // Сброс полей подтверждается вместе с формой, до ожидания её motion-позы.
     if (resetVariation) {
-      for (const input of ui['axis-controls'].querySelectorAll('[data-variation]')) {
-        input.value = String(state.variation[input.dataset.variation]);
-        input.setCustomValidity(''); input.removeAttribute('aria-invalid');
-        delete input.dataset.variationError;
-      }
-      updateVariationStatus();
+      resetVariationControls();
     }
     onVariationAccepted?.();
     // Значение неподвижного мастера задаёт семантика, а не имя иконки.
@@ -420,7 +464,9 @@ function controls() {
         const requestRevision = ++inputRevision;
         try {
           const requested = { ...state.variation, [name]: input.valueAsNumber };
-          state.module.glyph({ variant: state.variant, variation: requested });
+          if (!replacementMode() || !state.replacement.variationModule) {
+            state.module.glyph({ variant: state.variant, variation: requested });
+          }
           const result = await renderView('generated', { preserveProgress: true, variation: requested,
             onVariationAccepted() {
               if (revision !== state.revision || requestRevision !== inputRevision) return;
@@ -459,12 +505,18 @@ function motionChoices() {
   const selectedGesture = ui.gesture.value;
   const gestures = state.capabilities.motion.gestures.map(gesture => new Option(gesture.id, gesture.id));
   const contour = contourGroup(state.replacement);
-  const stateOptions = state.replacement && !state.legacy && state.view === 'original'
+  const stateOptions = state.replacement && !state.legacy && replacementViewAvailable(state.view)
     ? [new Option(contour ? 'Ориентация' : 'Смена знака', stateGesture(state.replacement))] : [];
+  if (state.replacement && !stateOptions.length && selectedGesture === stateGesture(state.replacement)) {
+    state.replacement.returnGesture = selectedGesture;
+  }
   // Групповые переходы доказаны для masters; вариация сохраняет свои жесты.
   ui.gesture.replaceChildren(...(contour ? [...gestures, ...stateOptions] : [...stateOptions, ...gestures]));
   if (!ui.gesture.options.length) ui.gesture.add(new Option('Нет принятого жеста', ''));
-  else if ([...ui.gesture.options].some(option => option.value === selectedGesture)) ui.gesture.value = selectedGesture;
+  else if (stateOptions.length && state.replacement.returnGesture === stateGesture(state.replacement)) {
+    ui.gesture.value = state.replacement.returnGesture;
+    delete state.replacement.returnGesture;
+  } else if ([...ui.gesture.options].some(option => option.value === selectedGesture)) ui.gesture.value = selectedGesture;
   replacementChoices();
 }
 
@@ -500,10 +552,12 @@ async function select(name, { reveal = false } = {}) {
   try {
     const membership = state.data.stateGroups?.find(group => group.members.some(member => member.icon === name && member.variant === state.variant));
     const namespace = state.data.variationIconIds.includes(name) ? 'variations' : 'symbols';
-    const [module, response, replacementModule] = await Promise.all([
+    const [module, response, replacementModule, variationModule] = await Promise.all([
       import(`./package/${namespace}/${name}.js`),
       fetch(row.views.original, { signal: state.abort.signal }),
       membership ? import(`./package/states/${membership.group}.js`) : null,
+      membership && state.data.stateVariationGroupIds?.includes(membership.group)
+        ? import(`./package/state-variations/${membership.group}.js`) : null,
     ]);
     if (!response.ok) throw new Error(`Авторский SVG недоступен: HTTP ${response.status}`);
     const original = await response.text();
@@ -519,7 +573,13 @@ async function select(name, { reveal = false } = {}) {
           capabilities.proof.source.fileKey !== state.data.source.fileKey || capabilities.proof.source.version !== state.data.source.version) {
         throw new Error('Группа не относится к выбранной авторской основе.');
       }
-      state.replacement = { module: replacementModule, capabilities, target: member.id, previous: member.id, paused: false };
+      if (variationModule) {
+        const variationCapabilities = variationModule.enclosureVariationCapabilities();
+        if (variationCapabilities.group !== capabilities.group || variationCapabilities.variant !== state.variant) {
+          throw new Error('Вариативная оболочка не относится к выбранной группе.');
+        }
+      }
+      state.replacement = { module: replacementModule, variationModule, capabilities, target: member.id, previous: member.id, paused: false };
     }
     state.loaded = true;
     controls();
@@ -715,7 +775,7 @@ ui.export.addEventListener('click', async () => {
   const legacyExport = state.view === 'generated' && state.legacy;
   const revision = state.revision;
   const viewRevision = state.viewRevision;
-  let content;
+  let content, visibleStateExport = false;
   const group = replacementMode() ? state.replacement : null;
   if (group) {
     const result = format === 'svg' ? group.module.render(group.target, { variant: state.variant }) :
@@ -723,7 +783,16 @@ ui.export.addEventListener('click', async () => {
         ...(contourGroup(group) ? { from: group.progress } : {}),
         duration: 900, variant: state.variant, reducedMotion: reducedPreference.matches || ui['reduce-motion'].checked });
     if (!result.ok) { ui['export-status'].textContent = `${result.reason.code}: ${result.reason.message}`; return; }
-    content = format === 'svg' ? result.svg : JSON.stringify(result.effect, null, 2);
+    try {
+      visibleStateExport = format === 'svg' && !contourGroup(group) &&
+        (state.animations.length > 0 || variationView());
+      content = visibleStateExport
+        ? visibleStateSvg(ui['symbol-stage'], group.capabilities, displayColor.value)
+        : format === 'svg' ? result.svg : JSON.stringify(result.effect, null, 2);
+    } catch (error) {
+      ui['export-status'].textContent = error.message;
+      return;
+    }
   }
   else if (format === 'svg') content = legacyExport ? state.glyph.svg : variationView()
     ? renderGlyphSvg(state.glyph, { instanceId: 'export' }) : state.original;
@@ -754,7 +823,9 @@ ui.export.addEventListener('click', async () => {
   } else { ui['export-status'].textContent = 'SF Symbols: для этого варианта нет проверенного адаптера.'; return; }
   downloadFile(content, format === 'svg' ? 'image/svg+xml' : 'application/json',
     `${group ? `${group.capabilities.group}-${group.target}` : state.name}-${state.variant}${legacyExport ? '-recorded-model' : variationView() ? '-variation' : ''}.${format === 'svg' ? 'svg' : format === 'lottie' ? 'lottie.json' : 'effect.json'}`);
-  ui['export-status'].textContent = group && format === 'svg' ? 'SVG выбранного состояния подготовлен.' : 'Файл подготовлен.';
+  ui['export-status'].textContent = group && format === 'svg'
+    ? visibleStateExport ? 'SVG видимой позы подготовлен.' : 'SVG выбранного состояния подготовлен.'
+    : 'Файл подготовлен.';
 });
 
 try {

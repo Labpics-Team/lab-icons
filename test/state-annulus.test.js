@@ -14,8 +14,10 @@ import { createCompiledEnclosureVariation, createCompiledEnclosureVariationCapab
 import { createCompiledAnnulusGlyph } from '../src/ir/author-annulus-runtime.js';
 import { createGlyphCompiler } from '../src/ir/compiler.js';
 import { assembleGlyphLayers, assembleGlyphFrame } from '../src/ir/svg-assembly.js';
-import { symbolExportName } from '../scripts/lib/symbol-modules.js';
+import { renderSymbolModules, symbolExportName } from '../scripts/lib/symbol-modules.js';
 import { symbolReleaseProjection } from '../scripts/lib/symbol-modules.js';
+import { authoredSymbolPayloads } from '../scripts/lib/authored-symbol-payload.js';
+import { authorVariationIconNames, authorVariationLawNames } from '../scripts/lib/author-variation.js';
 import { expandReleaseExports, validateReleaseContract, validateReleaseRuntimeDependencyGraph } from '../scripts/lib/release-contract.js';
 import { bundle } from '../scripts/build-ir.mjs';
 import { measureArtifact } from '../scripts/check-package-size.js';
@@ -179,6 +181,20 @@ describe('authored shared state enclosure: one geometry law and retained state p
     expect(validateReleaseContract(ghost).join('\n')).toContain('state variation не имеет source state group');
     const empty = structuredClone(plain); empty.exports['./state-variations/*'] = expanded.exports['./state-variations/*'];
     expect(validateReleaseContract(empty).join('\n')).toContain('state-variations wildcard не имеет точных proven group outputs');
+  });
+
+  it('one real packet output and proven state variations reproduce the complete release projection without catalog compilation', async () => {
+    const packet = Object.values(await authoredSymbolPayloads(['notifications'])).map(renderSymbolModules);
+    expect(packet[0].symbol).toContain('../ir/source-packet-runtime.js');
+    const captured = read('release/contract.json');
+    const projected = symbolReleaseProjection(captured, Object.keys(manifest.icons), Object.keys(capturedStates.groups),
+      authorVariationIconNames(originalAnatomy), authorVariationLawNames(originalAnatomy), packet,
+      authorStateVariationGroupNames(capturedStates, originalAnatomy));
+    expect(projected).toEqual(captured);
+    expect(projected.runtimeDependencies.filter(file => file.endsWith('source-packet-runtime.js'))).toHaveLength(1);
+    expect(projected.runtimeDependencies.filter(file => file.endsWith('annulus-geometry-runtime.js'))).toHaveLength(1);
+    const pkg = read('package.json');
+    expect(pkg.files).toEqual(projected.files); expect(pkg.exports).toEqual(projected.exports);
   });
 
   it.each([null, [], 1, { weight: 1.1 }, { variant: 'other' }, { variation: null }, { variation: [] },

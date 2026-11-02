@@ -875,7 +875,7 @@ export async function runExplorerJourney() {
     await wait(() => q('symbol-name').textContent === 'question-circle' && targetButton('question').getAttribute('aria-pressed') === 'true', 'replacement different subject');
     const questionMember = stateCaps.states.find(member => member.id === 'question');
     const questionParts = [...questionMember.contentPartIds, stateCaps.enclosurePartId];
-    for (const view of ['overlay', 'difference', 'generated']) {
+    for (const view of ['overlay', 'difference']) {
       const viewButton = document.querySelector(`[data-view="${view}"]`);
       check(`replacement-exit/${view}/available`, !viewButton.disabled);
       viewButton.click();
@@ -888,32 +888,20 @@ export async function runExplorerJourney() {
         q('state-choice-label').textContent === '' &&
         [...document.querySelectorAll('[data-view]')].every(button => button.getAttribute('aria-pressed') === String(button.dataset.view === view)));
       const projectedParts = [...q('parts').children];
-      let expectedExport = baseOriginal;
-      if (view === 'generated') {
-        const model = await import('./recorded-model.js');
-        const modelGlyph = model.glyph({ icon: 'checkmark-circle', variant: 'outline' });
-        expectedExport = modelGlyph.svg;
-        check('replacement-exit/generated/model-metadata', q('model-status').textContent === 'Прежняя модель' && aria.includes('Прежняя модель') &&
-          q('consumer-import').textContent.includes("from '@labpics/icons/ir'") &&
-          q('source-status').textContent.includes('паритет с новой авторской основой не принят') &&
-          JSON.stringify(projectedParts.map(part => part.title)) === JSON.stringify(modelGlyph.parts.map(part => part.id)) &&
-          ![...q('gesture').options].some(option => option.value === 'enclosure.replace'));
-      } else {
-        const comparison = await originalFetch(baseRow.views[view]).then(response => response.text());
-        const expected = new DOMParser().parseFromString(comparison, 'image/svg+xml').documentElement;
-        check(`replacement-exit/${view}/comparison-subject`, JSON.stringify(paths(q('symbol-stage').querySelector('svg'))) === JSON.stringify(paths(expected)) &&
-          q('model-status').textContent.includes('с прежней моделью') && aria.includes('с прежней моделью') &&
-          q('consumer-import').textContent.includes('/symbols/checkmark-circle') && !q('consumer-import').textContent.includes('/states/') &&
-          JSON.stringify(projectedParts.map(part => part.title)) === JSON.stringify(baseGlyph.parts.map(part => part.id)) &&
-          q('source-status').textContent.includes('Части и образцы размеров относятся к текущему авторскому мастеру') &&
-          [...q('size-samples').querySelectorAll('svg')].every(svg => JSON.stringify(paths(svg)) === JSON.stringify(basePaths)) &&
-          q('play').disabled && q('gesture').disabled);
-      }
+      const stageSvg = q('symbol-stage').querySelector('svg');
+      check(`replacement-exit/${view}/comparison-subject`,
+        JSON.stringify(paths(stageSvg.querySelector('[data-comparison="source"]'))) === JSON.stringify(basePaths) &&
+        JSON.stringify(paths(stageSvg.querySelector('[data-comparison="modified"]'))) === JSON.stringify(basePaths) &&
+        q('consumer-import').textContent.includes('/variations/checkmark-circle') &&
+        JSON.stringify(projectedParts.map(part => part.title)) === JSON.stringify(baseGlyph.parts.map(part => part.id)) &&
+        q('source-status').textContent.includes('Красным') &&
+        [...q('size-samples').querySelectorAll('svg')].every(svg => JSON.stringify(paths(svg)) === JSON.stringify(basePaths)) &&
+        q('play').disabled && q('gesture').disabled);
       q('export-format').value = 'svg';
       q('export').click();
       const exported = downloads.at(-1);
-      check(`replacement-exit/${view}/export-subject`, exported.filename === `checkmark-circle-outline${view === 'generated' ? '-recorded-model' : ''}.svg` &&
-        await exported.blob.text() === expectedExport);
+      check(`replacement-exit/${view}/export-subject`, exported.filename === 'checkmark-circle-outline-variation.svg' &&
+        JSON.stringify(paths(new DOMParser().parseFromString(await exported.blob.text(), 'image/svg+xml').documentElement)) === JSON.stringify(basePaths));
       document.querySelector('[data-view="original"]').click();
       await settle('question-circle');
       check(`replacement-return/${view}/state-metadata`, q('model-status').textContent === 'Авторские состояния' &&
@@ -925,6 +913,57 @@ export async function runExplorerJourney() {
         q('gesture').value === 'enclosure.replace' && targetButton('question').getAttribute('aria-pressed') === 'true' &&
         Number(getComputedStyle(q('symbol-stage').querySelector('[data-state="question"]')).opacity) === 1);
     }
+
+    // Один настоящий UI связывает вариативность и переход; контролы не получают
+    // геометрию от oracle и не могут восстановить смесь посредством remount.
+    check('state-variation/published-group', data.stateVariationGroupIds.includes('status-circle'));
+    const mounted = [...q('symbol-stage').querySelectorAll('*')];
+    const stateParts = [...q('symbol-stage').querySelectorAll('g[data-state]')];
+    const common = q('symbol-stage').querySelector(`[data-part="${stateCaps.enclosurePartId}"]`);
+    const rawCommon = basePaths.at(-1).d;
+    const contentBefore = stateParts.map(group => JSON.stringify(paths(group)));
+    const sameMounted = () => {
+      const current = q('symbol-stage').querySelectorAll('*');
+      return current.length === mounted.length && mounted.every((node, index) => node === current[index]);
+    };
+    const stateOpacity = () => stateParts.map(group => Number(getComputedStyle(group).opacity));
+    setReduced(false); targetButton('confirmation').click();
+    await wait(() => stateOpacity()[confirmationIndex] > 0.1 && stateOpacity()[confirmationIndex] < 0.9, 'state variation mixed pose');
+    q('pause').click(); await frame();
+    const mixture = stateOpacity();
+    await changeVariation('enclosureEmphasis', 1.2);
+    const variedCommon = common.getAttribute('d');
+    check('state-variation/one-event-preserves-mixture', sameMounted() && q('pause').textContent === 'Продолжить' &&
+      mixture.every((value, index) => Math.abs(value - stateOpacity()[index]) < 0.000001) &&
+      stateParts.every((group, index) => JSON.stringify(paths(group)) === contentBefore[index]) &&
+      variedCommon !== rawCommon && variedCommon.startsWith(rawCommon.split(/(?=M)/)[0]) &&
+      q('consumer-import').textContent.includes('/state-variations/status-circle') && !q('state-group-controls').hidden);
+    q('export-format').value = 'svg'; q('export').click();
+    const visibleExport = new DOMParser().parseFromString(await downloads.at(-1).blob.text(), 'image/svg+xml').documentElement;
+    check('state-variation/exports-visible-mixture',
+      visibleExport.querySelector(`[data-part="${stateCaps.enclosurePartId}"]`).getAttribute('d') === variedCommon &&
+      [...visibleExport.querySelectorAll('g[data-state]')].every((group, index) =>
+        Math.abs(Number(group.getAttribute('opacity')) - mixture[index]) < 0.000001) && sameMounted());
+    await changeVariation('enclosureEmphasis', 2.6, 'VARIATION_OUTSIDE_DOMAIN');
+    check('state-variation/refusal-before-mutation', common.getAttribute('d') === variedCommon && sameMounted() &&
+      mixture.every((value, index) => Math.abs(value - stateOpacity()[index]) < 0.000001));
+    targetButton('attention').click(); q('pause').click();
+    await wait(() => targetButton('attention').getAttribute('aria-pressed') === 'true' && q('pause').textContent === 'Продолжить', 'state variation successor');
+    check('state-variation/successor-pickup', sameMounted() && common.getAttribute('d') === variedCommon &&
+      mixture.every((value, index) => Math.abs(value - stateOpacity()[index]) < 0.01));
+    q('reverse').click(); q('pause').click();
+    await wait(() => targetButton('confirmation').getAttribute('aria-pressed') === 'true' && q('pause').textContent === 'Продолжить', 'state variation reverse');
+    check('state-variation/reverse-pickup', sameMounted() && common.getAttribute('d') === variedCommon &&
+      mixture.every((value, index) => Math.abs(value - stateOpacity()[index]) < 0.01));
+    q('axis-controls').querySelector('[data-variation-reset]').click();
+    await wait(() => q('symbol-stage').dataset.view === 'original', 'state variation reset');
+    check('state-variation/exact-reset-keeps-clock', common.getAttribute('d') === rawCommon && sameMounted() &&
+      q('pause').textContent === 'Продолжить' &&
+      mixture.every((value, index) => Math.abs(value - stateOpacity()[index]) < 0.01));
+    setReduced(true);
+    await wait(() => q('pause').disabled, 'state variation reduced terminal');
+    check('state-variation/reduced-terminal', sameMounted() && common.getAttribute('d') === rawCommon &&
+      stateOpacity().every((value, index) => value === (index === confirmationIndex ? 1 : 0)));
     await choose('question-circle', 'filled');
     check('replacement-filled-unavailable', q('state-group-controls').hidden &&
       ![...q('gesture').options].some(option => option.value === 'enclosure.replace'));

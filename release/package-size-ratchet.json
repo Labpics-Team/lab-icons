@@ -366,6 +366,20 @@
     "sourceMappingURL"
    ]
   },
+  "dist/ir/source-packet-runtime.js": {
+   "baselineBytes": 1181,
+   "baselineGzipBytes": 600,
+   "maxBytes": 1181,
+   "maxGzipBytes": 600,
+   "allowedModules": [
+    "src/ir/source-packet-runtime.ts"
+   ],
+   "forbiddenNeedles": [
+    "sourceMappingURL",
+    "semantics/catalog.json",
+    "anatomy.runtime.json"
+   ]
+  },
   "dist/ir/state-common-types.d.ts": {
    "baselineBytes": 523,
    "baselineGzipBytes": 283,

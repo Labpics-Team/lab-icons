@@ -13,10 +13,12 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { validateReleaseTypeDependencyGraph, validateReleaseRuntimeDependencyGraph } from './lib/release-contract.js';
 import { recoverOwnedDirectory, replaceOwnedDirectory } from './lib/owned-directory.js';
 import { renderSymbolModules, symbolExportName, symbolModuleDeclaration, variationModuleDeclaration, variationRuntimeTargets } from './lib/symbol-modules.js';
-import { authorSymbolPayload, loadAuthorBaseline } from './lib/author-baseline.js';
+import { loadAuthorBaseline } from './lib/author-baseline.js';
+import { compiledAuthorSymbolPayload } from './lib/authored-symbol-payload.js';
+import { sourcePacketRuntimeTargets } from './lib/source-packet.js';
 import { compileAuthorAnatomyWithEvidence } from './lib/author-anatomy.js';
-import { authorVariationIconNames, authorVariationLawNames, authorVariationCapability } from './lib/author-variation.js';
-import { compileLottieGeometry, renderLottieSymbolModule, lottieSymbolDeclaration } from './lib/lottie-geometry.js';
+import { authorVariationIconNames, authorVariationLawNames } from './lib/author-variation.js';
+import { renderLottieSymbolModule, lottieSymbolDeclaration } from './lib/lottie-geometry.js';
 import { compileAuthorStateGroups, renderStateGroupModule, stateGroupDeclaration } from './lib/author-state-groups.js';
 import { authorStateVariationGroupNames, compileAuthorStateVariations, renderStateVariationModule,
   stateVariationDeclaration } from './lib/author-state-variations.js';
@@ -179,20 +181,13 @@ async function compileIrTargets({ root, staging }) {
     const compiler = createGlyphCompiler({
       catalog: sourceCatalog, anatomy: { version: 1, glyphs: {} }, grid, staticIcons,
     });
+    const compiledModules = [];
     for (const icon of names) {
-      const payload = authorSymbolPayload(icon, authorSources[icon], compiler);
-      const projected = Object.fromEntries(['outline', 'filled'].map(variant => [variant, authorSources[icon][variant].sourceContract.variation]));
-      const variation = projected.outline || projected.filled ? projected : undefined;
+      const payload = compiledAuthorSymbolPayload(icon, authorSources[icon], compiler);
+      const { variation, targets } = payload;
       if (variationNames.has(icon) !== !!variation) throw new Error(`build-ir: ${icon}: compiled variation не совпадает с author spec`);
-      const targets = Object.fromEntries(['outline', 'filled'].map(variant => [variant, compileLottieGeometry(payload.source[variant])]));
-      const capabilities = Object.fromEntries(['outline', 'filled'].map(variant => {
-        const capability = payload.capabilities[variant];
-        const law = variation?.[variant];
-        return [variant, { ...capability, ...(law && { variation: authorVariationCapability(law) }),
-          motion: { ...capability.motion, adapters: { ...capability.motion.adapters,
-          lottie: targets[variant].ok && capability.motion.state === 'gesture-ready' ? 'lottie-web-svg-5.13' : 'not-exported' } } }];
-      }));
-      const modules = renderSymbolModules({ ...payload, capabilities, variation });
+      const modules = renderSymbolModules(payload);
+      compiledModules.push(modules);
       writeFileSync(join(staging, 'symbols', `${icon}.js`), modules.symbol);
       writeFileSync(join(staging, 'symbols', `${icon}.d.ts`), symbolModuleDeclaration(icon));
       if (modules.variation) {
@@ -203,6 +198,7 @@ async function compileIrTargets({ root, staging }) {
       writeFileSync(join(staging, 'lottie', `${icon}.js`), renderLottieSymbolModule(icon, targets));
       writeFileSync(join(staging, 'lottie', `${icon}.d.ts`), lottieSymbolDeclaration());
     }
+    for (const target of sourcePacketRuntimeTargets(compiledModules)) await bundle(root, staging, target.entry, `ir/${target.runtime}`);
     const assembly = await import(pathToFileURL(join(declarations, 'svg-assembly.mjs')).href);
     const stateGroups = compileAuthorStateGroups(author, stateSpec, { compiler, grid, ...assembly });
     for (const [name, payload] of Object.entries(stateGroups)) {

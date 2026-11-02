@@ -1,0 +1,70 @@
+{
+  "capturedAt": "2026-11-02T11:54:04.930Z",
+  "representationSourceSha": "cf4d9f5c009d313cba862220a7ef7cddadaede38",
+  "scope": "Два authored payloads; реальный helper bundle и generated module. Только deterministic representation bytes, без full build/pack/browser/cold/CPU/memory qualification.",
+  "environment": {
+    "node": "v24.15.0",
+    "platform": "win32",
+    "arch": "x64",
+    "esbuild": "0.28.1",
+    "fflate": "0.8.3",
+    "gzip": {
+      "level": 9,
+      "mtime": 0
+    }
+  },
+  "helper": {
+    "bundle": {
+      "format": "esm",
+      "platform": "browser",
+      "target": "es2022",
+      "minifyWhitespace": true
+    },
+    "removedExport": true
+  },
+  "inline": {
+    "removedImport": "../ir/source-packet-runtime.js",
+    "fullMinification": {
+      "loader": "js",
+      "format": "esm",
+      "target": "es2022",
+      "minify": true,
+      "legalComments": "inline"
+    }
+  },
+  "rows": [
+    {
+      "icon": "notifications",
+      "current": {
+        "raw": 14070,
+        "gzip": 4104
+      },
+      "inline": {
+        "raw": 15057,
+        "gzip": 4594
+      },
+      "minifiedInline": {
+        "raw": 14727,
+        "gzip": 4421
+      },
+      "maxGzipBytes": 4165
+    },
+    {
+      "icon": "notifications-unread",
+      "current": {
+        "raw": 17595,
+        "gzip": 4918
+      },
+      "inline": {
+        "raw": 18582,
+        "gzip": 5431
+      },
+      "minifiedInline": {
+        "raw": 17988,
+        "gzip": 5231
+      },
+      "maxGzipBytes": 5034
+    }
+  ],
+  "conclusion": "Проверенные inline layouts превышают оба сохранённых module gzip ceilings; внешний helper оставлен. Это не доказательство невозможности любого inline representation."
+}

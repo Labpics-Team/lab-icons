@@ -34,13 +34,36 @@ export function symbolExplorerVariationIds(contract, iconIds) {
   return ids;
 }
 
+/** Opt-in оболочки выводятся из опубликованных entries и semantic membership. */
+export function symbolExplorerStateVariationIds(contract, stateGroups) {
+  const files = contract.files.filter(file => /^dist\/state-variations\/[^/]+\.js$/.test(file));
+  const entry = contract.exports?.['./state-variations/*'];
+  if (files.length && (entry?.import !== './dist/state-variations/*.js' ||
+      entry?.types !== './dist/state-variations/*.d.ts')) {
+    throw new Error('symbol explorer: state variation output не имеет публичного package entry');
+  }
+  const ids = files.map(file => file.slice('dist/state-variations/'.length, -'.js'.length)).sort();
+  const groups = new Set(stateGroups.map(group => group.group));
+  if (new Set(ids).size !== ids.length || ids.some(id => !/^[a-z][a-z0-9-]*$/.test(id) || !groups.has(id))) {
+    throw new Error('symbol explorer: state variation output не имеет semantic group');
+  }
+  for (const id of ids) {
+    if (!contract.files.includes(`dist/state-variations/${id}.d.ts`)) {
+      throw new Error(`symbol explorer: state variation ${id} не имеет declaration в package contract`);
+    }
+  }
+  return ids;
+}
+
 /** Runtime presence задаёт package contract; semantic spec задаёт точное членство. */
 export function symbolExplorerBrowserFiles(contract, iconIds, stateGroups) {
   const stateFiles = stateGroups.map(({ group }) => `dist/states/${group}.js`);
   const variationFiles = symbolExplorerVariationIds(contract, iconIds).map(id => `dist/variations/${id}.js`);
+  const stateVariationFiles = symbolExplorerStateVariationIds(contract, stateGroups)
+    .map(id => `dist/state-variations/${id}.js`);
   const files = [...new Set([...contract.runtimeDependencies, 'dist/ir/render.js', 'dist/motion/index.js', 'dist/authoring/index.js',
     ...iconIds.flatMap(name => [`dist/symbols/${name}.js`, `dist/lottie/${name}.js`]),
-    ...stateFiles, ...variationFiles])];
+    ...stateFiles, ...variationFiles, ...stateVariationFiles])];
   for (const file of files) {
     if (!contract.files.includes(file)) throw new Error(`symbol explorer: ${file} не принадлежит package contract`);
   }
@@ -53,7 +76,7 @@ export function symbolExplorerBrowserFiles(contract, iconIds, stateGroups) {
 /** Observatory использует уже проверенные изображения и production package. */
 export function writeSymbolExplorer({ repo, outDir, report, visuals, canvas, iconSvg, comparisonVisual, packageDir = join(repo, 'dist') }) {
   mkdirSync(outDir, { recursive: true });
-  for (const name of ['index.html', 'explorer.css', 'explorer.js', 'variation-preview.js', 'authoring.html', 'authoring.js', 'download.js']) {
+  for (const name of ['index.html', 'explorer.css', 'explorer.js', 'variation-preview.js', 'geometry-patch.js', 'authoring.html', 'authoring.js', 'download.js']) {
     copyFileSync(join(repo, 'observatory', name), join(outDir, name));
   }
   const starter = authoringTutorialMaterial(readFileSync(join(repo, 'docs/authoring.md'), 'utf8'), join(packageDir, 'authoring/index.js'));
@@ -80,6 +103,7 @@ export function writeSymbolExplorer({ repo, outDir, report, visuals, canvas, ico
   const stateGroups = stateExplorerGroups(JSON.parse(readFileSync(join(repo, 'semantics/author-state-groups.json'), 'utf8')));
   const iconIds = Object.keys(baseline.icons);
   const variationIconIds = symbolExplorerVariationIds(contract, iconIds);
+  const stateVariationGroupIds = symbolExplorerStateVariationIds(contract, stateGroups);
   const browserFiles = symbolExplorerBrowserFiles(contract, iconIds, stateGroups);
   for (const relative of browserFiles) {
     const target = join(outDir, 'package', relative.slice('dist/'.length));
@@ -120,7 +144,7 @@ export function writeSymbolExplorer({ repo, outDir, report, visuals, canvas, ico
       metrics: null,
     };
   }));
-  const data = { version: 2, source: baseline.source, executionIdentity, stateGroups, variationIconIds, summary: { glyphs: iconIds.length, variants: rows.length }, rows };
+  const data = { version: 2, source: baseline.source, executionIdentity, stateGroups, variationIconIds, stateVariationGroupIds, summary: { glyphs: iconIds.length, variants: rows.length }, rows };
   writeFileSync(join(outDir, 'explorer.json'), `${JSON.stringify(data)}\n`);
   return join(outDir, 'index.html');
 }

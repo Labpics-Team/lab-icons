@@ -88,6 +88,7 @@ pnpm add @labpics/icons
 - `dist/ir/render.js`
 - `dist/ir/request.d.ts`
 - `dist/ir/request.js`
+- `dist/ir/source-packet-runtime.js`
 - `dist/ir/state-annulus-runtime.js`
 - `dist/ir/state-annulus-types.d.ts`
 - `dist/ir/state-common-types.d.ts`
