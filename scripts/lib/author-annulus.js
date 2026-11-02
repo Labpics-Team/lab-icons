@@ -11,6 +11,15 @@ const stableJSON = value => JSON.stringify(value, (_, item) => item && typeof it
   ? Object.fromEntries(Object.keys(item).sort().map(key => [key, item[key]])) : item);
 const fields = (value, keys) => value && Object.getPrototypeOf(value) === Object.prototype &&
   Object.keys(value).sort().join(',') === [...keys].sort().join(',');
+function partRecords(parts, count) {
+  if (!Array.isArray(parts) || parts.length !== count || count < 2 || count > 16) return false;
+  for (let index = 0; index < count; index++) {
+    if (!Object.hasOwn(parts, index)) return false;
+    const part = parts[index];
+    if (!part || typeof part !== 'object' || Object.getPrototypeOf(part) !== Object.prototype || typeof part.id !== 'string') return false;
+  }
+  return true;
+}
 function freeze(value) {
   if (value && typeof value === 'object' && !Object.isFrozen(value)) {
     Object.values(value).forEach(freeze); Object.freeze(value);
@@ -163,7 +172,7 @@ export function compileAuthorAnnulus(source, parts, declaration, grid) {
   if (hash(stableJSON(authorPathEntries(source.artifactSvg))) !== author.pathFingerprintSha256) refuse('SOURCE_MISMATCH', 'Path receipt не совпал.');
   const rawPaths = [...source.rawSvg.matchAll(/<path\b[^>]*\bd="([^"]+)"[^>]*>/g)].map(match => match[1]);
   if (rawPaths.length !== entries.length || rawPaths.some((d, index) => d !== entries[index].d)) refuse('SOURCE_MISMATCH', 'Raw path operands обязаны оставаться буквальными.');
-  if (!Array.isArray(parts) || parts.length !== entries.length || parts.length < 2 || parts.length > 16 ||
+  if (!partRecords(parts, entries.length) || typeof declaration.enclosurePartId !== 'string' ||
       !NAME.test(declaration.enclosurePartId) || new Set(parts.map(part => part.id)).size !== parts.length ||
       parts.some((part, index) => !NAME.test(part.id) || part.identity !== 'declared' || part.zIndex !== index ||
         part.fillRule !== entries[index].fillRule || part.role !== (index === parts.length - 1 ? 'container' : 'content')) ||

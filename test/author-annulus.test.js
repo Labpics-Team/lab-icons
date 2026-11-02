@@ -147,6 +147,20 @@ describe('authored annulus build compiler: exact master and certified countersha
     const anonymous = input(); anonymous.parts[1].identity = 'geometry-derived';
     expect(() => compile(anonymous)).toThrow(expect.objectContaining({ code: 'DECLARED_PARTS_REQUIRED' }));
   });
+  it('refuses null, missing and sparse declared parts before reading identity fields', () => {
+    for (const malformed of [null, undefined, 1, 'content', [], Object.create(null)]) {
+      const value = input(); value.parts[0] = malformed;
+      expect(() => compile(value)).toThrow(expect.objectContaining({ code: 'DECLARED_PARTS_REQUIRED' }));
+    }
+    for (const index of [0, 1]) {
+      const value = input(); delete value.parts[index];
+      expect(() => compile(value)).toThrow(expect.objectContaining({ code: 'DECLARED_PARTS_REQUIRED' }));
+    }
+    const invalidId = input(); invalidId.parts[0].id = Symbol('content');
+    expect(() => compile(invalidId)).toThrow(expect.objectContaining({ code: 'DECLARED_PARTS_REQUIRED' }));
+    expect(compile(input('plus-circle')).geometrySha256).toBe(packets['plus-circle'].geometrySha256);
+    expect(compile(input('minus-circle')).geometrySha256).toBe(packets['minus-circle'].geometrySha256);
+  });
   it('rebound controls reach geometric failures, rather than being hidden by old hash mismatch', () => {
     const badQuarter = rebound('plus-circle', (d, index) => index === 1 ? d.replace('17.7988 1.50013', '25 1.50013') : d);
     expect(() => compile(badQuarter)).toThrow(expect.objectContaining({ code: 'CORRESPONDENCE_UNSUPPORTED' }));
