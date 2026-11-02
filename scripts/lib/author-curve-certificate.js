@@ -1,6 +1,10 @@
 import { parsePathData } from '../../src/core/path-data.js';
 import { createAuthorExactArithmetic } from './author-exact-arithmetic.js';
 
+// Revision меняет digest proof при уточнении его обязательств, даже если
+// геометрия и число проверенных hull cells сохраняются.
+const SIMPLE_CONTOUR_CERTIFICATE_VERSION = 2;
+
 /** Общий build-only владелец Bézier hull proofs для source anatomy и width. */
 export function createAuthorCurveCertificate(refuse) {
   const { fraction, rational, add, sub, mul, cmp, min, max, square } = createAuthorExactArithmetic(() =>
@@ -115,11 +119,12 @@ export function createAuthorCurveCertificate(refuse) {
       return [1, -1].some(directionSign => {
         const lhs = left.map(([low, high]) => directionSign === 1 ? [low, high] : [[-high[0], high[1]], [-low[0], low[1]]]);
         const rhs = right.map(([low, high]) => directionSign === 1 ? [low, high] : [[-high[0], high[1]], [-low[0], low[1]]]);
-        // Одна открытая кривая может лежать на separating line. Другая
-        // обязана лежать строго по её сторону; injectivity исключает
-        // повторное посещение общего endpoint первой кривой.
+        // Строгий far endpoint имеет положительный Bernstein weight всюду,
+        // кроме общего endpoint. Поэтому вся эта кривая без общего конца
+        // строго отделена, включая её дальний конец. Строгости только
+        // внутреннего control недостаточно: дальний конец может касаться линии.
         return lhs.every(([, high]) => cmp(high, zero) <= 0) && rhs.every(([low]) => cmp(low, zero) >= 0) &&
-          (lhs.some(([, high]) => cmp(high, zero) < 0) || rhs.some(([low]) => cmp(low, zero) > 0));
+          (cmp(lhs[0][1], zero) < 0 || cmp(rhs.at(-1)[0], zero) > 0);
       });
     };
     if ([[one, zero], [zero, one]].some(accepts)) return true;
@@ -167,7 +172,7 @@ export function createAuthorCurveCertificate(refuse) {
       const lhs = left.map(point => dot(point, direction)), rhs = right.map(point => dot(point, direction));
       return [1, -1].some(directionSign => lhs.every(value => directionSign * sign(value) <= 0) &&
         rhs.every(value => directionSign * sign(value) >= 0) &&
-        lhs.some(value => directionSign * sign(value) < 0) && rhs.some(value => directionSign * sign(value) > 0));
+        (directionSign * sign(lhs[0]) < 0 || directionSign * sign(rhs.at(-1)) > 0));
     });
   }
   function certifySimpleContour(contour, statistics) {
@@ -233,7 +238,8 @@ export function createAuthorCurveCertificate(refuse) {
       if (!outside(shape[i], shape[j]) || !outside(shape[j], shape[i])) refuse('COMPOSITION_UNPROVEN', 'Вложенные или недоказанные knockout contours запрещены.');
       for (const a of curvePieces(shape[i], 1)) for (const b of curvePieces(shape[j], 1)) certifySeparation(a, b, 0, statistics, true);
     }
-    return { method: 'simple-disjoint-knockouts-in-inscribed-polygon', cells: statistics.cells };
+    return { version: SIMPLE_CONTOUR_CERTIFICATE_VERSION, method: 'simple-disjoint-knockouts-in-inscribed-polygon', cells: statistics.cells };
   }
-  return { contours, coordinateError, curvePieces, certifySeparation, certifyKnockouts, certifyMaterializedContour };
+  return { contours, coordinateError, curvePieces, certifySeparation, certifyKnockouts, certifyMaterializedContour,
+    simpleContourCertificateVersion: SIMPLE_CONTOUR_CERTIFICATE_VERSION };
 }

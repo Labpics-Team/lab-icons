@@ -37,7 +37,8 @@ const NEGATIVE_CAPSULE_SOURCE_STYLE = Object.freeze({
     bodyWidths: [.8, .9, 1], sizes: [16, 24, 48], dpr: 1 },
 });
 
-const { contours, coordinateError, curvePieces, certifySeparation, certifyKnockouts, certifyMaterializedContour } = createAuthorCurveCertificate(refuse);
+const { contours, coordinateError, curvePieces, certifySeparation, certifyKnockouts, certifyMaterializedContour,
+  simpleContourCertificateVersion } = createAuthorCurveCertificate(refuse);
 const bounds = points => [0, 1].map(axis => [Math.min(...points.map(point => point[axis])), Math.max(...points.map(point => point[axis]))]);
 
 /** Аннотация выбирает смысл body; координаты и ограничение выводятся из master. */
@@ -129,7 +130,7 @@ export function compileAuthorCapsule(source, parts, declaration, grid, compositi
   const proof = { method: 'exact-tensor-bernstein-separation', parameter: 'shared-width', evaluated: 'materialized-binary64-controls',
     geometricDomain: { minimum: geometricMinimum, maximum: 1 },
     cells: statistics.cells, coordinateErrorUpper: compiledContours.map(contour => receipt(contour.error)),
-    selfSimplicityCertificate: { method: 'materialized-simple-closed-contours',
+    selfSimplicityCertificate: { version: simpleContourCertificateVersion, method: 'materialized-simple-closed-contours',
       geometricDomain: { minimum: geometricMinimum, maximum: 1 },
       cells: selfStatistics.cells, contours: selfContours },
     ...(anatomyCertificate && { anatomyCertificate }) };
