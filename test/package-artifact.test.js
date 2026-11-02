@@ -78,11 +78,15 @@ function validPackage() {
   write(root, 'dist/ir/candidates.js', 'export const registerCandidates = () => {};\n');
   write(root, 'dist/ir/candidates.d.ts', 'export declare function registerCandidates(): void;\n');
   write(root, 'dist/ir/compiler.js', 'import "./request.js"; export const fixture = 1;\n');
-  write(root, 'dist/ir/compiler.d.ts', "import type { GlyphModelErrorCode } from './request.js';\nimport type { AuthorVariationProvenance } from './authored-variation.js';\nexport type IconVariant = 'outline' | 'filled';\nexport interface GlyphIR { readonly code: GlyphModelErrorCode; readonly variation?: AuthorVariationProvenance }\n");
+  write(root, 'dist/ir/compiler.d.ts', "export type { GlyphIR } from './glyph-types.js';\nexport type IconVariant = 'outline' | 'filled';\n");
+  write(root, 'dist/ir/glyph-types.d.ts', "import type { GlyphModelErrorCode } from './request.js';\nimport type { AuthorVariationProvenance } from './authored-variation.js';\nimport type { AuthorAnnulusVariationProvenance } from './author-annulus-types.js';\nimport type { FillPaint } from './paint-types.js';\nexport interface GlyphIR { readonly code: GlyphModelErrorCode; readonly variation?: AuthorVariationProvenance | AuthorAnnulusVariationProvenance; readonly paint?: FillPaint }\n");
+  write(root, 'dist/ir/author-annulus-types.d.ts', "export interface AuthorAnnulusVariationProvenance { readonly kind: 'authored-variation' }\n");
+  write(root, 'dist/ir/paint-types.d.ts', "export interface FillPaint { readonly kind: 'fill' }\n");
   write(root, 'dist/ir/authored-variation.d.ts', "export interface AuthorVariationProvenance { readonly kind: 'authored-variation' }\n");
   write(root, 'dist/ir/request.js', 'export const fixture = 1;\n');
   write(root, 'dist/ir/request.d.ts', "export type GlyphModelErrorCode = 'CANDIDATES_REQUIRED';\n");
-  write(root, 'dist/ir/symbol-runtime.js', 'import "./request.js"; export const fixture = 1;\n');
+  write(root, 'dist/ir/author-request-runtime.js', 'export const fixture = 1;\n');
+  write(root, 'dist/ir/symbol-runtime.js', 'import "./request.js"; import "./author-request-runtime.js"; export const fixture = 1;\n');
   write(root, 'dist/ir/contour-runtime.js', 'export const fixture = 1;\n');
   write(root, 'dist/ir/state-types.d.ts', "export type { StateRefusal } from './state-common-types.js';\n");
   write(root, 'dist/ir/state-common-types.d.ts', 'export interface StateRefusal { readonly ok: false }\n');

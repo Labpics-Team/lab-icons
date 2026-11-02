@@ -46,6 +46,7 @@ import { loadAuthorBaseline } from './lib/author-baseline.js';
 import { compileAuthorAnatomy } from './lib/author-anatomy.js';
 import { expectedAuthorEffect, expectedAuthorMotion } from './bench/author-oracle.js';
 import { statePackageExpectations, stateArtifactConsumerSource } from './lib/state-artifact-consumer.js';
+import { authorVariationArtifactConsumerSource } from './lib/author-variation-artifact-consumer.js';
 
 export const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -56,10 +57,22 @@ export function authorPackageExpectations(baseline, annotations) {
     Object.fromEntries(Object.entries(variants).map(([variant, record]) => {
       const contract = contracts[`${icon}/${variant}`] ?? record.sourceContract;
       const sourcePaths = [...record.normalizedSvg.matchAll(/<path\b[^>]*\bd="([^"]+)"/g)].map(match => match[1]);
+      const variation = contract.variation;
+      let variationExpected = variation ? { law: variation.law, geometrySha256: variation.geometrySha256, domain: variation.domain } : null;
+      if (variation?.law === 'annulus.counter-scale') {
+        const { enclosure, domain } = variation;
+        const emphasisForScale = scale => (enclosure.outerRadius - scale * enclosure.referenceInnerRadius) / enclosure.referenceThickness;
+        // Свидетель берётся внутри доказанного radial interval, а отказ — ниже него.
+        // Это параметры проверки, а не второй геометрический компилятор.
+        const scale = (1 + (domain.scale.minimum < 1 ? domain.scale.minimum : domain.scale.maximum)) / 2;
+        variationExpected = { ...variationExpected, enclosurePartId: enclosure.id, enclosureOuterD: enclosure.outerD,
+          nondefault: { enclosureEmphasis: emphasisForScale(scale) },
+          outsideDomain: { enclosureEmphasis: emphasisForScale(domain.scale.minimum / 2) } };
+      }
       return [variant, {
         master: record.master, author: record.author, svg: record.artifactSvg,
         anatomy: contract.anatomy ?? null,
-        variation: contract.variation ? { geometrySha256: contract.variation.geometrySha256, domain: contract.variation.domain } : null,
+        variation: variationExpected,
         motion: expectedAuthorMotion(contract, { kind: 'package', svg: record.normalizedSvg, compositionKind: 'layers' }),
         effects: Object.fromEntries((contract.gestures ?? []).map(gesture => [gesture.id, expectedAuthorEffect(gesture)])),
         parts: contract.parts.map(({ id, role, identity, fillRule, zIndex, sourceFingerprint, artifactFingerprint, anchor }, index) => ({
@@ -572,6 +585,7 @@ export function checkPackageArtifact({
         `import * as timeSymbol from '@labpics/icons/symbols/time';\n` +
         `import { compileSymbolEffect } from '@labpics/icons/motion';\n` +
         `import { renderGlyphSvg } from '@labpics/icons/ir/render';\n` +
+        authorVariationArtifactConsumerSource() +
         `if (typeof accessibilityOutline !== 'string' || !accessibilityOutline.includes('<svg')) throw new Error('root ESM export broken');\n` +
         `if ('buildDirectionalArrow' in fullIr) throw new Error('full IR leaks lightweight recipe surface');\n` +
         `if (typeof registerCandidates !== 'function') throw new Error('candidates ESM export broken');\n` +
@@ -606,23 +620,9 @@ export function checkPackageArtifact({
         `    if (capabilities.icon !== icon || capabilities.variant !== variant || capabilities.modelState !== null || capabilities.supportedAxes.length || Object.keys(capabilities.axes).length || JSON.stringify(capabilities.motion) !== JSON.stringify(expected.motion) || JSON.stringify(capabilities.anatomy ?? null) !== JSON.stringify(expected.anatomy) || JSON.stringify(capabilities.author) !== JSON.stringify(expected.author)) throw new Error('current source inherited stale admission: ' + icon + '/' + variant);\n` +
         `    const foreignMotion = compileSymbolEffect(current, capabilities, 'time.advance', { duration: 360 });\n` +
         `    if (foreignMotion.ok || foreignMotion.reason.code !== (expected.motion.state === 'gesture-ready' ? 'GESTURE_UNSUPPORTED' : 'SEMANTIC_MOTION_UNAVAILABLE')) throw new Error('current motion did not refuse precisely: ' + icon + '/' + variant);\n` +
-        `    if (expected.variation) {\n` +
-        `      const variable = await import('@labpics/icons/variations/' + icon); const variableCapabilities = variable.glyphCapabilities(variant);\n` +
-        `      if (variable.glyph({ variant }) !== current || variableCapabilities.author !== capabilities.author || variableCapabilities.anatomy !== capabilities.anatomy) throw new Error('opt-in variation duplicated authored source: ' + icon + '/' + variant);\n` +
-        `      if (variableCapabilities.variation?.geometrySha256 !== expected.variation.geometrySha256 || JSON.stringify(variableCapabilities.variation.domain) !== JSON.stringify(expected.variation.domain)) throw new Error('current authored variation policy differs: ' + icon + '/' + variant);\n` +
-        `      if (variable.glyph({ variant, variation: { dotScale: 1, spacingScale: 1 } }) !== current) throw new Error('authored variation identity roundtripped');\n` +
-        `      const varied = variable.glyph({ variant, variation: { dotScale: 1.1, spacingScale: 0.9 } });\n` +
-        `      if (varied.provenance.kind !== 'authored-variation' || varied.d === current.d || varied.svg === current.svg || varied.provenance.variation.geometrySha256 !== expected.variation.geometrySha256 || JSON.stringify(varied.provenance.author) !== JSON.stringify(expected.author)) throw new Error('authored variation not materialized: ' + icon + '/' + variant);\n` +
-        `      if (JSON.stringify(varied.parts.map(part => [part.id, part.fillRule, part.topologySignature])) !== JSON.stringify(current.parts.map(part => [part.id, part.fillRule, part.topologySignature])) || varied.parts.some((part, index) => part.d === current.parts[index].d || !varied.svg.includes('d="' + part.d + '"'))) throw new Error('authored variation lost parts/SVG: ' + icon + '/' + variant);\n` +
-        `      for (const [gesture] of Object.entries(expected.effects)) if (!compileSymbolEffect(varied, variableCapabilities, gesture, { duration: 360 }).ok) throw new Error('authored variation lost opacity gesture');\n` +
-        `      let outside = false; try { variable.glyph({ variant, variation: { dotScale: 3, spacingScale: 0.5 } }); } catch (error) { outside = error.code === 'VARIATION_OUTSIDE_DOMAIN'; }\n` +
-        `      if (!outside) throw new Error('authored variation admitted overlapping controls');\n` +
-        `      const lottie = await import('@labpics/icons/lottie/' + icon); const refusedTarget = lottie.exportLottie({ variant, variation: { dotScale: 1.1 } });\n` +
-        `      if (refusedTarget.ok || refusedTarget.reason.code !== 'VARIATION_UNSUPPORTED') throw new Error('Lottie silently exported default geometry for variation');\n` +
-        `    } else {\n` +
-        `      let unsupported = false; try { symbol.glyph({ variant, variation: { dotScale: 1.1 } }); } catch (error) { unsupported = error.code === 'AUTHOR_VARIATION_UNSUPPORTED'; }\n` +
-        `      if (!unsupported) throw new Error('undeclared authored geometry variation accepted: ' + icon + '/' + variant);\n` +
-        `    }\n` +
+        `    const variable = expected.variation ? await import('@labpics/icons/variations/' + icon) : null;\n` +
+        `    const lottieVariation = expected.variation ? await import('@labpics/icons/lottie/' + icon) : null;\n` +
+        `    verifyInstalledAuthorVariation({ icon, variant, expected, current, capabilities, symbol, variable, lottie: lottieVariation, compileSymbolEffect });\n` +
         `    for (const [gesture, expectedEffect] of Object.entries(expected.effects)) {\n` +
         `      const effect = compileSymbolEffect(current, capabilities, gesture, { duration: 360 });\n` +
         `      if (!effect.ok || effect.effect.version !== expectedEffect.version || JSON.stringify(effect.effect.targets) !== JSON.stringify(expectedEffect.targets) || JSON.stringify(effect.effect.stages) !== JSON.stringify(expectedEffect.stages)) throw new Error('current declared motion differs: ' + icon + '/' + variant);\n` +
