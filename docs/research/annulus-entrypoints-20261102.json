@@ -1,0 +1,418 @@
+{
+  "baseline": "1dd91b1bf3e58af5e2f72f634fd37a506bae942d",
+  "producerHead": "3a41fa2fa94f33d077623a3bf87751796fea7ca8",
+  "emitterSha256": "da3e7768575ea025d406e084a86d60f1fdad0a02eae7bf5d847f8a158c27270f",
+  "capturedAt": "2026-11-02T05:33:44.807Z",
+  "scope": "two annulus families/four masters and one dots control; exact emitted packets/browser bundles/cold native graphs; no package build/install, browser renders, timing, memory or optical acceptance",
+  "environment": {
+    "node": "v24.15.0",
+    "esbuild": "0.28.1",
+    "platform": "win32",
+    "arch": "x64",
+    "fflate": "0.8.3",
+    "brotli": "1.2.0",
+    "gzipLevel": 9,
+    "brotliQuality": 11
+  },
+  "artifacts": {
+    "dist/ir/request.js": {
+      "bytes": 2575,
+      "gzipBytes": 1029,
+      "brotliBytes": 824,
+      "sha256": "17790cc6df55cd2cd5a9fbe1b8614d3c9731391425e355fd357dc9c8360a03c3"
+    },
+    "dist/ir/symbol-runtime.js": {
+      "bytes": 1459,
+      "gzipBytes": 684,
+      "brotliBytes": 536,
+      "sha256": "6edde16bd372ea84ce9c8626b82b143aeb88a5a875fd3f945ace3a7213d94abe"
+    },
+    "dist/ir/annulus-runtime.js": {
+      "bytes": 10506,
+      "gzipBytes": 4093,
+      "brotliBytes": 3390,
+      "sha256": "bcd4f3a5f1040d8e5af8cd05304e68220d3d27db6fe34aea41553cd4c70b9afd"
+    },
+    "dist/ir/variation-runtime.js": {
+      "bytes": 12863,
+      "gzipBytes": 4766,
+      "brotliBytes": 3985,
+      "sha256": "b6265934ef6fbb67108c55c0b267d5fd330b330c8c0327ab443a7d55a32c517f"
+    },
+    "dist/symbols/plus-circle.js": {
+      "bytes": 519,
+      "gzipBytes": 216,
+      "brotliBytes": 171,
+      "sha256": "2ee24ca00a7dd02717ab23e36878a1ecc62d50508f4ee7a38e217da5093fc59d"
+    },
+    "dist/variations/plus-circle.js": {
+      "bytes": 2131,
+      "gzipBytes": 926,
+      "brotliBytes": 821,
+      "sha256": "84c3857bbf7d7e06c7f40774046fad329748ce136449aa5923a5dc7c831d534a"
+    },
+    "dist/ir/symbol-data/plus-circle.js": {
+      "bytes": 11411,
+      "gzipBytes": 2380,
+      "brotliBytes": 2022,
+      "sha256": "52cb819a7bd3c7c2bbcc41a149a99f267d5e097e750692ad24f12a9a5a563c70"
+    },
+    "dist/symbols/plus-circle.d.ts": {
+      "bytes": 424,
+      "gzipBytes": 206,
+      "brotliBytes": 143,
+      "sha256": "90ce5a2c474211a42a9fc87456f3def57339ce51d37408ed511643aa1332b3aa"
+    },
+    "dist/variations/plus-circle.d.ts": {
+      "bytes": 1022,
+      "gzipBytes": 292,
+      "brotliBytes": 223,
+      "sha256": "47713644936644fd13a41156ae40e5d42cda0e872dc461b28671bc49893d1069"
+    },
+    "dist/symbols/minus-circle.js": {
+      "bytes": 521,
+      "gzipBytes": 216,
+      "brotliBytes": 173,
+      "sha256": "4b85091759b884307f7f7cfc63f177f48961ac8d961104e9339e62d556b05988"
+    },
+    "dist/variations/minus-circle.js": {
+      "bytes": 2133,
+      "gzipBytes": 929,
+      "brotliBytes": 826,
+      "sha256": "1cc015211b20d57ccfb18bb82210e3d317e0070fc4c35fae2efba1d3bec135f9"
+    },
+    "dist/ir/symbol-data/minus-circle.js": {
+      "bytes": 9055,
+      "gzipBytes": 2083,
+      "brotliBytes": 1807,
+      "sha256": "52202f17cec3618e2982522d9177173815b85601a4410b5f0d437bd0650fd24f"
+    },
+    "dist/symbols/minus-circle.d.ts": {
+      "bytes": 426,
+      "gzipBytes": 207,
+      "brotliBytes": 145,
+      "sha256": "36c7d7951ddb5fee73858af4ab3e28c26e1ac4d1ba72b35d8c8e82dd37ae596b"
+    },
+    "dist/variations/minus-circle.d.ts": {
+      "bytes": 1028,
+      "gzipBytes": 293,
+      "brotliBytes": 226,
+      "sha256": "8ef1d0cec596718fb8819ebf8bf3a5d2d4972da0818343372374e3c2e3ff4b55"
+    },
+    "dist/symbols/ellipsis-horizontal.js": {
+      "bytes": 535,
+      "gzipBytes": 224,
+      "brotliBytes": 176,
+      "sha256": "a464a1ccda46049783267f599e5cf80087c5085ae797e6977a0046f4a5189b5f"
+    },
+    "dist/variations/ellipsis-horizontal.js": {
+      "bytes": 9530,
+      "gzipBytes": 1619,
+      "brotliBytes": 1340,
+      "sha256": "a0d3fd2d306fc8cc8fb19ceb756fce5b78ab5a5431734a43a9ad4afc855c2375"
+    },
+    "dist/ir/symbol-data/ellipsis-horizontal.js": {
+      "bytes": 15959,
+      "gzipBytes": 2646,
+      "brotliBytes": 2135,
+      "sha256": "22187d62f75641395fc9b1ec7570b8d34516748ed8cda9c2ef445b7904bc0163"
+    },
+    "dist/symbols/ellipsis-horizontal.d.ts": {
+      "bytes": 440,
+      "gzipBytes": 214,
+      "brotliBytes": 149,
+      "sha256": "687830fa8ed1fb1f978cd35c96bdff36f17a32dbbb81590740a99fd5a7f174c8"
+    },
+    "dist/variations/ellipsis-horizontal.d.ts": {
+      "bytes": 665,
+      "gzipBytes": 247,
+      "brotliBytes": 179,
+      "sha256": "1a33f8863eaff0de738abc47ee2902e1afdbb160158f1dc997a94e03ab41464b"
+    }
+  },
+  "rows": [
+    {
+      "icon": "plus-circle",
+      "consumers": {
+        "sourceGlyph": {
+          "baseline": {
+            "bytes": 11923,
+            "gzipBytes": 3263,
+            "brotliBytes": 2754,
+            "sha256": "6d9a2d8f9ff00caa340b36fbcf29ab63f8005951cfb4393195e35019ff6af3da",
+            "retainedFiles": [
+              "<stdin>",
+              "packet:dist/ir/request.js",
+              "packet:dist/ir/symbol-runtime.js",
+              "packet:dist/symbols/plus-circle.js"
+            ]
+          },
+          "actual": {
+            "bytes": 11931,
+            "gzipBytes": 3258,
+            "brotliBytes": 2773,
+            "sha256": "74332cb1b411d90662eea397ce35f2fa091a2323f3a51087b08b94e8cb33a395",
+            "retainedFiles": [
+              "<stdin>",
+              "packet:dist/ir/request.js",
+              "packet:dist/ir/symbol-data/plus-circle.js",
+              "packet:dist/ir/symbol-runtime.js",
+              "packet:dist/symbols/plus-circle.js"
+            ]
+          },
+          "resultEqual": true
+        },
+        "sourceCapabilities": {
+          "baseline": {
+            "bytes": 2111,
+            "gzipBytes": 1054,
+            "brotliBytes": 913,
+            "sha256": "2d4eaa78235c3f7abd9c2f33b27aff9e2fb7e1c972905e9381833a39c2481efe",
+            "retainedFiles": [
+              "<stdin>",
+              "packet:dist/ir/request.js",
+              "packet:dist/ir/symbol-runtime.js",
+              "packet:dist/symbols/plus-circle.js"
+            ]
+          },
+          "actual": {
+            "bytes": 2127,
+            "gzipBytes": 1056,
+            "brotliBytes": 931,
+            "sha256": "0661d7ab1fbcfbb3a576a521b15dc2087e61a46b605914b8597565849d306bbe",
+            "retainedFiles": [
+              "<stdin>",
+              "packet:dist/ir/request.js",
+              "packet:dist/ir/symbol-data/plus-circle.js",
+              "packet:dist/ir/symbol-runtime.js",
+              "packet:dist/symbols/plus-circle.js"
+            ]
+          },
+          "resultEqual": true
+        },
+        "sourceStatic": {
+          "baseline": {
+            "bytes": 1103,
+            "gzipBytes": 564,
+            "brotliBytes": 503,
+            "sha256": "6fbd8aff4e41f8dc05b86d139367cecaf5da6b26ff153a96caba9c6bce0cc154",
+            "retainedFiles": [
+              "<stdin>",
+              "packet:dist/symbols/plus-circle.js"
+            ]
+          },
+          "actual": {
+            "bytes": 1103,
+            "gzipBytes": 564,
+            "brotliBytes": 497,
+            "sha256": "cb8545779d2e32fc43b1cc73087ead77f75759c10da1d4d9b7226fbb788d8fef",
+            "retainedFiles": [
+              "<stdin>",
+              "packet:dist/ir/symbol-data/plus-circle.js"
+            ]
+          },
+          "resultEqual": true
+        },
+        "variableGlyph": {
+          "bytes": 20215,
+          "gzipBytes": 6445,
+          "brotliBytes": 5494,
+          "sha256": "0fa4377bd61777cf8b09c39ed326c1639e9799b47b51450ef566b0fe85a0574b",
+          "retainedFiles": [
+            "<stdin>",
+            "packet:dist/ir/annulus-runtime.js",
+            "packet:dist/ir/request.js",
+            "packet:dist/ir/symbol-data/plus-circle.js",
+            "packet:dist/ir/symbol-runtime.js",
+            "packet:dist/variations/plus-circle.js"
+          ]
+        }
+      },
+      "native": {
+        "source": {
+          "initialLoaded": [
+            "dist/symbols/plus-circle.js",
+            "dist/ir/symbol-data/plus-circle.js",
+            "dist/ir/symbol-runtime.js",
+            "dist/ir/request.js"
+          ],
+          "identity": true,
+          "privateRefused": true,
+          "aggregate": {
+            "bytes": 15964,
+            "gzipBytes": 4309,
+            "brotliBytes": 3553
+          }
+        },
+        "variation": {
+          "initialLoaded": [
+            "dist/variations/plus-circle.js",
+            "dist/ir/symbol-data/plus-circle.js",
+            "dist/ir/annulus-runtime.js",
+            "dist/ir/symbol-runtime.js",
+            "dist/ir/request.js"
+          ],
+          "identity": true,
+          "privateRefused": true,
+          "aggregate": {
+            "bytes": 28082,
+            "gzipBytes": 9112,
+            "brotliBytes": 7593
+          }
+        }
+      },
+      "masterSha256": "1187b32d965b0d97f97dae969f8d62c9e573757b9588341d41368657bd6dde54",
+      "geometrySha256": "fc1e4ba55a6d5b460ca46449f15c058ac8060f6d74457ae99a50ca1a65a82ad5"
+    },
+    {
+      "icon": "minus-circle",
+      "consumers": {
+        "sourceGlyph": {
+          "baseline": {
+            "bytes": 10150,
+            "gzipBytes": 2970,
+            "brotliBytes": 2530,
+            "sha256": "910614ad0904e1d26fbd3446c341fd1295979d35cff7f4e2bf7a51d8ebb723b8",
+            "retainedFiles": [
+              "<stdin>",
+              "packet:dist/ir/request.js",
+              "packet:dist/ir/symbol-runtime.js",
+              "packet:dist/symbols/minus-circle.js"
+            ]
+          },
+          "actual": {
+            "bytes": 10158,
+            "gzipBytes": 2964,
+            "brotliBytes": 2547,
+            "sha256": "c90efa2a8a3767913ae05506bbce87e41f4968be67fd5adcbcf90c3745386d0b",
+            "retainedFiles": [
+              "<stdin>",
+              "packet:dist/ir/request.js",
+              "packet:dist/ir/symbol-data/minus-circle.js",
+              "packet:dist/ir/symbol-runtime.js",
+              "packet:dist/symbols/minus-circle.js"
+            ]
+          },
+          "resultEqual": true
+        },
+        "sourceCapabilities": {
+          "baseline": {
+            "bytes": 2113,
+            "gzipBytes": 1056,
+            "brotliBytes": 927,
+            "sha256": "240a3a146db6b1082c37c14f7bd9d1bfc96e90004cb2ee56e5c6070ef0e44e8e",
+            "retainedFiles": [
+              "<stdin>",
+              "packet:dist/ir/request.js",
+              "packet:dist/ir/symbol-runtime.js",
+              "packet:dist/symbols/minus-circle.js"
+            ]
+          },
+          "actual": {
+            "bytes": 2129,
+            "gzipBytes": 1061,
+            "brotliBytes": 933,
+            "sha256": "162e7d280864c3fbd760b87874fce14a69fbacfd39bc3bfecf6f381b4b45b108",
+            "retainedFiles": [
+              "<stdin>",
+              "packet:dist/ir/request.js",
+              "packet:dist/ir/symbol-data/minus-circle.js",
+              "packet:dist/ir/symbol-runtime.js",
+              "packet:dist/symbols/minus-circle.js"
+            ]
+          },
+          "resultEqual": true
+        },
+        "sourceStatic": {
+          "baseline": {
+            "bytes": 814,
+            "gzipBytes": 439,
+            "brotliBytes": 388,
+            "sha256": "0efba420d7dbea5e4860e0a3ab91fdde48dcb0b52efeba1c623523a2782d2140",
+            "retainedFiles": [
+              "<stdin>",
+              "packet:dist/symbols/minus-circle.js"
+            ]
+          },
+          "actual": {
+            "bytes": 814,
+            "gzipBytes": 440,
+            "brotliBytes": 392,
+            "sha256": "ab5a80bbd0f4224739342398576b5517e081d4b04aac40392fb23322bb7c3d23",
+            "retainedFiles": [
+              "<stdin>",
+              "packet:dist/ir/symbol-data/minus-circle.js"
+            ]
+          },
+          "resultEqual": true
+        },
+        "variableGlyph": {
+          "bytes": 18442,
+          "gzipBytes": 6153,
+          "brotliBytes": 5279,
+          "sha256": "88d724d23f42c8099ba926fa5e7409238f94a12f01073146b081b87a4fb8da00",
+          "retainedFiles": [
+            "<stdin>",
+            "packet:dist/ir/annulus-runtime.js",
+            "packet:dist/ir/request.js",
+            "packet:dist/ir/symbol-data/minus-circle.js",
+            "packet:dist/ir/symbol-runtime.js",
+            "packet:dist/variations/minus-circle.js"
+          ]
+        }
+      },
+      "native": {
+        "source": {
+          "initialLoaded": [
+            "dist/symbols/minus-circle.js",
+            "dist/ir/symbol-data/minus-circle.js",
+            "dist/ir/symbol-runtime.js",
+            "dist/ir/request.js"
+          ],
+          "identity": true,
+          "privateRefused": true,
+          "aggregate": {
+            "bytes": 13610,
+            "gzipBytes": 4012,
+            "brotliBytes": 3340
+          }
+        },
+        "variation": {
+          "initialLoaded": [
+            "dist/variations/minus-circle.js",
+            "dist/ir/symbol-data/minus-circle.js",
+            "dist/ir/annulus-runtime.js",
+            "dist/ir/symbol-runtime.js",
+            "dist/ir/request.js"
+          ],
+          "identity": true,
+          "privateRefused": true,
+          "aggregate": {
+            "bytes": 25728,
+            "gzipBytes": 8818,
+            "brotliBytes": 7383
+          }
+        }
+      },
+      "masterSha256": "07be6c7e5b87e9f4ba0facd8fb3b31dbfaba03cb9a3bb9b0f6f552d16b4aaf85",
+      "geometrySha256": "ee4a06f7c973bcda26f4a89edb12550d06048b4065be126650eccb979c0f2fba"
+    }
+  ],
+  "dotsControl": {
+    "initialLoaded": [
+      "dist/variations/ellipsis-horizontal.js",
+      "dist/ir/symbol-data/ellipsis-horizontal.js",
+      "dist/ir/variation-runtime.js",
+      "dist/ir/symbol-runtime.js",
+      "dist/ir/request.js"
+    ],
+    "identity": true,
+    "privateRefused": true,
+    "aggregate": {
+      "bytes": 42386,
+      "gzipBytes": 10744,
+      "brotliBytes": 8820
+    }
+  },
+  "retained": "E:\\AgentWork\\annulus-runtime-observation-optimized-20261102"
+}

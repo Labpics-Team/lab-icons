@@ -12,16 +12,16 @@ import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { validateReleaseTypeDependencyGraph, validateReleaseRuntimeDependencyGraph } from './lib/release-contract.js';
 import { recoverOwnedDirectory, replaceOwnedDirectory } from './lib/owned-directory.js';
-import { renderSymbolModules, symbolExportName, symbolModuleDeclaration, variationModuleDeclaration } from './lib/symbol-modules.js';
+import { renderSymbolModules, symbolExportName, symbolModuleDeclaration, variationModuleDeclaration, variationRuntimeTargets } from './lib/symbol-modules.js';
 import { authorSymbolPayload, loadAuthorBaseline } from './lib/author-baseline.js';
 import { compileAuthorAnatomy } from './lib/author-anatomy.js';
-import { authorVariationIconNames } from './lib/author-variation.js';
+import { authorVariationIconNames, authorVariationLawNames, authorVariationCapability } from './lib/author-variation.js';
 import { compileLottieGeometry, renderLottieSymbolModule, lottieSymbolDeclaration } from './lib/lottie-geometry.js';
 import { compileAuthorStateGroups, renderStateGroupModule, stateGroupDeclaration } from './lib/author-state-groups.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const TARGETS = ['ir', 'symbols', 'variations', 'motion', 'lottie', 'authoring', 'states'];
-const REQUIRED_DECLARATIONS = ['author-catalog.generated.d.ts', 'author-provenance.d.ts', 'author-source.d.ts', 'authored-variation.d.ts', 'candidates.d.ts', 'catalog.generated.d.ts', 'compiler.d.ts', 'glyph-types.d.ts', 'index.d.ts', 'paint-types.d.ts', 'recipes.d.ts', 'render.d.ts', 'request.d.ts'];
+const REQUIRED_DECLARATIONS = ['author-annulus-types.d.ts', 'author-catalog.generated.d.ts', 'author-provenance.d.ts', 'author-source.d.ts', 'authored-variation.d.ts', 'candidates.d.ts', 'catalog.generated.d.ts', 'compiler.d.ts', 'glyph-types.d.ts', 'index.d.ts', 'paint-types.d.ts', 'recipes.d.ts', 'render.d.ts', 'request.d.ts'];
 const read = (root, file) => JSON.parse(readFileSync(join(root, file), 'utf8'));
 
 /** Только локальный checkout и его OS namespace: неизвестный или живой PID сохраняется. */
@@ -94,6 +94,7 @@ async function compileIrTargets({ root, staging }) {
   execFileSync(process.execPath, [join(root, 'scripts/build-anatomy-projection.mjs')], { cwd: root, stdio: 'inherit' });
   const declarations = mkdtempSync(join(tmpdir(), 'lab-icons-ir-dts-'));
   try {
+    const authorSpec = read(root, 'semantics/author-anatomy.json');
     for (const name of TARGETS) mkdirSync(join(staging, name));
     mkdirSync(join(staging, 'ir/symbol-data'));
     const bundles = await Promise.allSettled([
@@ -101,7 +102,8 @@ async function compileIrTargets({ root, staging }) {
       bundle(root, staging, 'src/ir/compiler.ts', 'ir/compiler.js', ['./request.js']),
       bundle(root, staging, 'src/ir/request.ts', 'ir/request.js'),
       bundle(root, staging, 'src/ir/symbol-runtime.ts', 'ir/symbol-runtime.js', ['./request.js']),
-      bundle(root, staging, 'src/ir/authored-variation.ts', 'ir/variation-runtime.js', ['./request.js', './symbol-runtime.js']),
+      ...variationRuntimeTargets(authorVariationLawNames(authorSpec)).map(target =>
+        bundle(root, staging, target.entry, `ir/${target.runtime}`, ['./request.js', './symbol-runtime.js'])),
       bundle(root, staging, 'src/ir/contour-runtime.ts', 'ir/contour-runtime.js'),
       bundle(root, staging, 'src/ir/recipes.ts', 'ir/recipes.js'),
       bundle(root, staging, 'src/ir/render.ts', 'ir/render.js'),
@@ -133,7 +135,6 @@ async function compileIrTargets({ root, staging }) {
     const catalog = read(root, 'semantics/catalog.json');
     const grid = read(root, 'semantics/grid.json');
     const author = loadAuthorBaseline(root);
-    const authorSpec = read(root, 'semantics/author-anatomy.json');
     const variationNames = new Set(authorVariationIconNames(authorSpec));
     const annotatedSources = compileAuthorAnatomy(author, authorSpec, grid);
     const authorSources = Object.fromEntries(Object.entries(author.icons).map(([icon, variants]) => [icon,
@@ -160,15 +161,12 @@ async function compileIrTargets({ root, staging }) {
       const payload = authorSymbolPayload(icon, authorSources[icon], compiler);
       const projected = Object.fromEntries(['outline', 'filled'].map(variant => [variant, authorSources[icon][variant].sourceContract.variation]));
       const variation = projected.outline || projected.filled ? projected : undefined;
-      if (variation && (!variation.outline || !variation.filled)) throw new Error(`build-ir: ${icon}: обе authored variation формы обязательны`);
       if (variationNames.has(icon) !== !!variation) throw new Error(`build-ir: ${icon}: compiled variation не совпадает с author spec`);
       const targets = Object.fromEntries(['outline', 'filled'].map(variant => [variant, compileLottieGeometry(payload.source[variant])]));
       const capabilities = Object.fromEntries(['outline', 'filled'].map(variant => {
         const capability = payload.capabilities[variant];
         const law = variation?.[variant];
-        return [variant, { ...capability, ...(law && { variation: { version: 1, law: law.law, geometrySha256: law.geometrySha256,
-          defaults: { dotScale: 1, spacingScale: 1 }, domain: law.domain,
-          targets: { svg: 'supported', webEffect: 'existing-part-gestures', lottie: 'not-exported', sfSymbols: 'not-exported' } } }),
+        return [variant, { ...capability, ...(law && { variation: authorVariationCapability(law) }),
           motion: { ...capability.motion, adapters: { ...capability.motion.adapters,
           lottie: targets[variant].ok && capability.motion.state === 'gesture-ready' ? 'lottie-web-svg-5.13' : 'not-exported' } } }];
       }));
@@ -178,7 +176,7 @@ async function compileIrTargets({ root, staging }) {
       if (modules.variation) {
         writeFileSync(join(staging, 'ir/symbol-data', `${icon}.js`), modules.data);
         writeFileSync(join(staging, 'variations', `${icon}.js`), modules.variation);
-        writeFileSync(join(staging, 'variations', `${icon}.d.ts`), variationModuleDeclaration(icon));
+        writeFileSync(join(staging, 'variations', `${icon}.d.ts`), variationModuleDeclaration(icon, variation.outline.law));
       }
       writeFileSync(join(staging, 'lottie', `${icon}.js`), renderLottieSymbolModule(icon, targets));
       writeFileSync(join(staging, 'lottie', `${icon}.d.ts`), lottieSymbolDeclaration());

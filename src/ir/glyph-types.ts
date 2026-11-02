@@ -5,6 +5,7 @@ import type { CatalogAxisName, CatalogIconId } from './catalog.generated.js';
 import type { AuthorAnatomyReceipt, AuthorSourceProvenance } from './author-provenance.js';
 
 import type { AuthorVariationCapability, AuthorVariationPartProvenance, AuthorVariationProvenance } from './authored-variation.js';
+import type { AuthorAnnulusVariationCapability, AuthorAnnulusVariationPartProvenance, AuthorAnnulusVariationProvenance } from './author-annulus-types.js';
 
 import type { RecipeFillPaint, RecipeStrokePaint } from './paint-types.js';
 
@@ -62,7 +63,7 @@ export interface RecipePartProvenance {
   readonly sourceDependency?: IconId;
 }
 
-export type PartProvenance = SourcePartProvenance | ModelPartProvenance | RecipePartProvenance | AuthorVariationPartProvenance;
+export type PartProvenance = SourcePartProvenance | ModelPartProvenance | RecipePartProvenance | AuthorVariationPartProvenance | AuthorAnnulusVariationPartProvenance;
 
 export interface GlyphPart {
   readonly id: string;
@@ -116,7 +117,7 @@ export interface DesignSpecGlyphProvenance {
   readonly state: 'candidate';
 }
 
-export type GlyphProvenance = SourceGlyphProvenance | ModelGlyphProvenance | RecipeGlyphProvenance | DesignSpecGlyphProvenance | AuthorVariationProvenance;
+export type GlyphProvenance = SourceGlyphProvenance | ModelGlyphProvenance | RecipeGlyphProvenance | DesignSpecGlyphProvenance | AuthorVariationProvenance | AuthorAnnulusVariationProvenance;
 
 export interface GlyphIR<TIcon extends string = IconId> {
   readonly icon: TIcon;
@@ -148,7 +149,7 @@ export interface GlyphCapabilities<TIcon extends string = IconId> {
   readonly motion: MotionCapabilities;
   readonly author?: AuthorSourceProvenance;
   readonly anatomy?: AuthorAnatomyReceipt;
-  readonly variation?: AuthorVariationCapability;
+  readonly variation?: AuthorVariationCapability | AuthorAnnulusVariationCapability;
 }
 
 export interface AxisContract {

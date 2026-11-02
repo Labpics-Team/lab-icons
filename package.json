@@ -68,6 +68,8 @@
     "dist/authoring/index.js",
     "dist/index.d.ts",
     "dist/index.js",
+    "dist/ir/annulus-runtime.js",
+    "dist/ir/author-annulus-types.d.ts",
     "dist/ir/author-catalog.generated.d.ts",
     "dist/ir/author-provenance.d.ts",
     "dist/ir/author-source.d.ts",
@@ -96,6 +98,8 @@
     "dist/ir/state-types.d.ts",
     "dist/ir/symbol-data/ellipsis-horizontal.js",
     "dist/ir/symbol-data/ellipsis-vertical.js",
+    "dist/ir/symbol-data/minus-circle.js",
+    "dist/ir/symbol-data/plus-circle.js",
     "dist/ir/symbol-runtime.js",
     "dist/ir/variation-runtime.js",
     "dist/lottie/accessibility.d.ts",
@@ -1433,7 +1437,11 @@
     "dist/variations/ellipsis-horizontal.d.ts",
     "dist/variations/ellipsis-horizontal.js",
     "dist/variations/ellipsis-vertical.d.ts",
-    "dist/variations/ellipsis-vertical.js"
+    "dist/variations/ellipsis-vertical.js",
+    "dist/variations/minus-circle.d.ts",
+    "dist/variations/minus-circle.js",
+    "dist/variations/plus-circle.d.ts",
+    "dist/variations/plus-circle.js"
   ],
   "scripts": {
     "baseline:freeze": "node scripts/freeze-baseline.mjs",

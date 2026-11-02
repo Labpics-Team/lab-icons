@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url';
 import { build } from 'esbuild';
 import { loadAuthorBaseline, authorSymbolPayload } from '../../scripts/lib/author-baseline.js';
 import { compileAuthorAnatomy } from '../../scripts/lib/author-anatomy.js';
+import { authorVariationCapability } from '../../scripts/lib/author-variation.js';
 import { compileLottieGeometry } from '../../scripts/lib/lottie-geometry.js';
 import { symbolExportName } from '../../scripts/lib/symbol-modules.js';
 
@@ -33,9 +34,7 @@ export async function authoredSymbolPayloads(names) {
     const variation = projected.outline || projected.filled ? projected : undefined;
     const capabilities = Object.fromEntries(['outline', 'filled'].map(variant => {
       const capability = payload.capabilities[variant], law = variation?.[variant], target = compileLottieGeometry(payload.source[variant]);
-      return [variant, { ...capability, ...(law && { variation: { version: 1, law: law.law, geometrySha256: law.geometrySha256,
-        defaults: { dotScale: 1, spacingScale: 1 }, domain: law.domain,
-        targets: { svg: 'supported', webEffect: 'existing-part-gestures', lottie: 'not-exported', sfSymbols: 'not-exported' } } }),
+      return [variant, { ...capability, ...(law && { variation: authorVariationCapability(law) }),
         motion: { ...capability.motion, adapters: { ...capability.motion.adapters,
           lottie: target.ok && capability.motion.state === 'gesture-ready' ? 'lottie-web-svg-5.13' : 'not-exported' } } }];
     }));

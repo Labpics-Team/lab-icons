@@ -125,7 +125,7 @@ export async function checkGlyphTypeBoundary({ baseline = null } = {}) {
     for (const before of baseline === null ? [false] : [true, false]) {
       const label = before ? 'baseline' : 'actual', sourceRoot = join(temporary, label), out = join(sourceRoot, 'consumer/node_modules/@labpics/icons/dist');
       for (const file of before ? baselineFiles : snapshotFiles) write(join(sourceRoot, file), readSnapshot(file, before));
-      if (!before) for (const file of ['src/ir/glyph-types.ts', 'src/ir/paint-types.ts']) write(join(sourceRoot, file), readSnapshot(file, false));
+      if (!before) for (const file of ['src/ir/glyph-types.ts', 'src/ir/paint-types.ts', 'src/ir/author-annulus-types.ts']) write(join(sourceRoot, file), readSnapshot(file, false));
       // Только два JSON источника используются type emit; geometry не строится.
       for (const file of ['semantics/catalog.json', 'semantics/anatomy.runtime.json', 'semantics/grid.json']) {
         const value = JSON.parse(readSnapshot(file, before));
@@ -171,7 +171,7 @@ export async function checkGlyphTypeBoundary({ baseline = null } = {}) {
       scope: 'two families; actual declaration emit and public type consumers; no runtime/build/pack/browser/timing qualification',
       environment: { node: process.version, typescript: JSON.parse(readFileSync(join(root, 'node_modules/typescript/package.json'))).version,
         platform: process.platform, arch: process.arch, gzip: { fflate: '0.8.3', level: 9, mtime: 0 }, brotli: process.versions.brotli, quality: 11 },
-      sourceDigests: Object.fromEntries([...new Set([...snapshotFiles, 'src/ir/glyph-types.ts', 'src/ir/paint-types.ts', 'scripts/lib/symbol-modules.js'])].map(file => [file, hash(readSnapshot(file, false))])), observations, findings };
+      sourceDigests: Object.fromEntries([...new Set([...snapshotFiles, 'src/ir/glyph-types.ts', 'src/ir/paint-types.ts', 'src/ir/author-annulus-types.ts', 'scripts/lib/symbol-modules.js'])].map(file => [file, hash(readSnapshot(file, false))])), observations, findings };
     return report;
   } finally { rmSync(temporary, { recursive: true, force: true }); }
 }
