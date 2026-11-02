@@ -78,6 +78,22 @@ function run(root, args = [], { output = join(root, 'report.json') } = {}) {
   });
 }
 
+it('новая state-variation проекция не может закрепить eager catalog в первом размере', () => {
+  const { root } = fixture({ realPackageOracle: true });
+  const added = 'dist/state-variations/fixture.js';
+  mkdirSync(join(root, 'dist/state-variations'));
+  writeFileSync(join(root, added), 'export const value = true;\n// semantics/catalog.json\n');
+  const contractPath = join(root, 'release/contract.json');
+  const contract = JSON.parse(readFileSync(contractPath));
+  contract.files.push(added);
+  writeFileSync(contractPath, JSON.stringify(contract));
+  const before = readFileSync(join(root, 'release/package-size-ratchet.json'));
+  const result = run(root, ['--update']);
+  expect(result.status).not.toBe(0);
+  expect(result.stderr).toContain('forbidden marker semantics/catalog.json');
+  expect(readFileSync(join(root, 'release/package-size-ratchet.json')).equals(before)).toBe(true);
+});
+
 function snapshotInputs(root) {
   return Object.fromEntries([
     'release/package-size-ratchet.json', 'release/consumer-size-ratchet.json', 'release/contract.json',

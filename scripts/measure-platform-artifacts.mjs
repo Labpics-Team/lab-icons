@@ -98,7 +98,7 @@ for (const file of contract.files) {
   const old = previous.artifacts[file];
   const forbiddenNeedles = [...new Set([
     ...(old?.forbiddenNeedles ?? []), 'sourceMappingURL',
-    ...(/^dist\/(symbols|states|variations)\//.test(file) ? ['semantics/catalog.json', 'anatomy.runtime.json'] : []),
+    ...(/^dist\/(symbols|states|variations|state-variations)\//.test(file) ? ['semantics/catalog.json', 'anatomy.runtime.json'] : []),
   ])];
   artifactMeasurements[file] = {
     ...measured,
