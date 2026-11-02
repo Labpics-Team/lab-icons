@@ -5,6 +5,7 @@ export async function runExplorerJourney() {
   const controls = [];
   const fixtures = [];
   const observers = [];
+  const restoreWrites = [];
   const q = id => document.querySelector(`#${id}`);
   const frame = () => new Promise(resolve => requestAnimationFrame(resolve));
   const check = (id, passed, detail) => {
@@ -266,7 +267,16 @@ export async function runExplorerJourney() {
     await choose('chatbubble-ellipses', 'filled');
     check('filled-typing-compound-refuses', q('play').disabled && q('gesture').value === '');
     await choose('ellipsis-vertical', 'outline');
-    check('vertical-menu-does-not-inherit-loading', q('play').disabled && q('gesture').value === '');
+    const verticalMenu = await import('./package/symbols/ellipsis-vertical.js');
+    const verticalCaps = verticalMenu.glyphCapabilities('outline');
+    check('vertical-menu-admits-orientation', !q('play').disabled && q('gesture').value === 'dots.orient' &&
+      !q('state-group-controls').hidden && q('gesture-progress-control').hidden);
+    for (const gesture of ['activity', 'idle']) {
+      const refused = compileSymbolEffect(verticalMenu.glyph({ variant: 'outline' }), verticalCaps,
+        `ellipsis-vertical.${gesture}`, { duration: 900 });
+      check(`vertical-menu-does-not-inherit-${gesture}`, !refused.ok && refused.reason.code === 'GESTURE_UNSUPPORTED' &&
+        ![...q('gesture').options].some(option => option.value === `ellipsis-vertical.${gesture}`));
+    }
 
     const viewButton = view => document.querySelector(`[data-view="${view}"]`);
     const chooseView = async view => {
@@ -708,14 +718,52 @@ export async function runExplorerJourney() {
         q('export-format').value = format; q('export').click();
         check(`${id}/${format}/honest-refusal`, downloads.length === before && q('export-status').textContent.startsWith('FORMAT_UNSUPPORTED:'));
       }
-      q('reverse').click(); q('pause').click();
-      await wait(() => button('horizontal').getAttribute('aria-pressed') === 'true' && q('pause').textContent === 'Продолжить', `${id} reversed paused pickup`);
-      check(`${id}/reverse-retains-exact-visible-pose`, nodes.every((node, index) => node.getAttribute('d') === frozen[index]) && stable());
-      button('vertical').click(); q('pause').click();
-      await wait(() => button('vertical').getAttribute('aria-pressed') === 'true' && q('pause').textContent === 'Продолжить', `${id} newer paused target`);
-      check(`${id}/newer-target-retains-exact-visible-pose`, nodes.every((node, index) => node.getAttribute('d') === frozen[index]) && stable());
+      const moving = [0, 2], writes = [];
+      const methods = moving.map(index => nodes[index].setAttribute);
+      moving.forEach((index, position) => {
+        nodes[index].setAttribute = function (property, value) {
+          if (property === 'd') writes.push({ index, d: String(value), at: performance.now() });
+          return methods[position].call(this, property, value);
+        };
+      });
+      const restore = () => moving.forEach((index, position) => { nodes[index].setAttribute = methods[position]; });
+      restoreWrites.push(restore);
+      const operandRoundoff = Number(caps.proof.roundingUpper.numerator) / Number(caps.proof.roundingUpper.denominator);
+      const phaseRoundoff = 4 * Number.EPSILON + 2 * operandRoundoff / Math.abs(vertical[0][0] - horizontal[0][0]);
+      const pausedSuccessor = async (target, action, label) => {
+        const before = nodes.map(node => node.getAttribute('d')), from = phase();
+        writes.length = 0;
+        action(); q('pause').click();
+        await wait(() => button(target).getAttribute('aria-pressed') === 'true' && q('pause').textContent === 'Продолжить', `${id}/${label} paused target`);
+        const admitted = moving.map(index => writes.find(write => write.index === index));
+        check(`${id}/${label}/exact-admission-pickup`, admitted.every((write, position) => write && write.d === before[moving[position]]) && stable());
+        const admissionAt = Math.min(...admitted.map(write => write.at)), lastSampleAt = writes.at(-1).at;
+        const beforeDownload = downloads.length;
+        q('export-format').value = 'effect'; q('export').click();
+        const effect = JSON.parse(await downloads.at(-1).blob.text());
+        const read = { progress: effect.from, paths: nodes.map(node => node.getAttribute('d')) };
+        check(`${id}/${label}/reads-paused-materialized-progress`, downloads.length === beforeDownload + 1 &&
+          effect.kind === 'contour-interpolation' && effect.targetState === target && Number.isFinite(read.progress));
+        check(`${id}/${label}/pause-matches-author-interpolation`, nodes.every((node, index) => {
+          const actual = numbers(read.paths[index]);
+          return actual.length === horizontal[index].length && actual.every((value, coordinate) =>
+            Math.abs(value - ((1 - read.progress) * horizontal[index][coordinate] + read.progress * vertical[index][coordinate])) <= operandRoundoff);
+        }) && stable() && middle.outerHTML === middleBefore);
+        // pause может применить время после admission; предел следует из 900 ms,
+        // измеренного интервала записи и опубликованной ошибки геометрии.
+        const travel = (read.progress - from) * Math.sign(effect.to - from);
+        const upper = Math.abs(effect.to - from) * Math.min(1, Math.max(0, lastSampleAt - admissionAt) / effect.options.duration);
+        check(`${id}/${label}/pause-has-bounded-continuous-travel`, travel >= -phaseRoundoff && travel <= upper + phaseRoundoff,
+          { from, progress: read.progress, elapsedUpper: lastSampleAt - admissionAt, upper, phaseRoundoff });
+        await frame(); await frame();
+        check(`${id}/${label}/paused-pose-stays-fixed`, nodes.every((node, index) => node.getAttribute('d') === read.paths[index]));
+        return read;
+      };
+      await pausedSuccessor('horizontal', () => q('reverse').click(), 'reverse');
+      const resumed = await pausedSuccessor('vertical', () => button('vertical').click(), 'newer-target');
+      restore(); restoreWrites.pop();
       q('pause').click();
-      await wait(() => phase() > frozenPhase + 0.04, `${id} resumed progress`);
+      await wait(() => phase() > resumed.progress + 0.04, `${id} resumed progress`);
       setReduced(true);
       await wait(() => endpoint('vertical') && q('pause').disabled, `${id} latest reduced target`);
       check(`${id}/reduced-motion-settles-latest-target`, endpoint('vertical') && stable() && middle.outerHTML === middleBefore);
@@ -900,6 +948,7 @@ export async function runExplorerJourney() {
     if (deferredReject) deferredReject(new Error('journey cleanup'));
     for (const control of controls) control.stop();
     for (const observer of observers) observer.disconnect();
+    for (const restore of restoreWrites) restore();
     for (const fixture of fixtures) fixture.remove();
     if (failed && q('pause')?.textContent === 'Пауза' && !q('pause').disabled) q('pause').click();
   }

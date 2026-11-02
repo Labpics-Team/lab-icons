@@ -12,12 +12,17 @@ class SvgViewport {
 }
 const control = () => ({ stop: vi.fn() });
 function scalarClock(initial) {
-  let current = initial, target = initial, resolve;
+  let current = initial, target = initial, elapsed = 0, resolve;
   const listeners = new Set();
-  const publish = progress => { current = progress; for (const listener of listeners) listener(progress); };
+  const publish = progress => {
+    current = progress;
+    if (target !== initial) elapsed = (progress - initial) / (target - initial) * playback.duration;
+    for (const listener of listeners) listener(progress);
+  };
+  const sample = () => publish(playback.duration ? initial + (target - initial) * Math.min(elapsed / playback.duration, 1) : target);
   const playback = {
     state: 'running', duration: 0, finished: new Promise(done => { resolve = done; }),
-    pause: vi.fn(() => { playback.state = 'paused'; }),
+    pause: vi.fn(() => { if (playback.state === 'running') { sample(); playback.state = 'paused'; } }),
     play: vi.fn(() => { playback.state = 'running'; }),
     seek: vi.fn(time => publish(initial + (target - initial) * time / playback.duration)),
     stop: vi.fn(() => {
@@ -27,7 +32,7 @@ function scalarClock(initial) {
   };
   const unsubscribe = vi.fn(() => listeners.clear());
   return {
-    playback, publish, unsubscribe, get: vi.fn(() => current),
+    playback, publish, unsubscribe, advanceTime: milliseconds => { elapsed += milliseconds; }, get: vi.fn(() => current),
     subscribe: vi.fn(listener => { listeners.add(listener); return unsubscribe; }),
     animate: vi.fn((next, options) => {
       target = next; playback.duration = options.duration;
@@ -106,6 +111,34 @@ describe('публичное исполнение подготовленного
     clock.publish(1);
     expect(svg.parts[0].d).toBe('first-dot-pose-0.685');
     expect(svg.parts[1].d).toBe('middle-dot-author');
+  });
+
+  it('различает точный admission и более позднюю позу pause публичного Motion 0.5', async () => {
+    const { value: publicValue } = await vi.importActual('@labpics/motion');
+    const svg = viewport(), effect = transition(), sampler = prepared(), frames = [];
+    effect.to = 0;
+    let now = 100;
+    const clock = vi.spyOn(performance, 'now').mockImplementation(() => now);
+    value.mockImplementation(publicValue);
+    let control;
+    try {
+      [control] = executeSymbolEffect(svg, effect, { preparedContour: sampler,
+        onProgress: progress => frames.push({ progress, paths: svg.parts.map(part => part.d) }) });
+      expect(frames).toEqual([{ progress: 0.37, paths: ['first-dot-pose-0.37', 'middle-dot-author', 'third-dot-pose-0.37'] }]);
+      now += 5;
+      control.pause();
+      const paused = 0.37 + (0 - 0.37) * 5 / 900;
+      expect(control.state).toBe('paused');
+      expect(frames.at(-1).progress).toBeCloseTo(paused, 15);
+      expect(frames.at(-1).progress).not.toBe(0.37);
+      expect(frames.at(-1).paths).toEqual([`first-dot-pose-${frames.at(-1).progress}`, 'middle-dot-author', `third-dot-pose-${frames.at(-1).progress}`]);
+      const snapshot = svg.parts.map(part => part.d), count = frames.length;
+      now += 50;
+      control.pause();
+      expect(frames).toHaveLength(count); expect(svg.parts.map(part => part.d)).toEqual(snapshot);
+      control.stop(); expect(await control.finished).toEqual({ status: 'stopped' });
+      expect(svg.parts[1].setAttribute).not.toHaveBeenCalled();
+    } finally { control?.stop(); clock.mockRestore(); }
   });
 
   it.each([0, 900])('завершает и освобождает clock при duration=%s', async duration => {
