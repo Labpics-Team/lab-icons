@@ -349,3 +349,102 @@ node scripts/bench/notification-payloads.mjs `
   E:/AgentWork/annulus-consumer-evidence-20261102/schema6-8fbb434-report.json `
   docs/research/notification-payloads-20261102.json
 ```
+
+## Продолжение gzip-поиска: records и printers
+
+На emitter `fd04561` оба notification module по-прежнему превышают gzip ceiling:
+`4584 > 4165` и `5463 > 5034` B. Дополнительные опыты не дали представления,
+которое закрывает обе границы. Production source, ceilings и package closure
+этим продолжением не изменены.
+
+[Единый отчёт](notification-records-20261102.json) закрепляет четыре masters,
+source/experiment digests, Node `24.15.0`, esbuild `0.28.1`, fflate `0.8.3`
+и прежний authenticated runtime receipt. [Скрипт](../../scripts/bench/notification-records.mjs)
+передаёт расходящиеся листья в fresh object-literal constructors. Только scalar
+параметры могут повторно использовать один slot; object параметры остаются
+раздельными. Exact UTF-16 slices берутся из independent static literals.
+Все эти варианты остаются исследовательскими.
+
+| Представление | notifications raw/gzip, B | unread raw/gzip, B |
+|---|---|---|
+| Parts constructor | 15653/4491 | 19317/5310 |
+| Static slices | 12411/4450 | 16641/5325 |
+| Slices + parts | 11557/4469 | 14543/5289 |
+| Named source materializer + syntax/identifier printer | 16523/4494 | 21387/5360 |
+| Terser current layout, ASCII, compressor 1 pass | 16606/4389 | 21262/5241 |
+| Лучший Terser combination для каждой семьи | 12554/4371 | 14426/5187 |
+
+Records и named-printer controls проверили exact `JSON.stringify` и пять
+селективных consumers на трёх runtime модулях. `regressions` в отчёте сравнивает
+их с текущим path-only emitter `fd04561`, а не с более ранним release baseline.
+Например, slices увеличили glyph gzip с `4812` до `4910` B и с `5649` до
+`5765` B; оба значения ещё ниже ранних `4937/5802`, но module ceiling остаётся
+RED. Parts constructor уведомлений дал caps `1512` против `1511` B.
+По одной этой разнице структурный дефект представления не заявляется.
+Native identity/freeze, cold import и full package для новых layouts не проверялись.
+
+Штатный syntax printer с named source materializer оставляет source вызов
+удаляемым. Однако syntax minification всё ещё раскрывает PURE slice-IIFE:
+на notification caps consumer получилось `9217/3772` вместо `4531/1511` B,
+а static consumer удержал обе формы. Этот конкретный layout отвергнут.
+
+У Terser `5.51.2` документированный
+[`format.preserve_annotations`](https://terser.org/docs/options/)
+сохранил PURE при compact print. Временная установка была выполнена вне repo
+с `--ignore-scripts`; новый product dependency не добавлен. Current layout
+сохранил четыре аннотации, но комбинации также оставили ceilings RED.
+Один и три compressor passes дали одинаковый output digest. Конечные
+перестановки независимых declarations и раннее размещение caps не дали
+существенной экономии. Primary docs и
+[ограничение сохранения annotation comments](https://github.com/terser/terser/issues/1690)
+проверены 2026-11-02. Regex reannotation и склейка строк вывода не используются.
+Для Terser выполнены только module measurements: количество PURE comments
+не удостоверяет semantic или tree-shaking qualification.
+
+Узкий `SourcePartProvenance(parentFile, fingerprint)` materializer проверен
+отдельно от общего constructor. Он допускает только точные ключи в порядке
+`kind, identity, file, sourceFingerprint, artifactFingerprint`, `source/declared`,
+file родительского источника и равные SHA256 fingerprints. Несовпадение сохраняет
+литерал. Каждый вызов создаёт свежий объект внутри прежнего PURE source
+materializer; родительский file разделяется как строка. Получились
+`15965/4502` и `20081/5341` raw/gzip B. Caps/static не выросли; glyph gzip
+уведомлений изменился `4812 → 4818`, unread — `5649 → 5622` B.
+Exact JSON/key-order прошёл. Terser ASCII print дал `15998/4404` и
+`19843/5225`; точное выделение `sha256:` prefix стало хуже, `4416/5236` gzip B.
+Ceilings остались RED, поэтому helper в production и cold-time проверка не добавлены.
+Whole-construction PURE соответствует границе effects из ответов сопровождающего
+esbuild [#2279](https://github.com/evanw/esbuild/issues/2279) и
+[#3189](https://github.com/evanw/esbuild/issues/3189).
+
+Отдельный deliberate falsifier удаляет только `parts[].provenance`.
+На настоящем runtime exact JSON consumers `glyph` и `both` обнаружили потерю.
+С Terser ASCII print такой output занял `15456/4132` и `18881/4760` B и прошёл
+обе размерные границы, но нарушил обязательный `GlyphPart.provenance` и
+`SourcePartProvenance` в `src/ir/glyph-types.ts`. Он помечен `candidate: false`.
+Этот контрпример отделяет сокращение данных от эквивалентного представления.
+
+Ceilings введены commit `f9a0897a89a525b6b14330bc02fe098ed3bd8e83`
+2026-11-01 22:44 +03 в `release/package-size-ratchet.json`. В его
+`semantics/author-anatomy.json` уведомления отсутствовали. Commit
+`c2f090921fd65befe4fe80babf09a154214de320` 2026-11-02 00:50 +03 добавил
+notification semantic mappings, anatomy receipts и ring gesture. Нынешний
+контракт требует сохранить эту способность и exact source values. История
+объясняет область прежнего baseline, но не разрешает удалить данные или поднять
+ceiling; невозможность любого другого encoding не заявляется.
+
+Воспроизведение из checkout с тем же emitter и pinned dependencies:
+Скрипту нужен authenticated receipt, указанный в отчёте. Его местоположение
+можно передать `--receipt <path>`; содержимое проверяется по закреплённому SHA256.
+
+```powershell
+node scripts/bench/notification-records.mjs records.json
+node scripts/bench/notification-records.mjs printers.json --printer
+npm install --prefix E:/AgentWork/notification-terser-probe-20261102 `
+  --ignore-scripts --no-audit --no-fund terser@5.51.2
+node scripts/bench/notification-records.mjs terser.json --terser-module-only `
+  --terser-entry E:/AgentWork/notification-terser-probe-20261102/node_modules/terser/main.js
+```
+
+Отрицательные результаты относятся к перечисленным семействам. Они не доказывают
+невозможность любого другого build-only представления и не закрывают исходный
+gzip/package gate.
