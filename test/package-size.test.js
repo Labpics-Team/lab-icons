@@ -9,6 +9,7 @@ import {
   measureArtifact,
   PACKAGE_SIZE_MEASUREMENT,
   PACKAGE_SIZE_ORACLE_VERSION,
+  parsePackageSizeRatchet,
   parsePackageSizeOracleVersion,
 } from '../scripts/check-package-size.js';
 
@@ -62,6 +63,20 @@ afterEach(() => {
 });
 
 describe('package size ratchet', () => {
+  it('канонический ratchet принимает emitted sections и отклоняет import specifiers', () => {
+    const source = JSON.parse(readFileSync(new URL('../release/package-size-ratchet.json', import.meta.url), 'utf8'));
+    const parsed = parsePackageSizeRatchet(source);
+    for (const icon of ['ellipsis-horizontal', 'ellipsis-vertical']) {
+      const file = `dist/symbols/${icon}.js`;
+      expect(parsed.artifacts[file].allowedModules).toEqual([]);
+      for (const specifier of [`../ir/symbol-data/${icon}.js`, '../ir/symbol-runtime.js']) {
+        const invalid = structuredClone(source);
+        invalid.artifacts[file].allowedModules = [specifier];
+        expect(() => parsePackageSizeRatchet(invalid)).toThrow(`${file}.allowedModules содержит невалидное значение`);
+      }
+    }
+  });
+
   it('фиксирует измеренный размер и закрытый import graph лёгкого recipes entry', () => {
     const { root, file } = fixture();
     const result = checkPackageSize({ root });

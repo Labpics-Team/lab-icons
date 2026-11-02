@@ -10479,10 +10479,7 @@
    "baselineGzipBytes": 2920,
    "maxBytes": 18401,
    "maxGzipBytes": 2920,
-   "allowedModules": [
-    "../ir/symbol-data/ellipsis-horizontal.js",
-    "../ir/symbol-runtime.js"
-   ],
+   "allowedModules": [],
    "forbiddenNeedles": [
     "sourceMappingURL",
     "semantics/catalog.json",
@@ -10506,10 +10503,7 @@
    "baselineGzipBytes": 2349,
    "maxBytes": 13144,
    "maxGzipBytes": 2349,
-   "allowedModules": [
-    "../ir/symbol-data/ellipsis-vertical.js",
-    "../ir/symbol-runtime.js"
-   ],
+   "allowedModules": [],
    "forbiddenNeedles": [
     "sourceMappingURL",
     "semantics/catalog.json",
