@@ -7431,6 +7431,7 @@
    "maxGzipBytes": 3817,
    "allowedModules": [
     "src/core/motion-sampler.js",
+    "src/motion/effect-projection.ts",
     "src/motion/index.ts"
    ],
    "forbiddenNeedles": [

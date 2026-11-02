@@ -48,23 +48,33 @@ function freezeTree(value) {
 }
 
 /**
- * Один закон двух циклических команд. Он не разделяет соединённые контуры
- * на предполагаемые части: независимые стрелки часов требуют другой анатомии.
+ * Один оборот вокруг объявленного центра. Elapsed-time выбирает отдельную
+ * стрелку и сохраняет container части; соединённые стрелки не разделяются.
  */
 function clockwiseCycle(icon, variant, declaration, parts) {
-  fields(declaration, ['law', 'partId'], `${icon}/${variant}.gesture`);
+  const elapsed = Object.hasOwn(declaration, 'purpose');
+  fields(declaration, ['law', 'partId', ...(elapsed ? ['purpose'] : [])], `${icon}/${variant}.gesture`);
   if (declaration.law !== 'cycle.clockwise') {
     refuse('LAW_UNSUPPORTED', `${icon}/${variant}: закон ${declaration.law} не объявлен`);
   }
+  if (elapsed && declaration.purpose !== 'elapsed-time') {
+    refuse('LAW_SEMANTICS_UNSUPPORTED', `${icon}/${variant}: cycle.clockwise поддерживает явно объявленный elapsed-time`);
+  }
   const part = parts.find(item => item.id === declaration.partId);
-  if (!part || parts.length !== 1 || part.role !== 'control' ||
-      part.topologySignature.includes('|') || !part.topologySignature.endsWith('Z')) {
-    refuse('LAW_TOPOLOGY_UNSUPPORTED', `${icon}/${variant}: cycle.clockwise требует одну целую замкнутую управляющую часть`);
+  if (!part || part.role !== 'control' ||
+      part.topologySignature.includes('|') || !part.topologySignature.endsWith('Z') ||
+      (elapsed ? parts.length < 2 || part.fillRule !== 'nonzero' ||
+        parts.some(item => item.id !== part.id && item.role !== 'container') : parts.length !== 1)) {
+    refuse('LAW_TOPOLOGY_UNSUPPORTED', elapsed
+      ? `${icon}/${variant}: cycle.clockwise требует отдельную закрытую control часть и неподвижные container части`
+      : `${icon}/${variant}: cycle.clockwise требует одну целую замкнутую управляющую часть`);
   }
   const gesture = {
-    id: `${icon}.cycle`,
+    id: `${icon}.${elapsed ? 'advance' : 'cycle'}`,
     kind: 'cycle',
-    meaning: 'Один оборот команды обновления по часовой стрелке; промежуточную позу можно развернуть или продолжить.',
+    meaning: elapsed
+      ? 'Один интервал таймера: отдельная авторская стрелка делает оборот по часовой стрелке из исходной позы; циферблат остаётся неподвижным.'
+      : 'Один оборот команды обновления по часовой стрелке; промежуточную позу можно развернуть или продолжить.',
     partIds: [part.id],
     progress: 'normalized-0-to-1',
     tracks: [{ partId: part.id, kind: 'rotate', anchor: [...part.anchor],
@@ -248,7 +258,9 @@ function compileLaw(icon, variant, declaration, parts, source) {
  * адресуют только этот закреплённый экспорт; наружу выходят стабильные part.id.
  * Весь документ проверяется до выдачи проекции, без частичного admission.
  */
-function compileAuthorAnatomyResult(baseline, document, grid) {
+function compileAuthorAnatomyResult(baseline, document, grid, options) {
+  if (!record(options) || Object.keys(options).some(key => key !== 'scope') ||
+      !['source', 'motion'].includes(options.scope)) refuse('ANNOTATION_INVALID', 'scope анатомии: source или motion');
   fields(document, ['schemaVersion', 'source', 'icons'], 'document');
   fields(document.source, ['fileKey', 'version'], 'source');
   if (document.schemaVersion !== 1 || !record(document.icons)) {
@@ -275,7 +287,12 @@ function compileAuthorAnatomyResult(baseline, document, grid) {
       fields(declaration, ['masterSha256', 'pathFingerprintSha256', 'parts', 'gesture',
         ...(Object.hasOwn(declaration, 'composition') ? ['composition'] : []),
         ...(Object.hasOwn(declaration, 'variation') ? ['variation'] : []),
+        ...(Object.hasOwn(declaration, 'scope') ? ['scope'] : []),
         ...(Object.hasOwn(declaration, 'contentVariation') ? ['contentVariation'] : [])], label);
+      if (Object.hasOwn(declaration, 'scope') && (declaration.scope !== 'motion' ||
+          declaration.variation || declaration.contentVariation || declaration.composition)) {
+        refuse('ANNOTATION_INVALID', `${label}: motion scope не меняет геометрический source target`);
+      }
       const source = baseline.icons[icon][variant];
       if (!HASH.test(declaration.masterSha256) || !HASH.test(declaration.pathFingerprintSha256) ||
           declaration.masterSha256 !== source.author.masterSha256 ||
@@ -355,6 +372,7 @@ function compileAuthorAnatomyResult(baseline, document, grid) {
         schemaVersion: document.schemaVersion, source: document.source, icon, variant,
         declaration: legacyDeclaration, gestures, ...(variation && { variation }),
       })).digest('hex');
+      if (declaration.scope === 'motion' && options.scope === 'source') continue;
       output[label] = {
         ...source.sourceContract,
         parts,
@@ -371,11 +389,11 @@ function compileAuthorAnatomyResult(baseline, document, grid) {
 }
 
 /** Существующие build consumers сохраняют прежнюю форму source contracts. */
-export function compileAuthorAnatomy(baseline, document, grid = defaultGrid) {
-  return compileAuthorAnatomyResult(baseline, document, grid).contracts;
+export function compileAuthorAnatomy(baseline, document, grid = defaultGrid, options = { scope: 'source' }) {
+  return compileAuthorAnatomyResult(baseline, document, grid, options).contracts;
 }
 
 /** Полный proof доступен build tooling без сериализации его в consumer runtime. */
-export function compileAuthorAnatomyWithEvidence(baseline, document, grid = defaultGrid) {
-  return compileAuthorAnatomyResult(baseline, document, grid);
+export function compileAuthorAnatomyWithEvidence(baseline, document, grid = defaultGrid, options = { scope: 'source' }) {
+  return compileAuthorAnatomyResult(baseline, document, grid, options);
 }

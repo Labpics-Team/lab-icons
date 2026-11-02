@@ -25,7 +25,7 @@ export function compiledAuthorSymbolPayload(icon, sources, compiler) {
 }
 
 /** Production projection выбирает имена; никакой ручной census возможностей. */
-export async function authoredSymbolPayloads(names) {
+export async function authoredSymbolPayloads(names, options = { scope: 'source' }) {
   const root = fileURLToPath(new URL('../..', import.meta.url));
   const read = path => JSON.parse(readFileSync(new URL(`../../${path}`, import.meta.url), 'utf8'));
   const captured = read('semantics/figma-baseline.json'), annotations = read('semantics/author-anatomy.json');
@@ -33,7 +33,7 @@ export async function authoredSymbolPayloads(names) {
     icons: Object.fromEntries(names.map(icon => [icon, captured.icons[icon]])) };
   const author = loadAuthorBaseline(root, { manifest }), grid = read('semantics/grid.json');
   const contracts = compileAuthorAnatomy(author, { ...annotations,
-    icons: Object.fromEntries(names.filter(icon => Object.hasOwn(annotations.icons, icon)).map(icon => [icon, annotations.icons[icon]])) }, grid);
+      icons: Object.fromEntries(names.filter(icon => Object.hasOwn(annotations.icons, icon)).map(icon => [icon, annotations.icons[icon]])) }, grid, options);
   const sources = Object.fromEntries(names.map(icon => [icon, Object.fromEntries(['outline', 'filled'].map(variant =>
     [variant, { ...author.icons[icon][variant], sourceContract: contracts[`${icon}/${variant}`] ?? author.icons[icon][variant].sourceContract }]))]));
   const bundle = await build({ stdin: { contents: 'export { createGlyphCompiler } from "./src/ir/compiler.ts";', resolveDir: root },

@@ -15,6 +15,11 @@ const stableJSON = value => JSON.stringify(value, (_, item) =>
     ? Object.fromEntries(Object.keys(item).sort().map(key => [key, item[key]]))
     : item);
 
+/** Одна identity геометрии для intake и компактных target projections. */
+export function authorPathFingerprint(svg) {
+  return sha256(stableJSON(authorPathEntries(svg)));
+}
+
 export class AuthorBaselineError extends Error {
   constructor(code, message, options) {
     super(`author-baseline: ${message}`, options);
@@ -102,7 +107,7 @@ export function loadAuthorBaseline(repoRoot, { manifest } = {}) {
       if (sha256(normalizedSvg) !== item.normalizedSource.sha256) {
         refuse('NORMALIZED_HASH_MISMATCH', `${name}/${variant}: normalized SHA256 не совпал с receipt`);
       }
-      const fingerprint = sha256(stableJSON(authorPathEntries(normalizedSvg)));
+      const fingerprint = authorPathFingerprint(normalizedSvg);
       if (fingerprint !== item.normalizedSource.pathFingerprintSha256) {
         refuse('PATH_FINGERPRINT_MISMATCH', `${name}/${variant}: path order/fill-rule fingerprint не совпал`);
       }

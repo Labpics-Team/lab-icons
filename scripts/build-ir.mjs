@@ -24,9 +24,10 @@ import { authorStateLawNames, compileAuthorStateGroups, renderStateGroupModule, 
   stateRuntimeTargets, stateRuntimeBuildOptions } from './lib/author-state-groups.js';
 import { authorStateVariationGroupNames, compileAuthorStateVariations, renderStateVariationModule,
   stateVariationDeclaration } from './lib/author-state-variations.js';
+import { authorMotionSymbolNames, compileAuthorMotionSymbols, renderAuthorMotionModule, authorMotionModuleDeclaration } from './lib/author-motion.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const TARGETS = ['ir', 'symbols', 'variations', 'content-variations', 'motion', 'lottie', 'authoring', 'states', 'state-variations'];
+const TARGETS = ['ir', 'symbols', 'variations', 'content-variations', 'motion', 'lottie', 'authoring', 'states', 'state-variations', 'gestures'];
 const REQUIRED_DECLARATIONS = ['author-annulus-types.d.ts', 'author-content-types.d.ts', 'author-capsule-types.d.ts', 'author-catalog.generated.d.ts', 'author-provenance.d.ts', 'author-source.d.ts', 'authored-variation.d.ts', 'candidates.d.ts', 'catalog.generated.d.ts', 'compiler.d.ts', 'glyph-types.d.ts', 'index.d.ts', 'paint-types.d.ts', 'recipes.d.ts', 'render.d.ts', 'request.d.ts'];
 const read = (root, file) => JSON.parse(readFileSync(join(root, file), 'utf8'));
 
@@ -117,6 +118,7 @@ async function compileIrTargets({ root, staging }) {
     const stateVariationNames = authorStateVariationGroupNames(stateSpec, authorSpec);
     const contentVariationNames = authorContentVariationIconNames(authorSpec);
     const variationLaws = authorVariationLawNames(authorSpec);
+    const motionNames = authorMotionSymbolNames(authorSpec);
     for (const name of TARGETS) mkdirSync(join(staging, name));
     mkdirSync(join(staging, 'ir/symbol-data'));
     const bundles = await Promise.allSettled([
@@ -139,6 +141,7 @@ async function compileIrTargets({ root, staging }) {
       bundle(root, staging, 'src/authoring/index.ts', 'authoring/index.js'),
       bundle(root, staging, 'src/ir/candidates.ts', 'ir/candidates.js', ['./index.js']),
       bundle(root, staging, 'src/motion/index.ts', 'motion/index.js', ['../ir/contour-runtime.js']),
+      ...(motionNames.length ? [bundle(root, staging, 'src/motion/gesture-runtime.ts', 'ir/gesture-runtime.js')] : []),
       bundle(root, staging, 'src/lottie/runtime.ts', 'ir/lottie-runtime.js', ['../motion/index.js']),
       ...stateRuntimeTargets(stateLaws).map(target => bundle(root, staging, target.entry, `ir/${target.runtime}`)),
       // Serializer остаётся build-only: runtime групп потребляет проверенные строки.
@@ -154,6 +157,10 @@ async function compileIrTargets({ root, staging }) {
     writeFileSync(join(staging, 'motion/index.d.ts'), readFileSync(join(declarations, 'motion/index.d.ts'), 'utf8')
       .replaceAll('../states/contour-types.js', '../ir/contour-state-types.js'));
     copyFileSync(join(declarations, 'lottie/types.d.ts'), join(staging, 'ir/lottie-types.d.ts'));
+    if (motionNames.length) {
+      writeFileSync(join(staging, 'ir/gesture-types.d.ts'), readFileSync(join(declarations, 'motion/gesture-types.d.ts'), 'utf8')
+        .replaceAll('./index.js', '../motion/index.js').replaceAll('../ir/author-provenance.js', './author-provenance.js'));
+    }
     if (stateLaws.includes('source.replace')) {
       writeFileSync(join(staging, 'ir/source-state-types.d.ts'), readFileSync(join(declarations, 'states/source-types.d.ts'), 'utf8')
         .replaceAll('./types.js', './state-types.js'));
@@ -216,6 +223,12 @@ async function compileIrTargets({ root, staging }) {
       writeFileSync(join(staging, 'lottie', `${icon}.d.ts`), lottieSymbolDeclaration());
     }
     for (const target of sourcePacketRuntimeTargets(compiledModules)) await bundle(root, staging, target.entry, `ir/${target.runtime}`);
+    const { compileSymbolEffect } = await import(pathToFileURL(join(staging, 'motion/index.js')).href);
+    const motionSymbols = compileAuthorMotionSymbols(author, authorSpec, { grid, catalog, createGlyphCompiler, compileSymbolEffect });
+    for (const [icon, payload] of Object.entries(motionSymbols)) {
+      writeFileSync(join(staging, 'gestures', `${icon}.js`), renderAuthorMotionModule(payload));
+      writeFileSync(join(staging, 'gestures', `${icon}.d.ts`), authorMotionModuleDeclaration(payload));
+    }
     const assembly = await import(pathToFileURL(join(declarations, 'svg-assembly.mjs')).href);
     const stateGroups = compileAuthorStateGroups(author, stateSpec, { compiler, grid, ...assembly });
     for (const [name, payload] of Object.entries(stateGroups)) {

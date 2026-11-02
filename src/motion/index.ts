@@ -2,6 +2,7 @@ import type { GlyphCapabilities, GlyphIR, MotionGestureOpacityTrackContract, Mot
 import { sampleOpacityTrack, sampleTranslationTrack, validateMotionGesture } from '../core/motion-sampler.js';
 import type { PreparedContourStateEffect, SymbolContourStateEffect } from '../states/contour-types.js';
 import { prepareContourStateEffect as prepareContourPacket } from '../ir/contour-runtime.js';
+import { parseEffectRequest, projectRotationEffect } from './effect-projection.js';
 
 export type { SymbolContourStateEffect, PreparedContourStateEffect, ContourStatePoseResult } from '../states/contour-types.js';
 /** Подготовка контура без каталога и часов. */
@@ -142,17 +143,9 @@ export function compileSymbolEffect(
   gestureId: string,
   request: SymbolEffectRequest,
 ): SymbolEffectResult {
-  if (!request || typeof request !== 'object' || Array.isArray(request) ||
-      Object.keys(request).some((key) => !['duration', 'from', 'to', 'reducedMotion'].includes(key)) ||
-      !Number.isFinite(request.duration) || request.duration < 0 ||
-      (request.reducedMotion !== undefined && typeof request.reducedMotion !== 'boolean')) {
-    return refuse('INVALID_REQUEST', 'Нужны конечная длительность ≥0 и поддержанные параметры эффекта.');
-  }
-  const from = request.from ?? 0;
-  const to = request.to ?? 1;
-  if (![from, to].every((value) => Number.isFinite(value) && value >= 0 && value <= 1)) {
-    return refuse('INVALID_REQUEST', 'Прогресс from и to обязан принадлежать [0,1].');
-  }
+  const parsed = parseEffectRequest(request);
+  if (!parsed.ok) return parsed;
+  const { from, to } = parsed;
   if (glyph.icon !== capabilities.icon || glyph.variant !== capabilities.variant) {
     return refuse('CAPABILITY_MISMATCH', 'Возможности относятся к другому символу или варианту.');
   }
@@ -217,7 +210,7 @@ export function compileSymbolEffect(
     if (glyph.composition.kind !== 'layers') {
       return refuse('COMPOSITION_NOT_ADDRESSABLE', 'Opacity-стадии требуют независимых layers авторской композиции.');
     }
-    const duration = request.reducedMotion || from === to ? 0 : request.duration;
+    const duration = parsed.duration;
     const tracks = gesture.tracks as readonly MotionGestureOpacityTrackContract[];
     const animated = new Set(tracks.map(track => track.partId));
     const stages = tracks.flatMap(track => opacityStages(track, from, to, duration))
@@ -236,7 +229,7 @@ export function compileSymbolEffect(
     if (glyph.composition.kind !== 'layers') {
       return refuse('COMPOSITION_NOT_ADDRESSABLE', 'Translation-стадии требуют независимых layers авторской композиции.');
     }
-    const duration = request.reducedMotion || from === to ? 0 : request.duration;
+    const duration = parsed.duration;
     const tracks = gesture.tracks as readonly MotionGestureTranslationTrackContract[];
     const animated = new Set(tracks.map(track => track.partId));
     const stages = tracks.flatMap(track => translationStages(track, from, to, duration))
@@ -255,40 +248,8 @@ export function compileSymbolEffect(
     return refuse('INVALID_GESTURE', 'Один эффект обязан использовать одну поддержанную систему каналов.');
   }
   const animatedPartIds = new Set(gesture.tracks.map((track) => track.partId));
-  const targets = gesture.tracks.map((track): SymbolEffectTarget => Object.freeze({
-    partId: track.partId,
-    rotation: Object.freeze({
-      from: track.from + (track.to - track.from) * from,
-      to: track.from + (track.to - track.from) * to,
-      unit: 'degrees',
-    }),
-    // Проценты относятся к viewBox, включая ненулевое начало и масштаб SVG.
-    style: Object.freeze({
-      transformBox: 'view-box',
-      transformOrigin: `${track.anchor[0] * 100}% ${track.anchor[1] * 100}%`,
-    }),
-    keyframes: Object.freeze([
-      Object.freeze({ offset: 0, transform: `rotate(${track.from + (track.to - track.from) * from}deg)` }),
-      Object.freeze({ offset: 1, transform: `rotate(${track.from + (track.to - track.from) * to}deg)` }),
-    ] as const),
-  }));
-  return Object.freeze({
-    ok: true,
-    effect: Object.freeze({
-      version: 1,
-      icon: glyph.icon,
-      variant: glyph.variant,
-      gesture: gesture.id,
-      from,
-      to,
-      targets: Object.freeze(targets),
-      unchangedPartIds: Object.freeze(glyph.parts.filter((part) => !animatedPartIds.has(part.id)).map((part) => part.id)),
-      viewport: Object.freeze({ overflow: 'visible' }),
-      options: Object.freeze({
-        duration: request.reducedMotion || from === to ? 0 : request.duration,
-        easing: 'linear',
-        fill: 'both',
-      }),
-    }),
-  });
+  return Object.freeze({ ok: true, effect: projectRotationEffect(glyph.icon, glyph.variant, {
+    id: gesture.id, targets: gesture.tracks,
+    unchangedPartIds: glyph.parts.filter(part => !animatedPartIds.has(part.id)).map(part => part.id),
+  }, parsed) });
 }

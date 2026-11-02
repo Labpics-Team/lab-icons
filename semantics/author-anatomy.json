@@ -5,6 +5,18 @@
     "version": "2416636003859748575"
   },
   "icons": {
+    "timer": {
+      "outline": {
+        "scope": "motion",
+        "masterSha256": "dfb433f25a8689d2a3bdd1a4f5da8bc09466efc824fdf1ed5d71da8dd5626a6a",
+        "pathFingerprintSha256": "4aac93e5a2b47f4181007f4a3e4c915037f1761e7091691b3f87f322b3304aed",
+        "parts": [
+          { "pathIndex": 0, "id": "timer-dial", "role": "container" },
+          { "pathIndex": 1, "id": "timer-hand", "role": "control", "anchor": [0.5, 0.5], "anchorMeaning": "canvas-center" }
+        ],
+        "gesture": { "law": "cycle.clockwise", "purpose": "elapsed-time", "partId": "timer-hand" }
+      }
+    },
     "mic": {
       "outline": {
         "masterSha256": "c526c734a2225a29ec6e71f76d860546f5bccf8475bad6e1842915a75f2a5f9c",

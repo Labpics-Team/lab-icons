@@ -7,6 +7,7 @@ import { authorIconNames, renderAuthorTypeProjection } from './lib/author-baseli
 import { authorStateGroupNames, authorStateLawNames } from './lib/author-state-groups.js';
 import { authorVariationIconNames, authorVariationLawNames } from './lib/author-variation.js';
 import { authorStateVariationGroupNames } from './lib/author-state-variations.js';
+import { authorMotionSymbolNames } from './lib/author-motion.js';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const read = path => JSON.parse(readFileSync(join(root, path), 'utf8'));
@@ -19,7 +20,7 @@ const variationNames = authorVariationIconNames(authorSpec);
 const payloads = await authoredSymbolPayloads(names);
 const modules = Object.values(payloads).map(renderSymbolModules);
 const contract = symbolReleaseProjection(read('release/contract.json'), names, groups, variationNames, authorVariationLawNames(authorSpec),
-  modules, authorStateVariationGroupNames(stateSpec, authorSpec), authorContentVariationIconNames(authorSpec), authorStateLawNames(stateSpec));
+  modules, authorStateVariationGroupNames(stateSpec, authorSpec), authorContentVariationIconNames(authorSpec), authorStateLawNames(stateSpec), authorMotionSymbolNames(authorSpec));
 writeFileSync(join(root, 'src/ir/author-catalog.generated.ts'), renderAuthorTypeProjection(author));
 writeFileSync(join(root, 'release/contract.json'), `${JSON.stringify(contract, null, 1)}\n`);
 const pkg = read('package.json');

@@ -533,6 +533,21 @@
     "glyphCapabilities",
     "outline"
   ],
+  "./gestures/refresh": [
+    "compileMotionEffect",
+    "motionCapabilities",
+    "renderMotionSvg"
+  ],
+  "./gestures/reload": [
+    "compileMotionEffect",
+    "motionCapabilities",
+    "renderMotionSvg"
+  ],
+  "./gestures/timer": [
+    "compileMotionEffect",
+    "motionCapabilities",
+    "renderMotionSvg"
+  ],
   "./ir": [
     "GlyphModelError",
     "axisContracts",

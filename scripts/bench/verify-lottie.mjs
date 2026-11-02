@@ -25,7 +25,9 @@ export async function verifyLottieConsumer({ browser, prepared, origin, outdir, 
   const cases = names.flatMap(name => ['outline', 'filled'].flatMap(variant => {
     const master = manifest.icons[name][variant], raw = readFileSync(join(prepared.source, master.master));
     if (sha256(raw) !== master.sha256) throw new Error(`${name}/${variant}: raw master SHA drift`);
-    const annotation = annotations.icons[name]?.[variant];
+    const declared = annotations.icons[name]?.[variant];
+    // Motion-only anatomy не назначает жест default Lottie target.
+    const annotation = declared?.scope === 'motion' ? undefined : declared;
     if (annotation && annotation.masterSha256 !== master.sha256) throw new Error(`${name}/${variant}: raw annotation SHA drift`);
     const common = { name, rawSvg: raw.toString('utf8'), masterSha256: master.sha256, annotation };
     const gestures = referenceLottieGestures(name, annotation);
