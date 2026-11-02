@@ -153,6 +153,52 @@
           "role": "container"
         }
       ]
+    },
+    "ellipsis-orientation-outline": {
+      "law": "dots.orient",
+      "defaultState": "horizontal",
+      "partIds": [
+        "dot-leading",
+        "dot-middle",
+        "dot-trailing"
+      ],
+      "states": {
+        "horizontal": {
+          "icon": "ellipsis-horizontal",
+          "variant": "outline",
+          "masterSha256": "2d809cc6e544a60ea8d97da5c3159b780263fd9637dba833a009a85c3cc6c681",
+          "pathFingerprintSha256": "dc3453fcadbb704334e60205dfb26bf5fce12ba527079981d8900a535f89da20"
+        },
+        "vertical": {
+          "icon": "ellipsis-vertical",
+          "variant": "outline",
+          "masterSha256": "c488b01da737ddf19adf1336b05a14c0c246d69d3456aea7e1c9dfe25e3ef9ed",
+          "pathFingerprintSha256": "79be5246b307c58af54f6cef91ee98a81c55e4ece84187b4d46268a7dd4200fb"
+        }
+      }
+    },
+    "ellipsis-orientation-filled": {
+      "law": "dots.orient",
+      "defaultState": "horizontal",
+      "partIds": [
+        "dot-leading",
+        "dot-middle",
+        "dot-trailing"
+      ],
+      "states": {
+        "horizontal": {
+          "icon": "ellipsis-horizontal",
+          "variant": "filled",
+          "masterSha256": "117152d7d2fa2b9ffc41f864d1def693a238ffd50645949ecf11e49aa850142e",
+          "pathFingerprintSha256": "486b5ab9d752e8a82054c486dcf2b1db48c284878636c6ea079ea043c8797a2e"
+        },
+        "vertical": {
+          "icon": "ellipsis-vertical",
+          "variant": "filled",
+          "masterSha256": "a80a27a7e4d942c07bcd2f8788d88020ab67559113fde5083c10ab7461ba98ba",
+          "pathFingerprintSha256": "fbb1d6c9b723255c4774cb04c73af98436c30204b95f05ca7bd9feb82a384b32"
+        }
+      }
     }
   }
 }

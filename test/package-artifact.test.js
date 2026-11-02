@@ -83,13 +83,15 @@ function validPackage() {
   write(root, 'dist/ir/request.js', 'export const fixture = 1;\n');
   write(root, 'dist/ir/request.d.ts', "export type GlyphModelErrorCode = 'CANDIDATES_REQUIRED';\n");
   write(root, 'dist/ir/symbol-runtime.js', 'import "./request.js"; export const fixture = 1;\n');
+  write(root, 'dist/ir/contour-runtime.js', 'export const fixture = 1;\n');
+  write(root, 'dist/ir/state-types.d.ts', 'export interface StateRefusal { readonly ok: false }\n');
   write(root, 'dist/ir/render.js', 'export const fixture = 1;\n');
   write(root, 'dist/ir/render.d.ts', "import type { GlyphIR } from './compiler.js';\nexport declare function renderGlyphSvg(glyph: GlyphIR): string;\n");
   write(root, 'dist/authoring/index.js', 'export const compileDesignSpec = () => ({});\n');
   write(root, 'dist/authoring/index.d.ts', "export { compileDesignSpec } from './design-spec.js';\n");
   write(root, 'dist/authoring/design-spec.d.ts', "import type { GlyphIR } from '../ir/compiler.js';\nexport declare function compileDesignSpec(spec: unknown): GlyphIR;\n");
-  write(root, 'dist/motion/index.js', 'export const fixture = 1;\n');
-  write(root, 'dist/motion/index.d.ts', 'export declare const fixture: number;\n');
+  write(root, 'dist/motion/index.js', 'import "../ir/contour-runtime.js"; export const fixture = 1;\n');
+  write(root, 'dist/motion/index.d.ts', "import type { StateRefusal } from '../ir/state-types.js'; export declare const fixture: StateRefusal;\n");
   write(root, 'dist/ir/lottie-runtime.js', 'import "../motion/index.js"; export const createLottieSymbol = () => ({});\n');
   write(root, 'dist/ir/lottie-types.d.ts', readFileSync(new URL('../src/lottie/types.ts', import.meta.url), 'utf8'));
   write(root, 'dist/symbols/fixture.js', 'import "../ir/symbol-runtime.js"; export const glyph = () => ({}); export const glyphCapabilities = () => ({});\n');

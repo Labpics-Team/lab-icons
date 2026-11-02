@@ -73,16 +73,19 @@ export function authorPackageExpectations(baseline, annotations) {
 }
 
 /** Оба type consumers получают весь semantic census, а не один выбранный модуль. */
-function stateTypeConsumerSource(expected, { dynamicImport = false } = {}) {
+export function stateTypeConsumerSource(expected, { dynamicImport = false } = {}) {
   const entries = Object.entries(expected).sort(([left], [right]) => left.localeCompare(right));
   const allStates = [...new Set(entries.flatMap(([, group]) => group.states.map(state => state.id)))];
-  return entries.map(([name, group], index) => {
+  const sampler = entries.some(([, group]) => group.law === 'dots.orient')
+    ? (dynamicImport ? "const { prepareContourStateEffect } = await import('@labpics/icons/motion');\n" : "import { prepareContourStateEffect } from '@labpics/icons/motion';\n") : '';
+  return sampler + entries.map(([name, group], index) => {
     const module = `stateGroup${index}`;
     const stateType = `State${index}`;
     const path = JSON.stringify(`@labpics/icons/states/${name}`);
     const states = group.states.map(state => state.id);
     const state = JSON.stringify(group.defaultState);
     const foreign = allStates.find(id => !states.includes(id));
+    const contour = group.law === 'dots.orient';
     return [
       dynamicImport ? `const ${module} = await import(${path});` : `import * as ${module} from ${path};`,
       `type ${stateType} = import(${path}).State;`,
@@ -90,16 +93,32 @@ function stateTypeConsumerSource(expected, { dynamicImport = false } = {}) {
       `const defaultSvg${index} = ${module}.render();`,
       `const defaultMount${index} = ${module}.renderStateSvg();`,
       `const declaredStates${index}: readonly ${stateType}[] = ${JSON.stringify(states)};`,
-      `const exactState${index}: ${states.map(id => JSON.stringify(id)).join(' | ')} = ${module}.stateCapabilities().states[0].id;`,
+      `const exactState${index}: ${states.map(id => JSON.stringify(id)).join(' | ')} = ${module}.stateCapabilities().states[0]!.id;`,
       `for (const state of declaredStates${index}) {`,
       `  const svg = ${module}.render(state);`,
       `  const mounted = ${module}.renderStateSvg(state);`,
       `  const effect = ${module}.compileStateEffect(state, { duration: 300, reducedMotion: true });`,
       `  const exported = ${module}.exportStateTransition(state, { duration: 300, format: 'web-effect' });`,
       `  if (svg.ok) { const markup: string = svg.svg; void markup; }`,
-      `  if (effect.ok) { const property: 'opacity' = effect.effect.stages[0].property; void property; }`,
+      ...(contour ? [
+        `  if (effect.ok) {`,
+        `    const property: 'd' = effect.effect.targets[0]!.property;`,
+        `    const prepared = prepareContourStateEffect(effect.effect);`,
+        `    if (prepared.ok) { const pose = prepared.sample(.37); if (pose.ok) { const d: string = pose.parts[0]!.d; void d; } }`,
+        `    // @ts-expect-error контурный переход не получает opacity stages`,
+        `    const stages = effect.effect.stages;`,
+        `    void [property, prepared, stages];`,
+        `  }`,
+      ] : [`  if (effect.ok) { const property: 'opacity' = effect.effect.stages[0]!.property; void property; }`]),
       `  void [mounted, exported];`,
       `}`,
+      ...(contour ? [
+        `${module}.compileStateEffect(defaultState${index}, { duration: 300, from: .37, variation: { dotScale: 1, spacingScale: 1 } });`,
+        `const rounding${index}: string = ${module}.stateCapabilities().proof.roundingNormUpper.numerator;`,
+        `// @ts-expect-error variation не принимает координаты или произвольный radius`,
+        `${module}.render(defaultState${index}, { variation: { radius: 1 } });`,
+        `void rounding${index};`,
+      ] : []),
       // Filled — допустимый запрос с typed runtime refusal, не ошибка типов.
       `const filled${index} = ${module}.render(defaultState${index}, { variant: 'filled' });`,
       `if (!filled${index}.ok) { const code: string = filled${index}.reason.code; void code; }`,
@@ -117,7 +136,7 @@ function stateTypeConsumerSource(expected, { dynamicImport = false } = {}) {
       `${module}.renderStateSvg(defaultState${index}, null);`,
       `// @ts-expect-error variant имеет конечный публичный domain`,
       `${module}.render(defaultState${index}, { variant: 'weight' });`,
-      `// @ts-expect-error takeover получает current opacity от executor, from не объявлен`,
+      contour ? `// @ts-expect-error from — численное положение, имя состояния не принимается` : `// @ts-expect-error takeover получает current opacity от executor, from не объявлен`,
       `${module}.compileStateEffect(defaultState${index}, { duration: 300, from: ${state} });`,
       `// @ts-expect-error effect duration принимает число`,
       `${module}.compileStateEffect(defaultState${index}, { duration: '300' });`,
@@ -537,7 +556,9 @@ export function checkPackageArtifact({
     const authorBaseline = loadAuthorBaseline(cleanSource);
     const authorExpected = authorPackageExpectations(authorBaseline, JSON.parse(readFileSync(join(cleanSource, 'semantics/author-anatomy.json'), 'utf8')));
     writeFileSync(join(consumer, 'author-expected.json'), `${JSON.stringify(authorExpected)}\n`, 'utf8');
-    const stateExpected = statePackageExpectations(authorBaseline, JSON.parse(readFileSync(join(cleanSource, 'semantics/author-state-groups.json'), 'utf8')));
+    const stateExpected = statePackageExpectations(authorBaseline,
+      JSON.parse(readFileSync(join(cleanSource, 'semantics/author-state-groups.json'), 'utf8')),
+      JSON.parse(readFileSync(join(cleanSource, 'semantics/grid.json'), 'utf8')));
     writeFileSync(join(consumer, 'state-expected.json'), `${JSON.stringify(stateExpected)}\n`, 'utf8');
 
     writeFileSync(
