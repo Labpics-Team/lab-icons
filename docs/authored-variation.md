@@ -120,9 +120,27 @@ console.log(capability.law, capability.domain);
 не обещает улучшенную оптику. [Геометрическое основание](research/author-annulus-20261102.md)
 содержит источник, контрпримеры и пределы доказательства.
 
-Закон не добавляет жест, morph или Lottie-экспорт. Observatory показывает текущий
-SVG, наложение и разницу. Групповые переходы `states/status-circle` относятся
-к авторскому default; изменённое обрамление не подменяется им при анимации.
+Закон сохраняет существующие opacity-жесты объявленных частей. Например,
+`checkmark-circle.presence` меняет видимость той же отметки при выбранной толщине
+обрамления; оболочка остаётся неподвижной. `targets.webEffect` сообщает
+`existing-part-gestures`, а доступные жесты перечислены в `motion.gestures`.
+У символа без объявленного жеста запрос получает `SEMANTIC_MOTION_UNAVAILABLE`.
+Повороты и переносы изменённой геометрии остаются неподдержанными.
+
+```ts
+import { glyph, glyphCapabilities } from '@labpics/icons/variations/checkmark-circle';
+import { compileSymbolEffect } from '@labpics/icons/motion';
+
+const symbol = glyph({ variation: { enclosureEmphasis: 1.2 } });
+const result = compileSymbolEffect(symbol, glyphCapabilities(), 'checkmark-circle.presence', {
+  duration: 240, from: 0, to: 1,
+});
+if (!result.ok) throw new Error(result.reason.code);
+```
+
+Новый жест, morph или Lottie-экспорт этим не создаётся. Observatory показывает
+текущий SVG, наложение и разницу. Групповые переходы `states/status-circle`
+относятся к авторскому default; изменённое обрамление не подменяется им при анимации.
 
 ## Поворот многоточия
 

@@ -32,6 +32,7 @@ it('public annulus declarations accept Outline, narrow capabilities and reject F
       "const outline: 'outline' = glyph({variation:{enclosureEmphasis:1.1}}).variant;",
       "const modifiedKind: 'source' | 'authored-variation' = glyph({variation:{enclosureEmphasis:1.1}}).provenance.kind;",
       "const law: 'annulus.counter-scale' = glyphCapabilities().variation.law;",
+      "const motion: 'existing-part-gestures' = glyphCapabilities().variation.targets.webEffect;",
       "const emphasis: 1 = glyphCapabilities('outline').variation.defaults.enclosureEmphasis;",
       "const filled = glyphCapabilities('filled'); const filledVariant: 'filled' = filled.variant;",
       "declare const variant: 'outline' | 'filled'; const capability = glyphCapabilities(variant);",

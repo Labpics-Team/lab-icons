@@ -50,7 +50,7 @@ export interface AuthorAnnulusVariationCapability {
   readonly geometrySha256: string;
   readonly defaults: Readonly<{ enclosureEmphasis: 1 }>;
   readonly domain: AuthorAnnulusVariationDomain;
-  readonly targets: Readonly<{ svg: 'supported'; webEffect: 'not-declared'; lottie: 'not-exported'; sfSymbols: 'not-exported' }>;
+  readonly targets: Readonly<{ svg: 'supported'; webEffect: 'existing-part-gestures'; lottie: 'not-exported'; sfSymbols: 'not-exported' }>;
 }
 
 export interface AuthorAnnulusVariationGlyph<TIcon extends AuthorIconId = AuthorIconId> extends GlyphIR<TIcon> {

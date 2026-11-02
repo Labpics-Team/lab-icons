@@ -162,8 +162,10 @@ export function compileSymbolEffect(
   const anatomy = authorBacked ? glyph.provenance.anatomy : undefined;
   const author = authorBacked ? glyph.provenance.author : undefined;
   const variationReady = glyph.provenance.kind !== 'authored-variation' ||
-    glyph.provenance.variation.version === 1 && glyph.provenance.variation.law === 'dots.affine' &&
-    capabilities.variation?.law === 'dots.affine' &&
+    glyph.provenance.variation.version === 1 && capabilities.variation?.version === 1 &&
+    (glyph.provenance.variation.law === 'dots.affine' || glyph.provenance.variation.law === 'annulus.counter-scale') &&
+    capabilities.variation.law === glyph.provenance.variation.law &&
+    capabilities.variation.targets?.webEffect === 'existing-part-gestures' &&
     glyph.provenance.variation.geometrySha256 === capabilities.variation.geometrySha256;
   const sourceReady = variationReady && capabilities.modelState === null && anatomy?.version === 1 && capabilities.anatomy?.version === 1 &&
     /^[a-f0-9]{64}$/.test(anatomy.annotationSha256) &&

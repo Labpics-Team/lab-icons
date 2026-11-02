@@ -79,7 +79,7 @@ describe('declared circle states reuse the exact annulus law without silhouette 
     const output = renderSymbolModules(payload);
     expect(output.variation).toContain('annulus-runtime.js');
     expect(output.symbol).not.toContain('annulus-runtime.js');
-    expect(payload.capabilities.outline.variation.targets.webEffect).toBe('not-declared');
+    expect(payload.capabilities.outline.variation.targets.webEffect).toBe('existing-part-gestures');
   });
 
   it('retains the existing confirmation gesture and does not invent gestures for other states', () => {
