@@ -8,6 +8,7 @@ import { build } from 'esbuild';
 import { describe, expect, it } from 'vitest';
 import { loadAuthorBaseline } from '../scripts/lib/author-baseline.js';
 import { compileAuthorAnatomy } from '../scripts/lib/author-anatomy.js';
+import { compileAuthorVariation } from '../scripts/lib/author-variation.js';
 import { compileAuthorStateGroups, renderStateGroupModule, stateGroupDeclaration } from '../scripts/lib/author-state-groups.js';
 import { symbolExportName, symbolReleaseProjection } from '../scripts/lib/symbol-modules.js';
 import { stateTypeConsumerSource } from '../scripts/check-package-artifact.js';
@@ -113,7 +114,7 @@ describe('authored dots.orient: независимые masters и весь ин�
       expect(a.sample(p)).toEqual(b.sample(p));
       a.sample(p).parts.forEach((part, index) => {
         const [h, v] = forward.effect.targets[index].vectors;
-        expect(operands(part.d)).toEqual(h.map((value, j) => value === v[j] ? value : (1 - p) * value + p * v[j]));
+        expect(operands(part.d)).toEqual(h.map((value, j) => p === 0 ? value : p === 1 ? v[j] : (1 - p) * value + p * v[j]));
         expect([...part.d.matchAll(/[MCZ]/g)].map(match => match[0])).toEqual(['M', 'C', 'C', 'C', 'C', 'Z']);
       });
     }
@@ -141,6 +142,24 @@ describe('authored dots.orient: независимые masters и весь ин�
     expect(() => compile(w.source, w.spec, w.owner)).toThrow(expect.objectContaining({ code: 'CORRESPONDENCE_UNAVAILABLE' }));
     const drift = structuredClone(document); drift.groups[groupName('outline')].states.horizontal.masterSha256 = '0'.repeat(64);
     expect(() => compile(baseline, drift)).toThrow(expect.objectContaining({ code: 'MASTER_MISMATCH' }));
+  });
+  it('управляемая source-анатомия не допускает четверть, схлопывающуюся при округлении', () => {
+    const nextUp = value => { const bytes = new DataView(new ArrayBuffer(8)); bytes.setFloat64(0, value); bytes.setBigUint64(0, bytes.getBigUint64(0) + 1n); return bytes.getFloat64(0); };
+    const w = witness('outline', d => {
+      const numbers = operands(d), [cx, cy] = [numbers[0], numbers[7]];
+      const s = [cx, nextUp(cy)], e = [nextUp(cx), cy], n = [cx, cy - 1.6], west = [cx - 1.6, cy];
+      return `M${s.join(' ')}C${[...s, ...e, ...e].join(' ')}C${[...e, ...n, ...n].join(' ')}C${[...n, ...west, ...west].join(' ')}C${[...west, ...s, ...s].join(' ')}Z`;
+    });
+    for (const state of ['horizontal', 'vertical']) {
+      const icon = `ellipsis-${state}`;
+      expect(() => compileAuthorVariation(w.source.icons[icon].outline, contracts[`${icon}/outline`].parts,
+        { law: 'dots.affine', axis: state === 'horizontal' ? 'x' : 'y' }, grid)).not.toThrow();
+    }
+    const h = operands(rawPaths(w.source.icons['ellipsis-horizontal'].outline.rawSvg)[0]);
+    const v = operands(rawPaths(w.source.icons['ellipsis-vertical'].outline.rawSvg)[0]);
+    const p = .01511, collapsed = h.slice(0, 8).map((value, index) => (1 - p) * value + p * v[index]);
+    expect(new Set([0, 1, 2, 3].map(index => collapsed.slice(index * 2, index * 2 + 2).join(','))).size).toBe(1);
+    expect(() => compile(w.source, w.spec, w.owner)).toThrow(expect.objectContaining({ code: 'INTERVAL_UNSAFE' }));
   });
   it('default-only domain, malformed requests и неподдержанные форматы дают явный отказ', () => {
     const group = runtime(payloads[groupName('outline')]);

@@ -126,9 +126,11 @@ export function compileAuthorContourStateGroup(baseline, name, group, { compiler
   const clearance = mul(rational(24), rational(grid.ratios.clearanceMin));
   for (const part of all) {
     const [south, east, north, west] = [part.points[0], part.points[3], part.points[6], part.points[9]];
-    if (cmp(sub(rational(east[0]), rational(west[0])), mul(rounding, [2n, 1n])) <= 0 ||
-        cmp(sub(rational(south[1]), rational(north[1])), mul(rounding, [2n, 1n])) <= 0) {
-      refuse('INTERVAL_UNSAFE', 'Размер между крайними узлами не отделён от ошибки интерполяции.');
+    const [cx, cy] = part.center;
+    const spans = [sub(rational(east[0]), rational(cx)), sub(rational(cx), rational(west[0])),
+      sub(rational(south[1]), rational(cy)), sub(rational(cy), rational(north[1]))];
+    if (spans.some(span => cmp(span, mul(rounding, [2n, 1n])) <= 0)) {
+      refuse('INTERVAL_UNSAFE', 'Каждый радиус от центра до крайнего узла должен превышать двойную ошибку интерполяции.');
     }
   }
   for (const part of all) for (const point of part.points) for (const value of point) {

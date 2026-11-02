@@ -96,7 +96,8 @@ export function prepareContourStateEffect(effect: SymbolContourStateEffect): Pre
       if (progress === 0 || progress === 1) d = item.endpoints[progress]!;
       else {
         const [a, b] = item.vectors as [number[], number[]];
-        const values = a.map((value, index) => value === b[index] ? value : (1 - progress) * value + progress * b[index]!);
+        // Одна монотонная арифметическая операция для всех соответствующих координат.
+        const values = a.map((value, index) => (1 - progress) * value + progress * b[index]!);
         if (!values.every(Number.isFinite)) return refuse('POSE_UNREPRESENTABLE', 'Интерполяция не представима конечными Number.');
         d = serialize(values);
       }

@@ -190,7 +190,7 @@ export function verifyInstalledContourStateGroup(group, expected, prepareContour
         if (p === 0 || p === 1) require(part.d === target.endpoints[p], `${state.id}: exact sampled endpoint`);
         else {
           const [a, b] = target.vectors;
-          require(equal(operands(part.d), a.map((value, operand) => value === b[operand] ? value : (1 - p) * value + p * b[operand])) &&
+          require(equal(operands(part.d), a.map((value, operand) => (1 - p) * value + p * b[operand])) &&
             part.d.replace(/[+-]?(?:\d*\.\d+|\d+\.?)(?:[eE][+-]?\d+)?/g, '').replace(/[\s,]/g, '') === target.commands.join(''),
           `${state.id}: forward/reverse numeric family pose`);
         }
