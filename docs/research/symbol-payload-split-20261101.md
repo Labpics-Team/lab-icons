@@ -448,3 +448,87 @@ node scripts/bench/notification-records.mjs terser.json --terser-module-only `
 Отрицательные результаты относятся к перечисленным семействам. Они не доказывают
 невозможность любого другого build-only представления и не закрывают исходный
 gzip/package gate.
+
+## Закрытый source/cycle packet
+
+Source `c212c11ab8fd8b30bdfcef5952dc12f4b566ebab` сохраняет реальные authored
+snapshots двух notification-семейств и переносит фиксированную форму записей в
+небольшой внутренний target materializer. Независимые входы — exact paths,
+anchors, topology, roles, z-order, fingerprints и motion amplitude — остаются
+явными данными. Geometry, topology и смысл частей в runtime не выводятся.
+
+Отличие от прежнего skeleton — проверенное отношение motion amplitude к шести
+stops. Build сравнивает полную реконструированную запись с исходной JSON-записью,
+включая key order, gesture meaning, IDs и adapters. Source admission отдельно
+проверяет все фиксированные root/part поля и связь file/fingerprint. Нарушенное
+отношение, extension key, другая композиция, paint или adapter сохраняют прежнее
+литеральное представление. Outline/Filled, отдельные part records и anchors не
+объединяются; прежние source/capability receipt aliases сохранены.
+
+Полный metadata packet дополнительно выразил отношения author → anatomy hashes.
+[Конечный опыт](semantic-packet-probe-20261102.json) получил module gzip
+3990/4802 B, но glyph/caps/both closures выросли. Его два receipt helpers
+отвергнуты. Выбранный source/cycle packet оставляет receipts литералами.
+Destructuring-форма source materializer тоже не принята: меньший raw helper
+consumer не улучшил его gzip. Нового JSON/path decoder, catalog, scheduler или
+публичного export нет.
+
+[Font Awesome 7.x IconDefinition](https://raw.githubusercontent.com/FortAwesome/Font-Awesome/7.x/js-packages/%40fortawesome/fontawesome-common-types/index.d.ts)
+показывает зрелый закрытый tuple с размерами и одной или несколькими path strings.
+Это основание проверить представление, а не гарантия выигрыша. Ответ
+[сопровождающего esbuild #3392](https://github.com/evanw/esbuild/issues/3392)
+определяет PURE на целом вызове/IIFE; новая source materialization закрывает
+включённые string expressions целиком. Оба первичных источника прочитаны
+2026-11-02. Deliberate снятие этой аннотации удержало source geometry в caps
+consumer и обнаружено regression control.
+
+[Настоящий qualification](source-packet-qualification-20261102.json) закрепляет
+baseline `ebec9e952c795d63c7d6c8c8e72bd44cda099ba3`, source `c212c11`, digests
+emitter/runtime, native ESM, retained graph и все пять selective consumers.
+Node 24.15.0, Windows x64, esbuild 0.28.1, fflate 0.8.3 level 9/mtime 0,
+Brotli quality 11. Это узкий deterministic emit/contract опыт, без full build,
+pack, browser или холодного BENCH.
+
+| Артефакт | Raw/gzip/Brotli до → после, B | Прежний raw/gzip ceiling, B |
+|---|---|---|
+| notifications.js | 16660/4584/3658 → 14070/4104/3243 | 23951/4165 |
+| notifications-unread.js | 21576/5463/4298 → 17595/4918/3910 | 30360/5034 |
+| Новый source-packet-runtime.js | 1181/600/517 | Новый baseline/ceiling 1181/600 зафиксирован до remote qualification |
+
+Все прежние artifact records и limits сохранены. Runtime target и release
+inventory выводятся из настоящих imports compiler output; source-only набор
+не оставляет orphan helper. Build и генератор поверхности используют одного
+владельца lowering target capabilities. Внутренние типы materializer не
+расширяют публичные declarations.
+
+| Семейство и consumer | Изменение raw/gzip/Brotli, B |
+|---|---|
+| notifications glyph | −1136 / +27 / +43 |
+| notifications caps | −626 / −18 / +10 |
+| notifications both | −1762 / +25 / +64 |
+| unread glyph | −2531 / −24 / +22 |
+| unread caps | −622 / −11 / −4 |
+| unread both | −3153 / −18 / −23 |
+
+Static SVG values, raw bytes и retained graph сохранены; private helper/IR
+дают 0 B в static consumer. Private minifier names меняют bundle digest и до
+3 B gzip/Brotli, поэтому побайтное равенство static bundles не заявляется.
+Сумма отдельно сжатых symbol module и helper — 4704/5518 B gzip против
+4584/5463 B; общие runtimes неизменны. Это дополнительная цена прямого native
+ESM, а не размер одного tree-shaken bundle.
+
+Native ESM подтвердил exact JSON/key order, frozen trees, identity/default,
+независимые варианты, receipt aliases, function names, getter receiver и
+прежние `AUTHOR_PARITY_REQUIRED` / `AUTHOR_VARIATION_UNSUPPORTED`. RED сначала
+обнаружил оба 4584/5463 overruns; после изменения прошли 64 bounded tests,
+targeted strict TypeScript, syntax, repo/diff checks. Initial materialization
+добавляет временный tuple для каждой части и входной parts array варианта;
+warm `glyph()` не создаёт новых объектов. Cold/parse/allocations/память,
+полный package/corpus, установленный consumer, motion/a11y и удалённые гейты
+ещё должны квалифицировать этот source. Пройденные module ceilings не
+закрывают BENCH-01, merge или публикацию.
+
+```powershell
+node scripts/bench/source-packet-qualification.mjs qualification.json
+node scripts/bench/semantic-packet-probe.mjs alternatives.json
+```
