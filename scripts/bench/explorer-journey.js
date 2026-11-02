@@ -302,15 +302,17 @@ export async function runExplorerJourney() {
     for (const name of ['ellipsis-horizontal', 'ellipsis-vertical']) for (const variant of ['outline', 'filled']) {
       const id = `${name}/${variant}/variation`;
       await choose(name, variant);
-      const symbol = await import(`./package/symbols/${name}.js`);
-      const source = symbol.glyph({ variant });
+      const sourceModule = await import(`./package/symbols/${name}.js`);
+      const symbol = await import(`./package/variations/${name}.js`);
+      const source = sourceModule.glyph({ variant });
       const caps = symbol.glyphCapabilities(variant);
       const row = data.rows.find(item => item.name === name && item.variant === variant);
       const masterResponse = await originalFetch(row.views.master);
       if (!masterResponse.ok) throw new Error(`explorer journey: variation master HTTP ${masterResponse.status}`);
       const master = new DOMParser().parseFromString(await masterResponse.text(), 'image/svg+xml').documentElement;
       const sourcePaths = JSON.stringify(paths(master));
-      check(`${id}/actual-capability-controls`, caps.variation?.law === 'dots.affine' &&
+      check(`${id}/actual-capability-controls`, data.variationIconIds.includes(name) &&
+        !sourceModule.glyphCapabilities(variant).variation && caps.variation?.law === 'dots.affine' &&
         caps.variation.targets.svg === 'supported' &&
         [...q('axis-controls').querySelectorAll('[data-variation]')].map(input => input.dataset.variation).join(',') === 'dotScale,spacingScale' &&
         [...q('axis-controls').querySelectorAll('[data-variation]')].every(input => input.type === 'number' && input.value === '1') &&
@@ -319,7 +321,8 @@ export async function runExplorerJourney() {
         JSON.stringify(paths(q('symbol-stage').querySelector(':scope > svg'))) === sourcePaths);
 
       await chooseView('generated');
-      check(`${id}/default-view-preserves-master`, JSON.stringify(paths(q('symbol-stage').querySelector(':scope > svg'))) === sourcePaths);
+      check(`${id}/default-view-preserves-master`, q('consumer-import').textContent.includes(`/variations/${name}`) &&
+        JSON.stringify(paths(q('symbol-stage').querySelector(':scope > svg'))) === sourcePaths);
       let retainedPhase = 0, retainedOpacity;
       if (name === 'ellipsis-horizontal') {
         setReduced(false);

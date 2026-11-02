@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { stateExplorerGroups, symbolExplorerBrowserFiles } from '../scripts/lib/symbol-explorer.js';
+import { stateExplorerGroups, symbolExplorerBrowserFiles, symbolExplorerVariationIds } from '../scripts/lib/symbol-explorer.js';
 import { symbolReleaseProjection } from '../scripts/lib/symbol-modules.js';
 
 const base = JSON.parse(readFileSync(new URL('../release/contract.json', import.meta.url), 'utf8'));
@@ -13,6 +13,7 @@ describe('browser-проекция принятых symbol capabilities', () => 
     const contract = symbolReleaseProjection(base, ['fixture']);
     const groups = stateExplorerGroups({ groups: {} });
     const files = symbolExplorerBrowserFiles(contract, ['fixture'], groups);
+    expect(symbolExplorerVariationIds(contract, ['fixture'])).toEqual([]);
     expect(files).toContain('dist/symbols/fixture.js');
     expect(files).toContain('dist/lottie/fixture.js');
     expect(files).not.toContain('dist/ir/state-runtime.js');
@@ -48,9 +49,24 @@ describe('browser-проекция принятых symbol capabilities', () => 
     contract.runtimeDependencies.push(futureRuntime);
     contract.files.push(futureRuntime);
     const files = symbolExplorerBrowserFiles(contract, ['fixture'], []);
+    expect(symbolExplorerVariationIds(contract, ['fixture'])).toEqual(['fixture']);
+    expect(files.filter(file => file === 'dist/variations/fixture.js')).toHaveLength(1);
     expect(files.filter(file => file === 'dist/ir/variation-runtime.js')).toHaveLength(1);
     expect(files.filter(file => file === futureRuntime)).toHaveLength(1);
     expect(files).not.toContain('dist/ir/authored-variation.d.ts');
+  });
+
+  it('не открывает вариативность вне каталога, публичных exports или declarations', () => {
+    const contract = symbolReleaseProjection(base, ['fixture'], [], ['fixture']);
+    expect(() => symbolExplorerVariationIds(contract, ['other'])).toThrow(/не принадлежит авторскому каталогу/);
+    const privateEntry = { ...contract, exports: { ...contract.exports } };
+    delete privateEntry.exports['./variations/*'];
+    expect(() => symbolExplorerVariationIds(privateEntry, ['fixture'])).toThrow(/публичного package entry/);
+    const wrongTypes = { ...contract, exports: { ...contract.exports,
+      './variations/*': { ...contract.exports['./variations/*'], types: './dist/unpublished/*.d.ts' } } };
+    expect(() => symbolExplorerVariationIds(wrongTypes, ['fixture'])).toThrow(/публичного package entry/);
+    const missingDeclaration = { ...contract, files: contract.files.filter(file => file !== 'dist/variations/fixture.d.ts') };
+    expect(() => symbolExplorerVariationIds(missingDeclaration, ['fixture'])).toThrow(/не имеет declaration/);
   });
 
   it('private runtime вне package files отклоняется до записи browser-проекции', () => {

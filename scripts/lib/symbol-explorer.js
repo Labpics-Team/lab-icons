@@ -15,12 +15,32 @@ export function stateExplorerGroups(spec) {
   }));
 }
 
+/** Вариативность открывает только производный публичный entrypoint пакета. */
+export function symbolExplorerVariationIds(contract, iconIds) {
+  const files = contract.files.filter(file => /^dist\/variations\/[^/]+\.js$/.test(file));
+  const entry = contract.exports?.['./variations/*'];
+  if (files.length && (entry?.import !== './dist/variations/*.js' || entry?.types !== './dist/variations/*.d.ts')) {
+    throw new Error('symbol explorer: variation output не имеет публичного package entry');
+  }
+  const ids = files.map(file => file.slice('dist/variations/'.length, -'.js'.length)).sort();
+  if (new Set(ids).size !== ids.length || ids.some(id => !/^[a-z][a-z0-9-]*$/.test(id) || !iconIds.includes(id))) {
+    throw new Error('symbol explorer: variation output не принадлежит авторскому каталогу');
+  }
+  for (const id of ids) {
+    if (!contract.files.includes(`dist/variations/${id}.d.ts`)) {
+      throw new Error(`symbol explorer: variation ${id} не имеет declaration в package contract`);
+    }
+  }
+  return ids;
+}
+
 /** Runtime presence задаёт package contract; semantic spec задаёт точное членство. */
 export function symbolExplorerBrowserFiles(contract, iconIds, stateGroups) {
   const stateFiles = stateGroups.map(({ group }) => `dist/states/${group}.js`);
+  const variationFiles = symbolExplorerVariationIds(contract, iconIds).map(id => `dist/variations/${id}.js`);
   const files = [...new Set([...contract.runtimeDependencies, 'dist/ir/render.js', 'dist/motion/index.js', 'dist/authoring/index.js',
     ...iconIds.flatMap(name => [`dist/symbols/${name}.js`, `dist/lottie/${name}.js`]),
-    ...stateFiles])];
+    ...stateFiles, ...variationFiles])];
   for (const file of files) {
     if (!contract.files.includes(file)) throw new Error(`symbol explorer: ${file} не принадлежит package contract`);
   }
@@ -58,7 +78,9 @@ export function writeSymbolExplorer({ repo, outDir, report, visuals, canvas, ico
   const contract = JSON.parse(readFileSync(join(repo, 'release', 'contract.json'), 'utf8'));
   const baseline = loadAuthorBaseline(repo);
   const stateGroups = stateExplorerGroups(JSON.parse(readFileSync(join(repo, 'semantics/author-state-groups.json'), 'utf8')));
-  const browserFiles = symbolExplorerBrowserFiles(contract, Object.keys(baseline.icons), stateGroups);
+  const iconIds = Object.keys(baseline.icons);
+  const variationIconIds = symbolExplorerVariationIds(contract, iconIds);
+  const browserFiles = symbolExplorerBrowserFiles(contract, iconIds, stateGroups);
   for (const relative of browserFiles) {
     const target = join(outDir, 'package', relative.slice('dist/'.length));
     mkdirSync(dirname(target), { recursive: true });
@@ -98,7 +120,7 @@ export function writeSymbolExplorer({ repo, outDir, report, visuals, canvas, ico
       metrics: null,
     };
   }));
-  const data = { version: 2, source: baseline.source, executionIdentity, stateGroups, summary: { glyphs: Object.keys(baseline.icons).length, variants: rows.length }, rows };
+  const data = { version: 2, source: baseline.source, executionIdentity, stateGroups, variationIconIds, summary: { glyphs: iconIds.length, variants: rows.length }, rows };
   writeFileSync(join(outDir, 'explorer.json'), `${JSON.stringify(data)}\n`);
   return join(outDir, 'index.html');
 }

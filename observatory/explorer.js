@@ -89,7 +89,7 @@ function inspectorPresentation() {
     (active ? contourGroup(group) ? 'Авторские контуры меняют ориентацию; средняя точка остаётся на месте.' : 'Авторский знак; общая оболочка сохраняется при замене.' : state.legacy ? 'Прежняя модель: паритет с новой авторской основой не принят.' : variation
       ? `${comparison ? 'Красным — исходная форма, синим — изменённая. ' : ''}Размер точки ×${state.variation.dotScale}; расстояние ×${state.variation.spacingScale}. Образцы размеров и SVG относятся к этой форме.`
       : comparison ? `Красным — текущая основа, синим — прежняя ${row.model?.catalogState === 'accepted' ? 'модель' : 'модель на проверке'} при исходных параметрах. Части и образцы размеров относятся к текущему авторскому мастеру. Паритет не принят.` : 'Текущий авторский мастер. Возможности относятся к его закреплённой версии.');
-  ui['consumer-import'].textContent = active ? `import { renderStateSvg, compileStateEffect } from\n  '@labpics/icons/states/${group.capabilities.group}';` : state.legacy ? `import { glyph } from '@labpics/icons/ir';\n// Прежняя основа; текущий master: ./symbols/${state.name}` : `import { glyph } from\n  '@labpics/icons/symbols/${state.name}';`;
+  ui['consumer-import'].textContent = active ? `import { renderStateSvg, compileStateEffect } from\n  '@labpics/icons/states/${group.capabilities.group}';` : state.legacy ? `import { glyph } from '@labpics/icons/ir';\n// Прежняя основа; текущий master: ./symbols/${state.name}` : `import { glyph } from\n  '@labpics/icons/${variation ? 'variations' : 'symbols'}/${state.name}';`;
   const parts = active ? (contourGroup(group) ? group.capabilities.partIds : [...member.contentPartIds, ...group.capabilities.sharedPartIds])
     .map(id => ({ id, role: id === group.capabilities.enclosurePartId ? 'container' : 'content' })) : state.glyph.parts;
   ui.parts.replaceChildren(...parts.map(part => {
@@ -498,8 +498,9 @@ async function select(name, { reveal = false } = {}) {
   grid();
   try {
     const membership = state.data.stateGroups?.find(group => group.members.some(member => member.icon === name && member.variant === state.variant));
+    const namespace = state.data.variationIconIds.includes(name) ? 'variations' : 'symbols';
     const [module, response, replacementModule] = await Promise.all([
-      import(`./package/symbols/${name}.js`),
+      import(`./package/${namespace}/${name}.js`),
       fetch(row.views.original, { signal: state.abort.signal }),
       membership ? import(`./package/states/${membership.group}.js`) : null,
     ]);
@@ -759,6 +760,7 @@ try {
   const response = await fetch('explorer.json');
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
   state.data = await response.json();
+  if (!Array.isArray(state.data.variationIconIds)) throw new Error('Метаданные вариативности недоступны.');
   ui['corpus-count'].textContent = `${state.data.summary.glyphs} семейств`;
   if (!state.data.rows.some((row) => row.name === state.name)) state.name = state.data.rows[0].name;
   await select(state.name);
