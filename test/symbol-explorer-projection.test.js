@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { stateExplorerGroups, symbolExplorerBrowserFiles, symbolExplorerVariationIds } from '../scripts/lib/symbol-explorer.js';
+import { stateExplorerGroups, symbolExplorerBrowserFiles, symbolExplorerVariationIds, symbolExplorerStateVariationIds } from '../scripts/lib/symbol-explorer.js';
 import { symbolReleaseProjection } from '../scripts/lib/symbol-modules.js';
 
 const base = JSON.parse(readFileSync(new URL('../release/contract.json', import.meta.url), 'utf8'));
@@ -9,6 +9,20 @@ const spec = { groups: { 'status-circle': { states: {
 } } } };
 
 describe('browser-проекция принятых symbol capabilities', () => {
+  it('opt-in оболочка принадлежит реальной группе и публичной паре JS/types', () => {
+    const contract = symbolReleaseProjection(base, ['fixture'], ['status-circle']);
+    contract.exports['./state-variations/*'] = { import: './dist/state-variations/*.js', types: './dist/state-variations/*.d.ts' };
+    contract.files.push('dist/state-variations/status-circle.js', 'dist/state-variations/status-circle.d.ts');
+    const groups = stateExplorerGroups(spec);
+    expect(symbolExplorerStateVariationIds(contract, groups)).toEqual(['status-circle']);
+    expect(symbolExplorerBrowserFiles(contract, ['fixture'], groups)).toContain('dist/state-variations/status-circle.js');
+    expect(() => symbolExplorerStateVariationIds(contract, [])).toThrow(/semantic group/);
+    const privateEntry = { ...contract, exports: { ...contract.exports } };
+    delete privateEntry.exports['./state-variations/*'];
+    expect(() => symbolExplorerStateVariationIds(privateEntry, groups)).toThrow(/публичного package entry/);
+    expect(() => symbolExplorerStateVariationIds({ ...contract, files: contract.files.filter(file => !file.endsWith('state-variations/status-circle.d.ts')) }, groups))
+      .toThrow(/declaration/);
+  });
   it('пустые state-группы сохраняют статические symbol и Lottie entries', () => {
     const contract = symbolReleaseProjection(base, ['fixture']);
     const groups = stateExplorerGroups({ groups: {} });
