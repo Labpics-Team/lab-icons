@@ -46,7 +46,7 @@ import { loadAuthorBaseline } from './lib/author-baseline.js';
 import { compileAuthorAnatomy } from './lib/author-anatomy.js';
 import { expectedAuthorEffect, expectedAuthorMotion } from './bench/author-oracle.js';
 import { statePackageExpectations, stateArtifactConsumerSource } from './lib/state-artifact-consumer.js';
-import { authorVariationArtifactConsumerSource } from './lib/author-variation-artifact-consumer.js';
+import { authorVariationArtifactConsumerSource, authorVariationFamilyConsumerSource } from './lib/author-variation-artifact-consumer.js';
 
 export const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
@@ -599,6 +599,7 @@ export function checkPackageArtifact({
         `if (Object.keys(authorExpected).length !== ${authorBaseline.counts.families}) throw new Error('current author census broken');\n` +
         `for (const [icon, variants] of Object.entries(authorExpected)) {\n` +
         `  const symbol = await import('@labpics/icons/symbols/' + icon);\n` +
+        authorVariationFamilyConsumerSource() +
         `  if (symbol.glyph() !== symbol.glyph() || !Object.isFrozen(symbol.glyph().parts)) throw new Error('symbol cache broken: ' + icon);\n` +
         `  for (const variant of ['outline', 'filled']) {\n` +
         `    const expected = variants[variant];\n` +
@@ -620,9 +621,7 @@ export function checkPackageArtifact({
         `    if (capabilities.icon !== icon || capabilities.variant !== variant || capabilities.modelState !== null || capabilities.supportedAxes.length || Object.keys(capabilities.axes).length || JSON.stringify(capabilities.motion) !== JSON.stringify(expected.motion) || JSON.stringify(capabilities.anatomy ?? null) !== JSON.stringify(expected.anatomy) || JSON.stringify(capabilities.author) !== JSON.stringify(expected.author)) throw new Error('current source inherited stale admission: ' + icon + '/' + variant);\n` +
         `    const foreignMotion = compileSymbolEffect(current, capabilities, 'time.advance', { duration: 360 });\n` +
         `    if (foreignMotion.ok || foreignMotion.reason.code !== (expected.motion.state === 'gesture-ready' ? 'GESTURE_UNSUPPORTED' : 'SEMANTIC_MOTION_UNAVAILABLE')) throw new Error('current motion did not refuse precisely: ' + icon + '/' + variant);\n` +
-        `    const variable = expected.variation ? await import('@labpics/icons/variations/' + icon) : null;\n` +
-        `    const lottieVariation = expected.variation ? await import('@labpics/icons/lottie/' + icon) : null;\n` +
-        `    verifyInstalledAuthorVariation({ icon, variant, expected, current, capabilities, symbol, variable, lottie: lottieVariation, compileSymbolEffect });\n` +
+        `    verifyInstalledAuthorVariation({ icon, variant, expected, familyVariation, current, capabilities, symbol, variable, lottie: lottieVariation, compileSymbolEffect });\n` +
         `    for (const [gesture, expectedEffect] of Object.entries(expected.effects)) {\n` +
         `      const effect = compileSymbolEffect(current, capabilities, gesture, { duration: 360 });\n` +
         `      if (!effect.ok || effect.effect.version !== expectedEffect.version || JSON.stringify(effect.effect.targets) !== JSON.stringify(expectedEffect.targets) || JSON.stringify(effect.effect.stages) !== JSON.stringify(expectedEffect.stages)) throw new Error('current declared motion differs: ' + icon + '/' + variant);\n` +

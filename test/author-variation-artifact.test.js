@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { build } from 'esbuild';
 import { authorPackageExpectations } from '../scripts/check-package-artifact.js';
-import { authorVariationArtifactConsumerSource } from '../scripts/lib/author-variation-artifact-consumer.js';
+import { authorVariationArtifactConsumerSource, authorVariationFamilyConsumerSource } from '../scripts/lib/author-variation-artifact-consumer.js';
 import { loadAuthorBaseline, authorSymbolPayload } from '../scripts/lib/author-baseline.js';
 import { compileAuthorAnatomy } from '../scripts/lib/author-anatomy.js';
 import { authorVariationCapability } from '../scripts/lib/author-variation.js';
@@ -45,11 +45,10 @@ ${authorVariationArtifactConsumerSource()}
 const expectedSymbols = JSON.parse(readFileSync(new URL('./author-expected.json', import.meta.url), 'utf8'));
 for (const [icon, variants] of Object.entries(expectedSymbols)) {
   const symbol = await import('@labpics/icons/symbols/' + icon);
+  ${authorVariationFamilyConsumerSource()}
   for (const [variant, expected] of Object.entries(variants)) {
     const current = symbol.glyph({ variant }), capabilities = symbol.glyphCapabilities(variant);
-    const variable = expected.variation ? await import('@labpics/icons/variations/' + icon) : null;
-    const lottie = expected.variation ? await import('@labpics/icons/lottie/' + icon) : null;
-    verifyInstalledAuthorVariation({ icon, variant, expected, current, capabilities, symbol, variable, lottie, compileSymbolEffect });
+    verifyInstalledAuthorVariation({ icon, variant, expected, familyVariation, current, capabilities, symbol, variable, lottie: lottieVariation, compileSymbolEffect });
   }
 }
 console.log('author variation installed consumer PASS');
@@ -122,5 +121,30 @@ describe('author variation: исполняемый installed smoke по объя
     const result = runConsumer({ expectations: corrupt });
     expect(result.status).not.toBe(0);
     expect(result.stderr).toContain('authored variation changed-part contract');
+  });
+
+  it.each([
+    ['unsupported admission', 'glyph',
+      "request => request?.variant === 'filled' && Object.hasOwn(request, 'variation') ? artifactOriginal({ variant: 'filled' }) : artifactOriginal(request)",
+      'unsupported authored variation accepted'],
+    ['wrong default', 'glyph',
+      "request => request?.variant === 'filled' ? { ...artifactOriginal(request) } : artifactOriginal(request)",
+      'unsupported authored variation default differs'],
+    ['wrong capabilities', 'glyphCapabilities',
+      "variant => variant === 'filled' ? { ...artifactOriginal(variant) } : artifactOriginal(variant)",
+      'unsupported authored variation capabilities differ'],
+  ])('Filled opt-in: reachable mutant %s обнаруживается после успешного syntax control', (_, exported, replacement, message) => {
+    const path = join(directory, 'node_modules/@labpics/icons/dist/variations/plus-circle.js');
+    const original = readFileSync(path, 'utf8');
+    const declaration = `export const ${exported} =`;
+    expect(original).toContain(declaration);
+    try {
+      writeFileSync(path, original.replace(declaration, 'const artifactOriginal =') + `\nexport const ${exported} = ${replacement};\n`);
+      const syntax = spawnSync(process.execPath, ['--check', path], { encoding: 'utf8' });
+      expect(syntax.status, syntax.stdout + syntax.stderr).toBe(0);
+      const result = runConsumer();
+      expect(result.status, result.stdout + result.stderr).not.toBe(0);
+      expect(result.stderr).toContain(message);
+    } finally { writeFileSync(path, original); }
   });
 });

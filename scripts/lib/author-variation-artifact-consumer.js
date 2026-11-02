@@ -1,5 +1,5 @@
 /** Встраивается целиком в installed consumer; зависимости приходят из public exports. */
-export function verifyInstalledAuthorVariation({ icon, variant, expected, current, capabilities, symbol, variable, lottie, compileSymbolEffect }) {
+export function verifyInstalledAuthorVariation({ icon, variant, expected, familyVariation, current, capabilities, symbol, variable, lottie, compileSymbolEffect }) {
   const require = (condition, message) => { if (!condition) throw new Error(`${message}: ${icon}/${variant}`); };
   const equal = (left, right) => JSON.stringify(left) === JSON.stringify(right);
   const refuses = (glyph, request, code) => {
@@ -63,9 +63,30 @@ export function verifyInstalledAuthorVariation({ icon, variant, expected, curren
   } else {
     require(refuses(symbol.glyph, { variant, variation: { dotScale: 1.1 } }, 'AUTHOR_VARIATION_UNSUPPORTED'),
       'undeclared authored geometry variation accepted');
+    if (familyVariation) {
+      let variation;
+      if (familyVariation.law === 'annulus.counter-scale') variation = familyVariation.nondefault;
+      else if (familyVariation.law === 'dots.affine') variation = { dotScale: 1.1, spacingScale: 0.9 };
+      else throw new Error(`unsupported authored variation law: ${familyVariation.law}: ${icon}/${variant}`);
+      require(variable.glyph({ variant }) === current, 'unsupported authored variation default differs');
+      const variableCapabilities = variable.glyphCapabilities(variant);
+      require(variableCapabilities === capabilities && !Object.hasOwn(variableCapabilities, 'variation'),
+        'unsupported authored variation capabilities differ');
+      require(refuses(variable.glyph, { variant, variation }, 'AUTHOR_VARIATION_UNSUPPORTED'),
+        'unsupported authored variation accepted');
+      require(refuses(symbol.glyph, { variant, variation }, 'AUTHOR_VARIATION_UNSUPPORTED'),
+        'ordinary source symbol accepted opt-in variation');
+    }
   }
 }
 
 export function authorVariationArtifactConsumerSource() {
   return `const verifyInstalledAuthorVariation = ${verifyInstalledAuthorVariation.toString()};\n`;
+}
+
+/** Одна family-level граница импорта используется полным smoke и узким consumer. */
+export function authorVariationFamilyConsumerSource() {
+  return `const familyVariation = Object.values(variants).find(expected => expected.variation)?.variation ?? null;\n` +
+    `const variable = familyVariation ? await import('@labpics/icons/variations/' + icon) : null;\n` +
+    `const lottieVariation = familyVariation ? await import('@labpics/icons/lottie/' + icon) : null;\n`;
 }
