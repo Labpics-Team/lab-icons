@@ -83,6 +83,15 @@ export function isFreshCapsuleDownload(downloads, previousCount, filename) {
   return downloads.length === previousCount + 1 && downloads.at(-1)?.filename === filename;
 }
 
+/** Геометрия должна быть залита в наблюдаемом CSS cascade, включая предков SVG. */
+export function capsulePaintMatches(observed) {
+  const visible = item => item.visibility === 'visible' && item.display !== 'none' && Number(item.opacity) === 1 &&
+    item.filter === 'none' && item.maskImage === 'none' && item.clipPath === 'none';
+  return observed.paths.length > 0 && observed.paths.every(item => visible(item) && item.fill === item.color &&
+    item.fillRule === item.declaredFillRule && Number(item.fillOpacity) === 1 && item.stroke === 'none') &&
+    observed.ancestors.length > 0 && observed.ancestors.every(visible);
+}
+
 /** Compound наблюдается как одна заливка с полным упорядоченным набором contours. */
 export function capsuleSemanticObservations(paths, anatomy) {
   const { kind, partIds, roles } = anatomy;
@@ -650,6 +659,18 @@ export async function runExplorerJourney() {
         ...(live ? { width: parseFloat(getComputedStyle(svg).width), height: parseFloat(getComputedStyle(svg).height),
           screen: svg.getScreenCTM() } : {}) };
     };
+    const capsulePaint = svg => {
+      const properties = element => {
+        const style = getComputedStyle(element);
+        return Object.fromEntries(['fill', 'color', 'fillRule', 'fillOpacity', 'stroke', 'opacity',
+          'visibility', 'display', 'filter', 'maskImage', 'clipPath'].map(property => [property, style[property]]));
+      };
+      const ancestors = [svg];
+      for (let parent = svg.parentElement; parent; parent = parent.parentElement) ancestors.push(parent);
+      return { paths: [...svg.querySelectorAll('path')].map(path => ({ ...properties(path),
+        declaredFillRule: path.getAttribute('fill-rule') ?? svg.getAttribute('fill-rule') ?? 'nonzero' })),
+        ancestors: ancestors.map(properties) };
+    };
     const capsuleExport = async (id, filename, expectedPaths, viewBox) => {
       const before = downloads.length;
       q('export-format').value = 'svg'; q('export').click();
@@ -677,6 +698,7 @@ export async function runExplorerJourney() {
         JSON.stringify(paths(q('symbol-stage').querySelector(':scope > svg'))) === sourcePaths);
       check(`${id}/source-viewport`, capsuleSvgFrameMatches(capsuleFrame(master), source.viewBox) &&
         capsuleViewportMatches(capsuleFrame(q('symbol-stage').querySelector(':scope > svg'), true), source.viewBox, Number(q('display-size').value)));
+      check(`${id}/source-visible-paint`, capsulePaintMatches(capsulePaint(q('symbol-stage').querySelector(':scope > svg'))));
       const partIds = source.parts.map(part => part.id);
       const anatomy = { kind: source.composition.kind, partIds, roles: source.parts.map(part => part.role) };
       const original = capsuleSnapshot(q('symbol-stage').querySelector(':scope > svg'), anatomy);
@@ -700,9 +722,11 @@ export async function runExplorerJourney() {
             shown.querySelector('path')?.dataset.roles === anatomy.roles.join(' ')
             : [...shown.querySelectorAll('[data-part]')].map(part => part.dataset.part).join(',') === partIds.join(',') ) &&
           capsuleViewportMatches(capsuleFrame(shown, true), source.viewBox, Number(q('display-size').value)));
+        check(`${id}/${width}/visible-paint`, capsulePaintMatches(capsulePaint(shown)));
         const samples = [...q('size-samples').querySelectorAll('.size-sample > svg')];
         check(`${id}/${width}/small-size-geometry`, samples.length === 3 && samples.every((svg, index) =>
-          JSON.stringify(paths(svg)) === modifiedPaths && capsuleViewportMatches(capsuleFrame(svg, true), source.viewBox, [16, 24, 48][index])));
+          JSON.stringify(paths(svg)) === modifiedPaths && capsulePaintMatches(capsulePaint(svg)) &&
+          capsuleViewportMatches(capsuleFrame(svg, true), source.viewBox, [16, 24, 48][index])));
         await capsuleExport(`${id}/${width}/exports-visible-width`, `${name}-${variant}-variation.svg`, modifiedPaths, source.viewBox);
       }
       const acceptedStage = q('symbol-stage').innerHTML, acceptedSamples = q('size-samples').innerHTML;
@@ -720,6 +744,7 @@ export async function runExplorerJourney() {
         variationInput('bodyWidth').getAttribute('aria-invalid') !== 'true' &&
         JSON.stringify(paths(q('symbol-stage').querySelector(':scope > svg'))) === sourcePaths &&
         capsuleViewportMatches(capsuleFrame(q('symbol-stage').querySelector(':scope > svg'), true), source.viewBox, Number(q('display-size').value)));
+      check(`${id}/reset-visible-paint`, capsulePaintMatches(capsulePaint(q('symbol-stage').querySelector(':scope > svg'))));
       await capsuleExport(`${id}/reset-export-restores-author`, `${name}-${variant}.svg`, sourcePaths, source.viewBox);
       authority.push({ name, variant, author: source.provenance.author, anatomy: source.provenance.anatomy, variation: modified.provenance.variation });
     }

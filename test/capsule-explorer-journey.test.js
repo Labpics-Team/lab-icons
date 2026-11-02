@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { capsuleWidthObservationChecks, capsuleViewportMatches, capsuleSvgFrameMatches,
-  isFreshCapsuleDownload, matchesAuthoredCapsulePath, capsuleSemanticObservations } from '../scripts/bench/explorer-journey.js';
+  isFreshCapsuleDownload, matchesAuthoredCapsulePath, capsuleSemanticObservations, capsulePaintMatches } from '../scripts/bench/explorer-journey.js';
 
 const outer = 'M12 1.5C15 1.5 17 3 17 6L17 12C17 15 15 16.8 12 16.8C9 16.8 7 15 7 12L7 6C7 3 9 1.5 12 1.5Z';
 const counter = 'M12 3.3C10 3.3 8.8 4.5 8.8 6L8.8 12C8.8 14 10 15 12 15C14 15 15.2 14 15.2 12L15.2 6C15.2 4.5 14 3.3 12 3.3Z';
@@ -29,6 +29,27 @@ const compoundPath = (body = outer) => ({ partId: null, role: null,
   d: 'M0 0L24 0L24 24L0 24Z' + 'M4 11C4 20 20 20 20 11Z' + body, fillRule: 'evenodd',
   contours: [{ x: 0, y: 0, width: 24, height: 24 }, { x: 4, y: 11, width: 16, height: 9 },
     { x: body === outer ? 7 : 7.5, y: 1.5, width: body === outer ? 10 : 9, height: 15.3 }] });
+
+const painted = () => ({ paths: [{ fill: 'rgb(16, 16, 16)', color: 'rgb(16, 16, 16)', fillRule: 'evenodd',
+  declaredFillRule: 'evenodd', stroke: 'none', fillOpacity: '1', opacity: '1', visibility: 'visible', display: 'inline',
+  filter: 'none', maskImage: 'none', clipPath: 'none' }], ancestors: [{ opacity: '1', visibility: 'visible', display: 'block',
+  filter: 'none', maskImage: 'none', clipPath: 'none' }] });
+describe('observed CSS paint cannot silently invalidate correct negative contours', () => {
+  it('admits the expected visible current-color evenodd fill', () => {
+    expect(capsulePaintMatches(painted())).toBe(true);
+  });
+  it.each([
+    ['fill:none', value => { value.paths[0].fill = 'none'; }],
+    ['CSS nonzero override', value => { value.paths[0].fillRule = 'nonzero'; }],
+    ['hidden fill', value => { value.paths[0].fillOpacity = '0'; }],
+    ['unexpected outline', value => { value.paths[0].stroke = 'rgb(16, 16, 16)'; }],
+    ['hidden ancestor', value => { value.ancestors[0].opacity = '0'; }],
+    ['clipped parent', value => { value.ancestors[0].clipPath = 'circle(1px)'; }],
+  ])('refuses %s while the path and viewport are unchanged', (_, mutate) => {
+    const observed = painted(); mutate(observed);
+    expect(capsulePaintMatches(observed)).toBe(false);
+  });
+});
 
 describe('compound negative capsule observation retains one fill and every semantic contour', () => {
   it('accepts healthy narrowing with unchanged container/support and a single negative body', () => {
