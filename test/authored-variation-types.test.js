@@ -29,20 +29,26 @@ it('generated public declarations distinguish named variation from exact source 
     } }));
     writeFileSync(join(consumer, 'package.json'), JSON.stringify({ private: true, type: 'module' }));
     writeFileSync(join(consumer, 'smoke.ts'), [
-      "import { glyph } from '@labpics/icons/symbols/ellipsis-horizontal';",
-      "import { glyph as ellipseGlyph } from '@labpics/icons/symbols/ellipse';",
+      "import { glyph, glyphCapabilities } from '@labpics/icons/symbols/ellipsis-horizontal';",
+      "import { glyph as ellipseGlyph, glyphCapabilities as ellipseCapabilities } from '@labpics/icons/symbols/ellipse';",
       'type AuthorVariationGlyphRequest = Parameters<typeof glyph>[0];',
       'const typedRequest: AuthorVariationGlyphRequest = { variation: { dotScale: 1.1 } };',
       "const defaultKind: 'source' = glyph().provenance.kind;",
       "const sourceKind: 'source' = glyph({ variant: 'filled', modelMode: 'source-only' }).provenance.kind;",
       "const variableKind: 'source' | 'authored-variation' = glyph(typedRequest).provenance.kind;",
       "const inlineKind: 'source' | 'authored-variation' = glyph({ variation: { dotScale: 1.1 } }).provenance.kind;",
+      "const variableIcon: 'ellipsis-horizontal' = glyph(typedRequest).icon;",
+      "const sourceIcon: 'ellipse' = ellipseGlyph().icon;",
+      "const capabilityLaw: 'dots.affine' = glyphCapabilities().variation.law;",
+      "const lastSignatureKind: ReturnType<typeof glyph>['provenance']['kind'] = 'authored-variation';",
       '// @ts-expect-error: named variation не обещает exact source.',
       "const falseSourcePromise: 'source' = glyph(typedRequest).provenance.kind;",
       '// @ts-expect-error: inline variation тоже не обещает exact source.',
       "const falseInlinePromise: 'source' = glyph({ variation: { dotScale: 1.1 } }).provenance.kind;",
       '// @ts-expect-error: неподдержанный symbol отвергает named variation.',
       'ellipseGlyph(typedRequest);',
+      '// @ts-expect-error: статический symbol не обещает variation capabilities.',
+      "const falseStaticLaw: 'dots.affine' = ellipseCapabilities().variation.law;",
       'void [defaultKind, sourceKind, variableKind, inlineKind, falseSourcePromise, falseInlinePromise];',
     ].join('\n'));
     writeFileSync(join(consumer, 'tsconfig.json'), JSON.stringify({ compilerOptions: {
@@ -67,8 +73,17 @@ it('generated public declarations distinguish named variation from exact source 
       diagnostics = [error.stdout, error.stderr].filter(Boolean).join('\n');
     }
     expect([...diagnostics.matchAll(/error TS(\d+):/g)].map(match => Number(match[1])), diagnostics)
-      .toEqual([2322, 2322, 2345]);
-    expect(readFileSync(join(pkg, 'dist/symbols/ellipsis-horizontal.d.ts'), 'utf8')).toContain('AuthorVariationGlyphRequest');
+      .toEqual([2322, 2322, 2345, 2532]);
+    writeFileSync(join(consumer, 'tsconfig.json'), JSON.stringify({ compilerOptions: {
+      target: 'ES2022', module: 'NodeNext', moduleResolution: 'NodeNext', strict: true, noEmit: true, skipLibCheck: false,
+    }, include: ['smoke.ts'] }));
+    diagnostics = '';
+    try {
+      execFileSync(process.execPath, [compiler, '-p', join(consumer, 'tsconfig.json')], { cwd: consumer, stdio: 'pipe' });
+    } catch (error) {
+      diagnostics = [error.stdout, error.stderr].filter(Boolean).join('\n');
+    }
+    expect(diagnostics, `actual NodeNext generated type consumer:\n${diagnostics}`).toBe('');
   } finally {
     rmSync(consumer, { recursive: true, force: true });
   }

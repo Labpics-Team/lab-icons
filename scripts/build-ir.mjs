@@ -20,7 +20,7 @@ import { compileAuthorStateGroups, renderStateGroupModule, stateGroupDeclaration
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const TARGETS = ['ir', 'symbols', 'motion', 'lottie', 'authoring', 'states'];
-const REQUIRED_DECLARATIONS = ['author-catalog.generated.d.ts', 'author-provenance.d.ts', 'author-source.d.ts', 'authored-variation.d.ts', 'candidates.d.ts', 'catalog.generated.d.ts', 'compiler.d.ts', 'index.d.ts', 'recipes.d.ts', 'render.d.ts', 'request.d.ts'];
+const REQUIRED_DECLARATIONS = ['author-catalog.generated.d.ts', 'author-provenance.d.ts', 'author-source.d.ts', 'author-symbol.d.ts', 'authored-variation.d.ts', 'candidates.d.ts', 'catalog.generated.d.ts', 'compiler.d.ts', 'index.d.ts', 'recipes.d.ts', 'render.d.ts', 'request.d.ts'];
 const read = (root, file) => JSON.parse(readFileSync(join(root, file), 'utf8'));
 
 /** Только локальный checkout и его OS namespace: неизвестный или живой PID сохраняется. */

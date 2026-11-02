@@ -89,8 +89,8 @@ describe('замкнутые symbol modules', () => {
 
   it('declaration связывает реальное добавленное имя с author corpus', () => {
     const declaration = symbolModuleDeclaration('align-bottom');
-    expect(declaration).toContain("AuthorSourceGlyph<'align-bottom'>");
-    expect(declaration).toContain("AuthorSourceCapabilities<'align-bottom'>");
+    expect(declaration).toContain("AuthorSymbolApi<'align-bottom'>");
+    expect(declaration).not.toContain('authored-variation');
     expect(declaration).not.toContain('CatalogIconId');
     expect(() => symbolModuleDeclaration('../escape')).toThrow();
   });
