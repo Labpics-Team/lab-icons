@@ -127,6 +127,48 @@
    "baselineGzipBytes": 6933,
    "maxBytes": 27098,
    "maxGzipBytes": 7453
+  },
+  "varied-microphone": {
+   "entry": "import { glyph } from '@labpics/icons/variations/mic';\nconsole.log(glyph({ variation: { bodyWidth: 0.9 } }));\n",
+   "baselineBytes": 27620,
+   "baselineGzipBytes": 8783,
+   "maxBytes": 27620,
+   "maxGzipBytes": 8783
+  },
+  "varied-microphone-circle": {
+   "entry": "import { glyph } from '@labpics/icons/variations/mic-circle';\nconsole.log(glyph({ variant: 'filled', variation: { bodyWidth: 0.8 } }));\n",
+   "baselineBytes": 24720,
+   "baselineGzipBytes": 9192,
+   "maxBytes": 24720,
+   "maxGzipBytes": 9192
+  },
+  "microphone-state-outline": {
+   "entry": "import { renderStateSvg, compileStateEffect } from '@labpics/icons/states/microphone';\nconsole.log(renderStateSvg('muted'), compileStateEffect('unmuted', { duration: 180 }));\n",
+   "baselineBytes": 9334,
+   "baselineGzipBytes": 3481,
+   "maxBytes": 9334,
+   "maxGzipBytes": 3481
+  },
+  "microphone-state-filled": {
+   "entry": "import { renderStateSvg, compileStateEffect } from '@labpics/icons/states/microphone-filled';\nconsole.log(renderStateSvg('muted'), compileStateEffect('unmuted', { duration: 180 }));\n",
+   "baselineBytes": 8595,
+   "baselineGzipBytes": 3126,
+   "maxBytes": 8595,
+   "maxGzipBytes": 3126
+  },
+  "visibility-state-outline": {
+   "entry": "import { renderStateSvg, compileStateEffect } from '@labpics/icons/states/visibility';\nconsole.log(renderStateSvg('hidden'), compileStateEffect('visible', { duration: 180 }));\n",
+   "baselineBytes": 11802,
+   "baselineGzipBytes": 4725,
+   "maxBytes": 11802,
+   "maxGzipBytes": 4725
+  },
+  "visibility-state-filled": {
+   "entry": "import { renderStateSvg, compileStateEffect } from '@labpics/icons/states/visibility-filled';\nconsole.log(renderStateSvg('hidden'), compileStateEffect('visible', { duration: 180 }));\n",
+   "baselineBytes": 7887,
+   "baselineGzipBytes": 2926,
+   "maxBytes": 7887,
+   "maxGzipBytes": 2926
   }
  }
 }
