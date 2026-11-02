@@ -72,7 +72,7 @@ export function symbolReleaseProjection(base, iconIds, stateGroupIds = [], varia
     key.includes('*')
       ? (key === './states/*' ? groups : key === './state-variations/*' ? stateVariations : key === './content-variations/*' ? contentVariations : key === './variations/*' ? [...variationIconIds].sort() : ids).flatMap(id => Object.values(conditions).map(target => target.replace('*', id).slice(2)))
       : Object.values(conditions).map(target => target.slice(2)));
-  const typeDependencies = ['dist/authoring/design-spec.d.ts', 'dist/ir/author-annulus-types.d.ts', 'dist/ir/author-catalog.generated.d.ts', 'dist/ir/author-provenance.d.ts', 'dist/ir/author-source.d.ts', 'dist/ir/authored-variation.d.ts', 'dist/ir/catalog.generated.d.ts', 'dist/ir/compiler.d.ts', 'dist/ir/glyph-types.d.ts', 'dist/ir/paint-types.d.ts', 'dist/ir/request.d.ts', 'dist/ir/lottie-types.d.ts', 'dist/ir/state-types.d.ts', 'dist/ir/state-common-types.d.ts', 'dist/ir/contour-state-types.d.ts'].sort();
+  const typeDependencies = ['dist/authoring/design-spec.d.ts', 'dist/ir/author-annulus-types.d.ts', 'dist/ir/author-content-types.d.ts', 'dist/ir/author-catalog.generated.d.ts', 'dist/ir/author-provenance.d.ts', 'dist/ir/author-source.d.ts', 'dist/ir/authored-variation.d.ts', 'dist/ir/catalog.generated.d.ts', 'dist/ir/compiler.d.ts', 'dist/ir/glyph-types.d.ts', 'dist/ir/paint-types.d.ts', 'dist/ir/request.d.ts', 'dist/ir/lottie-types.d.ts', 'dist/ir/state-types.d.ts', 'dist/ir/state-common-types.d.ts', 'dist/ir/contour-state-types.d.ts'].sort();
   const runtimeDependencies = ['dist/ir/author-request-runtime.js', 'dist/ir/compiler.js', 'dist/ir/contour-runtime.js', 'dist/ir/request.js', 'dist/ir/symbol-runtime.js', 'dist/ir/lottie-runtime.js'].sort();
   runtimeDependencies.push(...sourcePacketRuntimeTargets(compiledSymbolModules).map(target => `dist/ir/${target.runtime}`));
   if (variationIconIds.length) runtimeDependencies.push(...variationRuntimeTargets(variationLaws).map(target => `dist/ir/${target.runtime}`),
@@ -86,7 +86,6 @@ export function symbolReleaseProjection(base, iconIds, stateGroupIds = [], varia
   }
   if (contentVariations.length) {
     runtimeDependencies.push(...contentVariationRuntimeTargets(contentVariations).map(target => `dist/ir/${target.runtime}`));
-    typeDependencies.push('dist/ir/author-content-types.d.ts'); typeDependencies.sort();
   }
   if (variationIconIds.length && variationLaws.includes('annulus.counter-scale') || stateVariations.length || contentVariations.length) {
     runtimeDependencies.push('dist/ir/annulus-geometry-runtime.js');

@@ -68,6 +68,16 @@ const native = async name => {
 const sha = value => createHash('sha256').update(value).digest('hex');
 
 describe('content opt-in owns its payload without charging existing imports', () => {
+  it('removing all optional content laws keeps the public type dependency closure', () => {
+    const projection = symbolReleaseProjection(read('release/contract.json'), names, [], names, ['annulus.counter-scale'], [], [], []);
+    const glyphTypes = readFileSync(join(root, 'src/ir/glyph-types.ts'), 'utf8');
+    expect(glyphTypes).toContain("from './author-content-types.js'");
+    expect(projection.files).toContain('dist/ir/glyph-types.d.ts');
+    expect(projection.files).toContain('dist/ir/author-content-types.d.ts');
+    expect(projection.runtimeDependencies).not.toContain('dist/ir/content-runtime.js');
+    expect(projection.runtimeDependencies).not.toContain('dist/ir/content-geometry-runtime.js');
+    expect(Object.keys(projection.exports).some(key => key.startsWith('./content-variations/'))).toBe(false);
+  });
   it('declares exactly the truthful eight participants and adds only explicit release entries', () => {
     expect(authorContentVariationIconNames(anatomy)).toEqual(names);
     const base = read('release/contract.json');
