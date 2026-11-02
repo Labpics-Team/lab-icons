@@ -44,6 +44,20 @@ describe('независимый raw author oracle Lottie', () => {
     expect(() => canonicalCubicPath('M0 0A1 1 0 0 0 1 1Z')).toThrow('неподдержанная команда A');
     expect(() => canonicalCubicPath('m0 0l1 1z')).toThrow('absolute author commands');
   });
+  it('raw grammar читает весь path и отвергает junk, неверные separators и arity', () => {
+    for (const d of [
+      'M0 0L8 0L8 8L0 8Z#M20 20L28 20L28 28L20 28Z',
+      '#M0 0L1 1Z', 'M0 0L1 1Z#', 'M,0 0L1 1Z', 'M0,,0L1 1Z',
+      'M0 0,L1 1Z', 'M0 0L1 1,Z', 'M0 0L1 1Z,', 'M0\u00a00L1 1Z',
+      'L1 1', 'M0 0C1 2 3 4 5Z', 'M0 0L1Z',
+    ]) expect(() => canonicalCubicPath(d), d).toThrow();
+  });
+  it('raw grammar сохраняет допустимые comma_wsp, compact signs, decimal и exponent', () => {
+    expect(canonicalCubicPath('M.5.25 L1e1,-2e0 0,-2Z'))
+      .toBe('M0.5 0.25C0.5 0.25 10 -2 10 -2C10 -2 0 -2 0 -2C0 -2 0.5 0.25 0.5 0.25Z');
+    expect(canonicalCubicPath('\fM1,2\tL3-4\r\nH5V6Z\f'))
+      .toBe('M1 2C1 2 3 -4 3 -4C3 -4 5 -4 5 -4C5 -4 5 6 5 6C5 6 1 2 1 2Z');
+  });
   it('получает ожидаемый прогресс и terminal из request, без producer metadata', () => {
     expect(referenceLottieTiming({ gesture: 'reload.cycle', from: 0.17, to: 0.73, duration: 1000 })).toEqual({ from: 0.17, to: 0.73, terminalFrame: 60 });
     expect(referenceLottieTiming({ gesture: 'reload.cycle', from: 1, to: 0.3, reducedMotion: true })).toEqual({ from: 1, to: 0.3, terminalFrame: 0 });

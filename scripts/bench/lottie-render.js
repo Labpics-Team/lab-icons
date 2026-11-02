@@ -2,7 +2,18 @@ const NS = 'http://www.w3.org/2000/svg';
 const assert = (condition, message) => { if (!condition) throw new Error(`Lottie render: ${message}`); };
 /** Независимый oracle читает raw author commands; target parser сюда не импортируется. */
 export function canonicalCubicPath(d) {
-  const tokens = d.match(/[a-zA-Z]|[-+]?(?:\d*\.\d+|\d+\.?\d*)(?:[eE][-+]?\d+)?/g) ?? [];
+  assert(typeof d === 'string', 'raw path обязан быть строкой');
+  const tokens = []; let consumed = 0;
+  for (const match of d.matchAll(/[a-zA-Z]|[-+]?(?:\d*\.\d+|\d+\.?\d*)(?:[eE][-+]?\d+)?/g)) {
+    const gap = d.slice(consumed, match.index), token = match[0];
+    assert(/^[ \t\r\n\f]*(?:,[ \t\r\n\f]*)?$/.test(gap), 'raw path содержит неизвестный token или separator');
+    if (gap.includes(',')) {
+      assert(tokens.length && !/^[a-zA-Z]$/.test(tokens.at(-1)) && !/^[a-zA-Z]$/.test(token),
+        'raw path допускает comma только между координатами');
+    }
+    tokens.push(token); consumed = match.index + token.length;
+  }
+  assert(/^[ \t\r\n\f]*$/.test(d.slice(consumed)), 'raw path содержит неполный trailing token или separator');
   let index = 0, command, cursor = [0, 0], start, output = '';
   const number = () => {
     const value = Number(tokens[index++]); assert(Number.isFinite(value), 'raw command содержит нечисловую координату'); return value;
@@ -12,6 +23,7 @@ export function canonicalCubicPath(d) {
   while (index < tokens.length) {
     if (/^[a-zA-Z]$/.test(tokens[index])) command = tokens[index++];
     assert(command && !command.match(/[a-z]/), 'Independent raw oracle требует absolute author commands.');
+    assert(start || command === 'M', 'raw path обязан начинаться с M');
     if (command === 'M') { cursor = [number(), number()]; start = cursor; output += `M${coordinates(cursor)}`; command = 'L'; }
     else if (command === 'L') { const end = [number(), number()]; curve(cursor, end, end); }
     else if (command === 'H') { const end = [number(), cursor[1]]; curve(cursor, end, end); }
