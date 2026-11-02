@@ -1,3 +1,30 @@
+/** Browser getBBox округляет до float; допуск относится к измерению, не к оптике. */
+export function capsuleWidthObservationChecks(before, after, width) {
+  const same = (left, right) => Number.isFinite(left) && Number.isFinite(right) && Math.abs(left - right) < 0.0001;
+  const original = before.find(part => part.id === 'microphone-body');
+  const modified = after.find(part => part.id === 'microphone-body');
+  const identity = before.length >= 2 && before.length === after.length &&
+    before.filter(part => part.id === 'microphone-body').length === 1 &&
+    after.filter(part => part.id === 'microphone-body').length === 1 &&
+    before.every((part, index) => part.id === after[index].id && part.fillRule === after[index].fillRule);
+  const contours = Boolean(original && modified && original.contours.length > 0 &&
+    original.contours.length <= 2 && original.contours.length === modified.contours.length);
+  const sourceBox = original?.contours[0], box = modified?.contours[0];
+  return {
+    identity,
+    unchangedOtherParts: identity && before.every((part, index) => part.id === 'microphone-body' || part.d === after[index].d),
+    bodyChanged: Boolean(original && modified && original.d !== modified.d),
+    bodyWidth: contours && same(box.width, sourceBox.width * width) && box.width > 0,
+    bodyPosition: contours && original.contours.every((item, index) => {
+      const changed = modified.contours[index];
+      return same(item.x + item.width / 2, changed.x + changed.width / 2) && same(item.y, changed.y) &&
+        same(item.height, changed.height) && changed.height > 0;
+    }),
+    counterWalls: contours && (original.contours.length === 1 || modified.contours[1].width > 0 &&
+      same(sourceBox.width - original.contours[1].width, box.width - modified.contours[1].width)),
+  };
+}
+
 /** Проверка настоящего consumer UI; в продукт и статический пакет не входит. */
 export async function runExplorerJourney() {
   const checks = [];
@@ -474,6 +501,96 @@ export async function runExplorerJourney() {
       check(`${name}/no-invented-variation-controls`, !symbol.glyphCapabilities('outline').variation &&
         q('axis-controls').querySelectorAll('[data-variation]').length === 0 && viewButton('generated').textContent === 'Модель');
     }
+
+    // Контрформу измеряет browser из фактически показанного d, независимо от compiler.
+    const capsuleMeasure = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    capsuleMeasure.setAttribute('aria-hidden', 'true');
+    capsuleMeasure.style.cssText = 'position:absolute;left:0;top:0;visibility:hidden;pointer-events:none';
+    fixtures.push(capsuleMeasure); document.body.append(capsuleMeasure);
+    const capsuleSnapshot = (svg, partIds) => [...svg.querySelectorAll('path')].map((path, index) => {
+      const d = path.getAttribute('d');
+      const contours = d.split(/(?=M)/).map(contour => {
+        const probe = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        probe.setAttribute('d', contour); capsuleMeasure.append(probe);
+        const { x, y, width, height } = probe.getBBox(); probe.remove();
+        return { x, y, width, height };
+      });
+      return { id: path.dataset.part ?? partIds[index], d, contours,
+        fillRule: path.getAttribute('fill-rule') ?? svg.getAttribute('fill-rule') ?? 'nonzero' };
+    });
+    for (const [name, variant] of [['mic', 'outline'], ['mic', 'filled'], ['mic-circle', 'outline']]) {
+      const id = `${name}/${variant}/capsule-width`;
+      await choose(name, variant);
+      const sourceModule = await import(`./package/symbols/${name}.js`);
+      const symbol = await import(`./package/variations/${name}.js`);
+      const source = sourceModule.glyph({ variant }), caps = symbol.glyphCapabilities(variant);
+      const row = data.rows.find(item => item.name === name && item.variant === variant);
+      const masterResponse = await originalFetch(row.views.master);
+      if (!masterResponse.ok) throw new Error(`explorer journey: capsule master HTTP ${masterResponse.status}`);
+      const master = new DOMParser().parseFromString(await masterResponse.text(), 'image/svg+xml').documentElement;
+      const sourcePaths = JSON.stringify(paths(master));
+      check(`${id}/admitted-width-controls`, data.variationIconIds.includes(name) && caps.variation?.law === 'capsule.width' &&
+        caps.variation.targets.svg === 'supported' && caps.variation.domain.minimum === .8 && caps.variation.domain.maximum === 1 &&
+        [...q('axis-controls').querySelectorAll('[data-variation]')].map(input => input.dataset.variation).join(',') === 'bodyWidth' &&
+        variationInput('bodyWidth').type === 'number' && variationInput('bodyWidth').value === '1' &&
+        viewButton('generated').textContent === 'Вариация' && !viewButton('generated').disabled);
+      check(`${id}/exact-author-default`, symbol.glyph({ variant, variation: { bodyWidth: 1 } }) === source &&
+        JSON.stringify(paths(q('symbol-stage').querySelector(':scope > svg'))) === sourcePaths);
+      const partIds = source.parts.map(part => part.id);
+      const original = capsuleSnapshot(q('symbol-stage').querySelector(':scope > svg'), partIds);
+      await chooseView('generated');
+      check(`${id}/default-variation-view`, q('consumer-import').textContent.includes(`/variations/${name}`) &&
+        JSON.stringify(paths(q('symbol-stage').querySelector(':scope > svg'))) === sourcePaths);
+      let modified;
+      for (const width of [.9, .8]) {
+        await changeVariation('bodyWidth', width);
+        const shown = q('symbol-stage').querySelector(':scope > svg');
+        modified = symbol.glyph({ variant, variation: { bodyWidth: width } });
+        const observed = capsuleSnapshot(shown, partIds);
+        const geometry = capsuleWidthObservationChecks(original, observed, width);
+        for (const [property, passed] of Object.entries(geometry)) check(`${id}/${width}/${property}`, passed,
+          property === 'bodyWidth' ? { before: original, after: observed, width } : undefined);
+        const modifiedPaths = JSON.stringify(paths(new DOMParser().parseFromString(modified.svg, 'image/svg+xml').documentElement));
+        check(`${id}/${width}/production-package-render`, modified.provenance.variation.parameters.bodyWidth === width &&
+          JSON.stringify(paths(shown)) === modifiedPaths &&
+          [...shown.querySelectorAll('[data-part]')].map(part => part.dataset.part).join(',') === partIds.join(','));
+        check(`${id}/${width}/small-size-geometry`, [...q('size-samples').querySelectorAll('.size-sample > svg')]
+          .map(svg => svg.style.width).join(',') === '16px,24px,48px' &&
+          [...q('size-samples').querySelectorAll('.size-sample > svg')].every(svg => JSON.stringify(paths(svg)) === modifiedPaths));
+        q('export-format').value = 'svg'; q('export').click();
+        const exported = downloads.at(-1);
+        check(`${id}/${width}/exports-visible-width`, exported?.filename === `${name}-${variant}-variation.svg` &&
+          JSON.stringify(paths(new DOMParser().parseFromString(await exported.blob.text(), 'image/svg+xml').documentElement)) === modifiedPaths);
+      }
+      const acceptedStage = q('symbol-stage').innerHTML, acceptedSamples = q('size-samples').innerHTML;
+      for (const [width, refusal] of [[0, 'INVALID_VARIATION'], [.79, 'VARIATION_OUTSIDE_DOMAIN'], [1.01, 'VARIATION_OUTSIDE_DOMAIN']]) {
+        await changeVariation('bodyWidth', width, refusal);
+        check(`${id}/${width}/refusal-retains-accepted-width`, q('symbol-stage').innerHTML === acceptedStage &&
+          q('size-samples').innerHTML === acceptedSamples && !q('export').disabled);
+        q('export-format').value = 'svg'; q('export').click();
+        check(`${id}/${width}/refusal-exports-accepted-width`, JSON.stringify(paths(new DOMParser()
+          .parseFromString(await downloads.at(-1).blob.text(), 'image/svg+xml').documentElement)) ===
+          JSON.stringify(paths(new DOMParser().parseFromString(modified.svg, 'image/svg+xml').documentElement)));
+      }
+      check(`${id}/motion-is-not-invented`, q('play').disabled && q('gesture').value === '' && caps.variation.targets.webEffect === 'not-exported');
+      q('axis-controls').querySelector('[data-variation-reset]').click();
+      await wait(() => q('symbol-inspector').getAttribute('aria-busy') === 'false' && q('symbol-stage').dataset.view === 'original', `${id} reset`);
+      check(`${id}/reset-restores-exact-author`, variationInput('bodyWidth').value === '1' &&
+        variationInput('bodyWidth').getAttribute('aria-invalid') !== 'true' &&
+        JSON.stringify(paths(q('symbol-stage').querySelector(':scope > svg'))) === sourcePaths);
+      q('export-format').value = 'svg'; q('export').click();
+      check(`${id}/reset-export-restores-author`, downloads.at(-1)?.filename === `${name}-${variant}.svg` &&
+        JSON.stringify(paths(new DOMParser().parseFromString(await downloads.at(-1).blob.text(), 'image/svg+xml').documentElement)) === sourcePaths);
+      authority.push({ name, variant, author: source.provenance.author, anatomy: source.provenance.anatomy, variation: modified.provenance.variation });
+    }
+    capsuleMeasure.remove();
+    await choose('mic-circle', 'filled');
+    const filledMicrophone = await import('./package/variations/mic-circle.js');
+    let filledWidthRefusal;
+    try { filledMicrophone.glyph({ variant: 'filled', variation: { bodyWidth: .9 } }); }
+    catch (error) { filledWidthRefusal = error.code; }
+    check('mic-circle/filled/no-invented-body-width', !filledMicrophone.glyphCapabilities('filled').variation &&
+      q('axis-controls').querySelectorAll('[data-variation]').length === 0 && filledWidthRefusal === 'AUTHOR_VARIATION_UNSUPPORTED');
 
     for (const [name, variant, halfway] of [
       ['volume-high', 'outline', [1, 0.5, 0]],
