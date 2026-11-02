@@ -58,6 +58,15 @@ describe('независимый raw author oracle Lottie', () => {
     expect(canonicalCubicPath('\fM1,2\tL3-4\r\nH5V6Z\f'))
       .toBe('M1 2C1 2 3 -4 3 -4C3 -4 5 -4 5 -4C5 -4 5 6 5 6C5 6 1 2 1 2Z');
   });
+  it('canonical materialization отвергает binary32 overflow без порога координат', () => {
+    for (const d of ['M0 0L1e39 2Z', 'M0 0L-1e39 2Z', 'M1e39 0L1 2Z',
+      'M0 0C1 2 -1e39 4 5 6Z']) expect(() => canonicalCubicPath(d), d).toThrow('binary32');
+    for (const value of [3.4028234663852886e38, -3.4028234663852886e38, 1e38, -1e38]) {
+      const canonical = canonicalCubicPath(`M0 0L${value} 2Z`);
+      expect(canonical).toContain(`${Math.fround(value)} 2`);
+      expect(canonical).not.toMatch(/Infinity|NaN/);
+    }
+  });
   it('получает ожидаемый прогресс и terminal из request, без producer metadata', () => {
     expect(referenceLottieTiming({ gesture: 'reload.cycle', from: 0.17, to: 0.73, duration: 1000 })).toEqual({ from: 0.17, to: 0.73, terminalFrame: 60 });
     expect(referenceLottieTiming({ gesture: 'reload.cycle', from: 1, to: 0.3, reducedMotion: true })).toEqual({ from: 1, to: 0.3, terminalFrame: 0 });

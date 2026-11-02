@@ -18,7 +18,11 @@ export function canonicalCubicPath(d) {
   const number = () => {
     const value = Number(tokens[index++]); assert(Number.isFinite(value), 'raw command содержит нечисловую координату'); return value;
   };
-  const coordinates = point => point.map(Math.fround).join(' ');
+  const coordinates = point => {
+    const materialized = point.map(Math.fround);
+    assert(materialized.every(Number.isFinite), 'raw координаты невыразимы в конечном binary32');
+    return materialized.join(' ');
+  };
   const curve = (a, b, end) => { output += `C${coordinates(a)} ${coordinates(b)} ${coordinates(end)}`; cursor = end; };
   while (index < tokens.length) {
     if (/^[a-zA-Z]$/.test(tokens[index])) command = tokens[index++];
