@@ -67,22 +67,22 @@
   },
   "recorded-model-axis": {
    "entry": "import { glyph } from '@labpics/icons/ir';\nconsole.log(glyph({ icon: 'chevron-forward', axes: { weight: 1.1, opsz: 32 } }));\n",
-   "baselineBytes": 840088,
-   "baselineGzipBytes": 210501,
+   "baselineBytes": 841271,
+   "baselineGzipBytes": 210799,
    "maxBytes": 853339,
    "maxGzipBytes": 214703
   },
   "recorded-motion": {
    "entry": "import { glyph, glyphCapabilities } from '@labpics/icons/ir';\nimport { compileSymbolEffect } from '@labpics/icons/motion';\nconsole.log(compileSymbolEffect(glyph({ icon: 'time' }), glyphCapabilities('time'), 'time.advance', { duration: 400 }));\n",
-   "baselineBytes": 856854,
-   "baselineGzipBytes": 214343,
+   "baselineBytes": 858097,
+   "baselineGzipBytes": 214613,
    "maxBytes": 865952,
    "maxGzipBytes": 217706
   },
   "full-ir-opt-in": {
    "entry": "import { glyph } from '@labpics/icons/ir';\nconsole.log(glyph({ icon: 'alert' }));\n",
-   "baselineBytes": 840052,
-   "baselineGzipBytes": 210486,
+   "baselineBytes": 841235,
+   "baselineGzipBytes": 210784,
    "maxBytes": 921319,
    "maxGzipBytes": 231011
   },
@@ -109,8 +109,8 @@
   },
   "varied-ellipsis-horizontal": {
    "entry": "import { glyph } from '@labpics/icons/variations/ellipsis-horizontal';\nconsole.log(glyph({ variation: { dotScale: 1.1, spacingScale: 0.9 } }));\n",
-   "baselineBytes": 27351,
-   "baselineGzipBytes": 7509,
+   "baselineBytes": 25811,
+   "baselineGzipBytes": 6985,
    "maxBytes": 27351,
    "maxGzipBytes": 7509
   },
@@ -123,8 +123,8 @@
   },
   "varied-ellipsis-vertical": {
    "entry": "import { glyph } from '@labpics/icons/variations/ellipsis-vertical';\nconsole.log(glyph({ variation: { dotScale: 1.1, spacingScale: 0.9 } }));\n",
-   "baselineBytes": 27098,
-   "baselineGzipBytes": 7453,
+   "baselineBytes": 25558,
+   "baselineGzipBytes": 6933,
    "maxBytes": 27098,
    "maxGzipBytes": 7453
   }

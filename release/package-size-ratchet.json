@@ -23,8 +23,8 @@
    ]
   },
   "dist/authoring/index.js": {
-   "baselineBytes": 56638,
-   "baselineGzipBytes": 17677,
+   "baselineBytes": 56681,
+   "baselineGzipBytes": 17669,
    "maxBytes": 70596,
    "maxGzipBytes": 19660,
    "allowedModules": [
@@ -36,6 +36,166 @@
     "src/ir/sha256.ts",
     "src/ir/svg-assembly.ts"
    ],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ]
+  },
+  "dist/content-variations/alert-circle.d.ts": {
+   "baselineBytes": 1028,
+   "baselineGzipBytes": 293,
+   "maxBytes": 1028,
+   "maxGzipBytes": 293,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ]
+  },
+  "dist/content-variations/alert-circle.js": {
+   "baselineBytes": 4412,
+   "baselineGzipBytes": 1830,
+   "maxBytes": 4412,
+   "maxGzipBytes": 1830,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ]
+  },
+  "dist/content-variations/checkmark-circle.d.ts": {
+   "baselineBytes": 1052,
+   "baselineGzipBytes": 296,
+   "maxBytes": 1052,
+   "maxGzipBytes": 296,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ]
+  },
+  "dist/content-variations/checkmark-circle.js": {
+   "baselineBytes": 4153,
+   "baselineGzipBytes": 1775,
+   "maxBytes": 4153,
+   "maxGzipBytes": 1775,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ]
+  },
+  "dist/content-variations/close-circle.d.ts": {
+   "baselineBytes": 1028,
+   "baselineGzipBytes": 293,
+   "maxBytes": 1028,
+   "maxGzipBytes": 293,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ]
+  },
+  "dist/content-variations/close-circle.js": {
+   "baselineBytes": 4082,
+   "baselineGzipBytes": 1724,
+   "maxBytes": 4082,
+   "maxGzipBytes": 1724,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ]
+  },
+  "dist/content-variations/minus-circle.d.ts": {
+   "baselineBytes": 1028,
+   "baselineGzipBytes": 293,
+   "maxBytes": 1028,
+   "maxGzipBytes": 293,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ]
+  },
+  "dist/content-variations/minus-circle.js": {
+   "baselineBytes": 3505,
+   "baselineGzipBytes": 1428,
+   "maxBytes": 3505,
+   "maxGzipBytes": 1428,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ]
+  },
+  "dist/content-variations/pause-circle.d.ts": {
+   "baselineBytes": 1028,
+   "baselineGzipBytes": 293,
+   "maxBytes": 1028,
+   "maxGzipBytes": 293,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ]
+  },
+  "dist/content-variations/pause-circle.js": {
+   "baselineBytes": 4030,
+   "baselineGzipBytes": 1569,
+   "maxBytes": 4030,
+   "maxGzipBytes": 1569,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ]
+  },
+  "dist/content-variations/play-circle.d.ts": {
+   "baselineBytes": 1022,
+   "baselineGzipBytes": 293,
+   "maxBytes": 1022,
+   "maxGzipBytes": 293,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ]
+  },
+  "dist/content-variations/play-circle.js": {
+   "baselineBytes": 4312,
+   "baselineGzipBytes": 1832,
+   "maxBytes": 4312,
+   "maxGzipBytes": 1832,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ]
+  },
+  "dist/content-variations/plus-circle.d.ts": {
+   "baselineBytes": 1022,
+   "baselineGzipBytes": 293,
+   "maxBytes": 1022,
+   "maxGzipBytes": 293,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ]
+  },
+  "dist/content-variations/plus-circle.js": {
+   "baselineBytes": 3994,
+   "baselineGzipBytes": 1621,
+   "maxBytes": 3994,
+   "maxGzipBytes": 1621,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ]
+  },
+  "dist/content-variations/question-circle.d.ts": {
+   "baselineBytes": 1046,
+   "baselineGzipBytes": 293,
+   "maxBytes": 1046,
+   "maxGzipBytes": 293,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ]
+  },
+  "dist/content-variations/question-circle.js": {
+   "baselineBytes": 5098,
+   "baselineGzipBytes": 2138,
+   "maxBytes": 5098,
+   "maxGzipBytes": 2138,
+   "allowedModules": [],
    "forbiddenNeedles": [
     "sourceMappingURL"
    ]
@@ -96,11 +256,31 @@
     "sourceMappingURL"
    ]
   },
+  "dist/ir/author-capsule-types.d.ts": {
+   "baselineBytes": 3305,
+   "baselineGzipBytes": 976,
+   "maxBytes": 3305,
+   "maxGzipBytes": 976,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ]
+  },
   "dist/ir/author-catalog.generated.d.ts": {
    "baselineBytes": 5072,
    "baselineGzipBytes": 1631,
    "maxBytes": 5072,
    "maxGzipBytes": 1631,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ]
+  },
+  "dist/ir/author-content-types.d.ts": {
+   "baselineBytes": 3380,
+   "baselineGzipBytes": 1007,
+   "maxBytes": 3380,
+   "maxGzipBytes": 1007,
    "allowedModules": [],
    "forbiddenNeedles": [
     "sourceMappingURL"
@@ -172,6 +352,21 @@
     "sourceMappingURL"
    ]
   },
+  "dist/ir/capsule-runtime.js": {
+   "baselineBytes": 11254,
+   "baselineGzipBytes": 4680,
+   "maxBytes": 11254,
+   "maxGzipBytes": 4680,
+   "allowedModules": [
+    "src/core/annulus-content-geometry.js",
+    "src/ir/author-capsule-runtime.ts",
+    "src/ir/sha256.ts",
+    "src/ir/svg-assembly.ts"
+   ],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ]
+  },
   "dist/ir/catalog.generated.d.ts": {
    "baselineBytes": 3602,
    "baselineGzipBytes": 1407,
@@ -193,8 +388,8 @@
    ]
   },
   "dist/ir/compiler.js": {
-   "baselineBytes": 122393,
-   "baselineGzipBytes": 37364,
+   "baselineBytes": 124013,
+   "baselineGzipBytes": 37790,
    "maxBytes": 154789,
    "maxGzipBytes": 42120,
    "allowedModules": [
@@ -207,6 +402,33 @@
     "src/core/path-data.js",
     "src/ir/compiler.ts",
     "src/ir/recipes.ts",
+    "src/ir/sha256.ts",
+    "src/ir/svg-assembly.ts"
+   ],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ]
+  },
+  "dist/ir/content-geometry-runtime.js": {
+   "baselineBytes": 5014,
+   "baselineGzipBytes": 1995,
+   "maxBytes": 5014,
+   "maxGzipBytes": 1995,
+   "allowedModules": [
+    "src/core/annulus-content-geometry.js",
+    "src/ir/content-geometry-runtime.ts"
+   ],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ]
+  },
+  "dist/ir/content-runtime.js": {
+   "baselineBytes": 8389,
+   "baselineGzipBytes": 3559,
+   "maxBytes": 8389,
+   "maxGzipBytes": 3559,
+   "allowedModules": [
+    "src/ir/author-content-runtime.ts",
     "src/ir/sha256.ts",
     "src/ir/svg-assembly.ts"
    ],
@@ -238,8 +460,8 @@
    ]
   },
   "dist/ir/glyph-types.d.ts": {
-   "baselineBytes": 8762,
-   "baselineGzipBytes": 2302,
+   "baselineBytes": 8750,
+   "baselineGzipBytes": 2238,
    "maxBytes": 8762,
    "maxGzipBytes": 2302,
    "allowedModules": [],
@@ -496,6 +718,26 @@
     "sourceMappingURL"
    ]
   },
+  "dist/ir/symbol-data/mic-circle.js": {
+   "baselineBytes": 13375,
+   "baselineGzipBytes": 3460,
+   "maxBytes": 13375,
+   "maxGzipBytes": 3460,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ]
+  },
+  "dist/ir/symbol-data/mic.js": {
+   "baselineBytes": 14236,
+   "baselineGzipBytes": 2732,
+   "maxBytes": 14236,
+   "maxGzipBytes": 2732,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ]
+  },
   "dist/ir/symbol-data/minus-circle.js": {
    "baselineBytes": 9055,
    "baselineGzipBytes": 2083,
@@ -559,8 +801,8 @@
    ]
   },
   "dist/ir/variation-runtime.js": {
-   "baselineBytes": 10737,
-   "baselineGzipBytes": 4427,
+   "baselineBytes": 8872,
+   "baselineGzipBytes": 3859,
    "maxBytes": 10737,
    "maxGzipBytes": 4427,
    "allowedModules": [
@@ -4823,8 +5065,8 @@
    ]
   },
   "dist/lottie/mic-circle.js": {
-   "baselineBytes": 7735,
-   "baselineGzipBytes": 2829,
+   "baselineBytes": 4499,
+   "baselineGzipBytes": 1897,
    "maxBytes": 7891,
    "maxGzipBytes": 2845,
    "allowedModules": [],
@@ -4863,8 +5105,8 @@
    ]
   },
   "dist/lottie/mic.js": {
-   "baselineBytes": 6061,
-   "baselineGzipBytes": 2313,
+   "baselineBytes": 6051,
+   "baselineGzipBytes": 2287,
    "maxBytes": 6201,
    "maxGzipBytes": 2333,
    "allowedModules": [],
@@ -7183,8 +7425,8 @@
    ]
   },
   "dist/motion/index.js": {
-   "baselineBytes": 13700,
-   "baselineGzipBytes": 3783,
+   "baselineBytes": 13766,
+   "baselineGzipBytes": 3792,
    "maxBytes": 14620,
    "maxGzipBytes": 3817,
    "allowedModules": [
@@ -12464,8 +12706,8 @@
    ]
   },
   "dist/symbols/mic-circle.js": {
-   "baselineBytes": 11773,
-   "baselineGzipBytes": 3280,
+   "baselineBytes": 517,
+   "baselineGzipBytes": 214,
    "maxBytes": 18428,
    "maxGzipBytes": 3381,
    "allowedModules": [],
@@ -12512,8 +12754,8 @@
    ]
   },
   "dist/symbols/mic.js": {
-   "baselineBytes": 10022,
-   "baselineGzipBytes": 2839,
+   "baselineBytes": 503,
+   "baselineGzipBytes": 213,
    "maxBytes": 15064,
    "maxGzipBytes": 2914,
    "allowedModules": [],
@@ -15396,6 +15638,54 @@
    "baselineGzipBytes": 1581,
    "maxBytes": 9205,
    "maxGzipBytes": 1581,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL",
+    "semantics/catalog.json",
+    "anatomy.runtime.json"
+   ]
+  },
+  "dist/variations/mic-circle.d.ts": {
+   "baselineBytes": 1402,
+   "baselineGzipBytes": 333,
+   "maxBytes": 1402,
+   "maxGzipBytes": 333,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL",
+    "semantics/catalog.json",
+    "anatomy.runtime.json"
+   ]
+  },
+  "dist/variations/mic-circle.js": {
+   "baselineBytes": 5964,
+   "baselineGzipBytes": 1854,
+   "maxBytes": 5964,
+   "maxGzipBytes": 1854,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL",
+    "semantics/catalog.json",
+    "anatomy.runtime.json"
+   ]
+  },
+  "dist/variations/mic.d.ts": {
+   "baselineBytes": 1346,
+   "baselineGzipBytes": 330,
+   "maxBytes": 1346,
+   "maxGzipBytes": 330,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL",
+    "semantics/catalog.json",
+    "anatomy.runtime.json"
+   ]
+  },
+  "dist/variations/mic.js": {
+   "baselineBytes": 6762,
+   "baselineGzipBytes": 2098,
+   "maxBytes": 6762,
+   "maxGzipBytes": 2098,
    "allowedModules": [],
    "forbiddenNeedles": [
     "sourceMappingURL",
