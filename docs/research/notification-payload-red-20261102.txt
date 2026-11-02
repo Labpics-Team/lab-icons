@@ -1,0 +1,48 @@
+baselineSourceSha=8fbb434fb3c56b22703088c9e69b4f618bc2685f
+baselineEmitterSha256=efc62d51fed9c7e272fcd23609d15e14bbcc22c39010a06b2cafa943feac9398
+candidateEmitterSha256=80d08832720b5058bfe97e39cb0667ba255edc57177945ef10e0e4a8ac637b76
+command=node node_modules/vitest/vitest.mjs run test/notification-payload.test.js
+exitCode=1
+
+ RUN  v4.1.12 E:/AgentWork/lab-icons-notification-payload-20261102
+
+ ❯ test/notification-payload.test.js (7 tests | 4 failed) 63ms
+     × notifications хранит path один раз для source и один раз для независимого static 11ms
+     × notifications-unread хранит path один раз для source и один раз для независимого static 9ms
+     × notifications PURE охватывает весь source materializer; sabotage удерживает геометрию 7ms
+     × notifications-unread PURE охватывает весь source materializer; sabotage удерживает геометрию 7ms
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 3 passed (7)
+   Start at  10:48:21
+   Duration  619ms (transform 144ms, setup 0ms, import 432ms, tests 63ms, environment 0ms)
+
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/notification-payload.test.js > exact notification path representation > notifications хранит path один раз для source и один раз для независимого static
+ FAIL  test/notification-payload.test.js > exact notification path representation > notifications-unread хранит path один раз для source и один раз для независимого static
+AssertionError: expected 4 to be less than or equal to 2
+ ❯ test/notification-payload.test.js:62:95
+     60|       expect(JSON.stringify(consumer[index])).toBe(JSON.stringify(inpu…
+     61|       expect(JSON.stringify(consumer[index + 2])).toBe(JSON.stringify(…
+     62|       for (const part of input.source[variant].parts) expect(module.sp…
+       |                                                                                               ^
+     63|     }
+     64|     expect(consumer[4]).toBe(input.staticSvg.outline);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  test/notification-payload.test.js > exact notification path representation > notifications PURE охватывает весь source materializer; sabotage удерживает геометрию
+ FAIL  test/notification-payload.test.js > exact notification path representation > notifications-unread PURE охватывает весь source materializer; sabotage удерживает геометрию
+AssertionError: expected '/** GENERATED: проверенные текущие ав…' not to be '/** GENERATED: проверенные текущие ав…' // Object.is equality
+ ❯ test/notification-payload.test.js:74:26
+     72|     expect(caps).not.toContain(geometry);
+     73|     const sabotage = module.replaceAll('/* @__PURE__ */ (() =>', '(() …
+     74|     expect(sabotage).not.toBe(module);
+       |                          ^
+     75|     const { text: retained } = await consume(sabotage, 'glyphCapabilit…
+     76|     expect(retained).toContain(geometry);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+

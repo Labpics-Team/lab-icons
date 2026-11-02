@@ -257,3 +257,95 @@ private runtime и новые package dependencies не внесены.
 38 ограниченных controls проверили специальный ключ, четыре текущих masters,
 неизменные glyph/caps/static bundles и существующую авторскую вариацию.
 Полная remote qualification остаётся отдельным гейтом.
+
+## Точные notification bytes и граница повторов
+
+На `8fbb434fb3c56b22703088c9e69b4f618bc2685f` узкий
+`authoredSymbolPayloads(['notifications', 'notifications-unread'])` воспроизвёл
+оба shipping модуля remote run `41403011004` побайтно. Authenticated report
+`schema6-8fbb434-report.json` имеет SHA-256
+`b63ab4be495f7a8b866035ae24b3c25ea33211c0c10be466163880e1413e4d91`.
+Все три materialized runtime также совпали по digest. Числа ниже получены
+на Node `24.15.0`, Windows, esbuild `0.28.1`, fflate `0.8.3`,
+`gzipSync({ level: 9, mtime: 0 })`; они не являются новым browser или full pack run.
+
+Повторяется `part.d` внутри `source.d` и `source.svg`. Два author/anatomy
+receipts одного варианта уже разделены существующим build owner;
+Outline/Filled остаются независимыми. Проверены два разных остатка:
+exact path strings и равные scalar strings внутри разных metadata records.
+Проверка [notification-payloads.mjs](../../scripts/bench/notification-payloads.mjs)
+сохраняет все значения/ключи/порядок, функцию и snapshot identity,
+frozen trees, getter receiver и прежние отказы. Материализованные native
+модули и пять selective consumers используют один закреплённый compiler вход.
+
+| Представление | notifications raw/gzip B | unread raw/gzip B | Отказ |
+|---|---:|---:|---|
+| Shipping baseline | 24910/4661 | 31296/5535 | Ceilings 23951/4165 и 30360/5034 превышены |
+| Exact path constants, PURE source IIFE, независимый static literal | 16660/4584 | 21576/5463 | Gzip ceiling превышен на 419/429 B |
+| Те же paths также в static string expression | 12504/4519 | 16622/5395 | Ухудшились outline/filled consumers |
+| Exact scalar references без объединения objects | 23755/4764 | 29329/5672 | Ухудшились glyph/caps/both consumers |
+| Path и scalar references вместе | 15505/4689 | 19605/5602 | Ухудшился caps consumer |
+
+Path-only уменьшил настоящий glyph consumer с `20965/4937` до
+`12459/4812` B и unread с `26285/5802` до `16101/5649` B.
+Caps и оба static consumers по raw/gzip не ухудшились. Это полезный
+контрпример к выводу «повторы неустранимы без нового runtime adapter»,
+и этот срез внесён в общий build owner `sourceRecords`. Это не закрытие
+shipping gate. Scalar references уменьшили raw, сохранили
+все объекты независимыми, однако увеличили compressed consumer bytes;
+равенство поддерева само по себе не доказывает пользу его разделения.
+
+Deliberate sabotage удалил PURE только с source materializer. Caps consumer
+уведомлений вырос с `4531/1511` до `12176/4421` B, unread — с `4668/1529`
+до `15946/5257` B; static тоже удержал геометрию. Это согласуется с
+[ответом сопровождающего esbuild #3392](https://github.com/evanw/esbuild/issues/3392)
+и [границей PURE](https://esbuild.github.io/api/#pure): внешняя аннотация
+фабрики не устраняет потенциальные эффекты её заранее вычисленных аргументов.
+Идентичность объектов ограничивает объединение object literals; exact string
+references сохраняют scalar values по
+[ECMAScript PropertyDefinitionEvaluation](https://tc39.es/ecma262/multipage/ecmascript-language-expressions.html#sec-object-initializer-runtime-semantics-propertydefinitionevaluation).
+Источники проверены 2026-11-02; применимость esbuild проверена на закреплённой версии.
+
+[Полные измерения](notification-payloads-20261102.json) содержат digests,
+retained module graph, native controls и каждый consumer. [RED на точном
+исходном emitter](notification-payload-red-20261102.txt) обнаружил четыре
+копии `part.d` против требуемых двух: одну source и одну независимую static.
+После исправления прошли 44 tests, включая exact данные/extension keys,
+равные/расходящиеся receipts, варианты и static tree shaking. `pnpm exec`
+потребовал переустановку из-за junction
+node_modules в изолированном worktree, поэтому тот же pinned Vitest `4.1.12`
+запущен через его официальный Node entrypoint. Полная suite не запускалась.
+
+Source-only fixture раньше требовал одинаковый SHA всего minified consumer.
+Он теперь проверяет exact публичные данные и raw/gzip без роста; другое
+представление вправе менять private minifier names. Например, caps `i → t`
+в source-only `console.log` entry менял gzip на 1 B, хотя actual shipping
+closure сохранял caps `1511/1529` B. Поэтому caps gzip guard перенесён в
+настоящий трёхмодульный runtime closure, с неизменным baseline. Во вторичном
+source-only `time` control Brotli вырос на 8 B при уменьшении raw/gzip;
+Brotli nonregression и parse/allocations этим срезом не заявляются.
+
+Изолированное ревью source digest
+`80d08832720b5058bfe97e39cb0667ba255edc57177945ef10e0e4a8ac637b76`
+прошло: 1008 строковых случаев, 644 проверки четырёх layouts и восемь
+tree-shaking controls подтвердили exact JSON strings и границу materializer.
+Отдельная ось последствий второго порядка не нашла доказанного пропущенного
+простого представления в проверенных path/scalar/skeleton семействах.
+
+В product emitter принят только path-only layout, сравниваемый прежним
+`compactGeneratedModule` по raw/pinned gzip. Целиком отмеченный PURE source
+materializer не удерживает геометрию в caps/static. Generated public static
+строки остаются прежними независимыми литералами. Нет нового decoder,
+адаптера или runtime dependency. Ceilings не повышены: module gzip остаётся
+RED на 419/429 B. Отрицательный результат для остальных представлений
+не доказывает невозможность любого сильнейшего build-only решения. Browser,
+full corpus/package, timing/allocations и удалённая qualification остаются
+отдельными открытыми проверками исходной задачи.
+
+Воспроизведение из этого checkout:
+
+```powershell
+node scripts/bench/notification-payloads.mjs `
+  E:/AgentWork/annulus-consumer-evidence-20261102/schema6-8fbb434-report.json `
+  docs/research/notification-payloads-20261102.json
+```

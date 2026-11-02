@@ -89,12 +89,23 @@ function sourceCapabilities(input) {
   return result;
 }
 
+/** Сборка разбивает только exact строки; consumer не разбирает path или SVG. */
+function pathStringExpression(value, references) {
+  let fragments = [{ value }];
+  for (const [path, reference] of references) {
+    fragments = fragments.flatMap(fragment => fragment.reference ? [fragment]
+      : fragment.value.split(path).flatMap((value, index) => index ? [{ reference }, { value }] : [{ value }]));
+  }
+  return fragments.filter(fragment => fragment.reference || fragment.value)
+    .map(fragment => fragment.reference ?? jsonDataLiteral(fragment.value)).join('+') || '""';
+}
+
 /** Общий build-only источник записей и ссылок: размещение не меняет authored данные. */
-function sourceRecords({ source, capabilities, staticSvg }, compact) {
+function sourceRecords({ source, capabilities, staticSvg }, compact, sharePaths = false) {
   const json = jsonDataLiteral;
   const serialize = compact ? compactDataLiteral : json;
   const record = value => value !== null && typeof value === 'object' && !Array.isArray(value);
-  const shared = [], references = {};
+  const shared = [], paths = [], references = {};
   for (const variant of ['outline', 'filled']) {
     const provenance = source[variant]?.provenance, capability = capabilities[variant];
     references[variant] = new Map();
@@ -115,11 +126,25 @@ function sourceRecords({ source, capabilities, staticSvg }, compact) {
     const metadata = references[variant], sourceReferences = new Map();
     if (metadata.size) sourceReferences.set('provenance', renderJSONRecord(source[variant].provenance, metadata, compact));
     if (source[variant].svg === staticSvg[variant]) sourceReferences.set('svg', variant);
-    sources[variant] = renderJSONRecord(source[variant], sourceReferences, compact);
+    const shape = source[variant];
+    const geometry = sharePaths && typeof shape.d === 'string' && typeof shape.svg === 'string' &&
+      Array.isArray(shape.parts) && shape.parts.length && shape.parts.every(part => record(part) && typeof part.d === 'string' && part.d.length)
+      ? shape.parts.map((part, index) => [part.d, `${variant}Path${index}`]) : [];
+    if (geometry.length) {
+      paths.push(...geometry.map(([path, name]) => `const ${name} = ${json(path)};`));
+      sourceReferences.set('parts', `[${shape.parts.map((part, index) => renderJSONRecord(part,
+        new Map([['d', `${variant}Path${index}`]]), compact)).join(',')}]`);
+      sourceReferences.set('d', pathStringExpression(shape.d, geometry));
+      sourceReferences.set('svg', pathStringExpression(shape.svg, geometry));
+    }
+    const rendered = renderJSONRecord(shape, sourceReferences, compact);
+    // PURE закрывает string expressions целиком: caps/static не удерживают
+    // geometry из-за потенциального coercion в неиспользуемом source record.
+    sources[variant] = geometry.length ? `/* @__PURE__ */ (() => (${rendered}))()` : rendered;
     capabilityRecords[variant] = renderJSONRecord(capabilities[variant], metadata, compact);
     if (metadata.size) capabilityReferences.set(variant, capabilityRecords[variant]);
   }
-  return { shared, sources, capabilityRecords, capabilities: renderJSONRecord(capabilities, capabilityReferences, compact),
+  return { shared, paths, sources, capabilityRecords, capabilities: renderJSONRecord(capabilities, capabilityReferences, compact),
     static: ['outline', 'filled'].map(variant => `export const ${variant} = ${json(staticSvg[variant])};`) };
 }
 
@@ -127,12 +152,12 @@ function sourceRecords({ source, capabilities, staticSvg }, compact) {
 export function renderSymbolModule(input) {
   if (!SYMBOL_NAME.test(input.icon)) throw new TypeError('symbol module: невалидное имя');
   input = { ...input, capabilities: sourceCapabilities(input.capabilities) };
-  const emit = compact => {
-    const records = sourceRecords(input, compact);
+  const emit = (compact, sharePaths = false) => {
+    const records = sourceRecords(input, compact, sharePaths);
     return [
     '/** GENERATED: проверенные текущие авторские masters одного символа. */',
     "import { createCompiledGlyph, createCompiledCapabilities } from '../ir/symbol-runtime.js';",
-    ...records.static, ...records.shared,
+    ...records.paths, ...records.static, ...records.shared,
     `const outlineSource = ${records.sources.outline};`,
     `const filledSource = ${records.sources.filled};`,
     `export const glyph = /* @__PURE__ */ createCompiledGlyph(${jsonDataLiteral(input.icon)}, { outline: outlineSource, filled: filledSource });`,
@@ -140,7 +165,7 @@ export function renderSymbolModule(input) {
     '',
     ].join('\n');
   };
-  return compactGeneratedModule([emit(false), emit(true)]);
+  return compactGeneratedModule([emit(false), emit(true), emit(false, true), emit(true, true)]);
 }
 
 export function symbolModuleDeclaration(icon) {
@@ -175,9 +200,9 @@ export function renderSymbolModules(input) {
     }
   }
   const caps = input.capabilities;
-  const emitData = compact => {
-    const records = sourceRecords({ source, staticSvg, capabilities }, compact);
-    const lines = [...records.static, ...records.shared];
+  const emitData = (compact, sharePaths = false) => {
+    const records = sourceRecords({ source, staticSvg, capabilities }, compact, sharePaths);
+    const lines = [...records.paths, ...records.static, ...records.shared];
     for (const variant of ['outline', 'filled']) {
       lines.push(`export const ${variant}Source = ${records.sources[variant]};`);
       lines.push(`export const ${variant}Capabilities = ${records.capabilityRecords[variant]};`);
@@ -198,7 +223,7 @@ export function renderSymbolModules(input) {
     // оставляет чтения/spread данных в аргументе удалённой внешней фабрики.
     `export const glyphCapabilities = /* @__PURE__ */ createCompiledCapabilities(/* @__PURE__ */ (() => ({${['outline', 'filled'].map(variant =>
       `${variant}: ${caps[variant].variation ? `{ ...${variant}Capabilities, variation: ${(compact ? compactDataLiteral : jsonDataLiteral)(caps[variant].variation)} }` : `${variant}Capabilities`}`).join(',')}}))());`, ''].join('\n');
-  return { symbol: base, data: compactGeneratedModule([emitData(false), emitData(true)]),
+  return { symbol: base, data: compactGeneratedModule([emitData(false), emitData(true), emitData(false, true), emitData(true, true)]),
     variation: compactGeneratedModule([variable(false), variable(true)]) };
 }
 

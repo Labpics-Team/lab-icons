@@ -98,9 +98,16 @@ describe('build-only проекция без повторов авторских
     const oldCaps = await consume(oldModule, capsEntry), actualCaps = await consume(module, capsEntry);
     const staticEntryForReport = 'import { outline } from "test-symbol"; console.log(outline);';
     const oldStatic = await consume(oldModule, staticEntryForReport), actualStatic = await consume(module, staticEntryForReport);
-    expect(measure(actualConsumer)).toEqual(measure(oldConsumer));
-    expect(measure(actualCaps)).toEqual(measure(oldCaps));
-    expect(measure(actualStatic)).toEqual(measure(oldStatic));
+    // Изменение представления сохраняет exact данные, проверенные выше;
+    // consumer SHA вправе измениться при устранении повторов source strings.
+    // Source-only namespace меняет private minifier names после удаления path
+    // literals. Caps gzip проверяется на настоящих трёх shipping runtime модулях
+    // в notification-payload.test.js, без этого несоответствия consumer graph.
+    expect(measure(actualCaps).bytes).toBeLessThanOrEqual(measure(oldCaps).bytes);
+    for (const [current, previous] of [[actualConsumer, oldConsumer], [actualStatic, oldStatic]]) {
+      expect(measure(current).bytes).toBeLessThanOrEqual(measure(previous).bytes);
+      expect(measure(current).gzipBytes).toBeLessThanOrEqual(measure(previous).gzipBytes);
+    }
     expect(module).not.toContain('.slice(');
     expect(measure(actualConsumer).bytes).toBeLessThanOrEqual(measure(oldConsumer).bytes);
     const staticEntry = 'import { outline } from "test-symbol"; console.log(outline);';
