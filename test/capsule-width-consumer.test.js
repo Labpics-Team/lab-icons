@@ -28,6 +28,7 @@ describe('body width uses the actual public generated consumer module',()=>{
     expect(publicKeys).toEqual(JSON.parse(readFileSync(new URL('../release/export-surface.json',import.meta.url),'utf8'))[`./variations/${icon}`]);
     expect(varied.parts.find(part=>part.id==='microphone-body').d).not.toBe(source.parts.find(part=>part.id==='microphone-body').d);
     expect(varied.svg).not.toBe(source.svg);expect(caps.variation.law).toBe('capsule.width');
+    expect(varied.variant).toBe('outline');
     expect(lower.provenance.variation.parameters.bodyWidth).toBe(.8);
     expect(caps.variation.domain.minimum).toBe(.8);expect(refused).toBe('VARIATION_OUTSIDE_DOMAIN');
     // request.ts переиспользует маленький AXIS_NAMES из type-проекции;

@@ -31,6 +31,13 @@ it('packed declaration paths preserve admitted body variants and reject coordina
       "const filled=mic({variant:'filled',variation:{bodyWidth:.9}});",
       "const outline:'outline'=circled({variation:{bodyWidth:.9}}).variant;",
       "const negative:'filled'=circled({variant:'filled',variation:{bodyWidth:.9}}).variant;",
+      "const explicitNegative:'filled'=circled<'filled'>({variant:'filled',variation:{bodyWidth:.9}}).variant;",
+      "declare const optionalNegative:{variant?:'filled';variation:{bodyWidth:number}};",
+      "const uncertain:'outline'|'filled'=circled(optionalNegative).variant;",
+      '// @ts-expect-error: explicit type argument не выбирает runtime variant.',
+      "circled<'filled'>({variation:{bodyWidth:.9}});",
+      '// @ts-expect-error: optional Filled request может выбрать default Outline.',
+      "const falseFilled:'filled'=circled(optionalNegative).variant;",
       "const negativeLaw:'capsule.width'=circleCaps('filled').variation.law;",
       "const law:'capsule.width'=micCaps('filled').variation.law;",
       "const domain:'bounded-capsule-width'=circleCaps().variation.domain.kind;",
@@ -44,7 +51,7 @@ it('packed declaration paths preserve admitted body variants and reject coordina
       "mic({variation:{center:[12,12]}});",
       '// @ts-expect-error: изменение ширины не объявляется exact authored source.',
       "const fake:'source'=mic({variation:{bodyWidth:.9}}).provenance.kind;",
-      'void[exact,filled,outline,negative,negativeLaw,law,domain,capability];',
+      'void[exact,filled,outline,negative,explicitNegative,uncertain,negativeLaw,law,domain,capability];',
     ].join('\n');
     const negative = positive.replace(/^\/\/ @ts-expect-error:.*\n/gm,'');
     const diagnostics = (source,mode) => {
@@ -57,7 +64,7 @@ it('packed declaration paths preserve admitted body variants and reject coordina
     for (const mode of ['Bundler','NodeNext']) {
       expect(diagnostics(positive,mode),mode).toBe('');
       expect([...diagnostics(negative,mode).matchAll(/error TS(\d+):/g)].map(match=>Number(match[1])))
-        .toEqual([2769,2322,2769,2322]);
+        .toEqual([2345,2322,2769,2322,2769,2322]);
     }
   } finally {
     // В fixture нет junction/symlink; удаляется только собственный абсолютный tmp.

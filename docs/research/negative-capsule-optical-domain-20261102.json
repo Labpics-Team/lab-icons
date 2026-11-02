@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "base": "504fb6ab91aa989975b29fd7412bd06df627398f",
-  "sourceSnapshotSha256": "09ebc350a185cdc0cac4b56c80126c6b7516f307fe5a699b24c9751f80ed6b4f",
+  "sourceSnapshotSha256": "0a729d494e4b3c9c0efaf96f722b1fbb8f6cd7f617f591cafa70379650a2b8a9",
   "files": [
     {
       "file": "scripts/lib/author-anatomy.js",
@@ -21,7 +21,7 @@
     },
     {
       "file": "scripts/lib/symbol-modules.js",
-      "sha256": "1170d5f4630bbefa0d95d478cf1dbf7d23e337e6ddac6de9367eddcb0553e39a"
+      "sha256": "e11012c235570c4dd7fa8400997f4b80af2bbec8b8f39f8c249e0e6757a18f92"
     },
     {
       "file": "src/core/source-contours.js",

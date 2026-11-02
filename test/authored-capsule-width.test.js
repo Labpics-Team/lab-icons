@@ -150,7 +150,7 @@ describe('source-owned capsule width changes context without shrinking the whole
     const removed = symbolReleaseProjection(read('release/contract.json'), names, [], [], []);
     expect(removed.files).toContain('dist/ir/author-capsule-types.d.ts');
     expect(removed.runtimeDependencies).not.toContain('dist/ir/capsule-runtime.js');
-    expect(variationModuleDeclaration('mic-circle','capsule.width',['outline', 'filled'])).toContain("TVariant extends 'outline' | 'filled' = 'outline'");
+    expect(variationModuleDeclaration('mic-circle','capsule.width',['outline', 'filled'])).toContain("TVariant extends 'outline' | 'filled'>");
     expect(authorVariationIconNames(selected)).toEqual(names);
     expect(authorVariationLawNames(selected)).toEqual(['capsule.width']);
   });
