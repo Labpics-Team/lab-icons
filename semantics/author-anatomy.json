@@ -708,6 +708,11 @@
           "law": "confirmation.presence",
           "purpose": "confirmation",
           "partId": "confirmation-mark"
+        },
+        "variation": {
+          "law": "annulus.counter-scale",
+          "parameter": "enclosureEmphasis",
+          "enclosurePartId": "confirmation-enclosure"
         }
       }
     },
@@ -964,6 +969,141 @@
         "variation": {
           "law": "dots.affine",
           "axis": "y"
+        }
+      }
+    },
+    "close-circle": {
+      "outline": {
+        "masterSha256": "3aa89b46e44c8d65f0ac60847d3dd1a7883d26cc58e6b2d686240ddd69276cdb",
+        "pathFingerprintSha256": "b232d89c62b9aac9da78b1cbe0ad35e7210bc910f61f1e09c1c8a1cdf0cd7d3f",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "dismissal-mark",
+            "role": "content"
+          },
+          {
+            "pathIndex": 1,
+            "id": "status-enclosure",
+            "role": "container"
+          }
+        ],
+        "gesture": null,
+        "variation": {
+          "law": "annulus.counter-scale",
+          "parameter": "enclosureEmphasis",
+          "enclosurePartId": "status-enclosure"
+        }
+      }
+    },
+    "question-circle": {
+      "outline": {
+        "masterSha256": "a3fc2394714dbf91ac9fea7e92611a2348566309a5858bfd2d919b2fa9c92c7f",
+        "pathFingerprintSha256": "9b02e0ecfc6bbc7aa003c9edf01cb60c81e82095b872176b6ad383b995f5ed4f",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "question-dot",
+            "role": "content"
+          },
+          {
+            "pathIndex": 1,
+            "id": "question-stem",
+            "role": "content"
+          },
+          {
+            "pathIndex": 2,
+            "id": "status-enclosure",
+            "role": "container"
+          }
+        ],
+        "gesture": null,
+        "variation": {
+          "law": "annulus.counter-scale",
+          "parameter": "enclosureEmphasis",
+          "enclosurePartId": "status-enclosure"
+        }
+      }
+    },
+    "alert-circle": {
+      "outline": {
+        "masterSha256": "bd832c1a7812efcd0f2a065acf3afcff0ea7aeab397e8df4bf44115d9df7db6d",
+        "pathFingerprintSha256": "6ed22c2281ff78106a9b54ff058433f8594fdc9080f5bead686a87530f1e84a6",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "attention-dot",
+            "role": "content"
+          },
+          {
+            "pathIndex": 1,
+            "id": "attention-stem",
+            "role": "content"
+          },
+          {
+            "pathIndex": 2,
+            "id": "status-enclosure",
+            "role": "container"
+          }
+        ],
+        "gesture": null,
+        "variation": {
+          "law": "annulus.counter-scale",
+          "parameter": "enclosureEmphasis",
+          "enclosurePartId": "status-enclosure"
+        }
+      }
+    },
+    "play-circle": {
+      "outline": {
+        "masterSha256": "3e6fc6409cd6a828e171ea134289919e32615b416e8478c3208c3926fa36ffbd",
+        "pathFingerprintSha256": "bcc7c9845a74d2241809ec0ccc12b257310fc0615b71aca9ebc50423b098f3ee",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "play-mark",
+            "role": "content"
+          },
+          {
+            "pathIndex": 1,
+            "id": "playback-enclosure",
+            "role": "container"
+          }
+        ],
+        "gesture": null,
+        "variation": {
+          "law": "annulus.counter-scale",
+          "parameter": "enclosureEmphasis",
+          "enclosurePartId": "playback-enclosure"
+        }
+      }
+    },
+    "pause-circle": {
+      "outline": {
+        "masterSha256": "e25e6c6e4f5f2e7d6b797de7deb0f07462297bb939e3b9ed2a286da7b52af054",
+        "pathFingerprintSha256": "9cd5ce68d2d6f5fbda1c9a6ebfdf7d7a1be49df1d9e49bc5c5464a9ff3b151d7",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "pause-first-bar",
+            "role": "content"
+          },
+          {
+            "pathIndex": 1,
+            "id": "pause-second-bar",
+            "role": "content"
+          },
+          {
+            "pathIndex": 2,
+            "id": "playback-enclosure",
+            "role": "container"
+          }
+        ],
+        "gesture": null,
+        "variation": {
+          "law": "annulus.counter-scale",
+          "parameter": "enclosureEmphasis",
+          "enclosurePartId": "playback-enclosure"
         }
       }
     }

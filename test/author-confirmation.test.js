@@ -162,7 +162,11 @@ describe('confirmation.presence: внутренние состояния авт�
     ['неподходящий смысл', value => { value.icons.checkmark.outline.gesture.purpose = 'loading'; }, 'LAW_SEMANTICS_UNSUPPORTED'],
     ['чужая часть', value => { value.icons.checkmark.outline.gesture.partId = 'missing'; }, 'LAW_TOPOLOGY_UNSUPPORTED'],
     ['анимация оболочки', value => { value.icons['checkmark-circle'].outline.gesture.partId = 'confirmation-enclosure'; }, 'LAW_TOPOLOGY_UNSUPPORTED'],
-    ['вторая движущаяся часть', value => { value.icons['checkmark-circle'].outline.parts[1].role = 'content'; }, 'LAW_TOPOLOGY_UNSUPPORTED'],
+    ['вторая движущаяся часть', value => {
+      // Эта проверка адресует жест: annulus отдельно требует последнюю container-часть.
+      delete value.icons['checkmark-circle'].outline.variation;
+      value.icons['checkmark-circle'].outline.parts[1].role = 'content';
+    }, 'LAW_TOPOLOGY_UNSUPPORTED'],
     ['stale master', value => { value.icons.checkmark.outline.masterSha256 = '0'.repeat(64); }, 'MASTER_MISMATCH'],
     ['stale source', value => { value.source.version = '1'; }, 'SOURCE_MISMATCH'],
   ])('точный отказ: %s', (_, mutate, code) => {
