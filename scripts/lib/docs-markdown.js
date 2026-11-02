@@ -2,7 +2,7 @@ import { marked } from 'marked';
 
 // Один разбор для ссылок, примеров и текста. Разметка не удаляет символы
 // идентификаторов: GH_PAT и выделенное _слово_ имеют разную структуру.
-export function parseDocumentation(source, { blockSeparator = '\n' } = {}) {
+export function parseDocumentation(source, { blockSeparator = '\n', maskVersionIdentifiers = false } = {}) {
   const tokens = marked.lexer(source);
   const links = [];
   const examples = [];
@@ -17,7 +17,12 @@ export function parseDocumentation(source, { blockSeparator = '\n' } = {}) {
       return [token.header, ...token.rows].map((row) => row.map(text).join(' ')).join(blockSeparator);
     }
     const children = token.tokens ?? token.items;
-    const content = children ? children.map(text).join('') : token.text ?? '';
+    const content = children ? children.reduce((result, child) => {
+      // Marker и code literal должны находиться в одном inline-контексте.
+      const version = maskVersionIdentifiers && child.type === 'codespan' && /^\d+$/.test(child.text) &&
+        /(?:^|[^\p{L}\p{N}_])(?:версия|version)\s*[:=]?\s*$/iu.test(result);
+      return result + (version ? 'version-id' : text(child));
+    }, '') : token.text ?? '';
     return ['paragraph', 'heading', 'list', 'list_item', 'code', 'blockquote'].includes(token.type)
       ? `${blockSeparator}${content}${blockSeparator}` : content;
   }

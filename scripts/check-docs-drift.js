@@ -10,10 +10,10 @@ import { parseDocumentation } from './lib/docs-markdown.js';
 
 export const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
-export function normalizeDistributionText(text, { preserveBlocks = false } = {}) {
+export function normalizeDistributionText(text, { preserveBlocks = false, maskVersionIdentifiers = false } = {}) {
   // Перенос строки внутри абзаца остаётся пробелом; границу блока задаёт parser.
   const separator = '\u2029';
-  const blocks = parseDocumentation(text, { blockSeparator: separator }).text.split(separator);
+  const blocks = parseDocumentation(text, { blockSeparator: separator, maskVersionIdentifiers }).text.split(separator);
   return blocks.map(block => block.normalize('NFKC')
     .replace(/[‐‑‒–—―]/g, '-').replace(/\s+/g, ' ').trim())
     .filter(Boolean).join(preserveBlocks ? '\n' : ' ');
@@ -48,8 +48,7 @@ export function distributionClaimErrors(text) {
 export function manualCorpusCountErrors(source) {
   // Помеченный code literal версии — identity источника, не размер корпуса.
   // Обычные числовые code literals рядом с SVG/файлами остаются count claims.
-  const countsSource = source.replace(/((?<![\p{L}\p{N}_])(?:версия|version)[ \t]*[:=]?[ \t]*)`\d+`/giu, '$1version-id');
-  const sentences = normalizeDistributionText(countsSource, { preserveBlocks: true }).split(/\n|;|[.!?]\s+/u);
+  const sentences = normalizeDistributionText(source, { preserveBlocks: true, maskVersionIdentifiers: true }).split(/\n|;|[.!?]\s+/u);
   const ru = [
     'ноль', 'нуль',
     'один', 'одна', 'одно', 'одну', 'одного', 'одной',

@@ -54,6 +54,9 @@ describe('Согласованность документации', () => {
   it('отделяет помеченную числовую версию от соседнего счётчика файлов', () => {
     expect(manualCorpusCountErrors('Figma-версия `2416636003859748575` файла `LuaiBd4anRi4DMZayKAnY2`.')).toEqual([]);
     expect(manualCorpusCountErrors('Version: `2416636003859748575` files source.')).toEqual([]);
+    expect(manualCorpusCountErrors('Figma-версия\n`2416636003859748575` файла `LuaiBd4anRi4DMZayKAnY2`.')).toEqual([]);
+    expect(manualCorpusCountErrors('Figma-**версия** `2416636003859748575` файла `LuaiBd4anRi4DMZayKAnY2`.')).toEqual([]);
+    expect(manualCorpusCountErrors('**Figma-версия `2416636003859748575` файла**.')).toEqual([]);
     expect(manualCorpusCountErrors('Версия `2416636003859748575` файла; в текущем пакете `999` файлов.')).toHaveLength(1);
     expect(manualCorpusCountErrors('В текущем пакете `660` SVG.')).toHaveLength(1);
     expect(manualCorpusCountErrors('# Version\n\n`999` files.')).toHaveLength(1);
