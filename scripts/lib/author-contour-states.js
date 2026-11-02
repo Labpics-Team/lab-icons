@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { authorPathEntries } from '../../src/core/icon-geometry.js';
 import { parsePathData } from '../../src/core/path-data.js';
 import { jsonDataLiteral } from './generated-module.js';
+import { createAuthorExactArithmetic } from './author-exact-arithmetic.js';
 
 const hash = value => createHash('sha256').update(JSON.stringify(value)).digest('hex');
 const stableJSON = value => JSON.stringify(value, (_, item) => item && typeof item === 'object' && !Array.isArray(item)
@@ -16,39 +17,11 @@ export class AuthorContourStateError extends Error {
 const refuse = (code, message) => { throw new AuthorContourStateError(code, message); };
 const fields = (value, expected) => value && Object.getPrototypeOf(value) === Object.prototype &&
   Object.keys(value).sort().join(',') === [...expected].sort().join(',');
-function fraction(numerator, denominator) {
-  let a = numerator < 0n ? -numerator : numerator, b = denominator;
-  while (b) [a, b] = [b, a % b];
-  return [numerator / a, denominator / a];
-}
-const add = (a, b) => fraction(a[0] * b[1] + b[0] * a[1], a[1] * b[1]);
-const sub = (a, b) => fraction(a[0] * b[1] - b[0] * a[1], a[1] * b[1]);
-const mul = (a, b) => fraction(a[0] * b[0], a[1] * b[1]);
-const div = (a, b) => fraction(a[0] * b[1], a[1] * b[0]);
-const cmp = (a, b) => a[0] * b[1] < b[0] * a[1] ? -1 : a[0] * b[1] > b[0] * a[1] ? 1 : 0;
-const square = a => mul(a, a);
-const max = values => values.reduce((a, b) => cmp(a, b) >= 0 ? a : b);
-const bytes = new DataView(new ArrayBuffer(8));
-/** Точная дробь двоичного исходного Number. */
-function rational(value) {
-  if (!Number.isFinite(value)) refuse('SOURCE_UNSUPPORTED', 'Не конечный operand.');
-  if (value === 0) return [0n, 1n];
-  bytes.setFloat64(0, value);
-  const bits = bytes.getBigUint64(0), exponent = Number((bits >> 52n) & 2047n);
-  const mantissa = (bits & ((1n << 52n) - 1n)) + (exponent ? 1n << 52n : 0n);
-  const shift = (exponent ? exponent - 1023 : -1022) - 52;
-  const signed = bits >> 63n ? -mantissa : mantissa;
-  return shift >= 0 ? [signed << BigInt(shift), 1n] : fraction(signed, 1n << BigInt(-shift));
-}
-function upperRoot(value) {
-  let root = Math.sqrt(Number(value[0]) / Number(value[1]));
-  if (!Number.isFinite(root) || root === 0 && value[0] !== 0n) refuse('SOURCE_UNSUPPORTED', 'Невозможно ограничить радиус контрольных точек.');
-  while (cmp(square(rational(root)), value) < 0) {
-    bytes.setFloat64(0, root); bytes.setBigUint64(0, bytes.getBigUint64(0) + 1n); root = bytes.getFloat64(0);
-  }
-  return root;
-}
-const quotient = value => ({ numerator: value[0].toString(), denominator: value[1].toString() });
+const { add, sub, mul, div, cmp, square, max, rational, upperRoot, receipt: quotient } =
+  createAuthorExactArithmetic(kind => {
+    if (kind === 'zero-denominator') throw new RangeError('Division by zero');
+    refuse('SOURCE_UNSUPPORTED', kind === 'nonfinite-operand' ? 'Не конечный operand.' : 'Невозможно ограничить радиус контрольных точек.');
+  });
 
 function contour(part, entry) {
   // Общий parser нормализует relative и неявные команды; packet хранит точную строку.

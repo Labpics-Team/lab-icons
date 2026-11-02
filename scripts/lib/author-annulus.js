@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { authorPathEntries, sourcePathEntries, iconGeometry } from '../../src/core/icon-geometry.js';
 import { parsePathData } from '../../src/core/path-data.js';
 import { normalizeFigmaSvg } from './figma-import.js';
+import { createAuthorExactArithmetic } from './author-exact-arithmetic.js';
 
 const NUMBER = /[+-]?(?:\d*\.\d+|\d+\.?)(?:[eE][+-]?\d+)?/g;
 const NAME = /^[a-z][a-z0-9-]*$/;
@@ -31,53 +32,13 @@ export class AuthorAnnulusError extends Error {
 }
 const refuse = (code, message) => { throw new AuthorAnnulusError(code, message); };
 
-// Build-only исследование. Перед общей интеграцией эти операции следует вынести
-// вместе с author-contour-states в одного владельца точной арифметики.
-function fraction(n, d) {
-  if (!d) refuse('VARIATION_UNREPRESENTABLE', 'Деление на ноль в сертификате.');
-  if (d < 0n) { n = -n; d = -d; }
-  let a = n < 0n ? -n : n, b = d;
-  while (b) [a, b] = [b, a % b];
-  return [n / a, d / a];
-}
-const add = (a, b) => fraction(a[0] * b[1] + b[0] * a[1], a[1] * b[1]);
-const sub = (a, b) => fraction(a[0] * b[1] - b[0] * a[1], a[1] * b[1]);
-const mul = (a, b) => fraction(a[0] * b[0], a[1] * b[1]);
-const div = (a, b) => fraction(a[0] * b[1], a[1] * b[0]);
-const cmp = (a, b) => a[0] * b[1] < b[0] * a[1] ? -1 : a[0] * b[1] > b[0] * a[1] ? 1 : 0;
-const square = a => mul(a, a);
-const min = values => values.reduce((a, b) => cmp(a, b) <= 0 ? a : b);
-const max = values => values.reduce((a, b) => cmp(a, b) >= 0 ? a : b);
-const receipt = value => ({ numerator: value[0].toString(), denominator: value[1].toString() });
-const bytes = new DataView(new ArrayBuffer(8));
-function rational(value) {
-  if (!Number.isFinite(value)) refuse('VARIATION_UNREPRESENTABLE', 'Нужен конечный binary64 operand.');
-  if (value === 0) return [0n, 1n];
-  bytes.setFloat64(0, value);
-  const bits = bytes.getBigUint64(0), exponent = Number((bits >> 52n) & 2047n);
-  const mantissa = (bits & ((1n << 52n) - 1n)) + (exponent ? 1n << 52n : 0n);
-  const shift = (exponent ? exponent - 1023 : -1022) - 52;
-  const signed = bits >> 63n ? -mantissa : mantissa;
-  return shift >= 0 ? [signed << BigInt(shift), 1n] : fraction(signed, 1n << BigInt(-shift));
-}
-function adjacent(value, direction) {
-  if (value === 0) return direction * Number.MIN_VALUE;
-  bytes.setFloat64(0, value);
-  bytes.setBigUint64(0, bytes.getBigUint64(0) + BigInt((value > 0 ? 1 : -1) * direction));
-  return bytes.getFloat64(0);
-}
-function directedNumber(value, direction) {
-  let result = Number(value[0]) / Number(value[1]);
-  if (!Number.isFinite(result) || result === 0 && value[0]) refuse('VARIATION_UNREPRESENTABLE', 'Не представима конечная граница.');
-  while (direction * cmp(rational(result), value) < 0) result = adjacent(result, direction);
-  return result;
-}
-function directedRoot(value, direction) {
-  let result = Math.sqrt(Number(value[0]) / Number(value[1]));
-  if (!Number.isFinite(result) || result === 0 && value[0]) refuse('VARIATION_UNREPRESENTABLE', 'Не представима граница радиуса.');
-  while (direction * cmp(square(rational(result)), value) < 0) result = adjacent(result, direction);
-  return result;
-}
+const { fraction, add, sub, mul, div, cmp, square, min, max, receipt, rational, directedNumber, directedRoot } =
+  createAuthorExactArithmetic(kind => refuse('VARIATION_UNREPRESENTABLE', {
+    'zero-denominator': 'Деление на ноль в сертификате.',
+    'nonfinite-operand': 'Нужен конечный binary64 operand.',
+    'number-bound': 'Не представима конечная граница.',
+    'root-bound': 'Не представима граница радиуса.',
+  }[kind]));
 const radiusSquared = (point, center) => point.map((value, axis) => square(sub(rational(value), rational(center[axis])))).reduce(add);
 
 function cardinalStructure(points) {

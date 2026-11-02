@@ -232,4 +232,13 @@ describe('authored annulus build compiler: exact master and certified countersha
     }
     expect(accepted).toBeGreaterThan(0); expect(refused).toBeGreaterThan(0);
   });
+  it.each(names)('%s accepts a positive subnormal grid clearance without Infinity/Infinity refusal', icon => {
+    const value = input(icon), policy = { ...grid, ratios: { ...grid.ratios, clearanceMin: Number.MIN_VALUE } };
+    const packet = compileAuthorAnnulus(value.source, value.parts, value.declaration, policy);
+    expect(packet.domain.scale.minimum).toBeCloseTo(icon === 'plus-circle' ? 0.59980729450811 : 0.5985886483532691, 12);
+    expect(packet.domain.scale.maximum).toBeGreaterThan(1);
+    expect(materializeAuthorAnnulus(packet)).toBe(packet.defaults);
+    expect(materializeAuthorAnnulus(packet, { enclosureEmphasis: 2.6 }).parts[0]).toBe(packet.defaults.parts[0]);
+    expect(packet.domain.policy.minimumGapRatio).toBe(Number.MIN_VALUE);
+  });
 });

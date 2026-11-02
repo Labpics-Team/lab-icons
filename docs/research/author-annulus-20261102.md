@@ -142,3 +142,66 @@ Admission plus/minus не расширяет `status-circle`: каждый уч�
   альтернатива subdivision bounds; Hausdorff theorem здесь не используется.
 
 Эти источники обосновывают геометрические операции, а не визуальную приёмку Lab Icons.
+
+## Дополнение: единый численный владелец и точное квантование
+
+Независимое ревью `d476769` обнаружило две ошибки отказов. `null` или sparse
+entry в declared parts давал некодированный `TypeError`; fix `95f3f62` сначала
+проверяет плотный массив собственных plain records и строковые IDs. RED воспроизвёл
+ошибку; 14 узких tests после исправления прошли. Полные packets обоих реальных
+masters сохранились буквально.
+
+Второй дефект возникал при положительном `grid.ratios.clearanceMin=Number.MIN_VALUE`:
+числитель и знаменатель точной дроби отдельно превращались в Infinity, хотя их
+отношение имело конечную границу. Старый compiler возвращал
+`VARIATION_UNREPRESENTABLE`. Новое вычисление допускает plus minimum scale
+`0.59980729450811` и minus `0.5985886483532691`. Policy threshold не добавлен.
+
+`author-exact-arithmetic.js` теперь единственный build-only владелец рациональных
+операций, binary64 conversion и направленных границ для annulus и contour states.
+Module-specific классы и коды отказов остались в adapters каждого compiler.
+Подготовленное до исправлений extraction сохранено отдельно; возврат scoped hunks
+сохранил `95f3f62`, а не заменил весь файл старой копией.
+
+Для положительного `n/d` точный `floor(log2(n/d))` выводится из bit lengths и
+одного shifted integer comparison. Binary64 quantum равен
+`max(exponent-52,-1074)`. После точного integer scaling вычисляются quotient и
+remainder; направление и знак выбирают floor/ceil. Конвертируется только
+представимый целочисленный significand с power-of-two quantum. Carry нормализуется,
+finite result и точное направление проверяются. Отдельный `Number(n)/Number(d)`
+и повторные ULP nudges больше не нужны.
+
+Для корня exponent равен `floor(floor(log2(n/d))/2)`. В той же шкале
+`q=isqrt(floor(N/D))`; сравнение `q*q*D<N` определяет необходимость upper ceil.
+Integer Newton работает с quotient максимум в 106 бит независимо от размера
+исходных дробей. Negative radicand и конечная overflow boundary получают явный
+отказ. Subnormal и нулевые нижние bounds проверены отдельно. Общая decimal/math
+dependency не добавлена.
+
+Первичные основания выбора, прочитанные владельцем исследовательского фронта
+2026-11-02:
+
+- [CPython long_true_divide](https://github.com/python/cpython/blob/3d81c051234bf0c3f7bd37bb2434a473ff383cdd/Objects/longobject.c)
+  и [truediv controls](https://github.com/python/cpython/blob/3d81c051234bf0c3f7bd37bb2434a473ff383cdd/Lib/test/test_long.py),
+  current main SHA `3d81c051234bf0c3f7bd37bb2434a473ff383cdd`: целочисленная
+  шкала и остаток избегают переполнения отдельных floating-point operands.
+- [ECMAScript Number constructor](https://tc39.es/ecma262/multipage/numbers-and-dates.html#sec-number-constructor-number-value),
+  draft ECMAScript 2027, sec 21.1.1.1: каждый BigInt преобразуется отдельно;
+  поэтому два вызова Number не удостоверяют представимость отношения.
+
+Узкие проверки: 31 tests PASS в shared arithmetic + annulus; 10 contour tests
+PASS. Четыре consumer/build tests из contour suite не запускались выбранным
+фильтром, их статус не объявлен PASS. Node 24.15.0, Vitest 4.1.12, Windows,
+один worker. Никаких dependency install, fullbuild или browser/bench не было.
+
+Old/new comparison исполнил прямой `git show d476769` source через data URL:
+изменялись только import declarations для их разрешения. Для двух ellipsis
+вариантов совпали полные packets, emitted JS и declarations; для plus/minus
+совпали полные packets и materialized `enclosureEmphasis=1.1`. Все десять
+сравниваемых outputs имеют одинаковый SHA-256. Первую попытку сравнения transport
+ошибочно изменял import-подобные строки generated outputs; этот запуск был
+отклонён, transport исправлен, повторный exact comparison прошёл. Hashes и
+два numeric RED→GREEN witnesses сохранены в JSON.
+
+Это закрывает численный класс причин и дублирование build-owner. Public annulus
+интеграция и оптическая приёмка остаются отдельными открытыми условиями.

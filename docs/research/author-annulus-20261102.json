@@ -229,5 +229,140 @@
     "consumer": "not-installed",
     "performance": "not-measured",
     "integration": "exact arithmetic common owner required"
+  },
+  "exactArithmeticRevision": {
+    "date": "2026-11-02",
+    "scope": "build-only shared numerical owner",
+    "referenceCommit": "d4767699196f8a675c25db45c68f56d20a4fae7c",
+    "shapeFixCommit": "95f3f62ddb21b9d8c6672eadb5450a5c6794bdae",
+    "algorithm": "exact binary64 quantum; integer quotient/remainder; integer root; no separate floating-point ratio",
+    "sources": [
+      {
+        "url": "https://github.com/python/cpython/blob/3d81c051234bf0c3f7bd37bb2434a473ff383cdd/Objects/longobject.c",
+        "revision": "3d81c051234bf0c3f7bd37bb2434a473ff383cdd"
+      },
+      {
+        "url": "https://github.com/python/cpython/blob/3d81c051234bf0c3f7bd37bb2434a473ff383cdd/Lib/test/test_long.py",
+        "revision": "3d81c051234bf0c3f7bd37bb2434a473ff383cdd"
+      },
+      {
+        "url": "https://tc39.es/ecma262/multipage/numbers-and-dates.html#sec-number-constructor-number-value",
+        "revision": "ECMAScript2027 draft sec21.1.1.1"
+      }
+    ],
+    "numericWitnesses": [
+      {
+        "icon": "plus-circle",
+        "clearanceMin": 5e-324,
+        "before": {
+          "ok": false,
+          "code": "VARIATION_UNREPRESENTABLE"
+        },
+        "after": {
+          "ok": true,
+          "minimumScale": 0.59980729450811
+        }
+      },
+      {
+        "icon": "minus-circle",
+        "clearanceMin": 5e-324,
+        "before": {
+          "ok": false,
+          "code": "VARIATION_UNREPRESENTABLE"
+        },
+        "after": {
+          "ok": true,
+          "minimumScale": 0.5985886483532691
+        }
+      }
+    ],
+    "comparisons": [
+      {
+        "name": "ellipsis-orientation-outline",
+        "kind": "packet",
+        "oldSha256": "9209e93405e720e02b06086860656c361ab2b7af7c56d08f3e5cdaf3c9825d74",
+        "newSha256": "9209e93405e720e02b06086860656c361ab2b7af7c56d08f3e5cdaf3c9825d74",
+        "equal": true
+      },
+      {
+        "name": "ellipsis-orientation-outline",
+        "kind": "emitted-js",
+        "oldSha256": "0bf36c2caa57e08b6990924b8f5f946bf8a788e7524202cf8a71c27d21fb4efb",
+        "newSha256": "0bf36c2caa57e08b6990924b8f5f946bf8a788e7524202cf8a71c27d21fb4efb",
+        "equal": true
+      },
+      {
+        "name": "ellipsis-orientation-outline",
+        "kind": "declaration",
+        "oldSha256": "ea80254bcd3ded1d18deb8e5d2df0427d4d5deccf36a24cadf6f39533588b86a",
+        "newSha256": "ea80254bcd3ded1d18deb8e5d2df0427d4d5deccf36a24cadf6f39533588b86a",
+        "equal": true
+      },
+      {
+        "name": "ellipsis-orientation-filled",
+        "kind": "packet",
+        "oldSha256": "d7e57050af3a36e9268fc28c5d9e5cb2fb85445272b7ac630ad272018fb8afd1",
+        "newSha256": "d7e57050af3a36e9268fc28c5d9e5cb2fb85445272b7ac630ad272018fb8afd1",
+        "equal": true
+      },
+      {
+        "name": "ellipsis-orientation-filled",
+        "kind": "emitted-js",
+        "oldSha256": "11e24476bf8f535ba7a78fe83149e8b988af7116d7715124df806634d173b076",
+        "newSha256": "11e24476bf8f535ba7a78fe83149e8b988af7116d7715124df806634d173b076",
+        "equal": true
+      },
+      {
+        "name": "ellipsis-orientation-filled",
+        "kind": "declaration",
+        "oldSha256": "ea80254bcd3ded1d18deb8e5d2df0427d4d5deccf36a24cadf6f39533588b86a",
+        "newSha256": "ea80254bcd3ded1d18deb8e5d2df0427d4d5deccf36a24cadf6f39533588b86a",
+        "equal": true
+      },
+      {
+        "name": "plus-circle",
+        "kind": "packet",
+        "oldSha256": "cc5041ecbc0f0d027745b661664f62bdbcac0d6ad13a68930deead474a182785",
+        "newSha256": "cc5041ecbc0f0d027745b661664f62bdbcac0d6ad13a68930deead474a182785",
+        "equal": true
+      },
+      {
+        "name": "plus-circle",
+        "kind": "varied-1.1",
+        "oldSha256": "0b8b793587e041d80d96599f5fd764fd8e9841758ea56bf417f33f3830967a88",
+        "newSha256": "0b8b793587e041d80d96599f5fd764fd8e9841758ea56bf417f33f3830967a88",
+        "equal": true
+      },
+      {
+        "name": "minus-circle",
+        "kind": "packet",
+        "oldSha256": "e5fdeda3624295447b2e5db20ee0ed806440f4de1f5740e46d39fe20d374fd6e",
+        "newSha256": "e5fdeda3624295447b2e5db20ee0ed806440f4de1f5740e46d39fe20d374fd6e",
+        "equal": true
+      },
+      {
+        "name": "minus-circle",
+        "kind": "varied-1.1",
+        "oldSha256": "049e895a9d22344a81060b4732341b298df9db1d8afaea28c29dbe83dd566e5d",
+        "newSha256": "049e895a9d22344a81060b4732341b298df9db1d8afaea28c29dbe83dd566e5d",
+        "equal": true
+      }
+    ],
+    "verification": {
+      "sharedAndAnnulus": {
+        "tests": 31,
+        "outcome": "PASS"
+      },
+      "contour": {
+        "tests": 10,
+        "outcome": "PASS",
+        "unexecutedTests": 4
+      },
+      "environment": "Windows; Node24.15.0; Vitest4.1.12; one worker",
+      "fullCI": "not-run",
+      "optical": "not-reviewed",
+      "consumer": "not-installed",
+      "integration": "shared arithmetic owner extracted; public annulus integration pending"
+    }
   }
 }
