@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { dirname, extname, join, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { assertRemoteBenchmark } from './measurement.js';
-import { verifyLazyPause, verifyLazyStateSelection } from './explorer-journey.js';
+import { verifyLazyPause, verifyLazyStateSelection, verifyLazyGestureSelection } from './explorer-journey.js';
 import { verifyAuthoringPlayground } from './authoring-journey.js';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -53,6 +53,7 @@ export async function verifyExplorer({ browser, source, output }) {
     page.on('pageerror', error => report.pageErrors.push(error.message));
     report.lazyPause = await verifyLazyPause({ page, origin });
     report.lazyStateSelection = await verifyLazyStateSelection({ page, origin });
+    report.lazyGestureSelection = await verifyLazyGestureSelection({ page, origin });
     await page.goto(origin, { waitUntil: 'load' });
     report.journey = await page.evaluate(async () => {
       try { return await (await import('/journey.js')).runExplorerJourney(); }

@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { stateExplorerGroups, symbolExplorerBrowserFiles, symbolExplorerVariationIds, symbolExplorerStateVariationIds } from '../scripts/lib/symbol-explorer.js';
+import { stateExplorerGroups, symbolExplorerBrowserFiles, symbolExplorerVariationIds, symbolExplorerStateVariationIds,
+  symbolExplorerGestureProjection } from '../scripts/lib/symbol-explorer.js';
 import { symbolReleaseProjection } from '../scripts/lib/symbol-modules.js';
 
 const base = JSON.parse(readFileSync(new URL('../release/contract.json', import.meta.url), 'utf8'));
@@ -9,6 +10,41 @@ const spec = { groups: { 'status-circle': { states: {
 } } } };
 
 describe('browser-проекция принятых symbol capabilities', () => {
+  const gestureFixture = () => {
+    const contract = symbolReleaseProjection(base, ['timer', 'mic'], [], [], [], [], [], [], [], ['timer']);
+    contract.files.push('dist/gestures/mic.js', 'dist/gestures/mic.d.ts');
+    const surface = { './gestures/timer': ['compileMotionEffect', 'motionCapabilities', 'renderMotionSvg'],
+      './gestures/mic': ['motionCapabilities', 'prepareBodyWidth'] };
+    return { contract, surface };
+  };
+
+  it('копирует публичные gesture targets и отличает rotation от prepared sampler', () => {
+    const { contract, surface } = gestureFixture();
+    expect(symbolExplorerGestureProjection(contract, ['timer', 'mic'], surface))
+      .toEqual({ iconIds: ['mic', 'timer'], rotationIconIds: ['timer'] });
+    const files = symbolExplorerBrowserFiles(contract, ['timer', 'mic'], [], surface);
+    expect(files).toContain('dist/gestures/timer.js');
+    expect(files).toContain('dist/gestures/mic.js');
+    expect(files).toContain('dist/ir/gesture-runtime.js');
+    expect(files).not.toContain('dist/gestures/timer.d.ts');
+  });
+
+  it.each([
+    ['private export', value => { delete value.contract.exports['./gestures/*']; }, /публичного package entry/],
+    ['missing types', value => { value.contract.files = value.contract.files.filter(file => file !== 'dist/gestures/timer.d.ts'); }, /declaration/],
+    ['missing surface', value => { delete value.surface['./gestures/timer']; }, /export surface/],
+    ['incomplete rotation', value => { value.surface['./gestures/timer'].pop(); }, /неполный rotation contract/],
+    ['orphan surface', value => { value.surface['./gestures/other'] = ['prepareBodyWidth']; }, /не имеет package target/],
+  ])('не выдаёт %s за browser capability', (_, mutate, reason) => {
+    const value = gestureFixture(); mutate(value);
+    expect(() => symbolExplorerBrowserFiles(value.contract, ['timer', 'mic'], [], value.surface)).toThrow(reason);
+  });
+
+  it('не связывает gesture target с чужим авторским каталогом', () => {
+    const { contract, surface } = gestureFixture();
+    expect(() => symbolExplorerGestureProjection(contract, ['mic'], surface)).toThrow(/авторскому каталогу/);
+  });
+
   it('opt-in оболочка принадлежит реальной группе и публичной паре JS/types', () => {
     const contract = symbolReleaseProjection(base, ['fixture'], ['status-circle']);
     contract.exports['./state-variations/*'] = { import: './dist/state-variations/*.js', types: './dist/state-variations/*.d.ts' };

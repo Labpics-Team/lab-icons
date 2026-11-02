@@ -249,6 +249,8 @@ export async function runExplorerJourney() {
       check(`${name}/${variant}/keyboard-focus`, document.activeElement?.dataset.symbol === name);
       check(`${name}/${variant}/accessible-preview`, q('symbol-stage').getAttribute('role') === 'img' && q('symbol-stage').getAttribute('aria-label').includes(name));
       check(`${name}/${variant}/source-motion-controls`, !q('play').disabled && q('gesture').value === `${name}.cycle`);
+      check(`${name}/${variant}/sliced-gesture-consumer`, q('consumer-import').textContent.includes(`/gestures/${name}`) &&
+        data.rotationGestureIconIds.includes(name));
       check(`${name}/${variant}/no-unproved-axes`, q('axis-controls').children.length === 0);
 
       const beforeDisplay = JSON.stringify(paths(stage));
@@ -293,7 +295,107 @@ export async function runExplorerJourney() {
       check(`${name}/${variant}/sf-symbols-refusal`, downloads.length === beforeSf && q('export-status').textContent.includes('нет проверенного адаптера'));
     }
 
+    await choose('timer', 'outline');
+    const timerRow = data.rows.find(item => item.name === 'timer' && item.variant === 'outline');
+    const timerMasterResponse = await originalFetch(timerRow.views.master);
+    if (!timerMasterResponse.ok) throw new Error(`explorer journey: timer master HTTP ${timerMasterResponse.status}`);
+    const timerMaster = new DOMParser().parseFromString(await timerMasterResponse.text(), 'image/svg+xml').documentElement;
+    const timerModule = await import('./package/gestures/timer.js');
+    const timerSource = await import('./package/symbols/timer.js');
+    const timerCapabilities = timerModule.motionCapabilities('outline');
+    const timerStage = q('symbol-stage').querySelector('svg');
+    const timerHand = timerStage.querySelector('[data-part="timer-hand"]');
+    const timerDial = timerStage.querySelector('[data-part="timer-dial"]');
+    const dialBefore = timerDial?.outerHTML;
+    check('timer/outline/declared-source-target', timerCapabilities.ok && timerHand && timerDial &&
+      timerSource.glyphCapabilities('outline').motion.gestures.length === 0 && q('gesture').value === 'timer.advance' &&
+      !q('play').disabled && q('consumer-import').textContent.includes('/gestures/timer'));
+    check('timer/outline/exact-author-paths', JSON.stringify(paths(timerStage)) === JSON.stringify(paths(timerMaster)));
+    check('timer/outline/declared-parts-without-guessed-roles', [...q('parts').children].map(item => item.title).join(',') === 'timer-hand,timer-dial' &&
+      q('parts').textContent.includes('Движущаяся часть') && q('parts').textContent.includes('Неподвижная часть'));
+    check('timer/outline/small-samples-preserve-author', [...q('size-samples').querySelectorAll('svg')]
+      .every(svg => JSON.stringify(paths(svg)) === JSON.stringify(paths(timerMaster))));
+    authority.push({ name: 'timer', variant: 'outline', author: timerCapabilities.capabilities.author,
+      anatomy: timerCapabilities.capabilities.anatomy });
+    setReduced(false);
+    for (const phase of [0.125, 0.875, 0.5]) {
+      await setProgress(phase);
+      check(`timer/outline/pose-${phase}`, angleDistance(360 * phase, angle(timerHand)) < 0.01 &&
+        timerDial.outerHTML === dialBefore && timerHand === q('symbol-stage').querySelector('[data-part="timer-hand"]') &&
+        JSON.stringify(paths(timerStage)) === JSON.stringify(paths(timerMaster)));
+    }
+    await setProgress(0);
+    q('play').click();
+    await wait(() => Number(q('progress').value) > 0.15 && Number(q('progress').value) < 0.7, 'timer active phase');
+    q('pause').click();
+    const timerPaused = Number(q('progress').value), timerBeforeReverse = angle(timerHand);
+    for (let index = 0; index < 3; index++) await frame();
+    check('timer/outline/pause-keeps-pose', Number(q('progress').value) === timerPaused &&
+      angleDistance(timerBeforeReverse, angle(timerHand)) < 0.01);
+    q('reverse').click();
+    await Promise.resolve(); await Promise.resolve();
+    check('timer/outline/reverse-pickup', angleDistance(timerBeforeReverse, angle(timerHand)) < 0.1 &&
+      timerDial.outerHTML === dialBefore);
+    await wait(() => Number(q('progress').value) < timerPaused - 0.03, 'timer reverse phase');
+    q('pause').click();
+    const timerBeforeNewer = angle(timerHand);
+    q('play').click();
+    await Promise.resolve(); await Promise.resolve();
+    check('timer/outline/newer-target-pickup', angleDistance(timerBeforeNewer, angle(timerHand)) < 0.1 &&
+      timerHand === q('symbol-stage').querySelector('[data-part="timer-hand"]'));
+    setReduced(true);
+    await wait(() => Number(q('progress').value) === 1, 'timer live reduced terminal');
+    check('timer/outline/reduced-motion-terminal', angleDistance(0, angle(timerHand)) < 0.01 && timerDial.outerHTML === dialBefore);
+    await setProgress(0.125);
+    const beforeTimerSvg = downloads.length;
+    q('export-format').value = 'svg'; q('export').click();
+    const timerSvg = downloads.at(-1);
+    check('timer/outline/svg-exports-declared-original', downloads.length === beforeTimerSvg + 1 && timerSvg.filename === 'timer-outline.svg' &&
+      JSON.stringify(paths(new DOMParser().parseFromString(await timerSvg.blob.text(), 'image/svg+xml').documentElement)) === JSON.stringify(paths(timerMaster)) &&
+      q('export-status').textContent === 'SVG исходного мастера подготовлен.');
+    q('export-format').value = 'effect'; q('export').click();
+    const timerEffect = JSON.parse(await downloads.at(-1).blob.text());
+    check('timer/outline/effect-export', timerEffect.version === 1 && timerEffect.gesture === 'timer.advance' &&
+      timerEffect.targets[0].partId === 'timer-hand' && timerEffect.targets[0].style.transformOrigin === '50% 50%' &&
+      timerEffect.unchangedPartIds.join(',') === 'timer-dial');
+    const beforeTimerLottie = downloads.length;
+    q('export-format').value = 'lottie'; q('export').click();
+    await wait(() => q('export-status').textContent.startsWith('Lottie:'), 'timer Lottie refusal');
+    check('timer/outline/lottie-motion-refusal', downloads.length === beforeTimerLottie &&
+      q('export-status').textContent.startsWith('Lottie: MOTION_UNAVAILABLE: SEMANTIC_MOTION_UNAVAILABLE:'));
+    await choose('timer', 'filled');
+    const timerFilledRow = data.rows.find(item => item.name === 'timer' && item.variant === 'filled');
+    const timerFilledSource = await (await originalFetch(timerFilledRow.views.original)).text();
+    check('timer/filled/precise-motion-refusal', q('play').disabled && q('reverse').disabled && q('gesture').value === '' &&
+      q('motion-status').textContent.startsWith('VARIANT_UNSUPPORTED:') &&
+      JSON.stringify(paths(q('symbol-stage').querySelector('svg'))) === JSON.stringify(paths(new DOMParser()
+        .parseFromString(timerFilledSource, 'image/svg+xml').documentElement)) && !q('export').disabled &&
+      q('consumer-import').textContent.includes('/symbols/timer'));
+
+    await choose('time', 'outline');
+    const timeGenerated = document.querySelector('[data-view="generated"]');
+    check('gesture-view/legacy-model-available', !timeGenerated.disabled);
+    timeGenerated.click();
+    await settle('time');
+    check('gesture-view/legacy-uses-own-contract', q('symbol-stage').dataset.view === 'generated' &&
+      q('consumer-import').textContent.includes('@labpics/icons/ir') && !q('consumer-import').textContent.includes('/gestures/') &&
+      q('motion-status').textContent.includes('Жест относится к прежней модели.'));
+    document.querySelector('[data-view="original"]').click();
+    await settle('time');
+    check('gesture-view/legacy-return-preserves-time-contract', q('symbol-stage').dataset.view === 'original' &&
+      q('consumer-import').textContent.includes('/symbols/time') && q('gesture').value === 'time.advance' && !q('play').disabled);
     await choose('reload', 'outline');
+    const reloadOverlay = document.querySelector('[data-view="overlay"]');
+    check('gesture-view/comparison-available', !reloadOverlay.disabled);
+    reloadOverlay.click();
+    await settle('reload');
+    check('gesture-view/comparison-keeps-motion-inactive', q('symbol-stage').dataset.view === 'overlay' && q('play').disabled &&
+      !q('consumer-import').textContent.includes('/gestures/'));
+    document.querySelector('[data-view="original"]').click();
+    await settle('reload');
+    check('gesture-view/comparison-return-restores-authored-contract', q('symbol-stage').dataset.view === 'original' &&
+      q('consumer-import').textContent.includes('/gestures/reload') && q('gesture').value === 'reload.cycle' &&
+      q('symbol-stage').querySelectorAll('[data-part="cycle-body"]').length === 1 && !q('play').disabled);
     q('display-size').value = '112';
     q('display-size').dispatchEvent(new Event('input', { bubbles: true }));
     setReduced(false);
@@ -355,7 +457,7 @@ export async function runExplorerJourney() {
     deferredReject = null;
     for (let index = 0; index < 3; index++) await frame();
     check('late-failure-keeps-new-selection', q('symbol-name').textContent === 'reload' &&
-      q('consumer-import').textContent.includes('/symbols/reload') && q('source-status').textContent === status && !q('play').disabled);
+      q('consumer-import').textContent.includes('/gestures/reload') && q('source-status').textContent === status && !q('play').disabled);
     check('late-failure-keeps-new-visible-status', q('load-status').hidden);
     window.fetch = originalFetch;
 
@@ -1374,5 +1476,48 @@ export async function verifyLazyStateSelection({ page, origin }) {
     clearTimeout(timeout);
     release();
     await page.unroute('**/package/states/status-circle.js');
+  }
+}
+
+/** Поздний authored gesture import не заменяет новый выбор и его физический SVG. */
+export async function verifyLazyGestureSelection({ page, origin }) {
+  let release, signalRequested, timeout;
+  const held = new Promise(resolve => { release = resolve; });
+  const requested = new Promise(resolve => { signalRequested = resolve; });
+  await page.route('**/package/gestures/timer.js', async route => {
+    signalRequested();
+    await held;
+    await route.continue();
+  });
+  try {
+    await page.goto(origin, { waitUntil: 'load' });
+    await page.locator('#symbol-inspector[aria-busy="false"]').waitFor();
+    await page.locator('#symbol-search').fill('timer');
+    await page.locator('[data-symbol="timer"]').click();
+    await Promise.race([requested, new Promise((_, reject) => {
+      timeout = setTimeout(() => reject(new Error('authored gesture module was not requested')), 4000);
+    })]);
+    clearTimeout(timeout);
+    await page.locator('#symbol-search').fill('reload');
+    await page.locator('[data-symbol="reload"]').click();
+    await page.locator('#symbol-inspector[aria-busy="false"]').waitFor();
+    const before = await page.locator('#symbol-stage').innerHTML();
+    const sourceBefore = await page.locator('#source-status').textContent();
+    release();
+    await page.evaluate(async () => {
+      await import('/package/gestures/timer.js');
+      for (let index = 0; index < 2; index++) await new Promise(resolve => requestAnimationFrame(resolve));
+    });
+    const preserved = await page.locator('#symbol-name').textContent() === 'reload' &&
+      await page.locator('#symbol-stage').innerHTML() === before &&
+      await page.locator('#source-status').textContent() === sourceBefore &&
+      (await page.locator('#consumer-import').textContent()).includes('/gestures/reload') &&
+      await page.locator('#load-status').isHidden();
+    if (!preserved) throw new Error('late authored gesture module replaced the newer selection');
+    return { pass: true, requested: true, preservedSelection: 'reload', preservedDom: true, preservedSource: true };
+  } finally {
+    clearTimeout(timeout);
+    release();
+    await page.unroute('**/package/gestures/timer.js');
   }
 }

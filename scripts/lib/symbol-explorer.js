@@ -55,15 +55,52 @@ export function symbolExplorerStateVariationIds(contract, stateGroups) {
   return ids;
 }
 
+/** Членство жестов выводится из реальных публичных exports, без списка имён UI. */
+export function symbolExplorerGestureProjection(contract, iconIds, surface = {}) {
+  const files = contract.files.filter(file => /^dist\/gestures\/[^/]+\.js$/.test(file));
+  const entry = contract.exports?.['./gestures/*'];
+  if (files.length && (entry?.import !== './dist/gestures/*.js' || entry?.types !== './dist/gestures/*.d.ts')) {
+    throw new Error('symbol explorer: gesture output не имеет публичного package entry');
+  }
+  const ids = files.map(file => file.slice('dist/gestures/'.length, -'.js'.length)).sort();
+  if (new Set(ids).size !== ids.length || ids.some(id => !/^[a-z][a-z0-9-]*$/.test(id) || !iconIds.includes(id))) {
+    throw new Error('symbol explorer: gesture output не принадлежит авторскому каталогу');
+  }
+  const rotationIconIds = [];
+  for (const id of ids) {
+    if (!contract.files.includes(`dist/gestures/${id}.d.ts`)) {
+      throw new Error(`symbol explorer: gesture ${id} не имеет declaration в package contract`);
+    }
+    const names = surface[`./gestures/${id}`];
+    if (!Array.isArray(names) || !names.length || new Set(names).size !== names.length || names.some(name => typeof name !== 'string')) {
+      throw new Error(`symbol explorer: gesture ${id} не имеет точной публичной export surface`);
+    }
+    const required = ['renderMotionSvg', 'compileMotionEffect', 'motionCapabilities'];
+    if (names.includes('renderMotionSvg') || names.includes('compileMotionEffect')) {
+      if (!required.every(name => names.includes(name))) {
+        throw new Error(`symbol explorer: gesture ${id} имеет неполный rotation contract`);
+      }
+      rotationIconIds.push(id);
+    }
+  }
+  const declared = Object.keys(surface).filter(key => /^\.\/gestures\/[^/]+$/.test(key));
+  if (declared.some(key => !ids.includes(key.slice('./gestures/'.length)))) {
+    throw new Error('symbol explorer: gesture export surface не имеет package target');
+  }
+  return { iconIds: ids, rotationIconIds };
+}
+
 /** Runtime presence задаёт package contract; semantic spec задаёт точное членство. */
-export function symbolExplorerBrowserFiles(contract, iconIds, stateGroups) {
+export function symbolExplorerBrowserFiles(contract, iconIds, stateGroups, surface = {}) {
   const stateFiles = stateGroups.map(({ group }) => `dist/states/${group}.js`);
   const variationFiles = symbolExplorerVariationIds(contract, iconIds).map(id => `dist/variations/${id}.js`);
   const stateVariationFiles = symbolExplorerStateVariationIds(contract, stateGroups)
     .map(id => `dist/state-variations/${id}.js`);
+  const gestureFiles = symbolExplorerGestureProjection(contract, iconIds, surface).iconIds
+    .map(id => `dist/gestures/${id}.js`);
   const files = [...new Set([...contract.runtimeDependencies, 'dist/ir/render.js', 'dist/motion/index.js', 'dist/authoring/index.js',
     ...iconIds.flatMap(name => [`dist/symbols/${name}.js`, `dist/lottie/${name}.js`]),
-    ...stateFiles, ...variationFiles, ...stateVariationFiles])];
+    ...stateFiles, ...variationFiles, ...stateVariationFiles, ...gestureFiles])];
   for (const file of files) {
     if (!contract.files.includes(file)) throw new Error(`symbol explorer: ${file} не принадлежит package contract`);
   }
@@ -76,7 +113,7 @@ export function symbolExplorerBrowserFiles(contract, iconIds, stateGroups) {
 /** Observatory использует уже проверенные изображения и production package. */
 export function writeSymbolExplorer({ repo, outDir, report, visuals, canvas, iconSvg, comparisonVisual, packageDir = join(repo, 'dist') }) {
   mkdirSync(outDir, { recursive: true });
-  for (const name of ['index.html', 'explorer.css', 'explorer.js', 'variation-preview.js', 'geometry-patch.js', 'authoring.html', 'authoring.js', 'download.js']) {
+  for (const name of ['index.html', 'explorer.css', 'explorer.js', 'variation-preview.js', 'geometry-patch.js', 'authored-gesture.js', 'authoring.html', 'authoring.js', 'download.js']) {
     copyFileSync(join(repo, 'observatory', name), join(outDir, name));
   }
   const starter = authoringTutorialMaterial(readFileSync(join(repo, 'docs/authoring.md'), 'utf8'), join(packageDir, 'authoring/index.js'));
@@ -99,12 +136,14 @@ export function writeSymbolExplorer({ repo, outDir, report, visuals, canvas, ico
     bundle: true, format: 'esm', platform: 'browser', target: 'es2022', minify: true,
   });
   const contract = JSON.parse(readFileSync(join(repo, 'release', 'contract.json'), 'utf8'));
+  const surface = JSON.parse(readFileSync(join(repo, 'release', 'export-surface.json'), 'utf8'));
   const baseline = loadAuthorBaseline(repo);
   const stateGroups = stateExplorerGroups(JSON.parse(readFileSync(join(repo, 'semantics/author-state-groups.json'), 'utf8')));
   const iconIds = Object.keys(baseline.icons);
   const variationIconIds = symbolExplorerVariationIds(contract, iconIds);
   const stateVariationGroupIds = symbolExplorerStateVariationIds(contract, stateGroups);
-  const browserFiles = symbolExplorerBrowserFiles(contract, iconIds, stateGroups);
+  const rotationGestureIconIds = symbolExplorerGestureProjection(contract, iconIds, surface).rotationIconIds;
+  const browserFiles = symbolExplorerBrowserFiles(contract, iconIds, stateGroups, surface);
   for (const relative of browserFiles) {
     const target = join(outDir, 'package', relative.slice('dist/'.length));
     mkdirSync(dirname(target), { recursive: true });
@@ -144,7 +183,8 @@ export function writeSymbolExplorer({ repo, outDir, report, visuals, canvas, ico
       metrics: null,
     };
   }));
-  const data = { version: 2, source: baseline.source, executionIdentity, stateGroups, variationIconIds, stateVariationGroupIds, summary: { glyphs: iconIds.length, variants: rows.length }, rows };
+  const data = { version: 2, source: baseline.source, executionIdentity, stateGroups, variationIconIds, stateVariationGroupIds,
+    rotationGestureIconIds, summary: { glyphs: iconIds.length, variants: rows.length }, rows };
   writeFileSync(join(outDir, 'explorer.json'), `${JSON.stringify(data)}\n`);
   return join(outDir, 'index.html');
 }

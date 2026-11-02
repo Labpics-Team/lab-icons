@@ -3,6 +3,7 @@ import { renderGlyphSvg } from './package/ir/render.js';
 import { downloadFile } from './download.js';
 import { authoredVariationCapability, authoredVariationPresentation, renderVariationComparison } from './variation-preview.js';
 import { applyEnclosurePatch, visibleStateSvg } from './geometry-patch.js';
+import { admitAuthoredGesture, authoredGestureActive } from './authored-gesture.js';
 let execution;
 const motionExecutor = () => execution ??= import('./motion-execution.js');
 let recordedModels;
@@ -26,7 +27,11 @@ function loadMessage(message = '') {
   loadStatus.textContent = message;
   loadStatus.hidden = !message;
 }
-const state = { data: null, name: 'time', variant: 'outline', view: 'original', viewLoading: false, limit: 48, revision: 0, viewRevision: 0, motionRevision: 0, pendingMotion: null, loaded: false, legacy: false, modelModule: null, abort: null, module: null, capabilities: null, glyph: null, axes: {}, variation: {}, original: '', effect: null, animations: [], frame: null, playhead: null, replacement: null };
+const state = { data: null, name: 'time', variant: 'outline', view: 'original', viewLoading: false, limit: 48, revision: 0, viewRevision: 0, motionRevision: 0, pendingMotion: null, loaded: false, legacy: false, modelModule: null, motionModule: null, authoredGesture: null, abort: null, module: null, capabilities: null, glyph: null, axes: {}, variation: {}, original: '', effect: null, animations: [], frame: null, playhead: null, replacement: null };
+const authoredMotionView = (view = state.view, legacy = state.legacy) => authoredGestureActive(state.authoredGesture, view, legacy);
+const gestureDefinitions = (view = state.view, legacy = state.legacy, caps = state.capabilities) =>
+  view === 'original' && !legacy && state.motionModule
+    ? state.authoredGesture?.ok ? state.authoredGesture.capabilities.gestures : [] : caps?.motion.gestures ?? [];
 const variationAvailable = () => authoredVariationCapability(state.module?.glyphCapabilities(state.variant));
 const variationView = () => Boolean(variationAvailable() && state.view !== 'original' && !state.legacy);
 function updateVariationStatus() {
@@ -120,12 +125,17 @@ function inspectorPresentation() {
     (active ? contourGroup(group) ? 'Авторские контуры меняют ориентацию; средняя точка остаётся на месте.' : sourceGroup(group) ? 'Два самостоятельных авторских рисунка. Переход сохраняет видимую смесь при прерывании.' : variation ? 'Авторское содержимое; вариативное обрамление сохраняется при замене знака.' : 'Авторский знак; общая оболочка сохраняется при замене.' : state.legacy ? 'Прежняя модель: паритет с новой авторской основой не принят.' : variation
       ? `${comparison ? 'Красным — исходная форма, синим — изменённая. ' : ''}${authoredVariationPresentation(variationAvailable()).summary(state.variation)} Образцы размеров и SVG относятся к этой форме.`
       : comparison ? `Красным — текущая основа, синим — прежняя ${row.model?.catalogState === 'accepted' ? 'модель' : 'модель на проверке'} при исходных параметрах. Части и образцы размеров относятся к текущему авторскому мастеру. Паритет не принят.` : 'Текущий авторский мастер. Возможности относятся к его закреплённой версии.');
-  ui['consumer-import'].textContent = active ? `import { renderStateSvg, compileStateEffect${variation ? ', renderEnclosurePatch' : ''} } from\n  '@labpics/icons/${variation ? 'state-variations' : 'states'}/${group.capabilities.group}';` : state.legacy ? `import { glyph } from '@labpics/icons/ir';\n// Прежняя основа; текущий master: ./symbols/${state.name}` : `import { glyph } from\n  '@labpics/icons/${variation ? 'variations' : 'symbols'}/${state.name}';`;
+  ui['consumer-import'].textContent = active ? `import { renderStateSvg, compileStateEffect${variation ? ', renderEnclosurePatch' : ''} } from\n  '@labpics/icons/${variation ? 'state-variations' : 'states'}/${group.capabilities.group}';` : state.legacy ? `import { glyph } from '@labpics/icons/ir';\n// Прежняя основа; текущий master: ./symbols/${state.name}` : authoredMotionView()
+    ? `import { renderMotionSvg, compileMotionEffect } from\n  '@labpics/icons/gestures/${state.name}';`
+    : `import { glyph } from\n  '@labpics/icons/${variation ? 'variations' : 'symbols'}/${state.name}';`;
+  const authoredEffect = authoredMotionView() ? motionAdmission(state.glyph, caps, gestureDefinitions()[0]?.id) : null;
   const parts = active ? (contourGroup(group) ? group.capabilities.partIds : [...member.contentPartIds, ...group.capabilities.sharedPartIds])
-    .map(id => ({ id, role: id === group.capabilities.enclosurePartId ? 'container' : 'content' })) : state.glyph.parts;
+    .map(id => ({ id, role: id === group.capabilities.enclosurePartId ? 'container' : 'content' })) : authoredEffect?.ok
+      ? [...authoredEffect.effect.targets.map(target => ({ id: target.partId, motion: 'Движущаяся часть' })),
+        ...authoredEffect.effect.unchangedPartIds.map(id => ({ id, motion: 'Неподвижная часть' }))] : state.glyph.parts;
   ui.parts.replaceChildren(...parts.map(part => {
     const item = document.createElement('li');
-    item.textContent = part.role === 'unclassified' ? `Авторский контур ${part.zIndex + 1}; семантика пока не принята.` : `${comparison ? 'Авторский ' : ''}${part.id} — ${part.role}`;
+    item.textContent = part.motion ? `${part.id} — ${part.motion}` : part.role === 'unclassified' ? `Авторский контур ${part.zIndex + 1}; семантика пока не принята.` : `${comparison ? 'Авторский ' : ''}${part.id} — ${part.role}`;
     item.title = part.id;
     return item;
   }));
@@ -135,8 +145,9 @@ function inspectorPresentation() {
     stateSamples(result.svg);
     patchStateImages(ui['size-samples'], enclosurePatch());
   } else {
-    const productionSvg = state.legacy || variation || motionAdmission(state.glyph, caps, caps.motion.gestures[0]?.id)?.ok;
-    stateSamples(size => productionSvg ? renderGlyphSvg(state.glyph, { instanceId: `sample-${state.revision}-${state.viewRevision}-${size}` }) : state.original);
+    const productionSvg = state.legacy || variation || motionAdmission(state.glyph, caps, gestureDefinitions()[0]?.id)?.ok;
+    stateSamples(size => authoredMotionView() ? state.authoredGesture.svg : productionSvg
+      ? renderGlyphSvg(state.glyph, { instanceId: `sample-${state.revision}-${state.viewRevision}-${size}` }) : state.original);
   }
   updateVariationStatus();
 }
@@ -227,9 +238,17 @@ function selectedRow() {
   return state.data.rows.find((row) => row.name === state.name && row.variant === state.variant);
 }
 
-function motionAdmission(glyph = state.glyph, caps = state.capabilities, gesture = ui.gesture.value) {
+function compileGestureEffect(glyph, caps, gesture, request, { view = state.view, legacy = state.legacy } = {}) {
+  if (view === 'original' && !legacy && state.motionModule) {
+    if (!state.authoredGesture?.ok) return state.authoredGesture;
+    return state.motionModule.compileMotionEffect(gesture, { ...request, variant: glyph.variant });
+  }
+  return compileSymbolEffect(glyph, caps, gesture, request);
+}
+
+function motionAdmission(glyph = state.glyph, caps = state.capabilities, gesture = ui.gesture.value, viewOptions) {
   if (!glyph || !caps || !gesture) return null;
-  return compileSymbolEffect(glyph, caps, gesture, { duration: 0 });
+  return compileGestureEffect(glyph, caps, gesture, { duration: 0 }, viewOptions);
 }
 
 function motionView() {
@@ -237,7 +256,7 @@ function motionView() {
 }
 
 function selectedGesture() {
-  return state.capabilities?.motion.gestures.find(gesture => gesture.id === ui.gesture.value);
+  return gestureDefinitions().find(gesture => gesture.id === ui.gesture.value);
 }
 
 function cyclicGesture() {
@@ -270,7 +289,9 @@ function updateMotionControls() {
   ui.pause.disabled = !ready || (!state.playhead && !state.pendingMotion);
   ui.pause.textContent = (state.pendingMotion?.paused ?? (state.playhead && !state.playhead.running)) ? 'Продолжить' : 'Пауза';
   const identity = state.data.executionIdentity;
-  ui['motion-status'].textContent = ready ? `${identity.package} ${identity.version}. ${cyclicGesture() ? 'Можно повторить, развернуть или прервать движение.' : 'Можно развернуть или прервать движение.'}${state.legacy ? ' Жест относится к прежней модели.' : ''}` : admitted ? 'Выберите авторский вид, чтобы управлять его жестом.' : 'Для этой авторской основы семантический жест пока не принят.';
+  const refusal = state.view === 'original' && !state.legacy ? state.authoredGesture?.reason : null;
+  ui['motion-status'].textContent = ready ? `${identity.package} ${identity.version}. ${cyclicGesture() ? 'Можно повторить, развернуть или прервать движение.' : 'Можно развернуть или прервать движение.'}${state.legacy ? ' Жест относится к прежней модели.' : ''}` : refusal
+    ? `${refusal.code}: ${refusal.message}` : admitted ? 'Выберите авторский вид, чтобы управлять его жестом.' : 'Для этой авторской основы семантический жест пока не принят.';
 }
 
 function viewAvailable(view, row = selectedRow()) {
@@ -361,9 +382,10 @@ async function renderView(view = state.view, { preserveProgress = false, variati
       glyph = state.module.glyph({ variant: state.variant, ...(modified && { variation: requestedVariation }) });
       capabilities = state.module.glyphCapabilities(state.variant);
     }
-    const annotatedSource = !legacy && motionAdmission(glyph, capabilities, capabilities.motion.gestures[0]?.id)?.ok;
+    const annotatedSource = !legacy && motionAdmission(glyph, capabilities, gestureDefinitions(view, legacy, capabilities)[0]?.id, { view, legacy })?.ok;
     const productionSvg = legacy || modified || annotatedSource;
-    let svg = productionSvg ? renderGlyphSvg(glyph, { instanceId: `stage-${revision}-${viewRevision}` }) : state.original;
+    let svg = authoredMotionView(view, legacy) ? state.authoredGesture.svg : productionSvg
+      ? renderGlyphSvg(glyph, { instanceId: `stage-${revision}-${viewRevision}` }) : state.original;
     if (modified && ['overlay', 'difference'].includes(view)) {
       const source = state.module.glyph({ variant: state.variant, modelMode: 'source-only' });
       svg = renderVariationComparison(renderGlyphSvg(source, { instanceId: `source-${revision}-${viewRevision}` }),
@@ -376,11 +398,12 @@ async function renderView(view = state.view, { preserveProgress = false, variati
     if (revision !== state.revision || viewRevision !== state.viewRevision) return;
     const changedControls = capabilities !== state.capabilities || legacy !== state.legacy;
     const changedStateView = state.replacement && replacementViewAvailable(view) !== replacementViewAvailable(state.view);
+    const changedGestureView = authoredMotionView(view, legacy) !== authoredMotionView();
     Object.assign(state, { view, glyph, capabilities, modelModule, legacy, axes, variation: requestedVariation, viewLoading: false });
     ui['symbol-stage'].dataset.view = view;
     ui.pause.textContent = 'Пауза';
     if (changedControls) controls();
-    else if (changedStateView) motionChoices();
+    else if (changedStateView || changedGestureView) motionChoices();
     if (replacementMode()) {
       const result = state.replacement.module.renderStateSvg(state.replacement.target, { variant: state.variant });
       if (!result.ok) throw new Error(`${result.reason.code}: ${result.reason.message}`);
@@ -508,7 +531,7 @@ function controls() {
 
 function motionChoices() {
   const selectedGesture = ui.gesture.value;
-  const gestures = state.capabilities.motion.gestures.map(gesture => new Option(gesture.id, gesture.id));
+  const gestures = gestureDefinitions().map(gesture => new Option(gesture.id, gesture.id));
   const contour = contourGroup(state.replacement);
   const stateOptions = state.replacement && !state.legacy && replacementViewAvailable(state.view)
     ? [new Option(contour ? 'Ориентация' : 'Смена знака', stateGesture(state.replacement))] : [];
@@ -537,6 +560,7 @@ async function select(name, { reveal = false } = {}) {
   state.modelModule = null;
   state.loaded = false;
   state.module = state.capabilities = state.glyph = null;
+  state.motionModule = state.authoredGesture = null;
   state.replacement = null;
   state.original = '';
   state.revision++;
@@ -557,12 +581,13 @@ async function select(name, { reveal = false } = {}) {
   try {
     const membership = state.data.stateGroups?.find(group => group.members.some(member => member.icon === name && member.variant === state.variant));
     const namespace = state.data.variationIconIds.includes(name) ? 'variations' : 'symbols';
-    const [module, response, replacementModule, variationModule] = await Promise.all([
+    const [module, response, replacementModule, variationModule, motionModule] = await Promise.all([
       import(`./package/${namespace}/${name}.js`),
       fetch(row.views.original, { signal: state.abort.signal }),
       membership ? import(`./package/states/${membership.group}.js`) : null,
       membership && state.data.stateVariationGroupIds?.includes(membership.group)
         ? import(`./package/state-variations/${membership.group}.js`) : null,
+      state.data.rotationGestureIconIds.includes(name) ? import(`./package/gestures/${name}.js`) : null,
     ]);
     if (!response.ok) throw new Error(`Авторский SVG недоступен: HTTP ${response.status}`);
     const original = await response.text();
@@ -571,6 +596,8 @@ async function select(name, { reveal = false } = {}) {
     state.capabilities = module.glyphCapabilities(state.variant);
     state.glyph = module.glyph({ variant: state.variant });
     state.original = original;
+    state.motionModule = motionModule;
+    state.authoredGesture = motionModule ? admitAuthoredGesture(motionModule, state.glyph, row.original) : null;
     if (replacementModule) {
       const capabilities = replacementModule.stateCapabilities();
       const member = capabilities.states.find(member => member.icon === name);
@@ -597,6 +624,7 @@ async function select(name, { reveal = false } = {}) {
     state.loaded = false;
     state.viewLoading = false;
     state.module = state.capabilities = state.glyph = null;
+    state.motionModule = state.authoredGesture = null;
     state.replacement = null;
     state.original = '';
     clearInspector('Не загружен');
@@ -608,7 +636,7 @@ async function select(name, { reveal = false } = {}) {
 }
 
 function effect(from, to, { duration = 900 } = {}) {
-  return compileSymbolEffect(state.glyph, state.capabilities, ui.gesture.value, { duration, from, to, reducedMotion: reducedPreference.matches || ui['reduce-motion'].checked });
+  return compileGestureEffect(state.glyph, state.capabilities, ui.gesture.value, { duration, from, to, reducedMotion: reducedPreference.matches || ui['reduce-motion'].checked });
 }
 
 async function replaceState(target) {
@@ -830,6 +858,7 @@ ui.export.addEventListener('click', async () => {
     `${group ? `${group.capabilities.group}-${group.target}` : state.name}-${state.variant}${legacyExport ? '-recorded-model' : variationView() ? '-variation' : ''}.${format === 'svg' ? 'svg' : format === 'lottie' ? 'lottie.json' : 'effect.json'}`);
   ui['export-status'].textContent = group && format === 'svg'
     ? visibleStateExport ? 'SVG видимой позы подготовлен.' : 'SVG выбранного состояния подготовлен.'
+    : format === 'svg' && authoredMotionView() ? 'SVG исходного мастера подготовлен.'
     : 'Файл подготовлен.';
 });
 
@@ -838,6 +867,7 @@ try {
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
   state.data = await response.json();
   if (!Array.isArray(state.data.variationIconIds)) throw new Error('Метаданные вариативности недоступны.');
+  if (!Array.isArray(state.data.rotationGestureIconIds)) throw new Error('Метаданные авторских жестов недоступны.');
   ui['corpus-count'].textContent = `${state.data.summary.glyphs} семейств`;
   if (!state.data.rows.some((row) => row.name === state.name)) state.name = state.data.rows[0].name;
   await select(state.name);
