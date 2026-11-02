@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { animate, sequence } from '@labpics/motion';
+import { animate, sequence, value } from '@labpics/motion';
 
-vi.mock('@labpics/motion', () => ({ animate: vi.fn(), sequence: vi.fn() }));
+vi.mock('@labpics/motion', () => ({ animate: vi.fn(), sequence: vi.fn(), value: vi.fn() }));
 vi.stubGlobal('__MOTION_IDENTITY__', { package: '@labpics/motion', version: '0.5.0' });
 const { executeSymbolEffect } = await import('../observatory/motion-execution.js');
 
@@ -11,6 +11,32 @@ class SvgViewport {
   querySelectorAll() { return this.parts; }
 }
 const control = () => ({ stop: vi.fn() });
+function scalarClock(initial) {
+  let current = initial, target = initial, resolve;
+  const listeners = new Set();
+  const publish = progress => { current = progress; for (const listener of listeners) listener(progress); };
+  const playback = {
+    state: 'running', duration: 0, finished: new Promise(done => { resolve = done; }),
+    pause: vi.fn(() => { playback.state = 'paused'; }),
+    play: vi.fn(() => { playback.state = 'running'; }),
+    seek: vi.fn(time => publish(initial + (target - initial) * time / playback.duration)),
+    stop: vi.fn(() => {
+      if (!['finished', 'stopped'].includes(playback.state)) { playback.state = 'stopped'; resolve({ status: 'stopped' }); }
+    }),
+    finish: vi.fn(() => { publish(target); playback.state = 'finished'; resolve({ status: 'finished' }); }),
+  };
+  const unsubscribe = vi.fn(() => listeners.clear());
+  return {
+    playback, publish, unsubscribe, get: vi.fn(() => current),
+    subscribe: vi.fn(listener => { listeners.add(listener); return unsubscribe; }),
+    animate: vi.fn((next, options) => {
+      target = next; playback.duration = options.duration;
+      if (!options.duration) playback.finish();
+      return playback;
+    }),
+    dispose: vi.fn(() => { listeners.clear(); playback.stop(); }),
+  };
+}
 const effect = () => ({
   version: 3, viewport: { overflow: 'visible' }, options: { duration: 800, easing: 'linear' },
   targets: [{ partId: 'direction-body', property: 'x', unit: 'viewBox', from: 1.5, to: 0 }],
@@ -24,9 +50,113 @@ beforeEach(() => {
   vi.stubGlobal('SVGElement', SvgViewport);
   vi.stubGlobal('getComputedStyle', element => ({ opacity: String(element.style.opacity ?? 1) }));
   sequence.mockReturnValue(control()); animate.mockReturnValue(control());
+  value.mockImplementation(scalarClock);
 });
 afterEach(() => { vi.clearAllMocks(); });
 
+describe('публичное исполнение подготовленного contour-перехода', () => {
+  const transition = () => ({
+    contract: 'labpics.symbol-state-effect/1', version: 1, kind: 'contour-interpolation', from: 0.37, to: 1,
+    targets: ['first-dot', 'third-dot'].map(partId => ({ partId, property: 'd' })),
+    unchangedPartIds: ['middle-dot'], options: { duration: 900, easing: 'linear', fill: 'both' },
+  });
+  const viewport = () => {
+    const svg = new SvgViewport();
+    svg.parts = ['first-dot', 'middle-dot', 'third-dot'].map(part => ({
+      tagName: 'path', dataset: { part }, d: `${part}-author`,
+      setAttribute: vi.fn(function (key, value) { this[key] = value; }),
+    }));
+    svg.querySelectorAll = vi.fn(() => svg.parts);
+    return svg;
+  };
+  const prepared = () => ({ ok: true, sample: vi.fn(progress => ({ ok: true,
+    parts: ['first-dot', 'third-dot'].map(partId => ({ partId, d: `${partId}-pose-${progress}` })),
+  })) });
+
+  it('один раз связывает path-узлы и сообщает именно записанный кадр', () => {
+    const svg = viewport(), effect = transition(), sampler = prepared();
+    const frames = [];
+    const controls = executeSymbolEffect(svg, effect, { preparedContour: sampler,
+      onProgress: progress => frames.push({ progress, paths: svg.parts.map(part => part.d) }) });
+    const clock = value.mock.results[0].value;
+    expect(value).toHaveBeenCalledWith(0.37);
+    expect(clock.animate).toHaveBeenCalledWith(1, { duration: 900, ease: 'linear', reducedMotion: 'user' });
+    for (const progress of [0.4, 0.7, 0.9]) clock.publish(progress);
+    expect(frames).toEqual([0.37, 0.4, 0.7, 0.9].map(progress => ({ progress,
+      paths: [`first-dot-pose-${progress}`, 'middle-dot-author', `third-dot-pose-${progress}`] })));
+    expect(svg.querySelectorAll).toHaveBeenCalledTimes(1);
+    expect(svg.parts[1].setAttribute).not.toHaveBeenCalled();
+    expect(animate).not.toHaveBeenCalled(); expect(sequence).not.toHaveBeenCalled();
+    controls[0].stop();
+  });
+
+  it('делегирует playback и освобождает подписку один раз, сохраняя остановленную позу', async () => {
+    const svg = viewport();
+    const [control] = executeSymbolEffect(svg, transition(), { preparedContour: prepared() });
+    const clock = value.mock.results[0].value;
+    expect(control.duration).toBe(900);
+    control.pause(); expect(control.state).toBe('paused');
+    control.seek(450); expect(clock.playback.seek).toHaveBeenCalledWith(450);
+    expect(svg.parts[0].d).toBe('first-dot-pose-0.685');
+    control.play(); expect(control.state).toBe('running');
+    control.stop(); control.stop();
+    expect(await control.finished).toEqual({ status: 'stopped' });
+    expect(control.state).toBe('stopped');
+    expect(clock.unsubscribe).toHaveBeenCalledTimes(1); expect(clock.dispose).toHaveBeenCalledTimes(1);
+    clock.publish(1);
+    expect(svg.parts[0].d).toBe('first-dot-pose-0.685');
+    expect(svg.parts[1].d).toBe('middle-dot-author');
+  });
+
+  it.each([0, 900])('завершает и освобождает clock при duration=%s', async duration => {
+    const svg = viewport(), effect = transition(); effect.options.duration = duration;
+    const [control] = executeSymbolEffect(svg, effect, { preparedContour: prepared() });
+    const clock = value.mock.results[0].value;
+    expect(clock.animate.mock.calls[0][1].reducedMotion).toBe(duration ? 'user' : 'always');
+    if (duration) control.finish();
+    expect(await control.finished).toEqual({ status: 'finished' });
+    expect(svg.parts[0].d).toBe('first-dot-pose-1');
+    expect(clock.unsubscribe).toHaveBeenCalledTimes(1); expect(clock.dispose).toHaveBeenCalledTimes(1);
+    expect(svg.parts[1].setAttribute).not.toHaveBeenCalled();
+  });
+
+  it.each(['admission', 'playback'])('освобождает подписку при отказе Motion на границе %s', async boundary => {
+    const clock = scalarClock(0.37), failure = new Error('Motion отказал');
+    value.mockReturnValue(clock);
+    if (boundary === 'admission') {
+      clock.animate.mockImplementation(() => { throw failure; });
+      expect(() => executeSymbolEffect(viewport(), transition(), { preparedContour: prepared() })).toThrow(failure);
+    } else {
+      clock.playback.state = 'failed'; clock.playback.finished = Promise.reject(failure);
+      const [control] = executeSymbolEffect(viewport(), transition(), { preparedContour: prepared() });
+      await expect(control.finished).rejects.toThrow(failure);
+    }
+    expect(clock.unsubscribe).toHaveBeenCalledTimes(1); expect(clock.dispose).toHaveBeenCalledTimes(1);
+  });
+
+  it.each(['missing-path', 'group-target', 'wrong-property', 'moving-middle'])('отказывает %s до clock и записей', witness => {
+    const svg = viewport(), effect = transition();
+    if (witness === 'missing-path') effect.targets[0].partId = 'absent';
+    if (witness === 'group-target') svg.parts[0].tagName = 'g';
+    if (witness === 'wrong-property') effect.targets[0].property = 'opacity';
+    if (witness === 'moving-middle') effect.unchangedPartIds.push('first-dot');
+    expect(() => executeSymbolEffect(svg, effect, { preparedContour: prepared() })).toThrow(/подготовленных контуров/);
+    expect(value).not.toHaveBeenCalled();
+    expect(svg.parts.every(part => !part.setAttribute.mock.calls.length)).toBe(true);
+  });
+
+  it.each(['refusal', 'wrong-part', 'missing-data'])('отказывает начальной pose %s без частичных записей', witness => {
+    const svg = viewport(), sampler = prepared();
+    sampler.sample.mockImplementation(() => witness === 'refusal' ? { ok: false,
+      reason: { code: 'POSE_UNREPRESENTABLE', message: 'не представима' } } : { ok: true, parts: [
+      { partId: 'first-dot', d: 'valid-first' },
+      { partId: witness === 'wrong-part' ? 'other' : 'third-dot', ...(witness !== 'missing-data' && { d: 'valid-third' }) },
+    ] });
+    expect(() => executeSymbolEffect(svg, transition(), { preparedContour: sampler })).toThrow();
+    expect(value).not.toHaveBeenCalled();
+    expect(svg.parts.every(part => !part.setAttribute.mock.calls.length)).toBe(true);
+  });
+});
 describe('публичное исполнение semantic translation', () => {
   it('передаёт новый interval скалярным stages, сохраняя pickup текущей позы', () => {
     const svg = new SvgViewport();

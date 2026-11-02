@@ -1,4 +1,4 @@
-import { compileSymbolEffect } from './package/motion/index.js';
+import { compileSymbolEffect, prepareContourStateEffect } from './package/motion/index.js';
 import { renderGlyphSvg } from './package/ir/render.js';
 import { downloadFile } from './download.js';
 import { authoredVariationCapability, renderVariationComparison } from './variation-preview.js';
@@ -40,8 +40,11 @@ const stateLabels = Object.freeze({ confirmation: 'Подтверждение', 
   question: 'Вопрос', attention: 'Внимание', increase: 'Добавить', decrease: 'Убрать',
   play: 'Воспроизвести', pause: 'Приостановить',
   aloof: 'Сдержанное выражение', sad: 'Грустное выражение', smile: 'Улыбка' });
-const stateLabel = id => stateLabels[id] ?? id;
-const replacementMode = () => Boolean(state.replacement && ui.gesture.value === REPLACEMENT_GESTURE &&
+const orientationLabels = Object.freeze({ horizontal: 'Горизонтально', vertical: 'Вертикально' });
+const stateLabel = id => stateLabels[id] ?? orientationLabels[id] ?? id;
+const contourGroup = group => group?.capabilities.transition === 'contour-interpolation';
+const stateGesture = group => contourGroup(group) ? 'dots.orient' : REPLACEMENT_GESTURE;
+const replacementMode = () => Boolean(state.replacement && ui.gesture.value === stateGesture(state.replacement) &&
   state.view === 'original' && !state.legacy);
 const replacementMember = () => state.replacement?.capabilities.states.find(member => member.id === state.replacement.target);
 
@@ -83,11 +86,12 @@ function inspectorPresentation() {
   }
   const author = member?.author ?? row.original;
   ui['source-status'].textContent = `Lab UI v2.1. Версия ${author.version}. Узел ${author.nodeId}. ` +
-    (active ? 'Авторский знак; общая оболочка сохраняется при замене.' : state.legacy ? 'Прежняя модель: паритет с новой авторской основой не принят.' : variation
+    (active ? contourGroup(group) ? 'Авторские контуры меняют ориентацию; средняя точка остаётся на месте.' : 'Авторский знак; общая оболочка сохраняется при замене.' : state.legacy ? 'Прежняя модель: паритет с новой авторской основой не принят.' : variation
       ? `${comparison ? 'Красным — исходная форма, синим — изменённая. ' : ''}Размер точки ×${state.variation.dotScale}; расстояние ×${state.variation.spacingScale}. Образцы размеров и SVG относятся к этой форме.`
       : comparison ? `Красным — текущая основа, синим — прежняя ${row.model?.catalogState === 'accepted' ? 'модель' : 'модель на проверке'} при исходных параметрах. Части и образцы размеров относятся к текущему авторскому мастеру. Паритет не принят.` : 'Текущий авторский мастер. Возможности относятся к его закреплённой версии.');
   ui['consumer-import'].textContent = active ? `import { renderStateSvg, compileStateEffect } from\n  '@labpics/icons/states/${group.capabilities.group}';` : state.legacy ? `import { glyph } from '@labpics/icons/ir';\n// Прежняя основа; текущий master: ./symbols/${state.name}` : `import { glyph } from\n  '@labpics/icons/symbols/${state.name}';`;
-  const parts = active ? [...member.contentPartIds, ...group.capabilities.sharedPartIds].map(id => ({ id, role: id === group.capabilities.enclosurePartId ? 'container' : 'content' })) : state.glyph.parts;
+  const parts = active ? (contourGroup(group) ? group.capabilities.partIds : [...member.contentPartIds, ...group.capabilities.sharedPartIds])
+    .map(id => ({ id, role: id === group.capabilities.enclosurePartId ? 'container' : 'content' })) : state.glyph.parts;
   ui.parts.replaceChildren(...parts.map(part => {
     const item = document.createElement('li');
     item.textContent = part.role === 'unclassified' ? `Авторский контур ${part.zIndex + 1}; семантика пока не принята.` : `${comparison ? 'Авторский ' : ''}${part.id} — ${part.role}`;
@@ -109,6 +113,8 @@ function replacementChoices() {
   const group = state.replacement;
   ui['state-choices'].replaceChildren();
   if (!group || state.legacy) return;
+  ui['state-choices'].dataset.transition = group.capabilities.transition;
+  ui['state-choices'].setAttribute('aria-label', contourGroup(group) ? 'Ориентация многоточия' : 'Знак в общей оболочке');
   for (const member of group.capabilities.states) {
     const result = group.module.render(member.id, { variant: state.variant });
     if (!result.ok) throw new Error(`${result.reason.code}: ${result.reason.message}`);
@@ -215,7 +221,9 @@ function updateMotionControls() {
     const moving = state.animations.some(control => ['running', 'paused'].includes(control.state));
     ui.pause.disabled = !ready || (!moving && !state.pendingMotion);
     ui.pause.textContent = (state.pendingMotion?.paused ?? state.replacement.paused) ? 'Продолжить' : 'Пауза';
-    ui['motion-status'].textContent = ready ? 'Оболочка остаётся на месте. Выберите другой знак, разверните или прервите замену.' : 'Подготавливаем авторские состояния.';
+    ui['motion-status'].textContent = ready ? contourGroup(state.replacement)
+      ? 'Выберите ориентацию. Переход можно развернуть, приостановить или прервать.'
+      : 'Оболочка остаётся на месте. Выберите другой знак, разверните или прервите замену.' : 'Подготавливаем авторские состояния.';
     for (const button of ui['state-choices'].querySelectorAll('button')) button.disabled = !ready;
     return;
   }
@@ -313,14 +321,21 @@ async function renderView(view = state.view, { preserveProgress = false, variati
     }
     if (revision !== state.revision || viewRevision !== state.viewRevision) return;
     const changedControls = capabilities !== state.capabilities || legacy !== state.legacy;
+    const changedContourView = contourGroup(state.replacement) && (view === 'original') !== (state.view === 'original');
     Object.assign(state, { view, glyph, capabilities, modelModule, legacy, axes, variation: requestedVariation, viewLoading: false });
     ui['symbol-stage'].dataset.view = view;
     ui.pause.textContent = 'Пауза';
     if (changedControls) controls();
+    else if (changedContourView) motionChoices();
     if (replacementMode()) {
       const result = state.replacement.module.renderStateSvg(state.replacement.target, { variant: state.variant });
       if (!result.ok) throw new Error(`${result.reason.code}: ${result.reason.message}`);
       svg = result.svg;
+      if (contourGroup(state.replacement)) {
+        const endpoint = state.replacement.module.compileStateEffect(state.replacement.target, { duration: 0, variant: state.variant });
+        if (!endpoint.ok) throw new Error(`${endpoint.reason.code}: ${endpoint.reason.message}`);
+        state.replacement.progress = endpoint.effect.to;
+      }
     }
     ui['symbol-stage'].innerHTML = svg;
     for (const image of ui['symbol-stage'].querySelectorAll('svg')) image.setAttribute('aria-hidden', 'true');
@@ -436,9 +451,17 @@ function controls() {
   }
   ui['axis-status'].textContent = variation ? 'Положительные множители изменяют форму точек и расстояние между ними.'
     : caps.supportedAxes.length ? '' : 'Для этого варианта оси пока не приняты.';
+  motionChoices();
+}
+
+function motionChoices() {
   const selectedGesture = ui.gesture.value;
-  ui.gesture.replaceChildren(...(state.replacement && !state.legacy ? [new Option('Смена знака', REPLACEMENT_GESTURE)] : []),
-    ...caps.motion.gestures.map((gesture) => new Option(gesture.id, gesture.id)));
+  const gestures = state.capabilities.motion.gestures.map(gesture => new Option(gesture.id, gesture.id));
+  const contour = contourGroup(state.replacement);
+  const stateOptions = state.replacement && !state.legacy && (!contour || state.view === 'original')
+    ? [new Option(contour ? 'Ориентация' : 'Смена знака', stateGesture(state.replacement))] : [];
+  // Ориентация доказана для авторских endpoints; вариация сохраняет свои жесты.
+  ui.gesture.replaceChildren(...(contour ? [...gestures, ...stateOptions] : [...stateOptions, ...gestures]));
   if (!ui.gesture.options.length) ui.gesture.add(new Option('Нет принятого жеста', ''));
   else if ([...ui.gesture.options].some(option => option.value === selectedGesture)) ui.gesture.value = selectedGesture;
   replacementChoices();
@@ -534,10 +557,14 @@ async function replaceState(target) {
     if (revision !== state.revision || viewRevision !== state.viewRevision ||
         motionRevision !== state.motionRevision || state.replacement !== group || !replacementMode()) return;
     const result = group.module.compileStateEffect(target, { duration: 900, variant: state.variant,
+      ...(contourGroup(group) ? { from: group.progress } : {}),
       reducedMotion: reducedPreference.matches || ui['reduce-motion'].checked });
     if (!result.ok) throw new Error(`${result.reason.code}: ${result.reason.message}`);
     const previous = state.animations;
-    const controls = executor.executeSymbolEffect(ui['symbol-stage'], result.effect);
+    const preparedContour = contourGroup(group) ? prepareContourStateEffect(result.effect) : undefined;
+    if (preparedContour && !preparedContour.ok) throw new Error(`${preparedContour.reason.code}: ${preparedContour.reason.message}`);
+    const controls = executor.executeSymbolEffect(ui['symbol-stage'], result.effect, { preparedContour,
+      onProgress: progress => { if (state.replacement === group) group.progress = progress; } });
     // Все группы остаются mounted; successor считывает их видимость до stop прежнего.
     for (const control of previous) control.stop();
     if (target !== group.target) group.previous = group.target;
@@ -691,6 +718,7 @@ ui.export.addEventListener('click', async () => {
   if (group) {
     const result = format === 'svg' ? group.module.render(group.target, { variant: state.variant }) :
       group.module.exportStateTransition(group.target, { format: format === 'effect' ? 'web-effect' : format,
+        ...(contourGroup(group) ? { from: group.progress } : {}),
         duration: 900, variant: state.variant, reducedMotion: reducedPreference.matches || ui['reduce-motion'].checked });
     if (!result.ok) { ui['export-status'].textContent = `${result.reason.code}: ${result.reason.message}`; return; }
     content = format === 'svg' ? result.svg : JSON.stringify(result.effect, null, 2);
@@ -724,7 +752,7 @@ ui.export.addEventListener('click', async () => {
   } else { ui['export-status'].textContent = 'SF Symbols: для этого варианта нет проверенного адаптера.'; return; }
   downloadFile(content, format === 'svg' ? 'image/svg+xml' : 'application/json',
     `${group ? `${group.capabilities.group}-${group.target}` : state.name}-${state.variant}${legacyExport ? '-recorded-model' : variationView() ? '-variation' : ''}.${format === 'svg' ? 'svg' : format === 'lottie' ? 'lottie.json' : 'effect.json'}`);
-  ui['export-status'].textContent = 'Файл подготовлен.';
+  ui['export-status'].textContent = group && format === 'svg' ? 'SVG выбранного состояния подготовлен.' : 'Файл подготовлен.';
 });
 
 try {

@@ -4,6 +4,7 @@ export async function runExplorerJourney() {
   const authority = [];
   const controls = [];
   const fixtures = [];
+  const observers = [];
   const q = id => document.querySelector(`#${id}`);
   const frame = () => new Promise(resolve => requestAnimationFrame(resolve));
   const check = (id, passed, detail) => {
@@ -620,6 +621,126 @@ export async function runExplorerJourney() {
       check(`circle/${variant}/nudge-not-inferred`, q('play').disabled && q('gesture').value === '');
     }
 
+    for (const variant of ['outline', 'filled']) {
+      const id = `contour/${variant}`;
+      await choose('ellipsis-horizontal', variant);
+      const contourModule = await import(`./package/states/ellipsis-orientation-${variant}.js`);
+      const caps = contourModule.stateCapabilities();
+      const masters = {};
+      for (const member of caps.states) {
+        const row = data.rows.find(row => row.name === member.icon && row.variant === variant);
+        const response = await originalFetch(row.views.master);
+        if (!response.ok) throw new Error(`explorer journey: ${id}/${member.id} master HTTP ${response.status}`);
+        const raw = new DOMParser().parseFromString(await response.text(), 'image/svg+xml').documentElement;
+        masters[member.id] = paths(raw);
+        authority.push({ name: member.icon, variant, author: member.author, contour: caps.proof });
+      }
+      check(`${id}/preserves-activity-default`, q('gesture').value === 'ellipsis-horizontal.activity');
+      q('gesture').value = 'dots.orient';
+      q('gesture').dispatchEvent(new Event('change', { bubbles: true }));
+      await settle('ellipsis-horizontal');
+      const stage = q('symbol-stage');
+      const nodes = caps.partIds.map(partId => stage.querySelector(`[data-part="${partId}"]`));
+      const button = target => q('state-choices').querySelector(`[data-state-target="${target}"]`);
+      const stable = () => nodes.every((node, index) => node === stage.querySelector(`[data-part="${caps.partIds[index]}"]`));
+      const endpoint = target => JSON.stringify(paths(stage.querySelector(':scope > svg'))) === JSON.stringify(masters[target]);
+      const middle = nodes[1], middleBefore = middle.outerHTML;
+      const numbers = d => (d.match(/[+-]?(?:\d*\.\d+|\d+\.?)(?:[eE][+-]?\d+)?/g) ?? []).map(Number);
+      const horizontal = masters.horizontal.map(part => numbers(part.d));
+      const vertical = masters.vertical.map(part => numbers(part.d));
+      const phase = () => (numbers(nodes[0].getAttribute('d'))[0] - horizontal[0][0]) / (vertical[0][0] - horizontal[0][0]);
+      check(`${id}/real-public-controls`, caps.transition === 'contour-interpolation' && caps.morph === 'topology-proven' &&
+        nodes.length === 3 && nodes.every(node => node?.tagName.toLowerCase() === 'path') &&
+        !q('state-group-controls').hidden && q('gesture-progress-control').hidden && endpoint('horizontal') &&
+        q('consumer-import').textContent.includes(`/states/${caps.group}`) &&
+        [...q('parts').children].map(part => part.title).join(',') === caps.partIds.join(','));
+      for (const member of caps.states) {
+        const choice = button(member.id), rect = choice.getBoundingClientRect();
+        check(`${id}/${member.id}/accessible-choice`, rect.width >= 44 && rect.height >= 44 &&
+          Boolean(choice.getAttribute('aria-label')) && choice.querySelector('svg').getAttribute('aria-hidden') === 'true');
+        for (const size of [16, 24, 48]) {
+          q('display-size').value = String(size);
+          q('display-size').dispatchEvent(new Event('input', { bubbles: true }));
+          setReduced(true); choice.click();
+          await wait(() => endpoint(member.id) && q('pause').disabled, `${id}/${member.id} reduced endpoint`);
+          check(`${id}/${member.id}/${size}px-exact-master`, endpoint(member.id) && stable() && middle.outerHTML === middleBefore &&
+            Math.abs(stage.querySelector(':scope > svg').getBoundingClientRect().width - size) < 0.01 &&
+            [...q('size-samples').querySelectorAll('.size-sample > svg')].every(svg => JSON.stringify(paths(svg)) === JSON.stringify(masters[member.id])));
+        }
+      }
+      setReduced(true); button('horizontal').click();
+      await wait(() => endpoint('horizontal') && q('pause').disabled, `${id} horizontal start`);
+      setReduced(false);
+      const mutations = [];
+      const observer = new MutationObserver(records => mutations.push(...records));
+      observers.push(observer);
+      observer.observe(stage, { childList: true, subtree: true, attributes: true });
+      button('vertical').click();
+      await wait(() => phase() > 0.08 && phase() < 0.8, `${id} intermediate contour`);
+      q('pause').click();
+      await wait(() => q('pause').textContent === 'Продолжить', `${id} paused`);
+      const frozen = nodes.map(node => node.getAttribute('d')), frozenPhase = phase();
+      await frame(); await frame();
+      check(`${id}/paused-real-contours`, frozenPhase > 0 && frozenPhase < 1 &&
+        nodes.every((node, index) => node.getAttribute('d') === frozen[index]) && stable() && middle.outerHTML === middleBefore);
+      check(`${id}/interpolates-author-operands`, nodes.every((node, index) => {
+        const actual = numbers(node.getAttribute('d'));
+        return actual.length === horizontal[index].length && actual.every((value, coordinate) =>
+          Math.abs(value - ((1 - frozenPhase) * horizontal[index][coordinate] + frozenPhase * vertical[index][coordinate])) < 1e-9);
+      }));
+      q('export-format').value = 'effect'; q('export').click();
+      const exported = JSON.parse(await downloads.at(-1).blob.text());
+      check(`${id}/effect-exports-visible-pickup`, exported.contract === 'labpics.symbol-state-effect/1' &&
+        exported.kind === 'contour-interpolation' && exported.targetState === 'vertical' && exported.to === 1 &&
+        Math.abs(exported.from - frozenPhase) < 1e-9 && exported.targets.length === 2 &&
+        exported.unchangedPartIds.join(',') === caps.partIds[1] && exported.targets.every(target => {
+          const index = caps.partIds.indexOf(target.partId);
+          return target.property === 'd' && target.commands.join('') === 'MCCCCZ' &&
+            target.endpoints[0] === masters.horizontal[index].d && target.endpoints[1] === masters.vertical[index].d;
+        }));
+      q('export-format').value = 'svg'; q('export').click();
+      const canonical = downloads.at(-1);
+      check(`${id}/svg-exports-selected-author-state`, canonical.filename === `${caps.group}-vertical-${variant}.svg` &&
+        JSON.stringify(paths(new DOMParser().parseFromString(await canonical.blob.text(), 'image/svg+xml').documentElement)) === JSON.stringify(masters.vertical) &&
+        q('export-status').textContent === 'SVG выбранного состояния подготовлен.');
+      for (const format of ['lottie', 'sf-symbols']) {
+        const before = downloads.length;
+        q('export-format').value = format; q('export').click();
+        check(`${id}/${format}/honest-refusal`, downloads.length === before && q('export-status').textContent.startsWith('FORMAT_UNSUPPORTED:'));
+      }
+      q('reverse').click(); q('pause').click();
+      await wait(() => button('horizontal').getAttribute('aria-pressed') === 'true' && q('pause').textContent === 'Продолжить', `${id} reversed paused pickup`);
+      check(`${id}/reverse-retains-exact-visible-pose`, nodes.every((node, index) => node.getAttribute('d') === frozen[index]) && stable());
+      button('vertical').click(); q('pause').click();
+      await wait(() => button('vertical').getAttribute('aria-pressed') === 'true' && q('pause').textContent === 'Продолжить', `${id} newer paused target`);
+      check(`${id}/newer-target-retains-exact-visible-pose`, nodes.every((node, index) => node.getAttribute('d') === frozen[index]) && stable());
+      q('pause').click();
+      await wait(() => phase() > frozenPhase + 0.04, `${id} resumed progress`);
+      setReduced(true);
+      await wait(() => endpoint('vertical') && q('pause').disabled, `${id} latest reduced target`);
+      check(`${id}/reduced-motion-settles-latest-target`, endpoint('vertical') && stable() && middle.outerHTML === middleBefore);
+      q('reverse').click();
+      await wait(() => endpoint('horizontal') && q('pause').disabled, `${id} reverse endpoint`);
+      await frame();
+      mutations.push(...observer.takeRecords()); observer.disconnect();
+      check(`${id}/bounded-dom-work`, mutations.some(record => record.type === 'attributes' && nodes.includes(record.target)) &&
+        mutations.every(record => record.type !== 'childList' && (!nodes.includes(record.target) ||
+          record.target !== middle && record.attributeName === 'd')) && stable());
+      for (const axis of ['dotScale', 'spacingScale']) {
+        const refused = contourModule.compileStateEffect('vertical', { duration: 900, variant, variation: { [axis]: 1.1 } });
+        check(`${id}/${axis}/precise-variation-refusal`, !refused.ok && refused.reason.code === 'VARIATION_UNSUPPORTED');
+      }
+      await choose('ellipsis-vertical', variant);
+      check(`${id}/vertical-selects-its-author-endpoint`, q('gesture').value === 'dots.orient' &&
+        JSON.stringify(paths(q('symbol-stage').querySelector(':scope > svg'))) === JSON.stringify(masters.vertical));
+      await chooseView('generated');
+      check(`${id}/variation-retains-no-loading-refusal`, q('gesture').value === '' && q('play').disabled &&
+        q('state-group-controls').hidden && ![...q('gesture').options].some(option => option.value === 'dots.orient'));
+      await chooseView('original');
+      check(`${id}/return-restores-author-state`, q('gesture').value === 'dots.orient' && !q('state-group-controls').hidden &&
+        JSON.stringify(paths(q('symbol-stage').querySelector(':scope > svg'))) === JSON.stringify(masters.vertical));
+    }
+
     await choose('question-circle', 'outline');
     const stateModule = await import(new URL('./package/states/status-circle.js', location.href).href);
     const stateCaps = stateModule.stateCapabilities();
@@ -778,6 +899,7 @@ export async function runExplorerJourney() {
     HTMLAnchorElement.prototype.click = originalAnchorClick;
     if (deferredReject) deferredReject(new Error('journey cleanup'));
     for (const control of controls) control.stop();
+    for (const observer of observers) observer.disconnect();
     for (const fixture of fixtures) fixture.remove();
     if (failed && q('pause')?.textContent === 'Пауза' && !q('pause').disabled) q('pause').click();
   }

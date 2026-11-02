@@ -1,4 +1,47 @@
-import { animate, sequence } from '@labpics/motion';
+import { animate, sequence, value } from '@labpics/motion';
+
+function contourEffect(effect, byPart, prepared, onProgress) {
+  if (!prepared?.ok || typeof prepared.sample !== 'function' || !effect.targets.length ||
+    new Set(effect.targets.map(target => target.partId)).size !== effect.targets.length ||
+    effect.targets.some(target => target.property !== 'd' || !byPart.has(target.partId) ||
+      byPart.get(target.partId).tagName?.toLowerCase() !== 'path' || effect.unchangedPartIds.includes(target.partId)) ||
+    effect.unchangedPartIds.some(id => !byPart.has(id))) {
+    throw new Error('Переход требует подготовленных контуров и объявленных частей.');
+  }
+  const bindings = effect.targets.map(target => ({ id: target.partId, element: byPart.get(target.partId) }));
+  const poseAt = progress => {
+    const pose = prepared.sample(progress);
+    if (!pose.ok) throw new Error(`${pose.reason.code}: ${pose.reason.message}`);
+    if (pose.parts.length !== bindings.length || pose.parts.some((part, index) =>
+      part.partId !== bindings[index].id || typeof part.d !== 'string' || !part.d.length)) {
+      throw new Error('Поза не соответствует объявленному набору частей.');
+    }
+    return pose;
+  };
+  const initialPose = poseAt(effect.from);
+  const clock = value(effect.from);
+  let playback, disposed = false;
+  const writePose = (pose, progress) => {
+    for (let index = 0; index < bindings.length; index++) bindings[index].element.setAttribute('d', pose.parts[index].d);
+    // Подхват использует последний записанный кадр, а не другой расчёт времени.
+    onProgress?.(progress);
+  };
+  const unsubscribe = clock.subscribe(progress => writePose(poseAt(progress), progress));
+  const release = () => {
+    if (disposed) return;
+    disposed = true;
+    unsubscribe(); clock.dispose();
+  };
+  try {
+    writePose(initialPose, clock.get());
+    playback = clock.animate(effect.to, { duration: effect.options.duration, ease: effect.options.easing,
+      reducedMotion: effect.options.duration === 0 ? 'always' : 'user' });
+  } catch (error) { release(); throw error; }
+  const finished = playback.finished.then(result => { release(); return result; }, error => { release(); throw error; });
+  return { finished, get state() { return playback.state; }, get duration() { return playback.duration; },
+    pause: () => playback.pause(), play: () => playback.play(), seek: time => playback.seek(time),
+    finish: () => playback.finish(), stop() { playback.stop(); release(); } };
+}
 
 function opacityStages(stages, byPart, easing) {
   // Читаем все видимые начала до admission любого канала. В fallback модель
@@ -21,11 +64,14 @@ function opacityStages(stages, byPart, easing) {
 }
 
 /** Consumer сохраняет видимое начало; clock принадлежит публичному исполнителю. */
-export function executeSymbolEffect(root, effect, { initialize = false } = {}) {
+export function executeSymbolEffect(root, effect, { initialize = false, preparedContour, onProgress } = {}) {
   const viewport = root instanceof SVGElement ? root : root.querySelector('svg');
   if (!viewport) throw new Error('Композиция не содержит SVG viewport.');
   const byPart = new Map([...root.querySelectorAll('[data-part]')].map((element) => [element.dataset.part, element]));
   if (effect.contract === 'labpics.symbol-state-effect/1') {
+    if (effect.version === 1 && effect.kind === 'contour-interpolation') {
+      return [contourEffect(effect, byPart, preparedContour, onProgress)];
+    }
     if (effect.version !== 1 || effect.kind !== 'enclosure-replacement' ||
         !effect.stages.length || effect.stages.some(stage => stage.property !== 'opacity' ||
           !byPart.has(stage.partId) || byPart.get(stage.partId).tagName?.toLowerCase() !== 'g') ||
