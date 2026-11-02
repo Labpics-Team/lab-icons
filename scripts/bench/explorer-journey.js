@@ -87,7 +87,8 @@ export function isFreshCapsuleDownload(downloads, previousCount, filename) {
 export function capsulePaintMatches(observed) {
   const visible = item => item.visibility === 'visible' && item.display !== 'none' && Number(item.opacity) === 1 &&
     item.filter === 'none' && item.maskImage === 'none' && item.clipPath === 'none';
-  return observed.paths.length > 0 && observed.paths.every(item => visible(item) && item.fill === item.color &&
+  return /^rgb\(\d+, \d+, \d+\)$/.test(observed.expectedColor) && observed.paths.length > 0 &&
+    observed.paths.every(item => visible(item) && item.fill === observed.expectedColor && item.color === observed.expectedColor &&
     item.fillRule === item.declaredFillRule && Number(item.fillOpacity) === 1 && item.stroke === 'none') &&
     observed.ancestors.length > 0 && observed.ancestors.every(visible);
 }
@@ -671,11 +672,16 @@ export async function runExplorerJourney() {
         return Object.fromEntries(['fill', 'color', 'fillRule', 'fillOpacity', 'stroke', 'opacity',
           'visibility', 'display', 'filter', 'maskImage', 'clipPath'].map(property => [property, style[property]]));
       };
-      const ancestors = [svg];
-      for (let parent = svg.parentElement; parent; parent = parent.parentElement) ancestors.push(parent);
+      const ancestors = new Set();
+      for (const path of svg.querySelectorAll('path')) {
+        for (let parent = path.parentElement; parent; parent = parent.parentElement) ancestors.add(parent);
+      }
+      const color = q('display-color').value;
+      const expectedColor = /^#[0-9a-f]{6}$/i.test(color)
+        ? `rgb(${color.slice(1).match(/../g).map(channel => parseInt(channel, 16)).join(', ')})` : '';
       return { paths: [...svg.querySelectorAll('path')].map(path => ({ ...properties(path),
         declaredFillRule: path.getAttribute('fill-rule') ?? svg.getAttribute('fill-rule') ?? 'nonzero' })),
-        ancestors: ancestors.map(properties) };
+        ancestors: [...ancestors].map(properties), expectedColor };
     };
     const capsuleExport = async (id, filename, expectedPaths, viewBox) => {
       const before = downloads.length;
@@ -687,6 +693,13 @@ export async function runExplorerJourney() {
         Object.fromEntries([...path.attributes].map(attribute => [attribute.name, attribute.value])));
       check(`${id}/semantic-and-paint-attributes`, capsuleExportPathsMatch(attributes(exported),
         attributes(q('symbol-stage').querySelector(':scope > svg'))));
+      // Экспорт наблюдается в том же renderer: root/group opacity тоже влияет на заливку.
+      const host = document.createElement('div');
+      host.style.cssText = 'position:absolute;left:-10000px;top:0;pointer-events:none';
+      host.style.color = q('display-color').value;
+      document.body.append(host); host.append(exported);
+      try { check(`${id}/visible-export-paint`, capsulePaintMatches(capsulePaint(exported))); }
+      finally { host.remove(); }
     };
     for (const [name, variant] of [['mic', 'outline'], ['mic', 'filled'], ['mic-circle', 'outline'], ['mic-circle', 'filled']]) {
       const id = `${name}/${variant}/capsule-width`;

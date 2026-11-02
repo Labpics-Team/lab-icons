@@ -31,7 +31,7 @@ const compoundPath = (body = outer) => ({ partId: null, role: null,
   contours: [{ x: 0, y: 0, width: 24, height: 24 }, { x: 4, y: 11, width: 16, height: 9 },
     { x: body === outer ? 7 : 7.5, y: 1.5, width: body === outer ? 10 : 9, height: 15.3 }] });
 
-const painted = () => ({ paths: [{ fill: 'rgb(16, 16, 16)', color: 'rgb(16, 16, 16)', fillRule: 'evenodd',
+const painted = () => ({ expectedColor: 'rgb(16, 16, 16)', paths: [{ fill: 'rgb(16, 16, 16)', color: 'rgb(16, 16, 16)', fillRule: 'evenodd',
   declaredFillRule: 'evenodd', stroke: 'none', fillOpacity: '1', opacity: '1', visibility: 'visible', display: 'inline',
   filter: 'none', maskImage: 'none', clipPath: 'none' }], ancestors: [{ opacity: '1', visibility: 'visible', display: 'block',
   filter: 'none', maskImage: 'none', clipPath: 'none' }] });
@@ -58,10 +58,12 @@ describe('observed CSS paint cannot silently invalidate correct negative contour
   });
   it.each([
     ['fill:none', value => { value.paths[0].fill = 'none'; }],
+    ['transparent currentColor', value => { value.paths[0].fill = value.paths[0].color = 'rgba(16, 16, 16, 0)'; }],
     ['CSS nonzero override', value => { value.paths[0].fillRule = 'nonzero'; }],
     ['hidden fill', value => { value.paths[0].fillOpacity = '0'; }],
     ['unexpected outline', value => { value.paths[0].stroke = 'rgb(16, 16, 16)'; }],
     ['hidden ancestor', value => { value.ancestors[0].opacity = '0'; }],
+    ['hidden inner group', value => { value.ancestors.push({ ...value.ancestors[0], opacity: '0' }); }],
     ['clipped parent', value => { value.ancestors[0].clipPath = 'circle(1px)'; }],
   ])('refuses %s while the path and viewport are unchanged', (_, mutate) => {
     const observed = painted(); mutate(observed);
