@@ -1,0 +1,233 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-02",
+  "scope": "build-only-geometric-admission",
+  "records": [
+    {
+      "icon": "plus-circle",
+      "variant": "outline",
+      "source": {
+        "kind": "figma",
+        "fileKey": "LuaiBd4anRi4DMZayKAnY2",
+        "version": "2416636003859748575",
+        "nodeId": "6431:3751",
+        "nodeSha256": "765c5c12175d074add409491a91be0d7d38023290e2ab883cba0a12ae828b5ea",
+        "masterSha256": "1187b32d965b0d97f97dae969f8d62c9e573757b9588341d41368657bd6dde54",
+        "normalizedSha256": "1641727c9bbbdf922bd87973acebfdc4de27399db7e9b355da29609c6048e20e",
+        "pathFingerprintSha256": "052020c37b091e1697ce6f7bcae632fdcc5a220150a0ffcbaee5e2ad9a9360c2"
+      },
+      "geometrySha256": "fc1e4ba55a6d5b460ca46449f15c058ac8060f6d74457ae99a50ca1a65a82ad5",
+      "calibration": {
+        "center": [
+          12,
+          12
+        ],
+        "outerRadius": 10.5,
+        "referenceInnerRadius": 8.7002,
+        "referenceThickness": 1.7997999999999994
+      },
+      "domain": {
+        "kind": "radial-bernstein",
+        "parameter": "enclosureEmphasis",
+        "evaluated": "actual-binary64-scale",
+        "scale": {
+          "minimum": 0.6920350413189128,
+          "minimumInclusive": true,
+          "maximum": 1.2009441458845613,
+          "maximumInclusive": false
+        },
+        "emphasisBounds": {
+          "minimum": 0.02863970550902256,
+          "maximum": 2.4886969293905965,
+          "meaning": "Границы exact scale; фактическое вычисление scale дополнительно проверяется."
+        },
+        "policy": {
+          "gridVersion": 2,
+          "gridSha256": "2fe1efb08053f726fbe97ec326a1fa9d29d763a34f6783ce5ef2d45a8eff9f88",
+          "minimumGapRatio": 0.033333,
+          "minimumMarginRatio": 0.041666666666666664
+        },
+        "proof": {
+          "outerLowerSquared": {
+            "numerator": "347315165901445271362712650851543",
+            "denominator": "3169126500570573503741758013440"
+          },
+          "outerUpperSquared": {
+            "numerator": "43844607196226595821830493957331",
+            "denominator": "396140812571321687967719751680"
+          },
+          "innerLowerSquared": {
+            "numerator": "476889391412547986696344931569383",
+            "denominator": "6338253001141147007483516026880"
+          },
+          "innerUpperSquared": {
+            "numerator": "30101500282356127777311229076337",
+            "denominator": "396140812571321687967719751680"
+          },
+          "contentUpperSquared": {
+            "numerator": "8578495978614952458046879568165",
+            "denominator": "316912650057057350374175801344"
+          },
+          "minimumScale": {
+            "numerator": "2728726900479215865805081926801133288917184608606238625338241182066701244412125873842196975579",
+            "denominator": "3943047298990352407158873161136918930050082927151967048566913899432601818829251334796161843200"
+          },
+          "maximumScale": {
+            "numerator": "4758828212586443972724346628511418302980140372143305927487555791381428007002082810323597127717",
+            "denominator": "3962572471745807497349010413876868800639274884946049853432325473534756574245803653501351362560"
+          },
+          "minimumGap": {
+            "numerator": "1801421836549689",
+            "denominator": "2251799813685248"
+          },
+          "outerLower": {
+            "numerator": "368334069399305",
+            "denominator": "35184372088832"
+          },
+          "innerLower": {
+            "numerator": "1220769981677225",
+            "denominator": "140737488355328"
+          },
+          "innerUpper": {
+            "numerator": "613407493864765",
+            "denominator": "70368744177664"
+          },
+          "contentUpper": {
+            "numerator": "2928906959706121",
+            "denominator": "562949953421312"
+          },
+          "coordinateErrorUpper": {
+            "numerator": "485736835004317438340719727703517271443360416595077455083758151",
+            "denominator": "100936482664945054256660470680890562713795122506087466143657553697767671463936"
+          },
+          "euclideanErrorUpper": {
+            "numerator": "3093683001391623420833442879922186631361073900972084548585158410461931246325723",
+            "denominator": "454577505717935075407222340845978852011055051396045055461966669105359504952448844758574432256"
+          },
+          "topology": "opposite-winding-monotone-cardinal-quarters",
+          "radial": "degree-6-bernstein",
+          "content": "control-hull"
+        }
+      }
+    },
+    {
+      "icon": "minus-circle",
+      "variant": "outline",
+      "source": {
+        "kind": "figma",
+        "fileKey": "LuaiBd4anRi4DMZayKAnY2",
+        "version": "2416636003859748575",
+        "nodeId": "6431:4069",
+        "nodeSha256": "8b41a936f5747b6666b0ff3c314698259c2e064043db30a932fa1f635b66023a",
+        "masterSha256": "07be6c7e5b87e9f4ba0facd8fb3b31dbfaba03cb9a3bb9b0f6f552d16b4aaf85",
+        "normalizedSha256": "a7832ac96ec4716ac841132d617989e4d696c96d5d4cd1ff188e4891a7279b1f",
+        "pathFingerprintSha256": "29cc46dcf51cd5525021420d1f8428086bf7ba0a697527fdc1a8e4035813e508"
+      },
+      "geometrySha256": "ee4a06f7c973bcda26f4a89edb12550d06048b4065be126650eccb979c0f2fba",
+      "calibration": {
+        "center": [
+          12,
+          12
+        ],
+        "outerRadius": 10.5,
+        "referenceInnerRadius": 8.7002,
+        "referenceThickness": 1.7997999999999994
+      },
+      "domain": {
+        "kind": "radial-bernstein",
+        "parameter": "enclosureEmphasis",
+        "evaluated": "actual-binary64-scale",
+        "scale": {
+          "minimum": 0.6908163951640719,
+          "minimumInclusive": true,
+          "maximum": 1.2009441458845613,
+          "maximumInclusive": false
+        },
+        "emphasisBounds": {
+          "minimum": 0.02863970550902256,
+          "maximum": 2.4945878424233485,
+          "meaning": "Границы exact scale; фактическое вычисление scale дополнительно проверяется."
+        },
+        "policy": {
+          "gridVersion": 2,
+          "gridSha256": "2fe1efb08053f726fbe97ec326a1fa9d29d763a34f6783ce5ef2d45a8eff9f88",
+          "minimumGapRatio": 0.033333,
+          "minimumMarginRatio": 0.041666666666666664
+        },
+        "proof": {
+          "outerLowerSquared": {
+            "numerator": "347315165901445271362712650851543",
+            "denominator": "3169126500570573503741758013440"
+          },
+          "outerUpperSquared": {
+            "numerator": "43844607196226595821830493957331",
+            "denominator": "396140812571321687967719751680"
+          },
+          "innerLowerSquared": {
+            "numerator": "476889391412547986696344931569383",
+            "denominator": "6338253001141147007483516026880"
+          },
+          "innerUpperSquared": {
+            "numerator": "30101500282356127777311229076337",
+            "denominator": "396140812571321687967719751680"
+          },
+          "contentUpperSquared": {
+            "numerator": "8543673023873261496470201098645",
+            "denominator": "316912650057057350374175801344"
+          },
+          "minimumScale": {
+            "numerator": "2723921721049945544740731338810724675370535782529445358436521472148243196064124888699171901403",
+            "denominator": "3943047298990352407158873161136918930050082927151967048566913899432601818829251334796161843200"
+          },
+          "maximumScale": {
+            "numerator": "4758828212586443972724346628511418302980140372143305927487555791381428007002082810323597127717",
+            "denominator": "3962572471745807497349010413876868800639274884946049853432325473534756574245803653501351362560"
+          },
+          "minimumGap": {
+            "numerator": "1801421836549689",
+            "denominator": "2251799813685248"
+          },
+          "outerLower": {
+            "numerator": "368334069399305",
+            "denominator": "35184372088832"
+          },
+          "innerLower": {
+            "numerator": "1220769981677225",
+            "denominator": "140737488355328"
+          },
+          "innerUpper": {
+            "numerator": "613407493864765",
+            "denominator": "70368744177664"
+          },
+          "contentUpper": {
+            "numerator": "5845912426259313",
+            "denominator": "1125899906842624"
+          },
+          "coordinateErrorUpper": {
+            "numerator": "485736835004317438340719727703517271443360416595077455083758151",
+            "denominator": "100936482664945054256660470680890562713795122506087466143657553697767671463936"
+          },
+          "euclideanErrorUpper": {
+            "numerator": "3093683001391623420833442879922186631361073900972084548585158410461931246325723",
+            "denominator": "454577505717935075407222340845978852011055051396045055461966669105359504952448844758574432256"
+          },
+          "topology": "opposite-winding-monotone-cardinal-quarters",
+          "radial": "degree-6-bernstein",
+          "content": "control-hull"
+        }
+      }
+    }
+  ],
+  "verification": {
+    "command": "node node_modules/vitest/vitest.mjs run test/author-annulus.test.js --maxWorkers=1",
+    "vitest": "4.1.12",
+    "environment": "Windows/Node; one worker; two families/four source masters",
+    "tests": 13,
+    "outcome": "PASS",
+    "fullCI": "not-run",
+    "optical": "not-reviewed",
+    "consumer": "not-installed",
+    "performance": "not-measured",
+    "integration": "exact arithmetic common owner required"
+  }
+}
