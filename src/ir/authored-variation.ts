@@ -2,7 +2,7 @@ import type { GlyphIR, IconVariant, SourcePartProvenance } from './glyph-types.j
 import type { AuthorSourceGlyph, AuthorSourceCapabilities, AuthorSymbolGlyphRequest } from './author-source.js';
 import type { AuthorSourceProvenance, AuthorAnatomyReceipt } from './author-provenance.js';
 import type { AuthorIconId } from './author-catalog.generated.js';
-import { createCompiledGlyph } from './symbol-runtime.js';
+import { createCompiledGlyph, parseCompiledGlyphOptions } from './symbol-runtime.js';
 import { assembleGlyphSvg } from './svg-assembly.js';
 import { sha256Hex } from './sha256.js';
 import { GlyphModelError } from './request.js';
@@ -131,14 +131,15 @@ export function createCompiledVariationGlyph<TIcon extends AuthorIconId>(
   return function glyph(request?: AuthorVariationGlyphRequest): AuthorVariationGlyph<TIcon> {
     if (request === undefined) return sources.outline;
     if (!request || typeof request !== 'object' || Array.isArray(request)) return staticGlyph(request) as AuthorSourceGlyph<TIcon>;
-    const { variation, ...rest } = request;
-    const source = staticGlyph(rest) as AuthorSourceGlyph<TIcon>;
+    const variation = request.variation;
+    const selected = parseCompiledGlyphOptions(icon, request, true);
+    const source = sources[selected.variant];
     if (variation === undefined) return source;
     const effective = parameters(variation);
     const { dotScale: s, spacingScale: g } = effective;
     // Точный default не пересериализуется и возвращает тот же frozen объект.
     if (s === 1 && g === 1) return source;
-    if (request.modelMode === 'source-only') throw new GlyphModelError('AUTHOR_PARITY_REQUIRED', 'source-only сохраняет точный master.');
+    if (selected.modelMode === 'source-only') throw new GlyphModelError('AUTHOR_PARITY_REQUIRED', 'source-only сохраняет точный master.');
     const geometry = compiled[source.variant];
     if (geometry.domain.constraints.some(c => c.dotScale * s + c.spacingScale * g < c.minimum)) {
       throw new AuthoredVariationError('VARIATION_OUTSIDE_DOMAIN', 'Вариация нарушает авторский порядок, grid margin или minimum gap.');

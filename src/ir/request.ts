@@ -26,25 +26,29 @@ export function parseSymbolVariant(value: unknown): IconVariant {
 export function parseSymbolOptions(
   value: unknown,
   contracts?: Readonly<Record<AxisName, AxisContract>>,
+  authorVariation = false,
 ): SymbolOptions {
   if (value === null || typeof value !== 'object' || Array.isArray(value)) {
     throw new TypeError('@labpics/icons/ir: запрос обязан быть объектом');
   }
   const input = value as Record<string, unknown>;
-  const unknownKeys = Object.keys(input).filter(key => !['variant', 'modelMode', 'axes'].includes(key));
+  const unknownKeys = Object.keys(input).filter(key =>
+    !(authorVariation && key === 'variation') && !['variant', 'modelMode', 'axes'].includes(key));
   if (unknownKeys.length) {
     throw new TypeError(`@labpics/icons/ir: неизвестные поля запроса: ${unknownKeys.join(', ')}`);
   }
-  const mode = input.modelMode === undefined ? 'accepted-only' : input.modelMode;
+  const requestedMode = input.modelMode;
+  const mode = requestedMode === undefined ? 'accepted-only' : requestedMode;
   if (mode !== 'accepted-only' && mode !== 'allow-candidate' && mode !== 'source-only') {
     throw new TypeError(`@labpics/icons/ir: modelMode обязан быть accepted-only, allow-candidate или source-only, получено «${String(mode)}»`);
   }
   const axes: Partial<Record<AxisName, number>> = {};
-  if (input.axes !== undefined) {
-    if (input.axes === null || typeof input.axes !== 'object' || Array.isArray(input.axes)) {
+  const requestedAxes = input.axes;
+  if (requestedAxes !== undefined) {
+    if (requestedAxes === null || typeof requestedAxes !== 'object' || Array.isArray(requestedAxes)) {
       throw new TypeError('@labpics/icons/ir: axes обязан быть объектом');
     }
-    for (const [name, value] of Object.entries(input.axes)) {
+    for (const [name, value] of Object.entries(requestedAxes)) {
       if (contracts ? !Object.hasOwn(contracts, name) : !AXIS_NAMES.includes(name as AxisName)) {
         throw new TypeError(`@labpics/icons/ir: неизвестная ось «${name}»`);
       }
@@ -58,8 +62,9 @@ export function parseSymbolOptions(
       axes[name as AxisName] = value;
     }
   }
+  const variant = input.variant;
   return Object.freeze({
-    variant: input.variant === undefined ? 'outline' : parseSymbolVariant(input.variant),
+    variant: variant === undefined ? 'outline' : parseSymbolVariant(variant),
     modelMode: mode,
     axes: Object.freeze(axes),
   });

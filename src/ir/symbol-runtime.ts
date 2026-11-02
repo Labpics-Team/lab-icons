@@ -1,5 +1,5 @@
 import { GlyphModelError, parseSymbolOptions, parseSymbolVariant } from './request.js';
-import type { GlyphCapabilities, GlyphIR, GlyphRequest, IconId, IconVariant } from './glyph-types.js';
+import type { GlyphCapabilities, GlyphIR, GlyphRequest, IconId, IconVariant, SymbolOptions } from './glyph-types.js';
 
 export type SymbolGlyphRequest = Omit<GlyphRequest, 'icon'>;
 
@@ -9,6 +9,20 @@ function freezeTree<T>(value: T): T {
     Object.freeze(value);
   }
   return value;
+}
+
+/** @internal Законы разбирают исходный запрос; getters сохраняют receiver. */
+export function parseCompiledGlyphOptions(icon: string, request: unknown, authorVariation = false): SymbolOptions {
+  if (!authorVariation && request && typeof request === 'object' && Object.hasOwn(request, 'variation')) {
+    throw new GlyphModelError('AUTHOR_VARIATION_UNSUPPORTED',
+      `@labpics/icons/symbols: ${icon}: авторская геометрическая вариация не объявлена`);
+  }
+  const parsed = parseSymbolOptions(request, undefined, authorVariation);
+  if (Object.keys(parsed.axes).length || parsed.modelMode === 'allow-candidate') {
+    throw new GlyphModelError('AUTHOR_PARITY_REQUIRED',
+      `@labpics/icons/symbols: ${icon}/${parsed.variant}: требуется паритет с авторским master`);
+  }
+  return parsed;
 }
 
 /** @internal Сборка передаёт только проверенные авторские формы одного символа. */
@@ -22,15 +36,7 @@ export function createCompiledGlyph<TIcon extends string = IconId>(
     // Отсутствующий запрос — самый частый статический путь: без разбора,
     // geometry generation, хеширования и новых объектов на каждый render.
     if (request === undefined) return source.outline;
-    if (request && typeof request === 'object' && Object.hasOwn(request, 'variation')) {
-      throw new GlyphModelError('AUTHOR_VARIATION_UNSUPPORTED',
-        `@labpics/icons/symbols: ${icon}: авторская геометрическая вариация не объявлена`);
-    }
-    const parsed = parseSymbolOptions(request);
-    if (Object.keys(parsed.axes).length || parsed.modelMode === 'allow-candidate') {
-      throw new GlyphModelError('AUTHOR_PARITY_REQUIRED',
-        `@labpics/icons/symbols: ${icon}/${parsed.variant}: требуется паритет с авторским master`);
-    }
+    const parsed = parseCompiledGlyphOptions(icon, request);
     return source[parsed.variant];
   };
 }

@@ -3,7 +3,7 @@ import type { AuthorSourceGlyph, AuthorSymbolGlyphRequest } from './author-sourc
 import type { SourcePartProvenance } from './glyph-types.js';
 import type { AuthorAnnulusVariationDomain, AuthorAnnulusVariationGlyph, AuthorAnnulusVariationGlyphRequest,
   AuthorAnnulusVariationReceipt, AuthoredAnnulusVariation } from './author-annulus-types.js';
-import { createCompiledGlyph } from './symbol-runtime.js';
+import { createCompiledGlyph, parseCompiledGlyphOptions } from './symbol-runtime.js';
 import { GlyphModelError } from './request.js';
 import { assembleGlyphFrame, assembleGlyphLayers } from './svg-assembly.js';
 import { sha256Hex } from './sha256.js';
@@ -86,8 +86,9 @@ export function createCompiledAnnulusGlyph<TIcon extends AuthorIconId>(
   return function glyph(request?: AuthorSymbolGlyphRequest | AuthorAnnulusVariationGlyphRequest): AuthorSourceGlyph<TIcon> | AuthorAnnulusVariationGlyph<TIcon> {
     if (request === undefined) return source;
     if (!request || typeof request !== 'object' || Array.isArray(request)) return staticGlyph(request) as AuthorSourceGlyph<TIcon>;
-    const { variation, ...rest } = request;
-    const selected = staticGlyph(rest) as AuthorSourceGlyph<TIcon>;
+    const variation = request.variation;
+    const options = parseCompiledGlyphOptions(icon, request, true);
+    const selected = sources[options.variant];
     if (variation === undefined) return selected;
     if (selected.variant !== 'outline') {
       throw new GlyphModelError('AUTHOR_VARIATION_UNSUPPORTED', 'Независимая Filled форма не поддерживает этот закон обрамления.');
@@ -95,7 +96,7 @@ export function createCompiledAnnulusGlyph<TIcon extends AuthorIconId>(
     const emphasis = emphasisParameter(variation);
     // Exact default возвращает общий source объект, без генерации и хеша.
     if (emphasis === 1) return selected;
-    if (request.modelMode === 'source-only') throw new GlyphModelError('AUTHOR_PARITY_REQUIRED', 'source-only сохраняет точный master.');
+    if (options.modelMode === 'source-only') throw new GlyphModelError('AUTHOR_PARITY_REQUIRED', 'source-only сохраняет точный master.');
     const scale = (enclosure.outerRadius - emphasis * enclosure.referenceThickness) / enclosure.referenceInnerRadius;
     if (!Number.isFinite(scale) || scale <= 0) {
       throw new AuthoredAnnulusVariationError('VARIATION_UNREPRESENTABLE', 'Контрформа обрамления схлопнулась.');
