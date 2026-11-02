@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { capsuleWidthObservationChecks, capsuleViewportMatches, capsuleSvgFrameMatches,
-  isFreshCapsuleDownload, matchesAuthoredCapsulePath, capsuleSemanticObservations, capsulePaintMatches } from '../scripts/bench/explorer-journey.js';
+  isFreshCapsuleDownload, matchesAuthoredCapsulePath, capsuleSemanticObservations, capsulePaintMatches,
+  capsuleExportPathsMatch } from '../scripts/bench/explorer-journey.js';
 
 const outer = 'M12 1.5C15 1.5 17 3 17 6L17 12C17 15 15 16.8 12 16.8C9 16.8 7 15 7 12L7 6C7 3 9 1.5 12 1.5Z';
 const counter = 'M12 3.3C10 3.3 8.8 4.5 8.8 6L8.8 12C8.8 14 10 15 12 15C14 15 15.2 14 15.2 12L15.2 6C15.2 4.5 14 3.3 12 3.3Z';
@@ -34,6 +35,23 @@ const painted = () => ({ paths: [{ fill: 'rgb(16, 16, 16)', color: 'rgb(16, 16, 
   declaredFillRule: 'evenodd', stroke: 'none', fillOpacity: '1', opacity: '1', visibility: 'visible', display: 'inline',
   filter: 'none', maskImage: 'none', clipPath: 'none' }], ancestors: [{ opacity: '1', visibility: 'visible', display: 'block',
   filter: 'none', maskImage: 'none', clipPath: 'none' }] });
+describe('capsule export keeps semantic and paint attributes from the accepted visible paths', () => {
+  const paths = () => [{ d: compoundPath(narrowOuter).d, 'fill-rule': 'evenodd', fill: 'currentColor',
+    'data-parts': negativeAnatomy.partIds.join(' '), 'data-roles': negativeAnatomy.roles.join(' ') }];
+  it('admits the same attributes independently of XML attribute order', () => {
+    expect(capsuleExportPathsMatch(paths(), paths())).toBe(true);
+    expect(capsuleExportPathsMatch(paths().map(path => Object.fromEntries(Object.entries(path).reverse())), paths())).toBe(true);
+  });
+  it.each([
+    ['wrong counter role', path => { path['data-roles'] = 'container counter content'; }],
+    ['lost semantic target', path => { delete path['data-parts']; }],
+    ['paint disabled only in export', path => { path.style = 'fill:none'; }],
+    ['wrong parity', path => { path['fill-rule'] = 'nonzero'; }],
+  ])('refuses %s with unchanged geometry and viewport', (_, mutate) => {
+    const observed = paths(); mutate(observed[0]);
+    expect(capsuleExportPathsMatch(observed, paths())).toBe(false);
+  });
+});
 describe('observed CSS paint cannot silently invalidate correct negative contours', () => {
   it('admits the expected visible current-color evenodd fill', () => {
     expect(capsulePaintMatches(painted())).toBe(true);

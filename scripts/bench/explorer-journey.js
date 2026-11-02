@@ -92,6 +92,12 @@ export function capsulePaintMatches(observed) {
     observed.ancestors.length > 0 && observed.ancestors.every(visible);
 }
 
+/** Экспорт сохраняет все атрибуты реально показанных paths, включая semantic IDs. */
+export function capsuleExportPathsMatch(observed, expected) {
+  const attributes = paths => paths.map(path => Object.entries(path).sort(([left], [right]) => left.localeCompare(right)));
+  return observed.length > 0 && JSON.stringify(attributes(observed)) === JSON.stringify(attributes(expected));
+}
+
 /** Compound наблюдается как одна заливка с полным упорядоченным набором contours. */
 export function capsuleSemanticObservations(paths, anatomy) {
   const { kind, partIds, roles } = anatomy;
@@ -677,6 +683,10 @@ export async function runExplorerJourney() {
       check(`${id}/fresh-download`, isFreshCapsuleDownload(downloads, before, filename));
       const exported = new DOMParser().parseFromString(await downloads.at(-1).blob.text(), 'image/svg+xml').documentElement;
       check(id, JSON.stringify(paths(exported)) === expectedPaths && capsuleSvgFrameMatches(capsuleFrame(exported), viewBox));
+      const attributes = svg => [...svg.querySelectorAll('path')].map(path =>
+        Object.fromEntries([...path.attributes].map(attribute => [attribute.name, attribute.value])));
+      check(`${id}/semantic-and-paint-attributes`, capsuleExportPathsMatch(attributes(exported),
+        attributes(q('symbol-stage').querySelector(':scope > svg'))));
     };
     for (const [name, variant] of [['mic', 'outline'], ['mic', 'filled'], ['mic-circle', 'outline'], ['mic-circle', 'filled']]) {
       const id = `${name}/${variant}/capsule-width`;
