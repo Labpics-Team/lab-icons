@@ -90,6 +90,12 @@ const entries = {
   'varied-ellipsis-horizontal': "import { glyph } from '@labpics/icons/variations/ellipsis-horizontal';\nconsole.log(glyph({ variation: { dotScale: 1.1, spacingScale: 0.9 } }));\n",
   'source-ellipsis-vertical': "import { glyph } from '@labpics/icons/symbols/ellipsis-vertical';\nconsole.log(glyph());\n",
   'varied-ellipsis-vertical': "import { glyph } from '@labpics/icons/variations/ellipsis-vertical';\nconsole.log(glyph({ variation: { dotScale: 1.1, spacingScale: 0.9 } }));\n",
+  'varied-microphone': "import { glyph } from '@labpics/icons/variations/mic';\nconsole.log(glyph({ variation: { bodyWidth: 0.9 } }));\n",
+  'varied-microphone-circle': "import { glyph } from '@labpics/icons/variations/mic-circle';\nconsole.log(glyph({ variant: 'filled', variation: { bodyWidth: 0.8 } }));\n",
+  'microphone-state-outline': "import { renderStateSvg, compileStateEffect } from '@labpics/icons/states/microphone';\nconsole.log(renderStateSvg('muted'), compileStateEffect('unmuted', { duration: 180 }));\n",
+  'microphone-state-filled': "import { renderStateSvg, compileStateEffect } from '@labpics/icons/states/microphone-filled';\nconsole.log(renderStateSvg('muted'), compileStateEffect('unmuted', { duration: 180 }));\n",
+  'visibility-state-outline': "import { renderStateSvg, compileStateEffect } from '@labpics/icons/states/visibility';\nconsole.log(renderStateSvg('hidden'), compileStateEffect('visible', { duration: 180 }));\n",
+  'visibility-state-filled': "import { renderStateSvg, compileStateEffect } from '@labpics/icons/states/visibility-filled';\nconsole.log(renderStateSvg('hidden'), compileStateEffect('visible', { duration: 180 }));\n",
 };
 const artifacts = {};
 const artifactMeasurements = {};
