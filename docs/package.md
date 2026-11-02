@@ -111,6 +111,8 @@ pnpm add @labpics/icons
 - `dist/ir/request.d.ts`
 - `dist/ir/request.js`
 - `dist/ir/source-packet-runtime.js`
+- `dist/ir/source-state-runtime.js`
+- `dist/ir/source-state-types.d.ts`
 - `dist/ir/state-annulus-runtime.js`
 - `dist/ir/state-annulus-types.d.ts`
 - `dist/ir/state-common-types.d.ts`
@@ -802,10 +804,18 @@ pnpm add @labpics/icons
 - `dist/states/ellipsis-orientation-outline.js`
 - `dist/states/expression-face.d.ts`
 - `dist/states/expression-face.js`
+- `dist/states/microphone-filled.d.ts`
+- `dist/states/microphone-filled.js`
+- `dist/states/microphone.d.ts`
+- `dist/states/microphone.js`
 - `dist/states/playback-circle.d.ts`
 - `dist/states/playback-circle.js`
 - `dist/states/status-circle.d.ts`
 - `dist/states/status-circle.js`
+- `dist/states/visibility-filled.d.ts`
+- `dist/states/visibility-filled.js`
+- `dist/states/visibility.d.ts`
+- `dist/states/visibility.js`
 - `dist/symbols/accessibility.d.ts`
 - `dist/symbols/accessibility.js`
 - `dist/symbols/actions.d.ts`
@@ -1508,6 +1518,7 @@ pnpm add @labpics/icons
 - `dist/ir/lottie-types.d.ts`
 - `dist/ir/paint-types.d.ts`
 - `dist/ir/request.d.ts`
+- `dist/ir/source-state-types.d.ts`
 - `dist/ir/state-annulus-types.d.ts`
 - `dist/ir/state-common-types.d.ts`
 - `dist/ir/state-types.d.ts`

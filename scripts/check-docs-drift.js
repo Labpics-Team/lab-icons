@@ -46,7 +46,10 @@ export function distributionClaimErrors(text) {
  * Каталог документа не освобождает текущие утверждения от проверки.
  */
 export function manualCorpusCountErrors(source) {
-  const sentences = normalizeDistributionText(source, { preserveBlocks: true }).split(/\n|;|[.!?]\s+/u);
+  // Помеченный code literal версии — identity источника, не размер корпуса.
+  // Обычные числовые code literals рядом с SVG/файлами остаются count claims.
+  const countsSource = source.replace(/((?<![\p{L}\p{N}_])(?:версия|version)[ \t]*[:=]?[ \t]*)`\d+`/giu, '$1version-id');
+  const sentences = normalizeDistributionText(countsSource, { preserveBlocks: true }).split(/\n|;|[.!?]\s+/u);
   const ru = [
     'ноль', 'нуль',
     'один', 'одна', 'одно', 'одну', 'одного', 'одной',
