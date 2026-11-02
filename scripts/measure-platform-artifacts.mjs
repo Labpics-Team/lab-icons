@@ -107,6 +107,10 @@ const entries = {
   })),
   ...Object.fromEntries(['reload', 'refresh'].map(icon => [`gesture-${icon}-ir-reference`,
     `import { glyph, glyphCapabilities } from '@labpics/icons/symbols/${icon}';\nimport { renderGlyphSvg } from '@labpics/icons/ir/render';\nimport { compileSymbolEffect } from '@labpics/icons/motion';\nconst value = glyph();\nconsole.log(renderGlyphSvg(value), compileSymbolEffect(value, glyphCapabilities(), '${icon}.cycle', { duration: 400 }));\n`])),
+  ...Object.fromEntries(['mic', 'mic-circle'].flatMap(icon => [
+    [`gesture-${icon}-width`, `import { prepareBodyWidth } from '@labpics/icons/gestures/${icon}';\nconst result = prepareBodyWidth('filled');\nconsole.log(result.ok && result.prepared.sample(0.9));\n`],
+    [`gesture-${icon}-width-capabilities`, `import { motionCapabilities } from '@labpics/icons/gestures/${icon}';\nconsole.log(motionCapabilities());\n`],
+  ])),
 };
 const artifacts = {};
 const artifactMeasurements = {};

@@ -360,6 +360,7 @@
    "allowedModules": [
     "src/core/annulus-content-geometry.js",
     "src/ir/author-capsule-runtime.ts",
+    "src/ir/capsule-path.ts",
     "src/ir/sha256.ts",
     "src/ir/svg-assembly.ts"
    ],

@@ -25,10 +25,14 @@ import { authorStateLawNames, compileAuthorStateGroups, renderStateGroupModule, 
 import { authorStateVariationGroupNames, compileAuthorStateVariations, renderStateVariationModule,
   stateVariationDeclaration } from './lib/author-state-variations.js';
 import { authorMotionSymbolNames, compileAuthorMotionSymbols, renderAuthorMotionModule, authorMotionModuleDeclaration } from './lib/author-motion.js';
+import { authorMotionTargets } from './lib/author-motion-targets.js';
+import { projectAuthorCapsuleMotion, renderAuthorCapsuleMotionModule, authorCapsuleMotionModuleDeclaration } from './lib/author-capsule-motion.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const TARGETS = ['ir', 'symbols', 'variations', 'content-variations', 'motion', 'lottie', 'authoring', 'states', 'state-variations', 'gestures'];
-const REQUIRED_DECLARATIONS = ['author-annulus-types.d.ts', 'author-content-types.d.ts', 'author-capsule-types.d.ts', 'author-catalog.generated.d.ts', 'author-provenance.d.ts', 'author-source.d.ts', 'authored-variation.d.ts', 'candidates.d.ts', 'catalog.generated.d.ts', 'compiler.d.ts', 'glyph-types.d.ts', 'index.d.ts', 'paint-types.d.ts', 'recipes.d.ts', 'render.d.ts', 'request.d.ts'];
+// Эти runtime проверены с полной minify: публичные имена сохраняются штатным keepNames.
+const NAME_PRESERVING_MINIFIED_ENTRIES = new Set(['src/motion/index.ts', 'src/ir/author-capsule-runtime.ts']);
+const REQUIRED_DECLARATIONS = ['author-capsule-motion-types.d.ts', 'author-annulus-types.d.ts', 'author-content-types.d.ts', 'author-capsule-types.d.ts', 'author-catalog.generated.d.ts', 'author-provenance.d.ts', 'author-source.d.ts', 'authored-variation.d.ts', 'candidates.d.ts', 'catalog.generated.d.ts', 'compiler.d.ts', 'glyph-types.d.ts', 'index.d.ts', 'paint-types.d.ts', 'recipes.d.ts', 'render.d.ts', 'request.d.ts'];
 const read = (root, file) => JSON.parse(readFileSync(join(root, file), 'utf8'));
 
 /** Только локальный checkout и его OS namespace: неизвестный или живой PID сохраняется. */
@@ -89,12 +93,13 @@ function retainStaticArtifacts(output, staging) {
 }
 
 export async function bundle(root, staging, entry, target, external = []) {
-  // Сжатие пробелов сохраняет имена возвращаемых публичных функций без __name.
+  const minification = NAME_PRESERVING_MINIFIED_ENTRIES.has(entry)
+    ? { minify: true, keepNames: true } : { minify: false, minifyWhitespace: true };
   const compiled = await build({
     absWorkingDir: root,
     entryPoints: [join(root, entry)], outfile: join(staging, target),
     bundle: true, charset: 'utf8', external, format: 'esm', legalComments: 'none',
-    logLevel: 'info', minify: false, minifyWhitespace: true,
+    logLevel: 'info', ...minification,
     platform: 'browser', sourcemap: false, write: false, metafile: true,
     target: 'es2022', treeShaking: true,
     ...stateRuntimeBuildOptions(entry),
@@ -119,6 +124,7 @@ async function compileIrTargets({ root, staging }) {
     const contentVariationNames = authorContentVariationIconNames(authorSpec);
     const variationLaws = authorVariationLawNames(authorSpec);
     const motionNames = authorMotionSymbolNames(authorSpec);
+    const capsuleMotionNames = authorMotionTargets(authorSpec).capsules;
     for (const name of TARGETS) mkdirSync(join(staging, name));
     mkdirSync(join(staging, 'ir/symbol-data'));
     const bundles = await Promise.allSettled([
@@ -142,6 +148,7 @@ async function compileIrTargets({ root, staging }) {
       bundle(root, staging, 'src/ir/candidates.ts', 'ir/candidates.js', ['./index.js']),
       bundle(root, staging, 'src/motion/index.ts', 'motion/index.js', ['../ir/contour-runtime.js']),
       ...(motionNames.length ? [bundle(root, staging, 'src/motion/gesture-runtime.ts', 'ir/gesture-runtime.js')] : []),
+      ...(capsuleMotionNames.length ? [bundle(root, staging, 'src/ir/author-capsule-motion-runtime.ts', 'ir/capsule-motion-runtime.js')] : []),
       bundle(root, staging, 'src/lottie/runtime.ts', 'ir/lottie-runtime.js', ['../motion/index.js']),
       ...stateRuntimeTargets(stateLaws).map(target => bundle(root, staging, target.entry, `ir/${target.runtime}`)),
       // Serializer остаётся build-only: runtime групп потребляет проверенные строки.
@@ -206,6 +213,11 @@ async function compileIrTargets({ root, staging }) {
       if (variationNames.has(icon) !== !!variation) throw new Error(`build-ir: ${icon}: compiled variation не совпадает с author spec`);
       if (contentVariationNames.includes(icon) !== !!payload.contentVariation) throw new Error(`build-ir: ${icon}: compiled content variation не совпадает с author spec`);
       const modules = renderSymbolModules(payload);
+      if (capsuleMotionNames.includes(icon)) {
+        const motion = projectAuthorCapsuleMotion(payload);
+        writeFileSync(join(staging, 'gestures', `${icon}.js`), renderAuthorCapsuleMotionModule(motion));
+        writeFileSync(join(staging, 'gestures', `${icon}.d.ts`), authorCapsuleMotionModuleDeclaration(motion));
+      }
       compiledModules.push(modules);
       writeFileSync(join(staging, 'symbols', `${icon}.js`), modules.symbol);
       writeFileSync(join(staging, 'symbols', `${icon}.d.ts`), symbolModuleDeclaration(icon));

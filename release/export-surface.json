@@ -533,6 +533,14 @@
     "glyphCapabilities",
     "outline"
   ],
+  "./gestures/mic": [
+    "motionCapabilities",
+    "prepareBodyWidth"
+  ],
+  "./gestures/mic-circle": [
+    "motionCapabilities",
+    "prepareBodyWidth"
+  ],
   "./gestures/refresh": [
     "compileMotionEffect",
     "motionCapabilities",

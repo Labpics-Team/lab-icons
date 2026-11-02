@@ -9,6 +9,7 @@ import { GlyphModelError } from './request.js';
 import { assembleGlyphFrame, assembleGlyphLayers, assembleGlyphCompound } from './svg-assembly.js';
 import { sha256Hex } from './sha256.js';
 import { projectedContourAreas } from '../core/annulus-content-geometry.js';
+import { CAPSULE_OPERAND_COUNTS, prepareCapsulePath } from './capsule-path.js';
 
 type Point = readonly [number, number];
 /** @internal Команды и width coefficients допускаются только build compiler. */
@@ -38,7 +39,6 @@ function freezeTree<T>(value: T): T {
 }
 const stableJSON = (value: unknown): string => JSON.stringify(value, (_, item: unknown) => item && typeof item === 'object' && !Array.isArray(item)
   ? Object.fromEntries(Object.keys(item).sort().map(key => [key, (item as Record<string, unknown>)[key]])) : item);
-const COUNTS: Readonly<Record<string, number>> = { M: 1, L: 1, C: 3, Q: 2, Z: 0 };
 
 /** @internal Опт-in не добавляет geometry compiler в ordinary symbol import. */
 export function createCompiledCapsuleGlyph<TIcon extends AuthorIconId>(icon: TIcon,
@@ -68,12 +68,21 @@ export function createCompiledCapsuleGlyph<TIcon extends AuthorIconId>(icon: TIc
         !body || body.id !== geometry.body.id || body.role !== (compound ? 'counter' : 'content') || compound && geometry.body.index === 0 ||
         geometry.body.sourceLiteralSha256 !== sha256Hex(`${body.fillRule}\0${body.d}`) ||
         geometry.body.contours.length < 1 || geometry.body.contours.length > 2 || geometry.body.contours.some(contour =>
-          !/^M[LCQ]+Z$/.test(contour.commands) || [...contour.commands].reduce((count, command) => count + COUNTS[command]!, 0) !== contour.points.length ||
+          !/^M[LCQ]+Z$/.test(contour.commands) || [...contour.commands].reduce((count, command) => count + CAPSULE_OPERAND_COUNTS[command]!, 0) !== contour.points.length ||
           contour.points.length !== contour.rates.length || contour.points.some(point => point.length !== 2 || point.some(value => !Number.isFinite(value))) ||
           contour.rates.some(value => !Number.isFinite(value)) || !(contour.minimumSpan > 0) || ![-1, 1].includes(contour.winding))) {
       refuse('VARIATION_SOURCE_MISMATCH', 'Body width packet не принадлежит этому полному declared master.');
     }
   }
+  const paths = Object.fromEntries(Object.entries(compiled).map(([variant, geometry]) => [variant,
+    prepareCapsulePath(geometry.body.contours, (contour, points) => {
+      const xs = points.map(point => point[0]);
+      if (points.some(point => point.some(value => !Number.isFinite(value))) || Math.max(...xs) - Math.min(...xs) < contour.minimumSpan ||
+          contour.xOrder.slice(1).some((index, position) => points[index]![0] <= points[contour.xOrder[position]!]![0]) ||
+          Math.sign(projectedContourAreas(contour.commands, points, [0, 0])[0]!) !== contour.winding) {
+        refuse('VARIATION_UNREPRESENTABLE', 'Body width схлопнул controls, span или winding.');
+      }
+    })]));
   return function glyph(request?: AuthorSymbolGlyphRequest | AuthorCapsuleVariationGlyphRequest): AuthorSourceGlyph<TIcon> | AuthorCapsuleVariationGlyph<TIcon> {
     if (request === undefined) return sources.outline;
     if (!request || typeof request !== 'object' || Array.isArray(request)) return staticGlyph(request) as AuthorSourceGlyph<TIcon>;
@@ -90,20 +99,7 @@ export function createCompiledCapsuleGlyph<TIcon extends AuthorIconId>(icon: TIc
     if (width === 1) return source;
     if (options.modelMode === 'source-only') throw new GlyphModelError('AUTHOR_PARITY_REQUIRED', 'source-only сохраняет точный master.');
     if (width < geometry.domain.minimum || width > geometry.domain.maximum) refuse('VARIATION_OUTSIDE_DOMAIN', 'Body width выходит за пересечение геометрического допуска и оптического диапазона авторского стиля.');
-    const d = geometry.body.contours.map(contour => {
-      const points = contour.points.map((point, index) => [point[0] + (width - 1) * contour.rates[index]!, point[1]] as const);
-      const xs = points.map(point => point[0]);
-      if (points.some(point => point.some(value => !Number.isFinite(value))) || Math.max(...xs) - Math.min(...xs) < contour.minimumSpan ||
-          contour.xOrder.slice(1).some((index, position) => points[index]![0] <= points[contour.xOrder[position]!]![0]) ||
-          Math.sign(projectedContourAreas(contour.commands, points, [0, 0])[0]!) !== contour.winding) {
-        refuse('VARIATION_UNREPRESENTABLE', 'Body width схлопнул controls, span или winding.');
-      }
-      let index = 0;
-      return [...contour.commands].map(command => {
-        const count = COUNTS[command]!; const operands = points.slice(index, index + count); index += count;
-        return command + operands.flat().join(' ');
-      }).join('');
-    }).join('');
+    const d = paths[options.variant]!(width);
     const receipt: AuthorCapsuleVariationReceipt = { version: 1, law: geometry.law, geometrySha256: geometry.geometrySha256, parameters: { bodyWidth: width } };
     const parts = source.parts.map((part, index) => index === geometry.body.index ? { ...part, d,
       provenance: { kind: 'authored-variation' as const, identity: 'declared' as const, source: part.provenance as SourcePartProvenance,
