@@ -3884,6 +3884,24 @@
     "glyphCapabilities",
     "outline"
   ],
+  "./variations/alert-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./variations/checkmark-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./variations/close-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
   "./variations/ellipsis-horizontal": [
     "filled",
     "glyph",
@@ -3891,6 +3909,36 @@
     "outline"
   ],
   "./variations/ellipsis-vertical": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./variations/minus-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./variations/pause-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./variations/play-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./variations/plus-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./variations/question-circle": [
     "filled",
     "glyph",
     "glyphCapabilities",

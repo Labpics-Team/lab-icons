@@ -7,6 +7,7 @@ import { importSourceBundle, reflectAddedSourceSurface } from './helpers/source-
 
 const contract = JSON.parse(readFileSync(new URL('../release/contract.json', import.meta.url), 'utf8'));
 const snapshot = JSON.parse(readFileSync(new URL('../release/export-surface.json', import.meta.url), 'utf8'));
+const anatomy = JSON.parse(readFileSync(new URL('../semantics/author-anatomy.json', import.meta.url), 'utf8'));
 
 describe('полная публичная runtime-поверхность', () => {
   it('снимок покрывает ровно раскрытые entrypoints действующего контракта', () => {
@@ -22,6 +23,20 @@ describe('полная публичная runtime-поверхность', () =>
     }
     expect(exportSurfaceEntryErrors(contract, { ...snapshot, './private-helper': [] })).toContain('export-surface: неизвестный entrypoint ./private-helper');
     expect(exportSurfaceEntryErrors(contract, [])).toHaveLength(1);
+  });
+
+  it('обнаруживает точную потерю любого объявленного annulus entrypoint', () => {
+    const declared = Object.entries(anatomy.icons).filter(([, variants]) => variants.outline?.variation?.law === 'annulus.counter-scale')
+      .map(([icon]) => `./variations/${icon}`).sort();
+    const entries = Object.keys(expandReleaseExports(contract)).filter(entry => declared.includes(entry)).sort();
+    expect(declared.length).toBeGreaterThan(0);
+    expect(entries).toEqual(declared);
+    expect(exportSurfaceEntryErrors(contract, snapshot)).toEqual([]);
+    for (const entry of entries) {
+      const incomplete = { ...snapshot }; delete incomplete[entry];
+      expect(exportSurfaceEntryErrors(contract, incomplete), entry)
+        .toEqual([`export-surface: отсутствует публичный entrypoint ${entry}`]);
+    }
   });
 
   it('публичные source/template modules подтверждают имена snapshot и сохраняют настоящие static payloads', async () => {
