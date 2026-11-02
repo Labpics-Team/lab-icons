@@ -1,4 +1,4 @@
-import { compactDataLiteral, compactGeneratedModule, literalKey } from './generated-module.js';
+import { compactDataLiteral, compactGeneratedModule, jsonDataLiteral, literalKey } from './generated-module.js';
 
 const SYMBOL_NAME = /^[a-z][a-z0-9-]*$/;
 
@@ -56,18 +56,18 @@ export function symbolExportName(icon, variant) {
 
 /** Build-only ссылки заменяют только названные поля проверенной JSON-проекции. */
 function renderJSONRecord(value, references, compact = false) {
-  const serialize = compact ? compactDataLiteral : JSON.stringify;
+  const serialize = compact ? compactDataLiteral : jsonDataLiteral;
   if (!references.size) return serialize(value);
   return `{${Object.entries(value).flatMap(([key, item]) => {
     const encoded = references.get(key) ?? serialize(item);
-    return encoded === undefined ? [] : [`${compact ? literalKey(key) : JSON.stringify(key)}:${encoded}`];
+    return encoded === undefined ? [] : [`${literalKey(key, compact)}:${encoded}`];
   }).join(',')}}`;
 }
 
 /** Компактный символ собирается тем же compiler, которым проверяется общий IR. */
 export function renderSymbolModule({ icon, source, capabilities, staticSvg, variation }) {
   if (!SYMBOL_NAME.test(icon)) throw new TypeError('symbol module: невалидное имя');
-  const json = value => JSON.stringify(value);
+  const json = jsonDataLiteral;
   const record = value => value !== null && typeof value === 'object' && !Array.isArray(value);
   const shared = [], references = {};
   for (const variant of ['outline', 'filled']) {

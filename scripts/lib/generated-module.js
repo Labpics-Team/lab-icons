@@ -19,16 +19,19 @@ export function compactGeneratedModule(layouts) {
 }
 
 const JS_KEY = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
-export const literalKey = key => key === '__proto__' ? `[${JSON.stringify(key)}]`
-  : JS_KEY.test(key) ? key : JSON.stringify(key);
+export const literalKey = (key, compact = true) => key === '__proto__' ? `[${JSON.stringify(key)}]`
+  : compact && JS_KEY.test(key) ? key : JSON.stringify(key);
 
-/** JSON materialization остаётся build-only; PURE выражения сюда не поступают. */
-export function compactDataLiteral(value) {
+/** Оба layout сохраняют JSON-ключи данными, включая __proto__; PURE не разбирается. */
+function dataLiteral(value, compact) {
   const encoded = JSON.stringify(value);
   if (encoded === undefined) return undefined;
   const emit = item => Array.isArray(item) ? `[${item.map(emit).join(',')}]`
     : item !== null && typeof item === 'object'
-      ? `{${Object.entries(item).map(([key, child]) => `${literalKey(key)}:${emit(child)}`).join(',')}}`
+      ? `{${Object.entries(item).map(([key, child]) => `${literalKey(key, compact)}:${emit(child)}`).join(',')}}`
       : JSON.stringify(item);
   return emit(JSON.parse(encoded));
 }
+
+export const jsonDataLiteral = value => dataLiteral(value, false);
+export const compactDataLiteral = value => dataLiteral(value, true);

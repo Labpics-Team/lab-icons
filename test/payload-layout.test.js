@@ -56,6 +56,21 @@ const measure = contents => {
 };
 
 describe('build-only проекция без повторов авторских строк', () => {
+  it('JSON extension keys остаются собственными данными при любом выбранном layout', async () => {
+    const payload = structuredClone(payloads.time);
+    payload.source.outline.auxiliary = Array.from({ length: 400 }, () => JSON.parse('{"__proto__":true}'));
+    payload.capabilities.outline.auxiliary = JSON.parse('{"__proto__":{"meaning":"retained"}}');
+    const packed = await consume(renderSymbolModule(payload),
+      'export { glyph, glyphCapabilities } from "test-symbol";');
+    const consumer = await import(`data:text/javascript;base64,${Buffer.from(packed).toString('base64')}`);
+    const glyph = consumer.glyph(), caps = consumer.glyphCapabilities();
+    expect(Object.hasOwn(glyph.auxiliary[0], '__proto__')).toBe(true);
+    expect(Object.hasOwn(caps.auxiliary, '__proto__')).toBe(true);
+    expect(JSON.stringify(glyph)).toBe(JSON.stringify(payload.source.outline));
+    expect(JSON.stringify(caps)).toBe(JSON.stringify(payload.capabilities.outline));
+    expect(Object.getPrototypeOf(caps.auxiliary)).toBe(Object.prototype);
+  });
+
   it.each(names)('%s сохраняет exact glyph/caps/record order и уменьшает прежние module bytes', async icon => {
     const payload = payloads[icon], oldModule = baselineModule(payload), module = renderSymbolModule(payload);
     const baseline = measure(oldModule), actual = measure(module);

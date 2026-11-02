@@ -240,3 +240,20 @@ private runtime и новые package dependencies не внесены.
 [esbuild PURE](https://esbuild.github.io/api/#pure) отдельно ограничивает
 аннотацию самим вызовом; аргументы с побочными эффектами сохраняются. Эти первичные
 источники повторно проверены 2026-11-02 и не заменяют измерения.
+
+## JSON extension data и резервное представление
+
+Изолированное ревью `f2582fa` воспроизвело потерю собственного ключа
+`__proto__` в дополнительных JSON-данных. Компактный literal сохранял его,
+но выбор по размеру мог вернуться к прежнему object literal, где этот ключ
+имеет специальные JavaScript semantics. Это ошибка существовавшего baseline;
+она опровергает общий claim JSON-равенства для принятых extension records.
+
+Оба представления теперь проходят один build-only JSON encoder и записывают
+такой ключ как computed property. Остальные JSON keys, values и порядок
+сохраняются. Runtime helper, parser или новая регистрация не добавлены.
+Настоящий generated module → consumer RED обнаружил потерю собственного ключа;
+после исправления source/capability JSON и обычный Object.prototype сохранены.
+38 ограниченных controls проверили специальный ключ, четыре текущих masters,
+неизменные glyph/caps/static bundles и существующую авторскую вариацию.
+Полная remote qualification остаётся отдельным гейтом.
