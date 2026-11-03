@@ -109,3 +109,17 @@ describe('prepared width consumer исполняет физический d че
     expect(f.writes).toHaveLength(0); expect(f.clocks[0].disposed).toBe(true);
   });
 });
+
+it.each(['pendingMotion', 'widthHead'])('reduced motion сохраняет точную requested width из %s', key => {
+  const source = readFileSync(new URL('../observatory/explorer.js', import.meta.url), 'utf8');
+  const reduce = source.match(/^function reduceCurrentMotion\(\) \{[\s\S]*?^\}/m)?.[0];
+  if (!reduce) throw new Error('Нет реального reduceCurrentMotion.');
+  const minimum = .1, width = .10018, to = (1 - width) / (1 - minimum), calls = [];
+  // Нормализованный progress не является lossless кодированием requested width.
+  expect(1 + (minimum - 1) * to).not.toBe(width);
+  const state = { [key]: { to, width } };
+  new Function('state', 'replacementMode', 'widthGesture', 'advanceWidth', 'advance',
+    `${reduce}\nreduceCurrentMotion();`)(state, () => false, () => true,
+    (to, options) => calls.push({ to, width: options.width }), () => { throw new Error('Запрос ширины потерял prepared contract.'); });
+  expect(calls).toEqual([{ to, width }]);
+});

@@ -705,7 +705,7 @@ async function advanceWidth(to, { duration = 900, width = widthAt(to) } = {}) {
     }
     if (revision !== state.revision || requestRevision !== state.widthRequestRevision || state.preparedWidth !== admission || !widthGesture()) return;
     const viewRevision = state.viewRevision, motionRevision = ++state.motionRevision;
-    const pending = { paused: false, to };
+    const pending = { paused: false, to, width };
     state.pendingMotion = pending;
     updateMotionControls();
     const executor = await motionExecutor();
@@ -728,7 +728,7 @@ async function advanceWidth(to, { duration = 900, width = widthAt(to) } = {}) {
     state.effect = null;
     state.playhead = null;
     state.pendingMotion = null;
-    state.widthHead = { to, running: !pending.paused };
+    state.widthHead = { to, width, running: !pending.paused };
     if (pending.paused) for (const control of controls) control.pause();
     updateMotionControls();
     Promise.all(controls.map(control => control.finished)).then(results => {
@@ -919,6 +919,11 @@ ui['reduce-motion'].checked = reducedPreference.matches;
 function reduceCurrentMotion() {
   if (replacementMode()) {
     replaceState(state.pendingMotion?.target ?? state.replacement.target);
+    return;
+  }
+  if (widthGesture()) {
+    const target = state.pendingMotion ?? state.widthHead;
+    if (target) advanceWidth(target.to, { width: target.width });
     return;
   }
   const target = state.pendingMotion?.to ?? state.widthHead?.to ?? state.effect?.to;
