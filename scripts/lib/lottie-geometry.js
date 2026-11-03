@@ -115,8 +115,14 @@ export function renderLottieSymbolModule(icon, variants) {
   compact[3] = `const symbol = /* @__PURE__ */ createLottieSymbol({ glyph, glyphCapabilities }, ${compactDataLiteral(variants)});`;
   const module = compactGeneratedModule([lines.join('\n'), compact.join('\n')]);
   if (!Object.values(variants).some(target => target.ok && target.geometry.composition?.kind === 'compound')) return module;
-  // Новый compound не платит за комментарии/пробелы; имена публичных функций сохранены.
-  const minified = transformSync(module, { target: 'es2022', minifySyntax: true, minifyWhitespace: true, legalComments: 'none' }).code;
+  // Сжатие пробелов удаляет PURE. Сжимается только data declaration;
+  // imports, аннотированный factory root и публичные wrappers сохраняются.
+  const data = transformSync(`const targets=${compactDataLiteral(variants)};`,
+    { target: 'es2022', treeShaking: false, minifySyntax: true, minifyWhitespace: true, legalComments: 'none' }).code;
+  const minified = [...lines.slice(1, 3), data,
+    'const symbol=/* @__PURE__ */createLottieSymbol({glyph,glyphCapabilities},targets);',
+    ...lines.slice(4),
+  ].join('\n');
   return compactGeneratedModule([module, minified]);
 }
 

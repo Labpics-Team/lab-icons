@@ -5,6 +5,8 @@ import { lottieSymbols, names, nudgeNames } from './helpers/lottie-symbols.js';
 import { sampleMotionGesture } from '../src/core/motion-sampler.js';
 import { readFileSync } from 'node:fs';
 import { gzipSync, strToU8 } from 'fflate';
+import { transformSync } from 'esbuild';
+import { compactDataLiteral, compactGeneratedModule, jsonDataLiteral } from '../scripts/lib/generated-module.js';
 const consumers = lottieSymbols();
 const layer = (animation, id) => animation.layers.find(item => item.nm === id);
 
@@ -53,8 +55,47 @@ describe('точный build-time Lottie target', () => {
       .artifacts['dist/lottie/mic-circle.js'];
     const module = renderLottieSymbolModule('mic-circle', consumers['mic-circle'].targets);
     const bytes = strToU8(module);
+    process.stdout.write(`${JSON.stringify({ artifact: 'dist/lottie/mic-circle.js', bytes: bytes.length,
+      gzipBytes: gzipSync(bytes, { level: 9, mtime: 0 }).length })}\n`);
     expect(bytes.length).toBeLessThanOrEqual(policy.maxBytes);
     expect(gzipSync(bytes, { level: 9, mtime: 0 }).length).toBeLessThanOrEqual(policy.maxGzipBytes);
+    expect(/\/\*\s*[@#]__PURE__\s*\*\/\s*createLottieSymbol\(/.test(module)).toBe(true);
+    expect(module).toMatch(/export function exportLottie\(/);
+    expect(module).toMatch(/export function lottieCapabilities\(/);
+    // Удаляем только два последних публичных wrapper declarations:
+    // импортированные модули не получают package-level sideEffects подсказку.
+    const unused = module.slice(0, module.lastIndexOf('export function exportLottie('));
+    const options = { target: 'es2022', treeShaking: true, minifySyntax: true, minifyWhitespace: true };
+    const removed = transformSync(unused, options).code;
+    expect(/\bcreateLottieSymbol\s*\(/.test(removed)).toBe(false);
+    expect(removed).not.toContain('microphone-body');
+    const withoutPure = unused.replace(/\/\*\s*[@#]__PURE__\s*\*\/\s*(?=createLottieSymbol\()/, '');
+    const retainedWithoutPure = transformSync(withoutPure, options).code;
+    expect(/\bcreateLottieSymbol\s*\(/.test(retainedWithoutPure)).toBe(true);
+    expect(retainedWithoutPure).toContain('microphone-body');
+    const used = transformSync(module, options).code;
+    expect(/\bcreateLottieSymbol\s*\(/.test(used)).toBe(true);
+    expect(used).toContain('microphone-body');
+    // Проверяется именно выпущенный wrapper, включая binding imports и data.
+    expect(module.split('\n').filter(line => line.startsWith('import '))).toEqual([
+      "import { glyph, glyphCapabilities } from '../symbols/mic-circle.js';",
+      "import { createLottieSymbol } from '../ir/lottie-runtime.js';",
+    ]);
+    const executable = module.split('\n').filter(line => !line.startsWith('import ')).join('\n').replace(/^export /gm, '');
+    const glyph = () => {}, glyphCapabilities = () => {};
+    let captured;
+    const wrapper = new Function('glyph', 'glyphCapabilities', 'createLottieSymbol',
+      `${executable}\nreturn { exportLottie, lottieCapabilities };`)(glyph, glyphCapabilities, (source, targets) => {
+      captured = { source, targets };
+      return { exportLottie: request => request, lottieCapabilities: variant => variant };
+    });
+    expect(captured.source).toEqual({ glyph, glyphCapabilities });
+    expect(captured.targets).toEqual(consumers['mic-circle'].targets);
+    expect(wrapper.exportLottie.name).toBe('exportLottie');
+    expect(wrapper.lottieCapabilities.name).toBe('lottieCapabilities');
+    const request = { variant: 'filled' };
+    expect(wrapper.exportLottie(request)).toBe(request);
+    expect(wrapper.lottieCapabilities('filled')).toBe('filled');
   });
   it('не добавляет metadata в envelope прежних layered targets', () => {
     for (const { symbol, targets } of Object.values(consumers)) for (const [variant, target] of Object.entries(targets)) {
@@ -63,6 +104,18 @@ describe('точный build-time Lottie target', () => {
       expect(Object.hasOwn(target.geometry, 'composition')).toBe(false);
       expect(target.geometry.version).toBe(1);
       expect(Object.keys(target.geometry)).toEqual(['version', 'icon', 'variant', 'viewBox', 'author', 'parts']);
+    }
+    for (const name of names) {
+      const variants = consumers[name].targets;
+      const envelope = literal => [
+        '/** GENERATED: target-contours одного авторского символа; path parser остаётся в сборке. */',
+        `import { glyph, glyphCapabilities } from '../symbols/${name}.js';`,
+        "import { createLottieSymbol } from '../ir/lottie-runtime.js';",
+        `const symbol = /* @__PURE__ */ createLottieSymbol({ glyph, glyphCapabilities }, ${literal(variants)});`,
+        'export function exportLottie(request) { return symbol.exportLottie(request); }',
+        'export function lottieCapabilities(variant) { return symbol.lottieCapabilities(variant); }', '',
+      ].join('\n');
+      expect(renderLottieSymbolModule(name, variants)).toBe(compactGeneratedModule([envelope(jsonDataLiteral), envelope(compactDataLiteral)]));
     }
   });
   it('сохраняет closing cubic tangent, несколько контуров и направление', () => {
