@@ -25,8 +25,8 @@ export const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const EXACT_PNPM = /^pnpm@(\d+\.\d+\.\d+)$/;
 const PINNED_ACTION_REF = /^[0-9a-f]{40}$/;
 const CANONICAL_ENGINES = Object.freeze({ node: '>=22.14.0', pnpm: '>=11.13.1' });
-export const PUBLIC_VERIFY_RUNNER = '\${{ matrix.os }}';
-export const PUBLIC_BENCHMARK_RUNNER = 'ubuntu-latest';
+export const TRUSTED_VERIFY_RUNNER = `\${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && fromJSON(matrix.os == 'windows-latest' && '["self-hosted","Windows","X64"]' || matrix.os == 'macos-latest' && '["self-hosted","macOS","X64"]' || '["self-hosted","Linux","X64"]') || matrix.os }}`;
+export const TRUSTED_BENCHMARK_RUNNER = `\${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && fromJSON('["self-hosted","Linux","X64"]') || 'ubuntu-latest' }}`;
 const PNPM_POLICY = Object.freeze({
   blockExoticSubdeps: 'true',
   engineStrict: 'true',
@@ -270,14 +270,21 @@ function pnpmJobErrors({ relativePath, job, expectedPnpmVersion }) {
   return errors;
 }
 
-/** Публичный repository code не получает доступ к приватному self-hosted pool. */
+/** Общий ARC pool допускает только trusted code; native matrix и fork isolation сохраняются. */
 export function selfHostedWorkflowErrors(relativePath, text) {
-  if (relativePath === '.github/workflows/ci.yml' && /\bpull_request_target\b/.test(text)) {
-    return [`${relativePath}: pull_request_target запрещён для проверки repository code`];
-  }
   const runnerLines = source => source.split(/\r?\n/).filter(line => !line.trim().startsWith('#') && /\bself-hosted\b/.test(line));
   if (runnerLines(text).length === 0) return [];
-  return [`${relativePath}: persistent self-hosted runner запрещён для repository code`];
+  const forbidden = `${relativePath}: persistent self-hosted runner запрещён для repository code`;
+  if (relativePath !== '.github/workflows/ci.yml' || /\bpull_request_target\b/.test(text)) return [forbidden];
+  const allowed = { verify: TRUSTED_VERIFY_RUNNER, benchmark: TRUSTED_BENCHMARK_RUNNER, security: TRUSTED_BENCHMARK_RUNNER };
+  let acceptedLines = 0;
+  for (const job of workflowJobBlocks(text)) {
+    const lines = runnerLines(job.text);
+    if (lines.some(line => line.trim() !== `runs-on: ${allowed[job.id]}`)) return [forbidden];
+    acceptedLines += lines.length;
+  }
+  if (runnerLines(text).length !== acceptedLines) return [forbidden];
+  return [];
 }
 
 /** Добавочный performance job не может стать заменой проверки или необязательным PASS. */

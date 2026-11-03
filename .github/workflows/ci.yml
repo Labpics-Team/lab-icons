@@ -17,8 +17,9 @@ concurrency:
 jobs:
   verify:
     name: Verify ${{ matrix.os }} / Node ${{ matrix.node }}
-    # Публичный код выполняется в стандартных изолированных GitHub-hosted runners.
-    runs-on: ${{ matrix.os }}
+    # Trusted code использует self-hosted OS/arch; внешние fork PR — hosted isolation.
+    # Native capacity пока не подтверждена: её очередь не считается PASS.
+    runs-on: ${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && fromJSON(matrix.os == 'windows-latest' && '["self-hosted","Windows","X64"]' || matrix.os == 'macos-latest' && '["self-hosted","macOS","X64"]' || '["self-hosted","Linux","X64"]') || matrix.os }}
     timeout-minutes: 30
     strategy:
       fail-fast: false
@@ -110,7 +111,7 @@ jobs:
   # Исключение — только запись в .trivyignore.yaml; уязвимость с исправлением блокирует всегда.
   security:
     name: Безопасность
-    runs-on: ubuntu-latest
+    runs-on: ${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && fromJSON('["self-hosted","Linux","X64"]') || 'ubuntu-latest' }}
     timeout-minutes: 15
     steps:
       - name: Получение исходников
@@ -146,7 +147,7 @@ jobs:
   # Этот job добавляет измерение к verify, не заменяя ни одну его проверку.
   benchmark:
     name: Чистый consumer и browser benchmark
-    runs-on: ubuntu-latest
+    runs-on: ${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && fromJSON('["self-hosted","Linux","X64"]') || 'ubuntu-latest' }}
     timeout-minutes: 45
     env:
       PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
