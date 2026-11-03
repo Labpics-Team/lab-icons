@@ -17,7 +17,7 @@ export class GlyphModelError extends Error {
 
 export function parseSymbolVariant(value: unknown): IconVariant {
   if (value !== 'outline' && value !== 'filled') {
-    throw new TypeError(`@labpics/icons/ir: variant обязан быть outline или filled, получено «${String(value)}»`);
+    throw new TypeError(`variant: требуется outline/filled, получено «${String(value)}»`);
   }
   return value;
 }

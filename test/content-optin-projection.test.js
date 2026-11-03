@@ -1,4 +1,3 @@
-import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -68,7 +67,6 @@ const native = async name => {
   writeFileSync(consumer, `export * as source from '@labpics/icons/symbols/${name}';\nexport * as ring from '@labpics/icons/variations/${name}';\nexport * as content from '@labpics/icons/content-variations/${name}';\n`);
   return import(pathToFileURL(consumer).href);
 };
-const sha = value => createHash('sha256').update(value).digest('hex');
 
 describe('content opt-in owns its payload without charging existing imports', () => {
   it('removing all optional content laws keeps the public type dependency closure', () => {
@@ -99,12 +97,34 @@ describe('content opt-in owns its payload without charging existing imports', ()
       .toThrow(TypeError);
   });
 
-  it.each([...names, ...dots])('%s preserves old generator bytes, declaration bytes and capabilities exactly', name => {
+  it.each([...names, ...dots])('%s preserves old static strings, declarations and semantic results with lazy construction', async name => {
     const input = inputs[name], output = snapshots[name], baseline = old.renderSymbolModules(input);
     for (const field of ['symbol', 'data', 'variation']) {
-      expect(output[field], field).toBe(baseline[field]);
-      if (output[field]) expect(sha(output[field]), field).toBe(sha(baseline[field]));
       expect(output[field]).not.toMatch(/contentScale|content-runtime|content-geometry/);
+    }
+    const materialize = async modules => {
+      const result = await build({ stdin: { contents: 'export * as source from "history-source";export * as variable from "history-variation";' },
+        bundle: true, write: false, minify: true, platform: 'browser', format: 'esm', target: 'es2022', logLevel: 'silent',
+        plugins: [{ name: 'historical-symbol-semantics', setup(plugin) {
+          plugin.onResolve({ filter: /^history-(source|variation)$/ }, args => ({ path: args.path, namespace: 'history', sideEffects: false }));
+          plugin.onLoad({ filter: /.*/, namespace: 'history' }, args => ({ contents: args.path === 'history-source' ? modules.symbol : modules.variation, loader: 'js' }));
+          plugin.onResolve({ filter: /symbol-data\/[a-z0-9-]+\.js$/ }, () => ({ path: 'data', namespace: 'history-data', sideEffects: false }));
+          plugin.onLoad({ filter: /.*/, namespace: 'history-data' }, () => ({ contents: modules.data, loader: 'js' }));
+          plugin.onResolve({ filter: /(?:symbol|annulus|variation)-runtime\.js$/ }, args => {
+            const runtime = args.path.split('/').at(-1);
+            const entry = runtime === 'annulus-runtime.js' ? 'author-annulus-runtime.ts'
+              : runtime === 'variation-runtime.js' ? 'authored-variation.ts' : 'symbol-runtime.ts';
+            return { path: join(root, 'src/ir', entry) };
+          });
+        } }] });
+      return import(`data:text/javascript;base64,${Buffer.from(result.outputFiles[0].text).toString('base64')}`);
+    };
+    const current = await materialize(output), historical = await materialize(baseline);
+    for (const kind of ['source', 'variable']) for (const variant of ['outline', 'filled']) {
+      expect(current[kind][variant]).toBe(historical[kind][variant]);
+      expect(current[kind].glyph({ variant })).toEqual(historical[kind].glyph({ variant }));
+      expect(current[kind].glyphCapabilities(variant)).toEqual(historical[kind].glyphCapabilities(variant));
+      expect(current.variable.glyph({ variant })).toBe(current.source.glyph({ variant }));
     }
     expect(symbolModuleDeclaration(name)).toBe(old.symbolModuleDeclaration(name));
     expect(variationModuleDeclaration(name, input.variation.outline.law)).toBe(old.variationModuleDeclaration(name, input.variation.outline.law));

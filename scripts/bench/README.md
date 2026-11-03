@@ -112,6 +112,15 @@ Production bytes и module graphs отдельно собирает
 `scripts/measure-platform-artifacts.mjs --output …` из уже собранного candidate.
 CI не запускает `--update` и не принимает собственный результат за новый budget.
 
+`verify-author-consumer.mjs` отдельно наблюдает native import каждого установленного
+символа. В `author-consumer.json/nativeStaticLifecycle` записаны вызовы `Object.freeze`
+при импорте, первом запросе capabilities, первом glyph и повторных default-вызовах.
+Импорт статической строки и повторный default не замораживают данные; первые
+запросы возвращают frozen snapshots с устойчивой identity. Explicit request
+учитывается отдельно: parser замораживает разобранный запрос. Observer восстанавливается
+даже при отказе loader и работает в отдельном процессе от latency/heap probes.
+Эти счётчики проверяют freeze, число аллокаций и ускорение по ним не выводятся.
+
 Источник исполнения — [ARC owner](https://github.com/Labpics-Team/Labpics-infra/blob/main/services/github-runners/arc/README.md).
 Проверенный 2026-11-01 infra commit `8a7194f1dcc1bb6d630abb2946e8c72d0b9d501f`:
 Ubuntu 26.04, одноразовый Pod, Linux/amd64, sudo для runner. Playwright 1.64.1

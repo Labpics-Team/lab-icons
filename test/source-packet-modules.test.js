@@ -88,11 +88,11 @@ describe('целый source/cycle packet сохраняет действующи
     expect(retained.some(file => file.endsWith('src/ir/source-packet-runtime.ts'))).toBe(false);
   });
 
-  it('снятие PURE с source materialization удерживает геометрию в caps и ловится контролем', async () => {
+  it('eager source initialization удерживает геометрию в caps и ловится контролем', async () => {
     const input = inputs.notifications;
     const entry = 'import {glyphCapabilities} from "packet";export const result=glyphCapabilities();';
     const current = await consume(input, entry), sabotage = await consume(input, entry,
-      module => module.replaceAll('/* @__PURE__ */ (() => materializeSourceV1', '(() => materializeSourceV1'));
+      module => module + '\nglyph();\n');
     expect(current.text).not.toContain(input.source.outline.parts[0].d);
     expect(sabotage.text).toContain(input.source.outline.parts[0].d);
     expect(sabotage.text.length).toBeGreaterThan(current.text.length * 2);
