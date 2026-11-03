@@ -48,7 +48,9 @@ export function distributionClaimErrors(text) {
 export function manualCorpusCountErrors(source) {
   // Помеченный code literal версии — identity источника, не размер корпуса.
   // Обычные числовые code literals рядом с SVG/файлами остаются count claims.
-  const sentences = normalizeDistributionText(source, { preserveBlocks: true, maskVersionIdentifiers: true }).split(/\n|;|[.!?]\s+/u);
+  // marked кодирует > в ASCII-стрелке; entity не задаёт границу утверждения.
+  const sentences = normalizeDistributionText(source, { preserveBlocks: true, maskVersionIdentifiers: true })
+    .replaceAll('-&gt;', '->').split(/\n|;|[.!?]\s+/u);
   const ru = [
     'ноль', 'нуль',
     'один', 'одна', 'одно', 'одну', 'одного', 'одной',
@@ -91,6 +93,22 @@ export function manualCorpusCountErrors(source) {
   const countStart = `${number}\\s+${unit}(?=$|[^\\p{L}\\p{N}_])`;
   const clauseSeparator = new RegExp(`,\\s*(?=(?:(?:а|но|but|whereas)\\s+(?!${countStart})|(?:(?:в|на|in|at)\\s+)?${currentMarker.source}))`, 'iu');
   const clauses = sentences.flatMap(sentence => sentence.split(clauseSeparator));
+  const singularFileValue = /^(?:файл(?:а)?|file)\s*[:=]/iu;
+  // Свойство заканчивается у конкретного файла. Одно определение допускает имя
+  // артефакта; признак соседнего счётчика, предложения или блока не переносится.
+  const filePropertyContext = /(?:^|[^\p{L}\p{N}_])(?:(?:размер|длина)(?:\s+[\p{L}\p{N}_.\/-]+)?|(?:size|length)\s+of(?:\s+(?:this|the))?|baseline\s+(?:поля\s+этого|fields?\s+of\s+(?:this|the)))\s+$/iu;
+  const byteUnit = '(?:B|bytes?|байт(?:а|ов)?)';
+  const rangeTail = `(?:\\s*(?:→|->)\\s*${number})*`;
+  const measuredBytes = `${number}${rangeTail}\\s+${byteUnit}(?:\\s+(?:raw|gzip))?`;
+  const byteValueTail = new RegExp(`^${rangeTail}\\s+${byteUnit}(?:\\s+(?:raw|gzip))?(?:\\s+(?:и|and)\\s+${measuredBytes})*(?=$|\\s*[,.)!?])`, 'iu');
+  function artifactSizeProperty(match, text) {
+    const end = match.index + match[0].length;
+    const start = end - match[1].length;
+    // Байтовая единица сама бывает определением. Исключение требует одновременно
+    // явного свойства файла и законченной величины, а не только суффикса B.
+    return singularFileValue.test(match[1]) && filePropertyContext.test(text.slice(0, start)) &&
+      byteValueTail.test(text.slice(end));
+  }
   function nodeIdentifier(match, text) {
     return /:\s*\d+$/.test(match[1]) &&
       /^:\d+(?=$|[^\p{L}\p{N}_:])/u.test(text.slice(match.index + match[0].length));
@@ -102,7 +120,7 @@ export function manualCorpusCountErrors(source) {
   }
   return [...new Set(clauses.flatMap(sentence => historical(sentence) ? [] :
     patterns.flatMap(pattern => [...sentence.matchAll(pattern)]
-      .filter(match => !nodeIdentifier(match, sentence)).map(match => match[1]))))]
+      .filter(match => !nodeIdentifier(match, sentence) && !artifactSizeProperty(match, sentence)).map(match => match[1]))))]
     .map((claim) => `ручной счётчик «${claim}»: используйте ссылку на контракт или генерируемую справку`);
 }
 
