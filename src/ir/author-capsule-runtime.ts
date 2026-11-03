@@ -3,7 +3,6 @@ import type { AuthorSourceGlyph, AuthorSymbolGlyphRequest } from './author-sourc
 import type { SourcePartProvenance } from './glyph-types.js';
 import type { AuthorCapsuleVariationDomain, AuthorCapsuleVariationGlyph, AuthorCapsuleVariationGlyphRequest,
   AuthorCapsuleVariationReceipt } from './author-capsule-types.js';
-import { createCompiledGlyph } from './symbol-runtime.js';
 import { parseCompiledGlyphOptions } from './author-request-runtime.js';
 import { GlyphModelError } from './request.js';
 import { assembleGlyphFrame, assembleGlyphLayers, assembleGlyphCompound } from './svg-assembly.js';
@@ -31,9 +30,10 @@ export class AuthoredCapsuleVariationError extends Error {
   }
 }
 function refuse(code: AuthoredCapsuleVariationError['code'], message: string): never { throw new AuthoredCapsuleVariationError(code, message); }
-function freezeTree<T>(value: T): T {
-  if (value && typeof value === 'object' && !Object.isFrozen(value)) {
-    Object.values(value).forEach(freezeTree); Object.freeze(value);
+function freezeTree<T>(value: T, frozenParents = false): T {
+  if (value && typeof value === 'object' && (frozenParents || !Object.isFrozen(value))) {
+    for (const child of Object.values(value)) freezeTree(child, frozenParents);
+    Object.freeze(value);
   }
   return value;
 }
@@ -45,7 +45,8 @@ export function createCompiledCapsuleGlyph<TIcon extends AuthorIconId>(icon: TIc
   sources: Readonly<Record<'outline' | 'filled', AuthorSourceGlyph<TIcon>>>,
   input: Readonly<Partial<Record<'outline' | 'filled', CompiledAuthorCapsule>>>):
   (request?: AuthorSymbolGlyphRequest | AuthorCapsuleVariationGlyphRequest) => AuthorSourceGlyph<TIcon> | AuthorCapsuleVariationGlyph<TIcon> {
-  const staticGlyph = createCompiledGlyph(icon, sources), compiled = freezeTree(input);
+  freezeTree(sources, true);
+  const compiled = freezeTree(input), paths: Partial<Record<'outline' | 'filled', (width: number) => string>> = {};
   for (const variant of ['outline', 'filled'] as const) {
     const geometry = compiled[variant];
     if (!geometry) continue;
@@ -71,25 +72,24 @@ export function createCompiledCapsuleGlyph<TIcon extends AuthorIconId>(icon: TIc
           !/^M[LCQ]+Z$/.test(contour.commands) || [...contour.commands].reduce((count, command) => count + CAPSULE_OPERAND_COUNTS[command]!, 0) !== contour.points.length ||
           contour.points.length !== contour.rates.length || contour.points.some(point => point.length !== 2 || point.some(value => !Number.isFinite(value))) ||
           contour.rates.some(value => !Number.isFinite(value)) || !(contour.minimumSpan > 0) || ![-1, 1].includes(contour.winding))) {
-      refuse('VARIATION_SOURCE_MISMATCH', 'Body width packet не принадлежит этому полному declared master.');
+      refuse('VARIATION_SOURCE_MISMATCH', 'Packet capsule.width не принадлежит master.');
     }
-  }
-  const paths = Object.fromEntries(Object.entries(compiled).map(([variant, geometry]) => [variant,
-    prepareCapsulePath(geometry.body.contours, (contour, points) => {
+    paths[variant] = prepareCapsulePath(geometry.body.contours, (contour, points) => {
       const xs = points.map(point => point[0]);
       if (points.some(point => point.some(value => !Number.isFinite(value))) || Math.max(...xs) - Math.min(...xs) < contour.minimumSpan ||
           contour.xOrder.slice(1).some((index, position) => points[index]![0] <= points[contour.xOrder[position]!]![0]) ||
           Math.sign(projectedContourAreas(contour.commands, points, [0, 0])[0]!) !== contour.winding) {
         refuse('VARIATION_UNREPRESENTABLE', 'Body width схлопнул controls, span или winding.');
       }
-    })]));
-  return function glyph(request?: AuthorSymbolGlyphRequest | AuthorCapsuleVariationGlyphRequest): AuthorSourceGlyph<TIcon> | AuthorCapsuleVariationGlyph<TIcon> {
+    });
+  }
+  // Публичное имя сохраняется локально: private helpers не требуют keepNames.
+  return Object.defineProperty(function glyph(request?: AuthorSymbolGlyphRequest | AuthorCapsuleVariationGlyphRequest): AuthorSourceGlyph<TIcon> | AuthorCapsuleVariationGlyph<TIcon> {
     if (request === undefined) return sources.outline;
-    if (!request || typeof request !== 'object' || Array.isArray(request)) return staticGlyph(request) as AuthorSourceGlyph<TIcon>;
-    const options = parseCompiledGlyphOptions(icon, request, true), source = sources[options.variant];
+    const options = parseCompiledGlyphOptions(icon, request, Boolean(request && typeof request === 'object' && !Array.isArray(request))), source = sources[options.variant];
     if (request.variation === undefined) return source;
     const geometry = compiled[options.variant];
-    if (!geometry) throw new GlyphModelError('AUTHOR_VARIATION_UNSUPPORTED', 'У исходного контракта нет независимо адресуемого body или negative body с допуском этого закона.');
+    if (!geometry) throw new GlyphModelError('AUTHOR_VARIATION_UNSUPPORTED', 'Начертание не поддерживает capsule.width.');
     const variation = request.variation;
     if (!variation || Object.getPrototypeOf(variation) !== Object.prototype || Reflect.ownKeys(variation).some(key => key !== 'bodyWidth')) {
       refuse('INVALID_VARIATION', 'Нужен только bodyWidth, без coordinates или path.');
@@ -98,7 +98,7 @@ export function createCompiledCapsuleGlyph<TIcon extends AuthorIconId>(icon: TIc
     if (typeof width !== 'number' || !Number.isFinite(width) || width <= 0) refuse('INVALID_VARIATION', 'Body width обязан быть конечным положительным числом.');
     if (width === 1) return source;
     if (options.modelMode === 'source-only') throw new GlyphModelError('AUTHOR_PARITY_REQUIRED', 'source-only сохраняет точный master.');
-    if (width < geometry.domain.minimum || width > geometry.domain.maximum) refuse('VARIATION_OUTSIDE_DOMAIN', 'Body width выходит за пересечение геометрического допуска и оптического диапазона авторского стиля.');
+    if (width < geometry.domain.minimum || width > geometry.domain.maximum) refuse('VARIATION_OUTSIDE_DOMAIN', 'bodyWidth вне допущенного диапазона master.');
     const d = paths[options.variant]!(width);
     const receipt: AuthorCapsuleVariationReceipt = { version: 1, law: geometry.law, geometrySha256: geometry.geometrySha256, parameters: { bodyWidth: width } };
     const parts = source.parts.map((part, index) => index === geometry.body.index ? { ...part, d,
@@ -110,5 +110,5 @@ export function createCompiledCapsuleGlyph<TIcon extends AuthorIconId>(icon: TIc
     return freezeTree({ ...source, parts, d: parts.map(part => part.d).join(''), svg,
       provenance: { kind: 'authored-variation', file: source.provenance.file, author: source.provenance.author,
         anatomy: source.provenance.anatomy!, variation: receipt } });
-  };
+  }, 'name', { value: 'glyph', configurable: true });
 }

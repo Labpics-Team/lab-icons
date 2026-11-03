@@ -30,8 +30,8 @@ import { projectAuthorCapsuleMotion, renderAuthorCapsuleMotionModule, authorCaps
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const TARGETS = ['ir', 'symbols', 'variations', 'content-variations', 'motion', 'lottie', 'authoring', 'states', 'state-variations', 'gestures'];
-// Эти runtime проверены с полной minify: публичные имена сохраняются штатным keepNames.
-const NAME_PRESERVING_MINIFIED_ENTRIES = new Set(['src/motion/index.ts', 'src/ir/author-capsule-runtime.ts']);
+// Motion сохраняет имена публичных exports; capsule задаёт имя glyph на своей границе.
+const MINIFIED_ENTRIES = new Set(['src/motion/index.ts', 'src/ir/author-capsule-runtime.ts']);
 const REQUIRED_DECLARATIONS = ['author-capsule-motion-types.d.ts', 'author-annulus-types.d.ts', 'author-content-types.d.ts', 'author-capsule-types.d.ts', 'author-catalog.generated.d.ts', 'author-provenance.d.ts', 'author-source.d.ts', 'authored-variation.d.ts', 'candidates.d.ts', 'catalog.generated.d.ts', 'compiler.d.ts', 'glyph-types.d.ts', 'index.d.ts', 'paint-types.d.ts', 'recipes.d.ts', 'render.d.ts', 'request.d.ts'];
 const read = (root, file) => JSON.parse(readFileSync(join(root, file), 'utf8'));
 
@@ -93,8 +93,8 @@ function retainStaticArtifacts(output, staging) {
 }
 
 export async function bundle(root, staging, entry, target, external = []) {
-  const minification = NAME_PRESERVING_MINIFIED_ENTRIES.has(entry)
-    ? { minify: true, keepNames: true } : { minify: false, minifyWhitespace: true };
+  const minification = MINIFIED_ENTRIES.has(entry)
+    ? { minify: true, keepNames: entry === 'src/motion/index.ts' } : { minify: false, minifyWhitespace: true };
   const compiled = await build({
     absWorkingDir: root,
     entryPoints: [join(root, entry)], outfile: join(staging, target),

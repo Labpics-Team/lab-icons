@@ -2,7 +2,7 @@ import type { AuthorIconId } from './author-catalog.generated.js';
 import type { BodyWidthRefusal, BodyWidthMotionCapabilities, BodyWidthMotionCapabilitiesResult,
   PrepareBodyWidthResult, PreparedBodyWidth } from './author-capsule-motion-types.js';
 import type { CapsulePathContour } from './capsule-path.js';
-import { prepareCapsulePath } from './capsule-path.js';
+import { CAPSULE_OPERAND_COUNTS, prepareCapsulePath } from './capsule-path.js';
 import { sha256Hex } from './sha256.js';
 
 type Variant = 'outline' | 'filled';
@@ -51,6 +51,8 @@ export function createCompiledBodyWidthPreparation(input: Variants<CompiledBodyW
         packet.variant !== variant || !Number.isFinite(packet.domain.minimum) || packet.domain.minimum <= 0 ||
         packet.domain.minimum >= 1 || packet.domain.maximum !== 1 || packet.renderTarget.attribute !== 'd' ||
         !packet.contours.length || packet.contours.length > 2 || packet.contours.some(contour =>
+          !/^M[LCQ]+Z$/.test(contour.commands) ||
+          [...contour.commands].reduce((count, command) => count + CAPSULE_OPERAND_COUNTS[command]!, 0) !== contour.points.length ||
           !contour.points.length || contour.points.length !== contour.rates.length ||
           contour.points.some(point => point.length !== 2 || point.some(value => !Number.isFinite(value))) ||
           contour.rates.some(value => !Number.isFinite(value))) || !packet.svg || !packet.originalD || !packet.renderTarget.selector) {
