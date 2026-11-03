@@ -4,8 +4,9 @@ import type { LottieAnimation, LottieCapabilities, LottieExportRequest, LottieEx
 type Point = [number, number];
 interface Contour { v: Point[]; i: Point[]; o: Point[]; c: true }
 interface Geometry {
-  version: 2; icon: string; variant: IconVariant; viewBox: number[];
-  composition: { kind: 'layers' } | { kind: 'compound'; fillRule: 'evenodd' };
+  version: 1; icon: string; variant: IconVariant; viewBox: number[];
+  /** Отсутствие поля означает прежние независимые layers. */
+  composition?: { kind: 'compound'; fillRule: 'evenodd' };
   author: { masterSha256: string; pathFingerprintSha256: string; fileKey: string; version: string; nodeId: string };
   parts: { id: string; anchor: Point; fillRule: 'nonzero' | 'evenodd' | null; contours: Contour[] }[];
 }
@@ -24,9 +25,9 @@ const frame = (t: number, value: number | readonly number[]) => {
 };
 const cloneContour = (contour: Contour) => ({ c: true, v: contour.v.map(p => [...p]), i: contour.i.map(p => [...p]), o: contour.o.map(p => [...p]) });
 function matchesComposition(target: Geometry['composition'], source: GlyphIR<string>['composition']): boolean {
-  if (!target || !source || typeof target !== 'object' || typeof source !== 'object' || Array.isArray(target) || Array.isArray(source)) return false;
-  if (target.kind === 'layers') return source.kind === 'layers' &&
-    Object.keys(target).join(',') === 'kind' && Object.keys(source).join(',') === 'kind';
+  if (!source || typeof source !== 'object' || Array.isArray(source)) return false;
+  if (target === undefined) return source.kind === 'layers' && Object.keys(source).join(',') === 'kind';
+  if (!target || typeof target !== 'object' || Array.isArray(target)) return false;
   return target.kind === 'compound' && target.fillRule === 'evenodd' &&
     Object.keys(target).sort().join(',') === 'fillRule,kind' && source.kind === 'compound' &&
     Object.keys(source).sort().join(',') === 'fillRule,kind' && source.fillRule === target.fillRule;
@@ -39,7 +40,7 @@ export function createLottieSymbol(source: SymbolSource, variants: Record<IconVa
     if (!target.ok) return target;
     const glyph = source.glyph({ variant }), geometry = target.geometry;
     const author = glyph.provenance.kind === 'source' ? glyph.provenance.author : undefined;
-    if (geometry.icon !== glyph.icon || geometry.variant !== glyph.variant || geometry.version !== 2 ||
+    if (geometry.icon !== glyph.icon || geometry.variant !== glyph.variant || geometry.version !== 1 ||
         !matchesComposition(geometry.composition, glyph.composition) ||
         !author || Object.keys(geometry.author).some(key => geometry.author[key as keyof Geometry['author']] !== author[key as keyof typeof author]) ||
         geometry.parts.length !== glyph.parts.length || geometry.viewBox.some((value, index) => value !== glyph.viewBox[index]) ||
@@ -138,9 +139,10 @@ export function createLottieSymbol(source: SymbolSource, variants: Record<IconVa
     const op = terminalFrame + 1;
     // Семантические counter части принадлежат одному paint owner. Контуры
     // не дублируются и не получают самостоятельной положительной заливки.
-    const paintScopes = geometry.composition.kind === 'compound' ? [geometry.parts] : geometry.parts.map(part => [part]);
+    const compound = geometry.composition;
+    const paintScopes = compound ? [geometry.parts] : geometry.parts.map(part => [part]);
     const layers = paintScopes.map((parts, index) => {
-      const part = parts[0]!, fillRule = geometry.composition.kind === 'compound' ? geometry.composition.fillRule : part.fillRule;
+      const part = parts[0]!, fillRule = compound ? compound.fillRule : part.fillRule;
       const rotation = rotations.get(part.id), opacity = opacityTargets.get(part.id), translation = translations.get(part.id);
       const pivot: Point = rotation ? [geometry.viewBox[0]! + part.anchor[0] * geometry.viewBox[2]!, geometry.viewBox[1]! + part.anchor[1] * geometry.viewBox[3]!] : [0, 0];
       let opacityProperty: unknown = fixed(opacity ? (terminalFrame ? opacity.from : opacity.to) * 100 : 100);
@@ -170,7 +172,7 @@ export function createLottieSymbol(source: SymbolSource, variants: Record<IconVa
         }
         positionProperty = { a: 1, k: values };
       }
-      return { ddd: 0, ind: index + 1, ty: 4, nm: geometry.composition.kind === 'compound' ? 'compound' : part.id, sr: 1, ip: 0, op, st: 0, bm: 0,
+      return { ddd: 0, ind: index + 1, ty: 4, nm: compound ? 'compound' : part.id, sr: 1, ip: 0, op, st: 0, bm: 0,
         ks: { o: opacityProperty, r: rotation && terminalFrame ? { a: 1, k: [frame(0, rotation.from), frame(terminalFrame, rotation.to)] } : fixed(rotation?.to ?? 0),
           p: positionProperty, a: fixed([...pivot, 0]), s: fixed([100, 100, 100]) },
         // Один fill scope на исходный SVG path, включая все его countershapes.

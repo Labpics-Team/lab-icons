@@ -3,6 +3,8 @@ import { lottieContours, compileLottieGeometry, renderLottieSymbolModule } from 
 import { createLottieSymbol } from '../src/lottie/runtime.js';
 import { lottieSymbols, names, nudgeNames } from './helpers/lottie-symbols.js';
 import { sampleMotionGesture } from '../src/core/motion-sampler.js';
+import { readFileSync } from 'node:fs';
+import { gzipSync, strToU8 } from 'fflate';
 const consumers = lottieSymbols();
 const layer = (animation, id) => animation.layers.find(item => item.nm === id);
 
@@ -46,6 +48,23 @@ function scalar(property, t, component = 0) {
 }
 
 describe('точный build-time Lottie target', () => {
+  it('новый compound target помещается в прежние shipping ceilings', () => {
+    const policy = JSON.parse(readFileSync(new URL('../release/package-size-ratchet.json', import.meta.url), 'utf8'))
+      .artifacts['dist/lottie/mic-circle.js'];
+    const module = renderLottieSymbolModule('mic-circle', consumers['mic-circle'].targets);
+    const bytes = strToU8(module);
+    expect(bytes.length).toBeLessThanOrEqual(policy.maxBytes);
+    expect(gzipSync(bytes, { level: 9, mtime: 0 }).length).toBeLessThanOrEqual(policy.maxGzipBytes);
+  });
+  it('не добавляет metadata в envelope прежних layered targets', () => {
+    for (const { symbol, targets } of Object.values(consumers)) for (const [variant, target] of Object.entries(targets)) {
+      if (symbol.glyph({ variant }).composition.kind !== 'layers') continue;
+      expect(target.ok).toBe(true);
+      expect(Object.hasOwn(target.geometry, 'composition')).toBe(false);
+      expect(target.geometry.version).toBe(1);
+      expect(Object.keys(target.geometry)).toEqual(['version', 'icon', 'variant', 'viewBox', 'author', 'parts']);
+    }
+  });
   it('сохраняет closing cubic tangent, несколько контуров и направление', () => {
     expect(lottieContours('M0 0 C0 2 2 2 2 0 C2 -2 0 -2 0 0Z M4 4L4 6L6 6Z')).toEqual([
       { v: [[0, 0], [2, 0]], i: [[0, -2], [0, 2]], o: [[0, 2], [0, -2]], c: true },
@@ -144,7 +163,7 @@ describe('точный build-time Lottie target', () => {
       expect(lottie.lottieCapabilities('filled')).toMatchObject({ static: false, gestures: [], reason: { code: 'GEOMETRY_MISMATCH' } });
     }
     for (const mutate of [geometry => geometry.parts.reverse(), geometry => { geometry.parts[2].anchor[0] += 0.1; },
-      geometry => { geometry.parts[2].fillRule = 'evenodd'; }, geometry => { geometry.version = 1; }]) {
+      geometry => { geometry.parts[2].fillRule = 'evenodd'; }, geometry => { geometry.version = 2; }]) {
       const changed = structuredClone(targets);
       mutate(changed.filled.geometry);
       expect(createLottieSymbol(symbol, changed).exportLottie({ variant: 'filled' }))

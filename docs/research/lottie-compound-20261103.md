@@ -53,3 +53,22 @@ binary32 cubic-проекцию при 16/24/48 px; отдельные `nativeRa
 Жесты проверяет существующий motion owner; изменённая геометрия и
 непредставимые SVG arcs сохраняют явный отказ. Контуры, anchors и пределы
 сравнения ради прохождения проверки не изменяются.
+
+## Цена target envelope
+
+В [следующем CI `7959274`](https://github.com/Labpics-Team/lab-icons/actions/runs/41649221240)
+обязательное `composition` в каждом target увеличило даже неизменённые layers:
+например, `hard-drive` получил +56 raw B и +15 gzip B, на 1 gzip B выше прежнего
+потолка. Guard сообщил 892 нарушений factual baselines и части ceilings.
+Принять новые baselines для всех символов означало бы закрепить ненужные данные.
+
+Layers сохраняют прежний v1 envelope без нового поля. Только declared compound
+получает явное `composition`; отсутствие поля по этой схеме означает layers
+и проверяется против исходного IR. Отверстия и anchors не угадываются.
+Добавлена проверка envelope по исходной composition, чтобы пустая выборка
+target output не могла скрыть такую регрессию.
+
+Новый compound layout также проходит штатную esbuild 0.28.1 минификацию
+syntax/whitespace при сборке; публичные function names и PURE annotations
+сохраняются. Обычные layered modules остаются прежними. Здоровый target
+должен помещаться в прежние raw/gzip ceilings; они не увеличиваются.

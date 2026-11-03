@@ -1,5 +1,6 @@
 import { parsePathData } from '../../src/core/path-data.js';
 import { compactDataLiteral, compactGeneratedModule, jsonDataLiteral } from './generated-module.js';
+import { transformSync } from 'esbuild';
 
 export class LottieGeometryError extends Error {
   constructor(code, message) { super(message); this.name = 'LottieGeometryError'; this.code = code; }
@@ -90,7 +91,9 @@ export function compileLottieGeometry(glyph) {
       return { id: part.id, anchor: [...part.anchor], fillRule: part.fillRule, contours: lottieContours(part.d) };
     });
     if (!parts.length || new Set(parts.map(part => part.id)).size !== parts.length) fail('PATH_INVALID', 'Части обязаны иметь уникальные ID.');
-    return { ok: true, geometry: { version: 2, icon: glyph.icon, variant: glyph.variant, composition: { ...composition },
+    // Отсутствие composition сохраняет прежний layers envelope побайтно.
+    return { ok: true, geometry: { version: 1, icon: glyph.icon, variant: glyph.variant,
+      ...(compound ? { composition: { ...composition } } : {}),
       viewBox: [...glyph.viewBox], author: { ...glyph.provenance.author }, parts } };
   } catch (error) {
     if (!(error instanceof LottieGeometryError)) throw error;
@@ -110,7 +113,11 @@ export function renderLottieSymbolModule(icon, variants) {
   ];
   const compact = [...lines];
   compact[3] = `const symbol = /* @__PURE__ */ createLottieSymbol({ glyph, glyphCapabilities }, ${compactDataLiteral(variants)});`;
-  return compactGeneratedModule([lines.join('\n'), compact.join('\n')]);
+  const module = compactGeneratedModule([lines.join('\n'), compact.join('\n')]);
+  if (!Object.values(variants).some(target => target.ok && target.geometry.composition?.kind === 'compound')) return module;
+  // Новый compound не платит за комментарии/пробелы; имена публичных функций сохранены.
+  const minified = transformSync(module, { target: 'es2022', minifySyntax: true, minifyWhitespace: true, legalComments: 'none' }).code;
+  return compactGeneratedModule([module, minified]);
 }
 
 export function lottieSymbolDeclaration() {
