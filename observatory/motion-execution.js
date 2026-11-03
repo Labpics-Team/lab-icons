@@ -41,7 +41,7 @@ export function executePreparedWidth(roots, prepared, request, { onProgress } = 
   unsubscribe = clock.subscribe(width => {
     if (disposed) return;
     try { write(poseAt(width)); }
-    catch (error) { failure = error; playback?.stop(); release(); }
+    catch (error) { failure = error; release(); }
   });
   try {
     write(initial);
@@ -57,7 +57,7 @@ export function executePreparedWidth(roots, prepared, request, { onProgress } = 
   }).finally(release);
   return [{ finished, get state() { return playback.state; }, get duration() { return playback.duration; },
     pause: () => playback.pause(), play: () => playback.play(), seek: time => playback.seek(time),
-    finish: () => playback.finish(), stop() { playback.stop(); release(); } }];
+    finish: () => playback.finish(), stop: release }];
 }
 
 function contourEffect(effect, byPart, prepared, onProgress) {
@@ -90,6 +90,7 @@ function contourEffect(effect, byPart, prepared, onProgress) {
   const release = () => {
     if (disposed) return;
     disposed = true;
+    // dispose останавливает clock; прежний writer должен потерять подписку до этой записи.
     unsubscribe(); clock.dispose();
   };
   try {
@@ -100,7 +101,7 @@ function contourEffect(effect, byPart, prepared, onProgress) {
   const finished = playback.finished.then(result => { release(); return result; }, error => { release(); throw error; });
   return { finished, get state() { return playback.state; }, get duration() { return playback.duration; },
     pause: () => playback.pause(), play: () => playback.play(), seek: time => playback.seek(time),
-    finish: () => playback.finish(), stop() { playback.stop(); release(); } };
+    finish: () => playback.finish(), stop: release };
 }
 
 function opacityStages(stages, byPart, easing) {

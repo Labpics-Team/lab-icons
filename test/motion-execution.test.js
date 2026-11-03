@@ -1,9 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { readFileSync } from 'node:fs';
 import { animate, sequence, value } from '@labpics/motion';
+import { prepareContourStateEffect } from '../src/ir/contour-runtime.js';
 
 vi.mock('@labpics/motion', () => ({ animate: vi.fn(), sequence: vi.fn(), value: vi.fn() }));
 vi.stubGlobal('__MOTION_IDENTITY__', { package: '@labpics/motion', version: '0.5.0' });
-const { executeSymbolEffect } = await import('../observatory/motion-execution.js');
+const { executeSymbolEffect, executePreparedWidth } = await import('../observatory/motion-execution.js');
 
 class SvgViewport {
   style = {};
@@ -141,6 +143,55 @@ describe('публичное исполнение подготовленного
     } finally { control?.stop(); clock.mockRestore(); }
   });
 
+  it.each(['outline', 'filled'].flatMap(variant => [0, 1].flatMap(to => [0, 900].map(duration =>
+    [variant, to, duration]))))('%s: stop прежнего Motion не пишет поверх successor к %s, duration=%s', async (variant, to, duration) => {
+    const { value: publicValue } = await vi.importActual('@labpics/motion');
+    value.mockImplementation(publicValue);
+    const manifest = JSON.parse(readFileSync(new URL('../semantics/figma-baseline.json', import.meta.url), 'utf8'));
+    const masters = ['horizontal', 'vertical'].map(state => {
+      const svg = readFileSync(new URL(`../${manifest.icons[`ellipsis-${state}`][variant].master}`, import.meta.url), 'utf8');
+      return [...svg.matchAll(/\bd="([^"]+)"/g)].map(match => match[1]);
+    });
+    const svg = viewport(), effect = transition();
+    Object.assign(effect, { group: `ellipsis-orientation-${variant}`, variant,
+      targetState: to ? 'vertical' : 'horizontal', to });
+    effect.targets = effect.targets.map((target, index) => ({ ...target,
+      commands: ['M', 'C', 'C', 'C', 'C', 'Z'], endpoints: masters.map(paths => paths[index * 2]),
+      vectors: masters.map(paths => [...paths[index * 2].matchAll(/[+-]?(?:\d*\.\d+|\d+\.?)(?:[eE][+-]?\d+)?/g)].map(match => Number(match[0]))),
+    }));
+    svg.parts[1].d = masters[0][1];
+    const sampler = prepareContourStateEffect(effect);
+    expect(sampler.ok).toBe(true);
+    let now = 100, progress, previous, successor;
+    const clock = vi.spyOn(performance, 'now').mockImplementation(() => now);
+    const oldFrames = [], newFrames = [];
+    try {
+      [previous] = executeSymbolEffect(svg, effect, { preparedContour: sampler,
+        onProgress: next => { progress = next; oldFrames.push(next); } });
+      now += 100; previous.pause(); previous.play(); now += 50;
+      const next = { ...effect, from: progress, options: { ...effect.options, duration } };
+      [successor] = executeSymbolEffect(svg, next, { preparedContour: sampler,
+        onProgress: next => newFrames.push(next) });
+      const admitted = svg.parts.map(part => part.d), oldCount = oldFrames.length;
+      previous.stop();
+      expect(await previous.finished).toEqual({ status: 'stopped' });
+      expect(oldFrames).toHaveLength(oldCount);
+      expect(svg.parts.map(part => part.d)).toEqual(admitted);
+      if (duration) successor.finish();
+      expect(await successor.finished).toEqual({ status: 'finished' });
+      expect(svg.parts.map(part => part.d)).toEqual(masters[to]);
+      expect(newFrames.at(-1)).toBe(to);
+      expect(svg.parts[1].setAttribute).not.toHaveBeenCalled();
+      const writes = svg.parts.map(part => part.setAttribute.mock.calls.length);
+      previous.stop(); successor.stop(); now += 100;
+      expect(svg.parts.map(part => part.setAttribute.mock.calls.length)).toEqual(writes);
+    } finally {
+      previous?.stop(); successor?.stop();
+      await Promise.allSettled([previous?.finished, successor?.finished]);
+      clock.mockRestore();
+    }
+  });
+
   it.each([0, 900])('завершает и освобождает clock при duration=%s', async duration => {
     const svg = viewport(), effect = transition(); effect.options.duration = duration;
     const [control] = executeSymbolEffect(svg, effect, { preparedContour: prepared() });
@@ -188,6 +239,65 @@ describe('публичное исполнение подготовленного
     expect(() => executeSymbolEffect(svg, transition(), { preparedContour: sampler })).toThrow();
     expect(value).not.toHaveBeenCalled();
     expect(svg.parts.every(part => !part.setAttribute.mock.calls.length)).toBe(true);
+  });
+});
+
+describe('публичный Motion сохраняет владение подготовленной шириной', () => {
+  it.each([0, 900])('stop прежнего clock сохраняет successor и correspondence, duration=%s', async duration => {
+    const { value: publicValue } = await vi.importActual('@labpics/motion');
+    value.mockImplementation(publicValue);
+    const svg = new SvgViewport();
+    const body = { tagName: 'path', d: 'width-1', getAttribute(key) { return this[key]; },
+      setAttribute: vi.fn(function (key, next) { this[key] = next; }) };
+    svg.querySelectorAll = () => [body];
+    const prepared = { version: 1, law: 'capsule.width', renderTarget: { attribute: 'd', selector: '[data-part="body"]' },
+      sample: width => ({ ok: true, bodyWidth: width, d: `width-${width}` }) };
+    let now = 100, width = 1, previous, successor;
+    const clock = vi.spyOn(performance, 'now').mockImplementation(() => now);
+    const oldFrames = [];
+    try {
+      [previous] = executePreparedWidth(svg, prepared, { from: 1, to: .8, duration: 900, reducedMotion: false },
+        { onProgress: next => { width = next; oldFrames.push(next); } });
+      now += 100; previous.pause(); previous.play(); now += 50;
+      [successor] = executePreparedWidth(svg, prepared, { from: width, to: 1, duration, reducedMotion: duration === 0 });
+      const admitted = body.d, oldCount = oldFrames.length;
+      previous.stop();
+      expect(await previous.finished).toEqual({ status: 'stopped' });
+      expect(oldFrames).toHaveLength(oldCount);
+      expect(body.d).toBe(admitted);
+      if (duration) successor.finish();
+      expect(await successor.finished).toEqual({ status: 'finished' });
+      expect(body.d).toBe('width-1');
+      const writes = body.setAttribute.mock.calls.length;
+      previous.stop(); successor.stop();
+      expect(body.setAttribute).toHaveBeenCalledTimes(writes);
+    } finally {
+      previous?.stop(); successor?.stop();
+      await Promise.allSettled([previous?.finished, successor?.finished]);
+      clock.mockRestore();
+    }
+  });
+
+  it('отказ observer сохраняет последний записанный кадр без дополнительной записи stop', async () => {
+    const { value: publicValue } = await vi.importActual('@labpics/motion');
+    value.mockImplementation(publicValue);
+    const svg = new SvgViewport(), frames = [], failure = new Error('Наблюдатель отказал');
+    const body = { tagName: 'path', d: 'width-1', getAttribute(key) { return this[key]; },
+      setAttribute: vi.fn(function (key, next) { this[key] = next; }) };
+    svg.querySelectorAll = () => [body];
+    const prepared = { version: 1, law: 'capsule.width', renderTarget: { attribute: 'd', selector: '[data-part="body"]' },
+      sample: width => ({ ok: true, bodyWidth: width, d: `width-${width}` }) };
+    let now = 100, control;
+    const clock = vi.spyOn(performance, 'now').mockImplementation(() => now);
+    try {
+      [control] = executePreparedWidth(svg, prepared, { from: 1, to: .8, duration: 900, reducedMotion: false },
+        { onProgress: width => { frames.push(width); if (width !== 1) { now += 50; throw failure; } } });
+      now += 100; control.pause();
+      await expect(control.finished).rejects.toThrow(failure);
+      expect(frames).toEqual([1, 1 + (.8 - 1) * 100 / 900]);
+      expect(body.d).toBe(`width-${frames.at(-1)}`);
+      expect(body.setAttribute).toHaveBeenCalledTimes(1);
+    } finally { control?.stop(); clock.mockRestore(); }
   });
 });
 describe('публичное исполнение semantic translation', () => {
