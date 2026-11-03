@@ -23,52 +23,6 @@ const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
 const git = args => execFileSync('git', args, { cwd: root, encoding: 'utf8', windowsHide: true });
 let temporary, payload, payloads, candidate, previous;
 
-function nativeInitializationWitness(icon, first, transform = code => code) {
-  const input = structuredClone(payloads[icon]), probes = new Map();
-  for (const variant of ['outline', 'filled']) {
-    for (const [kind, record] of [['source', input.source[variant]], ['capability', input.capabilities[variant]],
-      ['metadata', input.source[variant].provenance.author]]) {
-      const marker = `NATIVE_INITIALIZATION_${kind}_${variant}`;
-      record.nativeInitialization = marker;
-      probes.set(marker, `${kind}:${variant}`);
-    }
-    input.capabilities[variant].author.nativeInitialization = input.source[variant].provenance.author.nativeInitialization;
-  }
-  const projections = renderSymbolModules(input), packageRoot = join(temporary, `native-${icon}-${first}-${Math.random()}`);
-  write(join(packageRoot, 'package.json'), '{"type":"module"}');
-  for (const [kind, directory] of [['symbol', 'symbols'], ['data', 'ir/symbol-data'], ['variation', 'variations']]) {
-    if (!projections[kind]) continue;
-    let code = projections[kind];
-    for (const [marker, event] of probes) code = code.replaceAll(JSON.stringify(marker),
-      `(globalThis.observeInitialization(${JSON.stringify(event)}),${JSON.stringify(marker)})`);
-    write(join(packageRoot, `dist/${directory}/${icon}.js`), transform(code, kind));
-  }
-  for (const runtime of ['symbol-runtime', 'annulus-runtime']) {
-    write(join(packageRoot, `dist/ir/${runtime}.js`),
-      `export * from ${JSON.stringify(pathToFileURL(join(candidate.packageRoot, `dist/ir/${runtime}.js`)).href)};`);
-  }
-  const result = execFileSync(process.execPath, ['--input-type=module', '-e', `
-    const events = [], snapshots = [];
-    globalThis.observeInitialization = event => events.push(event);
-    const base = await import('./dist/symbols/${icon}.js');
-    snapshots.push([...events]);
-    const variable = ${projections.variation ? `await import('./dist/variations/${icon}.js')` : 'base'};
-    snapshots.push([...events]);
-    const first = base.${first}(); snapshots.push([...events]);
-    const repeated = base.${first}(); snapshots.push([...events]);
-    const second = base.${first === 'glyph' ? 'glyphCapabilities' : 'glyph'}(); snapshots.push([...events]);
-    const glyph = base.glyph(), caps = base.glyphCapabilities();
-    const variableGlyph = variable.glyph(), variableCaps = variable.glyphCapabilities();
-    snapshots.push([...events]);
-    process.stdout.write(JSON.stringify({snapshots, repeated:first === repeated,
-      sharedSource:glyph === variableGlyph,
-      sharedMetadata:glyph.provenance.author === caps.author && caps.author === variableCaps.author,
-      frozen:Object.isFrozen(glyph) && Object.isFrozen(caps) && Object.isFrozen(caps.author),
-      staticExact:base.outline === ${JSON.stringify(input.staticSvg.outline)}}));
-  `], { cwd: packageRoot, encoding: 'utf8', windowsHide: true });
-  return JSON.parse(result);
-}
-
 function nativeClosure(packageRoot, entry) {
   const files = new Map();
   function visit(file) {
@@ -146,8 +100,6 @@ beforeAll(async () => {
     await bundle(root, staging, 'src/ir/request.ts', 'ir/request.js');
     await bundle(root, staging, 'src/ir/author-request-runtime.ts', 'ir/author-request-runtime.js', ['./request.js']);
     await bundle(root, staging, 'src/ir/symbol-runtime.ts', 'ir/symbol-runtime.js', ['./request.js', './author-request-runtime.js']);
-    await bundle(root, staging, 'src/ir/author-annulus-runtime.ts', 'ir/annulus-runtime.js',
-      ['./request.js', './symbol-runtime.js', './author-request-runtime.js']);
   });
   if (baseline) {
     expect(baseline).toMatch(/^[a-f0-9]{40}$/);
@@ -191,26 +143,6 @@ afterAll(() => {
 });
 
 describe('настоящий компактный build в отдельном symbol consumer', () => {
-  it.each(['time', 'plus-circle'])('native %s import откладывает все semantic records до первого вызова', icon => {
-    for (const first of ['glyphCapabilities', 'glyph']) {
-      const witness = nativeInitializationWitness(icon, first);
-      expect(witness.snapshots[0]).toEqual([]);
-      expect(witness.snapshots[1]).toEqual([]);
-      const kind = first === 'glyph' ? 'source' : 'capability';
-      expect([...witness.snapshots[2]].sort()).toEqual(['metadata:outline', 'metadata:filled', `${kind}:outline`, `${kind}:filled`].sort());
-      expect(witness.snapshots[3]).toEqual(witness.snapshots[2]);
-      expect([...witness.snapshots[4]].sort()).toEqual(['metadata:outline', 'metadata:filled', 'source:outline', 'source:filled',
-        'capability:outline', 'capability:filled'].sort());
-      expect(witness.snapshots[5]).toEqual(witness.snapshots[4]);
-      expect(witness).toMatchObject({ repeated: true, sharedSource: true, sharedMetadata: true, frozen: true, staticExact: true });
-    }
-  });
-
-  it('native witness обнаруживает eager glyph initialization с работоспособным consumer', () => {
-    const witness = nativeInitializationWitness('time', 'glyphCapabilities', code => code + '\nglyph();\n');
-    expect([...witness.snapshots[0]].sort()).toEqual(['metadata:outline', 'metadata:filled', 'source:outline', 'source:filled'].sort());
-    expect(witness).toMatchObject({ repeated: true, sharedSource: true, sharedMetadata: true, frozen: true, staticExact: true });
-  });
   it.each(ratchetNames)('%s удерживает исходный consumer-size-ratchet на точном entry', name => {
     const actual = candidate.scenarios[name], limit = ratchet.scenarios[name];
     expect(actual.bytes).toBeLessThanOrEqual(limit.maxBytes);

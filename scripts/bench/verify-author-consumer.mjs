@@ -5,7 +5,6 @@ import { pathToFileURL } from 'node:url';
 import { loadAuthorBaseline } from '../lib/author-baseline.js';
 import { compileAuthorAnatomy } from '../lib/author-anatomy.js';
 import { assertRemoteBenchmark } from './measurement.js';
-import { observeNativeStaticLifecycle } from './native-static-lifecycle.js';
 import { expectedAuthorEffect, expectedAuthorMotionRefusal, expectedAuthorObservation, observeAuthorGlyph, sha256, stableJSON, validateAuthorAdmission, validateAuthorObservation } from './author-oracle.js';
 
 assertRemoteBenchmark();
@@ -14,13 +13,10 @@ const baseline = loadAuthorBaseline(request.sourceRoot);
 const contracts = compileAuthorAnatomy(baseline, JSON.parse(readFileSync(join(request.sourceRoot, 'semantics/author-anatomy.json'), 'utf8')));
 const manifestBytes = readFileSync(join(request.sourceRoot, 'semantics/figma-baseline.json'));
 const { compileSymbolEffect } = await import(pathToFileURL(join(request.packageRoot, 'dist/motion/index.js')).href);
-const report = { version: 1, source: baseline.source, manifestSha256: sha256(manifestBytes), expectedCounts: baseline.counts, completed: 0, icons: {}, nativeStaticLifecycle: {} };
+const report = { version: 1, source: baseline.source, manifestSha256: sha256(manifestBytes), expectedCounts: baseline.counts, completed: 0, icons: {} };
 try {
   for (const [icon, variants] of Object.entries(baseline.icons)) {
-    const moduleUrl = pathToFileURL(join(request.packageRoot, `dist/symbols/${icon}.js`)).href;
-    report.nativeStaticLifecycle[icon] = await observeNativeStaticLifecycle(() => import(moduleUrl),
-      Object.fromEntries(['outline', 'filled'].map(variant => [variant, variants[variant].normalizedSvg])));
-    const module = await import(moduleUrl);
+    const module = await import(pathToFileURL(join(request.packageRoot, `dist/symbols/${icon}.js`)).href);
     report.icons[icon] = {};
     for (const variant of ['outline', 'filled']) {
       const record = variants[variant];

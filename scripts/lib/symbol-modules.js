@@ -186,19 +186,12 @@ function sourceRecords({ source, capabilities, staticSvg }, compact, sharePaths 
       if (!record(left) || !record(right)) continue;
       const encoded = json(left);
       if (encoded !== json(right)) continue;
-      const name = `a[${shared.length}]`;
-      shared.push(serialize(left));
+      const name = `${variant}${field === 'author' ? 'Author' : 'Anatomy'}`;
+      shared.push(`const ${name} = ${serialize(left)};`);
       references[variant].set(field, name);
     }
   }
-  const sources = {}, capabilityRecords = {}, capabilityReferences = new Map(), capabilityBuilders = [];
-  const commonMotion = record(capabilities.outline?.motion) && record(capabilities.filled?.motion) &&
-    json(capabilities.outline.motion) === json(capabilities.filled.motion);
-  if (commonMotion) {
-    const expression = packet ? cyclePacketExpression(translationCyclePacket(capabilities.outline.motion), false) : serialize(capabilities.outline.motion);
-    // Каждый вызов создаёт свой record: совпавшие данные не объединяют авторские объекты.
-    capabilityBuilders.push(`function motion(){return ${expression};}`);
-  }
+  const sources = {}, capabilityRecords = {}, capabilityReferences = new Map();
   for (const variant of ['outline', 'filled']) {
     const metadata = references[variant], sourceReferences = new Map();
     if (metadata.size) sourceReferences.set('provenance', renderJSONRecord(source[variant].provenance, metadata, compact));
@@ -215,44 +208,17 @@ function sourceRecords({ source, capabilities, staticSvg }, compact, sharePaths 
       sourceReferences.set('svg', pathStringExpression(shape.svg, geometry));
     }
     const rendered = renderJSONRecord(shape, sourceReferences, compact);
-    // First-use factory сама удерживает только используемую конструкцию.
-    sources[variant] = packet ? sourcePacketExpression(shape, geometry, metadata, pathStringExpression, false) : rendered;
+    // PURE закрывает string expressions целиком: caps/static не удерживают
+    // geometry из-за потенциального coercion в неиспользуемом source record.
+    sources[variant] = packet ? sourcePacketExpression(shape, geometry, metadata, pathStringExpression)
+      : geometry.length ? `/* @__PURE__ */ (() => (${rendered}))()` : rendered;
     const capabilityMetadata = new Map(metadata);
-    if (commonMotion) capabilityMetadata.set('motion', 'motion()');
-    else if (packet) capabilityMetadata.set('motion', cyclePacketExpression(translationCyclePacket(capabilities[variant].motion), false));
+    if (packet) capabilityMetadata.set('motion', cyclePacketExpression(translationCyclePacket(capabilities[variant].motion)));
     capabilityRecords[variant] = renderJSONRecord(capabilities[variant], capabilityMetadata, compact);
     if (capabilityMetadata.size) capabilityReferences.set(variant, capabilityRecords[variant]);
   }
-  return { shared, paths, sources, capabilityBuilders, capabilityRecords, capabilities: renderJSONRecord(capabilities, capabilityReferences, compact),
+  return { shared, paths, sources, capabilityRecords, capabilities: renderJSONRecord(capabilities, capabilityReferences, compact),
     static: ['outline', 'filled'].map(variant => `export const ${variant} = ${json(staticSvg[variant])};`) };
-}
-
-/** Один tuple сохраняет identity receipts при любом порядке source/caps вызовов. */
-function metadataProvider(records) {
-  return records.shared.length ? ['let m;', `function metadata(){return m??=[${records.shared.join(',')}];}`] : [];
-}
-
-const metadataBinding = records => records.shared.length ? ['const a=metadata();'] : [];
-
-/** Обычный модуль кеширует фабрику; её записи не нужны до первого вызова. */
-function symbolFactories(icon, records) {
-  return [
-    'let g,c;',
-    'export function glyph(request){',
-    'if(!g){', ...metadataBinding(records), ...records.paths,
-    `g=createCompiledGlyph(${jsonDataLiteral(icon)},{outline:${records.sources.outline},filled:${records.sources.filled}});`,
-    '}return g(request);}',
-    'export function glyphCapabilities(variant){',
-    'if(!c){', ...metadataBinding(records),
-    `c=createCompiledCapabilities(${records.capabilities});`,
-    '}return c(variant);}',
-  ];
-}
-
-function forwardingFactories(glyphExpression, capabilitiesExpression) {
-  return ['let g,c;',
-    `export function glyph(request){return (g??=${glyphExpression})(request);}`,
-    `export function glyphCapabilities(variant){return (c??=${capabilitiesExpression})(variant);}`];
 }
 
 /** Компактный символ собирается тем же compiler, которым проверяется общий IR. */
@@ -262,12 +228,16 @@ export function renderSymbolModule(input) {
   const emit = (compact, sharePaths = false, packet = false) => {
     const records = sourceRecords(input, compact, sharePaths, packet);
     return [
-    compact ? '/** GENERATED */' : '/** GENERATED: проверенные текущие авторские masters одного символа. */',
+    packet ? '/** GENERATED */' : '/** GENERATED: проверенные текущие авторские masters одного символа. */',
     "import { createCompiledGlyph, createCompiledCapabilities } from '../ir/symbol-runtime.js';",
     ...(packet ? ["import { materializeSourceV1, materializeTranslationCycleV1 } from '../ir/source-packet-runtime.js';"] : []),
-    ...records.static, ...metadataProvider(records), ...records.capabilityBuilders, ...symbolFactories(input.icon, records),
+    ...records.paths, ...records.static, ...records.shared,
+    `const outlineSource = ${records.sources.outline};`,
+    `const filledSource = ${records.sources.filled};`,
+    `export const glyph = /* @__PURE__ */ createCompiledGlyph(${jsonDataLiteral(input.icon)}, { outline: outlineSource, filled: filledSource });`,
+    `export const glyphCapabilities = /* @__PURE__ */ createCompiledCapabilities(${records.capabilities});`,
     '',
-    ].join(compact ? '' : '\n');
+    ].join('\n');
   };
   const packet = ['outline', 'filled'].every(variant => sourcePacketEligible(input.source[variant], input.icon, variant) &&
     translationCyclePacket(input.capabilities[variant]?.motion));
@@ -309,25 +279,27 @@ export function renderSymbolModules(input) {
   const caps = input.capabilities;
   const emitData = (compact, sharePaths = false) => {
     const records = sourceRecords({ source, staticSvg, capabilities }, compact, sharePaths);
-    return [...records.static, ...metadataProvider(records), ...records.capabilityBuilders, 'let sources,capabilities;',
-      'export function getSources(){if(!sources){', ...metadataBinding(records), ...records.paths,
-      `sources={outline:${records.sources.outline},filled:${records.sources.filled}};`, '}return sources;}',
-      'export function getCapabilities(){if(!capabilities){', ...metadataBinding(records),
-      `capabilities=${records.capabilities};`, '}return capabilities;}',
-    ].join('\n');
+    const lines = [...records.paths, ...records.static, ...records.shared];
+    for (const variant of ['outline', 'filled']) {
+      lines.push(`export const ${variant}Source = ${records.sources[variant]};`);
+      lines.push(`export const ${variant}Capabilities = ${records.capabilityRecords[variant]};`);
+    }
+    return lines.join('\n');
   };
   const dataPath = `../ir/symbol-data/${icon}.js`;
-  const imports = `import { outline, filled, getSources, getCapabilities } from '${dataPath}';`;
+  const imports = `import { outline, filled, outlineSource, filledSource, outlineCapabilities, filledCapabilities } from '${dataPath}';`;
   const exports = 'export { outline, filled };';
   const base = [imports, "import { createCompiledGlyph, createCompiledCapabilities } from '../ir/symbol-runtime.js';", exports,
-    ...forwardingFactories(`createCompiledGlyph(${jsonDataLiteral(icon)},getSources())`,
-      'createCompiledCapabilities(getCapabilities())'), ''].join('\n');
+    `export const glyph = /* @__PURE__ */ createCompiledGlyph(${jsonDataLiteral(icon)}, { outline: outlineSource, filled: filledSource });`,
+    'export const glyphCapabilities = /* @__PURE__ */ createCompiledCapabilities({ outline: outlineCapabilities, filled: filledCapabilities });', ''].join('\n');
   const variable = compact => [imports,
     `import { ${target.factory} } from '../ir/${target.runtime}';`,
     "import { createCompiledCapabilities } from '../ir/symbol-runtime.js';", exports,
-    ...forwardingFactories(`${target.factory}(${jsonDataLiteral(icon)},getSources(),${(compact ? compactDataLiteral : jsonDataLiteral)(law === 'annulus.counter-scale' ? variation.outline : variation)})`,
-      `createCompiledCapabilities({${['outline', 'filled'].map(variant =>
-        `${variant}:${caps[variant].variation ? `{...getCapabilities().${variant},variation:${(compact ? compactDataLiteral : jsonDataLiteral)(caps[variant].variation)}}` : `getCapabilities().${variant}`}`).join(',')}})`), ''].join('\n');
+    `export const glyph = /* @__PURE__ */ ${target.factory}(${jsonDataLiteral(icon)}, { outline: outlineSource, filled: filledSource }, ${(compact ? compactDataLiteral : jsonDataLiteral)(law === 'annulus.counter-scale' ? variation.outline : variation)});`,
+    // PURE закрывает весь materializer: неиспользуемый capability export не
+    // оставляет чтения/spread данных в аргументе удалённой внешней фабрики.
+    `export const glyphCapabilities = /* @__PURE__ */ createCompiledCapabilities(/* @__PURE__ */ (() => ({${['outline', 'filled'].map(variant =>
+      `${variant}: ${caps[variant].variation ? `{ ...${variant}Capabilities, variation: ${(compact ? compactDataLiteral : jsonDataLiteral)(caps[variant].variation)} }` : `${variant}Capabilities`}`).join(',')}}))());`, ''].join('\n');
   const modules = { symbol: base, data: compactGeneratedModule([emitData(false), emitData(true), emitData(false, true), emitData(true, true)]),
     variation: compactGeneratedModule([variable(false), variable(true)]) };
   if (input.contentVariation) {
@@ -349,12 +321,12 @@ function renderContentVariationModule(input) {
   const emit = compact => {
     const literal = compact ? compactDataLiteral : jsonDataLiteral;
     return [
-      `import { outline, filled, getSources, getCapabilities } from '../ir/symbol-data/${icon}.js';`,
+      `import { outline, filled, outlineSource, filledSource, outlineCapabilities, filledCapabilities } from '../ir/symbol-data/${icon}.js';`,
       "import { createCompiledContentGlyph } from '../ir/content-runtime.js';",
       "import { createCompiledCapabilities } from '../ir/symbol-runtime.js';",
       'export { outline, filled };',
-      ...forwardingFactories(`createCompiledContentGlyph(${jsonDataLiteral(icon)},getSources(),${literal(compiled)})`,
-        `createCompiledCapabilities({outline:{...getCapabilities().outline,variation:${literal(capability)}},filled:getCapabilities().filled})`),
+      `export const glyph = /* @__PURE__ */ createCompiledContentGlyph(${jsonDataLiteral(icon)}, { outline: outlineSource, filled: filledSource }, ${literal(compiled)});`,
+      `export const glyphCapabilities = /* @__PURE__ */ createCompiledCapabilities(/* @__PURE__ */ (() => ({ outline: { ...outlineCapabilities, variation: ${literal(capability)} }, filled: filledCapabilities }))());`,
       '',
     ].join('\n');
   };

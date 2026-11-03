@@ -112,14 +112,14 @@ Production bytes и module graphs отдельно собирает
 `scripts/measure-platform-artifacts.mjs --output …` из уже собранного candidate.
 CI не запускает `--update` и не принимает собственный результат за новый budget.
 
-`verify-author-consumer.mjs` отдельно наблюдает native import каждого установленного
-символа. В `author-consumer.json/nativeStaticLifecycle` записаны вызовы `Object.freeze`
-при импорте, первом запросе capabilities, первом glyph и повторных default-вызовах.
-Импорт статической строки и повторный default не замораживают данные; первые
-запросы возвращают frozen snapshots с устойчивой identity. Explicit request
-учитывается отдельно: parser замораживает разобранный запрос. Observer восстанавливается
-даже при отказе loader и работает в отдельном процессе от latency/heap probes.
-Эти счётчики проверяют freeze, число аллокаций и ускорение по ним не выводятся.
+Эксперимент с отложенной материализацией `dc72e5b` сохранён отдельно от поставляемой
+проекции: он уменьшал работу при native import, но нарушил прежние byte ceilings
+установленного consumer. Поставляемая проекция вновь создаёт готовые записи
+при загрузке модуля; статический bundler удаляет ненужную геометрию и runtime.
+`native-static-lifecycle.js` сохраняет диагностический observer вызовов `Object.freeze`.
+Он восстанавливается даже при отказе loader; исторические счётчики не доказывают
+число аллокаций, ускорение или zero-work import текущей проекции. Полная
+сравнительная квалификация производительности остаётся открытой.
 
 Источник исполнения — [ARC owner](https://github.com/Labpics-Team/Labpics-infra/blob/main/services/github-runners/arc/README.md).
 Проверенный 2026-11-01 infra commit `8a7194f1dcc1bb6d630abb2946e8c72d0b9d501f`:

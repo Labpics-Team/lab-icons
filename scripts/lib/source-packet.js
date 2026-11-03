@@ -52,7 +52,7 @@ export function translationCyclePacket(motion) {
 }
 
 /** Полная source materialization заключена в PURE, включая exact string operands. */
-export function sourcePacketExpression(shape, geometry, metadata, stringExpression, wrap = true) {
+export function sourcePacketExpression(shape, geometry, metadata, stringExpression) {
   const parts = shape.parts.map((part, index) => `[${[
     compactDataLiteral(part.id), compactDataLiteral(part.role), compactDataLiteral(part.zIndex), geometry[index][1],
     compactDataLiteral(part.fillRule), compactDataLiteral(part.anchor), compactDataLiteral(part.anchorSource),
@@ -61,9 +61,7 @@ export function sourcePacketExpression(shape, geometry, metadata, stringExpressi
   const arguments_ = [compactDataLiteral(shape.icon), compactDataLiteral(shape.variant), compactDataLiteral(shape.provenance.file),
     `[${parts.join(',')}]`, stringExpression(shape.d, geometry), stringExpression(shape.svg, geometry),
     metadata.get('author') ?? compactDataLiteral(shape.provenance.author), metadata.get('anatomy') ?? compactDataLiteral(shape.provenance.anatomy)];
-  const expression = `materializeSourceV1(${arguments_.join(',')})`;
-  return wrap ? `/* @__PURE__ */ (() => ${expression})()` : expression;
+  return `/* @__PURE__ */ (() => materializeSourceV1(${arguments_.join(',')}))()`;
 }
 
-export const cyclePacketExpression = (packet, annotate = true) =>
-  `${annotate ? '/* @__PURE__ */ ' : ''}materializeTranslationCycleV1(${packet.map(compactDataLiteral).join(',')})`;
+export const cyclePacketExpression = packet => `/* @__PURE__ */ materializeTranslationCycleV1(${packet.map(compactDataLiteral).join(',')})`;

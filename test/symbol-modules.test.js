@@ -121,8 +121,7 @@ describe('замкнутые symbol modules', () => {
     expect(runtimeModuleSpecifiers(result).specifiers).toEqual(['../ir/symbol-runtime.js']);
     expect(result).not.toContain('createGlyphCompiler');
     expect(result).not.toContain('catalog.json');
-    expect(result).toContain('export function glyph(request)');
-    expect(result).toContain('createCompiledGlyph("alert",{outline:');
+    expect(result).toContain('createCompiledGlyph("alert", { outline: outlineSource, filled: filledSource })');
   });
 
   it('declaration связывает реальное добавленное имя с author corpus', () => {
@@ -329,7 +328,7 @@ describe('замкнутые symbol modules', () => {
     expect(Object.isFrozen(filled.motion.adapters)).toBe(true);
   });
 
-  it('outline-only consumer удаляет runtime и весь IR payload; eager initialization это нарушает', async () => {
+  it('outline-only consumer удаляет настоящий runtime и весь IR payload; прежний member-read это нарушает', async () => {
     const shape = { icon: 'alert', svg: 'AUTHOR_IR_SENTINEL', parts: [] };
     const module = renderSymbolModule({ icon: 'alert', source: { outline: shape, filled: shape }, capabilities: { trace: 'AUTHOR_CAPS_SENTINEL' }, staticSvg: { outline: '<svg>SVG_STATIC_CONTROL</svg>', filled: '<svg>FILLED_UNUSED</svg>' } });
     const consume = contents => consumeSymbol(contents, 'import { outline } from "test-symbol"; console.log(outline);');
@@ -339,7 +338,11 @@ describe('замкнутые symbol modules', () => {
     expect(actual).not.toContain('AUTHOR_CAPS_SENTINEL');
     expect(actual).not.toContain('FILLED_UNUSED');
     expect(actual).not.toContain('AUTHOR_PARITY_REQUIRED');
-    const stale = module + '\nglyph();\nglyphCapabilities();\n';
+    const stale = module
+      .replace('export const glyph = /* @__PURE__ */', 'const symbolGlyph = /* @__PURE__ */')
+      .replace('export const glyphCapabilities = /* @__PURE__ */', 'const symbolCapabilities = /* @__PURE__ */') +
+      '\nconst symbol = { glyph: symbolGlyph, glyphCapabilities: symbolCapabilities };\n' +
+      'export const glyph = symbol.glyph;\nexport const glyphCapabilities = symbol.glyphCapabilities;\n';
     expect(await consume(stale)).toContain('AUTHOR_IR_SENTINEL');
   });
 

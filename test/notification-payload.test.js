@@ -67,12 +67,12 @@ describe('exact notification path representation', () => {
     expect(JSON.stringify(input)).toBe(original);
   });
 
-  it.each(Object.keys(payloads))('%s lazy source construction исключает геометрию; eager initialization её удерживает', async icon => {
+  it.each(Object.keys(payloads))('%s PURE охватывает весь source materializer; sabotage удерживает геометрию', async icon => {
     const input = payloads[icon], module = renderSymbolModules(input).symbol;
     const geometry = input.source.outline.parts[0].d.slice(0, 120);
     const { text: caps } = await consume(module, 'glyphCapabilities()');
     expect(caps).not.toContain(geometry);
-    const sabotage = module + '\nglyph();\n';
+    const sabotage = module.replaceAll('/* @__PURE__ */ (() =>', '(() =>');
     expect(sabotage).not.toBe(module);
     const { text: retained } = await consume(sabotage, 'glyphCapabilities()');
     expect(retained).toContain(geometry);

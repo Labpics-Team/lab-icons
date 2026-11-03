@@ -148,13 +148,12 @@ describe('build-only проекция без повторов авторских
     expect(compactGeneratedModule([compressible, noisy])).toBe(compressible);
   });
 
-  it('whitespace-minification сохраняет lazy static границу; eager initialization её нарушает', async () => {
+  it('whitespace-minification не переносится на library PURE declarations', async () => {
     const module = renderSymbolModule(payloads.time);
     const entry = 'import { outline } from "test-symbol"; console.log(outline);';
     const healthy = await consume(module, entry);
     const stripped = transformSync(module, { minifyWhitespace: true, format: 'esm' }).code;
-    expect(await consume(stripped, entry)).not.toContain('AUTHOR_PARITY_REQUIRED');
-    expect(await consume(stripped + '\nglyph();\n', entry)).toContain('AUTHOR_PARITY_REQUIRED');
+    expect(await consume(stripped, entry)).toContain('AUTHOR_PARITY_REQUIRED');
     expect(healthy).not.toContain('AUTHOR_PARITY_REQUIRED');
   });
 
