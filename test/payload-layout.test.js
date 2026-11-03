@@ -43,6 +43,7 @@ async function consume(contents, entry) {
       plugin.onResolve({ filter: /^test-symbol$/ }, () => ({ path: 'symbol', namespace: 'symbol', sideEffects: false }));
       plugin.onLoad({ filter: /.*/, namespace: 'symbol' }, () => ({ contents, loader: 'js' }));
       plugin.onResolve({ filter: /symbol-runtime\.js$/ }, () => ({ path: fileURLToPath(new URL('../src/ir/symbol-runtime.ts', import.meta.url)) }));
+      plugin.onResolve({ filter: /source-packet-runtime\.js$/ }, () => ({ path: fileURLToPath(new URL('../src/ir/source-packet-runtime.ts', import.meta.url)) }));
     } }],
   });
   return output.outputFiles[0].text;
@@ -101,7 +102,7 @@ describe('build-only проекция без повторов авторских
     // Изменение представления сохраняет exact данные, проверенные выше;
     // consumer SHA вправе измениться при устранении повторов source strings.
     // Source-only namespace меняет private minifier names после удаления path
-    // literals. Caps gzip проверяется на настоящих трёх shipping runtime модулях
+    // literals. Caps gzip проверяется на настоящем shipping runtime closure
     // в notification-payload.test.js, без этого несоответствия consumer graph.
     expect(measure(actualCaps).bytes).toBeLessThanOrEqual(measure(oldCaps).bytes);
     for (const [current, previous] of [[actualConsumer, oldConsumer], [actualStatic, oldStatic]]) {

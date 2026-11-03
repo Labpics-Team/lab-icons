@@ -18,6 +18,7 @@ import { renderSymbolModules, symbolExportName } from '../scripts/lib/symbol-mod
 import { symbolReleaseProjection, authorContentVariationIconNames } from '../scripts/lib/symbol-modules.js';
 import { authoredSymbolPayloads } from '../scripts/lib/authored-symbol-payload.js';
 import { authorVariationIconNames, authorVariationLawNames } from '../scripts/lib/author-variation.js';
+import { authorMotionTargets } from '../scripts/lib/author-motion-targets.js';
 import { expandReleaseExports, validateReleaseContract, validateReleaseRuntimeDependencyGraph } from '../scripts/lib/release-contract.js';
 import { bundle } from '../scripts/build-ir.mjs';
 import { measureArtifact } from '../scripts/check-package-size.js';
@@ -188,9 +189,11 @@ describe('authored shared state enclosure: one geometry law and retained state p
     const packet = Object.values(await authoredSymbolPayloads(['notifications'])).map(renderSymbolModules);
     expect(packet[0].symbol).toContain('../ir/source-packet-runtime.js');
     const captured = read('release/contract.json');
+    const motionTargets = authorMotionTargets(originalAnatomy);
     const projected = symbolReleaseProjection(captured, Object.keys(manifest.icons), Object.keys(capturedStates.groups),
       authorVariationIconNames(originalAnatomy), authorVariationLawNames(originalAnatomy), packet,
-      authorStateVariationGroupNames(capturedStates, originalAnatomy), authorContentVariationIconNames(originalAnatomy), authorStateLawNames(capturedStates));
+      authorStateVariationGroupNames(capturedStates, originalAnatomy), authorContentVariationIconNames(originalAnatomy), authorStateLawNames(capturedStates),
+      motionTargets.names, motionTargets.capsules);
     expect(projected).toEqual(captured);
     expect(projected.runtimeDependencies.filter(file => file.endsWith('source-packet-runtime.js'))).toHaveLength(1);
     expect(projected.runtimeDependencies.filter(file => file.endsWith('annulus-geometry-runtime.js'))).toHaveLength(1);

@@ -1389,7 +1389,7 @@ export async function runExplorerJourney() {
         q('model-status').textContent !== 'Авторские состояния' && q('source-status').textContent.includes(baseRow.original.nodeId));
       check(`replacement-exit/${view}/mode-controls`, q('state-group-controls').hidden && !q('gesture-progress-control').hidden &&
         q('state-choice-label').textContent === '' &&
-        [...document.querySelectorAll('[data-view]')].every(button => button.getAttribute('aria-pressed') === String(button.dataset.view === view)));
+        [...document.querySelectorAll('button[data-view]')].every(button => button.getAttribute('aria-pressed') === String(button.dataset.view === view)));
       const projectedParts = [...q('parts').children];
       const stageSvg = q('symbol-stage').querySelector('svg');
       check(`replacement-exit/${view}/comparison-subject`,

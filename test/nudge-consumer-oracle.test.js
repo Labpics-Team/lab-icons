@@ -113,7 +113,9 @@ describe('независимая consumer projection directional law', () => {
 
   it('анатомия без жеста и неполный package context не дают ложный target admission', () => {
     const motion = expectedAuthorMotion({ ...sources.outline.sourceContract, gestures: [] }, packageContext('outline'));
-    expect(motion).toMatchObject({ state: 'source-only', partIds: [], tracks: [], gestures: [], adapters: { lottie: 'not-exported' } });
+    expect(motion).toMatchObject({ state: 'semantic-parts', partIds: ['direction-body'], tracks: [], gestures: [], adapters: { lottie: 'not-exported' } });
+    const sourceOnly = expectedAuthorMotion({ ...sources.outline.sourceContract, anatomy: null, gestures: [] }, packageContext('outline'));
+    expect(sourceOnly).toMatchObject({ state: 'source-only', partIds: [], tracks: [], gestures: [], adapters: { lottie: 'not-exported' } });
     for (const context of [{ kind: 'package' }, { kind: 'other' }, { kind: 'source', svg: sources.outline.normalizedSvg }]) {
       expect(() => expectedAuthorMotion(sources.outline.sourceContract, context)).toThrow(TypeError);
     }

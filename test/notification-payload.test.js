@@ -20,6 +20,7 @@ const shipping = {
   'dist/ir/request.js': await shippingRuntime('src/ir/request.ts'),
   'dist/ir/author-request-runtime.js': await shippingRuntime('src/ir/author-request-runtime.ts', ['./request.js']),
   'dist/ir/symbol-runtime.js': await shippingRuntime('src/ir/symbol-runtime.ts', ['./request.js', './author-request-runtime.js']),
+  'dist/ir/source-packet-runtime.js': await shippingRuntime('src/ir/source-packet-runtime.ts'),
 };
 async function consume(module, expression) {
   const result = await build({ stdin: { contents: `import {glyph,glyphCapabilities,outline} from 'test-symbol';export const value=${expression};` },
@@ -28,6 +29,7 @@ async function consume(module, expression) {
       plugin.onResolve({ filter: /^test-symbol$/ }, () => ({ path: 'symbol', namespace: 'symbol', sideEffects: false }));
       plugin.onLoad({ filter: /.*/, namespace: 'symbol' }, () => ({ contents: module, loader: 'js' }));
       plugin.onResolve({ filter: /symbol-runtime\.js$/ }, () => ({ path: fileURLToPath(new URL('../src/ir/symbol-runtime.ts', import.meta.url)) }));
+      plugin.onResolve({ filter: /source-packet-runtime\.js$/ }, () => ({ path: fileURLToPath(new URL('../src/ir/source-packet-runtime.ts', import.meta.url)) }));
     } }] });
   const text = result.outputFiles[0].text;
   const { value } = await import(`data:text/javascript;base64,${Buffer.from(text).toString('base64')}`);

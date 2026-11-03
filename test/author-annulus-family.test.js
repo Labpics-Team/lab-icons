@@ -115,13 +115,16 @@ describe('declared circle states reuse the exact annulus law without silhouette 
     const parts = source.sourceContract.parts.map((part, index) => ({ ...part,
       id: index === source.sourceContract.parts.length - 1 ? 'mic-enclosure' : `mic-content-${index}`,
       identity: 'declared', role: index === source.sourceContract.parts.length - 1 ? 'container' : 'content' }));
-    // Только тестовый кандидат: равный силуэт не даёт production-аннотацию микрофону.
+    // Совпадение кольца не переносит допуск annulus на контекстный корпус.
     const declaration = { law: 'annulus.counter-scale', parameter: 'enclosureEmphasis', variant: 'outline',
       enclosurePartId: 'mic-enclosure', source: Object.fromEntries(
         ['fileKey', 'version', 'masterSha256', 'pathFingerprintSha256'].map(key => [key, source.author[key]])) };
     expect(() => compileAuthorAnnulus(source, parts, declaration, grid))
       .toThrow(expect.objectContaining({ code: 'DEFAULT_OUTSIDE_DOMAIN' }));
-    expect(fullSpec.icons['mic-circle']).toBeUndefined();
+    for (const variant of ['outline', 'filled']) {
+      expect(fullSpec.icons['mic-circle'][variant].variation.law).toBe('capsule.width');
+      expect(fullSpec.icons['mic-circle'][variant].variation.law).not.toBe('annulus.counter-scale');
+    }
     expect(evidence['checkmark-circle/outline'].domain.scale.minimum)
       .not.toBe(evidence['play-circle/outline'].domain.scale.minimum);
     expect(evidence['checkmark-circle/outline'].domain.proof.contentUpperSquared)

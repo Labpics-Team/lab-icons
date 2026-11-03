@@ -19,6 +19,7 @@ function element(tagName, view, content) {
     get textContent() { return innerHTML; },
     // Как у DOM Element, запись текста заменяет дочерние SVG-узлы.
     set textContent(value) { innerHTML = String(value); },
+    getAttribute(name) { return attributes.get(name) ?? null; },
     setAttribute(name, value) { attributes.set(name, value); },
     addEventListener(name, listener) { listeners.set(name, listener); },
   };
@@ -68,6 +69,20 @@ describe('presentation data-view не делает SVG-поверхность к
       expect(button.disabled).toBe(!loaded || ['generated', 'difference'].includes(button.dataset.view));
     }
     expect(buttons.find(button => button.dataset.view === 'generated').textContent).toBe('Модель');
+  });
+
+  it.each(['overlay', 'difference'])('journey проверяет выбор %s только у кнопок и замечает неверный aria-pressed', view => {
+    const journey = readFileSync(new URL('../scripts/bench/explorer-journey.js', import.meta.url), 'utf8');
+    const condition = journey.match(/\[\.\.\.document\.querySelectorAll\('[^']+'\)\]\.every\(button => button\.getAttribute\('aria-pressed'\) === String\(button\.dataset\.view === view\)\)/)?.[0];
+    if (!condition) throw new Error('Проверка выбора вида в реальном journey не найдена');
+    const selected = new Function('document', 'view', `return ${condition};`);
+    const { update, document, stage, sample, buttons } = fixture({ view });
+    update();
+    expect(selected(document, view)).toBe(true);
+    expect(stage.getAttribute('aria-pressed')).toBeNull();
+    expect(sample.getAttribute('aria-pressed')).toBeNull();
+    buttons.find(button => button.dataset.view === view).setAttribute('aria-pressed', 'false');
+    expect(selected(document, view)).toBe(false);
   });
 
   it('только кнопки переключают вид, сохраняя progress по поддержке вариации', () => {

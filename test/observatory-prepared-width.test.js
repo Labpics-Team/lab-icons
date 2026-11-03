@@ -24,7 +24,12 @@ function fixture({ compound = false, reducedMotion = false } = {}) {
     let resolve, reject;
     const clock = { current: initial, disposed: false, listener: null,
       subscribe(listener) { this.listener = listener; this.saved = listener; return () => { this.listener = null; }; },
-      dispose() { this.disposed = true; },
+      dispose() {
+        if (this.disposed) return;
+        this.disposed = true;
+        this.listener = null;
+        if (['running', 'paused'].includes(this.playback?.state)) this.playback.stop();
+      },
       emit(width) { this.current = width; this.listener?.(width); },
       animate(to, options) {
         this.options = options;
