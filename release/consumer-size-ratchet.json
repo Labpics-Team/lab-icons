@@ -67,22 +67,22 @@
   },
   "recorded-model-axis": {
    "entry": "import { glyph } from '@labpics/icons/ir';\nconsole.log(glyph({ icon: 'chevron-forward', axes: { weight: 1.1, opsz: 32 } }));\n",
-   "baselineBytes": 841271,
-   "baselineGzipBytes": 210799,
+   "baselineBytes": 841281,
+   "baselineGzipBytes": 210797,
    "maxBytes": 853339,
    "maxGzipBytes": 214703
   },
   "recorded-motion": {
    "entry": "import { glyph, glyphCapabilities } from '@labpics/icons/ir';\nimport { compileSymbolEffect } from '@labpics/icons/motion';\nconsole.log(compileSymbolEffect(glyph({ icon: 'time' }), glyphCapabilities('time'), 'time.advance', { duration: 400 }));\n",
-   "baselineBytes": 863407,
-   "baselineGzipBytes": 216697,
+   "baselineBytes": 863417,
+   "baselineGzipBytes": 216690,
    "maxBytes": 865952,
    "maxGzipBytes": 217706
   },
   "full-ir-opt-in": {
    "entry": "import { glyph } from '@labpics/icons/ir';\nconsole.log(glyph({ icon: 'alert' }));\n",
-   "baselineBytes": 841235,
-   "baselineGzipBytes": 210784,
+   "baselineBytes": 841245,
+   "baselineGzipBytes": 210782,
    "maxBytes": 921319,
    "maxGzipBytes": 231011
   },
