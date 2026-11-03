@@ -19,9 +19,10 @@ import { bundle } from '../scripts/build-ir.mjs';
 const root = fileURLToPath(new URL('..', import.meta.url));
 const read = file => JSON.parse(readFileSync(join(root, file), 'utf8'));
 const document = read('semantics/author-anatomy.json');
-const names = ['reload', 'refresh', 'timer'].sort();
-const source = await authoredSymbolPayloads(names);
-const rich = await authoredSymbolPayloads(names, { scope: 'motion' });
+const allNames = ['reload', 'refresh', 'timer'].sort();
+const names = ['reload', 'refresh'].sort();
+const source = await authoredSymbolPayloads(allNames);
+const rich = await authoredSymbolPayloads(allNames, { scope: 'motion' });
 const packets = Object.fromEntries(names.map(icon => [icon, projectAuthorMotionSymbol(rich[icon], compileSymbolEffect)]));
 // Oracle читает raw master непосредственно, минуя production normalizer/parser.
 const rawPaths = svg => [...svg.matchAll(/<path\b[^>]*>/g)].map(([tag]) => ({
@@ -44,13 +45,14 @@ async function importBaseline(file) {
   return import(pathToFileURL(output).href);
 }
 
-async function consume(icon, expression) {
+async function consume(icon, expression, outlineOnly = false) {
+  const packet = outlineOnly ? { ...packets[icon], variants: { outline: packets[icon].variants.outline } } : packets[icon];
   const result = await build({ stdin: { contents: expression, resolveDir: root },
     bundle: true, write: false, metafile: true, format: 'esm', platform: 'browser', target: 'es2022', logLevel: 'silent',
     plugins: [{ name: 'production-motion-projection', setup(builder) {
       builder.onResolve({ filter: /^packet$/ }, () => ({ path: icon, namespace: 'motion-packet' }));
       builder.onLoad({ filter: /.*/, namespace: 'motion-packet' }, () => ({
-        contents: renderAuthorMotionModule(packets[icon]).replace('../ir/gesture-runtime.js',
+        contents: renderAuthorMotionModule(packet).replace('../ir/gesture-runtime.js',
           './src/motion/gesture-runtime.ts'), resolveDir: root, loader: 'js',
       }));
     } }],
@@ -65,19 +67,41 @@ describe('авторский motion target без стоимости полно�
   it('выбирает только существующий закон и сохраняет default source contracts и module bytes', async () => {
     expect(authorMotionSymbolNames(document)).toEqual(names);
     const manifest = read('semantics/figma-baseline.json');
-    const author = loadAuthorBaseline(root, { manifest: { ...manifest, counts: { families: names.length, variants: names.length * 2 },
-      icons: Object.fromEntries(names.map(icon => [icon, manifest.icons[icon]])) } });
+    const author = loadAuthorBaseline(root, { manifest: { ...manifest, counts: { families: allNames.length, variants: allNames.length * 2 },
+      icons: Object.fromEntries(allNames.map(icon => [icon, manifest.icons[icon]])) } });
     const old = await importBaseline('scripts/lib/author-anatomy.js');
     const legacyDocument = { ...document, icons: Object.fromEntries(['reload', 'refresh'].map(icon => [icon, document.icons[icon]])) };
-    const selected = { ...document, icons: Object.fromEntries(names.map(icon => [icon, document.icons[icon]])) };
+    const selected = { ...document, icons: Object.fromEntries(allNames.map(icon => [icon, document.icons[icon]])) };
     expect(compileAuthorAnatomy(author, selected)).toEqual(old.compileAuthorAnatomy(author, legacyDocument));
     const oldModules = await importBaseline('scripts/lib/symbol-modules.js');
-    for (const icon of names) expect(renderSymbolModules(source[icon])).toEqual(oldModules.renderSymbolModules(source[icon]));
+    for (const icon of allNames) expect(renderSymbolModules(source[icon])).toEqual(oldModules.renderSymbolModules(source[icon]));
     expect(source.timer.capabilities.outline.motion.state).toBe('source-only');
     expect(source.timer.source.outline.provenance.anatomy).toBeUndefined();
     expect(source.timer.source.filled).toEqual(rich.timer.source.filled);
     const noScope = structuredClone(selected); delete noScope.icons.timer.outline.scope;
-    expect(compileAuthorAnatomy(author, noScope)).not.toEqual(compileAuthorAnatomy(author, selected));
+    expect(() => compileAuthorAnatomy(author, noScope)).toThrow(/static parts/);
+  });
+
+  it('timer сохраняет scoped parts и authored masters без ложного motion admission', () => {
+    expect(document.icons.timer.outline.gesture).toBeNull();
+    expect(rich.timer.source.outline.parts.map(({ id, role, anchor }) => ({ id, role, anchor })))
+      .toEqual([{ id: 'timer-dial', role: 'container', anchor: [0.5, 0.5] },
+        { id: 'timer-hand', role: 'control', anchor: [0.5, 0.5] }]);
+    expect(rich.timer.source.outline.provenance.anatomy).toMatchObject({ version: 1,
+      masterSha256: document.icons.timer.outline.masterSha256,
+      pathFingerprintSha256: document.icons.timer.outline.pathFingerprintSha256 });
+    expect(rich.timer.capabilities.outline.motion.gestures).toEqual([]);
+    expect(() => projectAuthorMotionSymbol(rich.timer, compileSymbolEffect)).toThrow(TypeError);
+    for (const variant of ['outline', 'filled']) {
+      const glyph = source.timer.source[variant], caps = source.timer.capabilities[variant];
+      expect(compileSymbolEffect(glyph, caps, 'timer.advance', { duration: 600 }))
+        .toMatchObject({ ok: false, reason: { code: 'SEMANTIC_MOTION_UNAVAILABLE' } });
+      const raw = readFileSync(join(root, glyph.provenance.file), 'utf8');
+      expect(authorPathEntries(glyph.svg.replace(/ data-(?:part|role)="[^"]*"/g, '')).map(({ d, fillRule }) => ({ d, fillRule }))).toEqual(rawPaths(raw));
+    }
+    const contract = read('release/contract.json'), surface = read('release/export-surface.json');
+    expect(contract.files.filter(file => /dist\/gestures\/timer\./.test(file))).toEqual([]);
+    expect(Object.hasOwn(surface, './gestures/timer')).toBe(false);
   });
 
   it.each(names)('%s сохраняет настоящие authored paths, правила заливки и порядок', async icon => {
@@ -95,18 +119,18 @@ describe('авторский motion target без стоимости полно�
     }
   });
 
-  it.each([[0, 1], [0.4, 0], [0.75, 0.25], [0.25, 0.75], [0.4, 0.4]])('timer %s → %s совпадает с прежним владельцем v1 и явным угловым oracle', async (from, to) => {
-    const { module } = await consume('timer', 'export {compileMotionEffect} from "packet";');
-    const result = module.compileMotionEffect('timer.advance', { duration: 800, from, to });
-    expect(result).toEqual(compileSymbolEffect(rich.timer.source.outline, rich.timer.capabilities.outline,
-      'timer.advance', { duration: 800, from, to }));
-    expect(result.effect.targets).toEqual([{ partId: 'timer-hand', rotation: { from: 360 * from, to: 360 * to, unit: 'degrees' },
+  it.each([[0, 1], [0.4, 0], [0.75, 0.25], [0.25, 0.75], [0.4, 0.4]])('reload %s → %s совпадает с прежним владельцем v1 и явным угловым oracle', async (from, to) => {
+    const { module } = await consume('reload', 'export {compileMotionEffect} from "packet";');
+    const result = module.compileMotionEffect('reload.cycle', { duration: 800, from, to });
+    expect(result).toEqual(compileSymbolEffect(rich.reload.source.outline, rich.reload.capabilities.outline,
+      'reload.cycle', { duration: 800, from, to }));
+    expect(result.effect.targets).toEqual([{ partId: 'cycle-body', rotation: { from: 360 * from, to: 360 * to, unit: 'degrees' },
       style: { transformBox: 'view-box', transformOrigin: '50% 50%' },
       keyframes: [{ offset: 0, transform: `rotate(${360 * from}deg)` }, { offset: 1, transform: `rotate(${360 * to}deg)` }] }]);
-    expect(result.effect.unchangedPartIds).toEqual(['timer-dial']);
+    expect(result.effect.unchangedPartIds).toEqual([]);
     expect(result.effect.options.duration).toBe(from === to ? 0 : 800);
     expect(Object.isFrozen(result.effect.targets[0].keyframes[0])).toBe(true);
-    const reduced = module.compileMotionEffect('timer.advance', { duration: 800, from, to, reducedMotion: true });
+    const reduced = module.compileMotionEffect('reload.cycle', { duration: 800, from, to, reducedMotion: true });
     expect(reduced.effect.options.duration).toBe(0);
     expect(reduced.effect.targets).toEqual(result.effect.targets);
   });
@@ -127,45 +151,45 @@ describe('авторский motion target без стоимости полно�
   });
 
   it('вариант, чужой жест и malformed запрос имеют точный отказ', async () => {
-    const { module } = await consume('timer', 'export * from "packet";');
+    const { module } = await consume('reload', 'export * from "packet";', true);
     for (const operation of [() => module.renderMotionSvg('filled'), () => module.motionCapabilities('filled'),
-      () => module.compileMotionEffect('timer.advance', { duration: 600, variant: 'filled' })]) {
+      () => module.compileMotionEffect('reload.cycle', { duration: 600, variant: 'filled' })]) {
       expect(operation()).toMatchObject({ ok: false, reason: { code: 'VARIANT_UNSUPPORTED' } });
     }
     expect(module.compileMotionEffect('time.advance', { duration: 600 })).toMatchObject({ ok: false, reason: { code: 'GESTURE_UNSUPPORTED' } });
     for (const request of [null, [], {}, { duration: -1 }, { duration: Infinity }, { duration: 600, from: NaN },
       { duration: 600, from: null }, { duration: 600, to: null },
       { duration: 600, to: 1.01 }, { duration: 600, reducedMotion: 'yes' }, { duration: 600, loop: true }, { duration: 600, variant: 'other' }]) {
-      expect(module.compileMotionEffect('timer.advance', request)).toMatchObject({ ok: false, reason: { code: 'INVALID_REQUEST' } });
+      expect(module.compileMotionEffect('reload.cycle', request)).toMatchObject({ ok: false, reason: { code: 'INVALID_REQUEST' } });
     }
     for (const key of ['from', 'to']) {
       const request = JSON.parse(`{"duration":600,"${key}":null}`);
-      expect(compileSymbolEffect(rich.timer.source.outline, rich.timer.capabilities.outline,
-        'timer.advance', request)).toMatchObject({ ok: false, reason: { code: 'INVALID_REQUEST' } });
+      expect(compileSymbolEffect(rich.reload.source.outline, rich.reload.capabilities.outline,
+        'reload.cycle', request)).toMatchObject({ ok: false, reason: { code: 'INVALID_REQUEST' } });
     }
-    expect(module.compileMotionEffect('timer.advance', { duration: 600, from: undefined, to: undefined }))
-      .toEqual(module.compileMotionEffect('timer.advance', { duration: 600 }));
+    expect(module.compileMotionEffect('reload.cycle', { duration: 600, from: undefined, to: undefined }))
+      .toEqual(module.compileMotionEffect('reload.cycle', { duration: 600 }));
   });
 
   it.each([
     ['чужой master', value => { value.capabilities.outline.author.masterSha256 = '0'.repeat(64); }],
     ['чужой anchor', value => { value.capabilities.outline.motion.gestures[0].tracks[0].anchor[0] = 0.4; }],
-    ['чужая part', value => { value.capabilities.outline.motion.gestures[0].tracks[0].partId = 'timer-dial'; }],
+    ['чужая part', value => { value.capabilities.outline.motion.gestures[0].tracks[0].partId = 'other-body'; }],
     ['compound', value => { value.source.outline.composition = { kind: 'compound', fillRule: 'evenodd' }; }],
-    ['чужой SVG', value => { value.source.outline.svg = value.source.outline.svg.replace('timer-hand', 'other-hand'); }],
-    ['подменённая geometry', value => { value.source.outline.parts[1].d += 'M0 0L1 1Z'; }],
+    ['чужой SVG', value => { value.source.outline.svg = value.source.outline.svg.replace('cycle-body', 'other-body'); }],
+    ['подменённая geometry', value => { value.source.outline.parts[0].d += 'M0 0L1 1Z'; }],
   ])('%s не получает ложный подготовленный packet', (_, mutate) => {
-    const input = structuredClone(rich.timer); mutate(input);
+    const input = structuredClone(rich.reload); mutate(input);
     expect(() => projectAuthorMotionSymbol(input, compileSymbolEffect)).toThrow(TypeError);
   });
 
   it('PURE consumers не удерживают чужие данные или общий compiler', async () => {
     for (const [entry, forbidden] of [
-      ['compileMotionEffect', [rich.timer.source.outline.parts[1].d, rich.timer.capabilities.outline.author.masterSha256, 'timer-dial" data-role']],
-      ['renderMotionSvg', ['projectRotationEffect', 'parseEffectRequest', rich.timer.capabilities.outline.author.masterSha256]],
-      ['motionCapabilities', [rich.timer.source.outline.parts[1].d, 'projectRotationEffect', 'parseEffectRequest']],
+      ['compileMotionEffect', [rich.reload.source.outline.parts[0].d, rich.reload.capabilities.outline.author.masterSha256, 'cycle-body" data-role']],
+      ['renderMotionSvg', ['projectRotationEffect', 'parseEffectRequest', rich.reload.capabilities.outline.author.masterSha256]],
+      ['motionCapabilities', [rich.reload.source.outline.parts[0].d, 'projectRotationEffect', 'parseEffectRequest']],
     ]) {
-      const { text, retained } = await consume('timer', `export {${entry}} from "packet";`);
+      const { text, retained } = await consume('reload', `export {${entry}} from "packet";`);
       for (const needle of forbidden) expect(text).not.toContain(needle);
       expect(retained.filter(file => file.startsWith('src/'))).not.toEqual([]);
       expect(retained.some(file => /src\/(?:ir|core|authoring)\//.test(file))).toBe(false);
@@ -175,8 +199,8 @@ describe('авторский motion target без стоимости полно�
 
   it('exact release projection добавляет и удаляет только действительные motion targets', () => {
     const base = read('release/contract.json');
-    const plain = symbolReleaseProjection(base, names);
-    const expanded = symbolReleaseProjection(base, names, [], [], [], [], [], [], [], names);
+    const plain = symbolReleaseProjection(base, allNames);
+    const expanded = symbolReleaseProjection(base, allNames, [], [], [], [], [], [], [], names);
     expect(validateReleaseContract(expanded)).toEqual([]);
     for (const [key, value] of Object.entries(plain.exports)) expect(expanded.exports[key]).toEqual(value);
     expect(expanded.files.filter(file => !plain.files.includes(file))).toEqual([
@@ -184,24 +208,24 @@ describe('авторский motion target без стоимости полно�
       'dist/ir/gesture-runtime.js', 'dist/ir/gesture-types.d.ts',
     ].sort());
     expect(plain.runtimeDependencies).not.toContain('dist/ir/gesture-runtime.js');
-    expect(() => symbolReleaseProjection(base, names, [], [], [], [], [], [], [], ['other'])).toThrow(TypeError);
-    expect(authorMotionModuleDeclaration(packets.timer)).toContain('export type MotionVariant = "outline"');
+    expect(() => symbolReleaseProjection(base, allNames, [], [], [], [], [], [], [], ['other'])).toThrow(TypeError);
+    expect(authorMotionModuleDeclaration(packets.reload)).toContain('export type MotionVariant = "outline" | "filled"');
   });
 
   it('native consumer использует фактическую ESM closure и публичный entrypoint', async () => {
     const pkg = join(fixture, 'node_modules/@labpics/icons'), out = join(pkg, 'dist');
     mkdirSync(join(out, 'ir'), { recursive: true }); mkdirSync(join(out, 'gestures'), { recursive: true });
     await bundle(root, out, 'src/motion/gesture-runtime.ts', 'ir/gesture-runtime.js');
-    writeFileSync(join(out, 'gestures/timer.js'), renderAuthorMotionModule(packets.timer));
-    const contract = { exports: { './gestures/timer': { import: './dist/gestures/timer.js' } },
-      runtimeDependencies: ['dist/ir/gesture-runtime.js'], files: ['dist/gestures/timer.js', 'dist/ir/gesture-runtime.js'] };
+    writeFileSync(join(out, 'gestures/reload.js'), renderAuthorMotionModule(packets.reload));
+    const contract = { exports: { './gestures/reload': { import: './dist/gestures/reload.js' } },
+      runtimeDependencies: ['dist/ir/gesture-runtime.js'], files: ['dist/gestures/reload.js', 'dist/ir/gesture-runtime.js'] };
     expect(validateReleaseRuntimeDependencyGraph({ contract, readText: file => readFileSync(join(pkg, file), 'utf8') })).toEqual([]);
     writeFileSync(join(pkg, 'package.json'), JSON.stringify({ name: '@labpics/icons', type: 'module', exports: contract.exports }));
     const entry = join(fixture, 'consumer.mjs');
-    writeFileSync(entry, 'export * from "@labpics/icons/gestures/timer";');
+    writeFileSync(entry, 'export * from "@labpics/icons/gestures/reload";');
     const consumer = await import(pathToFileURL(entry).href);
-    expect(consumer.renderMotionSvg()).toEqual({ ok: true, svg: rich.timer.source.outline.svg });
-    expect(consumer.compileMotionEffect('timer.advance', { duration: 700, from: 0.4, to: 0 }).effect.targets[0].rotation)
+    expect(consumer.renderMotionSvg()).toEqual({ ok: true, svg: rich.reload.source.outline.svg });
+    expect(consumer.compileMotionEffect('reload.cycle', { duration: 700, from: 0.4, to: 0 }).effect.targets[0].rotation)
       .toEqual({ from: 144, to: 0, unit: 'degrees' });
   });
 });

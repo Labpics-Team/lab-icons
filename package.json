@@ -102,8 +102,6 @@
     "dist/gestures/refresh.js",
     "dist/gestures/reload.d.ts",
     "dist/gestures/reload.js",
-    "dist/gestures/timer.d.ts",
-    "dist/gestures/timer.js",
     "dist/index.d.ts",
     "dist/index.js",
     "dist/ir/annulus-geometry-runtime.js",

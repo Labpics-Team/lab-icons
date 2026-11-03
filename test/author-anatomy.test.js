@@ -15,6 +15,25 @@ const manifest = { ...captured, counts: { families: 3, variants: 6 },
 const baseline = loadAuthorBaseline(root, { manifest });
 
 describe('явная анатомия неизменённых авторских masters', () => {
+  it('отзыв motion law сохраняет scoped анатомию без допуска движения', () => {
+    const selected = { ...captured, counts: { families: 1, variants: 2 }, icons: { timer: captured.icons.timer } };
+    const author = loadAuthorBaseline(root, { manifest: selected });
+    const scoped = { ...allAnnotations, icons: { timer: allAnnotations.icons.timer } };
+    expect(scoped.icons.timer.outline.gesture).toBeNull();
+    const projected = compileAuthorAnatomy(author, scoped, undefined, { scope: 'motion' })['timer/outline'];
+    expect(projected.gestures).toEqual([]);
+    expect(projected.parts.map(({ id, role }) => ({ id, role }))).toEqual([
+      { id: 'timer-dial', role: 'container' }, { id: 'timer-hand', role: 'control' },
+    ]);
+    expect(projected.parts[1]).toMatchObject({ anchor: [0.5, 0.5], anchorSource: 'declared' });
+    expect(projected.anatomy).toMatchObject({ version: 1,
+      masterSha256: scoped.icons.timer.outline.masterSha256,
+      pathFingerprintSha256: scoped.icons.timer.outline.pathFingerprintSha256 });
+    expect(compileAuthorAnatomy(author, scoped)).toEqual({});
+    const unscoped = structuredClone(scoped); delete unscoped.icons.timer.outline.scope;
+    expect(() => compileAuthorAnatomy(author, unscoped)).toThrow(expect.objectContaining({ code: 'LAW_UNSUPPORTED' }));
+  });
+
   it('даёт один закон двум настоящим семействам и сохраняет обе независимые формы', () => {
     const contracts = compileAuthorAnatomy(baseline, document);
     expect(Object.keys(contracts).sort()).toEqual(['refresh/filled', 'refresh/outline', 'reload/filled', 'reload/outline']);

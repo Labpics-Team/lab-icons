@@ -14,7 +14,7 @@
           { "pathIndex": 0, "id": "timer-dial", "role": "container" },
           { "pathIndex": 1, "id": "timer-hand", "role": "control", "anchor": [0.5, 0.5], "anchorMeaning": "canvas-center" }
         ],
-        "gesture": { "law": "cycle.clockwise", "purpose": "elapsed-time", "partId": "timer-hand" }
+        "gesture": null
       }
     },
     "mic": {

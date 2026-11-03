@@ -349,7 +349,8 @@ function compileAuthorAnatomyResult(baseline, document, grid, options) {
       } else if (declaration.variation) {
         variation = compileAuthorVariation(source, parts, declaration.variation, grid);
       }
-      if (declaration.gesture === null && !variation) {
+      // Отозванный motion law сохраняет проверенную анатомию, но не создаёт жест.
+      if (declaration.gesture === null && !variation && declaration.scope !== 'motion') {
         refuse('LAW_UNSUPPORTED', `${label}: static parts требуют явного геометрического закона и grid policy`);
       }
       const gestures = declaration.gesture === null ? [] : compileLaw(icon, variant, declaration.gesture, parts, source);

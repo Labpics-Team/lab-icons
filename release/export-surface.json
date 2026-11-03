@@ -551,11 +551,6 @@
     "motionCapabilities",
     "renderMotionSvg"
   ],
-  "./gestures/timer": [
-    "compileMotionEffect",
-    "motionCapabilities",
-    "renderMotionSvg"
-  ],
   "./ir": [
     "GlyphModelError",
     "axisContracts",
