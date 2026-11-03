@@ -11,6 +11,8 @@ import { gzipSync } from 'node:zlib';
 import { pathBBox } from '../../src/core/path-data.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
+const stdoutOnly = process.argv.length === 3 && process.argv[2] === '--stdout';
+if (process.argv.length > 2 && !stdoutOnly) throw new Error('census: допустим только --stdout');
 const read = (p) => JSON.parse(readFileSync(join(ROOT, p), 'utf8'));
 
 const catalog = read('semantics/catalog.json');
@@ -134,10 +136,14 @@ const census = {
   consumerBudgets,
 };
 
-writeFileSync(join(ROOT, 'semantics', 'census.json'), JSON.stringify(census, null, 1) + '\n');
-console.log(
-  `census: ${census.modeledCount} modeled / ${census.sourceOnlyCount} source-only; ` +
-    `families: enclosure ${structural.enclosure.length}, directional ${structural.directional.length}, ` +
-    `off-slash ${structural['off-slash'].length}, badge ${structural.badge.length}, singleton ${structural.singleton.length}` +
-    (bundle ? `; bundle ${bundle.totalBytes}B` : ''),
-);
+const serialized = JSON.stringify(census, null, 1) + '\n';
+if (stdoutOnly) process.stdout.write(serialized);
+else {
+  writeFileSync(join(ROOT, 'semantics', 'census.json'), serialized);
+  console.log(
+    `census: ${census.modeledCount} modeled / ${census.sourceOnlyCount} source-only; ` +
+      `families: enclosure ${structural.enclosure.length}, directional ${structural.directional.length}, ` +
+      `off-slash ${structural['off-slash'].length}, badge ${structural.badge.length}, singleton ${structural.singleton.length}` +
+      (bundle ? `; bundle ${bundle.totalBytes}B` : ''),
+  );
+}

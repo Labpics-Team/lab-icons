@@ -7,6 +7,7 @@
  * HARD (класс дефекта: артефакт лжёт о своём происхождении).
  */
 import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -15,14 +16,18 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const CENSUS = join(ROOT, 'semantics', 'census.json');
 
 const committed = readFileSync(CENSUS, 'utf8');
-execFileSync(process.execPath, [join(ROOT, 'scripts', 'census', 'build-census.mjs')], {
-  stdio: ['ignore', 'ignore', 'inherit'],
+const regenerated = execFileSync(process.execPath, [join(ROOT, 'scripts', 'census', 'build-census.mjs'), '--stdout'], {
+  encoding: 'utf8', stdio: ['ignore', 'pipe', 'inherit'],
 });
-const regenerated = readFileSync(CENSUS, 'utf8');
 
 if (committed !== regenerated) {
   console.error('check-census-fresh: HARD — semantics/census.json не воспроизводится генератором.');
   console.error('Правка руками запрещена; после изменения catalog/anatomy/dist перегенерируй: node scripts/census/build-census.mjs');
+  // Точные bytes удалённой генерации позволяют восстановить projection без новой сборки.
+  console.error('check-census-fresh: GENERATED_JSON ' + JSON.stringify({
+    sha256: createHash('sha256').update(regenerated).digest('hex'),
+    base64: Buffer.from(regenerated).toString('base64'),
+  }));
   process.exit(1);
 }
 console.log('check-census-fresh: OK — census бит-в-бит воспроизводим генератором');
