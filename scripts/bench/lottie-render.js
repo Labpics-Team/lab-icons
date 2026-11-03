@@ -41,6 +41,45 @@ export function canonicalCubicPath(d) {
   }
   return output;
 }
+/** Только диагностическая интервенция: исходные C и числовые tokens сохраняются.
+ * Это не compiler и не новая форма публичной геометрии. */
+export function diagnosticPath(d, { lines = 'native', numbers = 'author' } = {}) {
+  assert(['native', 'zero-tangent', 'parameter-linear'].includes(lines), 'Неизвестная line intervention');
+  assert(['author', 'binary32'].includes(numbers), 'Неизвестная number intervention');
+  canonicalCubicPath(d); // Существующий независимый parser проверяет весь вход.
+  const numberPattern = /[-+]?(?:\d*\.\d+|\d+\.?\d*)(?:[eE][-+]?\d+)?/g;
+  const materialize = value => value.replace(numberPattern, token => ` ${Math.fround(Number(token))} `);
+  if (lines === 'native') return numbers === 'binary32' ? materialize(d) : d;
+  const tokens = d.match(/[a-zA-Z]|[-+]?(?:\d*\.\d+|\d+\.?\d*)(?:[eE][-+]?\d+)?/g);
+  let index = 0, command, cursor, start, output = '';
+  const point = () => [tokens[index++], tokens[index++]];
+  const coordinates = value => value.join(' ');
+  const line = end => {
+    const control = fraction => cursor.map((value, axis) => {
+      const interpolated = Number(value) + (Number(end[axis]) - Number(value)) * fraction;
+      return String(interpolated);
+    });
+    const a = lines === 'zero-tangent' ? cursor : control(1 / 3);
+    const b = lines === 'zero-tangent' ? end : control(2 / 3);
+    output += `C${coordinates(a)} ${coordinates(b)} ${coordinates(end)}`; cursor = end;
+  };
+  while (index < tokens.length) {
+    if (/^[a-zA-Z]$/.test(tokens[index])) command = tokens[index++];
+    if (command === 'M') { cursor = point(); start = cursor; output += `M${coordinates(cursor)}`; command = 'L'; }
+    else if (command === 'L') line(point());
+    else if (command === 'H') line([tokens[index++], cursor[1]]);
+    else if (command === 'V') line([cursor[0], tokens[index++]]);
+    else if (command === 'C') {
+      const a = point(), b = point(), end = point();
+      output += `C${coordinates(a)} ${coordinates(b)} ${coordinates(end)}`; cursor = end;
+    } else if (command === 'Z') {
+      if (cursor.some((value, axis) => Number(value) !== Number(start[axis]))) line(start);
+      output += 'Z'; command = undefined;
+    }
+  }
+  // Проекция применяется после line intervention; одновременно endpoints не меняются.
+  return numbers === 'binary32' ? output.replace(numberPattern, token => String(Math.fround(Number(token)))) : output;
+}
 export function referenceLottieOpacity(declaration, id, gesture, progress) {
   if (!declaration || !gesture) return 1;
   const law = declaration.gesture;
@@ -232,9 +271,68 @@ export function compareLottiePixels(actual, expected, { expectedEmpty = false } 
     pass: expectedEmpty ? referenceInk === 0 && alphaError === 0 :
       referenceInk > 0 && relativeInkError <= 0.001 && maxAlphaError <= 4 && relativeColorError <= 0.001 && maxColorError <= 4 };
 }
+export function diagnosticAlpha(actual, expected) {
+  const comparison = compareLottiePixels(actual, expected);
+  assert(Number.isFinite(comparison.referenceInk), 'Diagnostic pixels имеют неверную длину');
+  const alpha = [], alphaDifference = [];
+  let actualInk = 0;
+  for (let index = 3; index < actual.length; index += 4) {
+    alpha.push(actual[index]); alphaDifference.push(actual[index] - expected[index]); actualInk += actual[index];
+  }
+  return { ...comparison, actualInk, signedInkBias: (actualInk - comparison.referenceInk) / Math.max(1, comparison.referenceInk), alpha, alphaDifference };
+}
+const nativeDiagnosticCells = [
+  ['native-author', { lines: 'native', numbers: 'author' }],
+  ['native-binary32', { lines: 'native', numbers: 'binary32' }],
+  ['zero-author', { lines: 'zero-tangent', numbers: 'author' }],
+  ['zero-binary32', { lines: 'zero-tangent', numbers: 'binary32' }],
+  ['linear-author', { lines: 'parameter-linear', numbers: 'author' }],
+  ['linear-binary32', { lines: 'parameter-linear', numbers: 'binary32' }],
+];
+async function diagnoseNativeRaster(testCase, raw, frame, rendered, animation) {
+  assert(!testCase.request.gesture, 'Native diagnostic ограничена static pose');
+  const rawPaths = [...raw.source.querySelectorAll('path')];
+  assert(rawPaths.length === 1, 'Bounded native diagnostic требует один author paint path');
+  const reference = referenceSvg(testCase, raw, frame, 0), surfaces = [];
+  for (const [id, intervention] of nativeDiagnosticCells) {
+    const svg = reference.cloneNode(true);
+    svg.querySelector('path').setAttribute('d', diagnosticPath(rawPaths[0].getAttribute('d'), intervention));
+    surfaces.push({ id, intervention, svg });
+  }
+  const clonedMaster = raw.source.documentElement.cloneNode(true);
+  clonedMaster.setAttribute('viewBox', frame.join(' '));
+  for (const path of clonedMaster.querySelectorAll('path')) path.style.fill = testCase.request.color ?? '#000000';
+  surfaces.push({ id: 'cloned-master', svg: clonedMaster });
+  if (rendered) {
+    surfaces.push({ id: 'player', svg: observedSvg(rendered, animation, frame) });
+    const envelope = observedSvg(rendered, animation, frame);
+    const painted = [...envelope.querySelectorAll('path')].filter(path => !path.closest('defs') && path.getAttribute('fill') !== 'none');
+    assert(painted.length === 1, 'Native envelope diagnostic требует один physical player paint path');
+    painted[0].setAttribute('d', rawPaths[0].getAttribute('d'));
+    surfaces.push({ id: 'native-player-envelope', svg: envelope });
+  }
+  const observations = [];
+  for (const size of [16, 24, 48]) {
+    const width = Math.ceil(frame[2] * size / raw.viewBox[2]), height = Math.ceil(frame[3] * size / raw.viewBox[3]);
+    const expected = await pixels(reference, width, height);
+    for (const { id, svg } of surfaces) observations.push({ id, size, width, height, ...diagnosticAlpha(await pixels(svg, width, height), expected) });
+  }
+  return { name: testCase.name, variant: testCase.request.variant ?? 'outline', masterSha256: testCase.masterSha256 ?? null,
+    scope: 'static-native-raster-intervention; observations are not optical admission', frame,
+    surfaces: surfaces.map(({ id, intervention, svg }) => ({ id, intervention: intervention ?? null,
+      physicalPathCount: [...svg.querySelectorAll('path')].filter(path => !path.closest('defs')).length,
+      serializedSvg: new XMLSerializer().serializeToString(svg) })), observations };
+}
+async function syntheticNativeDiagnostic() {
+  // Целые endpoints и line vectors кратны 3: linear controls также целые.
+  const testCase = { name: 'synthetic-integer-mixed-contour', request: { color: '#123456' },
+    rawSvg: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 15C3 14 3 13 6 12L12 6L18 12C19 13 20 14 18 15L12 9L6 15C3 18 1 17 3 15Z"/></svg>' };
+  const raw = rawSource(testCase);
+  return diagnoseNativeRaster(testCase, raw, raw.viewBox);
+}
 export async function runLottieRenderCases(create, testCases, { controls = true, visible = true } = {}) {
   assert(window.lottie?.version === '5.13.0', 'Нужен pinned lottie-web 5.13.0 SVG player.');
-  const rows = [];
+  const rows = [], nativeDiagnostics = [];
   const gallery = document.createElement('div');
   if (visible) gallery.id = 'lottie-gallery';
   else gallery.style.cssText = 'position:absolute;left:-10000px;top:0';
@@ -291,6 +389,10 @@ export async function runLottieRenderCases(create, testCases, { controls = true,
           }
         }
       }
+      if (controls && !testCase.request.gesture &&
+          (testCase.name === 'chevron-up' && testCase.request.variant === 'outline' || testCase.name === 'mic-circle' && testCase.request.variant === 'filled')) {
+        nativeDiagnostics.push(await diagnoseNativeRaster(testCase, raw, frame, container.querySelector('svg'), animation));
+      }
       if (expectedTime.terminalFrame) {
         await new Promise((resolve, reject) => {
           const timer = setTimeout(() => reject(new Error('Lottie completion timeout')), 3000);
@@ -320,7 +422,11 @@ export async function runLottieRenderCases(create, testCases, { controls = true,
   assert(!compareLottiePixels(new Uint8ClampedArray([0, 0, 0, 0, 0, 0, 0, 255]), expected).pass, 'Pixel oracle допускает другую форму.');
   assert(rows.every(row => row.pass), `raster mismatches: ${rows.filter(row => !row.pass).length}/${rows.length}; ${JSON.stringify(rows.filter(row => !row.pass).slice(0, 2))}`);
   const negativeControls = controls ? await runLottieNegativeControls(create, testCases) : [];
-  return { player: window.lottie.version, rows, negativeControls, complete: true };
+  if (controls) {
+    assert(nativeDiagnostics.length === 2, 'Нужны оба объявленных real native diagnostic cases');
+    nativeDiagnostics.push(await syntheticNativeDiagnostic());
+  }
+  return { player: window.lottie.version, rows, negativeControls, nativeDiagnostics, complete: true };
   } finally { if (!visible) gallery.remove(); }
 }
 
