@@ -222,6 +222,7 @@ export function readSemanticPartOpacities(root, partIds, style = globalThis.getC
 export async function runExplorerJourney() {
   const checks = [];
   const authority = [];
+  const clockPoses = [];
   const controls = [];
   const fixtures = [];
   const observers = [];
@@ -386,6 +387,87 @@ export async function runExplorerJourney() {
         q('export-status').textContent === timerRefusal.reason.message && !q('export').disabled);
     }
 
+    for (const [name, variant] of [['time', 'outline'], ['history', 'outline'], ['history', 'filled']]) {
+      const id = `${name}/${variant}/clock-hands`;
+      await choose(name, variant);
+      const module = await import(`./package/gestures/${name}.js`);
+      const source = (await import(`./package/symbols/${name}.js`)).glyph({ variant });
+      const preparation = module.prepareClockHands(variant), capability = module.motionCapabilities(variant);
+      check(`${id}/public-preparation`, preparation.ok && capability.ok && data.preparedClockIconIds.includes(name));
+      if (!preparation.ok || !capability.ok) throw new Error(`${id}: clock target unavailable`);
+      const prepared = preparation.prepared, caps = capability.capabilities;
+      const stage = () => q('symbol-stage').querySelector('svg');
+      const samples = () => [...q('size-samples').querySelectorAll('svg')];
+      const target = svg => svg.querySelector(prepared.renderTarget.selector);
+      const unchanged = svg => [...svg.querySelectorAll('path')].filter(path => !path.matches(prepared.renderTarget.selector))
+        .map(path => ({ d: path.getAttribute('d'), fill: path.getAttribute('fill'), fillRule: path.getAttribute('fill-rule') }));
+      const row = data.rows.find(item => item.name === name && item.variant === variant);
+      const masterResponse = await originalFetch(row.views.original);
+      if (!masterResponse.ok) throw new Error(`${id}: master HTTP ${masterResponse.status}`);
+      const master = new DOMParser().parseFromString(await masterResponse.text(), 'image/svg+xml').documentElement;
+      const rest = JSON.stringify(paths(master)), still = JSON.stringify(unchanged(stage()));
+      const capture = pose => clockPoses.push({ name, variant, pose, progress: Number(q('progress').value),
+        svg: stage().outerHTML, samples: samples().map(svg => svg.outerHTML) });
+      const poseMatches = () => {
+        const hours = caps.gesture.from + (caps.gesture.to - caps.gesture.from) * Number(q('progress').value);
+        const pose = prepared.sample(hours);
+        return pose.ok && target(stage())?.getAttribute('d') === pose.d &&
+          JSON.stringify(unchanged(stage())) === still && samples().length === 3 && samples().every(svg =>
+            target(svg)?.getAttribute('d') === pose.d && JSON.stringify(unchanged(svg)) === still);
+      };
+      check(`${id}/author-identity`, caps.author.masterSha256 === source.provenance.author.masterSha256 &&
+        caps.author.nodeSha256 === source.provenance.author.nodeSha256 && /^[a-f0-9]{64}$/.test(caps.geometrySha256));
+      check(`${id}/exact-authored-rest`, JSON.stringify(paths(stage())) === rest && samples().every(svg => JSON.stringify(paths(svg)) === rest));
+      check(`${id}/semantic-controls`, q('gesture').value === caps.gesture.id && !q('play').disabled &&
+        q('consumer-import').textContent.includes(`/gestures/${name}`) &&
+        prepared.renderTarget.partIds.every(part => q('parts').textContent.includes(part)));
+      capture('authored-rest');
+      setReduced(false); q('play').click();
+      await wait(() => Number(q('progress').value) > .12 && Number(q('progress').value) < .8, `${id} in flight`);
+      q('pause').click();
+      const paused = JSON.stringify(paths(stage())), pausedProgress = Number(q('progress').value);
+      check(`${id}/in-flight-public-pose`, poseMatches() && paused !== rest);
+      for (let index = 0; index < 3; index++) await frame();
+      check(`${id}/pause-retains-pose`, JSON.stringify(paths(stage())) === paused && Number(q('progress').value) === pausedProgress);
+      capture('paused');
+      const beforeSvg = downloads.length;
+      q('export-format').value = 'svg'; q('export').click();
+      const artifact = downloads.at(-1);
+      check(`${id}/exports-visible-pose`, downloads.length === beforeSvg + 1 && artifact.filename === `${name}-${variant}.svg` &&
+        JSON.stringify(paths(new DOMParser().parseFromString(await artifact.blob.text(), 'image/svg+xml').documentElement)) === paused);
+      for (const format of ['effect', 'lottie', 'sf-symbols']) {
+        const before = downloads.length;
+        q('export-format').value = format; q('export').click();
+        check(`${id}/${format}/precise-format-refusal`, downloads.length === before && q('export-status').textContent.startsWith('FORMAT_UNSUPPORTED:'));
+      }
+      q('reverse').click(); await Promise.resolve(); await Promise.resolve();
+      check(`${id}/reverse-picks-up-visible-pose`, JSON.stringify(paths(stage())) === paused);
+      setReduced(true);
+      await wait(() => q('pause').disabled && Number(q('progress').value) === 0, `${id} reduced reverse`);
+      check(`${id}/reverse-restores-author`, JSON.stringify(paths(stage())) === rest && poseMatches());
+      await setProgress(.5);
+      check(`${id}/seek-prepared-pose`, Number(q('progress').value) === .5 && poseMatches());
+      capture('half-hour');
+      document.querySelector('[data-view="original"]').click(); await settle(name);
+      check(`${id}/presentation-preserves-pose`, Number(q('progress').value) === .5 && poseMatches());
+      q('play').click(); await wait(() => q('pause').disabled && Number(q('progress').value) === 1, `${id} reduced endpoint`);
+      check(`${id}/reduced-endpoint`, poseMatches());
+      capture('one-hour');
+      authority.push({ name, variant, author: caps.author, geometrySha256: caps.geometrySha256, gesture: caps.gesture });
+    }
+    await choose('time', 'filled');
+    const negativeClock = (await import('./package/gestures/time.js')).motionCapabilities('filled');
+    check('time/filled/clock-hands/precise-composition-refusal', !negativeClock.ok && negativeClock.reason.code === 'COMPOSITION_UNSUPPORTED' &&
+      q('play').disabled && q('reverse').disabled && q('gesture').value === '' && q('motion-status').textContent.startsWith('COMPOSITION_UNSUPPORTED:') &&
+      !q('export').disabled && q('consumer-import').textContent.includes('/symbols/time'));
+    const negativeRow = data.rows.find(item => item.name === 'time' && item.variant === 'filled');
+    const negativeResponse = await originalFetch(negativeRow.views.original);
+    if (!negativeResponse.ok) throw new Error(`time/filled: master HTTP ${negativeResponse.status}`);
+    const negativeMaster = new DOMParser().parseFromString(await negativeResponse.text(), 'image/svg+xml').documentElement;
+    check('time/filled/clock-hands/refusal-preserves-static-master',
+      JSON.stringify(paths(q('symbol-stage').querySelector('svg'))) === JSON.stringify(paths(negativeMaster)) &&
+      [...q('size-samples').querySelectorAll('svg')].every(svg => JSON.stringify(paths(svg)) === JSON.stringify(paths(negativeMaster))));
+
     await choose('time', 'outline');
     const timeGenerated = document.querySelector('[data-view="generated"]');
     check('gesture-view/legacy-model-available', !timeGenerated.disabled);
@@ -405,8 +487,8 @@ export async function runExplorerJourney() {
     if (!timeResponse.ok) throw new Error(`explorer journey: time master HTTP ${timeResponse.status}`);
     const timeMaster = new DOMParser().parseFromString(await timeResponse.text(), 'image/svg+xml').documentElement;
     check('gesture-view/legacy-return-preserves-author-contract', q('symbol-stage').dataset.view === 'original' &&
-      q('consumer-import').textContent.includes('/symbols/time') && q('gesture').value === '' && q('play').disabled &&
-      q('reverse').disabled && q('progress').disabled && !timeRefusal.ok && timeRefusal.reason.code === 'SEMANTIC_MOTION_UNAVAILABLE');
+      q('consumer-import').textContent.includes('/gestures/time') && q('gesture').value === 'clock.advance-hour' && !q('play').disabled &&
+      !q('reverse').disabled && !q('progress').disabled && !timeRefusal.ok && timeRefusal.reason.code === 'SEMANTIC_MOTION_UNAVAILABLE');
     check('gesture-view/legacy-return-preserves-author-paths',
       JSON.stringify(paths(q('symbol-stage').querySelector('svg'))) === JSON.stringify(paths(timeMaster)));
     await choose('reload', 'outline');
@@ -1523,7 +1605,7 @@ export async function runExplorerJourney() {
     }
 
     await choose('time', 'outline');
-    check('latest-clock-motion-refuses', q('play').disabled && q('gesture').value === '');
+    check('latest-clock-motion-uses-prepared-target', !q('play').disabled && q('gesture').value === 'clock.advance-hour');
     await choose('reload', 'outline');
     setReduced(true);
     await setProgress(0);
@@ -1531,11 +1613,11 @@ export async function runExplorerJourney() {
     q('display-color').value = '#19191e';
     q('display-color').dispatchEvent(new Event('input', { bubbles: true }));
     return { version: 1, scope: 'source Observatory consumer journey; bounded controls, no performance claim',
-      source: data.source, counts: data.summary, executionIdentity: data.executionIdentity, authority, checks,
+      source: data.source, counts: data.summary, executionIdentity: data.executionIdentity, authority, clockPoses, checks,
       userAgent: navigator.userAgent, downloadsChecked: downloads.length };
   } catch (error) {
     failed = true;
-    error.journey = { version: 1, checks, authority, failure: error.message };
+    error.journey = { version: 1, checks, authority, clockPoses, failure: error.message };
     throw error;
   } finally {
     window.fetch = originalFetch;

@@ -13,6 +13,47 @@ const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; ch
   '.json': 'application/json; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png' };
 const command = (file, args, cwd) => execFileSync(file, args, { cwd, encoding: 'utf8', windowsHide: true, maxBuffer: 16 * 1024 * 1024 });
 
+/** Рендеры фиксируют подготовленную позу в production Observatory вместе с 16/24/48 px. */
+async function captureClockRenderings(page, destination) {
+  const captures = [];
+  await page.setViewportSize({ width: 1440, height: 960 });
+  for (const [name, variant] of [['time', 'outline'], ['history', 'outline'], ['history', 'filled'], ['time', 'filled']]) {
+    await page.locator('#variant').selectOption(variant);
+    await page.locator('#symbol-inspector[aria-busy="false"]').waitFor();
+    await page.locator('#symbol-search').fill(name);
+    await page.locator(`[data-symbol="${name}"]`).click();
+    await page.locator('#symbol-inspector[aria-busy="false"]').waitFor();
+    await page.evaluate(() => {
+      const input = document.querySelector('#display-size');
+      input.value = '128'; input.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    const refusal = name === 'time' && variant === 'filled';
+    for (const progress of refusal ? [null] : [0, .5, 1]) {
+      if (progress !== null) {
+        await page.evaluate(value => {
+          const input = document.querySelector('#progress');
+          input.value = String(value); input.dispatchEvent(new Event('input', { bubbles: true }));
+        }, progress);
+        await page.waitForFunction(async ({ name, variant, progress }) => {
+          const result = (await import(`/package/gestures/${name}.js`)).prepareClockHands(variant);
+          if (!result.ok) return false;
+          const pose = result.prepared.sample(progress);
+          return pose.ok && document.querySelector('#pause').disabled &&
+            document.querySelector('#symbol-stage svg')?.querySelector(result.prepared.renderTarget.selector)?.getAttribute('d') === pose.d;
+        }, { name, variant, progress });
+      } else {
+        await page.waitForFunction(() => document.querySelector('#motion-status').textContent.startsWith('COMPOSITION_UNSUPPORTED:'));
+      }
+      const file = `explorer-clock-${name}-${variant}-${progress === null ? 'refusal' : progress === 0 ? 'rest' : progress === .5 ? 'half-hour' : 'one-hour'}.png`;
+      await page.locator('#symbol-inspector').scrollIntoViewIfNeeded();
+      await page.screenshot({ path: join(destination, file), fullPage: true, scale: 'css' });
+      const visible = await page.locator('#symbol-stage').innerHTML();
+      captures.push({ name, variant, progress, file, visibleSvg: visible });
+    }
+  }
+  return captures;
+}
+
 /** Already-built frozen candidate; упаковка проверяется внешним consumer lane. */
 export async function verifyExplorer({ browser, source, output }) {
   assertRemoteBenchmark();
@@ -73,6 +114,8 @@ export async function verifyExplorer({ browser, source, output }) {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.locator('#symbol-inspector').scrollIntoViewIfNeeded();
     await page.screenshot({ path: join(destination, 'explorer-states-mobile.png'), fullPage: true, scale: 'css' });
+    report.clockRenderings = await captureClockRenderings(page, destination);
+    if (report.pageErrors.length) throw new Error(`explorer clock renders: page errors: ${report.pageErrors.join('; ')}`);
     report.authoring = await verifyAuthoringPlayground({ browser, origin, output: destination });
     report.complete = true;
     writeFileSync(join(destination, 'explorer-journey.json'), JSON.stringify(report, null, 2));

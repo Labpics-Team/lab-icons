@@ -37,18 +37,22 @@ export function variationRuntimeTargets(laws) {
 
 /** Единственная release-проекция каталога; wildcard раскрывается в точные файлы. */
 export function symbolReleaseProjection(base, iconIds, stateGroupIds = [], variationIconIds = [], variationLaws = ['dots.affine'],
-  compiledSymbolModules = [], stateVariationGroupIds = [], contentVariationIconIds = [], stateLaws = ['enclosure.replace'], motionIconIds = [], capsuleMotionIconIds = []) {
+  compiledSymbolModules = [], stateVariationGroupIds = [], contentVariationIconIds = [], stateLaws = ['enclosure.replace'], motionIconIds = [], capsuleMotionIconIds = [], clockMotionIconIds = []) {
   const ids = [...iconIds].sort();
   const groups = [...stateGroupIds].sort();
   const stateVariations = [...stateVariationGroupIds].sort();
   const contentVariations = [...contentVariationIconIds].sort();
   const motions = [...motionIconIds].sort();
   const capsuleMotions = [...capsuleMotionIconIds].sort();
+  const clockMotions = [...clockMotionIconIds].sort();
   if (new Set(motions).size !== motions.length || motions.some(id => !ids.includes(id))) {
     throw new TypeError('motion projection: символ должен принадлежать авторскому каталогу');
   }
   if (new Set(capsuleMotions).size !== capsuleMotions.length || capsuleMotions.some(id => !motions.includes(id))) {
     throw new TypeError('capsule motion projection: width target должен принадлежать gesture каталогу');
+  }
+  if (new Set(clockMotions).size !== clockMotions.length || clockMotions.some(id => !motions.includes(id) || capsuleMotions.includes(id))) {
+    throw new TypeError('clock motion projection: отдельный clock target должен принадлежать gesture каталогу');
   }
   if (new Set(contentVariations).size !== contentVariations.length || contentVariations.some(id => !variationIconIds.includes(id))) {
     throw new TypeError('content variation projection: символ должен иметь авторский variation допуск');
@@ -85,13 +89,17 @@ export function symbolReleaseProjection(base, iconIds, stateGroupIds = [], varia
       : Object.values(conditions).map(target => target.slice(2)));
   const typeDependencies = ['dist/authoring/design-spec.d.ts', 'dist/ir/author-annulus-types.d.ts', 'dist/ir/author-content-types.d.ts', 'dist/ir/author-capsule-types.d.ts', 'dist/ir/author-catalog.generated.d.ts', 'dist/ir/author-provenance.d.ts', 'dist/ir/author-source.d.ts', 'dist/ir/authored-variation.d.ts', 'dist/ir/catalog.generated.d.ts', 'dist/ir/compiler.d.ts', 'dist/ir/glyph-types.d.ts', 'dist/ir/paint-types.d.ts', 'dist/ir/request.d.ts', 'dist/ir/lottie-types.d.ts', 'dist/ir/state-types.d.ts', 'dist/ir/state-common-types.d.ts', 'dist/ir/contour-state-types.d.ts'].sort();
   const runtimeDependencies = ['dist/ir/author-request-runtime.js', 'dist/ir/compiler.js', 'dist/ir/contour-runtime.js', 'dist/ir/request.js', 'dist/ir/symbol-runtime.js', 'dist/ir/lottie-runtime.js'].sort();
-  if (motions.some(id => !capsuleMotions.includes(id))) {
+  if (motions.some(id => !capsuleMotions.includes(id) && !clockMotions.includes(id))) {
     typeDependencies.push('dist/ir/gesture-types.d.ts'); typeDependencies.sort();
     runtimeDependencies.push('dist/ir/gesture-runtime.js');
   }
   if (capsuleMotions.length) {
     typeDependencies.push('dist/ir/author-capsule-motion-types.d.ts'); typeDependencies.sort();
     runtimeDependencies.push('dist/ir/capsule-motion-runtime.js');
+  }
+  if (clockMotions.length) {
+    typeDependencies.push('dist/ir/author-clock-motion-types.d.ts'); typeDependencies.sort();
+    runtimeDependencies.push('dist/ir/clock-motion-runtime.js');
   }
   if (groups.length && stateLaws.includes('source.replace')) {
     typeDependencies.push('dist/ir/source-state-types.d.ts'); typeDependencies.sort();

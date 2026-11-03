@@ -77,6 +77,8 @@ pnpm add @labpics/icons
 - `dist/content-variations/plus-circle.js`
 - `dist/content-variations/question-circle.d.ts`
 - `dist/content-variations/question-circle.js`
+- `dist/gestures/history.d.ts`
+- `dist/gestures/history.js`
 - `dist/gestures/mic-circle.d.ts`
 - `dist/gestures/mic-circle.js`
 - `dist/gestures/mic.d.ts`
@@ -85,6 +87,8 @@ pnpm add @labpics/icons
 - `dist/gestures/refresh.js`
 - `dist/gestures/reload.d.ts`
 - `dist/gestures/reload.js`
+- `dist/gestures/time.d.ts`
+- `dist/gestures/time.js`
 - `dist/index.d.ts`
 - `dist/index.js`
 - `dist/ir/annulus-geometry-runtime.js`
@@ -93,6 +97,7 @@ pnpm add @labpics/icons
 - `dist/ir/author-capsule-motion-types.d.ts`
 - `dist/ir/author-capsule-types.d.ts`
 - `dist/ir/author-catalog.generated.d.ts`
+- `dist/ir/author-clock-motion-types.d.ts`
 - `dist/ir/author-content-types.d.ts`
 - `dist/ir/author-provenance.d.ts`
 - `dist/ir/author-request-runtime.js`
@@ -103,6 +108,7 @@ pnpm add @labpics/icons
 - `dist/ir/capsule-motion-runtime.js`
 - `dist/ir/capsule-runtime.js`
 - `dist/ir/catalog.generated.d.ts`
+- `dist/ir/clock-motion-runtime.js`
 - `dist/ir/compiler.d.ts`
 - `dist/ir/compiler.js`
 - `dist/ir/content-geometry-runtime.js`
@@ -1529,6 +1535,7 @@ pnpm add @labpics/icons
 - `dist/ir/author-capsule-motion-types.d.ts`
 - `dist/ir/author-capsule-types.d.ts`
 - `dist/ir/author-catalog.generated.d.ts`
+- `dist/ir/author-clock-motion-types.d.ts`
 - `dist/ir/author-content-types.d.ts`
 - `dist/ir/author-provenance.d.ts`
 - `dist/ir/author-source.d.ts`

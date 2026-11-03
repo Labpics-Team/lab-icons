@@ -5,7 +5,7 @@ import { prepareContourStateEffect } from '../src/ir/contour-runtime.js';
 
 vi.mock('@labpics/motion', () => ({ animate: vi.fn(), sequence: vi.fn(), value: vi.fn() }));
 vi.stubGlobal('__MOTION_IDENTITY__', { package: '@labpics/motion', version: '0.5.0' });
-const { executeSymbolEffect, executePreparedWidth } = await import('../observatory/motion-execution.js');
+const { executeSymbolEffect, executePreparedWidth, executePreparedClock } = await import('../observatory/motion-execution.js');
 
 class SvgViewport {
   style = {};
@@ -298,6 +298,68 @@ describe('публичный Motion сохраняет владение подг
       expect(body.d).toBe(`width-${frames.at(-1)}`);
       expect(body.setAttribute).toHaveBeenCalledTimes(1);
     } finally { control?.stop(); clock.mockRestore(); }
+  });
+});
+
+describe('публичный Motion исполняет подготовленные стрелки в часах', () => {
+  const fixture = () => {
+    const prepared = { version: 1, law: 'joint.authored-elbow', reference: 'authored-pose', parameter: 'elapsed-hours',
+      renderTarget: { attribute: 'd', selector: '[data-part="clock-hands"]' },
+      sample: vi.fn(elapsedHours => ({ ok: true, elapsedHours, d: `hands-${elapsedHours}` })) };
+    const roots = Array.from({ length: 4 }, () => {
+      const svg = new SvgViewport();
+      const hands = { tagName: 'path', d: 'hands-0', getAttribute(key) { return this[key]; },
+        setAttribute: vi.fn(function (key, next) { this[key] = next; }) };
+      svg.querySelectorAll = vi.fn(() => [hands]);
+      svg.hands = hands;
+      return svg;
+    });
+    return { prepared, roots, request: { from: 0, to: 1, duration: 900, reducedMotion: false } };
+  };
+
+  it('один sample на кадр обновляет stage и три размера без нового binding', async () => {
+    const f = fixture(), observed = [];
+    const [control] = executePreparedClock(f.roots, f.prepared, f.request, { onProgress: hours => observed.push(hours) });
+    const clock = value.mock.results[0].value;
+    const before = f.prepared.sample.mock.calls.length;
+    clock.publish(.37);
+    expect(f.prepared.sample).toHaveBeenCalledTimes(before + 1);
+    expect(f.roots.map(svg => svg.hands.d)).toEqual(Array(4).fill('hands-0.37'));
+    expect(observed.at(-1)).toBe(.37);
+    for (const svg of f.roots) expect(svg.querySelectorAll).toHaveBeenCalledTimes(1);
+    expect(animate).not.toHaveBeenCalled(); expect(sequence).not.toHaveBeenCalled();
+    control.finish(); await expect(control.finished).resolves.toEqual({ status: 'finished' });
+  });
+
+  it.each([false, true])('новый обратный переход сохраняет видимую позу, reduced=%s', async reducedMotion => {
+    const { value: publicValue } = await vi.importActual('@labpics/motion');
+    value.mockImplementation(publicValue);
+    const f = fixture();
+    let hours = 0, previous, successor, now = 100;
+    const timer = vi.spyOn(performance, 'now').mockImplementation(() => now);
+    try {
+      [previous] = executePreparedClock(f.roots, f.prepared, f.request, { onProgress: next => { hours = next; } });
+      now += 200; previous.pause();
+      expect(hours).toBeGreaterThan(0); expect(hours).toBeLessThan(1);
+      [successor] = executePreparedClock(f.roots, f.prepared, { ...f.request, from: hours, to: 0, reducedMotion });
+      const visible = f.roots.map(svg => svg.hands.d);
+      previous.stop(); await expect(previous.finished).resolves.toEqual({ status: 'stopped' });
+      expect(f.roots.map(svg => svg.hands.d)).toEqual(visible);
+      successor.finish(); await expect(successor.finished).resolves.toEqual({ status: 'finished' });
+      expect(f.roots.every(svg => svg.hands.d === 'hands-0')).toBe(true);
+    } finally {
+      previous?.stop(); successor?.stop();
+      await Promise.allSettled([previous?.finished, successor?.finished]); timer.mockRestore();
+    }
+  });
+
+  it('не принимает другой scalar и несовпадающий physical target до admission clock', () => {
+    const f = fixture();
+    f.prepared.parameter = 'degrees';
+    expect(() => executePreparedClock(f.roots, f.prepared, f.request)).toThrow(/от авторской позы/);
+    f.prepared.parameter = 'elapsed-hours'; f.roots[2].hands.d = 'foreign';
+    expect(() => executePreparedClock(f.roots, f.prepared, f.request)).toThrow(/RENDER_CORRESPONDENCE_MISMATCH/);
+    expect(value).not.toHaveBeenCalled();
   });
 });
 describe('публичное исполнение semantic translation', () => {

@@ -1,24 +1,25 @@
 import { animate, sequence, value } from '@labpics/motion';
 
-/** Публичный scalar clock исполняет подготовленную геометрию; последняя запись — начало successor. */
-export function executePreparedWidth(roots, prepared, request, { onProgress } = {}) {
-  if (!prepared || prepared.version !== 1 || prepared.law !== 'capsule.width' || typeof prepared.sample !== 'function' ||
-      prepared.renderTarget?.attribute !== 'd' || !Number.isFinite(request?.duration) || request.duration < 0 ||
-      typeof request.reducedMotion !== 'boolean') throw new Error('Нужны подготовленная ширина и конечный запрос исполнения.');
-  const poseAt = width => {
-    const pose = prepared.sample(width);
+/** Последний записанный scalar — начало successor; clock принадлежит Lab Motion. */
+function executePreparedScalar(roots, prepared, request, scalarField, { onProgress } = {}) {
+  if (!prepared || prepared.version !== 1 || typeof prepared.sample !== 'function' ||
+      prepared.renderTarget?.attribute !== 'd' || typeof prepared.renderTarget.selector !== 'string' || !prepared.renderTarget.selector.length ||
+      !Number.isFinite(request?.from) || !Number.isFinite(request?.to) || !Number.isFinite(request?.duration) || request.duration < 0 ||
+      typeof request.reducedMotion !== 'boolean') throw new Error('INVALID_REQUEST: нужны подготовленная геометрия и конечный запрос исполнения.');
+  const poseAt = scalar => {
+    const pose = prepared.sample(scalar);
     if (!pose.ok) throw new Error(`${pose.reason.code}: ${pose.reason.message}`);
-    if (pose.bodyWidth !== width || typeof pose.d !== 'string' || !pose.d.length) throw new Error('Sampler не подготовил объявленную ширину.');
+    if (pose[scalarField] !== scalar || typeof pose.d !== 'string' || !pose.d.length) throw new Error('Sampler не подготовил объявленную позу.');
     return pose;
   };
   const initial = poseAt(request.from), endpoint = poseAt(request.to);
   const viewports = (Array.isArray(roots) ? roots : [roots]).flatMap(root =>
     root instanceof SVGElement ? [root] : [...root.querySelectorAll('svg')]);
-  if (!viewports.length || new Set(viewports).size !== viewports.length) throw new Error('Ширина требует независимые SVG viewport.');
+  if (!viewports.length || new Set(viewports).size !== viewports.length) throw new Error('Подготовленная геометрия требует независимые SVG viewport.');
   const bindings = viewports.map(svg => {
     const targets = svg.querySelectorAll(prepared.renderTarget.selector);
     if (targets.length !== 1 || targets[0].tagName?.toLowerCase() !== 'path' || targets[0].getAttribute('d') !== initial.d) {
-      throw new Error('RENDER_CORRESPONDENCE_MISMATCH: видимая ширина не соответствует preparation.');
+      throw new Error('RENDER_CORRESPONDENCE_MISMATCH: видимая поза не соответствует preparation.');
     }
     return targets[0];
   });
@@ -36,11 +37,11 @@ export function executePreparedWidth(roots, prepared, request, { onProgress } = 
     }
     if (pose.d !== lastD) for (const element of bindings) element.setAttribute('d', pose.d);
     lastD = pose.d;
-    onProgress?.(pose.bodyWidth);
+    onProgress?.(pose[scalarField]);
   };
-  unsubscribe = clock.subscribe(width => {
+  unsubscribe = clock.subscribe(scalar => {
     if (disposed) return;
-    try { write(poseAt(width)); }
+    try { write(poseAt(scalar)); }
     catch (error) { failure = error; release(); }
   });
   try {
@@ -58,6 +59,18 @@ export function executePreparedWidth(roots, prepared, request, { onProgress } = 
   return [{ finished, get state() { return playback.state; }, get duration() { return playback.duration; },
     pause: () => playback.pause(), play: () => playback.play(), seek: time => playback.seek(time),
     finish: () => playback.finish(), stop: release }];
+}
+
+export function executePreparedWidth(roots, prepared, request, options) {
+  if (prepared?.law !== 'capsule.width') throw new Error('Нужна подготовленная ширина корпуса.');
+  return executePreparedScalar(roots, prepared, request, 'bodyWidth', options);
+}
+
+export function executePreparedClock(roots, prepared, request, options) {
+  if (prepared?.law !== 'joint.authored-elbow' || prepared.parameter !== 'elapsed-hours' || prepared.reference !== 'authored-pose') {
+    throw new Error('Нужны подготовленные стрелки от авторской позы.');
+  }
+  return executePreparedScalar(roots, prepared, request, 'elapsedHours', options);
 }
 
 function contourEffect(effect, byPart, prepared, onProgress) {

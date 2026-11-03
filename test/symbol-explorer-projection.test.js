@@ -21,12 +21,23 @@ describe('browser-проекция принятых symbol capabilities', () => 
   it('копирует публичные gesture targets и отличает rotation от prepared sampler', () => {
     const { contract, surface } = gestureFixture();
     expect(symbolExplorerGestureProjection(contract, ['timer', 'mic'], surface))
-      .toEqual({ iconIds: ['mic', 'timer'], rotationIconIds: ['timer'], preparedWidthIconIds: ['mic'] });
+      .toEqual({ iconIds: ['mic', 'timer'], rotationIconIds: ['timer'], preparedWidthIconIds: ['mic'], preparedClockIconIds: [] });
     const files = symbolExplorerBrowserFiles(contract, ['timer', 'mic'], [], surface);
     expect(files).toContain('dist/gestures/timer.js');
     expect(files).toContain('dist/gestures/mic.js');
     expect(files).toContain('dist/ir/gesture-runtime.js');
     expect(files).not.toContain('dist/gestures/timer.d.ts');
+  });
+
+  it('подготовленные стрелки получают собственный sampler contract без rotation exports', () => {
+    const { surface } = gestureFixture(), ids = ['timer', 'mic', 'time'];
+    const contract = symbolReleaseProjection(base, ids, [], [], [], [], [], [], [], ['timer']);
+    contract.files.push('dist/gestures/mic.js', 'dist/gestures/mic.d.ts', 'dist/gestures/time.js', 'dist/gestures/time.d.ts');
+    surface['./gestures/time'] = ['motionCapabilities', 'prepareClockHands'];
+    expect(symbolExplorerGestureProjection(contract, ids, surface).preparedClockIconIds).toEqual(['time']);
+    expect(symbolExplorerBrowserFiles(contract, ids, [], surface)).toContain('dist/gestures/time.js');
+    surface['./gestures/time'] = ['prepareClockHands'];
+    expect(() => symbolExplorerGestureProjection(contract, ids, surface)).toThrow(/неполный prepared clock contract/);
   });
 
   it.each([

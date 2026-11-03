@@ -87,6 +87,12 @@ fill scopes. Записанные модели, оси и candidate-регист
 
 ## Получить семантический эффект
 
+Для изменения формы используйте отдельные подготовленные программы:
+[ширина микрофона](prepared-body-width.md) и
+[стрелки Time/History](prepared-clock-hands.md). Они принимают предметное
+число и возвращают полный `d` указанной физической path. Статический
+`symbols/<имя>` не подключает их автоматически.
+
 `compileSymbolEffect` принимает GlyphIR и capabilities без каталога или parser.
 Неаннотированный master получает `SEMANTIC_MOTION_UNAVAILABLE`. Текущие
 авторские `reload` и `refresh` поддерживают соответственно `reload.cycle` и

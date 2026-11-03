@@ -27,6 +27,7 @@ import { authorStateVariationGroupNames, compileAuthorStateVariations, renderSta
 import { authorMotionSymbolNames, compileAuthorMotionSymbols, renderAuthorMotionModule, authorMotionModuleDeclaration } from './lib/author-motion.js';
 import { authorMotionTargets } from './lib/author-motion-targets.js';
 import { projectAuthorCapsuleMotion, renderAuthorCapsuleMotionModule, authorCapsuleMotionModuleDeclaration } from './lib/author-capsule-motion.js';
+import { compileAuthorClockMotionSymbols, renderAuthorClockMotionModule, authorClockMotionModuleDeclaration } from './lib/author-clock-motion.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const TARGETS = ['ir', 'symbols', 'variations', 'content-variations', 'motion', 'lottie', 'authoring', 'states', 'state-variations', 'gestures'];
@@ -125,6 +126,7 @@ async function compileIrTargets({ root, staging }) {
     const variationLaws = authorVariationLawNames(authorSpec);
     const motionNames = authorMotionSymbolNames(authorSpec);
     const capsuleMotionNames = authorMotionTargets(authorSpec).capsules;
+    const clockMotionNames = authorMotionTargets(authorSpec).clocks;
     for (const name of TARGETS) mkdirSync(join(staging, name));
     mkdirSync(join(staging, 'ir/symbol-data'));
     const bundles = await Promise.allSettled([
@@ -149,6 +151,7 @@ async function compileIrTargets({ root, staging }) {
       bundle(root, staging, 'src/motion/index.ts', 'motion/index.js', ['../ir/contour-runtime.js']),
       ...(motionNames.length ? [bundle(root, staging, 'src/motion/gesture-runtime.ts', 'ir/gesture-runtime.js')] : []),
       ...(capsuleMotionNames.length ? [bundle(root, staging, 'src/ir/author-capsule-motion-runtime.ts', 'ir/capsule-motion-runtime.js')] : []),
+      ...(clockMotionNames.length ? [bundle(root, staging, 'src/ir/author-clock-motion-runtime.ts', 'ir/clock-motion-runtime.js')] : []),
       bundle(root, staging, 'src/lottie/runtime.ts', 'ir/lottie-runtime.js', ['../motion/index.js']),
       ...stateRuntimeTargets(stateLaws).map(target => bundle(root, staging, target.entry, `ir/${target.runtime}`)),
       // Serializer остаётся build-only: runtime групп потребляет проверенные строки.
@@ -160,6 +163,7 @@ async function compileIrTargets({ root, staging }) {
     if (failedBundle) throw failedBundle.reason;
     execFileSync(process.execPath, [join(root, 'node_modules/typescript/bin/tsc'), '-p', join(root, 'tsconfig.build.json'), '--outDir', declarations], { cwd: root, stdio: 'inherit' });
     for (const file of REQUIRED_DECLARATIONS) copyFileSync(join(declarations, 'ir', file), join(staging, 'ir', file));
+    if (clockMotionNames.length) copyFileSync(join(declarations, 'ir/author-clock-motion-types.d.ts'), join(staging, 'ir/author-clock-motion-types.d.ts'));
     // Source state-types публикуется под прежним IR specifier того же владельца.
     writeFileSync(join(staging, 'motion/index.d.ts'), readFileSync(join(declarations, 'motion/index.d.ts'), 'utf8')
       .replaceAll('../states/contour-types.js', '../ir/contour-state-types.js'));
@@ -240,6 +244,11 @@ async function compileIrTargets({ root, staging }) {
     for (const [icon, payload] of Object.entries(motionSymbols)) {
       writeFileSync(join(staging, 'gestures', `${icon}.js`), renderAuthorMotionModule(payload));
       writeFileSync(join(staging, 'gestures', `${icon}.d.ts`), authorMotionModuleDeclaration(payload));
+    }
+    const clockSymbols = compileAuthorClockMotionSymbols(author, authorSpec, { grid, catalog, createGlyphCompiler });
+    for (const [icon, payload] of Object.entries(clockSymbols)) {
+      writeFileSync(join(staging, 'gestures', `${icon}.js`), renderAuthorClockMotionModule(payload));
+      writeFileSync(join(staging, 'gestures', `${icon}.d.ts`), authorClockMotionModuleDeclaration(payload));
     }
     const assembly = await import(pathToFileURL(join(declarations, 'svg-assembly.mjs')).href);
     const stateGroups = compileAuthorStateGroups(author, stateSpec, { compiler, grid, ...assembly });

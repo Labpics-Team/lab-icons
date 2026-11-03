@@ -74,6 +74,20 @@ function independentReportDestination(output) {
 
 const motionTargets = authorMotionTargets(read('semantics/author-anatomy.json'));
 const rotationEntries = {};
+const clockEntries = {};
+for (const icon of motionTargets.clocks) {
+  const file = `dist/gestures/${icon}.js`;
+  if (!contract.files.includes(file)) throw new Error('measurement: clock target отсутствует в release contract');
+  const module = await import(pathToFileURL(join(root, file)).href);
+  const admitted = module.motionCapabilities();
+  if (!admitted.ok || admitted.capabilities.icon !== icon || admitted.capabilities.parameter !== 'elapsed-hours') {
+    throw new Error(`measurement: ${icon} не имеет подготовленных часов`);
+  }
+  const entry = `@labpics/icons/gestures/${icon}`;
+  clockEntries[`gesture-${icon}-prepared`] = `import { prepareClockHands } from '${entry}';\nconst result = prepareClockHands();\nconsole.log(result.ok ? result.prepared.sample(0.5) : result);\n`;
+  clockEntries[`gesture-${icon}-capabilities`] = `import { motionCapabilities } from '${entry}';\nconsole.log(motionCapabilities());\n`;
+  clockEntries[`gesture-${icon}-combined`] = `import { prepareClockHands, motionCapabilities } from '${entry}';\nconsole.log(prepareClockHands(), motionCapabilities());\n`;
+}
 for (const icon of motionTargets.rotations) {
   const file = `dist/gestures/${icon}.js`;
   if (!/^[a-z][a-z0-9-]*$/.test(icon) || !contract.files.includes(file)) {
@@ -93,6 +107,7 @@ for (const icon of motionTargets.rotations) {
   rotationEntries[`gesture-${icon}-combined`] = `import { renderMotionSvg, compileMotionEffect } from '${entry}';\nconsole.log(renderMotionSvg(${renderArgument}), compileMotionEffect('${gestures[0].id}', ${request}));\n`;
 }
 const entries = {
+  ...clockEntries,
   'one-static': oldConsumers.scenarios['one-static'].entry,
   'authored-static': "import { outline } from '@labpics/icons/symbols/time';\nconsole.log(outline);\n",
   'glyph-one': "import { glyph } from '@labpics/icons/symbols/alert';\nconsole.log(glyph());\n",

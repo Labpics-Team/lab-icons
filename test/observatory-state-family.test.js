@@ -14,7 +14,7 @@ function fixture({ holdFirst = false, acceptedGroups = groups, initialVariant = 
   const sourceIdentity = { fileKey: 'fixture', version: '1' };
   const state = { revision: 0, name: 'mic', variant: 'outline', glyph: { previous: true }, loaded: true,
     data: { source: sourceIdentity, stateGroups: acceptedGroups, variationIconIds: [], stateVariationGroupIds: [],
-      rotationGestureIconIds: [], preparedWidthIconIds: [] } };
+      rotationGestureIconIds: [], preparedWidthIconIds: [], preparedClockIconIds: [] } };
   const node = () => ({ value: '', hidden: false, disabled: false, textContent: '',
     setAttribute() {}, replaceChildren(...options) { this.options = options; this.value = options[0]?.value ?? ''; } });
   const ui = Object.fromEntries(['symbol-name', 'symbol-stage', 'source-status', 'export-status', 'progress', 'state-family', 'state-family-control'].map(id => [id, node()]));

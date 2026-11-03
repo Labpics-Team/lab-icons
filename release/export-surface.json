@@ -533,6 +533,10 @@
     "glyphCapabilities",
     "outline"
   ],
+  "./gestures/history": [
+    "motionCapabilities",
+    "prepareClockHands"
+  ],
   "./gestures/mic": [
     "motionCapabilities",
     "prepareBodyWidth"
@@ -550,6 +554,10 @@
     "compileMotionEffect",
     "motionCapabilities",
     "renderMotionSvg"
+  ],
+  "./gestures/time": [
+    "motionCapabilities",
+    "prepareClockHands"
   ],
   "./ir": [
     "GlyphModelError",

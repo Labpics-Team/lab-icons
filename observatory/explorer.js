@@ -3,7 +3,8 @@ import { renderGlyphSvg } from './package/ir/render.js';
 import { downloadFile } from './download.js';
 import { authoredVariationCapability, authoredVariationPresentation, renderVariationComparison } from './variation-preview.js';
 import { applyEnclosurePatch, visibleStateSvg } from './geometry-patch.js';
-import { admitAuthoredGesture, admitPreparedWidth, authoredGestureActive } from './authored-gesture.js';
+import { admitAuthoredGesture, admitPreparedWidth, admitPreparedClock, authoredGestureActive,
+  preparedPoseSvg, visiblePreparedSvg } from './authored-gesture.js';
 let execution;
 const motionExecutor = () => execution ??= import('./motion-execution.js');
 let recordedModels;
@@ -35,16 +36,32 @@ state.widthHead = null;
 state.widthRequestRevision = 0;
 state.widthViewPromise = null;
 state.widthInput = null;
+state.preparedClock = null;
+state.clockProgress = 0;
+state.clockValue = 0;
+state.clockHead = null;
 const authoredMotionView = (view = state.view, legacy = state.legacy) => authoredGestureActive(state.authoredGesture, view, legacy);
 const preparedWidthView = (view = state.view, legacy = state.legacy) => Boolean(state.preparedWidth?.ok && !legacy && ['original', 'generated'].includes(view));
+const preparedClockView = (view = state.view, legacy = state.legacy) => Boolean(state.preparedClock?.ok && !legacy && view === 'original');
 const widthGesture = () => preparedWidthView() && ui.gesture.value === state.preparedWidth.capabilities.law;
+const clockGesture = () => preparedClockView() && ui.gesture.value === state.preparedClock.capabilities.gesture.id;
 const widthAt = progress => 1 + (state.preparedWidth.prepared.domain.minimum - 1) * progress;
 const widthProgress = width => (1 - width) / (1 - state.preparedWidth.prepared.domain.minimum);
+const clockAt = progress => {
+  const gesture = state.preparedClock.capabilities.gesture;
+  return gesture.from + (gesture.to - gesture.from) * progress;
+};
+const clockProgress = hours => {
+  const gesture = state.preparedClock.capabilities.gesture;
+  return (hours - gesture.from) / (gesture.to - gesture.from);
+};
 const gestureDefinitions = (view = state.view, legacy = state.legacy, caps = state.capabilities) => [...(
   view === 'original' && !legacy && state.motionModule
     ? state.authoredGesture?.ok ? state.authoredGesture.capabilities.gestures : [] : caps?.motion.gestures ?? []),
   ...(preparedWidthView(view, legacy) ? [{ id: state.preparedWidth.capabilities.law, kind: 'state',
-    label: 'Ширина корпуса', restProgress: 0, meaning: 'Корпус сужается при неизменной высоте и толщине боковых стенок.' }] : [])];
+    label: 'Ширина корпуса', restProgress: 0, meaning: 'Корпус сужается при неизменной высоте и толщине боковых стенок.' }] : []),
+  ...(preparedClockView(view, legacy) ? [{ ...state.preparedClock.capabilities.gesture,
+    label: 'Ход времени', restProgress: 0 }] : [])];
 const variationAvailable = () => authoredVariationCapability(state.module?.glyphCapabilities(state.variant));
 const variationView = () => Boolean(variationAvailable() && state.view !== 'original' && !state.legacy);
 function updateVariationStatus() {
@@ -155,21 +172,26 @@ function inspectorPresentation() {
   const author = member?.author ?? row.original;
   ui['source-status'].textContent = `Lab UI v2.1. Версия ${author.version}. Узел ${author.nodeId}. ` +
     (active ? contourGroup(group) ? 'Авторские контуры меняют ориентацию; средняя точка остаётся на месте.' : sourceGroup(group) ? 'Два самостоятельных авторских рисунка. Переход сохраняет видимую смесь при прерывании.' : variation ? 'Авторское содержимое; вариативное обрамление сохраняется при замене знака.' : 'Авторский знак; общая оболочка сохраняется при замене.' : widthGesture()
-      ? 'Подготовленная ширина авторского корпуса. Высота и остальные части сохраняются; размерные образцы повторяют видимую форму.' : state.legacy ? 'Прежняя модель: паритет с новой авторской основой не принят.' : variation
+      ? 'Подготовленная ширина авторского корпуса. Высота и остальные части сохраняются; размерные образцы повторяют видимую форму.' : clockGesture()
+      ? `${state.preparedClock.capabilities.gesture.meaning} Размерные образцы и SVG повторяют видимую позу.` : state.legacy ? 'Прежняя модель: паритет с новой авторской основой не принят.' : variation
       ? `${comparison ? 'Красным — исходная форма, синим — изменённая. ' : ''}${authoredVariationPresentation(variationAvailable()).summary(state.variation)} Образцы размеров и SVG относятся к этой форме.`
       : comparison ? `Красным — текущая основа, синим — прежняя ${row.model?.catalogState === 'accepted' ? 'модель' : 'модель на проверке'} при исходных параметрах. Части и образцы размеров относятся к текущему авторскому мастеру. Паритет не принят.` : 'Текущий авторский мастер. Возможности относятся к его закреплённой версии.');
   ui['consumer-import'].textContent = active ? `import { renderStateSvg, compileStateEffect${variation ? ', renderEnclosurePatch' : ''} } from\n  '@labpics/icons/${variation ? 'state-variations' : 'states'}/${group.capabilities.group}';` : widthGesture()
-    ? `import { prepareBodyWidth } from\n  '@labpics/icons/gestures/${state.name}';\nimport { value } from '@labpics/motion';` : state.legacy ? `import { glyph } from '@labpics/icons/ir';\n// Прежняя основа; текущий master: ./symbols/${state.name}` : authoredMotionView()
+    ? `import { prepareBodyWidth } from\n  '@labpics/icons/gestures/${state.name}';\nimport { value } from '@labpics/motion';` : clockGesture()
+    ? `import { prepareClockHands, motionCapabilities } from\n  '@labpics/icons/gestures/${state.name}';\nimport { value } from '@labpics/motion';` : state.legacy ? `import { glyph } from '@labpics/icons/ir';\n// Прежняя основа; текущий master: ./symbols/${state.name}` : authoredMotionView()
     ? `import { renderMotionSvg, compileMotionEffect } from\n  '@labpics/icons/gestures/${state.name}';`
     : `import { glyph } from\n  '@labpics/icons/${variation ? 'variations' : 'symbols'}/${state.name}';`;
   const authoredEffect = authoredMotionView() ? motionAdmission(state.glyph, caps, gestureDefinitions()[0]?.id) : null;
   const widthTarget = widthGesture() ? state.preparedWidth.prepared.renderTarget : null;
+  const clockTarget = clockGesture() ? state.preparedClock.prepared.renderTarget : null;
   const parts = active ? (contourGroup(group) ? group.capabilities.partIds : [...member.contentPartIds, ...group.capabilities.sharedPartIds])
     .map(id => ({ id, role: id === group.capabilities.enclosurePartId ? 'container' : 'content' })) : authoredEffect?.ok
       ? [...authoredEffect.effect.targets.map(target => ({ id: target.partId, motion: 'Движущаяся часть' })),
         ...authoredEffect.effect.unchangedPartIds.map(id => ({ id, motion: 'Неподвижная часть' }))] : widthTarget
         ? [{ id: widthTarget.partId, motion: 'Меняется ширина корпуса' },
-          ...widthTarget.unchangedPartIds.map(id => ({ id, motion: 'Неподвижная часть' }))] : state.glyph.parts;
+          ...widthTarget.unchangedPartIds.map(id => ({ id, motion: 'Неподвижная часть' }))] : clockTarget
+        ? [...clockTarget.partIds.map(id => ({ id, motion: 'Стрелка от авторской позы' })),
+          ...clockTarget.unchangedPartIds.map(id => ({ id, motion: 'Неподвижная часть' }))] : state.glyph.parts;
   ui.parts.replaceChildren(...parts.map(part => {
     const item = document.createElement('li');
     item.textContent = part.motion ? `${part.id} — ${part.motion}` : part.role === 'unclassified' ? `Авторский контур ${part.zIndex + 1}; семантика пока не принята.` : `${comparison ? 'Авторский ' : ''}${part.id} — ${part.role}`;
@@ -183,8 +205,9 @@ function inspectorPresentation() {
     patchStateImages(ui['size-samples'], enclosurePatch());
   } else {
     const productionSvg = state.legacy || variation || motionAdmission(state.glyph, caps, gestureDefinitions()[0]?.id)?.ok;
-    stateSamples(size => authoredMotionView() ? state.authoredGesture.svg : productionSvg
-      ? renderGlyphSvg(state.glyph, { instanceId: `sample-${state.revision}-${state.viewRevision}-${size}` }) : state.original);
+    const clockSvg = preparedClockView() ? preparedPoseSvg(state.preparedClock.prepared, state.clockValue) : null;
+    stateSamples(size => clockSvg ?? (authoredMotionView() ? state.authoredGesture.svg : productionSvg
+      ? renderGlyphSvg(state.glyph, { instanceId: `sample-${state.revision}-${state.viewRevision}-${size}` }) : state.original));
   }
   updateVariationStatus();
 }
@@ -215,6 +238,7 @@ function replacementChoices() {
 
 function progress() {
   if (state.widthHead || widthGesture()) return state.widthProgress;
+  if (state.clockHead || clockGesture()) return state.clockProgress;
   const head = state.playhead;
   if (!head) return Number(ui.progress.value);
   // Фаза нужна для выбора обратного участка: одинаковый сдвиг бывает на
@@ -231,6 +255,7 @@ function stop() {
   state.effect = null;
   state.playhead = null;
   state.widthHead = null;
+  state.clockHead = null;
   state.pendingMotion = null;
   state.motionRevision++;
   if (state.replacement) state.replacement.paused = false;
@@ -288,6 +313,7 @@ function compileGestureEffect(glyph, caps, gesture, request, { view = state.view
 function motionAdmission(glyph = state.glyph, caps = state.capabilities, gesture = ui.gesture.value, viewOptions) {
   if (!glyph || !caps || !gesture) return null;
   if (gesture === state.preparedWidth?.capabilities?.law && preparedWidthView(viewOptions?.view, viewOptions?.legacy)) return state.preparedWidth;
+  if (gesture === state.preparedClock?.capabilities?.gesture.id && preparedClockView(viewOptions?.view, viewOptions?.legacy)) return state.preparedClock;
   return compileGestureEffect(glyph, caps, gesture, { duration: 0 }, viewOptions);
 }
 
@@ -324,12 +350,13 @@ function updateMotionControls() {
   }
   const admitted = state.loaded && motionAdmission()?.ok;
   const ready = admitted && !state.viewLoading && motionView();
-  ui['progress-label'].textContent = widthGesture() ? 'Прогресс сужения' : selectedGesture()?.kind === 'state' ? 'Состояние' : 'Прогресс';
+  ui['progress-label'].textContent = widthGesture() ? 'Прогресс сужения' : clockGesture() ? 'Ход на один час' : selectedGesture()?.kind === 'state' ? 'Состояние' : 'Прогресс';
   for (const id of ['play', 'reverse', 'progress', 'gesture']) ui[id].disabled = !ready;
-  ui.pause.disabled = !ready || (!state.playhead && !state.widthHead && !state.pendingMotion);
-  ui.pause.textContent = (state.pendingMotion?.paused ?? (state.widthHead ? !state.widthHead.running : state.playhead && !state.playhead.running)) ? 'Продолжить' : 'Пауза';
+  const preparedHead = state.widthHead ?? state.clockHead;
+  ui.pause.disabled = !ready || (!state.playhead && !preparedHead && !state.pendingMotion);
+  ui.pause.textContent = (state.pendingMotion?.paused ?? (preparedHead ? !preparedHead.running : state.playhead && !state.playhead.running)) ? 'Продолжить' : 'Пауза';
   const identity = state.data.executionIdentity;
-  const refusal = state.view === 'original' && !state.legacy ? state.authoredGesture?.reason ?? state.preparedWidth?.reason : null;
+  const refusal = state.view === 'original' && !state.legacy ? state.authoredGesture?.reason ?? state.preparedWidth?.reason ?? state.preparedClock?.reason : null;
   ui['motion-status'].textContent = ready ? `${identity.package} ${identity.version}. ${cyclicGesture() ? 'Можно повторить, развернуть или прервать движение.' : 'Можно развернуть или прервать движение.'}${state.legacy ? ' Жест относится к прежней модели.' : ''}` : refusal
     ? `${refusal.code}: ${refusal.message}` : admitted ? 'Выберите авторский вид, чтобы управлять его жестом.' : 'Для этой авторской основы семантический жест пока не принят.';
 }
@@ -424,8 +451,9 @@ async function renderView(view = state.view, { preserveProgress = false, variati
     }
     const annotatedSource = !legacy && motionAdmission(glyph, capabilities, gestureDefinitions(view, legacy, capabilities)[0]?.id, { view, legacy })?.ok;
     const productionSvg = legacy || modified || annotatedSource;
-    let svg = authoredMotionView(view, legacy) ? state.authoredGesture.svg : productionSvg
-      ? renderGlyphSvg(glyph, { instanceId: `stage-${revision}-${viewRevision}` }) : state.original;
+    let svg = preparedClockView(view, legacy) ? preparedPoseSvg(state.preparedClock.prepared, state.clockValue)
+      : authoredMotionView(view, legacy) ? state.authoredGesture.svg : productionSvg
+        ? renderGlyphSvg(glyph, { instanceId: `stage-${revision}-${viewRevision}` }) : state.original;
     if (modified && ['overlay', 'difference'].includes(view)) {
       const source = state.module.glyph({ variant: state.variant, modelMode: 'source-only' });
       svg = renderVariationComparison(renderGlyphSvg(source, { instanceId: `source-${revision}-${viewRevision}` }),
@@ -438,7 +466,8 @@ async function renderView(view = state.view, { preserveProgress = false, variati
     if (revision !== state.revision || viewRevision !== state.viewRevision) return;
     const changedControls = capabilities !== state.capabilities || legacy !== state.legacy;
     const changedStateView = state.replacement && replacementViewAvailable(view) !== replacementViewAvailable(state.view);
-    const changedGestureView = authoredMotionView(view, legacy) !== authoredMotionView() || preparedWidthView(view, legacy) !== preparedWidthView();
+    const changedGestureView = authoredMotionView(view, legacy) !== authoredMotionView() || preparedWidthView(view, legacy) !== preparedWidthView() ||
+      preparedClockView(view, legacy) !== preparedClockView();
     Object.assign(state, { view, glyph, capabilities, modelModule, legacy, axes, variation: requestedVariation, viewLoading: false });
     ui['symbol-stage'].dataset.view = view;
     ui.pause.textContent = 'Пауза';
@@ -467,8 +496,8 @@ async function renderView(view = state.view, { preserveProgress = false, variati
       state.widthValue = view === 'original' ? 1 : state.variation.bodyWidth;
       state.widthProgress = widthProgress(state.widthValue);
     }
-    ui.progress.value = String(widthGesture() ? state.widthProgress : motionAdmission()?.ok ? preserveProgress ? previousProgress : selectedGesture()?.restProgress ?? 0 : 0);
-    if (!widthGesture() && preserveProgress && motionAdmission()?.ok && motionView()) await seekProgress(previousProgress);
+    ui.progress.value = String(widthGesture() ? state.widthProgress : clockGesture() ? state.clockProgress : motionAdmission()?.ok ? preserveProgress ? previousProgress : selectedGesture()?.restProgress ?? 0 : 0);
+    if (!widthGesture() && !clockGesture() && preserveProgress && motionAdmission()?.ok && motionView()) await seekProgress(previousProgress);
     if (revision !== state.revision || viewRevision !== state.viewRevision) return;
     inspectorPresentation();
     updateViewControls();
@@ -623,6 +652,9 @@ async function select(name, { reveal = false, stateGroup = null } = {}) {
   state.widthProgress = 0;
   state.widthValue = 1;
   state.widthViewPromise = null;
+  state.preparedClock = null;
+  state.clockProgress = 0;
+  state.clockValue = 0;
   state.replacement = null;
   state.original = '';
   state.revision++;
@@ -650,7 +682,7 @@ async function select(name, { reveal = false, stateGroup = null } = {}) {
       membership ? import(`./package/states/${membership.group}.js`) : null,
       membership && state.data.stateVariationGroupIds?.includes(membership.group)
         ? import(`./package/state-variations/${membership.group}.js`) : null,
-      state.data.rotationGestureIconIds.includes(name) || state.data.preparedWidthIconIds.includes(name) ? import(`./package/gestures/${name}.js`) : null,
+      state.data.rotationGestureIconIds.includes(name) || state.data.preparedWidthIconIds.includes(name) || state.data.preparedClockIconIds.includes(name) ? import(`./package/gestures/${name}.js`) : null,
     ]);
     if (!response.ok) throw new Error(`Авторский SVG недоступен: HTTP ${response.status}`);
     const original = await response.text();
@@ -662,6 +694,8 @@ async function select(name, { reveal = false, stateGroup = null } = {}) {
     state.motionModule = motionModule;
     state.authoredGesture = state.data.rotationGestureIconIds.includes(name) ? admitAuthoredGesture(motionModule, state.glyph, row.original) : null;
     state.preparedWidth = state.data.preparedWidthIconIds.includes(name) ? admitPreparedWidth(motionModule, state.glyph, row.original, state.capabilities.variation) : null;
+    state.preparedClock = state.data.preparedClockIconIds.includes(name) ? admitPreparedClock(motionModule, state.glyph, row.original) : null;
+    if (state.preparedClock?.ok) state.clockValue = state.preparedClock.capabilities.gesture.from;
     if (replacementModule) {
       const capabilities = replacementModule.stateCapabilities();
       const member = capabilities.states.find(member => member.icon === name);
@@ -690,6 +724,7 @@ async function select(name, { reveal = false, stateGroup = null } = {}) {
     state.module = state.capabilities = state.glyph = null;
     state.motionModule = state.authoredGesture = null;
     state.preparedWidth = null;
+    state.preparedClock = null;
     state.replacement = null;
     state.original = '';
     clearInspector('Не загружен');
@@ -776,6 +811,59 @@ async function advanceWidth(to, { duration = 900, width = widthAt(to) } = {}) {
   }
 }
 
+async function advanceClock(to, { duration = 900, hours = clockAt(to) } = {}) {
+  if (!state.loaded || state.viewLoading || !clockGesture()) return;
+  const admission = state.preparedClock, prepared = admission.prepared;
+  const sampled = prepared.sample(hours);
+  if (!sampled.ok) {
+    const error = Object.assign(new Error(sampled.reason.message), { code: sampled.reason.code });
+    ui['motion-status'].textContent = `${error.code}: ${error.message}`;
+    return { ok: false, error };
+  }
+  const revision = state.revision, viewRevision = state.viewRevision;
+  const motionRevision = ++state.motionRevision, pending = { paused: false, to, hours };
+  state.pendingMotion = pending;
+  updateMotionControls();
+  try {
+    const executor = await motionExecutor();
+    if (revision !== state.revision || viewRevision !== state.viewRevision || motionRevision !== state.motionRevision ||
+        state.preparedClock !== admission || !clockGesture()) return;
+    const previous = state.animations;
+    const controls = executor.executePreparedClock([ui['symbol-stage'], ui['size-samples']], prepared, {
+      from: state.clockValue, to: hours, duration,
+      reducedMotion: reducedPreference.matches || ui['reduce-motion'].checked,
+    }, { onProgress(value) {
+      if (revision !== state.revision || viewRevision !== state.viewRevision || state.preparedClock !== admission) return;
+      state.clockValue = value;
+      state.clockProgress = clockProgress(value);
+      ui.progress.value = String(state.clockProgress);
+    } });
+    for (const control of previous) control.stop();
+    state.animations = controls;
+    state.effect = null;
+    state.playhead = null;
+    state.pendingMotion = null;
+    state.clockHead = { to, hours, running: !pending.paused };
+    if (pending.paused) for (const control of controls) control.pause();
+    updateMotionControls();
+    Promise.all(controls.map(control => control.finished)).then(results => {
+      if (motionRevision !== state.motionRevision || results.some(result => result.status !== 'finished')) return;
+      state.clockHead = null; state.animations = [];
+      inspectorPresentation(); updateMotionControls(); displayStyle();
+    }).catch(error => {
+      if (motionRevision !== state.motionRevision) return;
+      state.clockHead = null; state.animations = [];
+      updateMotionControls(); ui['motion-status'].textContent = error.message;
+    });
+    return { ok: true };
+  } catch (error) {
+    if (revision !== state.revision || viewRevision !== state.viewRevision || motionRevision !== state.motionRevision) return;
+    state.pendingMotion = null;
+    updateMotionControls(); ui['motion-status'].textContent = error.message;
+    return { ok: false, error };
+  }
+}
+
 async function replaceState(target) {
   if (!replacementMode() || !state.loaded || state.viewLoading) return;
   const group = state.replacement;
@@ -826,6 +914,7 @@ async function replaceState(target) {
 
 async function advance(to, { repeatCycle = false } = {}) {
   if (widthGesture()) return advanceWidth(to);
+  if (clockGesture()) return advanceClock(to);
   if (!state.loaded || state.viewLoading || !motionView()) return;
   const revision = state.revision;
   const viewRevision = state.viewRevision;
@@ -887,10 +976,11 @@ for (const button of document.querySelectorAll('button[data-view]')) button.addE
 ui.play.addEventListener('click', () => replacementMode() ? replaceState(state.replacement.target) : advance(1, { repeatCycle: true }));
 ui.reverse.addEventListener('click', () => replacementMode() ? replaceState(state.replacement.previous) : advance(0));
 ui.pause.addEventListener('click', () => {
-  if (widthGesture()) {
-    const pause = state.pendingMotion ? !state.pendingMotion.paused : Boolean(state.widthHead?.running);
+  if (widthGesture() || clockGesture()) {
+    const head = widthGesture() ? state.widthHead : state.clockHead;
+    const pause = state.pendingMotion ? !state.pendingMotion.paused : Boolean(head?.running);
     if (state.pendingMotion) state.pendingMotion.paused = pause;
-    if (state.widthHead) state.widthHead.running = !pause;
+    if (head) head.running = !pause;
     for (const control of state.animations) pause ? control.pause() : control.play();
     updateMotionControls();
     return;
@@ -928,6 +1018,7 @@ ui.pause.addEventListener('click', () => {
 });
 async function seekProgress(to) {
   if (widthGesture()) return advanceWidth(to, { duration: 0 });
+  if (clockGesture()) return advanceClock(to, { duration: 0 });
   stop();
   const motionRevision = state.motionRevision;
   const result = effect(to, to, { duration: 0 });
@@ -950,6 +1041,11 @@ function reduceCurrentMotion() {
   if (widthGesture()) {
     const target = state.pendingMotion ?? state.widthHead;
     if (target) advanceWidth(target.to, { width: target.width });
+    return;
+  }
+  if (clockGesture()) {
+    const target = state.pendingMotion ?? state.clockHead;
+    if (target) advanceClock(target.to, { hours: target.hours });
     return;
   }
   const target = state.pendingMotion?.to ?? state.widthHead?.to ?? state.effect?.to;
@@ -982,18 +1078,15 @@ ui.export.addEventListener('click', async () => {
       return;
     }
   }
-  else if (widthGesture()) {
-    if (format !== 'svg') { ui['export-status'].textContent = `FORMAT_UNSUPPORTED: ${format === 'effect' ? 'Web effect' : format === 'lottie' ? 'Lottie' : 'SF Symbols'} не экспортирует подготовленную ширину корпуса.`; return; }
-    const svg = ui['symbol-stage'].querySelector('svg');
-    const pose = state.preparedWidth.prepared.sample(state.widthValue);
-    const targets = svg?.querySelectorAll(state.preparedWidth.prepared.renderTarget.selector);
-    if (!pose.ok || targets?.length !== 1 || targets[0].getAttribute('d') !== pose.d) {
-      ui['export-status'].textContent = 'RENDER_CORRESPONDENCE_MISMATCH: SVG не соответствует видимой ширине.'; return;
+  else if (widthGesture() || clockGesture()) {
+    if (format !== 'svg') {
+      ui['export-status'].textContent = `FORMAT_UNSUPPORTED: ${format === 'effect' ? 'Web effect' : format === 'lottie' ? 'Lottie' : 'SF Symbols'} не экспортирует ${clockGesture() ? 'подготовленный ход стрелок' : 'подготовленную ширину корпуса'}.`;
+      return;
     }
-    const image = svg.cloneNode(true);
-    image.style.removeProperty('width'); image.style.removeProperty('height');
-    image.setAttribute('color', displayColor.value);
-    content = image.outerHTML;
+    try {
+      const admission = clockGesture() ? state.preparedClock : state.preparedWidth;
+      content = visiblePreparedSvg(ui['symbol-stage'], admission.prepared, clockGesture() ? state.clockValue : state.widthValue, displayColor.value);
+    } catch (error) { ui['export-status'].textContent = error.message; return; }
   }
   else if (format === 'svg') content = legacyExport ? state.glyph.svg : variationView()
     ? renderGlyphSvg(state.glyph, { instanceId: 'export' }) : state.original;
@@ -1026,7 +1119,7 @@ ui.export.addEventListener('click', async () => {
     `${group ? `${group.capabilities.group}-${group.target}` : state.name}-${state.variant}${legacyExport ? '-recorded-model' : variationView() ? '-variation' : ''}.${format === 'svg' ? 'svg' : format === 'lottie' ? 'lottie.json' : 'effect.json'}`);
   ui['export-status'].textContent = group && format === 'svg'
     ? visibleStateExport ? 'SVG видимой позы подготовлен.' : 'SVG выбранного состояния подготовлен.'
-    : format === 'svg' && widthGesture() ? 'SVG видимой ширины подготовлен.' : format === 'svg' && authoredMotionView() ? 'SVG исходного мастера подготовлен.'
+    : format === 'svg' && clockGesture() ? 'SVG видимой позы стрелок подготовлен.' : format === 'svg' && widthGesture() ? 'SVG видимой ширины подготовлен.' : format === 'svg' && authoredMotionView() ? 'SVG исходного мастера подготовлен.'
     : 'Файл подготовлен.';
 });
 
@@ -1037,6 +1130,7 @@ try {
   if (!Array.isArray(state.data.variationIconIds)) throw new Error('Метаданные вариативности недоступны.');
   if (!Array.isArray(state.data.rotationGestureIconIds)) throw new Error('Метаданные авторских жестов недоступны.');
   if (!Array.isArray(state.data.preparedWidthIconIds)) throw new Error('Метаданные подготовленной ширины недоступны.');
+  if (!Array.isArray(state.data.preparedClockIconIds)) throw new Error('Метаданные подготовленных стрелок недоступны.');
   ui['corpus-count'].textContent = `${state.data.summary.glyphs} семейств`;
   if (!state.data.rows.some((row) => row.name === state.name)) state.name = state.data.rows[0].name;
   await select(state.name);

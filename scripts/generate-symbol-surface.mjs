@@ -21,7 +21,7 @@ const payloads = await authoredSymbolPayloads(names);
 const modules = Object.values(payloads).map(renderSymbolModules);
 const motion = authorMotionTargets(authorSpec);
 const contract = symbolReleaseProjection(read('release/contract.json'), names, groups, variationNames, authorVariationLawNames(authorSpec),
-  modules, authorStateVariationGroupNames(stateSpec, authorSpec), authorContentVariationIconNames(authorSpec), authorStateLawNames(stateSpec), motion.names, motion.capsules);
+  modules, authorStateVariationGroupNames(stateSpec, authorSpec), authorContentVariationIconNames(authorSpec), authorStateLawNames(stateSpec), motion.names, motion.capsules, motion.clocks);
 writeFileSync(join(root, 'src/ir/author-catalog.generated.ts'), renderAuthorTypeProjection(author));
 writeFileSync(join(root, 'release/contract.json'), `${JSON.stringify(contract, null, 1)}\n`);
 const pkg = read('package.json');

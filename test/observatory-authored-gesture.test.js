@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { admitAuthoredGesture, admitPreparedWidth, authoredGestureActive } from '../observatory/authored-gesture.js';
+import { admitAuthoredGesture, admitPreparedWidth, admitPreparedClock, authoredGestureActive } from '../observatory/authored-gesture.js';
 
 function fixture() {
   const author = { kind: 'figma', fileKey: 'file', version: 'version', nodeId: '1:2',
@@ -126,5 +126,56 @@ describe('подготовленная ширина имеет свой конт
   ])('отклоняет %s', (_, mutate) => {
     const value = widthFixture(); mutate(value);
     expect(() => admitPreparedWidth(value.module, value.glyph, value.original, value.variation)).toThrow(/не соответствует/);
+  });
+});
+
+function clockFixture() {
+  const value = fixture();
+  const capabilities = { icon: value.glyph.icon, variant: value.glyph.variant, author: value.capabilities.author,
+    version: 1, law: 'joint.authored-elbow', parameter: 'elapsed-hours', reference: 'authored-pose',
+    geometrySha256: '6'.repeat(64), formats: ['svg', 'prepared-clock-hands'],
+    gesture: { id: 'clock.advance-hour', kind: 'state', meaning: 'Один час от авторской позы.', from: 0, to: 1, unit: 'elapsed-hours' } };
+  const prepared = { version: 1, icon: capabilities.icon, variant: capabilities.variant, law: capabilities.law,
+    parameter: capabilities.parameter, reference: capabilities.reference, svg: '<svg><path data-part="clock-hands"/></svg>',
+    sample: elapsedHours => ({ ok: true, elapsedHours, d: `M${elapsedHours} 0Z` }),
+    renderTarget: { selector: '[data-part="clock-hands"]', attribute: 'd', partIds: ['minute', 'hour'], unchangedPartIds: ['enclosure'] } };
+  const module = { motionCapabilities: () => ({ ok: true, capabilities }), prepareClockHands: () => ({ ok: true, prepared }) };
+  return { ...value, module, capabilities, prepared };
+}
+
+describe('подготовленные стрелки принимаются независимо от rotation-анатомии', () => {
+  it('проверяет master, смысл и preparation, сохраняя static glyph без анатомии', () => {
+    const f = clockFixture(), before = structuredClone(f.glyph);
+    expect(f.capabilities.anatomy).toBeUndefined();
+    expect(f.prepared.svg).not.toBe(f.svg);
+    const admitted = admitPreparedClock(f.module, f.glyph, f.original);
+    expect(admitted).toEqual({ ok: true, capabilities: f.capabilities, prepared: f.prepared });
+    expect(Object.isFrozen(admitted)).toBe(true);
+    expect(f.glyph).toEqual(before);
+  });
+
+  it.each(['VARIANT_UNSUPPORTED', 'COMPOSITION_UNSUPPORTED'])('сохраняет %s без вызова preparation и отказа static glyph', code => {
+    const f = clockFixture(), refusal = { ok: false, reason: { code, message: 'Target не подготовлен.' } };
+    f.module.motionCapabilities = () => refusal;
+    f.module.prepareClockHands = () => { throw new Error('Preparation не должна вызываться.'); };
+    expect(admitPreparedClock(f.module, f.glyph, f.original)).toBe(refusal);
+  });
+
+  it.each([
+    ['другой master', f => { f.original.masterSha256 = '7'.repeat(64); }],
+    ['чужой author receipt', f => { f.capabilities.author = { ...f.capabilities.author, nodeSha256: '7'.repeat(64) }; }],
+    ['нет geometry identity', f => { f.capabilities.geometrySha256 = ''; }],
+    ['чужая единица', f => { f.capabilities.gesture.unit = 'degrees'; }],
+    ['чужая начальная поза', f => { f.capabilities.reference = 'absolute-time'; }],
+    ['потерянный смысл', f => { f.capabilities.gesture.meaning = ''; }],
+    ['другой интервал', f => { f.capabilities.gesture.to = 12; }],
+    ['подменённая preparation', f => { f.prepared.icon = 'other'; }],
+    ['нет clock-svg формата', f => { f.capabilities.formats = ['svg']; }],
+    ['отдельный transform', f => { f.prepared.renderTarget.attribute = 'transform'; }],
+    ['повторная стрелка', f => { f.prepared.renderTarget.partIds = ['minute', 'minute']; }],
+    ['стрелка одновременно неподвижна', f => { f.prepared.renderTarget.unchangedPartIds = ['hour']; }],
+  ])('отклоняет %s', (_, mutate) => {
+    const f = clockFixture(); mutate(f);
+    expect(() => admitPreparedClock(f.module, f.glyph, f.original)).toThrow(/не соответствуют/);
   });
 });

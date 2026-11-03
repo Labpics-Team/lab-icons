@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 
 const source = readFileSync(new URL('../observatory/motion-execution.js', import.meta.url), 'utf8');
-const functionSource = source.slice(source.indexOf('export function executePreparedWidth'), source.indexOf('\nfunction contourEffect')).replace(/^export /, '');
+const functionSource = source.slice(source.indexOf('function executePreparedScalar'), source.indexOf('\nfunction contourEffect')).replace(/^export /gm, '');
 
 function fixture({ compound = false, reducedMotion = false } = {}) {
   const selector = compound ? '[data-parts="enclosure support body"]' : '[data-part="body"]';
