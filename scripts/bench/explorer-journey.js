@@ -64,11 +64,29 @@ export function matchesAuthoredCapsulePath(before, after, width) {
   } catch { return false; }
 }
 
-export function capsuleSvgFrameMatches(observed, viewBox) {
+function capsuleFrameGeometryMatches(observed, viewBox) {
   const same = (left, right) => Number.isFinite(left) && Number.isFinite(right) && Math.abs(left - right) < 0.0001;
   return observed?.viewBox?.length === 4 && viewBox.length === 4 && observed.viewBox.every((value, index) => same(value, viewBox[index])) &&
-    observed.preserveAspectRatio === 'xMidYMid meet' && observed.untransformed === true && observed.directPathsOnly === true &&
+    observed.preserveAspectRatio === 'xMidYMid meet' && observed.untransformed === true &&
     same(observed.intrinsicWidth, viewBox[2]) && same(observed.intrinsicHeight, viewBox[3]);
+}
+
+/** Авторский master сохраняет нейтральные Figma-группы с metadata. */
+export function capsuleContentShapeMatches(svg, authored = false) {
+  const elements = [...svg.querySelectorAll('*')];
+  return elements.some(element => element.localName === 'path') && elements.every(element =>
+    element.namespaceURI === 'http://www.w3.org/2000/svg' && (element.localName === 'path'
+      ? element.children.length === 0 && (authored || element.parentElement === svg)
+      : authored && element.localName === 'g' && [...element.attributes].every(attribute =>
+        attribute.name === 'id' || attribute.name.startsWith('data-'))));
+}
+
+export function capsuleSvgFrameMatches(observed, viewBox) {
+  return capsuleFrameGeometryMatches(observed, viewBox) && observed.directPathsOnly === true;
+}
+
+export function capsuleAuthoredFrameMatches(observed, viewBox) {
+  return capsuleFrameGeometryMatches(observed, viewBox) && observed.inertGroupsOnly === true;
 }
 
 export function capsuleViewportMatches(observed, viewBox, displaySize) {
@@ -785,12 +803,11 @@ export async function runExplorerJourney() {
         }));
       return { viewBox: [box.x, box.y, box.width, box.height],
         // Canonical capsule output целиком состоит из адресованных непосредственных paths.
-        directPathsOnly: svg.children.length > 0 && [...svg.querySelectorAll('*')].every(element =>
-          element.localName === 'path' && element.parentElement === svg && element.children.length === 0),
+        directPathsOnly: capsuleContentShapeMatches(svg), inertGroupsOnly: capsuleContentShapeMatches(svg, true),
         intrinsicWidth: Number(svg.getAttribute('width')), intrinsicHeight: Number(svg.getAttribute('height')),
         preserveAspectRatio: (svg.getAttribute('preserveAspectRatio') ?? 'xMidYMid meet').trim().replace(/\s+/g, ' '), untransformed,
         ...(live ? { width: parseFloat(getComputedStyle(svg).width), height: parseFloat(getComputedStyle(svg).height),
-          screen: svg.getScreenCTM() } : {}) };
+          screen: ((matrix) => matrix && Object.fromEntries(['a', 'b', 'c', 'd', 'e', 'f'].map(key => [key, matrix[key]])))(svg.getScreenCTM()) } : {}) };
     };
     const capsulePaint = svg => {
       const properties = element => {
@@ -854,8 +871,10 @@ export async function runExplorerJourney() {
         viewButton('generated').textContent === 'Вариация' && !viewButton('generated').disabled);
       check(`${id}/exact-author-default`, symbol.glyph({ variant, variation: { bodyWidth: 1 } }) === source &&
         JSON.stringify(paths(q('symbol-stage').querySelector(':scope > svg'))) === sourcePaths);
-      check(`${id}/source-viewport`, capsuleSvgFrameMatches(capsuleFrame(master), source.viewBox) &&
-        capsuleViewportMatches(capsuleFrame(q('symbol-stage').querySelector(':scope > svg'), true), source.viewBox, Number(q('display-size').value)));
+      const masterFrame = capsuleFrame(master), sourceFrame = capsuleFrame(q('symbol-stage').querySelector(':scope > svg'), true);
+      check(`${id}/source-viewport`, capsuleAuthoredFrameMatches(masterFrame, source.viewBox) &&
+        capsuleViewportMatches(sourceFrame, source.viewBox, Number(q('display-size').value)),
+        { master: masterFrame, source: sourceFrame, viewBox: source.viewBox, displaySize: Number(q('display-size').value) });
       check(`${id}/source-visible-paint`, capsulePaintMatches(capsulePaint(q('symbol-stage').querySelector(':scope > svg'))));
       const partIds = source.parts.map(part => part.id);
       const anatomy = { kind: source.composition.kind, partIds, roles: source.parts.map(part => part.role) };
