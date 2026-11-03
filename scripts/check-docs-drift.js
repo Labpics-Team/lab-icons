@@ -95,7 +95,7 @@ export function manualCorpusCountErrors(source) {
   const clauseSeparator = new RegExp(`,\\s*(?=(?:(?:а|но|but|whereas)\\s+(?!${countStart})|(?:(?:в|на|in|at)\\s+)?${currentMarker.source}))`, 'iu');
   const clauses = sentences.flatMap(sentence => sentence.split(clauseSeparator));
   const fileProperty = new RegExp(`^${fileUnit}\\s*[:=]`, 'iu');
-  const byteValueTail = new RegExp(`^\\s*(?:(?:→|->)\\s*${number})*\\s*(?:B|bytes?|байт(?:а|ов)?)(?=$|[^\\p{L}\\p{N}_])`, 'iu');
+  const byteValueTail = new RegExp(`^\\s*(?:(?:→|->)\\s*${number})*\\s*(?:B|bytes?|байт(?:а|ов)?)(?=$|[^\\p{L}\\p{N}_-])`, 'iu');
   function artifactByteMeasurement(match, text) {
     // Единица относится к этому значению или переходу baseline, не ко всей фразе.
     return fileProperty.test(match[1]) && byteValueTail.test(text.slice(match.index + match[0].length));

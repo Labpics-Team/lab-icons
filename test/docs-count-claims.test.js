@@ -13,6 +13,11 @@ describe('Ручные счётчики в документации', () => {
     'две тысячи иконок', 'один миллион иконок', 'дюжина иконок',
     'eleven icons', 'one hundred and eleven icons', 'two thousand SVG files',
     'one million exports', 'a dozen icons',
+    'Current package files: 999 byte-for-byte copies of source SVGs.',
+    'Current package files: 999 byte-sized SVGs.',
+    'Current package files: 999 byte‑sized SVGs.',
+    'В текущем пакете файлов: 999 B-вариантов иконок.',
+    'В текущем пакете файлов: 999 B‑вариантов иконок.',
   ];
   for (const claim of claims) {
     it(`отклоняет ручной счётчик: ${claim}`, ({ root }) => {
