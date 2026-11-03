@@ -44,7 +44,7 @@ import {
 } from './lib/corpus-contract.js';
 import { loadAuthorBaseline } from './lib/author-baseline.js';
 import { compileAuthorAnatomy } from './lib/author-anatomy.js';
-import { expectedAuthorEffect, expectedAuthorMotion } from './bench/author-oracle.js';
+import { expectedAuthorEffect, expectedAuthorMotion, expectedAuthorObservation } from './bench/author-oracle.js';
 import { statePackageExpectations, stateArtifactConsumerSource } from './lib/state-artifact-consumer.js';
 import { authorVariationArtifactConsumerSource, authorVariationFamilyConsumerSource } from './lib/author-variation-artifact-consumer.js';
 
@@ -57,6 +57,8 @@ export function authorPackageExpectations(baseline, annotations) {
     Object.fromEntries(Object.entries(variants).map(([variant, record]) => {
       const contract = contracts[`${icon}/${variant}`] ?? record.sourceContract;
       const sourcePaths = [...record.normalizedSvg.matchAll(/<path\b[^>]*\bd="([^"]+)"/g)].map(match => match[1]);
+      const { composition } = expectedAuthorObservation(icon, variant, record, contract);
+      const compound = composition.kind === 'compound';
       const variation = contract.variation;
       let variationExpected = variation ? { law: variation.law, geometrySha256: variation.geometrySha256, domain: variation.domain } : null;
       if (variation?.law === 'annulus.counter-scale') {
@@ -76,11 +78,20 @@ export function authorPackageExpectations(baseline, annotations) {
       return [variant, {
         master: record.master, author: record.author, svg: record.artifactSvg,
         anatomy: contract.anatomy ?? null,
+        composition,
+        renderedPaths: record.sourceContract.parts.map((part, index) => ({ d: sourcePaths[index], fillRule: part.fillRule })),
+        renderedMetadata: {
+          parts: compound ? [] : contract.parts.map(part => part.id),
+          roles: compound ? [] : contract.parts.map(part => part.role),
+          contourParts: compound ? [contract.parts.map(part => part.id).join(' ')] : [],
+          contourRoles: compound ? [contract.parts.map(part => part.role).join(' ')] : [],
+        },
         variation: variationExpected,
-        motion: expectedAuthorMotion(contract, { kind: 'package', svg: record.normalizedSvg, compositionKind: 'layers' }),
+        motion: expectedAuthorMotion(contract, { kind: 'package', svg: record.normalizedSvg, compositionKind: composition.kind }),
         effects: Object.fromEntries((contract.gestures ?? []).map(gesture => [gesture.id, expectedAuthorEffect(gesture)])),
         parts: contract.parts.map(({ id, role, identity, fillRule, zIndex, sourceFingerprint, artifactFingerprint, anchor }, index) => ({
-          id, fillRule, zIndex, sourceFingerprint, artifactFingerprint, d: sourcePaths[index], role, identity,
+          id, fillRule, zIndex, sourceFingerprint, artifactFingerprint,
+          d: compound ? sourcePaths[0].slice(...contract.parts[index].sourceSpan) : sourcePaths[index], role, identity,
           anchorSource: contract.anatomy && anchor ? 'declared' : 'geometry-bbox-center',
           ...(contract.anatomy && anchor && { anchor }),
         })),
@@ -610,17 +621,19 @@ export function checkPackageArtifact({
         `    const expected = variants[variant];\n` +
         `    const current = symbol.glyph({ variant });\n` +
         `    if (symbol[variant] !== expected.svg) throw new Error('current static master differs: ' + icon + '/' + variant);\n` +
-        `    if (symbol.glyph({ variant, modelMode: 'source-only' }) !== current || current.icon !== icon || current.variant !== variant || current.composition.kind !== 'layers') throw new Error('current source/default differs: ' + icon + '/' + variant);\n` +
+        `    if (symbol.glyph({ variant, modelMode: 'source-only' }) !== current || current.icon !== icon || current.variant !== variant || !isDeepStrictEqual(current.composition, expected.composition)) throw new Error('current source/default differs: ' + icon + '/' + variant);\n` +
         `    if (JSON.stringify(current.viewBox) !== '[0,0,24,24]' || !/<svg\\b[^>]*\\bfill="currentColor"/.test(current.svg) || current.parts.some(part => part.paint.kind !== 'fill' || part.paint.fill !== 'currentColor')) throw new Error('current viewport/paint differs: ' + icon + '/' + variant);\n` +
         `    if (current.provenance.kind !== 'source' || current.provenance.file !== expected.master || JSON.stringify(current.provenance.author) !== JSON.stringify(expected.author) || JSON.stringify(current.provenance.anatomy ?? null) !== JSON.stringify(expected.anatomy)) throw new Error('current author provenance differs: ' + icon + '/' + variant);\n` +
         `    const actualParts = current.parts.map((part, index) => ({ id: part.id, fillRule: part.fillRule, zIndex: part.zIndex, sourceFingerprint: part.provenance.sourceFingerprint, artifactFingerprint: part.provenance.artifactFingerprint, d: part.d, role: part.role, identity: part.provenance.identity, anchorSource: part.anchorSource, ...(expected.parts[index].anchor && { anchor: part.anchor }) }));\n` +
-        `    if (JSON.stringify(actualParts) !== JSON.stringify(expected.parts) || current.parts.some(part => part.provenance.kind !== 'source' || part.morphGroup !== null)) throw new Error('current source path/fill/z-order differs: ' + icon + '/' + variant);\n` +
+        `    if (!isDeepStrictEqual(actualParts, expected.parts) || current.parts.some(part => part.provenance.kind !== 'source' || part.morphGroup !== null)) throw new Error('current source path/fill/z-order differs: ' + icon + '/' + variant);\n` +
         `    const renderedD = [...current.svg.matchAll(/<path\\b[^>]*\\bd="([^"]+)"/g)].map(match => match[1]);\n` +
         `    const renderedRules = [...current.svg.matchAll(/<path\\b[^>]*\\bfill-rule="([^"]+)"/g)].map(match => match[1]);\n` +
-        `    if (JSON.stringify(renderedD) !== JSON.stringify(expected.parts.map(part => part.d)) || JSON.stringify(renderedRules) !== JSON.stringify(expected.parts.map(part => part.fillRule))) throw new Error('current SVG assembly differs: ' + icon + '/' + variant);\n` +
+        `    if (!isDeepStrictEqual(renderedD, expected.renderedPaths.map(part => part.d)) || !isDeepStrictEqual(renderedRules, expected.renderedPaths.map(part => part.fillRule))) throw new Error('current SVG assembly differs: ' + icon + '/' + variant);\n` +
         `    const renderedParts = [...current.svg.matchAll(/<path\\b[^>]*\\bdata-part="([^"]+)"/g)].map(match => match[1]);\n` +
         `    const renderedRoles = [...current.svg.matchAll(/<path\\b[^>]*\\bdata-role="([^"]+)"/g)].map(match => match[1]);\n` +
-        `    if (JSON.stringify(renderedParts) !== JSON.stringify(expected.parts.map(part => part.id)) || JSON.stringify(renderedRoles) !== JSON.stringify(expected.parts.map(part => part.role))) throw new Error('current rendered anatomy differs: ' + icon + '/' + variant);\n` +
+        `    const renderedContourParts = [...current.svg.matchAll(/<path\\b[^>]*\\bdata-parts="([^"]+)"/g)].map(match => match[1]);\n` +
+        `    const renderedContourRoles = [...current.svg.matchAll(/<path\\b[^>]*\\bdata-roles="([^"]+)"/g)].map(match => match[1]);\n` +
+        `    if (!isDeepStrictEqual({ parts: renderedParts, roles: renderedRoles, contourParts: renderedContourParts, contourRoles: renderedContourRoles }, expected.renderedMetadata)) throw new Error('current rendered anatomy differs: ' + icon + '/' + variant);\n` +
         `    const capabilities = symbol.glyphCapabilities(variant);\n` +
         `    if (Object.hasOwn(capabilities, 'variation')) throw new Error('source symbol advertised opt-in variation: ' + icon + '/' + variant);\n` +
         `    if (capabilities.icon !== icon || capabilities.variant !== variant || capabilities.modelState !== null || capabilities.supportedAxes.length || Object.keys(capabilities.axes).length || JSON.stringify(capabilities.motion) !== JSON.stringify(expected.motion) || JSON.stringify(capabilities.anatomy ?? null) !== JSON.stringify(expected.anatomy) || JSON.stringify(capabilities.author) !== JSON.stringify(expected.author)) throw new Error('current source inherited stale admission: ' + icon + '/' + variant);\n` +

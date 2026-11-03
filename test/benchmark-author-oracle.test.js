@@ -1,12 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
+import { isDeepStrictEqual } from 'node:util';
 import { loadAuthorBaseline, authorSymbolPayload } from '../scripts/lib/author-baseline.js';
 import { compileAuthorAnatomy } from '../scripts/lib/author-anatomy.js';
 import { createGlyphCompiler } from '../src/ir/compiler.js';
 import { createCompiledGlyph, createCompiledCapabilities } from '../src/ir/symbol-runtime.js';
 import { compileSymbolEffect } from '../src/motion/index.js';
 import { authorPackageExpectations } from '../scripts/check-package-artifact.js';
+import { authoredSymbolPayloads } from './helpers/authored-symbol-payload.js';
 import { expectedAuthorMotionRefusal, expectedAuthorObservation, inspectAuthorSvg, observeAuthorGlyph, sha256, stableJSON, validateAuthorAdmission, validateAuthorObservation, validateRetainedPair } from '../scripts/bench/author-oracle.js';
 
 const root = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">';
@@ -21,6 +23,46 @@ const expected = { icon: 'test', variant: 'outline', master: 'master.svg', autho
 const observe = (entries = paths, rendered = svg(entries, true)) => ({ ...inspectAuthorSvg(rendered, { ir: true }), icon: 'test', variant: 'outline', sourceFile: 'master.svg', compositionKind: 'layers', author, staticArtifactSha256: sha256(artifact), parts: entries });
 
 describe('benchmark author oracle и сохранённый output', () => {
+  it.each(['outline', 'filled'])('installed source smoke сохраняет авторскую composition mic-circle/%s', async variant => {
+    const rootPath = new URL('..', import.meta.url);
+    const read = path => JSON.parse(readFileSync(new URL(path, rootPath), 'utf8'));
+    const captured = read('semantics/figma-baseline.json');
+    const baseline = loadAuthorBaseline(fileURLToPath(rootPath), { manifest: { ...captured,
+      counts: { families: 1, variants: 2 }, icons: { 'mic-circle': captured.icons['mic-circle'] } } });
+    const allAnnotations = read('semantics/author-anatomy.json');
+    const annotations = { ...allAnnotations, icons: { 'mic-circle': allAnnotations.icons['mic-circle'] } };
+    const expected = authorPackageExpectations(baseline, annotations)['mic-circle'][variant];
+    const payload = (await authoredSymbolPayloads(['mic-circle']))['mic-circle'];
+    const symbol = { glyph: createCompiledGlyph(payload.icon, payload.source) };
+    const current = symbol.glyph({ variant });
+    const source = readFileSync(new URL('../scripts/check-package-artifact.js', import.meta.url), 'utf8');
+    const start = source.indexOf('        `    if (symbol.glyph({ variant, modelMode:');
+    const end = source.indexOf('        `    const capabilities = symbol.glyphCapabilities(variant);', start);
+    expect(start >= 0 && end > start).toBe(true);
+    const templates = source.slice(start, end).trim().split('\n')
+      .map(line => line.trim().replace(/ \+$/, ''));
+    const observation = new Function(`return ${templates.join(' +\n')};`)();
+    const verify = new Function('symbol', 'current', 'expected', 'icon', 'variant', 'isDeepStrictEqual', observation);
+    expect(() => verify(symbol, current, expected, 'mic-circle', variant, isDeepStrictEqual)).not.toThrow();
+    expect(current.composition).toEqual(variant === 'filled' ? { kind: 'compound', fillRule: 'evenodd' } : { kind: 'layers' });
+    for (const mutate of [
+      value => { value.composition = { kind: 'layers', fillRule: 'nonzero' }; },
+      value => { value.parts.reverse(); },
+      value => { value.parts[1].d += 'M0 0Z'; },
+      value => { value.parts[1].fillRule = value.parts[1].fillRule === 'nonzero' ? 'evenodd' : 'nonzero'; },
+      value => { value.parts[1].paint.fill = '#000'; },
+      value => { value.parts[1].role = 'unclassified'; },
+      value => { value.svg = value.svg.replace('data-part', 'other-part'); },
+      value => { value.svg = value.svg.replace(/ d="([^"]+)"/, ' d="M0 0Z"'); },
+      value => { value.provenance.author.version = 'stale'; },
+    ]) {
+      const changed = structuredClone(current);
+      mutate(changed);
+      expect(changed).not.toEqual(current);
+      expect(() => verify({ glyph: () => changed }, changed, expected, 'mic-circle', variant, isDeepStrictEqual)).toThrow();
+    }
+  });
+
   it('compound source oracle сохраняет один evenodd parent и три авторских counter contours', () => {
     const rootPath = new URL('..', import.meta.url);
     const read = path => JSON.parse(readFileSync(new URL(path, rootPath), 'utf8'));
