@@ -79,6 +79,26 @@ export function capsuleViewportMatches(observed, viewBox, displaySize) {
     same(observed.screen?.b, 0) && same(observed.screen?.c, 0);
 }
 
+/** Вложенный SVG сравнивается в экранных координатах: CSS width может быть auto.
+ * Допуск 0.001 CSS px относится к browser measurement, не к авторской геометрии. */
+export function comparisonViewportMatches(observed, reference, viewBox) {
+  const frame = item => item?.viewBox?.length === 4 && item.viewBox.every(Number.isFinite) &&
+    item.viewBox[2] > 0 && item.viewBox[3] > 0 && item.screen?.length === 6 &&
+    item.screen.every(Number.isFinite) && item.screen[0] * item.screen[3] - item.screen[1] * item.screen[2] !== 0;
+  if (!frame(reference) || !Array.isArray(viewBox) || viewBox.length !== 4 ||
+      !reference.viewBox.every((value, index) => value === viewBox[index]) ||
+      !Array.isArray(observed) || observed.length < 2) return false;
+  const [x, y, width, height] = reference.viewBox;
+  const corners = [[x, y], [x + width, y], [x, y + height], [x + width, y + height]];
+  const project = ([a, b, c, d, e, f], [px, py]) => [a * px + c * py + e, b * px + d * py + f];
+  return observed.every(item => frame(item) && item.viewBox.every((value, index) => value === reference.viewBox[index]) &&
+    item.intrinsicWidth === width && item.intrinsicHeight === height && corners.every(point => {
+      const expected = project(reference.screen, point), actual = project(item.screen, point);
+      return actual.every((value, index) => Number.isFinite(value) && Number.isFinite(expected[index]) &&
+        Math.abs(value - expected[index]) < 0.001);
+    }));
+}
+
 export function isFreshCapsuleDownload(downloads, previousCount, filename) {
   return downloads.length === previousCount + 1 && downloads.at(-1)?.filename === filename;
 }
@@ -597,15 +617,18 @@ export async function runExplorerJourney() {
         const nested = [...comparison.querySelectorAll('svg')];
         check(`${id}/${view}/production-layers`, comparison.dataset.variationComparison === view &&
           JSON.stringify(paths(originalLayer)) === sourcePaths && JSON.stringify(paths(modifiedLayer)) === modifiedPaths);
-        check(`${id}/${view}/authored-viewport-scaling`, nested.length >= 2 && nested.every(svg =>
-          Math.abs(parseFloat(getComputedStyle(svg).width) - modified.viewBox[2]) < 0.001 &&
-          Math.abs(parseFloat(getComputedStyle(svg).height) - modified.viewBox[3]) < 0.001),
-        { expected: modified.viewBox, nested: nested.map(svg => {
+        const viewport = svg => {
           const screen = svg.getScreenCTM();
+          const box = svg.viewBox.baseVal;
           return { width: svg.getAttribute('width'), height: svg.getAttribute('height'),
             computedWidth: getComputedStyle(svg).width, computedHeight: getComputedStyle(svg).height,
-            viewBox: svg.getAttribute('viewBox'), screen: screen && ['a', 'b', 'c', 'd', 'e', 'f'].map(key => screen[key]) };
-        }) });
+            intrinsicWidth: svg.width.baseVal.value, intrinsicHeight: svg.height.baseVal.value,
+            viewBox: [box.x, box.y, box.width, box.height],
+            screen: screen && ['a', 'b', 'c', 'd', 'e', 'f'].map(key => screen[key]) };
+        };
+        const viewportReference = viewport(comparison), nestedViewports = nested.map(viewport);
+        check(`${id}/${view}/authored-viewport-scaling`, comparisonViewportMatches(nestedViewports, viewportReference, modified.viewBox),
+          { reference: viewportReference, nested: nestedViewports });
         check(`${id}/${view}/meaningful-colors`, getComputedStyle(originalLayer).color === 'rgb(185, 70, 60)' &&
           getComputedStyle(modifiedLayer).color === 'rgb(67, 132, 201)');
         if (view === 'difference') {
