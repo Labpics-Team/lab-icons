@@ -3,7 +3,7 @@ import { renderGlyphSvg } from './package/ir/render.js';
 import { downloadFile } from './download.js';
 import { authoredVariationCapability, authoredVariationPresentation, renderVariationComparison } from './variation-preview.js';
 import { applyEnclosurePatch, visibleStateSvg } from './geometry-patch.js';
-import { admitAuthoredGesture, authoredGestureActive } from './authored-gesture.js';
+import { admitAuthoredGesture, admitPreparedWidth, authoredGestureActive } from './authored-gesture.js';
 let execution;
 const motionExecutor = () => execution ??= import('./motion-execution.js');
 let recordedModels;
@@ -28,10 +28,23 @@ function loadMessage(message = '') {
   loadStatus.hidden = !message;
 }
 const state = { data: null, name: 'time', variant: 'outline', view: 'original', viewLoading: false, limit: 48, revision: 0, viewRevision: 0, motionRevision: 0, pendingMotion: null, loaded: false, legacy: false, modelModule: null, motionModule: null, authoredGesture: null, abort: null, module: null, capabilities: null, glyph: null, axes: {}, variation: {}, original: '', effect: null, animations: [], frame: null, playhead: null, replacement: null };
+state.preparedWidth = null;
+state.widthProgress = 0;
+state.widthValue = 1;
+state.widthHead = null;
+state.widthRequestRevision = 0;
+state.widthViewPromise = null;
+state.widthInput = null;
 const authoredMotionView = (view = state.view, legacy = state.legacy) => authoredGestureActive(state.authoredGesture, view, legacy);
-const gestureDefinitions = (view = state.view, legacy = state.legacy, caps = state.capabilities) =>
+const preparedWidthView = (view = state.view, legacy = state.legacy) => Boolean(state.preparedWidth?.ok && !legacy && ['original', 'generated'].includes(view));
+const widthGesture = () => preparedWidthView() && ui.gesture.value === state.preparedWidth.capabilities.law;
+const widthAt = progress => 1 + (state.preparedWidth.prepared.domain.minimum - 1) * progress;
+const widthProgress = width => (1 - width) / (1 - state.preparedWidth.prepared.domain.minimum);
+const gestureDefinitions = (view = state.view, legacy = state.legacy, caps = state.capabilities) => [...(
   view === 'original' && !legacy && state.motionModule
-    ? state.authoredGesture?.ok ? state.authoredGesture.capabilities.gestures : [] : caps?.motion.gestures ?? [];
+    ? state.authoredGesture?.ok ? state.authoredGesture.capabilities.gestures : [] : caps?.motion.gestures ?? []),
+  ...(preparedWidthView(view, legacy) ? [{ id: state.preparedWidth.capabilities.law, kind: 'state',
+    label: 'Ширина корпуса', restProgress: 0, meaning: 'Корпус сужается при неизменной высоте и толщине боковых стенок.' }] : [])];
 const variationAvailable = () => authoredVariationCapability(state.module?.glyphCapabilities(state.variant));
 const variationView = () => Boolean(variationAvailable() && state.view !== 'original' && !state.legacy);
 function updateVariationStatus() {
@@ -122,17 +135,22 @@ function inspectorPresentation() {
   }
   const author = member?.author ?? row.original;
   ui['source-status'].textContent = `Lab UI v2.1. Версия ${author.version}. Узел ${author.nodeId}. ` +
-    (active ? contourGroup(group) ? 'Авторские контуры меняют ориентацию; средняя точка остаётся на месте.' : sourceGroup(group) ? 'Два самостоятельных авторских рисунка. Переход сохраняет видимую смесь при прерывании.' : variation ? 'Авторское содержимое; вариативное обрамление сохраняется при замене знака.' : 'Авторский знак; общая оболочка сохраняется при замене.' : state.legacy ? 'Прежняя модель: паритет с новой авторской основой не принят.' : variation
+    (active ? contourGroup(group) ? 'Авторские контуры меняют ориентацию; средняя точка остаётся на месте.' : sourceGroup(group) ? 'Два самостоятельных авторских рисунка. Переход сохраняет видимую смесь при прерывании.' : variation ? 'Авторское содержимое; вариативное обрамление сохраняется при замене знака.' : 'Авторский знак; общая оболочка сохраняется при замене.' : widthGesture()
+      ? 'Подготовленная ширина авторского корпуса. Высота и остальные части сохраняются; размерные образцы повторяют видимую форму.' : state.legacy ? 'Прежняя модель: паритет с новой авторской основой не принят.' : variation
       ? `${comparison ? 'Красным — исходная форма, синим — изменённая. ' : ''}${authoredVariationPresentation(variationAvailable()).summary(state.variation)} Образцы размеров и SVG относятся к этой форме.`
       : comparison ? `Красным — текущая основа, синим — прежняя ${row.model?.catalogState === 'accepted' ? 'модель' : 'модель на проверке'} при исходных параметрах. Части и образцы размеров относятся к текущему авторскому мастеру. Паритет не принят.` : 'Текущий авторский мастер. Возможности относятся к его закреплённой версии.');
-  ui['consumer-import'].textContent = active ? `import { renderStateSvg, compileStateEffect${variation ? ', renderEnclosurePatch' : ''} } from\n  '@labpics/icons/${variation ? 'state-variations' : 'states'}/${group.capabilities.group}';` : state.legacy ? `import { glyph } from '@labpics/icons/ir';\n// Прежняя основа; текущий master: ./symbols/${state.name}` : authoredMotionView()
+  ui['consumer-import'].textContent = active ? `import { renderStateSvg, compileStateEffect${variation ? ', renderEnclosurePatch' : ''} } from\n  '@labpics/icons/${variation ? 'state-variations' : 'states'}/${group.capabilities.group}';` : widthGesture()
+    ? `import { prepareBodyWidth } from\n  '@labpics/icons/gestures/${state.name}';\nimport { value } from '@labpics/motion';` : state.legacy ? `import { glyph } from '@labpics/icons/ir';\n// Прежняя основа; текущий master: ./symbols/${state.name}` : authoredMotionView()
     ? `import { renderMotionSvg, compileMotionEffect } from\n  '@labpics/icons/gestures/${state.name}';`
     : `import { glyph } from\n  '@labpics/icons/${variation ? 'variations' : 'symbols'}/${state.name}';`;
   const authoredEffect = authoredMotionView() ? motionAdmission(state.glyph, caps, gestureDefinitions()[0]?.id) : null;
+  const widthTarget = widthGesture() ? state.preparedWidth.prepared.renderTarget : null;
   const parts = active ? (contourGroup(group) ? group.capabilities.partIds : [...member.contentPartIds, ...group.capabilities.sharedPartIds])
     .map(id => ({ id, role: id === group.capabilities.enclosurePartId ? 'container' : 'content' })) : authoredEffect?.ok
       ? [...authoredEffect.effect.targets.map(target => ({ id: target.partId, motion: 'Движущаяся часть' })),
-        ...authoredEffect.effect.unchangedPartIds.map(id => ({ id, motion: 'Неподвижная часть' }))] : state.glyph.parts;
+        ...authoredEffect.effect.unchangedPartIds.map(id => ({ id, motion: 'Неподвижная часть' }))] : widthTarget
+        ? [{ id: widthTarget.partId, motion: 'Меняется ширина корпуса' },
+          ...widthTarget.unchangedPartIds.map(id => ({ id, motion: 'Неподвижная часть' }))] : state.glyph.parts;
   ui.parts.replaceChildren(...parts.map(part => {
     const item = document.createElement('li');
     item.textContent = part.motion ? `${part.id} — ${part.motion}` : part.role === 'unclassified' ? `Авторский контур ${part.zIndex + 1}; семантика пока не принята.` : `${comparison ? 'Авторский ' : ''}${part.id} — ${part.role}`;
@@ -177,6 +195,7 @@ function replacementChoices() {
 }
 
 function progress() {
+  if (state.widthHead || widthGesture()) return state.widthProgress;
   const head = state.playhead;
   if (!head) return Number(ui.progress.value);
   // Фаза нужна для выбора обратного участка: одинаковый сдвиг бывает на
@@ -192,6 +211,7 @@ function stop() {
   state.animations = [];
   state.effect = null;
   state.playhead = null;
+  state.widthHead = null;
   state.pendingMotion = null;
   state.motionRevision++;
   if (state.replacement) state.replacement.paused = false;
@@ -248,6 +268,7 @@ function compileGestureEffect(glyph, caps, gesture, request, { view = state.view
 
 function motionAdmission(glyph = state.glyph, caps = state.capabilities, gesture = ui.gesture.value, viewOptions) {
   if (!glyph || !caps || !gesture) return null;
+  if (gesture === state.preparedWidth?.capabilities?.law && preparedWidthView(viewOptions?.view, viewOptions?.legacy)) return state.preparedWidth;
   return compileGestureEffect(glyph, caps, gesture, { duration: 0 }, viewOptions);
 }
 
@@ -284,12 +305,12 @@ function updateMotionControls() {
   }
   const admitted = state.loaded && motionAdmission()?.ok;
   const ready = admitted && !state.viewLoading && motionView();
-  ui['progress-label'].textContent = selectedGesture()?.kind === 'state' ? 'Состояние' : 'Прогресс';
+  ui['progress-label'].textContent = widthGesture() ? 'Прогресс сужения' : selectedGesture()?.kind === 'state' ? 'Состояние' : 'Прогресс';
   for (const id of ['play', 'reverse', 'progress', 'gesture']) ui[id].disabled = !ready;
-  ui.pause.disabled = !ready || (!state.playhead && !state.pendingMotion);
-  ui.pause.textContent = (state.pendingMotion?.paused ?? (state.playhead && !state.playhead.running)) ? 'Продолжить' : 'Пауза';
+  ui.pause.disabled = !ready || (!state.playhead && !state.widthHead && !state.pendingMotion);
+  ui.pause.textContent = (state.pendingMotion?.paused ?? (state.widthHead ? !state.widthHead.running : state.playhead && !state.playhead.running)) ? 'Продолжить' : 'Пауза';
   const identity = state.data.executionIdentity;
-  const refusal = state.view === 'original' && !state.legacy ? state.authoredGesture?.reason : null;
+  const refusal = state.view === 'original' && !state.legacy ? state.authoredGesture?.reason ?? state.preparedWidth?.reason : null;
   ui['motion-status'].textContent = ready ? `${identity.package} ${identity.version}. ${cyclicGesture() ? 'Можно повторить, развернуть или прервать движение.' : 'Можно развернуть или прервать движение.'}${state.legacy ? ' Жест относится к прежней модели.' : ''}` : refusal
     ? `${refusal.code}: ${refusal.message}` : admitted ? 'Выберите авторский вид, чтобы управлять его жестом.' : 'Для этой авторской основы семантический жест пока не принят.';
 }
@@ -398,7 +419,7 @@ async function renderView(view = state.view, { preserveProgress = false, variati
     if (revision !== state.revision || viewRevision !== state.viewRevision) return;
     const changedControls = capabilities !== state.capabilities || legacy !== state.legacy;
     const changedStateView = state.replacement && replacementViewAvailable(view) !== replacementViewAvailable(state.view);
-    const changedGestureView = authoredMotionView(view, legacy) !== authoredMotionView();
+    const changedGestureView = authoredMotionView(view, legacy) !== authoredMotionView() || preparedWidthView(view, legacy) !== preparedWidthView();
     Object.assign(state, { view, glyph, capabilities, modelModule, legacy, axes, variation: requestedVariation, viewLoading: false });
     ui['symbol-stage'].dataset.view = view;
     ui.pause.textContent = 'Пауза';
@@ -423,8 +444,12 @@ async function renderView(view = state.view, { preserveProgress = false, variati
     }
     onVariationAccepted?.();
     // Значение неподвижного мастера задаёт семантика, а не имя иконки.
-    ui.progress.value = String(motionAdmission()?.ok ? preserveProgress ? previousProgress : selectedGesture()?.restProgress ?? 0 : 0);
-    if (preserveProgress && motionAdmission()?.ok && motionView()) await seekProgress(previousProgress);
+    if (preparedWidthView()) {
+      state.widthValue = view === 'original' ? 1 : state.variation.bodyWidth;
+      state.widthProgress = widthProgress(state.widthValue);
+    }
+    ui.progress.value = String(widthGesture() ? state.widthProgress : motionAdmission()?.ok ? preserveProgress ? previousProgress : selectedGesture()?.restProgress ?? 0 : 0);
+    if (!widthGesture() && preserveProgress && motionAdmission()?.ok && motionView()) await seekProgress(previousProgress);
     if (revision !== state.revision || viewRevision !== state.viewRevision) return;
     inspectorPresentation();
     updateViewControls();
@@ -445,6 +470,7 @@ async function renderView(view = state.view, { preserveProgress = false, variati
 }
 
 function controls() {
+  state.widthInput = null;
   const caps = state.capabilities;
   ui['axis-controls'].replaceChildren(...caps.supportedAxes.map((name) => {
     const contract = caps.axes[name];
@@ -484,6 +510,7 @@ function controls() {
       const input = document.createElement('input');
       input.type = 'number'; input.step = 'any'; input.min = '0';
       input.dataset.variation = name;
+      if (name === 'bodyWidth') state.widthInput = input;
       input.value = String(state.variation[name]);
       input.setAttribute('aria-describedby', 'axis-status');
       let inputRevision = 0;
@@ -492,6 +519,15 @@ function controls() {
         const requestRevision = ++inputRevision;
         try {
           const requested = { ...state.variation, [name]: input.valueAsNumber };
+          if (name === 'bodyWidth' && state.preparedWidth?.ok) {
+            const admitted = state.preparedWidth.prepared.sample(requested.bodyWidth);
+            if (!admitted.ok) throw Object.assign(new Error(admitted.reason.message), { code: admitted.reason.code });
+            const result = await advanceWidth(widthProgress(requested.bodyWidth), { width: requested.bodyWidth });
+            if (revision !== state.revision || requestRevision !== inputRevision || !result) return;
+            if (!result.ok) throw result.error;
+            input.setCustomValidity(''); input.removeAttribute('aria-invalid'); delete input.dataset.variationError;
+            return;
+          }
           if (!replacementMode() || !state.replacement.variationModule) {
             state.module.glyph({ variant: state.variant, variation: requested });
           }
@@ -531,7 +567,7 @@ function controls() {
 
 function motionChoices() {
   const selectedGesture = ui.gesture.value;
-  const gestures = gestureDefinitions().map(gesture => new Option(gesture.id, gesture.id));
+  const gestures = gestureDefinitions().map(gesture => new Option(gesture.label ?? gesture.id, gesture.id));
   const contour = contourGroup(state.replacement);
   const stateOptions = state.replacement && !state.legacy && replacementViewAvailable(state.view)
     ? [new Option(contour ? 'Ориентация' : 'Смена знака', stateGesture(state.replacement))] : [];
@@ -561,6 +597,10 @@ async function select(name, { reveal = false } = {}) {
   state.loaded = false;
   state.module = state.capabilities = state.glyph = null;
   state.motionModule = state.authoredGesture = null;
+  state.preparedWidth = null;
+  state.widthProgress = 0;
+  state.widthValue = 1;
+  state.widthViewPromise = null;
   state.replacement = null;
   state.original = '';
   state.revision++;
@@ -587,7 +627,7 @@ async function select(name, { reveal = false } = {}) {
       membership ? import(`./package/states/${membership.group}.js`) : null,
       membership && state.data.stateVariationGroupIds?.includes(membership.group)
         ? import(`./package/state-variations/${membership.group}.js`) : null,
-      state.data.rotationGestureIconIds.includes(name) ? import(`./package/gestures/${name}.js`) : null,
+      state.data.rotationGestureIconIds.includes(name) || state.data.preparedWidthIconIds.includes(name) ? import(`./package/gestures/${name}.js`) : null,
     ]);
     if (!response.ok) throw new Error(`Авторский SVG недоступен: HTTP ${response.status}`);
     const original = await response.text();
@@ -597,7 +637,8 @@ async function select(name, { reveal = false } = {}) {
     state.glyph = module.glyph({ variant: state.variant });
     state.original = original;
     state.motionModule = motionModule;
-    state.authoredGesture = motionModule ? admitAuthoredGesture(motionModule, state.glyph, row.original) : null;
+    state.authoredGesture = state.data.rotationGestureIconIds.includes(name) ? admitAuthoredGesture(motionModule, state.glyph, row.original) : null;
+    state.preparedWidth = state.data.preparedWidthIconIds.includes(name) ? admitPreparedWidth(motionModule, state.glyph, row.original, state.capabilities.variation) : null;
     if (replacementModule) {
       const capabilities = replacementModule.stateCapabilities();
       const member = capabilities.states.find(member => member.icon === name);
@@ -625,6 +666,7 @@ async function select(name, { reveal = false } = {}) {
     state.viewLoading = false;
     state.module = state.capabilities = state.glyph = null;
     state.motionModule = state.authoredGesture = null;
+    state.preparedWidth = null;
     state.replacement = null;
     state.original = '';
     clearInspector('Не загружен');
@@ -637,6 +679,78 @@ async function select(name, { reveal = false } = {}) {
 
 function effect(from, to, { duration = 900 } = {}) {
   return compileGestureEffect(state.glyph, state.capabilities, ui.gesture.value, { duration, from, to, reducedMotion: reducedPreference.matches || ui['reduce-motion'].checked });
+}
+
+async function advanceWidth(to, { duration = 900, width = widthAt(to) } = {}) {
+  if (!state.loaded || !state.preparedWidth?.ok || state.viewLoading && !state.widthViewPromise) return;
+  const admission = state.preparedWidth, prepared = admission.prepared;
+  const sampled = prepared.sample(width);
+  if (!sampled.ok) {
+    const error = Object.assign(new Error(sampled.reason.message), { code: sampled.reason.code });
+    ui['motion-status'].textContent = `${error.code}: ${error.message}`;
+    return { ok: false, error };
+  }
+  const revision = state.revision, requestRevision = ++state.widthRequestRevision;
+  try {
+    if (!state.widthViewPromise && (!widthGesture() || state.view !== 'generated' || replacementMode())) {
+      const from = state.view === 'original' ? 1 : state.widthValue;
+      ui.gesture.value = admission.capabilities.law;
+      state.widthViewPromise = renderView('generated', { variation: { ...state.variation, bodyWidth: from } });
+    }
+    const preparation = state.widthViewPromise;
+    if (preparation) {
+      const result = await preparation;
+      if (state.widthViewPromise === preparation) state.widthViewPromise = null;
+      if (result?.ok === false) throw result.error;
+    }
+    if (revision !== state.revision || requestRevision !== state.widthRequestRevision || state.preparedWidth !== admission || !widthGesture()) return;
+    const viewRevision = state.viewRevision, motionRevision = ++state.motionRevision;
+    const pending = { paused: false, to };
+    state.pendingMotion = pending;
+    updateMotionControls();
+    const executor = await motionExecutor();
+    if (revision !== state.revision || viewRevision !== state.viewRevision || requestRevision !== state.widthRequestRevision || motionRevision !== state.motionRevision || !widthGesture()) return;
+    const previous = state.animations;
+    const controls = executor.executePreparedWidth([ui['symbol-stage'], ui['size-samples']], prepared, {
+      from: state.widthValue, to: width, duration,
+      reducedMotion: reducedPreference.matches || ui['reduce-motion'].checked,
+    }, { onProgress(value) {
+      if (revision !== state.revision || viewRevision !== state.viewRevision || state.preparedWidth !== admission) return;
+      // Самpler уже записал этот кадр; подхват и export не вычисляют другие часы.
+      state.widthValue = value;
+      state.widthProgress = widthProgress(value);
+      state.variation.bodyWidth = value;
+      ui.progress.value = String(state.widthProgress);
+      if (state.widthInput && document.activeElement !== state.widthInput) state.widthInput.value = String(value);
+    } });
+    for (const control of previous) control.stop();
+    state.animations = controls;
+    state.effect = null;
+    state.playhead = null;
+    state.pendingMotion = null;
+    state.widthHead = { to, running: !pending.paused };
+    if (pending.paused) for (const control of controls) control.pause();
+    updateMotionControls();
+    Promise.all(controls.map(control => control.finished)).then(results => {
+      if (motionRevision !== state.motionRevision || results.some(result => result.status !== 'finished')) return;
+      state.widthHead = null;
+      state.animations = [];
+      // Полный static glyph нужен только для завершённой presentation, не в кадре.
+      state.glyph = state.module.glyph({ variant: state.variant, variation: state.variation });
+      resetVariationControls(); inspectorPresentation(); updateMotionControls(); displayStyle();
+    }).catch(error => {
+      if (motionRevision !== state.motionRevision) return;
+      state.widthHead = null; state.animations = [];
+      updateMotionControls(); ui['motion-status'].textContent = error.message;
+    });
+    return { ok: true };
+  } catch (error) {
+    if (revision !== state.revision || requestRevision !== state.widthRequestRevision) return;
+    state.widthViewPromise = null;
+    state.pendingMotion = null;
+    updateMotionControls(); ui['motion-status'].textContent = error.message;
+    return { ok: false, error };
+  }
 }
 
 async function replaceState(target) {
@@ -688,6 +802,7 @@ async function replaceState(target) {
 }
 
 async function advance(to, { repeatCycle = false } = {}) {
+  if (widthGesture()) return advanceWidth(to);
   if (!state.loaded || state.viewLoading || !motionView()) return;
   const revision = state.revision;
   const viewRevision = state.viewRevision;
@@ -746,6 +861,14 @@ for (const button of document.querySelectorAll('button[data-view]')) button.addE
 ui.play.addEventListener('click', () => replacementMode() ? replaceState(state.replacement.target) : advance(1, { repeatCycle: true }));
 ui.reverse.addEventListener('click', () => replacementMode() ? replaceState(state.replacement.previous) : advance(0));
 ui.pause.addEventListener('click', () => {
+  if (widthGesture()) {
+    const pause = state.pendingMotion ? !state.pendingMotion.paused : Boolean(state.widthHead?.running);
+    if (state.pendingMotion) state.pendingMotion.paused = pause;
+    if (state.widthHead) state.widthHead.running = !pause;
+    for (const control of state.animations) pause ? control.pause() : control.play();
+    updateMotionControls();
+    return;
+  }
   if (replacementMode()) {
     const pending = state.pendingMotion;
     const pause = pending ? !pending.paused : !state.replacement.paused;
@@ -778,6 +901,7 @@ ui.pause.addEventListener('click', () => {
   updateMotionControls();
 });
 async function seekProgress(to) {
+  if (widthGesture()) return advanceWidth(to, { duration: 0 });
   stop();
   const motionRevision = state.motionRevision;
   const result = effect(to, to, { duration: 0 });
@@ -797,7 +921,7 @@ function reduceCurrentMotion() {
     replaceState(state.pendingMotion?.target ?? state.replacement.target);
     return;
   }
-  const target = state.pendingMotion?.to ?? state.effect?.to;
+  const target = state.pendingMotion?.to ?? state.widthHead?.to ?? state.effect?.to;
   if (target !== undefined) advance(target);
 }
 ui['reduce-motion'].addEventListener('change', () => { if (ui['reduce-motion'].checked) reduceCurrentMotion(); });
@@ -826,6 +950,19 @@ ui.export.addEventListener('click', async () => {
       ui['export-status'].textContent = error.message;
       return;
     }
+  }
+  else if (widthGesture()) {
+    if (format !== 'svg') { ui['export-status'].textContent = `FORMAT_UNSUPPORTED: ${format === 'effect' ? 'Web effect' : format === 'lottie' ? 'Lottie' : 'SF Symbols'} не экспортирует подготовленную ширину корпуса.`; return; }
+    const svg = ui['symbol-stage'].querySelector('svg');
+    const pose = state.preparedWidth.prepared.sample(state.widthValue);
+    const targets = svg?.querySelectorAll(state.preparedWidth.prepared.renderTarget.selector);
+    if (!pose.ok || targets?.length !== 1 || targets[0].getAttribute('d') !== pose.d) {
+      ui['export-status'].textContent = 'RENDER_CORRESPONDENCE_MISMATCH: SVG не соответствует видимой ширине.'; return;
+    }
+    const image = svg.cloneNode(true);
+    image.style.removeProperty('width'); image.style.removeProperty('height');
+    image.setAttribute('color', displayColor.value);
+    content = image.outerHTML;
   }
   else if (format === 'svg') content = legacyExport ? state.glyph.svg : variationView()
     ? renderGlyphSvg(state.glyph, { instanceId: 'export' }) : state.original;
@@ -858,7 +995,7 @@ ui.export.addEventListener('click', async () => {
     `${group ? `${group.capabilities.group}-${group.target}` : state.name}-${state.variant}${legacyExport ? '-recorded-model' : variationView() ? '-variation' : ''}.${format === 'svg' ? 'svg' : format === 'lottie' ? 'lottie.json' : 'effect.json'}`);
   ui['export-status'].textContent = group && format === 'svg'
     ? visibleStateExport ? 'SVG видимой позы подготовлен.' : 'SVG выбранного состояния подготовлен.'
-    : format === 'svg' && authoredMotionView() ? 'SVG исходного мастера подготовлен.'
+    : format === 'svg' && widthGesture() ? 'SVG видимой ширины подготовлен.' : format === 'svg' && authoredMotionView() ? 'SVG исходного мастера подготовлен.'
     : 'Файл подготовлен.';
 });
 
@@ -868,6 +1005,7 @@ try {
   state.data = await response.json();
   if (!Array.isArray(state.data.variationIconIds)) throw new Error('Метаданные вариативности недоступны.');
   if (!Array.isArray(state.data.rotationGestureIconIds)) throw new Error('Метаданные авторских жестов недоступны.');
+  if (!Array.isArray(state.data.preparedWidthIconIds)) throw new Error('Метаданные подготовленной ширины недоступны.');
   ui['corpus-count'].textContent = `${state.data.summary.glyphs} семейств`;
   if (!state.data.rows.some((row) => row.name === state.name)) state.name = state.data.rows[0].name;
   await select(state.name);

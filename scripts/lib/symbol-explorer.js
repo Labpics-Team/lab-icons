@@ -66,7 +66,7 @@ export function symbolExplorerGestureProjection(contract, iconIds, surface = {})
   if (new Set(ids).size !== ids.length || ids.some(id => !/^[a-z][a-z0-9-]*$/.test(id) || !iconIds.includes(id))) {
     throw new Error('symbol explorer: gesture output не принадлежит авторскому каталогу');
   }
-  const rotationIconIds = [];
+  const rotationIconIds = [], preparedWidthIconIds = [];
   for (const id of ids) {
     if (!contract.files.includes(`dist/gestures/${id}.d.ts`)) {
       throw new Error(`symbol explorer: gesture ${id} не имеет declaration в package contract`);
@@ -82,12 +82,16 @@ export function symbolExplorerGestureProjection(contract, iconIds, surface = {})
       }
       rotationIconIds.push(id);
     }
+    if (names.includes('prepareBodyWidth')) {
+      if (!names.includes('motionCapabilities')) throw new Error(`symbol explorer: gesture ${id} имеет неполный prepared width contract`);
+      preparedWidthIconIds.push(id);
+    }
   }
   const declared = Object.keys(surface).filter(key => /^\.\/gestures\/[^/]+$/.test(key));
   if (declared.some(key => !ids.includes(key.slice('./gestures/'.length)))) {
     throw new Error('symbol explorer: gesture export surface не имеет package target');
   }
-  return { iconIds: ids, rotationIconIds };
+  return { iconIds: ids, rotationIconIds, preparedWidthIconIds };
 }
 
 /** Runtime presence задаёт package contract; semantic spec задаёт точное членство. */
@@ -142,7 +146,9 @@ export function writeSymbolExplorer({ repo, outDir, report, visuals, canvas, ico
   const iconIds = Object.keys(baseline.icons);
   const variationIconIds = symbolExplorerVariationIds(contract, iconIds);
   const stateVariationGroupIds = symbolExplorerStateVariationIds(contract, stateGroups);
-  const rotationGestureIconIds = symbolExplorerGestureProjection(contract, iconIds, surface).rotationIconIds;
+  const gestureProjection = symbolExplorerGestureProjection(contract, iconIds, surface);
+  const rotationGestureIconIds = gestureProjection.rotationIconIds;
+  const preparedWidthIconIds = gestureProjection.preparedWidthIconIds;
   const browserFiles = symbolExplorerBrowserFiles(contract, iconIds, stateGroups, surface);
   for (const relative of browserFiles) {
     const target = join(outDir, 'package', relative.slice('dist/'.length));
@@ -184,7 +190,7 @@ export function writeSymbolExplorer({ repo, outDir, report, visuals, canvas, ico
     };
   }));
   const data = { version: 2, source: baseline.source, executionIdentity, stateGroups, variationIconIds, stateVariationGroupIds,
-    rotationGestureIconIds, summary: { glyphs: iconIds.length, variants: rows.length }, rows };
+    rotationGestureIconIds, preparedWidthIconIds, summary: { glyphs: iconIds.length, variants: rows.length }, rows };
   writeFileSync(join(outDir, 'explorer.json'), `${JSON.stringify(data)}\n`);
   return join(outDir, 'index.html');
 }

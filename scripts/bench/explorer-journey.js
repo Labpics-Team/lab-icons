@@ -599,7 +599,10 @@ export async function runExplorerJourney() {
           JSON.stringify(paths(originalLayer)) === sourcePaths && JSON.stringify(paths(modifiedLayer)) === modifiedPaths);
         check(`${id}/${view}/authored-viewport-scaling`, nested.length >= 2 && nested.every(svg =>
           Math.abs(parseFloat(getComputedStyle(svg).width) - modified.viewBox[2]) < 0.001 &&
-          Math.abs(parseFloat(getComputedStyle(svg).height) - modified.viewBox[3]) < 0.001));
+          Math.abs(parseFloat(getComputedStyle(svg).height) - modified.viewBox[3]) < 0.001),
+        { expected: modified.viewBox, nested: nested.map(svg => ({ width: svg.getAttribute('width'), height: svg.getAttribute('height'),
+          computedWidth: getComputedStyle(svg).width, computedHeight: getComputedStyle(svg).height,
+          viewBox: svg.getAttribute('viewBox'), screen: svg.getScreenCTM()?.toJSON() })) });
         check(`${id}/${view}/meaningful-colors`, getComputedStyle(originalLayer).color === 'rgb(185, 70, 60)' &&
           getComputedStyle(modifiedLayer).color === 'rgb(67, 132, 201)');
         if (view === 'difference') {
@@ -791,6 +794,15 @@ export async function runExplorerJourney() {
       await choose(name, variant);
       const sourceModule = await import(`./package/symbols/${name}.js`);
       const symbol = await import(`./package/variations/${name}.js`);
+      const widthApi = await import(`./package/gestures/${name}.js`);
+      const preparation = widthApi.prepareBodyWidth(variant);
+      check(`${id}/public-preparation`, preparation.ok && preparation.prepared.law === 'capsule.width' &&
+        data.preparedWidthIconIds.includes(name) && !data.rotationGestureIconIds.includes(name));
+      if (!preparation.ok) throw new Error(`${id}: ${preparation.reason.code}`);
+      q('gesture').value = 'capsule.width';
+      q('gesture').dispatchEvent(new Event('change', { bubbles: true }));
+      await wait(() => q('symbol-inspector').getAttribute('aria-busy') === 'false' && q('gesture').value === 'capsule.width', `${id} width mode`);
+      setReduced(true);
       const source = sourceModule.glyph({ variant }), caps = symbol.glyphCapabilities(variant);
       const row = data.rows.find(item => item.name === name && item.variant === variant);
       const masterResponse = await originalFetch(row.views.master);
@@ -811,12 +823,13 @@ export async function runExplorerJourney() {
       const anatomy = { kind: source.composition.kind, partIds, roles: source.parts.map(part => part.role) };
       const original = capsuleSnapshot(q('symbol-stage').querySelector(':scope > svg'), anatomy);
       await chooseView('generated');
-      check(`${id}/default-variation-view`, q('consumer-import').textContent.includes(`/variations/${name}`) &&
+      check(`${id}/default-variation-view`, q('consumer-import').textContent.includes(`/gestures/${name}`) &&
         JSON.stringify(paths(q('symbol-stage').querySelector(':scope > svg'))) === sourcePaths &&
         capsuleViewportMatches(capsuleFrame(q('symbol-stage').querySelector(':scope > svg'), true), source.viewBox, Number(q('display-size').value)));
       let modified;
       for (const width of [.9, .8]) {
         await changeVariation('bodyWidth', width);
+        await wait(() => q('pause').disabled && variationInput('bodyWidth').value === String(width), `${id} width endpoint ${width}`);
         const shown = q('symbol-stage').querySelector(':scope > svg');
         modified = symbol.glyph({ variant, variation: { bodyWidth: width } });
         const observed = capsuleSnapshot(shown, anatomy);
@@ -838,14 +851,15 @@ export async function runExplorerJourney() {
         await capsuleExport(`${id}/${width}/exports-visible-width`, `${name}-${variant}-variation.svg`, modifiedPaths, source.viewBox);
       }
       const acceptedStage = q('symbol-stage').innerHTML, acceptedSamples = q('size-samples').innerHTML;
-      for (const [width, refusal] of [[0, 'INVALID_VARIATION'], [.79, 'VARIATION_OUTSIDE_DOMAIN'], [1.01, 'VARIATION_OUTSIDE_DOMAIN']]) {
+      for (const [width, refusal] of [[0, 'VARIATION_OUTSIDE_DOMAIN'], [.79, 'VARIATION_OUTSIDE_DOMAIN'], [1.01, 'VARIATION_OUTSIDE_DOMAIN']]) {
         await changeVariation('bodyWidth', width, refusal);
         check(`${id}/${width}/refusal-retains-accepted-width`, q('symbol-stage').innerHTML === acceptedStage &&
           q('size-samples').innerHTML === acceptedSamples && !q('export').disabled);
         await capsuleExport(`${id}/${width}/refusal-exports-accepted-width`, `${name}-${variant}-variation.svg`,
           JSON.stringify(paths(new DOMParser().parseFromString(modified.svg, 'image/svg+xml').documentElement)), source.viewBox);
       }
-      check(`${id}/motion-is-not-invented`, q('play').disabled && q('gesture').value === '' && caps.variation.targets.webEffect === 'not-exported');
+      check(`${id}/prepared-motion-is-distinct-from-format-export`, !q('play').disabled && q('gesture').value === 'capsule.width' &&
+        caps.variation.targets.webEffect === 'not-exported');
       q('axis-controls').querySelector('[data-variation-reset]').click();
       await wait(() => q('symbol-inspector').getAttribute('aria-busy') === 'false' && q('symbol-stage').dataset.view === 'original', `${id} reset`);
       check(`${id}/reset-restores-exact-author`, variationInput('bodyWidth').value === '1' &&
@@ -854,6 +868,56 @@ export async function runExplorerJourney() {
         capsuleViewportMatches(capsuleFrame(q('symbol-stage').querySelector(':scope > svg'), true), source.viewBox, Number(q('display-size').value)));
       check(`${id}/reset-visible-paint`, capsulePaintMatches(capsulePaint(q('symbol-stage').querySelector(':scope > svg'))));
       await capsuleExport(`${id}/reset-export-restores-author`, `${name}-${variant}.svg`, sourcePaths, source.viewBox);
+      setReduced(false);
+      q('play').click();
+      await wait(() => Number(q('progress').value) > .12 && Number(q('progress').value) < .8, `${id} width in flight`);
+      q('pause').click();
+      const pausedWidth = Number(variationInput('bodyWidth').value);
+      const pausedPaths = JSON.stringify(paths(q('symbol-stage').querySelector(':scope > svg')));
+      const pausedExpected = symbol.glyph({ variant, variation: { bodyWidth: pausedWidth } });
+      const expectedPausedPaths = JSON.stringify(paths(new DOMParser().parseFromString(pausedExpected.svg, 'image/svg+xml').documentElement));
+      check(`${id}/in-flight-physical-sample-matches-static`, pausedWidth > preparation.prepared.domain.minimum && pausedWidth < 1 &&
+        pausedPaths === expectedPausedPaths && preparation.prepared.sample(pausedWidth).d ===
+        q('symbol-stage').querySelector(preparation.prepared.renderTarget.selector).getAttribute('d'));
+      const pausedGeometry = capsuleWidthObservationChecks(original,
+        capsuleSnapshot(q('symbol-stage').querySelector(':scope > svg'), anatomy), pausedWidth);
+      check(`${id}/in-flight-keeps-optical-laws`, Object.values(pausedGeometry).every(Boolean), pausedGeometry);
+      for (let frameIndex = 0; frameIndex < 5; frameIndex++) await frame();
+      check(`${id}/pause-retains-physical-width`, JSON.stringify(paths(q('symbol-stage').querySelector(':scope > svg'))) === pausedPaths &&
+        Number(variationInput('bodyWidth').value) === pausedWidth);
+      await capsuleExport(`${id}/pause-exports-visible-width`, `${name}-${variant}-variation.svg`, pausedPaths, source.viewBox);
+      q('reverse').click();
+      await Promise.resolve(); await Promise.resolve();
+      check(`${id}/reverse-picks-up-last-written-width`, JSON.stringify(paths(q('symbol-stage').querySelector(':scope > svg'))) === pausedPaths);
+      setReduced(true);
+      await wait(() => Number(q('progress').value) === 0 && q('pause').disabled, `${id} reduced reverse terminal`);
+      check(`${id}/reduced-reverse-restores-master`, JSON.stringify(paths(q('symbol-stage').querySelector(':scope > svg'))) === sourcePaths);
+      setReduced(false);
+      q('play').click();
+      await wait(() => Number(q('progress').value) > .1 && Number(q('progress').value) < .8, `${id} latest width setup`);
+      q('pause').click();
+      const input = variationInput('bodyWidth');
+      const beforeRetarget = JSON.stringify(paths(q('symbol-stage').querySelector(':scope > svg')));
+      input.value = '.9'; input.dispatchEvent(new Event('input', { bubbles: true }));
+      input.value = '.92'; input.dispatchEvent(new Event('input', { bubbles: true }));
+      await Promise.resolve(); await Promise.resolve();
+      check(`${id}/paused-retarget-keeps-visible-start`, JSON.stringify(paths(q('symbol-stage').querySelector(':scope > svg'))) === beforeRetarget);
+      setReduced(true);
+      await wait(() => Number(variationInput('bodyWidth').value) === .92 && q('pause').disabled, `${id} latest target terminal`);
+      const latest = symbol.glyph({ variant, variation: { bodyWidth: .92 } });
+      const latestPaths = JSON.stringify(paths(new DOMParser().parseFromString(latest.svg, 'image/svg+xml').documentElement));
+      check(`${id}/latest-target-wins`, JSON.stringify(paths(q('symbol-stage').querySelector(':scope > svg'))) === latestPaths);
+      await capsuleExport(`${id}/latest-export`, `${name}-${variant}-variation.svg`, latestPaths, source.viewBox);
+      const settled = q('symbol-stage').innerHTML;
+      for (let frameIndex = 0; frameIndex < 4; frameIndex++) await frame();
+      check(`${id}/reduced-terminal-no-running-writer`, q('pause').disabled && q('symbol-stage').innerHTML === settled);
+      for (const format of ['effect', 'lottie', 'sf-symbols']) {
+        q('export-format').value = format;
+        const before = downloads.length;
+        q('export').click(); await Promise.resolve();
+        check(`${id}/${format}/precise-refusal`, downloads.length === before && q('export-status').textContent.startsWith('FORMAT_UNSUPPORTED:'));
+      }
+      q('export-format').value = 'svg';
       authority.push({ name, variant, author: source.provenance.author, anatomy: source.provenance.anatomy, variation: modified.provenance.variation });
     }
     capsuleMeasure.remove();

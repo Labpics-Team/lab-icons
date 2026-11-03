@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { admitAuthoredGesture, authoredGestureActive } from '../observatory/authored-gesture.js';
+import { admitAuthoredGesture, admitPreparedWidth, authoredGestureActive } from '../observatory/authored-gesture.js';
 
 function fixture() {
   const author = { kind: 'figma', fileKey: 'file', version: 'version', nodeId: '1:2',
@@ -77,5 +77,54 @@ describe('авторский gesture target в Observatory', () => {
     for (const view of ['generated', 'overlay', 'difference']) expect(authoredGestureActive(admitted, view, false)).toBe(false);
     expect(authoredGestureActive(admitted, 'original', true)).toBe(false);
     expect(authoredGestureActive(null, 'original', false)).toBe(false);
+  });
+});
+
+function widthFixture() {
+  const value = fixture();
+  const domain = { kind: 'bounded-capsule-width', minimum: .8, maximum: 1 };
+  const geometrySha256 = '6'.repeat(64);
+  const capabilities = { ...value.capabilities, version: 1, law: 'capsule.width', domain, geometrySha256,
+    formats: ['svg', 'prepared-width'] };
+  delete capabilities.gestures;
+  const prepared = { version: 1, icon: capabilities.icon, variant: capabilities.variant, law: capabilities.law,
+    svg: value.svg, domain: { minimum: .8, maximum: 1 }, sample: width => ({ ok: true, bodyWidth: width, d: `M${width} 0Z` }),
+    renderTarget: { selector: '[data-part="body"]', attribute: 'd', partId: 'body', unchangedPartIds: ['support'] } };
+  const variation = { version: 1, law: capabilities.law, geometrySha256, domain };
+  const module = { motionCapabilities: () => ({ ok: true, capabilities }), prepareBodyWidth: () => ({ ok: true, prepared }) };
+  value.glyph.svg = value.svg;
+  value.glyph.provenance.anatomy = { ...capabilities.anatomy };
+  return { ...value, module, capabilities, prepared, variation };
+}
+
+describe('подготовленная ширина имеет свой контракт и тот же master', () => {
+  it('принимает публичный sampler без выдуманных rotation exports', () => {
+    const value = widthFixture();
+    const result = admitPreparedWidth(value.module, value.glyph, value.original, value.variation);
+    expect(result).toEqual({ ok: true, capabilities: value.capabilities, prepared: value.prepared });
+    expect(Object.isFrozen(result)).toBe(true);
+  });
+  it('сохраняет точный отказ начертания до подготовки', () => {
+    const value = widthFixture();
+    const refusal = { ok: false, reason: { code: 'VARIANT_UNSUPPORTED', message: 'Нет подготовки Filled.' } };
+    value.module.motionCapabilities = () => refusal;
+    value.module.prepareBodyWidth = () => { throw new Error('Не должна вызываться.'); };
+    expect(admitPreparedWidth(value.module, value.glyph, value.original, value.variation)).toBe(refusal);
+  });
+  it.each([
+    ['чужой master', value => { value.original.masterSha256 = '7'.repeat(64); }],
+    ['иная геометрия static capability', value => { value.variation.geometrySha256 = '7'.repeat(64); }],
+    ['другая оптическая область', value => { value.variation.domain = { ...value.variation.domain, minimum: .7 }; }],
+    ['чужая анатомия', value => { value.capabilities.anatomy = { ...value.capabilities.anatomy, pathFingerprintSha256: '7'.repeat(64) }; }],
+    ['иная аннотация source', value => { value.glyph.provenance.anatomy.annotationSha256 = '7'.repeat(64); }],
+    ['иная SVG preparation', value => { value.prepared.svg = '<svg/>'; }],
+    ['чужой prepared icon', value => { value.prepared.icon = 'other'; }],
+    ['иной prepared domain', value => { value.prepared.domain.minimum = .7; }],
+    ['нефизическая цель', value => { value.prepared.renderTarget.attribute = 'transform'; }],
+    ['дублированные неподвижные части', value => { value.prepared.renderTarget.unchangedPartIds = ['support', 'support']; }],
+    ['body одновременно неподвижен', value => { value.prepared.renderTarget.unchangedPartIds = ['body']; }],
+  ])('отклоняет %s', (_, mutate) => {
+    const value = widthFixture(); mutate(value);
+    expect(() => admitPreparedWidth(value.module, value.glyph, value.original, value.variation)).toThrow(/не соответствует/);
   });
 });

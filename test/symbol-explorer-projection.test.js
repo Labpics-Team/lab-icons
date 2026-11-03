@@ -21,7 +21,7 @@ describe('browser-проекция принятых symbol capabilities', () => 
   it('копирует публичные gesture targets и отличает rotation от prepared sampler', () => {
     const { contract, surface } = gestureFixture();
     expect(symbolExplorerGestureProjection(contract, ['timer', 'mic'], surface))
-      .toEqual({ iconIds: ['mic', 'timer'], rotationIconIds: ['timer'] });
+      .toEqual({ iconIds: ['mic', 'timer'], rotationIconIds: ['timer'], preparedWidthIconIds: ['mic'] });
     const files = symbolExplorerBrowserFiles(contract, ['timer', 'mic'], [], surface);
     expect(files).toContain('dist/gestures/timer.js');
     expect(files).toContain('dist/gestures/mic.js');
@@ -34,6 +34,7 @@ describe('browser-проекция принятых symbol capabilities', () => 
     ['missing types', value => { value.contract.files = value.contract.files.filter(file => file !== 'dist/gestures/timer.d.ts'); }, /declaration/],
     ['missing surface', value => { delete value.surface['./gestures/timer']; }, /export surface/],
     ['incomplete rotation', value => { value.surface['./gestures/timer'].pop(); }, /неполный rotation contract/],
+    ['incomplete prepared width', value => { value.surface['./gestures/mic'] = ['prepareBodyWidth']; }, /неполный prepared width contract/],
     ['orphan surface', value => { value.surface['./gestures/other'] = ['prepareBodyWidth']; }, /не имеет package target/],
   ])('не выдаёт %s за browser capability', (_, mutate, reason) => {
     const value = gestureFixture(); mutate(value);

@@ -1,5 +1,65 @@
 import { animate, sequence, value } from '@labpics/motion';
 
+/** Публичный scalar clock исполняет подготовленную геометрию; последняя запись — начало successor. */
+export function executePreparedWidth(roots, prepared, request, { onProgress } = {}) {
+  if (!prepared || prepared.version !== 1 || prepared.law !== 'capsule.width' || typeof prepared.sample !== 'function' ||
+      prepared.renderTarget?.attribute !== 'd' || !Number.isFinite(request?.duration) || request.duration < 0 ||
+      typeof request.reducedMotion !== 'boolean') throw new Error('Нужны подготовленная ширина и конечный запрос исполнения.');
+  const poseAt = width => {
+    const pose = prepared.sample(width);
+    if (!pose.ok) throw new Error(`${pose.reason.code}: ${pose.reason.message}`);
+    if (pose.bodyWidth !== width || typeof pose.d !== 'string' || !pose.d.length) throw new Error('Sampler не подготовил объявленную ширину.');
+    return pose;
+  };
+  const initial = poseAt(request.from), endpoint = poseAt(request.to);
+  const viewports = (Array.isArray(roots) ? roots : [roots]).flatMap(root =>
+    root instanceof SVGElement ? [root] : [...root.querySelectorAll('svg')]);
+  if (!viewports.length || new Set(viewports).size !== viewports.length) throw new Error('Ширина требует независимые SVG viewport.');
+  const bindings = viewports.map(svg => {
+    const targets = svg.querySelectorAll(prepared.renderTarget.selector);
+    if (targets.length !== 1 || targets[0].tagName?.toLowerCase() !== 'path' || targets[0].getAttribute('d') !== initial.d) {
+      throw new Error('RENDER_CORRESPONDENCE_MISMATCH: видимая ширина не соответствует preparation.');
+    }
+    return targets[0];
+  });
+  const clock = value(request.from);
+  let playback, disposed = false, lastD = initial.d, failure;
+  let unsubscribe = () => {};
+  const release = () => {
+    if (disposed) return;
+    disposed = true; unsubscribe(); clock.dispose();
+  };
+  const write = pose => {
+    if (disposed) return;
+    if (bindings.some(element => element.getAttribute('d') !== lastD)) {
+      throw new Error('RENDER_CORRESPONDENCE_MISMATCH: другой writer изменил подготовленную форму.');
+    }
+    if (pose.d !== lastD) for (const element of bindings) element.setAttribute('d', pose.d);
+    lastD = pose.d;
+    onProgress?.(pose.bodyWidth);
+  };
+  unsubscribe = clock.subscribe(width => {
+    if (disposed) return;
+    try { write(poseAt(width)); }
+    catch (error) { failure = error; playback?.stop(); release(); }
+  });
+  try {
+    write(initial);
+    if (request.reducedMotion || request.duration === 0) write(endpoint);
+    playback = clock.animate(request.to, { duration: request.reducedMotion ? 0 : request.duration,
+      ease: 'linear', reducedMotion: request.reducedMotion ? 'always' : 'user' });
+    if (failure) { playback.stop(); throw failure; }
+  } catch (error) { release(); throw error; }
+  const finished = playback.finished.then(result => {
+    if (failure) throw failure;
+    if (result.status === 'finished' && !disposed) write(endpoint);
+    return result;
+  }).finally(release);
+  return [{ finished, get state() { return playback.state; }, get duration() { return playback.duration; },
+    pause: () => playback.pause(), play: () => playback.play(), seek: time => playback.seek(time),
+    finish: () => playback.finish(), stop() { playback.stop(); release(); } }];
+}
+
 function contourEffect(effect, byPart, prepared, onProgress) {
   if (!prepared?.ok || typeof prepared.sample !== 'function' || !effect.targets.length ||
     new Set(effect.targets.map(target => target.partId)).size !== effect.targets.length ||
