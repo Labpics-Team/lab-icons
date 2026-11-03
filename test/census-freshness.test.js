@@ -24,7 +24,7 @@ beforeEach(() => {
   writeFileSync(join(root, 'semantics/anatomy.json'), '{"glyphs":{}}');
   writeFileSync(join(root, 'semantics/census.json'), 'unchanged sentinel\n');
   writeFileSync(join(root, 'dist/index.js'), 'export const plain = "<svg/>";\n');
-  writeFileSync(join(root, 'dist/ir/index.js'), '// src/first.js\nexport const plain = 1;\n');
+  writeFileSync(join(root, 'dist/ir/index.js'), '// src/first.js\nexport const plain = "Микрофон";\n');
 });
 afterEach(() => rmSync(root, { recursive: true, force: true }));
 
@@ -33,6 +33,10 @@ describe('Свежесть census без изменения проверяемо
     const expected = generate('--stdout');
     expect(census()).toBe('unchanged sentinel\n');
     expect(JSON.parse(expected)).toMatchObject({ sourceOnlyCount: 1, modeledCount: 0 });
+    const irBytes = readFileSync(join(root, 'dist/ir/index.js')).length;
+    expect(JSON.parse(expected).bundle.totalBytes).toBe(irBytes);
+    expect(JSON.parse(expected).bundle.modules[0].bytes).toBe(irBytes);
+    expect(JSON.parse(expected).consumerBudgets.glyphRuntime.raw).toBe(irBytes);
     generate();
     expect(census()).toBe(expected);
     expect(check().status).toBe(0);

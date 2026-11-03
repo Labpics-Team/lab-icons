@@ -47,14 +47,15 @@ for (const n of sourceOnly) {
 // --- аттрибуция dist/ir/index.js по маркерам esbuild + consumer-бюджеты ---
 // dist обязателен: census без bundle-секции недетерминирован относительно
 // состояния рабочей копии (finding изолированного ревью PR #81).
-const irSrc = readFileSync(join(ROOT, 'dist', 'ir', 'index.js'), 'utf8');
+const irBytes = readFileSync(join(ROOT, 'dist', 'ir', 'index.js'));
+const irSrc = irBytes.toString('utf8');
 const markers = [...irSrc.matchAll(/^\/\/ ([^\n]+)$/gm)].map((m) => ({ path: m[1], idx: m.index }));
 const mods = markers.map((m, i) => ({
   path: m.path,
-  bytes: (i + 1 < markers.length ? markers[i + 1].idx : irSrc.length) - m.idx,
+  bytes: Buffer.byteLength(irSrc.slice(m.idx, i + 1 < markers.length ? markers[i + 1].idx : irSrc.length)),
 }));
 mods.sort((a, b) => b.bytes - a.bytes);
-const bundle = { totalBytes: irSrc.length, modules: mods };
+const bundle = { totalBytes: irBytes.length, modules: mods };
 
 const staticSrc = readFileSync(join(ROOT, 'dist', 'index.js'));
 const consumerBudgets = {
@@ -62,9 +63,9 @@ const consumerBudgets = {
     'SIZE-01: цена потребителю по маршрутам импорта; one-icon цену доказывает check-treeshake (rollup), здесь замер полных артефактов',
   fullStaticCatalog: { raw: staticSrc.length, gzip: gzipSync(staticSrc).length },
   glyphRuntime: {
-    raw: irSrc.length,
-    gzip: gzipSync(Buffer.from(irSrc)).length,
-    note: 'один glyph() тянет весь IR-бандл: JSON-данные доминируют — кандидат на split/lazy в REL-волне',
+    raw: irBytes.length,
+    gzip: gzipSync(irBytes).length,
+    note: 'полный @labpics/icons/ir entrypoint: размер файла, не транзитивный footprint одного consumer',
   },
 };
 
