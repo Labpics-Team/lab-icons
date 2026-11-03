@@ -4,9 +4,10 @@ import type { LottieAnimation, LottieCapabilities, LottieExportRequest, LottieEx
 type Point = [number, number];
 interface Contour { v: Point[]; i: Point[]; o: Point[]; c: true }
 interface Geometry {
-  version: 1; icon: string; variant: IconVariant; viewBox: number[];
+  version: 2; icon: string; variant: IconVariant; viewBox: number[];
+  composition: { kind: 'layers' } | { kind: 'compound'; fillRule: 'evenodd' };
   author: { masterSha256: string; pathFingerprintSha256: string; fileKey: string; version: string; nodeId: string };
-  parts: { id: string; anchor: Point; fillRule: 'nonzero' | 'evenodd'; contours: Contour[] }[];
+  parts: { id: string; anchor: Point; fillRule: 'nonzero' | 'evenodd' | null; contours: Contour[] }[];
 }
 type Lowering = { ok: true; geometry: Geometry } | { ok: false; reason: { code: LottieRefusalCode; message: string } };
 interface SymbolSource {
@@ -22,6 +23,14 @@ const frame = (t: number, value: number | readonly number[]) => {
   return { t, s, i: { x: s.map(() => 1), y: s.map(() => 1) }, o: { x: s.map(() => 0), y: s.map(() => 0) } };
 };
 const cloneContour = (contour: Contour) => ({ c: true, v: contour.v.map(p => [...p]), i: contour.i.map(p => [...p]), o: contour.o.map(p => [...p]) });
+function matchesComposition(target: Geometry['composition'], source: GlyphIR<string>['composition']): boolean {
+  if (!target || !source || typeof target !== 'object' || typeof source !== 'object' || Array.isArray(target) || Array.isArray(source)) return false;
+  if (target.kind === 'layers') return source.kind === 'layers' &&
+    Object.keys(target).join(',') === 'kind' && Object.keys(source).join(',') === 'kind';
+  return target.kind === 'compound' && target.fillRule === 'evenodd' &&
+    Object.keys(target).sort().join(',') === 'fillRule,kind' && source.kind === 'compound' &&
+    Object.keys(source).sort().join(',') === 'fillRule,kind' && source.fillRule === target.fillRule;
+}
 
 /** @internal Геометрия уже скомпилирована. Runtime не импортирует parser или каталог. */
 export function createLottieSymbol(source: SymbolSource, variants: Record<IconVariant, Lowering>) {
@@ -30,7 +39,8 @@ export function createLottieSymbol(source: SymbolSource, variants: Record<IconVa
     if (!target.ok) return target;
     const glyph = source.glyph({ variant }), geometry = target.geometry;
     const author = glyph.provenance.kind === 'source' ? glyph.provenance.author : undefined;
-    if (geometry.icon !== glyph.icon || geometry.variant !== glyph.variant || geometry.version !== 1 ||
+    if (geometry.icon !== glyph.icon || geometry.variant !== glyph.variant || geometry.version !== 2 ||
+        !matchesComposition(geometry.composition, glyph.composition) ||
         !author || Object.keys(geometry.author).some(key => geometry.author[key as keyof Geometry['author']] !== author[key as keyof typeof author]) ||
         geometry.parts.length !== glyph.parts.length || geometry.viewBox.some((value, index) => value !== glyph.viewBox[index]) ||
         geometry.parts.some((part, index) => part.id !== glyph.parts[index]?.id || part.fillRule !== glyph.parts[index]?.fillRule ||
@@ -57,8 +67,10 @@ export function createLottieSymbol(source: SymbolSource, variants: Record<IconVa
         Object.keys(request).some(key => !['variant', 'gesture', 'duration', 'from', 'to', 'reducedMotion', 'color', 'frameRate'].includes(key))) {
       return refuse('INVALID_REQUEST', 'Неизвестные параметры Lottie export.');
     }
-    const variant = request.variant ?? 'outline', color = request.color ?? '#000000', rate = request.frameRate ?? 60;
-    const duration = request.duration ?? 1000, from = request.from ?? 0, to = request.to ?? 1;
+    const variant = request.variant === undefined ? 'outline' : request.variant;
+    const color = request.color === undefined ? '#000000' : request.color, rate = request.frameRate === undefined ? 60 : request.frameRate;
+    const duration = request.duration === undefined ? 1000 : request.duration;
+    const from = request.from === undefined ? 0 : request.from, to = request.to === undefined ? 1 : request.to;
     if (!['outline', 'filled'].includes(variant) || typeof color !== 'string' || !/^#[\da-f]{6}$/i.test(color) ||
         !Number.isSafeInteger(rate) || rate <= 0 || !Number.isFinite(duration) || duration < 0 ||
         ![from, to].every(value => Number.isFinite(value) && value >= 0 && value <= 1) ||
@@ -124,7 +136,11 @@ export function createLottieSymbol(source: SymbolSource, variants: Record<IconVa
     if (![width, height, ...origin].every(Number.isSafeInteger) || width <= 0 || height <= 0) return refuse('CANVAS_UNSUPPORTED', 'Canvas не представим безопасными целыми размерами target.');
     const rgb = [1, 3, 5].map(index => Number.parseInt(color.slice(index, index + 2), 16) / 255);
     const op = terminalFrame + 1;
-    const layers = geometry.parts.map((part, index) => {
+    // Семантические counter части принадлежат одному paint owner. Контуры
+    // не дублируются и не получают самостоятельной положительной заливки.
+    const paintScopes = geometry.composition.kind === 'compound' ? [geometry.parts] : geometry.parts.map(part => [part]);
+    const layers = paintScopes.map((parts, index) => {
+      const part = parts[0]!, fillRule = geometry.composition.kind === 'compound' ? geometry.composition.fillRule : part.fillRule;
       const rotation = rotations.get(part.id), opacity = opacityTargets.get(part.id), translation = translations.get(part.id);
       const pivot: Point = rotation ? [geometry.viewBox[0]! + part.anchor[0] * geometry.viewBox[2]!, geometry.viewBox[1]! + part.anchor[1] * geometry.viewBox[3]!] : [0, 0];
       let opacityProperty: unknown = fixed(opacity ? (terminalFrame ? opacity.from : opacity.to) * 100 : 100);
@@ -154,12 +170,12 @@ export function createLottieSymbol(source: SymbolSource, variants: Record<IconVa
         }
         positionProperty = { a: 1, k: values };
       }
-      return { ddd: 0, ind: index + 1, ty: 4, nm: part.id, sr: 1, ip: 0, op, st: 0, bm: 0,
+      return { ddd: 0, ind: index + 1, ty: 4, nm: geometry.composition.kind === 'compound' ? 'compound' : part.id, sr: 1, ip: 0, op, st: 0, bm: 0,
         ks: { o: opacityProperty, r: rotation && terminalFrame ? { a: 1, k: [frame(0, rotation.from), frame(terminalFrame, rotation.to)] } : fixed(rotation?.to ?? 0),
           p: positionProperty, a: fixed([...pivot, 0]), s: fixed([100, 100, 100]) },
         // Один fill scope на исходный SVG path, включая все его countershapes.
-        shapes: [...part.contours.map(contour => ({ ty: 'sh', ks: fixed(cloneContour(contour)), nm: part.id })),
-          { ty: 'fl', c: fixed(rgb), o: fixed(100), r: part.fillRule === 'evenodd' ? 2 : 1, bm: 0, nm: 'ink' }] };
+        shapes: [...parts.flatMap(part => part.contours.map(contour => ({ ty: 'sh', ks: fixed(cloneContour(contour)), nm: part.id }))),
+          { ty: 'fl', c: fixed(rgb), o: fixed(100), r: fillRule === 'evenodd' ? 2 : 1, bm: 0, nm: 'ink' }] };
     }).reverse();
     const animation: LottieAnimation = { v: '5.13.0', fr: rate, ip: 0, op, w: width, h: height, nm: `${geometry.icon}/${variant}`, ddd: 0, assets: [], layers,
       meta: { labIcons: { profile, icon: geometry.icon, variant, logicalViewBox: [...geometry.viewBox], offset, durationMs: effectiveDuration,

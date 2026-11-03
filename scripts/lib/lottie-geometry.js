@@ -67,18 +67,30 @@ export function lottieContours(d) {
 export function compileLottieGeometry(glyph) {
   try {
     if (glyph.provenance.kind !== 'source' || !glyph.provenance.author) fail('AUTHOR_SOURCE_REQUIRED', 'Нужен текущий авторский источник.');
-    if (glyph.composition.kind !== 'layers') fail('COMPOSITION_UNSUPPORTED', 'Target сохраняет независимые авторские fill layers.');
+    const composition = glyph.composition, compound = composition?.kind === 'compound';
+    if (!composition || typeof composition !== 'object' || Array.isArray(composition) ||
+        (compound ? composition.fillRule !== 'evenodd' || Object.keys(composition).sort().join(',') !== 'fillRule,kind'
+          : composition.kind !== 'layers' || Object.keys(composition).join(',') !== 'kind')) {
+      fail('COMPOSITION_UNSUPPORTED', 'Target сохраняет layers либо объявленный общий evenodd fill owner.');
+    }
+    if (compound && (glyph.provenance.anatomy?.version !== 1 || glyph.provenance.anatomy.masterSha256 !== glyph.provenance.author.masterSha256 ||
+        glyph.provenance.anatomy.pathFingerprintSha256 !== glyph.provenance.author.pathFingerprintSha256 ||
+        glyph.d !== glyph.parts.map(part => part.d).join(''))) {
+      fail('COMPOSITION_UNSUPPORTED', 'Compound требует авторскую анатомию и полное упорядоченное покрытие общего path.');
+    }
     if (!Array.isArray(glyph.viewBox) || glyph.viewBox.length !== 4 || glyph.viewBox.some(value => !Number.isFinite(value)) || glyph.viewBox[2] <= 0 || glyph.viewBox[3] <= 0) {
       fail('PATH_INVALID', 'Нужен конечный положительный viewBox.');
     }
     const parts = glyph.parts.map(part => {
-      if (part.paint?.kind !== 'fill' || part.paint.fill !== 'currentColor' || !['nonzero', 'evenodd'].includes(part.fillRule)) {
+      if (part.paint?.kind !== 'fill' || part.paint.fill !== 'currentColor' ||
+          (compound ? part.fillRule !== null || part.provenance?.kind !== 'source' || part.provenance.identity !== 'declared'
+            : !['nonzero', 'evenodd'].includes(part.fillRule))) {
         fail('PAINT_UNSUPPORTED', 'Stroke, маски и неопределённый fill-rule требуют отдельного target.');
       }
       return { id: part.id, anchor: [...part.anchor], fillRule: part.fillRule, contours: lottieContours(part.d) };
     });
     if (!parts.length || new Set(parts.map(part => part.id)).size !== parts.length) fail('PATH_INVALID', 'Части обязаны иметь уникальные ID.');
-    return { ok: true, geometry: { version: 1, icon: glyph.icon, variant: glyph.variant,
+    return { ok: true, geometry: { version: 2, icon: glyph.icon, variant: glyph.variant, composition: { ...composition },
       viewBox: [...glyph.viewBox], author: { ...glyph.provenance.author }, parts } };
   } catch (error) {
     if (!(error instanceof LottieGeometryError)) throw error;

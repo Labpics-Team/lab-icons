@@ -329,7 +329,10 @@ async function runLottieNegativeControls(create, testCases) {
   const countershape = testCases.find(item => item.name === 'chatbubble-ellipses' && item.request.variant === 'outline' && !item.request.gesture);
   const nudging = testCases.find(item => item.name === 'arrow-forward' && item.request.variant === 'outline' && item.request.gesture === 'arrow-forward.nudge');
   const ringing = testCases.find(item => item.name === 'notifications' && item.request.variant === 'outline' && item.request.gesture === 'notifications.ring');
-  assert(rotating && countershape && nudging && ringing, 'Нужны реальные cycle, countershape, nudge и ring controls.');
+  const compound = testCases.find(item => item.name === 'mic-circle' && item.request.variant === 'filled' && !item.request.gesture);
+  assert(rotating && countershape && nudging && ringing && compound, 'Нужны реальные cycle, countershape, nudge, ring и compound controls.');
+  const counterId = compound.annotation.parts.find(part => part.role === 'counter')?.id;
+  assert(counterId, 'Compound control требует объявленного авторского counter.');
   const cycle = { ...rotating, request: { ...rotating.request, duration: 1000, frameRate: 60, from: 0.17, to: 0.73 } };
   const reverse = { ...cycle, request: { ...cycle.request, from: 0.73, to: 0.17 } };
   const reduced = { ...reverse, request: { ...reverse.request, reducedMotion: true } };
@@ -337,11 +340,23 @@ async function runLottieNegativeControls(create, testCases) {
   const nudgeReverse = { ...nudge, request: { ...nudge.request, from: 0.73, to: 0.17 } };
   const nudgeReduced = { ...nudgeReverse, request: { ...nudgeReverse.request, to: 0.37, reducedMotion: true } };
   const nudgeNoop = { ...nudge, request: { ...nudge.request, from: 0.37, to: 0.37 } };
-  await runLottieRenderCases(create, [cycle, countershape, reverse, reduced, nudge, nudgeReverse, nudgeReduced, nudgeNoop], { controls: false, visible: false });
+  await runLottieRenderCases(create, [cycle, countershape, compound, reverse, reduced, nudge, nudgeReverse, nudgeReduced, nudgeNoop], { controls: false, visible: false });
   const mutants = [
     ['geometry', cycle, animation => { animation.layers[0].shapes.find(shape => shape.ty === 'sh').ks.k.v[0][0] += 1; }, /raster mismatches/],
     ['anchor', cycle, animation => { const layer = animation.layers.find(layer => layer.ks.r.a); layer.ks.a.k[0] += 1; layer.ks.p.k[0] += 1; }, /raster mismatches/],
     ['fill-countershape', countershape, animation => { const layer = animation.layers.find(layer => layer.shapes.filter(shape => shape.ty === 'sh').length > 1); layer.shapes.splice(layer.shapes.findLastIndex(shape => shape.ty === 'sh'), 1); }, /raster mismatches/],
+    ['compound-hole', compound, animation => {
+      for (const layer of animation.layers) layer.shapes = layer.shapes.filter(shape => shape.ty !== 'sh' || shape.nm !== counterId);
+    }, /raster mismatches/],
+    ['compound-fill-scopes', compound, animation => {
+      // Сохраняет все контуры и цвет, но намеренно нарушает единого paint owner.
+      animation.layers = animation.layers.flatMap(layer => {
+        const fill = layer.shapes.find(shape => shape.ty === 'fl');
+        return layer.shapes.filter(shape => shape.ty === 'sh').map(shape => ({
+          ...layer, nm: shape.nm, shapes: [shape, structuredClone(fill)],
+        }));
+      }).map((layer, index) => ({ ...layer, ind: index + 1 }));
+    }, /raster mismatches/],
     ['terminal-hold', cycle, animation => { animation.op -= 1; for (const layer of animation.layers) layer.op -= 1; }, /natural completion=59, terminal=60/],
     ['canvas-crop', cycle, animation => { animation.w = Math.floor(animation.w / 2); }, /raster mismatches/],
     ['nudge-axis', nudge, animation => { const position = animation.layers.find(layer => layer.ks.p.a).ks.p; for (const keyframe of position.k) [keyframe.s[0], keyframe.s[1]] = [keyframe.s[1], keyframe.s[0]]; }, /raster mismatches/],

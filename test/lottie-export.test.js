@@ -5,6 +5,37 @@ import { lottieSymbols, names, nudgeNames } from './helpers/lottie-symbols.js';
 import { sampleMotionGesture } from '../src/core/motion-sampler.js';
 const consumers = lottieSymbols();
 const layer = (animation, id) => animation.layers.find(item => item.nm === id);
+
+// Только interior witnesses статической evenodd заливки, не raster tolerance:
+// независимое семплирование cubic проверяет точки вдали от границ контура.
+function evenOddInkAt(animation, point) {
+  const inside = contour => {
+    const polygon = [];
+    for (let index = 0; index < contour.v.length; index++) {
+      const next = (index + 1) % contour.v.length, a = contour.v[index], b = contour.v[next];
+      const c = a.map((value, axis) => value + contour.o[index][axis]);
+      const d = b.map((value, axis) => value + contour.i[next][axis]);
+      for (let sample = 0; sample < 16; sample++) {
+        const t = sample / 16, u = 1 - t;
+        polygon.push(a.map((value, axis) => u ** 3 * value + 3 * u ** 2 * t * c[axis] + 3 * u * t ** 2 * d[axis] + t ** 3 * b[axis]));
+      }
+    }
+    let crossings = 0;
+    for (let index = 0; index < polygon.length; index++) {
+      const a = polygon[index], b = polygon[(index + 1) % polygon.length];
+      if ((a[1] > point[1]) !== (b[1] > point[1]) &&
+          point[0] < a[0] + (point[1] - a[1]) * (b[0] - a[0]) / (b[1] - a[1])) crossings++;
+    }
+    return crossings % 2;
+  };
+  return animation.layers.some(item => {
+    const fill = item.shapes.find(shape => shape.ty === 'fl');
+    const interiors = item.shapes.filter(shape => shape.ty === 'sh').map(shape => inside(shape.ks.k));
+    expect(fill.r).toBe(2);
+    return interiors.reduce((count, value) => count + value, 0) % 2 === 1;
+  });
+}
+
 function scalar(property, t, component = 0) {
   if (!property.a) return Array.isArray(property.k) ? property.k[component] : property.k;
   const keyframes = property.k;
@@ -53,6 +84,92 @@ describe('точный build-time Lottie target', () => {
         expect(shapes.filter(shape => shape.ty === 'sh')).toHaveLength((part.d.match(/[Mm]/g) ?? []).length);
       }
     }
+  });
+  it('экспортирует настоящий Filled mic-circle одним fill owner с отрицательными контурами', () => {
+    const { symbol, targets, lottie, masters } = consumers['mic-circle'];
+    const glyph = symbol.glyph({ variant: 'filled' }), result = lottie.exportLottie({ variant: 'filled' });
+    expect(result.ok).toBe(true);
+    expect(targets.filled.geometry.composition).toEqual(glyph.composition);
+    expect(targets.filled.geometry.parts.map(part => [part.id, part.anchor, part.fillRule]))
+      .toEqual(glyph.parts.map(part => [part.id, part.anchor, part.fillRule]));
+    const { animation } = result;
+    expect(animation.layers).toHaveLength(1);
+    const shapes = animation.layers[0].shapes;
+    expect(shapes.filter(shape => shape.ty === 'fl')).toHaveLength(1);
+    expect(shapes.at(-1).r).toBe(2);
+    expect(shapes.filter(shape => shape.ty === 'sh').map(shape => shape.nm)).toEqual(glyph.parts.map(part => part.id));
+    const rawPath = masters.filled.rawSvg.match(/<path\b[^>]*\bd="([^"]+)"/)[1];
+    const rawStarts = [...rawPath.matchAll(/M([-\d.]+)[ ,]+([-\d.]+)/g)].map(match => [Number(match[1]), Number(match[2])]);
+    expect(shapes.filter(shape => shape.ty === 'sh').map(shape => shape.ks.k.v[0])).toEqual(rawStarts);
+    expect(animation.meta.labIcons.masterSha256).toBe(masters.filled.sha256);
+    expect(evenOddInkAt(animation, [12, 3])).toBe(true);
+    expect(evenOddInkAt(animation, [12, 9])).toBe(false);
+    expect(evenOddInkAt(animation, [12, 18])).toBe(false);
+    expect(evenOddInkAt(animation, [0, 0])).toBe(false);
+    const missingCounter = structuredClone(animation);
+    missingCounter.layers[0].shapes = missingCounter.layers[0].shapes.filter(shape => shape.nm !== 'microphone-body');
+    expect(evenOddInkAt(missingCounter, [12, 9])).toBe(true);
+    const independentlyPainted = structuredClone(animation);
+    independentlyPainted.layers.push({ shapes: [shapes.find(shape => shape.nm === 'microphone-body'), shapes.at(-1)] });
+    expect(evenOddInkAt(independentlyPainted, [12, 9])).toBe(true);
+  });
+  it.each([null, undefined, [], { kind: 'mask-subtract' }, { kind: 'layers', fillRule: 'evenodd' },
+    { kind: 'compound' }, { kind: 'compound', fillRule: 'nonzero' }, { kind: 'compound', fillRule: 'evenodd', extra: true }])
+    ('точно отказывает неподдержанной composition %j', composition => {
+      const glyph = consumers['mic-circle'].symbol.glyph({ variant: 'filled' });
+      expect(compileLottieGeometry({ ...glyph, composition })).toMatchObject({ ok: false, reason: { code: 'COMPOSITION_UNSUPPORTED' } });
+    });
+  it('не принимает compound contours за самостоятельный paint и проверяет source coverage', () => {
+    const glyph = consumers['mic-circle'].symbol.glyph({ variant: 'filled' });
+    for (const patch of [{ fillRule: 'evenodd' }, { paint: { kind: 'stroke', stroke: 'currentColor' } },
+      { paint: { kind: 'fill', fill: '#123456' } }, { provenance: { kind: 'source', identity: 'derived' } }]) {
+      expect(compileLottieGeometry({ ...glyph, parts: glyph.parts.map((part, index) => index === 2 ? { ...part, ...patch } : part) }))
+        .toMatchObject({ ok: false, reason: { code: 'PAINT_UNSUPPORTED' } });
+    }
+    expect(compileLottieGeometry({ ...glyph, parts: glyph.parts.slice(0, 2) }))
+      .toMatchObject({ ok: false, reason: { code: 'COMPOSITION_UNSUPPORTED' } });
+    expect(compileLottieGeometry({ ...glyph, provenance: { ...glyph.provenance, anatomy: undefined } }))
+      .toMatchObject({ ok: false, reason: { code: 'COMPOSITION_UNSUPPORTED' } });
+    expect(compileLottieGeometry({ ...glyph, provenance: { ...glyph.provenance, anatomy: { ...glyph.provenance.anatomy, version: 2 } } }))
+      .toMatchObject({ ok: false, reason: { code: 'COMPOSITION_UNSUPPORTED' } });
+  });
+  it('проверяет composition identity, порядок stable IDs и anchors target snapshot', () => {
+    const { symbol, targets } = consumers['mic-circle'];
+    for (const composition of [undefined, { kind: 'layers' }, { kind: 'compound', fillRule: 'nonzero' },
+      { kind: 'compound', fillRule: 'evenodd', extra: true }]) {
+      const changed = structuredClone(targets);
+      changed.filled.geometry.composition = composition;
+      const lottie = createLottieSymbol(symbol, changed);
+      expect(lottie.exportLottie({ variant: 'filled' })).toMatchObject({ ok: false, reason: { code: 'GEOMETRY_MISMATCH' } });
+      expect(lottie.lottieCapabilities('filled')).toMatchObject({ static: false, gestures: [], reason: { code: 'GEOMETRY_MISMATCH' } });
+    }
+    for (const mutate of [geometry => geometry.parts.reverse(), geometry => { geometry.parts[2].anchor[0] += 0.1; },
+      geometry => { geometry.parts[2].fillRule = 'evenodd'; }, geometry => { geometry.version = 1; }]) {
+      const changed = structuredClone(targets);
+      mutate(changed.filled.geometry);
+      expect(createLottieSymbol(symbol, changed).exportLottie({ variant: 'filled' }))
+        .toMatchObject({ ok: false, reason: { code: 'GEOMETRY_MISMATCH' } });
+    }
+    for (const composition of [undefined, { kind: 'layers' }, { kind: 'compound', fillRule: 'evenodd', extra: true }]) {
+      const changedSource = { ...symbol, glyph: request => ({ ...symbol.glyph(request), composition }) };
+      expect(createLottieSymbol(changedSource, targets).exportLottie({ variant: 'filled' }))
+        .toMatchObject({ ok: false, reason: { code: 'GEOMETRY_MISMATCH' } });
+    }
+  });
+  it('существующий motion owner не допускает независимое движение отрицательного контура', () => {
+    const { symbol, targets, lottie } = consumers['mic-circle'];
+    expect(lottie.lottieCapabilities('filled')).toMatchObject({ static: true, gestures: [] });
+    expect(lottie.exportLottie({ variant: 'filled', gesture: 'mic-circle.body' }))
+      .toMatchObject({ ok: false, reason: { code: 'MOTION_UNAVAILABLE' } });
+    const capabilities = symbol.glyphCapabilities('filled');
+    const gesture = { id: 'mic-circle.body', kind: 'state', meaning: 'Отдельная отрицательная часть в проверке отказа',
+      partIds: ['microphone-body'], progress: 'normalized-0-to-1', tracks: [{ partId: 'microphone-body',
+        kind: 'opacity', unit: 'fraction', interpolation: 'linear', stops: [{ at: 0, value: 0 }, { at: 1, value: 1 }] }] };
+    const injected = createLottieSymbol({ ...symbol, glyphCapabilities: () => ({ ...capabilities,
+      motion: { ...capabilities.motion, state: 'gesture-ready', gestures: [gesture] } }) }, targets);
+    expect(injected.lottieCapabilities('filled')).toMatchObject({ static: true, gestures: [] });
+    expect(injected.exportLottie({ variant: 'filled', gesture: gesture.id }))
+      .toMatchObject({ ok: false, reason: { code: 'MOTION_UNAVAILABLE', message: expect.stringMatching(/^COMPOSITION_NOT_ADDRESSABLE:/) } });
   });
 });
 
@@ -104,11 +221,36 @@ describe('Lottie использует единые semantic effects', () => {
   it('не приписывает motion source-only variant и сохраняет precise geometry refusals', () => {
     expect(consumers['volume-middle'].lottie.exportLottie({ gesture: 'volume-middle.level' })).toMatchObject({ ok: false, reason: { code: 'MOTION_UNAVAILABLE' } });
     const glyph = consumers.reload.symbol.glyph();
-    expect(compileLottieGeometry({ ...glyph, composition: { kind: 'compound', fillRule: 'evenodd' } })).toMatchObject({ ok: false, reason: { code: 'COMPOSITION_UNSUPPORTED' } });
+    expect(compileLottieGeometry({ ...glyph, composition: { kind: 'mask-subtract', basePartIds: [], subtractPartIds: [] } }))
+      .toMatchObject({ ok: false, reason: { code: 'COMPOSITION_UNSUPPORTED' } });
     expect(compileLottieGeometry({ ...glyph, parts: glyph.parts.map(part => ({ ...part, d: 'M0 0A2 2 0 0 1 2 2Z' })) })).toMatchObject({ ok: false, reason: { code: 'ARC_UNSUPPORTED' } });
   });
   it.each([null, { color: 'currentColor' }, { frameRate: 0 }, { frameRate: 2.1 }, { bogus: 1 }, { from: 0.2 }, { gesture: 'reload.cycle', duration: NaN }, { gesture: 'reload.cycle', to: 2 }])('отказывает недопустимому request %j', request => {
     expect(consumers.reload.lottie.exportLottie(request)).toMatchObject({ ok: false, reason: { code: 'INVALID_REQUEST' } });
+  });
+  it('пропущенные поля и явный undefined сохраняют статические defaults', () => {
+    expect(consumers.reload.lottie.exportLottie({ variant: undefined, color: undefined, frameRate: undefined, gesture: undefined }))
+      .toEqual(consumers.reload.lottie.exportLottie());
+  });
+  it('пропущенные поля и явный undefined сохраняют defaults объявленного жеста', () => {
+    expect(consumers.reload.lottie.exportLottie({ gesture: 'reload.cycle', variant: undefined, color: undefined,
+      frameRate: undefined, duration: undefined, from: undefined, to: undefined, reducedMotion: undefined }))
+      .toEqual(consumers.reload.lottie.exportLottie({ gesture: 'reload.cycle' }));
+  });
+  it.each(['variant', 'color', 'frameRate'])('null статического поля %s получает точный отказ', field => {
+    expect(consumers.reload.lottie.exportLottie({ [field]: null }))
+      .toMatchObject({ ok: false, reason: { code: 'INVALID_REQUEST' } });
+  });
+  it.each(['variant', 'color', 'frameRate', 'duration', 'from', 'to', 'gesture', 'reducedMotion'])
+    ('null motion поля %s получает точный отказ', field => {
+      expect(consumers.reload.lottie.exportLottie({ gesture: 'reload.cycle', [field]: null }))
+        .toMatchObject({ ok: false, reason: { code: 'INVALID_REQUEST' } });
+    });
+  it('переданные параметры движения без gesture не исчезают из статического запроса', () => {
+    for (const field of ['duration', 'from', 'to', 'reducedMotion']) for (const value of [undefined, null, 0]) {
+      expect(consumers.reload.lottie.exportLottie({ [field]: value }))
+        .toMatchObject({ ok: false, reason: { code: 'INVALID_REQUEST' } });
+    }
   });
   it('не округляет молча duration и не выдаёт другую версию geometry', () => {
     expect(consumers.reload.lottie.exportLottie({ gesture: 'reload.cycle', duration: 1001 })).toMatchObject({ ok: false, reason: { code: 'DURATION_NOT_FRAME_ALIGNED' } });

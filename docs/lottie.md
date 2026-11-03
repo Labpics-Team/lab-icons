@@ -25,6 +25,8 @@ const animationData = result.animation;
 `from` и `to` задают сегмент нормализованного прогресса; обратный сегмент
 экспортируется тем же способом. `reducedMotion: true` материализует конечную
 неподвижную позу. Параметры движения требуют явного `gesture`.
+Значения по умолчанию действуют только для пропущенного поля или `undefined`;
+явный `null` получает `INVALID_REQUEST`.
 
 `<name>.nudge` у `chevron-{back,forward,up,down}` и
 `arrow-{back,forward,up,down}` переносит исходную цельную часть в объявленном
@@ -47,10 +49,16 @@ Target profile — `lottie-web-svg-5.13`: квалификация относи�
 `lottie-web` 5.13.0. Canvas, native players и dotLottie ещё требуют собственных
 проверок. `color` — RGB `#rrggbb`; Lottie JSON не наследует CSS `currentColor`.
 
-JSON содержит отдельную layer для каждой исходной части и общий fill scope
-для её контуров. Build сохраняет cubic geometry, winding и порядок частей.
-Невырожденные SVG arcs, открытые fill contours, compound/mask composition и
-stroke получают точный отказ. Оси текущего author master не добавляются.
+При `layers` JSON содержит отдельную layer для каждой исходной части и общий
+fill scope для её контуров. Объявленный авторский `compound` с `evenodd`
+экспортируется статически одной layer и одной общей заливкой: отрицательные
+контуры сохраняют отверстия. Имена shapes сохраняют semantic part IDs и
+исходный порядок; build сохраняет cubic geometry, winding, anchors и авторский
+receipt. Например, Filled `mic-circle` сохраняет отрицательные корпус и опору.
+Независимое движение этих контуров получает отказ существующего motion owner;
+`lottieCapabilities('filled').gestures` у этого символа остаётся пустым.
+Невырожденные SVG arcs, открытые fill contours, неподдержанная композиция,
+маски и stroke получают точный отказ. Оси текущего author master не добавляются.
 
 Длительность задаётся как `N * 1000 / frameRate`, где `N` — целое число кадров.
 Строгая обратная проверка принимает это представление в JavaScript Number;
