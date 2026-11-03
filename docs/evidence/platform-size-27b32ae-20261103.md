@@ -1,17 +1,22 @@
-# Размер prepared capsule у установленного consumer
+# Размер consumer-сборок prepared capsule из producer dist
 
 Измерение выполнено в [Lab UI run 41559501182](https://github.com/Labpics-Team/labui/actions/runs/41559501182/job/125666413059)
 на source Icons `27b32aebc887795cb9c1c439d658b0205544a5fe` и consumer
 `c149bdccd22584e45ce6c6559e9e5de5f1883059`. Время захвата —
 `2026-11-03T01:36:45.889Z`. Linux x64, Node `22.19.0`, AMD Ryzen 9 5950X,
-12 доступных CPU, 33 635 536 896 B памяти. Пакет установлен из собранного tarball;
-workspace aliases в измеряемых imports не используются.
+12 доступных CPU, 33 635 536 896 B памяти. `prepare-icons-inputs.mjs` запускает
+producer `measure-platform-artifacts.mjs` до installed/browser proof.
+`check-consumer-size.js` разрешает imports сценариев в собранный producer `dist`
+через esbuild plugin. Эти байты относятся к consumer-сборкам из точного `dist`,
+а не к отдельному измерению установленного tarball.
 
 [Полный measurement](platform-size-27b32ae-20261103/platform-measurement.json.gz)
 содержит 1455 artifacts и 36 consumer scenarios. SHA256 распакованного JSON:
 `63ad2ea57b3b5ae43cdbb31dd1441a38e5bae07dd901015c5a60ac37eb928491`.
-Проверены BEGIN/29 CHUNK/END, gzip, длина 820984 B, compressed 87484 B,
-digest и source SHA. Lockfile SHA256:
+Проверены BEGIN/29 CHUNK/END, транспортный gzip 87484 B, длина JSON 820984 B,
+digest и source SHA. Сохранённый gzip заново сжат закреплённым fflate;
+его размер 98288 B, распакованный JSON совпадает с транспортным отчётом.
+Lockfile SHA256:
 `0bb03e42de120f119236cb4334f1bdd33659ce61bc8fc10901c65dff0d7df4c7`.
 
 | Полный импорт семьи | Raw B | Gzip B | Brotli B | Прежний потолок raw/gzip B |
@@ -33,6 +38,6 @@ forbidden markers и `identicalTo` сохранены. У отчёта нет po
 
 Этот run завершился отказом browser proof: общий срок 120 s истёк в режиме
 reduced motion при продолжающейся конечной работе. Измерение размеров завершено
-до этого отказа. Оно не подтверждает browser, motion, visual, frame latency
+до этого отказа. Оно не подтверждает installed package, browser, motion, visual, frame latency
 или полную приёмку исходного задания. Конечная пара source/consumer и обязательные
 CI/review остаются открытыми до нового удалённого запуска.
