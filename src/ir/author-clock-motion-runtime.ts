@@ -40,11 +40,18 @@ function select<T>(values: Variants<T>, requested: unknown): Variant | ClockHand
 }
 
 /** @internal Парсинга SVG, Boolean clipping и построения IR в кадре нет. */
-export function createCompiledClockPreparation(input: Variants<CompiledClockHands>) {
+export function createCompiledClockPreparation(input: Variants<CompiledClockHands | ClockHandsRefusal>) {
   const packets = freezeTree(input), prepared: Partial<Record<Variant, PreparedClockHands | ClockHandsRefusal>> = {};
   for (const variant of ['outline', 'filled'] as const) {
     const packet = packets[variant];
     if (!packet) continue;
+    if ('ok' in packet) {
+      if (packet.ok !== false || packet.reason.code !== 'COMPOSITION_UNSUPPORTED' || typeof packet.reason.message !== 'string') {
+        throw new TypeError('clock hands: неподтверждённый target refusal');
+      }
+      prepared[variant] = packet;
+      continue;
+    }
     const { packetSha256, ...program } = packet;
     if (packetSha256 !== sha256Hex(stableJSON(program)) || packet.version !== 1 || packet.law !== 'joint.authored-elbow' ||
         packet.variant !== variant || packet.coordinateSpace !== 'viewBox' || !['positive', 'negative'].includes(packet.polarity) || packet.bearing.length !== 2 ||

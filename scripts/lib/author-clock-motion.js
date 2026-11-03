@@ -67,7 +67,9 @@ export function compileAuthorClockMotionSymbols(author, document, { grid, catalo
 export function renderAuthorClockMotionModule(payload) {
   if (!NAME.test(payload?.icon) || !Object.keys(payload.variants ?? {}).length ||
       Object.keys(payload.variants).some(variant => !VARIANTS.includes(variant))) throw new TypeError('clock module: нужен compiler target');
-  const select = field => Object.fromEntries(Object.entries(payload.variants).map(([variant, value]) => [variant, value[field]]));
+  // Неподдержанный target поставляет причину; его build evidence и operands не нужны runtime.
+  const select = field => Object.fromEntries(Object.entries(payload.variants).map(([variant, value]) =>
+    [variant, field === 'motion' && value.capabilities.ok === false ? value.capabilities : value[field]]));
   return [
     '/** GENERATED: авторские стрелки и один nonzero-union target; scheduler независим. */',
     "import { createCompiledClockPreparation, createCompiledClockCapabilities } from '../ir/clock-motion-runtime.js';",

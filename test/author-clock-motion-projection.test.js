@@ -99,6 +99,15 @@ describe('clock motion: авторский compiler и публичная target
     expect(capabilities.geometrySha256).toMatch(/^[a-f0-9]{64}$/);
   });
 
+  it('refusal неподдержанного target не удерживает его authored geometry в gesture consumer', () => {
+    const negative = payloads.time.variants.filled.motion;
+    const module = renderAuthorClockMotionModule(payloads.time);
+    expect(module).not.toContain(JSON.stringify(negative.svg));
+    expect(module).not.toContain(negative.packetSha256);
+    expect(module).not.toContain(JSON.stringify(negative.originalD));
+    expect(negative.polarity).toBe('negative');
+  });
+
   it('negative time остаётся явно недоступным: неподдерживаемая union subtraction не притворяется слоями', () => {
     const { motion, capabilities } = payloads.time.variants.filled;
     expect(motion.polarity).toBe('negative');

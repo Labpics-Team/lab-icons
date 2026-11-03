@@ -178,6 +178,14 @@ describe("подготовленные authored стрелки: реальный
     expect(factory("filled")).toMatchObject({ ok: false, reason: { code: "VARIANT_UNSUPPORTED" } });
     for (const value of [null, 1, "duotone", {}]) expect(factory(value)).toMatchObject({ ok: false, reason: { code: "INVALID_REQUEST" } });
   });
+  it("target refusal сохраняет точную immutable причину без геометрического packet", () => {
+    const refusal = { ok: false, reason: { code: "COMPOSITION_UNSUPPORTED", message: "Нет union-minus target." } };
+    const factory = createCompiledClockPreparation({ outline: first, filled: refusal });
+    expect(factory("filled")).toBe(refusal);
+    expect(Object.isFrozen(refusal.reason)).toBe(true);
+    expect(factory().ok).toBe(true);
+    expect(() => createCompiledClockPreparation({ filled: { ok: false, reason: { code: "UNKNOWN", message: "" } } })).toThrow(TypeError);
+  });
   it("stale digest связывает bearing, polarity, SVG и physical target", () => {
     for (const mutate of [
       (packet) => {
