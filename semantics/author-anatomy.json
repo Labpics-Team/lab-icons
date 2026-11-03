@@ -1229,6 +1229,121 @@
           "enclosurePartId": "playback-enclosure"
         }
       }
+    },
+    "time": {
+      "outline": {
+        "masterSha256": "68a38b8c5e843eb2ea2f52b1bfb3c42cee4a3521165290a8846689960ea73036",
+        "pathFingerprintSha256": "70421c685ffbd4cf616fd7699dae0b36aa566177c25341a81a0dd4e6aa23e2c8",
+        "scope": "motion",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "clock-hands",
+            "role": "content"
+          },
+          {
+            "pathIndex": 1,
+            "id": "clock-enclosure",
+            "role": "container"
+          }
+        ],
+        "gesture": null,
+        "joint": {
+          "law": "joint.authored-elbow",
+          "purpose": "elapsed-time",
+          "pathIndex": 0,
+          "contourIndex": 0,
+          "partIds": {
+            "minute": "clock-minute",
+            "hour": "clock-hour"
+          },
+          "polarity": "positive"
+        }
+      },
+      "filled": {
+        "masterSha256": "e5ea53855b53dba61c7fb7066f25f78c9743d9a1a6bc4259c7bfd5784bb214c9",
+        "pathFingerprintSha256": "fc0afd4ba86d4dda9ec61902292f09d169b6d3f42dce13426af665a3bc552294",
+        "scope": "motion",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "clock-body",
+            "role": "container"
+          }
+        ],
+        "gesture": null,
+        "joint": {
+          "law": "joint.authored-elbow",
+          "purpose": "elapsed-time",
+          "pathIndex": 0,
+          "contourIndex": 1,
+          "partIds": {
+            "minute": "clock-minute",
+            "hour": "clock-hour"
+          },
+          "polarity": "negative"
+        }
+      }
+    },
+    "history": {
+      "outline": {
+        "masterSha256": "43b8c4debf600e9541f9fa5a5fc511aac94ed58f72214dab7f060040dbc75d44",
+        "pathFingerprintSha256": "95473b86de1a48e45452977f619d1f0b76bcdaa3e6782ffbccb9e19ad20dbf5d",
+        "scope": "motion",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "clock-enclosure",
+            "role": "container"
+          },
+          {
+            "pathIndex": 1,
+            "id": "clock-hands",
+            "role": "content"
+          }
+        ],
+        "gesture": null,
+        "joint": {
+          "law": "joint.authored-elbow",
+          "purpose": "elapsed-time",
+          "pathIndex": 1,
+          "contourIndex": 0,
+          "partIds": {
+            "minute": "clock-minute",
+            "hour": "clock-hour"
+          },
+          "polarity": "positive"
+        }
+      },
+      "filled": {
+        "masterSha256": "b8061fb8cd253e697b8b1231fbb069d0830a8f995321349865ac92a22feee1e6",
+        "pathFingerprintSha256": "699e8533748d458640d68ac4db8904020558468b5fec319e9fe66602cf48cda2",
+        "scope": "motion",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "clock-enclosure",
+            "role": "container"
+          },
+          {
+            "pathIndex": 1,
+            "id": "clock-hands",
+            "role": "content"
+          }
+        ],
+        "gesture": null,
+        "joint": {
+          "law": "joint.authored-elbow",
+          "purpose": "elapsed-time",
+          "pathIndex": 1,
+          "contourIndex": 0,
+          "partIds": {
+            "minute": "clock-minute",
+            "hour": "clock-hour"
+          },
+          "polarity": "positive"
+        }
+      }
     }
   }
 }

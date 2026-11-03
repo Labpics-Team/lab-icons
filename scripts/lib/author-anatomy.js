@@ -3,6 +3,7 @@ import { iconGeometry } from '../../src/core/icon-geometry.js';
 import { validateMotionGesture } from '../../src/core/motion-sampler.js';
 import { compileAuthorVariation } from './author-variation.js';
 import { compileAuthorCapsule, projectAuthorCapsuleRuntime } from './author-capsule.js';
+import { compileAuthorClockJoint } from './author-clock-joint.js';
 import { projectAuthorSourceContours } from './author-source-contours.js';
 import { compileAuthorAnnulus, projectAuthorAnnulusRuntime, compileAuthorContentVariation,
   projectAuthorContentVariationRuntime } from './author-annulus.js';
@@ -271,7 +272,7 @@ function compileAuthorAnatomyResult(baseline, document, grid, options) {
     refuse('SOURCE_MISMATCH', 'анатомия относится к другому файлу или версии Figma');
   }
 
-  const output = {}, evidence = {}, contentEvidence = {}, capsuleEvidence = {};
+  const output = {}, evidence = {}, contentEvidence = {}, capsuleEvidence = {}, jointEvidence = {};
   for (const icon of Object.keys(document.icons).sort()) {
     if (!NAME.test(icon) || !Object.hasOwn(baseline.icons, icon)) {
       refuse('ANNOTATION_INVALID', `нет авторского семейства ${icon}`);
@@ -288,6 +289,7 @@ function compileAuthorAnatomyResult(baseline, document, grid, options) {
         ...(Object.hasOwn(declaration, 'composition') ? ['composition'] : []),
         ...(Object.hasOwn(declaration, 'variation') ? ['variation'] : []),
         ...(Object.hasOwn(declaration, 'scope') ? ['scope'] : []),
+        ...(Object.hasOwn(declaration, 'joint') ? ['joint'] : []),
         ...(Object.hasOwn(declaration, 'contentVariation') ? ['contentVariation'] : [])], label);
       if (Object.hasOwn(declaration, 'scope') && (declaration.scope !== 'motion' ||
           declaration.variation || declaration.contentVariation || declaration.composition)) {
@@ -298,6 +300,15 @@ function compileAuthorAnatomyResult(baseline, document, grid, options) {
           declaration.masterSha256 !== source.author.masterSha256 ||
           declaration.pathFingerprintSha256 !== source.author.pathFingerprintSha256) {
         refuse('MASTER_MISMATCH', `${label}: raw master и path receipt не совпадают`);
+      }
+      if (declaration.joint) {
+        fields(declaration.joint, ['law', 'purpose', 'pathIndex', 'contourIndex', 'partIds', 'polarity'], `${label}.joint`);
+        if (declaration.scope !== 'motion' || declaration.gesture !== null ||
+            declaration.joint.law !== 'joint.authored-elbow' || declaration.joint.purpose !== 'elapsed-time') {
+          refuse('LAW_SEMANTICS_UNSUPPORTED', `${label}: сустав часов требует отдельный motion scope и elapsed-time`);
+        }
+        const { law: _law, purpose: _purpose, ...selectors } = declaration.joint;
+        jointEvidence[label] = compileAuthorClockJoint(source, selectors);
       }
       const compound = Object.hasOwn(declaration, 'composition');
       if (!Array.isArray(declaration.parts) ||
@@ -386,7 +397,7 @@ function compileAuthorAnatomyResult(baseline, document, grid, options) {
       };
     }
   }
-  return freezeTree({ contracts: output, evidence, contentEvidence, capsuleEvidence });
+  return freezeTree({ contracts: output, evidence, contentEvidence, capsuleEvidence, jointEvidence });
 }
 
 /** Существующие build consumers сохраняют прежнюю форму source contracts. */
