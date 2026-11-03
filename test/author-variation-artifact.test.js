@@ -16,7 +16,7 @@ import { createGlyphCompiler } from '../src/ir/compiler.js';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const read = path => JSON.parse(readFileSync(join(root, path), 'utf8'));
-const names = ['plus-circle', 'checkmark-circle', 'ellipsis-horizontal'];
+const names = ['plus-circle', 'checkmark-circle', 'ellipsis-horizontal', 'mic', 'mic-circle'];
 const variants = ['outline', 'filled'];
 const manifest = read('semantics/figma-baseline.json');
 const baseline = loadAuthorBaseline(root, { manifest: { ...manifest,
@@ -63,10 +63,11 @@ beforeAll(async () => {
   const pkg = join(directory, 'node_modules/@labpics/icons'), dist = join(pkg, 'dist');
   for (const path of ['ir/symbol-data', 'symbols', 'variations', 'lottie', 'motion']) mkdirSync(join(dist, path), { recursive: true });
   writeFileSync(join(pkg, 'package.json'), JSON.stringify({ name: '@labpics/icons', type: 'module', exports: read('package.json').exports }));
-  // Пять узких runtime entrypoints; полный build/pack и каталог не запускаются.
+  // Узкие runtime entrypoints; полный build/pack и каталог не запускаются.
   for (const [input, output] of [
     ['src/ir/symbol-runtime.ts', 'ir/symbol-runtime.js'],
     ['src/ir/author-annulus-runtime.ts', 'ir/annulus-runtime.js'],
+    ['src/ir/author-capsule-runtime.ts', 'ir/capsule-runtime.js'],
     ['src/ir/authored-variation.ts', 'ir/variation-runtime.js'],
     ['src/motion/index.ts', 'motion/index.js'],
     ['src/lottie/runtime.ts', 'ir/lottie-runtime.js'],
@@ -95,8 +96,20 @@ describe('author variation: исполняемый installed smoke по объя
     const result = runConsumer({ expectations: { 'ellipsis-horizontal': expected['ellipsis-horizontal'] } });
     expect(result.status, result.stdout + result.stderr).toBe(0);
   });
-  it('оба закона проходят один generated smoke через public exports; Filled остаётся независимым', () => {
+  it('все три закона проходят один generated smoke через public exports; Filled остаётся независимым', () => {
     const result = runConsumer();
+    expect(result.status, result.stdout + result.stderr).toBe(0);
+    expect(result.stdout).toContain('author variation installed consumer PASS');
+  });
+
+  it('настоящая capsule сохраняет независимые layers и отрицательный Filled compound', () => {
+    expect(expected['mic'].outline.composition).toEqual({ kind: 'layers' });
+    expect(expected['mic-circle'].filled.composition).toEqual({ kind: 'compound', fillRule: 'evenodd' });
+    expect(expected['mic-circle'].filled.parts.map(part => part.role)).toEqual(['container', 'counter', 'counter']);
+    for (const icon of ['mic', 'mic-circle']) for (const variant of variants) {
+      expect(expected[icon][variant].variation).toMatchObject({ law: 'capsule.width', bodyPartId: 'microphone-body' });
+    }
+    const result = runConsumer({ expectations: { mic: expected.mic, 'mic-circle': expected['mic-circle'] } });
     expect(result.status, result.stdout + result.stderr).toBe(0);
     expect(result.stdout).toContain('author variation installed consumer PASS');
   });
@@ -144,6 +157,35 @@ describe('author variation: исполняемый installed smoke по объя
       const syntax = spawnSync(process.execPath, ['--check', path], { encoding: 'utf8' });
       expect(syntax.status, syntax.stdout + syntax.stderr).toBe(0);
       const result = runConsumer();
+      expect(result.status, result.stdout + result.stderr).not.toBe(0);
+      expect(result.stderr).toContain(message);
+    } finally { writeFileSync(path, original); }
+  });
+
+  it.each([
+    ['потеря semantic part', 'return { ...glyph, parts: glyph.parts.slice(0, -1) };', 'authored variation lost parts/SVG'],
+    ['дублирование semantic part', 'return { ...glyph, parts: [...glyph.parts, glyph.parts[1]] };', 'authored variation lost parts/SVG'],
+    ['перестановка semantic parts', 'return { ...glyph, parts: [glyph.parts[0], glyph.parts[2], glyph.parts[1]] };', 'authored variation lost parts/SVG'],
+    ['подмена semantic role', "return { ...glyph, parts: glyph.parts.map((part, index) => index === 1 ? { ...part, role: 'content' } : part) };", 'authored variation lost parts/SVG'],
+    ['потеря физического contour', 'return { ...glyph, svg: glyph.svg.replace(\'d="\' + glyph.d + \'"\', \'d="\' + glyph.parts.slice(0, -1).map(part => part.d).join(\'\') + \'"\') };', 'authored variation lost parts/SVG'],
+    ['дублирование физического contour', 'return { ...glyph, svg: glyph.svg.replace(\'d="\' + glyph.d + \'"\', \'d="\' + glyph.d + glyph.parts[1].d + \'"\') };', 'authored variation lost parts/SVG'],
+    ['подмена физической role', 'return { ...glyph, svg: glyph.svg.replace(\'data-roles="container counter counter"\', \'data-roles="container content counter"\') };', 'compound parent утратил ordered contour metadata'],
+    ['подмена общего fill owner', 'return { ...glyph, svg: glyph.svg.replace(\'fill-rule="evenodd"\', \'fill-rule="nonzero"\') };', 'compound source требует один точный evenodd fill owner'],
+  ])('Filled compound: %s обнаруживается в установленном consumer', (_, mutation, message) => {
+    const path = join(directory, 'node_modules/@labpics/icons/dist/variations/mic-circle.js');
+    const original = readFileSync(path, 'utf8'), declaration = 'export const glyph =';
+    expect(original).toContain(declaration);
+    try {
+      writeFileSync(path, original.replace(declaration, 'const artifactOriginal =') + `
+export const glyph = request => {
+  const glyph = artifactOriginal(request);
+  if (request?.variant === 'filled' && request.variation?.bodyWidth < 1) { ${mutation} }
+  return glyph;
+};
+`);
+      const syntax = spawnSync(process.execPath, ['--check', path], { encoding: 'utf8' });
+      expect(syntax.status, syntax.stdout + syntax.stderr).toBe(0);
+      const result = runConsumer({ expectations: { 'mic-circle': { filled: expected['mic-circle'].filled } } });
       expect(result.status, result.stdout + result.stderr).not.toBe(0);
       expect(result.stderr).toContain(message);
     } finally { writeFileSync(path, original); }
