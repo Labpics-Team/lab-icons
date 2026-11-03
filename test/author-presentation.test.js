@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { build } from 'esbuild';
 import { describe, expect, it } from 'vitest';
 import { loadAuthorBaseline } from '../scripts/lib/author-baseline.js';
+import { projectAuthorSourceContours } from '../scripts/lib/author-source-contours.js';
 import { compileAuthorStateGroups, renderStateGroupModule, stateGroupDeclaration, stateRuntimeBuildOptions } from '../scripts/lib/author-state-groups.js';
 import { statePackageExpectations, verifyInstalledStateGroup } from '../scripts/lib/state-artifact-consumer.js';
 import { symbolExportName } from '../scripts/lib/symbol-modules.js';
@@ -27,24 +28,45 @@ const baseline = loadAuthorBaseline(root, { manifest: { ...manifest,
   counts: { families: names.length, variants: names.length * 2 },
   icons: Object.fromEntries(names.map(name => [name, manifest.icons[name]])),
 } });
-const compiler = createGlyphCompiler({
+function compilerFor(contracts = {}) { return createGlyphCompiler({
   catalog: { canvas: { viewBox: [0, 0, 24, 24] }, axes: read('semantics/catalog.json').axes,
     icons: Object.fromEntries(Object.entries(baseline.icons).map(([icon, variants]) => [icon, {
-      model: null, source: Object.fromEntries(Object.entries(variants).map(([variant, item]) => [variant, item.sourceContract])),
+      model: null, source: Object.fromEntries(Object.entries(variants).map(([variant, item]) => [variant, contracts[`${icon}/${variant}`] ?? item.sourceContract])),
     }])),
   }, anatomy: { version: 1, glyphs: {} }, grid: read('semantics/grid.json'),
   staticIcons: Object.fromEntries(Object.entries(baseline.icons).flatMap(([icon, variants]) =>
     Object.entries(variants).map(([variant, item]) => [symbolExportName(icon, variant), item.artifactSvg]))),
-});
+}); }
+const compiler = compilerFor();
 const paths = svg => [...svg.matchAll(/<path\b[^>]*>/g)].map(([tag]) => ({
   d: /\bd="([^"]+)"/.exec(tag)[1], fillRule: /\bfill-rule="([^"]+)"/.exec(tag)?.[1] ?? 'nonzero',
 }));
 const hash = value => createHash('sha256').update(value).digest('hex');
-function compile(name) {
+function productionSourceCompiler() {
+  const declarations = read('semantics/author-anatomy.json');
+  const contracts = Object.fromEntries(names.flatMap(icon => ['outline', 'filled'].map(variant => {
+    const source = baseline.icons[icon][variant], declaration = declarations.icons[icon]?.[variant];
+    if (!declaration) return [`${icon}/${variant}`, source.sourceContract];
+    // Тот же production contour projection; ширина и её proof не меняются этим state admission.
+    const parts = declaration.composition
+      ? projectAuthorSourceContours(source, declaration.parts, declaration.composition,
+        (code, message) => { throw Object.assign(new Error(message), { code }); })
+      : source.sourceContract.parts.map((part, index) => {
+        const annotation = declaration.parts.find(part => part.pathIndex === index);
+        return { ...part, id: annotation.id, identity: 'declared', role: annotation.role };
+      });
+    return [`${icon}/${variant}`, { ...source.sourceContract, parts, ...(declaration.composition && { composition: declaration.composition }),
+      anatomy: { version: 1, annotationSha256: hash(JSON.stringify(declaration)),
+        masterSha256: source.author.masterSha256, pathFingerprintSha256: source.author.pathFingerprintSha256 }, gestures: [] }];
+  })));
+  return compilerFor(contracts);
+}
+const productionCompiler = productionSourceCompiler();
+function compile(name, owner = compiler) {
   expect(captured.groups[name], `presentation ${name}`).toBeDefined();
   const document = { ...captured, groups: { [name]: captured.groups[name] } };
   return { document, payload: compileAuthorStateGroups(baseline, document,
-    { compiler, assembleGlyphFrame, assembleGlyphLayers })[name] };
+    { compiler: owner, assembleGlyphFrame, assembleGlyphLayers })[name] };
 }
 async function publicModule(payload) {
   const output = await build({
@@ -60,6 +82,40 @@ async function publicModule(payload) {
 }
 
 describe('авторские plain/circle presentation пары', () => {
+  it.each(cases)('%s: production contour anatomy сохраняет целую авторскую заливку', (name, plain, circle, variant) => {
+    const glyph = productionCompiler.glyph({ icon: circle, variant, modelMode: 'source-only' });
+    expect(paths(glyph.svg)).toEqual(paths(baseline.icons[circle][variant].rawSvg));
+    if (glyph.composition.kind === 'compound') {
+      expect(glyph.composition).toEqual({ kind: 'compound', fillRule: 'evenodd' });
+      expect(glyph.parts).toHaveLength(3);
+      expect(glyph.parts.map(part => part.fillRule)).toEqual([null, null, null]);
+      expect(glyph.parts.map(part => part.d).join('')).toBe(glyph.d);
+    }
+    expect(compile(name, productionCompiler).payload).toEqual(compile(name).payload);
+  });
+
+  it.each([
+    ['потерянный counter', glyph => { glyph.parts.pop(); }],
+    ['изменённый counter', glyph => { glyph.parts[1].d += 'M0 0Z'; }],
+    ['отдельная заливка counter', glyph => { glyph.parts[1].fillRule = 'evenodd'; }],
+    ['цвет counter', glyph => { glyph.parts[1].paint.fill = '#ff00ff'; }],
+    ['stroke counter', glyph => { glyph.parts[1].paint = { kind: 'stroke', strokeWidth: 1 }; }],
+    ['положительный counter', glyph => { glyph.parts[1].role = 'content'; }],
+    ['порядок contours', glyph => { [glyph.parts[1], glyph.parts[2]] = [glyph.parts[2], glyph.parts[1]]; glyph.parts.forEach((part, index) => { part.zIndex = index; }); }],
+    ['подмена общего path', glyph => { glyph.d += 'M0 0Z'; }],
+    ['потерянный receipt', glyph => { delete glyph.provenance.anatomy; }],
+    ['чужой receipt', glyph => { glyph.provenance.anatomy.masterSha256 = 'a'.repeat(64); }],
+    ['подмена fill owner', glyph => { glyph.composition.fillRule = 'nonzero'; }],
+    ['слои вместо holes', glyph => { glyph.composition.kind = 'layers'; glyph.parts.forEach(part => { part.fillRule = 'evenodd'; }); }],
+  ])('production compound: %s получает точный отказ', (_, mutate) => {
+    const owner = { glyph(request) {
+      const glyph = structuredClone(productionCompiler.glyph(request));
+      if (request.icon === 'mic-circle' && request.variant === 'filled') mutate(glyph);
+      return glyph;
+    } };
+    expect(() => compile('microphone-presentation-filled', owner)).toThrow(expect.objectContaining({ code: 'COMPILER_MISMATCH' }));
+  });
+
   it.each(cases)('%s: точные независимые masters проходят существующий source закон', (name, plain, circle, variant) => {
     const { document, payload } = compile(name);
     expect(document.groups[name]).toMatchObject({ law: 'source.replace', defaultState: 'plain', sharedParts: [],

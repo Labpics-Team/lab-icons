@@ -51,6 +51,26 @@ function sameFillPart(left, right) {
 }
 const fillPart = part => ({ d: part.d, fillRule: part.fillRule, paint: part.paint });
 
+// source.replace меняет целый рисунок: адресуемые counter contours сохраняют
+// одного evenodd fill owner. Их нельзя принимать за самостоятельные layer paths.
+function sourceArtworkParts(glyph, entries, sourceReplacement, author, label) {
+  if (glyph.composition.kind === 'layers') return glyph.parts;
+  if (!sourceReplacement || glyph.composition.kind !== 'compound' ||
+      glyph.composition.fillRule !== 'evenodd' || entries.length !== 1 || entries[0].fillRule !== 'evenodd' ||
+      glyph.parts.length < 2 || glyph.parts.map(part => part.d).join('') !== entries[0].d || glyph.d !== entries[0].d ||
+      glyph.provenance.anatomy?.masterSha256 !== author.masterSha256 ||
+      glyph.provenance.anatomy?.pathFingerprintSha256 !== author.pathFingerprintSha256 ||
+      glyph.parts.some((part, index) => part.zIndex !== index || part.fillRule !== null ||
+        part.paint.kind !== 'fill' || part.paint.fill !== 'currentColor' ||
+        part.role !== (index === 0 ? 'container' : 'counter') ||
+        !/^[\t\n\r ]*M/.test(part.d) || part.topologySignature.includes('|') || !part.topologySignature.endsWith('Z') ||
+        part.provenance.kind !== 'source' || part.provenance.file !== glyph.provenance.file)) {
+    refuse('COMPILER_MISMATCH', `${label}: compound не сохраняет полный ordered source fill`);
+  }
+  return [{ ...glyph.parts[0], d: glyph.d, fillRule: glyph.composition.fillRule, zIndex: 0,
+    topologySignature: glyph.parts.map(part => part.topologySignature).join('|') }];
+}
+
 /** Имена release-проекции выводятся из spec, не из параллельного списка. */
 export function authorStateGroupNames(document) {
   fields(document, ['schemaVersion', 'source', 'groups'], 'document');
@@ -179,10 +199,11 @@ export function compileAuthorStateGroups(baseline, document, { compiler, grid, a
         partIds.add(id);
       }
       const glyph = compiler.glyph({ icon: member.icon, variant: member.variant, modelMode: 'source-only' });
+      const artworkParts = sourceArtworkParts(glyph, entries, sourceReplacement, source.author, `${name}.${state}`);
       if (glyph.icon !== member.icon || glyph.variant !== member.variant ||
           glyph.provenance.kind !== 'source' || glyph.provenance.file !== source.master ||
-          glyph.composition.kind !== 'layers' || glyph.parts.length !== entries.length ||
-          glyph.parts.some((part, index) => part.d !== entries[index].d || part.fillRule !== entries[index].fillRule ||
+          artworkParts.length !== entries.length ||
+          artworkParts.some((part, index) => part.d !== entries[index].d || part.fillRule !== entries[index].fillRule ||
             part.paint.kind !== 'fill' || part.paint.fill !== 'currentColor' || part.zIndex !== index)) {
         refuse('COMPILER_MISMATCH', `${name}.${state}: production glyph изменил ordered geometry/paint`);
       }
@@ -193,13 +214,13 @@ export function compileAuthorStateGroups(baseline, document, { compiler, grid, a
       if (JSON.stringify(glyph.viewBox) !== '[0,0,24,24]') refuse('COMPILER_MISMATCH', `${name}.${state}: viewBox изменился`);
       if (variant !== undefined && member.variant !== variant) refuse(sourceReplacement ? 'VARIANT_MISMATCH' : 'ENCLOSURE_MISMATCH', `${name}: нельзя смешивать начертания`);
       variant = member.variant;
-      const enclosure = glyph.parts.at(-1);
+      const enclosure = artworkParts.at(-1);
       const enclosureContract = sourceReplacement ? null : { ...fillPart(enclosure),
         viewBox: glyph.viewBox, dimensions: [24, 24], placement: 'after-content' };
       if (!sourceReplacement && referenceEnclosure !== undefined && !sameFillPart(enclosureContract, referenceEnclosure)) {
         refuse('ENCLOSURE_MISMATCH', `${name}.${state}: оболочка/paint/рамка не равна`);
       }
-      const shared = glyph.parts.slice(member.contentPartIds.length)
+      const shared = artworkParts.slice(member.contentPartIds.length)
         .map((part, index) => ({ ...part, ...group.sharedParts[index] }));
       const identity = stableJSON({ parts: shared.map(part => ({ id: part.id, role: part.role,
         d: part.d, fillRule: part.fillRule, paint: part.paint })),
@@ -220,7 +241,7 @@ export function compileAuthorStateGroups(baseline, document, { compiler, grid, a
         sharedSvg = staticSharedSvg;
         frame = assembleGlyphFrame(glyph.viewBox, [24, 24]);
       }
-      const content = glyph.parts.slice(0, member.contentPartIds.length)
+      const content = artworkParts.slice(0, member.contentPartIds.length)
         .map((part, index) => ({ ...part, id: member.contentPartIds[index], role: 'content' }));
       for (const part of content) {
         const current = fillPart(part);
