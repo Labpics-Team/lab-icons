@@ -600,9 +600,12 @@ export async function runExplorerJourney() {
         check(`${id}/${view}/authored-viewport-scaling`, nested.length >= 2 && nested.every(svg =>
           Math.abs(parseFloat(getComputedStyle(svg).width) - modified.viewBox[2]) < 0.001 &&
           Math.abs(parseFloat(getComputedStyle(svg).height) - modified.viewBox[3]) < 0.001),
-        { expected: modified.viewBox, nested: nested.map(svg => ({ width: svg.getAttribute('width'), height: svg.getAttribute('height'),
-          computedWidth: getComputedStyle(svg).width, computedHeight: getComputedStyle(svg).height,
-          viewBox: svg.getAttribute('viewBox'), screen: svg.getScreenCTM()?.toJSON() })) });
+        { expected: modified.viewBox, nested: nested.map(svg => {
+          const screen = svg.getScreenCTM();
+          return { width: svg.getAttribute('width'), height: svg.getAttribute('height'),
+            computedWidth: getComputedStyle(svg).width, computedHeight: getComputedStyle(svg).height,
+            viewBox: svg.getAttribute('viewBox'), screen: screen && ['a', 'b', 'c', 'd', 'e', 'f'].map(key => screen[key]) };
+        }) });
         check(`${id}/${view}/meaningful-colors`, getComputedStyle(originalLayer).color === 'rgb(185, 70, 60)' &&
           getComputedStyle(modifiedLayer).color === 'rgb(67, 132, 201)');
         if (view === 'difference') {
