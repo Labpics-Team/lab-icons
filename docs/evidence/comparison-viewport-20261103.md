@@ -33,3 +33,15 @@ Computed width/height были `auto`; прежний `parseFloat()` давал 
 шести коэффициентов, неверные dimensions/viewBox, отсутствующие observations,
 смещённая система координат и внешний поворот. Это проверка oracle;
 полный новый browser journey остаётся обязательным удалённым гейтом.
+
+Независимое ревью обнаружило дополнительный пробел: DOM `getScreenCTM()` внутри
+mask не наблюдает преобразование `maskContentUnits="objectBoundingBox"` при
+painting. [CSS Masking §9.1](https://drafts.csswg.org/css-masking-1/#the-mask-element)
+и [Chromium SVGMaskPainter](https://raw.githubusercontent.com/chromium/chromium/facfdaa6ef8631887757836f560bd5b3c9970899/third_party/blink/renderer/core/paint/svg_mask_painter.cc)
+определяют этот отдельный instance context. Например, bbox `[5,11,14,2]`
+превращает точку `[12,12]` в `[173,35]` при прежней DOM-матрице.
+Renderer теперь явно задаёт userSpaceOnUse для области и содержимого обеих масок.
+Journey проверяет оба basis, luminance и полные границы области; regression
+отвергает смену content units при неизменных viewport snapshots. Default painting
+сохраняется. Дополнительные source controls и новый remote journey проверяются
+после этой правки; прежний viewport review FAIL не объявляется PASS.

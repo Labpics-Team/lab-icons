@@ -49,6 +49,7 @@ describe('сравнение готовых SVG', () => {
     for (const mask of masks) {
       expect(mask[2]).toContain('mask-type="luminance"');
       expect(mask[2]).toContain('maskUnits="userSpaceOnUse"');
+      expect(mask[2]).toContain('maskContentUnits="userSpaceOnUse"');
       expect(mask[3]).toContain('fill="#fff"');
       expect(mask[3]).toContain('color="#000"');
     }

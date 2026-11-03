@@ -99,6 +99,15 @@ export function comparisonViewportMatches(observed, reference, viewBox) {
     }));
 }
 
+/** Mask painting добавляет instance coordinates вне DOM getScreenCTM. */
+export function comparisonMasksMatch(observed, viewBox) {
+  return Array.isArray(observed) && observed.length === 2 && Array.isArray(viewBox) && viewBox.length === 4 &&
+    viewBox.every(Number.isFinite) && viewBox[2] > 0 && viewBox[3] > 0 && observed.every(mask =>
+      mask.maskType === 'luminance' && mask.maskUnits === 'userSpaceOnUse' && mask.maskContentUnits === 'userSpaceOnUse' &&
+      Array.isArray(mask.bounds) && mask.bounds.length === 4 && mask.bounds.every((value, index) =>
+        Number.isFinite(value) && Math.abs(value - viewBox[index]) < 0.0001));
+}
+
 export function isFreshCapsuleDownload(downloads, previousCount, filename) {
   return downloads.length === previousCount + 1 && downloads.at(-1)?.filename === filename;
 }
@@ -634,10 +643,13 @@ export async function runExplorerJourney() {
         if (view === 'difference') {
           const masks = [...comparison.querySelectorAll('mask')];
           const ids = [...document.querySelectorAll('[id]')].map(element => element.id);
-          check(`${id}/difference/directed-luminance-masks`, masks.length === 2 && masks.every(mask =>
-            getComputedStyle(mask).maskType === 'luminance' && mask.getAttribute('maskUnits') === 'userSpaceOnUse') &&
+          const maskContexts = masks.map(mask => ({ maskType: getComputedStyle(mask).maskType,
+            maskUnits: mask.getAttribute('maskUnits'), maskContentUnits: mask.getAttribute('maskContentUnits'),
+            bounds: [mask.x.baseVal.value, mask.y.baseVal.value, mask.width.baseVal.value, mask.height.baseVal.value] }));
+          check(`${id}/difference/directed-luminance-masks`, comparisonMasksMatch(maskContexts, modified.viewBox) &&
             new Set(ids).size === ids.length &&
-            [originalLayer, modifiedLayer].every(layer => masks.some(mask => layer.getAttribute('mask') === `url(#${mask.id})`)));
+            [originalLayer, modifiedLayer].every(layer => masks.some(mask => layer.getAttribute('mask') === `url(#${mask.id})`)),
+            { masks: maskContexts });
         }
         check(`${id}/${view}/samples-remain-modified`, [...q('size-samples').querySelectorAll('.size-sample > svg')]
           .every(svg => JSON.stringify(paths(svg)) === modifiedPaths));

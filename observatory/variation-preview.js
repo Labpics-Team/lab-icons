@@ -41,7 +41,7 @@ export function renderVariationComparison(sourceSvg, modifiedSvg, viewBox, view,
   if (view === 'overlay') return `${frame}<g class="overlay-original" data-comparison="source">${viewport(sourceSvg)}</g>` +
     `<g class="overlay-candidate" data-comparison="modified">${viewport(modifiedSvg)}</g></svg>`;
   const withoutModified = `${instanceId}-without-modified`, withoutSource = `${instanceId}-without-source`;
-  const mask = (id, svg) => `<mask id="${id}" mask-type="luminance" maskUnits="userSpaceOnUse" ` +
+  const mask = (id, svg) => `<mask id="${id}" mask-type="luminance" maskUnits="userSpaceOnUse" maskContentUnits="userSpaceOnUse" ` +
     `x="${x}" y="${y}" width="${width}" height="${height}">` +
     `<rect x="${x}" y="${y}" width="${width}" height="${height}" fill="#fff"/>` +
     `<g color="#000">${viewport(svg)}</g></mask>`;

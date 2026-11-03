@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { comparisonViewportMatches } from '../scripts/bench/explorer-journey.js';
+import { comparisonMasksMatch, comparisonViewportMatches } from '../scripts/bench/explorer-journey.js';
 
 const reference = () => ({ viewBox: [0, 0, 24, 24], screen: [112 / 24, 0, 0, 112 / 24, 1194.5, 269.5] });
 const viewport = () => ({ ...reference(), intrinsicWidth: 24, intrinsicHeight: 24,
@@ -39,5 +39,30 @@ describe('экранная система координат авторског�
     const expected = { viewBox: [4, 5, 24, 32], screen: [0, 3, -2, 0, 107, 209] };
     const nested = [0, 1].map(() => ({ ...expected, intrinsicWidth: 24, intrinsicHeight: 32 }));
     expect(matches(nested, expected, expected.viewBox)).toBe(true);
+  });
+});
+
+describe('система координат направленных масок', () => {
+  const mask = () => ({ maskType: 'luminance', maskUnits: 'userSpaceOnUse',
+    maskContentUnits: 'userSpaceOnUse', bounds: [0, 0, 24, 24] });
+
+  it('проверяет painting units отдельно от неизменной DOM-матрицы', () => {
+    const masks = [mask(), mask()];
+    expect(comparisonMasksMatch(masks, [0, 0, 24, 24])).toBe(true);
+    masks[1].maskContentUnits = 'objectBoundingBox';
+    expect(matches(observed(), reference())).toBe(true);
+    expect(comparisonMasksMatch(masks, [0, 0, 24, 24])).toBe(false);
+  });
+
+  it('не принимает другой fill basis, отсутствующие units и обрезанный viewport', () => {
+    for (const change of [item => { item.maskType = 'alpha'; }, item => { item.maskUnits = 'objectBoundingBox'; },
+      item => { delete item.maskContentUnits; }, item => { item.bounds[0] = 1; },
+      item => { item.bounds[1] = 1; }, item => { item.bounds[2] = 23; },
+      item => { item.bounds[3] = 23; }, item => { item.bounds[0] = NaN; }]) {
+      const masks = [mask(), mask()]; change(masks[1]);
+      expect(comparisonMasksMatch(masks, [0, 0, 24, 24])).toBe(false);
+    }
+    expect(comparisonMasksMatch([], [0, 0, 24, 24])).toBe(false);
+    expect(comparisonMasksMatch([mask()], [0, 0, 24, 24])).toBe(false);
   });
 });
