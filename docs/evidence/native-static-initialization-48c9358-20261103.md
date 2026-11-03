@@ -6,10 +6,7 @@
 Данные остаются замороженными, повторный default возвращает тот же объект.
 Части, контуры, авторские SVG, anchors и публичные декларации сохранены.
 
-Внутренние object-only фабрики не менялись. Supplier overload, меняющий их
-контракт, отклонён после превышения прежних gzip-потолков notifications
-1511/1529 B. Общий reader object, constructor factoring metadata и изменение
-формата stops также отклонены. Cache принадлежит generated module; shared
+Внутренние object-only фабрики не менялись. Cache принадлежит generated module; shared
 data provider сохраняет identity исходника при использовании base, variation
 и content entrypoints в любом порядке. Равные motion descriptors создаются
 независимыми записями. Сообщение invalid variant стало короче; TypeError,
