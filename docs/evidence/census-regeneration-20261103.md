@@ -14,7 +14,7 @@ anatomy, SVG и path-data совпадают с входами указанно�
 
 | Файл | Raw B | gzip B |
 | --- | ---: | ---: |
-| `dist/index.js` | 365324 | 101525 |
+| `dist/index.js` | 365324 | 96297 |
 | `dist/ir/index.js` | 379932 | 74017 |
 
 Gzip здесь вычисляет Node `zlib.gzipSync` с обычными параметрами генератора;
