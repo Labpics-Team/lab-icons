@@ -11,6 +11,7 @@ import {
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve, win32 } from 'node:path';
 import { isDeepStrictEqual } from 'node:util';
+import { pathToFileURL } from 'node:url';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   checkPackageArtifact,
@@ -22,6 +23,7 @@ import {
   mutateExportWithoutRootAttribute,
   mutateFirstPathCoordinate,
   pnpmInvocation,
+  refusalModuleRunnerSource,
   shouldCopyCleanPackPath,
   validateInstalledPackage,
 } from '../scripts/check-package-artifact.js';
@@ -31,6 +33,60 @@ import { lottieSymbolDeclaration, renderLottieSymbolModule } from '../scripts/li
 vi.mock('node:child_process', () => ({ execFileSync: vi.fn() }));
 
 const roots = [];
+
+it('refusal runner сохраняет компактную ошибку большого transitive module и завершает pending output', async () => {
+  const { spawnSync } = await vi.importActual('node:child_process');
+  const root = mkdtempSync(join(tmpdir(), 'lab-icons-refusal-runner-'));
+  roots.push(root);
+  const marker = 'installed source svg.fill обязан быть currentColor';
+  const encoded = Buffer.from(marker).toString('base64');
+  write(root, 'compiler.mjs', 'void 0;'.repeat(10_000) +
+    `setImmediate(() => process.stdout.write('refusal-output-drained'));` +
+    `throw Object.assign(new TypeError(Buffer.from('${encoded}', 'base64').toString()), { code: 'SOURCE_REFUSAL' });\n`);
+  write(root, 'consumer.mjs', `import './compiler.mjs';\n`);
+  write(root, 'runner.mjs', refusalModuleRunnerSource());
+  const run = args => spawnSync(process.execPath, args, {
+    cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true,
+  });
+  const direct = run([join(root, 'consumer.mjs')]);
+  expect(direct.status).toBe(1);
+  expect(direct.error).toBeUndefined();
+  // В macOS receipt сохранились ровно первые 65536 bytes stderr, до настоящего message.
+  // Здесь квалифицируется та же проекция; потеря OS pipe на этой платформе не утверждается.
+  expect(Buffer.from(direct.stderr).subarray(0, 65536).toString().includes(marker)).toBe(false);
+  expect(() => JSON.parse(direct.stderr)).toThrow();
+
+  const caught = run([join(root, 'runner.mjs'), pathToFileURL(join(root, 'consumer.mjs')).href]);
+  expect(caught.status).toBe(1);
+  expect(caught.error).toBeUndefined();
+  expect(JSON.parse(caught.stderr)).toEqual({ name: 'TypeError', message: marker, code: 'SOURCE_REFUSAL' });
+  expect(caught.stdout).toBe('refusal-output-drained');
+  expect(Buffer.from(caught.stderr).subarray(0, 65536).toString().includes(marker)).toBe(true);
+});
+
+it('refusal runner не принимает успешный consumer или чужую ошибку за ожидаемый source отказ', async () => {
+  const { spawnSync } = await vi.importActual('node:child_process');
+  const root = mkdtempSync(join(tmpdir(), 'lab-icons-refusal-controls-'));
+  roots.push(root);
+  const marker = 'fingerprint drift accessibility/outline';
+  write(root, 'runner.mjs', refusalModuleRunnerSource());
+  const run = source => {
+    write(root, 'consumer.mjs', source);
+    return spawnSync(process.execPath, [join(root, 'runner.mjs'), pathToFileURL(join(root, 'consumer.mjs')).href], {
+      cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true,
+    });
+  };
+  const success = run(`console.log(${JSON.stringify(marker)});\n`);
+  expect(success.status).toBe(0);
+  expect(success.stderr).toBe('');
+  const unrelated = run(`throw new Error('unrelated loader failure');\n`);
+  expect(unrelated.status).toBe(1);
+  expect(JSON.parse(unrelated.stderr)).toEqual({ name: 'Error', message: 'unrelated loader failure' });
+  expect(unrelated.stderr.includes(marker)).toBe(false);
+  const refused = run(`throw new Error(${JSON.stringify(marker)});\n`);
+  expect(refused.status).toBe(1);
+  expect(JSON.parse(refused.stderr).message).toBe(marker);
+});
 
 it('installed motion smoke сравнивает значения и порядок стадий независимо от порядка ключей', () => {
   const source = readFileSync(new URL('../scripts/check-package-artifact.js', import.meta.url), 'utf8');

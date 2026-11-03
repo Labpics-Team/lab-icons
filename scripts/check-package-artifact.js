@@ -500,6 +500,16 @@ function commandFailure(error) {
   return [error.message, stdout.trim(), stderr.trim()].filter(Boolean).join('\n');
 }
 
+/** Refusal probe сообщает ошибку, не печатая minified source перед её message. */
+export function refusalModuleRunnerSource() {
+  return `try {\n` +
+    `  await import(process.argv[2]);\n` +
+    `} catch (error) {\n` +
+    `  console.error(JSON.stringify({ name: error?.name ?? 'Error', message: error?.message ?? String(error), code: error?.code }));\n` +
+    `  process.exitCode = 1;\n` +
+    `}\n`;
+}
+
 /** Полный pack/install/import/typecheck smoke. */
 export function checkPackageArtifact({
   root = ROOT,
@@ -820,6 +830,8 @@ export function checkPackageArtifact({
 
     const rootEntry = join(installed, 'dist/index.js');
     const originalRootEntry = readFileSync(rootEntry, 'utf8');
+    const refusalRunner = join(consumer, 'refusal-runner.mjs');
+    writeFileSync(refusalRunner, refusalModuleRunnerSource(), 'utf8');
     // Root contract bites не меняют path-data. Каждый обязан остановить
     // installed consumer на source boundary до render/hash claim.
     const hostileRootScript = join(consumer, 'hostile-root-attribute.mjs');
@@ -843,7 +855,7 @@ export function checkPackageArtifact({
       );
       let rootAttributeFailure = '';
       try {
-        execFileSync(process.execPath, [hostileRootScript], {
+        execFileSync(process.execPath, [refusalRunner, pathToFileURL(hostileRootScript).href], {
           cwd: consumer,
           encoding: 'utf8',
           stdio: ['ignore', 'pipe', 'pipe'],
@@ -873,7 +885,7 @@ export function checkPackageArtifact({
     );
     let hostileFailure = '';
     try {
-      execFileSync(process.execPath, [join(consumer, 'hostile-coordinate.mjs')], {
+      execFileSync(process.execPath, [refusalRunner, pathToFileURL(join(consumer, 'hostile-coordinate.mjs')).href], {
         cwd: consumer,
         encoding: 'utf8',
         stdio: ['ignore', 'pipe', 'pipe'],
@@ -899,7 +911,7 @@ export function checkPackageArtifact({
     );
     let hostileClipFailure = '';
     try {
-      execFileSync(process.execPath, [join(consumer, 'hostile-clip.mjs')], {
+      execFileSync(process.execPath, [refusalRunner, pathToFileURL(join(consumer, 'hostile-clip.mjs')).href], {
         cwd: consumer,
         encoding: 'utf8',
         stdio: ['ignore', 'pipe', 'pipe'],
@@ -924,7 +936,7 @@ export function checkPackageArtifact({
     );
     let hostileViewportFailure = '';
     try {
-      execFileSync(process.execPath, [join(consumer, 'hostile-nested-viewport.mjs')], {
+      execFileSync(process.execPath, [refusalRunner, pathToFileURL(join(consumer, 'hostile-nested-viewport.mjs')).href], {
         cwd: consumer,
         encoding: 'utf8',
         stdio: ['ignore', 'pipe', 'pipe'],
@@ -950,7 +962,7 @@ export function checkPackageArtifact({
     );
     let hostileFillRuleFailure = '';
     try {
-      execFileSync(process.execPath, [join(consumer, 'hostile-fill-rule.mjs')], {
+      execFileSync(process.execPath, [refusalRunner, pathToFileURL(join(consumer, 'hostile-fill-rule.mjs')).href], {
         cwd: consumer,
         encoding: 'utf8',
         stdio: ['ignore', 'pipe', 'pipe'],
