@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { canonicalCubicPath, diagnosticAlpha, diagnosticPath, nativeSvgAssetCandidate } from '../scripts/bench/lottie-render.js';
+import { canonicalCubicPath, diagnosticAlpha, diagnosticPath, nativeSvgAssetCandidate, runNativeAssetControls } from '../scripts/bench/lottie-render.js';
 
 describe('различающие native raster interventions', () => {
   it('native author сохраняет исходные verbs и literals побайтово, binary32 меняет только числа', () => {
@@ -65,5 +65,45 @@ describe('различающие native raster interventions', () => {
     expect(() => nativeSvgAssetCandidate({ ...source, layers: [] }, svg)).toThrow('whole paint layer');
     expect(() => nativeSvgAssetCandidate(source, '')).toThrow('payload');
     expect(() => nativeSvgAssetCandidate({ ...source, meta: { labIcons: { ...source.meta.labIcons, logicalViewBox: [1, 0, 24, 24] } } }, svg)).toThrow('zero-origin');
+  });
+  it('optical mismatch здорового baseline не превращает обычный mutant nonpass в detected defect', async () => {
+    const expected = Uint8ClampedArray.from([18, 52, 86, 255]);
+    const mismatch = Uint8ClampedArray.from([18, 52, 86, 220]);
+    const baseline = { name: 'healthy-optical-mismatch', complete: true, nonempty: true, pass: diagnosticAlpha(mismatch, expected).pass };
+    expect(baseline.pass).toBe(false);
+    const calls = [];
+    const result = await runNativeAssetControls([baseline], [['wrong-position', {}]], async (testCase, mutation) => {
+      calls.push(mutation);
+      return { complete: true, nonempty: true, pass: diagnosticAlpha(mismatch, expected).pass };
+    });
+    expect(result.controls).toEqual([]);
+    expect(calls).toEqual([]);
+    expect(result).toMatchObject({ status: 'NOT_RUN', reason: 'HEALTHY_BASELINE_NOT_QUALIFIED',
+      baselineQualification: { status: 'FAIL', caseCount: 1, failedCases: [{ name: baseline.name, complete: true, nonempty: true, pass: false }] } });
+  });
+  it('qualified raw baseline разрешает targeted mutation и различает surviving либо incomplete control', async () => {
+    const expected = Uint8ClampedArray.from([18, 52, 86, 255, 0, 0, 0, 0]);
+    const shifted = Uint8ClampedArray.from([0, 0, 0, 0, 18, 52, 86, 255]);
+    const baseline = { name: 'qualified', complete: true, nonempty: true, pass: diagnosticAlpha(expected, expected).pass };
+    const calls = [];
+    const controls = [['wrong-position', shifted], ['surviving-control', expected], ['load-failure', null]];
+    const result = await runNativeAssetControls([baseline], controls, async (pixels, mutation) => {
+      calls.push(mutation);
+      return pixels ? { complete: true, pass: diagnosticAlpha(pixels, expected).pass } : { complete: false, pass: false };
+    });
+    expect(result.baselineQualification).toMatchObject({ status: 'PASS', caseCount: 1, failedCases: [] });
+    expect(calls).toEqual(controls.map(([mutation]) => mutation));
+    expect(result.controls.map(control => control.detected)).toEqual([true, false, false]);
+    expect(result.status).toBe('FAIL');
+    const passed = await runNativeAssetControls([baseline], [controls[0]], async pixels => ({ complete: true, pass: diagnosticAlpha(pixels, expected).pass }));
+    expect(passed.status).toBe('PASS');
+  });
+  it('незавершённый и пустой healthy baseline не запускают controls', async () => {
+    for (const baseline of [[], [{ name: 'unloaded', complete: false, nonempty: true, pass: true }]]) {
+      let calls = 0;
+      const result = await runNativeAssetControls(baseline, [['missing-image-ink', {}]], async () => { calls++; return { complete: true, pass: false }; });
+      expect(calls).toBe(0);
+      expect(result).toMatchObject({ status: 'NOT_RUN', reason: 'HEALTHY_BASELINE_NOT_QUALIFIED', controls: [] });
+    }
   });
 });

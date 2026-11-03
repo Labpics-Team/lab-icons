@@ -419,6 +419,21 @@ async function observeNativeSvgAsset(testCase, sourceAnimation, { mutation } = {
   finally { if (player?.renderer) player.destroy(); container.remove(); }
   return report;
 }
+export async function runNativeAssetControls(cases, mutations, observe) {
+  const failedCases = cases.filter(testCase => testCase.complete !== true || testCase.nonempty !== true || testCase.pass !== true);
+  const baselineQualification = { status: cases.length > 0 && failedCases.length === 0 ? 'PASS' : 'FAIL', caseCount: cases.length,
+    failedCases: failedCases.map(testCase => ({ name: testCase.name, gesture: testCase.gesture ?? null,
+      complete: testCase.complete === true, nonempty: testCase.nonempty === true, pass: testCase.pass === true })) };
+  if (baselineQualification.status !== 'PASS') {
+    return { status: 'NOT_RUN', reason: 'HEALTHY_BASELINE_NOT_QUALIFIED', baselineQualification, controls: [] };
+  }
+  const controls = [];
+  for (const [mutation, testCase] of mutations) {
+    const observed = await observe(testCase, mutation);
+    controls.push({ ...observed, mutation, detected: observed.complete === true && observed.pass === false });
+  }
+  return { status: controls.length > 0 && controls.every(control => control.detected) ? 'PASS' : 'FAIL', baselineQualification, controls };
+}
 async function runNativeSvgAssetDiagnostics(create, testCases) {
   const select = (name, variant, gesture) => testCases.find(item => item.name === name && item.request.variant === variant &&
     (item.request.gesture ?? null) === gesture);
@@ -429,15 +444,12 @@ async function runNativeSvgAssetDiagnostics(create, testCases) {
   };
   const cases = [];
   for (const testCase of [chevron, mic, nudge]) cases.push(await observeNativeSvgAsset(testCase, exportSource(testCase)));
-  const negativeControls = [];
-  if (cases.every(testCase => testCase.complete && testCase.nonempty)) {
-    for (const [mutation, testCase] of [['missing-image-ink', chevron], ['wrong-position', chevron], ['remove-hole', mic]]) {
-      const observed = await observeNativeSvgAsset(testCase, exportSource(testCase), { mutation });
-      negativeControls.push({ mutation, detected: observed.complete && !observed.pass, ...observed });
-    }
-  }
-  return { player: window.lottie.version, cases, negativeControls, complete: cases.every(testCase => testCase.complete),
-    pass: cases.every(testCase => testCase.pass) && negativeControls.length === 3 && negativeControls.every(control => control.detected) };
+  const negative = await runNativeAssetControls(cases,
+    [['missing-image-ink', chevron], ['wrong-position', chevron], ['remove-hole', mic]],
+    (testCase, mutation) => observeNativeSvgAsset(testCase, exportSource(testCase), { mutation }));
+  return { player: window.lottie.version, cases, negativeControls: negative.controls, baselineQualification: negative.baselineQualification,
+    negativeControlStatus: negative.status, negativeControlReason: negative.reason ?? null, complete: cases.every(testCase => testCase.complete),
+    pass: negative.status === 'PASS' && negative.controls.length === 3 };
 }
 export async function runLottieRenderCases(create, testCases, { controls = true, visible = true } = {}) {
   assert(window.lottie?.version === '5.13.0', 'Нужен pinned lottie-web 5.13.0 SVG player.');
