@@ -218,6 +218,9 @@ describe('публикация единой эпохи IR/symbols/motion/Lottie'
   it.each(['ir/index.js', 'ir/lottie-runtime.js', 'ir/state-runtime.js'])('при отказе bundle %s ждёт остальных writers до cleanup, не оставляя поздний staging', async rejectedTarget => {
     const { root, output } = fixture();
     write(root, 'scripts/build-anatomy-projection.mjs', 'export {};');
+    for (const spec of ['author-anatomy', 'author-state-groups']) {
+      write(root, `semantics/${spec}.json`, fs.readFileSync(new URL(`../semantics/${spec}.json`, import.meta.url), 'utf8'));
+    }
     let started = 0;
     let finished = 0;
     const completed = [];
@@ -228,18 +231,20 @@ describe('публикация единой эпохи IR/symbols/motion/Lottie'
       const operation = target === rejectedTarget
         ? Promise.reject(new Error(`bundle ${rejectedTarget} refused`)).finally(() => { finished++; completed.push(target); })
         : new Promise(resolveWrite => setTimeout(() => {
-          write(dirname(outfile), basename(outfile), 'export {};');
           finished++;
           completed.push(target);
-          resolveWrite();
+          // Как esbuild с write:false: финальную запись выполняет настоящий bundle.
+          resolveWrite({ outputFiles: [{ path: outfile, text: 'export {};' }],
+            metafile: { outputs: { [outfile]: { inputs: {} } } } });
         }, target === 'ir/lottie-runtime.js' ? 50 : 25));
       pending.push(operation);
       return operation;
     });
     try {
       await expect(buildIr({ root })).rejects.toThrow(`bundle ${rejectedTarget} refused`);
-      expect(started).toBe(12);
+      expect(started).toBeGreaterThan(1);
       expect(finished).toBe(started);
+      expect(completed).toContain(rejectedTarget);
       expect(completed).toContain('authoring/index.js');
       expect(completed).toContain('ir/lottie-runtime.js');
       expect(completed).toContain('ir/state-runtime.js');

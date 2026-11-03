@@ -47,7 +47,7 @@ function independentReportDestination(output) {
     return target === base || target.startsWith(`${base}${sep}`);
   };
   const refuse = () => { throw new Error('measurement report destination обязан быть независимым от inputs, release и dist'); };
-  const directories = ['dist', 'release', 'scripts'].map(name => join(root, name));
+  const directories = ['dist', 'release', 'scripts', 'semantics'].map(name => join(root, name));
   for (const directory of directories) {
     const physical = realpathSync(directory);
     if ([requested, actual].some(path => inside(directory, path) || inside(physical, path))) refuse();

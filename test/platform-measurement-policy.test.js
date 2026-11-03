@@ -27,10 +27,14 @@ afterEach(() => {
 function fixture({ source = original, other = source, modules = ['scripts/lib/kernel.js'], ceiling = 4096, realPackageOracle = false } = {}) {
   const root = mkdtempSync(join(tmpdir(), 'lab-icons-measure-policy-'));
   roots.push(root);
-  for (const directory of ['scripts', 'release', 'dist/ir']) mkdirSync(join(root, directory), { recursive: true });
+  for (const directory of ['scripts', 'release', 'semantics', 'dist/ir']) mkdirSync(join(root, directory), { recursive: true });
   writeFileSync(join(root, 'scripts/measure-platform-artifacts.mjs'), subject.replace(
     "import { execFileSync } from 'node:child_process';", `const execFileSync = () => '${hash}';`,
-  ).replace("'./lib/release-contract.js'", JSON.stringify(new URL('../scripts/lib/release-contract.js', import.meta.url).href)));
+  ).replace("'./lib/release-contract.js'", JSON.stringify(new URL('../scripts/lib/release-contract.js', import.meta.url).href))
+    .replace("'./lib/author-motion-targets.js'", JSON.stringify(new URL('../scripts/lib/author-motion-targets.js', import.meta.url).href)));
+  writeFileSync(join(root, 'semantics/author-anatomy.json'), JSON.stringify({
+    schemaVersion: 1, source: { fileKey: 'Fixture', version: '1' }, icons: {},
+  }));
   // Здесь проверяется admission policy; compressor и bundler проверяются отдельно.
   writeFileSync(join(root, 'scripts/check-package-size.js'), realPackageOracle
     ? `export { PACKAGE_SIZE_MEASUREMENT, parsePackageSizeRatchet, measureArtifact } from ${JSON.stringify(new URL('../scripts/check-package-size.js', import.meta.url).href)};`
@@ -98,6 +102,7 @@ function snapshotInputs(root) {
   return Object.fromEntries([
     'release/package-size-ratchet.json', 'release/consumer-size-ratchet.json', 'release/contract.json',
     'package.json', 'pnpm-lock.yaml', 'scripts/measure-platform-artifacts.mjs',
+    'semantics/author-anatomy.json',
     'scripts/check-package-size.js', 'scripts/check-consumer-size.js', file, twin,
   ].map(path => [path, readFileSync(join(root, path))]));
 }
@@ -140,6 +145,7 @@ describe('platform measurement admission policy', () => {
     'release/package-size-ratchet.json', 'release/consumer-size-ratchet.json', 'release/contract.json',
     'package.json', 'pnpm-lock.yaml', 'scripts/measure-platform-artifacts.mjs',
     'scripts/check-package-size.js', 'scripts/check-consumer-size.js', file, retiring,
+    'semantics/author-anatomy.json', 'semantics/new-output.json',
     'dist/ir/new-output.json', './release/../release/package-size-ratchet.json',
   ])('retirement report destination %s не пишет в защищённые inputs или output', destination => {
     const { root, policy } = fixture();
@@ -155,7 +161,7 @@ describe('platform measurement admission policy', () => {
     if (!existed) expect(existsSync(output)).toBe(false);
   });
 
-  it.each(['release', 'dist/ir'])('retirement report отвергает parent alias к %s до любых записей', directory => {
+  it.each(['release', 'dist/ir', 'semantics'])('retirement report отвергает parent alias к %s до любых записей', directory => {
     const { root, policy } = fixture();
     policy.artifacts[retiring] = retirementLimits;
     writeFileSync(join(root, 'release/package-size-ratchet.json'), JSON.stringify(policy));
