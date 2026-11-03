@@ -45,8 +45,9 @@ describe('prepared optical width uses one law and the actual physical render pat
   it('derives motion targets from genuine variation declarations without fake rotation', () => {
     const document = read('semantics/author-anatomy.json');
     expect(authorCapsuleMotionSymbolNames(document)).toEqual(names);
-    expect(authorMotionTargets(document)).toEqual({ rotations: ['refresh', 'reload', 'timer'], capsules: names,
-      names: ['mic', 'mic-circle', 'refresh', 'reload', 'timer'] });
+    expect(authorMotionTargets(document)).toEqual({ rotations: ['refresh', 'reload'], capsules: names,
+      names: ['mic', 'mic-circle', 'refresh', 'reload'] });
+    expect(document.icons.timer.outline.gesture).toBeNull();
     expect(renderAuthorCapsuleMotionModule(packets.mic)).not.toContain('compileMotionEffect');
   });
 
