@@ -515,7 +515,7 @@ export async function runExplorerJourney() {
     for (const gesture of ['activity', 'idle']) {
       const refused = compileSymbolEffect(verticalMenu.glyph({ variant: 'outline' }), verticalCaps,
         `ellipsis-vertical.${gesture}`, { duration: 900 });
-      check(`vertical-menu-does-not-inherit-${gesture}`, !refused.ok && refused.reason.code === 'GESTURE_UNSUPPORTED' &&
+      check(`vertical-menu-does-not-inherit-${gesture}`, !refused.ok && refused.reason.code === 'SEMANTIC_MOTION_UNAVAILABLE' &&
         ![...q('gesture').options].some(option => option.value === `ellipsis-vertical.${gesture}`));
     }
 
