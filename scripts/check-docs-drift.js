@@ -93,7 +93,7 @@ export function manualCorpusCountErrors(source) {
   const countStart = `${number}\\s+${unit}(?=$|[^\\p{L}\\p{N}_])`;
   const clauseSeparator = new RegExp(`,\\s*(?=(?:(?:а|но|but|whereas)\\s+(?!${countStart})|(?:(?:в|на|in|at)\\s+)?${currentMarker.source}))`, 'iu');
   const clauses = sentences.flatMap(sentence => sentence.split(clauseSeparator));
-  const singularFileValue = /^(?:файл(?:а)?|file)\s*[:=]/iu;
+  const singularFileValue = /^(?:(?:release[- ]?)?файл(?:а)?|file)\s*[:=]/iu;
   // Свойство заканчивается у конкретного файла. Одно определение допускает имя
   // артефакта; признак соседнего счётчика, предложения или блока не переносится.
   const filePropertyContext = /(?:^|[^\p{L}\p{N}_])(?:(?:размер|длина)(?:\s+[\p{L}\p{N}_.\/-]+)?|(?:size|length)\s+of(?:\s+(?:this|the))?|baseline\s+(?:поля\s+этого|fields?\s+of\s+(?:this|the)))\s+$/iu;
@@ -104,9 +104,12 @@ export function manualCorpusCountErrors(source) {
   function artifactSizeProperty(match, text) {
     const end = match.index + match[0].length;
     const start = end - match[1].length;
+    // Английская конструкция начинается с file внутри release-file;
+    // определение release относится к этому артефакту, не к его свойству.
+    const propertyPrefix = text.slice(0, start).replace(/\brelease[- ]$/iu, '');
     // Байтовая единица сама бывает определением. Исключение требует одновременно
     // явного свойства файла и законченной величины, а не только суффикса B.
-    return singularFileValue.test(match[1]) && filePropertyContext.test(text.slice(0, start)) &&
+    return singularFileValue.test(match[1]) && filePropertyContext.test(propertyPrefix) &&
       byteValueTail.test(text.slice(end));
   }
   function nodeIdentifier(match, text) {
