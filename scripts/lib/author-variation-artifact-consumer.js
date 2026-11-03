@@ -1,5 +1,5 @@
 /** Встраивается целиком в installed consumer; runtime приходит из public exports, oracle — из harness. */
-export function verifyInstalledAuthorVariation({ icon, variant, expected, familyVariation, current, capabilities, symbol, variable, lottie, compileSymbolEffect, observeAuthorGlyph }) {
+export function verifyInstalledAuthorVariation({ icon, variant, expected, familyVariation, current, capabilities, symbol, variable, lottie, compileSymbolEffect, observeAuthorGlyph, matchesAuthoredCapsulePath }) {
   const require = (condition, message) => { if (!condition) throw new Error(`${message}: ${icon}/${variant}`); };
   const equal = (left, right) => JSON.stringify(left) === JSON.stringify(right);
   const refuses = (glyph, request, code) => {
@@ -55,6 +55,10 @@ export function verifyInstalledAuthorVariation({ icon, variant, expected, family
         varied.parts.every((part, index) => index === bodyIndex
           ? part.d !== current.parts[index].d && equal(part.anchor, current.parts[index].anchor)
           : part === current.parts[index]), 'authored variation changed-part contract');
+      // Закон сужения сверяется с исходными координатами авторского корпуса независимо от согласованности SVG.
+      const authoredBody = expected.parts.find(part => part.id === policy.bodyPartId);
+      require(matchesAuthoredCapsulePath(authoredBody?.d, varied.parts[bodyIndex].d, nondefault.bodyWidth),
+        'authored variation body width differs from master');
     } else {
       const enclosureIndex = current.parts.findIndex(part => part.id === policy.enclosurePartId);
       require(enclosureIndex >= 0 && current.parts[enclosureIndex].role === 'container' &&

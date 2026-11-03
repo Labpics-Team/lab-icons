@@ -590,6 +590,7 @@ export function checkPackageArtifact({
         `import { isDeepStrictEqual } from 'node:util';\n` +
         // Oracle принадлежит test harness; публичные импорты ниже идут из установленного tarball.
         `import { observeAuthorGlyph, validateAuthorObservation } from ${JSON.stringify(pathToFileURL(join(cleanSource, 'scripts/bench/author-oracle.js')).href)};\n` +
+        `import { matchesAuthoredCapsulePath } from ${JSON.stringify(pathToFileURL(join(cleanSource, 'scripts/bench/explorer-journey.js')).href)};\n` +
         `import { accessibilityOutline } from '@labpics/icons';\n` +
         `import * as fullIr from '@labpics/icons/ir';\n` +
         `import { axisNames, calendarNumberGlyph, glyph, glyphCapabilities, iconDesignContract, iconIds } from '@labpics/icons/ir';\n` +
@@ -629,7 +630,7 @@ export function checkPackageArtifact({
         `    if (capabilities.icon !== icon || capabilities.variant !== variant || capabilities.modelState !== null || capabilities.supportedAxes.length || Object.keys(capabilities.axes).length || JSON.stringify(capabilities.motion) !== JSON.stringify(expected.motion) || JSON.stringify(capabilities.anatomy ?? null) !== JSON.stringify(expected.anatomy) || JSON.stringify(capabilities.author) !== JSON.stringify(expected.author)) throw new Error('current source inherited stale admission: ' + icon + '/' + variant);\n` +
         `    const foreignMotion = compileSymbolEffect(current, capabilities, 'time.advance', { duration: 360 });\n` +
         `    if (foreignMotion.ok || foreignMotion.reason.code !== (expected.motion.state === 'gesture-ready' ? 'GESTURE_UNSUPPORTED' : 'SEMANTIC_MOTION_UNAVAILABLE')) throw new Error('current motion did not refuse precisely: ' + icon + '/' + variant);\n` +
-        `    verifyInstalledAuthorVariation({ icon, variant, expected, familyVariation, current, capabilities, symbol, variable, lottie: lottieVariation, compileSymbolEffect, observeAuthorGlyph });\n` +
+        `    verifyInstalledAuthorVariation({ icon, variant, expected, familyVariation, current, capabilities, symbol, variable, lottie: lottieVariation, compileSymbolEffect, observeAuthorGlyph, matchesAuthoredCapsulePath });\n` +
         `    for (const [gesture, expectedEffect] of Object.entries(expected.effects)) {\n` +
         `      const effect = compileSymbolEffect(current, capabilities, gesture, { duration: 360 });\n` +
         `      if (!effect.ok || effect.effect.version !== expectedEffect.version || !isDeepStrictEqual(effect.effect.targets, expectedEffect.targets) || !isDeepStrictEqual(effect.effect.stages, expectedEffect.stages)) throw new Error('current declared motion differs: ' + icon + '/' + variant);\n` +
