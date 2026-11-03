@@ -42,10 +42,11 @@ describe('benchmark author oracle и сохранённый output', () => {
     const templates = source.slice(start, end).trim().split('\n')
       .map(line => line.trim().replace(/ \+$/, ''));
     const observation = new Function(`return ${templates.join(' +\n')};`)();
-    const verify = new Function('symbol', 'current', 'expected', 'icon', 'variant', 'isDeepStrictEqual', observation);
-    expect(() => verify(symbol, current, expected, 'mic-circle', variant, isDeepStrictEqual)).not.toThrow();
+    const evaluate = new Function('symbol', 'current', 'expected', 'icon', 'variant', 'isDeepStrictEqual', 'observeAuthorGlyph', 'validateAuthorObservation', observation);
+    const verify = (symbol, current) => evaluate(symbol, current, expected, 'mic-circle', variant, isDeepStrictEqual, observeAuthorGlyph, validateAuthorObservation);
+    expect(() => verify(symbol, current)).not.toThrow();
     expect(current.composition).toEqual(variant === 'filled' ? { kind: 'compound', fillRule: 'evenodd' } : { kind: 'layers' });
-    for (const mutate of [
+    const acceptedMutations = [
       value => { value.composition = { kind: 'layers', fillRule: 'nonzero' }; },
       value => { value.parts.reverse(); },
       value => { value.parts[1].d += 'M0 0Z'; },
@@ -54,13 +55,21 @@ describe('benchmark author oracle и сохранённый output', () => {
       value => { value.parts[1].role = 'unclassified'; },
       value => { value.svg = value.svg.replace('data-part', 'other-part'); },
       value => { value.svg = value.svg.replace(/ d="([^"]+)"/, ' d="M0 0Z"'); },
+      value => { value.svg = value.svg.replace(/(<path\b[^>]*\bfill=")currentColor"/, '$1#000"'); },
+      ...['opacity="0.5"', 'transform="translate(1)"', 'stroke="#000"', 'clip-path="url(#clip)"']
+        .map(attribute => value => { value.svg = value.svg.replace('<path ', `<path ${attribute} `); }),
+      value => { value.svg = value.svg.replace('</svg>', '<rect width="24" height="24"/></svg>'); },
+      value => { value.svg = value.svg.replace('viewBox="0 0 24 24"', 'viewBox="0 0 12 24"'); },
       value => { value.provenance.author.version = 'stale'; },
-    ]) {
+    ].flatMap((mutate, index) => {
       const changed = structuredClone(current);
       mutate(changed);
       expect(changed).not.toEqual(current);
-      expect(() => verify({ glyph: () => changed }, changed, expected, 'mic-circle', variant, isDeepStrictEqual)).toThrow();
-    }
+      try { verify({ glyph: () => changed }, changed); }
+      catch { return []; }
+      return [index];
+    });
+    expect(acceptedMutations).toEqual([]);
   });
 
   it('compound source oracle сохраняет один evenodd parent и три авторских counter contours', () => {
