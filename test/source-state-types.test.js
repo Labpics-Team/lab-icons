@@ -5,6 +5,9 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { expect, it } from 'vitest';
 import { stateGroupDeclaration } from '../scripts/lib/author-state-groups.js';
+import { stateTypeConsumerSource } from '../scripts/check-package-artifact.js';
+import { statePackageExpectations } from '../scripts/lib/state-artifact-consumer.js';
+import { loadAuthorBaseline } from '../scripts/lib/author-baseline.js';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const tsc = join(root, 'node_modules/typescript/bin/tsc');
@@ -16,6 +19,15 @@ const members = [
   { name: 'visibility', variant: 'outline', state: 'hidden', states: '"hidden" | "visible"', foreign: 'muted' },
   { name: 'visibility-filled', variant: 'filled', state: 'visible', states: '"hidden" | "visible"', foreign: 'unmuted' },
 ];
+const groups = [...members.map(member => member.name), 'status-circle'];
+const scopedDocument = { ...document, groups: Object.fromEntries(groups.map(name => [name, document.groups[name]])) };
+const names = [...new Set(Object.values(scopedDocument.groups).flatMap(group =>
+  Object.values(group.states).map(member => member.icon)))];
+const manifest = read('semantics/figma-baseline.json');
+const baseline = loadAuthorBaseline(root, { manifest: { ...manifest,
+  counts: { families: names.length, variants: names.length * 2 },
+  icons: Object.fromEntries(names.map(name => [name, manifest.icons[name]])) } });
+const generatedExpected = statePackageExpectations(baseline, scopedDocument);
 
 it('чистый NodeNext consumer сохраняет точные source типы и прежний enclosure контракт', () => {
   const temporaryRoot = resolve(tmpdir());
@@ -107,12 +119,14 @@ it('чистый NodeNext consumer сохраняет точные source тип
     );
     const positive = lines.join('\n');
     const consumer = join(directory, 'consumer.mts');
-    const diagnostics = source => {
+    const diagnostics = (source, loadedFiles) => {
       writeFileSync(consumer, source);
       try {
-        execFileSync(process.execPath, [tsc, '--ignoreConfig', '--noEmit', '--strict', '--noUncheckedIndexedAccess',
-          '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', '--skipLibCheck', 'false', consumer],
+        const output = execFileSync(process.execPath, [tsc, '--ignoreConfig', '--noEmit', '--strict', '--noUncheckedIndexedAccess',
+          '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', '--skipLibCheck', 'false',
+          ...(loadedFiles ? ['--listFiles'] : []), consumer],
         { cwd: directory, stdio: 'pipe', windowsHide: true });
+        if (loadedFiles) loadedFiles.push(...String(output).trim().split(/\r?\n/).filter(Boolean).map(file => resolve(file)));
         return '';
       } catch (error) {
         if (error.status !== 1 && error.status !== 2) throw error;
@@ -126,6 +140,17 @@ it('чистый NodeNext consumer сохраняет точные source тип
       .map(([, line, code]) => ({ line: Number(line), code: Number(code) }));
     expect(errors.map(error => error.line), negative).toEqual(forbiddenLines);
     expect(errors.map(error => error.code), negative).toEqual(members.flatMap(() => [2345, 2322, 2322, 2322, 2353]));
+
+    // Полный smoke использует этот же generator; declarations не подменяются.
+    expect(Object.keys(generatedExpected).sort()).toEqual(groups.toSorted());
+    const generatedChecks = [false, true].map(dynamicImport => {
+      const loadedFiles = [];
+      const generated = stateTypeConsumerSource(generatedExpected, { dynamicImport });
+      return { diagnostics: diagnostics(generated, loadedFiles), loadedFiles };
+    });
+    expect(generatedChecks.map(result => result.diagnostics)).toEqual(['', '']);
+    for (const { loadedFiles } of generatedChecks) expect(loadedFiles.filter(file => dirname(file) === join(dist, 'states')).sort())
+      .toEqual(groups.map(name => join(dist, 'states', `${name}.d.ts`)).sort());
 
     // Deliberate widening различает exact result.variant и правдоподобный union.
     const sourceLeaf = join(dist, 'ir/source-state-types.d.ts');
