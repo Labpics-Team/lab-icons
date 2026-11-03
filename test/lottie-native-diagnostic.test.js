@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { canonicalCubicPath, diagnosticAlpha, diagnosticPath } from '../scripts/bench/lottie-render.js';
+import { canonicalCubicPath, diagnosticAlpha, diagnosticPath, nativeSvgAssetCandidate } from '../scripts/bench/lottie-render.js';
 
 describe('различающие native raster interventions', () => {
   it('native author сохраняет исходные verbs и literals побайтово, binary32 меняет только числа', () => {
@@ -43,5 +43,27 @@ describe('различающие native raster interventions', () => {
     expect(diagnosticAlpha(pixels([110, 110]), expected)).toMatchObject({ actualInk: 220, signedInkBias: 0.1, alphaDifference: [10, 10] });
     expect(diagnosticAlpha(pixels([90, 110]), expected)).toMatchObject({ alphaError: 20, signedInkBias: 0, alphaDifference: [-10, 10] });
     expect(() => diagnosticAlpha(new Uint8ClampedArray(3), expected)).toThrow('неверную длину');
+  });
+  it('SVG image candidate сохраняет canvas, timing и transform, не выдавая asset за bezier shapes', () => {
+    const source = { v: '5.13.0', fr: 60, ip: 0, op: 61, w: 24, h: 27, assets: [],
+      layers: [{ ty: 4, ind: 1, ip: 0, op: 61, nm: 'body', ks: { p: { a: 1, k: [{ t: 0, s: [0, 3, 0] }, { t: 30, s: [0, 0, 0] }, { t: 60, s: [0, 3, 0] }] },
+        a: { a: 0, k: [0, 0, 0] }, s: { a: 0, k: [100, 100, 100] } }, shapes: [{ ty: 'sh', ks: 'private-shape-data' }] }],
+      meta: { labIcons: { profile: 'source-bezier-profile', logicalViewBox: [0, 0, 24, 24], offset: [0, 3], terminalFrame: 60, masterSha256: 'author-sha' } } };
+    const before = JSON.stringify(source), svg = '<svg viewBox="0 0 24 24"><path d="M1 2L3 4Z" fill="#123456"/></svg>';
+    const candidate = nativeSvgAssetCandidate(source, svg);
+    expect(JSON.stringify(source)).toBe(before);
+    expect(candidate).toMatchObject({ v: '5.13.0', fr: 60, ip: 0, op: 61, w: 24, h: 27 });
+    expect(candidate.layers[0].ks).toEqual(source.layers[0].ks);
+    expect(candidate.layers[0]).toMatchObject({ ty: 2, refId: 'native-master-svg', nm: 'body', ip: 0, op: 61 });
+    expect(candidate.layers[0]).not.toHaveProperty('shapes');
+    expect(candidate.assets[0]).toMatchObject({ id: 'native-master-svg', w: 24, h: 24, e: 1, u: '', pr: 'xMidYMid meet' });
+    expect(decodeURIComponent(candidate.assets[0].p.split(',').slice(1).join(','))).toBe(svg);
+    expect(candidate.meta.labIcons).toEqual({ ...source.meta.labIcons,
+      profile: 'lab-icons.lottie-web.svg-asset.diagnostic.v1', sourceProfile: 'source-bezier-profile' });
+    candidate.layers[0].ks.p.k[0].s[0] = 99;
+    expect(source.layers[0].ks.p.k[0].s[0]).toBe(0);
+    expect(() => nativeSvgAssetCandidate({ ...source, layers: [] }, svg)).toThrow('whole paint layer');
+    expect(() => nativeSvgAssetCandidate(source, '')).toThrow('payload');
+    expect(() => nativeSvgAssetCandidate({ ...source, meta: { labIcons: { ...source.meta.labIcons, logicalViewBox: [1, 0, 24, 24] } } }, svg)).toThrow('zero-origin');
   });
 });

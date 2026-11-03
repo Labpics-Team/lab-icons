@@ -330,6 +330,115 @@ async function syntheticNativeDiagnostic() {
   const raw = rawSource(testCase);
   return diagnoseNativeRaster(testCase, raw, raw.viewBox);
 }
+/** Evidence-only candidate для штатного SVG image asset; public exporter не меняется. */
+export function nativeSvgAssetCandidate(sourceAnimation, svgText) {
+  const animation = structuredClone(sourceAnimation), meta = animation.meta.labIcons;
+  assert(animation.layers.length === 1 && animation.layers[0].ty === 4, 'SVG asset diagnostic требует один whole paint layer');
+  assert(meta.logicalViewBox[0] === 0 && meta.logicalViewBox[1] === 0, 'Bounded SVG asset diagnostic требует zero-origin master');
+  assert(typeof svgText === 'string' && svgText.length > 0, 'SVG asset diagnostic требует явный payload');
+  const id = 'native-master-svg';
+  animation.assets = [{ id, w: meta.logicalViewBox[2], h: meta.logicalViewBox[3], e: 1, u: '',
+    p: `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgText)}`, pr: 'xMidYMid meet' }];
+  const layer = animation.layers[0];
+  layer.ty = 2; layer.refId = id; delete layer.shapes;
+  animation.meta.labIcons = { ...meta, profile: 'lab-icons.lottie-web.svg-asset.diagnostic.v1', sourceProfile: meta.profile };
+  return animation;
+}
+async function observeNativeSvgAsset(testCase, sourceAnimation, { mutation } = {}) {
+  const raw = rawSource(testCase), frame = referenceFrame(testCase, raw), expectedTime = referenceLottieTiming(testCase.request);
+  const source = raw.source.documentElement.cloneNode(true);
+  for (const path of source.querySelectorAll('path')) path.style.fill = testCase.request.color ?? '#000000';
+  if (mutation === 'remove-hole') {
+    const path = source.querySelector('path'), contours = path.getAttribute('d').split(/(?=M)/).filter(Boolean);
+    assert(contours.length === 3, 'Mic negative control требует outer и два counter contours');
+    path.setAttribute('d', contours.slice(0, -1).join(''));
+  }
+  const svgText = mutation === 'missing-image-ink'
+    ? `<svg xmlns="${NS}" viewBox="${raw.viewBox.join(' ')}"></svg>` : new XMLSerializer().serializeToString(source);
+  const animation = nativeSvgAssetCandidate(sourceAnimation, svgText);
+  if (mutation === 'wrong-position') {
+    assert(animation.layers[0].ks.p.a === 0, 'Wrong-position control требует static layer');
+    animation.layers[0].ks.p.k[0] += 1;
+  }
+  const dataBeforePlayer = JSON.stringify(animation), container = document.createElement('div');
+  container.style.cssText = 'position:absolute;left:-10000px;top:0'; document.body.append(container);
+  let player;
+  const report = { name: testCase.name, variant: testCase.request.variant, gesture: testCase.request.gesture ?? null,
+    mutation: mutation ?? null, profile: animation.meta.labIcons.profile, sourceProfile: animation.meta.labIcons.sourceProfile,
+    scope: 'stock lottie-web 5.13.0 SVG image asset experiment; not bezier editability or native/dotLottie admission',
+    masterSha256: testCase.masterSha256, animation: JSON.parse(dataBeforePlayer), frame, observations: [], complete: false };
+  try {
+    player = window.lottie.loadAnimation({ container, animationData: animation, renderer: 'svg', loop: false, autoplay: false,
+      rendererSettings: { preserveAspectRatio: 'xMidYMid meet', imagePreserveAspectRatio: 'xMidYMid meet' } });
+    await new Promise((resolve, reject) => {
+      let domLoaded = player.isLoaded === true, imagesLoaded = false;
+      const finish = error => {
+        clearTimeout(timer); player.removeEventListener('DOMLoaded', onDom); player.removeEventListener('loaded_images', onImages);
+        player.removeEventListener('data_failed', onFailure); error ? reject(error) : resolve();
+      };
+      const check = () => { if (domLoaded && imagesLoaded) finish(); };
+      const onDom = () => { domLoaded = true; check(); }, onImages = () => { imagesLoaded = true; check(); };
+      const onFailure = () => finish(new Error('SVG asset diagnostic: data_failed'));
+      const timer = setTimeout(() => finish(new Error(`SVG asset load timeout: DOMLoaded=${domLoaded}, loaded_images=${imagesLoaded}`)), 3000);
+      player.addEventListener('DOMLoaded', onDom); player.addEventListener('loaded_images', onImages); player.addEventListener('data_failed', onFailure);
+    });
+    const rendered = container.querySelector('svg'), imageNodes = [...rendered.querySelectorAll('image')].filter(node => !node.closest('defs'));
+    assert(imageNodes.length === 1, 'SVG asset diagnostic требует один physical image');
+    const href = imageNodes[0].getAttributeNS('http://www.w3.org/1999/xlink', 'href') ?? imageNodes[0].getAttribute('href');
+    assert(href === animation.assets[0].p, 'Player image href обязан сохранить payload');
+    const decoded = new Image(); decoded.src = href; await decoded.decode();
+    assert(decoded.naturalWidth > 0 && decoded.naturalHeight > 0, 'SVG asset href не декодирован');
+    report.loaded = { domLoaded: true, loadedImages: true, hrefDecoded: true, naturalWidth: decoded.naturalWidth, naturalHeight: decoded.naturalHeight };
+    const phases = expectedTime.terminalFrame ? [0, 0.25, 0.5, 0.75, 1] : [0];
+    for (const fraction of phases) {
+      const t = expectedTime.terminalFrame * fraction, progress = testCase.request.gesture
+        ? expectedTime.from + (expectedTime.to - expectedTime.from) * fraction : 0;
+      player.goToAndStop(t, true);
+      const actual = observedSvg(container.querySelector('svg'), animation, frame), reference = referenceSvg(testCase, raw, frame, progress);
+      for (const size of [16, 24, 48]) {
+        const width = Math.ceil(frame[2] * size / raw.viewBox[2]), height = Math.ceil(frame[3] * size / raw.viewBox[3]);
+        const observation = diagnosticAlpha(await pixels(actual, width, height), await pixels(reference, width, height));
+        report.observations.push({ t, fraction, progress, size, width, height, ...observation });
+      }
+      (report.surfaces ??= []).push({ t, progress, physicalImageCount: 1, physicalPathCount: [...actual.querySelectorAll('path')].filter(node => !node.closest('defs')).length,
+        serializedSvg: new XMLSerializer().serializeToString(actual), referenceSvg: new XMLSerializer().serializeToString(reference) });
+    }
+    if (expectedTime.terminalFrame) {
+      await new Promise((resolve, reject) => {
+        const onComplete = () => { clearTimeout(timer); player.removeEventListener('complete', onComplete); resolve(); };
+        const timer = setTimeout(() => { player.removeEventListener('complete', onComplete); reject(new Error('SVG asset completion timeout')); }, 3000);
+        player.addEventListener('complete', onComplete); player.goToAndStop(0, true); player.setSpeed(100); player.play();
+      });
+      assert(player.currentFrame === expectedTime.terminalFrame, 'SVG asset natural completion теряет terminal hold');
+      report.naturalCompletion = { frame: player.currentFrame, expectedTerminalFrame: expectedTime.terminalFrame };
+    }
+    report.nonempty = report.observations.every(row => row.actualInk > 0);
+    report.pass = report.nonempty && report.observations.every(row => row.pass);
+    report.complete = true;
+  } catch (error) { report.error = error.message; report.pass = false; }
+  finally { if (player?.renderer) player.destroy(); container.remove(); }
+  return report;
+}
+async function runNativeSvgAssetDiagnostics(create, testCases) {
+  const select = (name, variant, gesture) => testCases.find(item => item.name === name && item.request.variant === variant &&
+    (item.request.gesture ?? null) === gesture);
+  const chevron = select('chevron-up', 'outline', null), mic = select('mic-circle', 'filled', null), nudge = select('chevron-up', 'outline', 'chevron-up.nudge');
+  assert(chevron && mic && nudge, 'SVG asset experiment требует две статики и полный direction.nudge interval');
+  const exportSource = testCase => {
+    const result = create(testCase.name, testCase.request); assert(result.ok, 'SVG asset experiment: source export refused'); return result.animation;
+  };
+  const cases = [];
+  for (const testCase of [chevron, mic, nudge]) cases.push(await observeNativeSvgAsset(testCase, exportSource(testCase)));
+  const negativeControls = [];
+  if (cases.every(testCase => testCase.complete && testCase.nonempty)) {
+    for (const [mutation, testCase] of [['missing-image-ink', chevron], ['wrong-position', chevron], ['remove-hole', mic]]) {
+      const observed = await observeNativeSvgAsset(testCase, exportSource(testCase), { mutation });
+      negativeControls.push({ mutation, detected: observed.complete && !observed.pass, ...observed });
+    }
+  }
+  return { player: window.lottie.version, cases, negativeControls, complete: cases.every(testCase => testCase.complete),
+    pass: cases.every(testCase => testCase.pass) && negativeControls.length === 3 && negativeControls.every(control => control.detected) };
+}
 export async function runLottieRenderCases(create, testCases, { controls = true, visible = true } = {}) {
   assert(window.lottie?.version === '5.13.0', 'Нужен pinned lottie-web 5.13.0 SVG player.');
   const rows = [], nativeDiagnostics = [];
@@ -426,7 +535,8 @@ export async function runLottieRenderCases(create, testCases, { controls = true,
     assert(nativeDiagnostics.length === 2, 'Нужны оба объявленных real native diagnostic cases');
     nativeDiagnostics.push(await syntheticNativeDiagnostic());
   }
-  return { player: window.lottie.version, rows, negativeControls, nativeDiagnostics, complete: true };
+  const nativeSvgAssetDiagnostics = controls ? await runNativeSvgAssetDiagnostics(create, testCases) : null;
+  return { player: window.lottie.version, rows, negativeControls, nativeDiagnostics, nativeSvgAssetDiagnostics, complete: true };
   } finally { if (!visible) gallery.remove(); }
 }
 
