@@ -7733,6 +7733,54 @@
     "anatomy.runtime.json"
    ]
   },
+  "dist/states/microphone-presentation-filled.d.ts": {
+   "baselineBytes": 857,
+   "baselineGzipBytes": 274,
+   "maxBytes": 857,
+   "maxGzipBytes": 274,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL",
+    "semantics/catalog.json",
+    "anatomy.runtime.json"
+   ]
+  },
+  "dist/states/microphone-presentation-filled.js": {
+   "baselineBytes": 4896,
+   "baselineGzipBytes": 2286,
+   "maxBytes": 4896,
+   "maxGzipBytes": 2286,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL",
+    "semantics/catalog.json",
+    "anatomy.runtime.json"
+   ]
+  },
+  "dist/states/microphone-presentation.d.ts": {
+   "baselineBytes": 864,
+   "baselineGzipBytes": 275,
+   "maxBytes": 864,
+   "maxGzipBytes": 275,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL",
+    "semantics/catalog.json",
+    "anatomy.runtime.json"
+   ]
+  },
+  "dist/states/microphone-presentation.js": {
+   "baselineBytes": 5634,
+   "baselineGzipBytes": 2486,
+   "maxBytes": 5634,
+   "maxGzipBytes": 2486,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL",
+    "semantics/catalog.json",
+    "anatomy.runtime.json"
+   ]
+  },
   "dist/states/microphone.d.ts": {
    "baselineBytes": 865,
    "baselineGzipBytes": 273,
@@ -7774,6 +7822,54 @@
    "baselineGzipBytes": 1988,
    "maxBytes": 4637,
    "maxGzipBytes": 2126,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL",
+    "semantics/catalog.json",
+    "anatomy.runtime.json"
+   ]
+  },
+  "dist/states/plus-presentation-filled.d.ts": {
+   "baselineBytes": 857,
+   "baselineGzipBytes": 274,
+   "maxBytes": 857,
+   "maxGzipBytes": 274,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL",
+    "semantics/catalog.json",
+    "anatomy.runtime.json"
+   ]
+  },
+  "dist/states/plus-presentation-filled.js": {
+   "baselineBytes": 3704,
+   "baselineGzipBytes": 1749,
+   "maxBytes": 3704,
+   "maxGzipBytes": 1749,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL",
+    "semantics/catalog.json",
+    "anatomy.runtime.json"
+   ]
+  },
+  "dist/states/plus-presentation.d.ts": {
+   "baselineBytes": 864,
+   "baselineGzipBytes": 275,
+   "maxBytes": 864,
+   "maxGzipBytes": 275,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL",
+    "semantics/catalog.json",
+    "anatomy.runtime.json"
+   ]
+  },
+  "dist/states/plus-presentation.js": {
+   "baselineBytes": 3979,
+   "baselineGzipBytes": 1804,
+   "maxBytes": 3979,
+   "maxGzipBytes": 1804,
    "allowedModules": [],
    "forbiddenNeedles": [
     "sourceMappingURL",
