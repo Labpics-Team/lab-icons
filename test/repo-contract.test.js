@@ -344,6 +344,17 @@ jobs:
     expect(source).toContain('run: pnpm verify');
   });
 
+  it('запрещает pull_request_target независимо от выбора runner', () => {
+    const source = readFileSync(new URL('../.github/workflows/ci.yml', import.meta.url), 'utf8');
+    const target = source.replace('  pull_request:', '  pull_request_target:')
+      .replace(/^(\s*)runs-on:[^\r\n]*$/gm, '$1runs-on: ubuntu-latest');
+    const error = '.github/workflows/ci.yml: pull_request_target запрещён для проверки repository code';
+    expect(selfHostedWorkflowErrors('.github/workflows/ci.yml', target)).toContain(error);
+    expect(fixture({ filesPatch: { '.github/workflows/ci.yml': target } })).toContain(error);
+    expect(selfHostedWorkflowErrors('.github/workflows/ci.yml', source
+      .replace(/^(\s*)runs-on:[^\r\n]*$/gm, '$1runs-on: ubuntu-latest'))).toEqual([]);
+  });
+
   it.each([
     ['fork без проверки trust', source => source.replaceAll("(github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)", 'true')],
     ['pull_request_target', source => source.replace('  pull_request:', '  pull_request_target:')],

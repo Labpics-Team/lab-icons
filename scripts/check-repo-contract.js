@@ -272,10 +272,13 @@ function pnpmJobErrors({ relativePath, job, expectedPnpmVersion }) {
 
 /** Общий ARC pool допускает только trusted code; native matrix и fork isolation сохраняются. */
 export function selfHostedWorkflowErrors(relativePath, text) {
+  if (relativePath === '.github/workflows/ci.yml' && /\bpull_request_target\b/.test(text)) {
+    return [`${relativePath}: pull_request_target запрещён для проверки repository code`];
+  }
   const runnerLines = source => source.split(/\r?\n/).filter(line => !line.trim().startsWith('#') && /\bself-hosted\b/.test(line));
   if (runnerLines(text).length === 0) return [];
   const forbidden = `${relativePath}: persistent self-hosted runner запрещён для repository code`;
-  if (relativePath !== '.github/workflows/ci.yml' || /\bpull_request_target\b/.test(text)) return [forbidden];
+  if (relativePath !== '.github/workflows/ci.yml') return [forbidden];
   const allowed = { verify: TRUSTED_VERIFY_RUNNER, benchmark: TRUSTED_BENCHMARK_RUNNER, security: TRUSTED_BENCHMARK_RUNNER };
   let acceptedLines = 0;
   for (const job of workflowJobBlocks(text)) {
