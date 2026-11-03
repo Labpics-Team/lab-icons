@@ -42,6 +42,7 @@ function runConsumer({ expectations = expected } = {}) {
   const source = `import { readFileSync } from 'node:fs';
 import { compileSymbolEffect } from '@labpics/icons/motion';
 import { observeAuthorGlyph } from ${JSON.stringify(pathToFileURL(join(root, 'scripts/bench/author-oracle.js')).href)};
+import { matchesAuthoredCapsulePath } from ${JSON.stringify(pathToFileURL(join(root, 'scripts/bench/explorer-journey.js')).href)};
 ${authorVariationArtifactConsumerSource()}
 const expectedSymbols = JSON.parse(readFileSync(new URL('./author-expected.json', import.meta.url), 'utf8'));
 for (const [icon, variants] of Object.entries(expectedSymbols)) {
@@ -49,7 +50,7 @@ for (const [icon, variants] of Object.entries(expectedSymbols)) {
   ${authorVariationFamilyConsumerSource()}
   for (const [variant, expected] of Object.entries(variants)) {
     const current = symbol.glyph({ variant }), capabilities = symbol.glyphCapabilities(variant);
-    verifyInstalledAuthorVariation({ icon, variant, expected, familyVariation, current, capabilities, symbol, variable, lottie: lottieVariation, compileSymbolEffect, observeAuthorGlyph });
+    verifyInstalledAuthorVariation({ icon, variant, expected, familyVariation, current, capabilities, symbol, variable, lottie: lottieVariation, compileSymbolEffect, observeAuthorGlyph, matchesAuthoredCapsulePath });
   }
 }
 console.log('author variation installed consumer PASS');
@@ -188,6 +189,39 @@ export const glyph = request => {
       const result = runConsumer({ expectations: { 'mic-circle': { filled: expected['mic-circle'].filled } } });
       expect(result.status, result.stdout + result.stderr).not.toBe(0);
       expect(result.stderr).toContain(message);
+    } finally { writeFileSync(path, original); }
+  });
+
+  it.each([
+    ['mic-circle', 'filled', 'тело заменено стойкой', "const changedD = glyph.parts.find(part => part.id === 'microphone-support').d;"],
+    ['mic', 'outline', 'тело смещено по высоте', `let coordinate = 0;
+const changedD = body.d.replace(/[-+]?(?:\\d*\\.\\d+|\\d+\\.?\\d*)(?:[eE][-+]?\\d+)?/g,
+  value => String(Number(value) + (coordinate++ % 2 ? .125 : 0)));`],
+  ])('capsule %s/%s: согласованная подмена %s нарушает исходный закон', (icon, variant, _, mutation) => {
+    const path = join(directory, `node_modules/@labpics/icons/dist/variations/${icon}.js`);
+    const original = readFileSync(path, 'utf8'), declaration = 'export const glyph =';
+    expect(original).toContain(declaration);
+    try {
+      writeFileSync(path, original.replace(declaration, 'const artifactOriginal =') + `
+export const glyph = request => {
+  const glyph = artifactOriginal(request);
+  if (request?.variant !== '${variant}' || !(request.variation?.bodyWidth < 1)) return glyph;
+  const body = glyph.parts.find(part => part.id === 'microphone-body');
+  ${mutation}
+  const parts = glyph.parts.map(part => part === body ? { ...part, d: changedD } : part);
+  const d = parts.map(part => part.d).join('');
+  const physicalBefore = glyph.composition.kind === 'compound' ? glyph.d : body.d;
+  const physicalAfter = glyph.composition.kind === 'compound' ? d : changedD;
+  const svg = glyph.svg.replace('d="' + physicalBefore + '"', 'd="' + physicalAfter + '"');
+  if (svg === glyph.svg) throw new Error('coupled mutation did not reach the physical SVG');
+  return { ...glyph, parts, d, svg };
+};
+`);
+      const syntax = spawnSync(process.execPath, ['--check', path], { encoding: 'utf8' });
+      expect(syntax.status, syntax.stdout + syntax.stderr).toBe(0);
+      const result = runConsumer({ expectations: { [icon]: { [variant]: expected[icon][variant] } } });
+      expect(result.status, result.stdout + result.stderr).not.toBe(0);
+      expect(result.stderr).toContain(`authored variation body width differs from master: ${icon}/${variant}`);
     } finally { writeFileSync(path, original); }
   });
 });
