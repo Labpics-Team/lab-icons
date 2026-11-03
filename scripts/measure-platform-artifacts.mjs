@@ -4,12 +4,13 @@ import { lstatSync, readFileSync, realpathSync, statSync, writeFileSync } from '
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { basename, dirname, join, resolve, sep, toNamespacedPath } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { cpus, totalmem } from 'node:os';
 import { brotliCompressSync, constants } from 'node:zlib';
 import { measureArtifact, PACKAGE_SIZE_MEASUREMENT, parsePackageSizeRatchet } from './check-package-size.js';
 import { bundleScenario, CONSUMER_SIZE_MEASUREMENT, parseConsumerSizeRatchet } from './check-consumer-size.js';
 import { validateReleaseRuntimeDependencyGraph, validateReleaseTypeDependencyGraph } from './lib/release-contract.js';
+import { authorMotionTargets } from './lib/author-motion-targets.js';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const args = process.argv.slice(2);
@@ -71,6 +72,26 @@ function independentReportDestination(output) {
   return actual;
 }
 
+const motionTargets = authorMotionTargets(read('semantics/author-anatomy.json'));
+const rotationEntries = {};
+for (const icon of motionTargets.rotations) {
+  const file = `dist/gestures/${icon}.js`;
+  if (!/^[a-z][a-z0-9-]*$/.test(icon) || !contract.files.includes(file)) {
+    throw new Error('measurement: rotation target отсутствует в release contract');
+  }
+  const module = await import(pathToFileURL(join(root, file)).href);
+  const admitted = ['outline', 'filled'].map(variant => module.motionCapabilities(variant)).find(result => result.ok);
+  if (!admitted || admitted.capabilities.icon !== icon || !admitted.capabilities.gestures.length) {
+    throw new Error(`measurement: ${icon} не имеет допущенного gesture`);
+  }
+  const { variant, gestures } = admitted.capabilities;
+  const entry = `@labpics/icons/gestures/${icon}`;
+  const renderArgument = variant === 'outline' ? '' : JSON.stringify(variant);
+  const request = variant === 'outline' ? '{ duration: 400 }' : `{ duration: 400, variant: ${JSON.stringify(variant)} }`;
+  rotationEntries[`gesture-${icon}-svg`] = `import { renderMotionSvg } from '${entry}';\nconsole.log(renderMotionSvg(${renderArgument}));\n`;
+  rotationEntries[`gesture-${icon}-effect`] = `import { compileMotionEffect } from '${entry}';\nconsole.log(compileMotionEffect('${gestures[0].id}', ${request}));\n`;
+  rotationEntries[`gesture-${icon}-combined`] = `import { renderMotionSvg, compileMotionEffect } from '${entry}';\nconsole.log(renderMotionSvg(${renderArgument}), compileMotionEffect('${gestures[0].id}', ${request}));\n`;
+}
 const entries = {
   'one-static': oldConsumers.scenarios['one-static'].entry,
   'authored-static': "import { outline } from '@labpics/icons/symbols/time';\nconsole.log(outline);\n",
@@ -96,15 +117,7 @@ const entries = {
   'microphone-state-filled': "import { renderStateSvg, compileStateEffect } from '@labpics/icons/states/microphone-filled';\nconsole.log(renderStateSvg('muted'), compileStateEffect('unmuted', { duration: 180 }));\n",
   'visibility-state-outline': "import { renderStateSvg, compileStateEffect } from '@labpics/icons/states/visibility';\nconsole.log(renderStateSvg('hidden'), compileStateEffect('visible', { duration: 180 }));\n",
   'visibility-state-filled': "import { renderStateSvg, compileStateEffect } from '@labpics/icons/states/visibility-filled';\nconsole.log(renderStateSvg('hidden'), compileStateEffect('visible', { duration: 180 }));\n",
-  ...Object.fromEntries(['reload', 'refresh', 'timer'].flatMap(icon => {
-    const gesture = icon === 'timer' ? 'timer.advance' : `${icon}.cycle`;
-    const entry = `@labpics/icons/gestures/${icon}`;
-    return [
-      [`gesture-${icon}-svg`, `import { renderMotionSvg } from '${entry}';\nconsole.log(renderMotionSvg());\n`],
-      [`gesture-${icon}-effect`, `import { compileMotionEffect } from '${entry}';\nconsole.log(compileMotionEffect('${gesture}', { duration: 400 }));\n`],
-      [`gesture-${icon}-combined`, `import { renderMotionSvg, compileMotionEffect } from '${entry}';\nconsole.log(renderMotionSvg(), compileMotionEffect('${gesture}', { duration: 400 }));\n`],
-    ];
-  })),
+  ...rotationEntries,
   ...Object.fromEntries(['reload', 'refresh'].map(icon => [`gesture-${icon}-ir-reference`,
     `import { glyph, glyphCapabilities } from '@labpics/icons/symbols/${icon}';\nimport { renderGlyphSvg } from '@labpics/icons/ir/render';\nimport { compileSymbolEffect } from '@labpics/icons/motion';\nconst value = glyph();\nconsole.log(renderGlyphSvg(value), compileSymbolEffect(value, glyphCapabilities(), '${icon}.cycle', { duration: 400 }));\n`])),
   ...Object.fromEntries(['mic', 'mic-circle'].flatMap(icon => [
