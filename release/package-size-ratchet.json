@@ -624,8 +624,8 @@
    ]
   },
   "dist/ir/lottie-runtime.js": {
-   "baselineBytes": 9467,
-   "baselineGzipBytes": 3463,
+   "baselineBytes": 10409,
+   "baselineGzipBytes": 3724,
    "maxBytes": 11590,
    "maxGzipBytes": 3776,
    "allowedModules": [
@@ -5216,8 +5216,8 @@
    ]
   },
   "dist/lottie/mic-circle.js": {
-   "baselineBytes": 4499,
-   "baselineGzipBytes": 1897,
+   "baselineBytes": 7620,
+   "baselineGzipBytes": 2706,
    "maxBytes": 7891,
    "maxGzipBytes": 2845,
    "allowedModules": [],
