@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process';
-import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -126,7 +126,7 @@ it('чистый NodeNext consumer сохраняет точные source тип
           '--target', 'ES2022', '--module', 'NodeNext', '--moduleResolution', 'NodeNext', '--skipLibCheck', 'false',
           ...(loadedFiles ? ['--listFiles'] : []), consumer],
         { cwd: directory, stdio: 'pipe', windowsHide: true });
-        if (loadedFiles) loadedFiles.push(...String(output).trim().split(/\r?\n/).filter(Boolean).map(file => resolve(file)));
+        if (loadedFiles) loadedFiles.push(...String(output).trim().split(/\r?\n/).filter(Boolean).map(file => realpathSync.native(file)));
         return '';
       } catch (error) {
         if (error.status !== 1 && error.status !== 2) throw error;
@@ -149,8 +149,11 @@ it('чистый NodeNext consumer сохраняет точные source тип
       return { diagnostics: diagnostics(generated, loadedFiles), loadedFiles };
     });
     expect(generatedChecks.map(result => result.diagnostics)).toEqual(['', '']);
-    for (const { loadedFiles } of generatedChecks) expect(loadedFiles.filter(file => dirname(file) === join(dist, 'states')).sort())
-      .toEqual(groups.map(name => join(dist, 'states', `${name}.d.ts`)).sort());
+    // TypeScript раскрывает symlink и короткие Windows-имена в физических путях.
+    const stateDirectory = realpathSync.native(join(dist, 'states'));
+    const expectedStateFiles = groups.map(name => realpathSync.native(join(stateDirectory, `${name}.d.ts`))).sort();
+    for (const { loadedFiles } of generatedChecks) expect(loadedFiles.filter(file => dirname(file) === stateDirectory).sort(), loadedFiles)
+      .toEqual(expectedStateFiles);
 
     // Deliberate widening различает exact result.variant и правдоподобный union.
     const sourceLeaf = join(dist, 'ir/source-state-types.d.ts');
