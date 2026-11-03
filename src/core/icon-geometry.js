@@ -272,6 +272,29 @@ export function lowerViewportIdentityClip(svgContent) {
   return `${svgTag}${renderedBody}</svg>`;
 }
 
+function openingTagAttributes(tag) {
+  const head = tag.match(/^<([a-z][\w:-]*)\b/i);
+  if (!head) throw new Error('icon-geometry: невалидный opening tag');
+  let rest = tag.slice(head[0].length).replace(/\/?\s*>$/, '');
+  const parsed = new Map();
+  while (rest.trim() !== '') {
+    const match = rest.match(/^\s+([a-z_:][\w:.-]*)\s*=\s*(?:"([^"]*)"|'([^']*)')/i);
+    if (!match) throw new Error(`icon-geometry: невалидные атрибуты <${head[1]}>`);
+    const name = match[1];
+    if (parsed.has(name)) throw new Error(`icon-geometry: повторён атрибут ${name}`);
+    parsed.set(name, match[2] ?? match[3] ?? '');
+    rest = rest.slice(match[0].length);
+  }
+  return parsed;
+}
+
+/** XML-нормализация не должна стирать невалидные атрибуты, включая IR metadata. */
+export function assertSourceAttributeSyntax(svgContent) {
+  for (const tag of svgContent.match(/<[a-z][\w:-]*\b[^>]*>/gi) ?? []) {
+    openingTagAttributes(tag);
+  }
+}
+
 /**
  * Закрытый source-язык после lowering: svg + fill-paths. Иначе fingerprint
  * path-data не является fingerprint отображения (transform/mask/stroke могли
@@ -304,25 +327,9 @@ function assertSupportedRenderedLanguage(svgContent, { artifact }) {
     }
   }
 
-  const attributes = (tag) => {
-    const head = tag.match(/^<([a-z][\w:-]*)\b/i);
-    if (!head) throw new Error('icon-geometry: невалидный opening tag');
-    let rest = tag.slice(head[0].length).replace(/\/?\s*>$/, '');
-    const parsed = new Map();
-    while (rest.trim() !== '') {
-      const match = rest.match(/^\s+([a-z_:][\w:.-]*)\s*=\s*(?:"([^"]*)"|'([^']*)')/i);
-      if (!match) throw new Error(`icon-geometry: невалидные атрибуты <${head[1]}>`);
-      const name = match[1];
-      if (parsed.has(name)) throw new Error(`icon-geometry: повторён атрибут ${name}`);
-      parsed.set(name, match[2] ?? match[3] ?? '');
-      rest = rest.slice(match[0].length);
-    }
-    return parsed;
-  };
-
   const svgTag = svgContent.match(SVG_TAG_RE)?.[0];
   if (!svgTag) throw new Error('icon-geometry: source обязан иметь корневой <svg>');
-  const rootAttrs = attributes(svgTag);
+  const rootAttrs = openingTagAttributes(svgTag);
   const allowedRootAttrs = new Set(['viewBox', 'xmlns', 'width', 'height', 'fill']);
   for (const name of rootAttrs.keys()) {
     if (!allowedRootAttrs.has(name)) {
@@ -352,7 +359,7 @@ function assertSupportedRenderedLanguage(svgContent, { artifact }) {
   }
 
   for (const pathTag of svgContent.match(PATH_TAG_RE) ?? []) {
-    const pathAttrs = attributes(pathTag);
+    const pathAttrs = openingTagAttributes(pathTag);
     const allowedPathAttrs = new Set(['d', 'fill', 'fill-rule', 'clip-rule', 'style']);
     for (const name of pathAttrs.keys()) {
       if (!allowedPathAttrs.has(name)) {

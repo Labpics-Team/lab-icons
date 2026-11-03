@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { optimize } from 'svgo';
-import { authorPathEntries, sourcePathEntries } from '../../src/core/icon-geometry.js';
+import { assertSourceAttributeSyntax, authorPathEntries, sourcePathEntries } from '../../src/core/icon-geometry.js';
 import { parsePathData } from '../../src/core/path-data.js';
 
 export const sha256 = value => createHash('sha256').update(value).digest('hex');
@@ -14,6 +14,7 @@ export function stableJSON(value) {
 
 /** XML parser снимает только объявленные IR metadata; geometry language остаётся закрытым. */
 export function inspectAuthorSvg(svg, { ir = false, expectedMetadata, composition } = {}) {
+  assertSourceAttributeSyntax(svg);
   if (expectedMetadata !== undefined && (!ir || !Array.isArray(expectedMetadata))) {
     throw new TypeError('benchmark oracle: expected metadata требует IR и упорядоченный список частей');
   }

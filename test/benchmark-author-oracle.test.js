@@ -56,6 +56,8 @@ describe('benchmark author oracle и сохранённый output', () => {
       value => { value.svg = value.svg.replace('data-part', 'other-part'); },
       value => { value.svg = value.svg.replace(/ d="([^"]+)"/, ' d="M0 0Z"'); },
       value => { value.svg = value.svg.replace(/(<path\b[^>]*\bfill=")currentColor"/, '$1#000"'); },
+      value => { value.svg = value.svg.replace(/(<path\b[^>]*\bfill=")currentColor"/, '$1#000" fill="currentColor"'); },
+      value => { value.svg = value.svg.replace(/(<path\b[^>]*\bfill=")currentColor"/, '$1currentColor" fill="#000"'); },
       ...['opacity="0.5"', 'transform="translate(1)"', 'stroke="#000"', 'clip-path="url(#clip)"']
         .map(attribute => value => { value.svg = value.svg.replace('<path ', `<path ${attribute} `); }),
       value => { value.svg = value.svg.replace('</svg>', '<rect width="24" height="24"/></svg>'); },
@@ -244,6 +246,23 @@ describe('benchmark author oracle и сохранённый output', () => {
     expect(() => inspectAuthorSvg(svg(paths, true).replace('data-role="unclassified"', 'data-role="content"'), { ir: true })).toThrow();
     expect(() => inspectAuthorSvg(svg(paths, true).replace('<path', '<path opacity="0.5"'), { ir: true })).toThrow();
     expect(() => inspectAuthorSvg(svg(paths, true).replace('<path', '<path transform="translate(1)"'), { ir: true })).toThrow();
+  });
+  it.each([['source', false], ['IR', true]])('отвергает raw duplicate XML attributes до нормализации: %s', (_lane, ir) => {
+    const control = svg(paths, ir);
+    expect(() => inspectAuthorSvg(control, { ir })).not.toThrow();
+    const duplicates = [
+      control.replace('<path', '<path fill="#000" fill="currentColor"'),
+      control.replace('<path', '<path fill="currentColor" fill="#000"'),
+      control.replace('<svg ', '<svg fill="#000" '),
+      control.replace('fill="currentColor">', 'fill="currentColor" fill="#000">'),
+      control.replace('d="M2 2H22V22H2ZM7 7H17V17H7Z"', 'd="M0 0Z" d="M2 2H22V22H2ZM7 7H17V17H7Z"'),
+      control.replace('d="M2 2H22V22H2ZM7 7H17V17H7Z"', 'd="M2 2H22V22H2ZM7 7H17V17H7Z" d="M0 0Z"'),
+      ...(ir ? [control.replace('<path', '<path data-part="wrong"')] : []),
+    ];
+    for (const changed of duplicates) {
+      expect(changed).not.toEqual(control);
+      expect(() => inspectAuthorSvg(changed, { ir })).toThrow(/повторён атрибут/);
+    }
   });
   it('explicit metadata не разрешает пропавшие или добавленные paths и не снимает geometry guards', () => {
     const metadata = paths.map(({ id, role }) => ({ id, role }));
