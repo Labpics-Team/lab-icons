@@ -152,19 +152,15 @@ beforeAll(async () => {
   if (baseline) {
     expect(baseline).toMatch(/^[a-f0-9]{40}$/);
     const snapshot = join(temporary, 'baseline-source');
-    for (const file of ['src/ir/request.ts', 'src/ir/symbol-runtime.ts', 'src/ir/catalog.generated.ts', 'tsconfig.json']) {
+    for (const file of ['src/ir/request.ts', 'src/ir/author-request-runtime.ts', 'src/ir/symbol-runtime.ts', 'src/ir/catalog.generated.ts', 'tsconfig.json']) {
       write(join(snapshot, file), git(['show', `${baseline}:${file}`]));
     }
-    const builder = git(['show', `${baseline}:scripts/build-ir.mjs`]);
-    const start = builder.indexOf('async function bundle('), end = builder.indexOf('\nasync function compileIrTargets', start);
-    expect(start).toBeGreaterThanOrEqual(0);
-    expect(end).toBeGreaterThan(start);
-    // Исходный helper выполняется с cwd своего snapshot; политика берётся из commit.
-    const oldBundle = new Function('build', 'join', `${builder.slice(start, end)}; return bundle;`)(
-      options => build({ ...options, absWorkingDir: snapshot }), join);
+    // Один production compiler для двух исходников: lexical dependencies не
+    // извлекаются из чужой функции, policy delta не смешивается с runtime delta.
     previous = await installedSlice('baseline', async staging => {
-      await oldBundle(snapshot, staging, 'src/ir/request.ts', 'ir/request.js');
-      await oldBundle(snapshot, staging, 'src/ir/symbol-runtime.ts', 'ir/symbol-runtime.js', ['./request.js']);
+      await bundle(snapshot, staging, 'src/ir/request.ts', 'ir/request.js');
+      await bundle(snapshot, staging, 'src/ir/author-request-runtime.ts', 'ir/author-request-runtime.js', ['./request.js']);
+      await bundle(snapshot, staging, 'src/ir/symbol-runtime.ts', 'ir/symbol-runtime.js', ['./request.js', './author-request-runtime.js']);
     });
   }
   if (reportPath) {
@@ -179,7 +175,7 @@ beforeAll(async () => {
       'src/ir/author-request-runtime.ts', 'src/ir/symbol-runtime.ts', 'test/compiled-runtime-policy.test.js',
       'test/helpers/authored-symbol-payload.js', 'release/consumer-size-ratchet.json'];
     write(reportPath, JSON.stringify({ capturedAt: new Date().toISOString(), head: git(['rev-parse', 'HEAD']).trim(), baseline,
-      scope: 'isolated installed-layout slice; three real authored families; exact canonical alert/time entries; same payload and current symbol emitter for both runtime policies; no full build, pack, registry install, browser or timing qualification',
+      scope: 'isolated installed-layout slice; three real authored families; exact canonical alert/time entries; same payload, current symbol emitter and current production build policy for both frozen runtime sources; no full build, pack, registry install, browser or timing qualification',
       environment: { node: process.version, esbuild: '0.28.1', gzip: { fflate: '0.8.3', level: 9, mtime: 0 }, platform: process.platform, arch: process.arch },
       sourceDigests: Object.fromEntries(files.map(file => [file, sha256(readFileSync(join(root, file)))])),
       candidate: recorded(candidate), ...(previous && { previous: recorded(previous) }) }, null, 2) + '\n');
