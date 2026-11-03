@@ -303,7 +303,7 @@ function viewAvailable(view, row = selectedRow()) {
 }
 
 function updateViewControls() {
-  for (const button of document.querySelectorAll('[data-view]')) {
+  for (const button of document.querySelectorAll('button[data-view]')) {
     if (button.dataset.view === 'generated') button.textContent = variationAvailable() ? 'Вариация' : 'Модель';
     button.setAttribute('aria-pressed', String(button.dataset.view === state.view));
     button.disabled = !state.loaded || !viewAvailable(button.dataset.view);
@@ -742,7 +742,7 @@ displayColor.addEventListener('input', displayStyle);
 ui.variant.addEventListener('change', () => select(state.name));
 ui['more-symbols'].addEventListener('click', () => { state.limit += 48; grid(); });
 ui.gesture.addEventListener('change', () => state.replacement ? renderView(state.view) : updateMotionControls());
-for (const button of document.querySelectorAll('[data-view]')) button.addEventListener('click', () => renderView(button.dataset.view, { preserveProgress: Boolean(variationAvailable()) }));
+for (const button of document.querySelectorAll('button[data-view]')) button.addEventListener('click', () => renderView(button.dataset.view, { preserveProgress: Boolean(variationAvailable()) }));
 ui.play.addEventListener('click', () => replacementMode() ? replaceState(state.replacement.target) : advance(1, { repeatCycle: true }));
 ui.reverse.addEventListener('click', () => replacementMode() ? replaceState(state.replacement.previous) : advance(0));
 ui.pause.addEventListener('click', () => {
