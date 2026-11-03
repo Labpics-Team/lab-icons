@@ -13,11 +13,6 @@ describe('Ручные счётчики в документации', () => {
     'две тысячи иконок', 'один миллион иконок', 'дюжина иконок',
     'eleven icons', 'one hundred and eleven icons', 'two thousand SVG files',
     'one million exports', 'a dozen icons',
-    'Current package files: 999 byte-for-byte copies of source SVGs.',
-    'Current package files: 999 byte-sized SVGs.',
-    'Current package files: 999 byte‑sized SVGs.',
-    'В текущем пакете файлов: 999 B-вариантов иконок.',
-    'В текущем пакете файлов: 999 B‑вариантов иконок.',
   ];
   for (const claim of claims) {
     it(`отклоняет ручной счётчик: ${claim}`, ({ root }) => {
@@ -29,45 +24,6 @@ describe('Ручные счётчики в документации', () => {
       }
     });
   }
-
-  it('сохраняет наблюдения размера файла в байтах, включая переход baseline', ({ root }) => {
-    mkdirSync(join(root, 'docs/evidence'), { recursive: true });
-    const measurements = [
-      'Измерен `dist/ir/compiler.js`. Изменились только два фактических baseline поля этого файла: 124013 → 124044 B\nи 37790 → 37801 B gzip.',
-      'Размер файла `dist/ir/compiler.js` измерен. Размер файла: **124013** → **124044** B.',
-      'Размер файла `dist/ir/compiler.js` измерен. Размер файла: 124044 байта.',
-      'Размер файла `dist/ir/compiler.js` измерен. Размер файла: 124044 байтов.',
-      'Measured `dist/ir/compiler.js`. Size of file: 124044 bytes.',
-      'Measured `dist/ir/compiler.js`. Size of file: 124013 -> 124044 bytes.',
-    ];
-    for (const file of ['README.md', 'docs/evidence/size.md']) {
-      for (const measurement of measurements) {
-        writeFileSync(join(root, file), '# Размер\n\n' + measurement);
-        expect(auditRepo(root).errors, `${file}: ${measurement}`).toEqual([]);
-      }
-      writeFileSync(join(root, file), '# Размер\n');
-    }
-  });
-
-  it('не скрывает ручной счётчик рядом с измерением размера файла', ({ root }) => {
-    mkdirSync(join(root, 'docs/evidence'), { recursive: true });
-    const measurement = 'Размер compiler файла: 124013 → 124044 B';
-    const controls = [
-      ['В текущем пакете файлов: 999, ' + measurement + '.', 'файлов: 999'],
-      [measurement + ', в текущем пакете файлов: 999.', 'файлов: 999'],
-      [measurement + '; в текущем пакете 999 SVG.', '999 SVG'],
-      [measurement + '.\n\nВ текущем пакете 999 icons.', '999 icons'],
-    ];
-    for (const file of ['README.md', 'docs/evidence/size.md']) {
-      for (const [source, claim] of controls) {
-        writeFileSync(join(root, file), '# Размер и корпус\n\n' + source);
-        const errors = auditRepo(root).errors.filter(error => error.includes('ручной счётчик'));
-        expect(errors, `${file}: ${source}`).toHaveLength(1);
-        expect(errors[0], `${file}: ${source}`).toContain(`«${claim}»`);
-      }
-      writeFileSync(join(root, file), '# Размер и корпус\n');
-    }
-  });
 
   it('сохраняет параметры геометрии и названия API', ({ root }) => {
     writeFileSync(join(root, 'docs/geometry.md'), [

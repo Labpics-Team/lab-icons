@@ -48,9 +48,7 @@ export function distributionClaimErrors(text) {
 export function manualCorpusCountErrors(source) {
   // Помеченный code literal версии — identity источника, не размер корпуса.
   // Обычные числовые code literals рядом с SVG/файлами остаются count claims.
-  // marked кодирует > в ASCII-стрелке; её entity не задаёт границу утверждения.
-  const sentences = normalizeDistributionText(source, { preserveBlocks: true, maskVersionIdentifiers: true })
-    .replaceAll('-&gt;', '->').split(/\n|;|[.!?]\s+/u);
+  const sentences = normalizeDistributionText(source, { preserveBlocks: true, maskVersionIdentifiers: true }).split(/\n|;|[.!?]\s+/u);
   const ru = [
     'ноль', 'нуль',
     'один', 'одна', 'одно', 'одну', 'одного', 'одной',
@@ -82,8 +80,7 @@ export function manualCorpusCountErrors(source) {
   // SVG-строка называет представление значения, а не элемент census.
   // Частичное совпадение SVG внутри такого типа давало ложный corpus claim.
   const svgUnit = 'SVG(?![-\\s]+(?:строк[\\p{L}]*|strings?)(?=$|[^\\p{L}\\p{N}_]))';
-  const fileUnit = '(?:(?:release[- ]?)?файл(?:а|ов)?|files?)';
-  const unit = `(?:икон(?:ка|ки|ок|ку)|имён|имени|имен|${svgUnit}|глиф(?:а|ов)?|(?:именованных\\s+)?(?:ESM[- ]?)?экспорт(?:а|ов)?|${fileUnit}|icons?|glyphs?|exports?)`;
+  const unit = `(?:икон(?:ка|ки|ок|ку)|имён|имени|имен|${svgUnit}|глиф(?:а|ов)?|(?:именованных\\s+)?(?:ESM[- ]?)?экспорт(?:а|ов)?|(?:release[- ]?)?файл(?:а|ов)?|icons?|glyphs?|exports?|files?)`;
   const patterns = [
     new RegExp(`(?:^|[^\\p{L}\\p{N}_])(${number}\\s+${unit})(?=$|[^\\p{L}\\p{N}_])`, 'giu'),
     new RegExp(`(?:^|[^\\p{L}\\p{N}_])(${unit}\\s*[:=]\\s*${number})(?=$|[^\\p{L}\\p{N}_])`, 'giu'),
@@ -94,12 +91,6 @@ export function manualCorpusCountErrors(source) {
   const countStart = `${number}\\s+${unit}(?=$|[^\\p{L}\\p{N}_])`;
   const clauseSeparator = new RegExp(`,\\s*(?=(?:(?:а|но|but|whereas)\\s+(?!${countStart})|(?:(?:в|на|in|at)\\s+)?${currentMarker.source}))`, 'iu');
   const clauses = sentences.flatMap(sentence => sentence.split(clauseSeparator));
-  const fileProperty = new RegExp(`^${fileUnit}\\s*[:=]`, 'iu');
-  const byteValueTail = new RegExp(`^\\s*(?:(?:→|->)\\s*${number})*\\s*(?:B|bytes?|байт(?:а|ов)?)(?=$|[^\\p{L}\\p{N}_-])`, 'iu');
-  function artifactByteMeasurement(match, text) {
-    // Единица относится к этому значению или переходу baseline, не ко всей фразе.
-    return fileProperty.test(match[1]) && byteValueTail.test(text.slice(match.index + match[0].length));
-  }
   function nodeIdentifier(match, text) {
     return /:\s*\d+$/.test(match[1]) &&
       /^:\d+(?=$|[^\p{L}\p{N}_:])/u.test(text.slice(match.index + match[0].length));
@@ -111,7 +102,7 @@ export function manualCorpusCountErrors(source) {
   }
   return [...new Set(clauses.flatMap(sentence => historical(sentence) ? [] :
     patterns.flatMap(pattern => [...sentence.matchAll(pattern)]
-      .filter(match => !nodeIdentifier(match, sentence) && !artifactByteMeasurement(match, sentence)).map(match => match[1]))))]
+      .filter(match => !nodeIdentifier(match, sentence)).map(match => match[1]))))]
     .map((claim) => `ручной счётчик «${claim}»: используйте ссылку на контракт или генерируемую справку`);
 }
 
