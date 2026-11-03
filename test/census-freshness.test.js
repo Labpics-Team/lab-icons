@@ -61,6 +61,20 @@ describe('Свежесть census без изменения проверяемо
     expect(census()).toBe('unchanged sentinel\n');
   });
 
+  it('отклоняет повреждение UTF-8 при одинаковом декодированном тексте', () => {
+    writeFileSync(join(root, 'dist/ir/index.js'), '// src/\uFFFD.js\nexport const plain = 1;\n');
+    generate();
+    const expected = readFileSync(join(root, 'semantics/census.json'));
+    const offset = expected.indexOf(Buffer.from('\uFFFD'));
+    expect(offset).toBeGreaterThanOrEqual(0);
+    const corrupt = Buffer.concat([expected.subarray(0, offset), Buffer.from([0xff]), expected.subarray(offset + 3)]);
+    expect(corrupt.toString('utf8')).toBe(expected.toString('utf8'));
+    expect(corrupt.equals(expected)).toBe(false);
+    writeFileSync(join(root, 'semantics/census.json'), corrupt);
+    expect(check().status).toBe(1);
+    expect(readFileSync(join(root, 'semantics/census.json')).equals(corrupt)).toBe(true);
+  });
+
   it('отклоняет неизвестный режим до записи projection', () => {
     const result = spawnSync(process.execPath, [join(root, 'scripts/census/build-census.mjs'), '--unknown'], { encoding: 'utf8' });
     expect(result.status).not.toBe(0);
