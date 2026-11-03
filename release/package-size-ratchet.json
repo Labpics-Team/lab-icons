@@ -493,8 +493,8 @@
    ]
   },
   "dist/ir/compiler.js": {
-   "baselineBytes": 124013,
-   "baselineGzipBytes": 37790,
+   "baselineBytes": 124044,
+   "baselineGzipBytes": 37801,
    "maxBytes": 154789,
    "maxGzipBytes": 42120,
    "allowedModules": [
