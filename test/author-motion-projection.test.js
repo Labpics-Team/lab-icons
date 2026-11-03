@@ -84,9 +84,9 @@ describe('авторский motion target без стоимости полно�
 
   it('timer сохраняет scoped parts и authored masters без ложного motion admission', () => {
     expect(document.icons.timer.outline.gesture).toBeNull();
-    expect(rich.timer.source.outline.parts.map(({ id, role, anchor }) => ({ id, role, anchor })))
-      .toEqual([{ id: 'timer-dial', role: 'container', anchor: [0.5, 0.5] },
-        { id: 'timer-hand', role: 'control', anchor: [0.5, 0.5] }]);
+    expect(rich.timer.source.outline.parts.map(({ id, role }) => ({ id, role })))
+      .toEqual([{ id: 'timer-dial', role: 'container' }, { id: 'timer-hand', role: 'control' }]);
+    expect(rich.timer.source.outline.parts[1]).toMatchObject({ anchor: [0.5, 0.5], anchorSource: 'declared' });
     expect(rich.timer.source.outline.provenance.anatomy).toMatchObject({ version: 1,
       masterSha256: document.icons.timer.outline.masterSha256,
       pathFingerprintSha256: document.icons.timer.outline.pathFingerprintSha256 });
@@ -209,7 +209,7 @@ describe('авторский motion target без стоимости полно�
     ].sort());
     expect(plain.runtimeDependencies).not.toContain('dist/ir/gesture-runtime.js');
     expect(() => symbolReleaseProjection(base, allNames, [], [], [], [], [], [], [], ['other'])).toThrow(TypeError);
-    expect(authorMotionModuleDeclaration(packets.reload)).toContain('export type MotionVariant = "outline" | "filled"');
+    expect(authorMotionModuleDeclaration(packets.reload)).toContain('export type MotionVariant = "filled" | "outline"');
   });
 
   it('native consumer использует фактическую ESM closure и публичный entrypoint', async () => {
