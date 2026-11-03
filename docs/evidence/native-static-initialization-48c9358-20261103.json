@@ -1,0 +1,355 @@
+{
+  "capturedAt": "2026-11-03T18:45:11.808Z",
+  "head": "48c9358d96ab989ee408a6bf695d64b08a642835",
+  "baseline": "eccb51c4398d8b5ff95ece70d36ac4dbaf81e356",
+  "scope": "isolated installed-layout slice; three real authored families; exact canonical alert/time entries; same payload, current symbol emitter and current production build policy for both frozen runtime sources; no full build, pack, registry install, browser or timing qualification",
+  "environment": {
+    "node": "v24.15.0",
+    "esbuild": "0.28.1",
+    "gzip": {
+      "fflate": "0.8.3",
+      "level": 9,
+      "mtime": 0
+    },
+    "platform": "win32",
+    "arch": "x64"
+  },
+  "sourceDigests": {
+    "scripts/build-ir.mjs": "39901c794b81df1233606280f92ddcba7ff44ae77f2259c66166ee16a4ea2083",
+    "scripts/lib/symbol-modules.js": "95436ed1d9f3304be5eabecb216009cc8e3d66a09bc178e88762af988771b318",
+    "src/ir/request.ts": "b24d9517d5762168fed86344e9a6d31c2785ec65d63ae78c9e293b2d4c56a65a",
+    "src/ir/author-request-runtime.ts": "6b156bd076ebe95cc323c2987ff71bb262e3001376f65fbb6810e24223327376",
+    "src/ir/symbol-runtime.ts": "dd03669d428e6c908203b78b5b55344d1bf5fe21b50748211fc35f83d4f5a19c",
+    "test/compiled-runtime-policy.test.js": "3d9c6b0a63f38973470f750d705484024b3d7defb2fc579faf6f6a9e6e9b3977",
+    "test/helpers/authored-symbol-payload.js": "1b41a4ad4a131074a1111590a136c5b451870291a0e66e0779f946e0e582315f",
+    "release/consumer-size-ratchet.json": "0fd7b278a60eacb529814c794f77617b147e31158f22488ea416c0e54372c122"
+  },
+  "candidate": {
+    "nativeFunctions": {
+      "glyph": {
+        "name": "glyph",
+        "length": 1
+      },
+      "glyphCapabilities": {
+        "name": "glyphCapabilities",
+        "length": 1
+      }
+    },
+    "native": {
+      "artifacts": {
+        "dist/symbols/plus-circle.js": {
+          "bytes": 441,
+          "gzipBytes": 224,
+          "sha256": "0d064337351fa43d2e35ce8c4a817a936f43834ae5785d378fd5aee4f90c28a1",
+          "imports": [
+            "dist/ir/symbol-data/plus-circle.js",
+            "dist/ir/symbol-runtime.js"
+          ]
+        },
+        "dist/ir/symbol-data/plus-circle.js": {
+          "bytes": 8406,
+          "gzipBytes": 2461,
+          "sha256": "ff8deee58da1b6fb12d6482697cfb4c979ec56d0d3ac8f57c735f13206c0bf6e",
+          "imports": []
+        },
+        "dist/ir/symbol-runtime.js": {
+          "bytes": 786,
+          "gzipBytes": 354,
+          "sha256": "7a3a0226218b04c5c31da0e40eab102aef5d8908ba448da6080bc0209aeb9639",
+          "imports": [
+            "dist/ir/request.js",
+            "dist/ir/author-request-runtime.js"
+          ]
+        },
+        "dist/ir/request.js": {
+          "bytes": 2328,
+          "gzipBytes": 1023,
+          "sha256": "73ec99107dc127dd17285b29c69feef04bfbe81096b99d61e5934e2b70d51c66",
+          "imports": []
+        },
+        "dist/ir/author-request-runtime.js": {
+          "bytes": 798,
+          "gzipBytes": 489,
+          "sha256": "4284632485b0d66cf70f316da75ebe4c45be5c94ac487bc3d29d5965b9a9e31b",
+          "imports": [
+            "dist/ir/request.js"
+          ]
+        }
+      },
+      "individualModuleTotals": {
+        "bytes": 12759,
+        "gzipBytes": 4551
+      }
+    },
+    "glyph": {
+      "bytes": 8838,
+      "gzipBytes": 3308,
+      "sha256": "35c84412629014512c028a2ea9819f09d5b1c83450a9f2213eb42efca7408d02",
+      "contributed": [
+        {
+          "file": "dist/ir/symbol-data/plus-circle.js",
+          "bytes": 5452
+        },
+        {
+          "file": "dist/ir/request.js",
+          "bytes": 2326
+        },
+        {
+          "file": "dist/ir/author-request-runtime.js",
+          "bytes": 755
+        },
+        {
+          "file": "dist/ir/symbol-runtime.js",
+          "bytes": 219
+        },
+        {
+          "file": "dist/symbols/plus-circle.js",
+          "bytes": 56
+        }
+      ]
+    },
+    "static": {
+      "bytes": 1102,
+      "gzipBytes": 564,
+      "sha256": "f85976db091642548f0084b5b677a57242585008da1726d0c0e59f4ad396a94b",
+      "contributed": [
+        {
+          "file": "dist/ir/symbol-data/plus-circle.js",
+          "bytes": 1074
+        }
+      ]
+    },
+    "scenarios": {
+      "glyph-one": {
+        "entry": "import { glyph } from '@labpics/icons/symbols/alert';\nconsole.log(glyph());\n",
+        "maxBytes": 12433,
+        "maxGzipBytes": 3265,
+        "bytes": 11209,
+        "gzipBytes": 3190,
+        "sha256": "e1c87fb3edeeb18c5de6a534ae18151598dc05e8704cd11e12f287ff28234538",
+        "contributed": [
+          {
+            "file": "dist/ir/request.js",
+            "bytes": 2326
+          },
+          {
+            "file": "dist/ir/author-request-runtime.js",
+            "bytes": 755
+          },
+          {
+            "file": "dist/ir/symbol-runtime.js",
+            "bytes": 219
+          },
+          {
+            "file": "dist/symbols/alert.js",
+            "bytes": 7891
+          }
+        ]
+      },
+      "authored-time": {
+        "entry": "import { glyph } from '@labpics/icons/symbols/time';\nconsole.log(glyph());\n",
+        "maxBytes": 12652,
+        "maxGzipBytes": 3250,
+        "bytes": 8403,
+        "gzipBytes": 3135,
+        "sha256": "dc1114a9869b243dfffbadc6966f2220804426d72e8f8657ab1fa0b8b5f6d0c5",
+        "contributed": [
+          {
+            "file": "dist/ir/request.js",
+            "bytes": 2326
+          },
+          {
+            "file": "dist/ir/author-request-runtime.js",
+            "bytes": 755
+          },
+          {
+            "file": "dist/ir/symbol-runtime.js",
+            "bytes": 219
+          },
+          {
+            "file": "dist/symbols/time.js",
+            "bytes": 5085
+          }
+        ]
+      },
+      "authored-static": {
+        "entry": "import { outline } from '@labpics/icons/symbols/time';\nconsole.log(outline);\n",
+        "maxBytes": 1155,
+        "maxGzipBytes": 583,
+        "bytes": 1155,
+        "gzipBytes": 583,
+        "sha256": "d0661efeffd81a318650ac42d25e2dd7772fd8d0b73d1fcbc207116e869a0630",
+        "contributed": [
+          {
+            "file": "dist/symbols/time.js",
+            "bytes": 1139
+          }
+        ]
+      }
+    }
+  },
+  "previous": {
+    "nativeFunctions": {
+      "glyph": {
+        "name": "glyph",
+        "length": 1
+      },
+      "glyphCapabilities": {
+        "name": "glyphCapabilities",
+        "length": 1
+      }
+    },
+    "native": {
+      "artifacts": {
+        "dist/symbols/plus-circle.js": {
+          "bytes": 441,
+          "gzipBytes": 224,
+          "sha256": "0d064337351fa43d2e35ce8c4a817a936f43834ae5785d378fd5aee4f90c28a1",
+          "imports": [
+            "dist/ir/symbol-data/plus-circle.js",
+            "dist/ir/symbol-runtime.js"
+          ]
+        },
+        "dist/ir/symbol-data/plus-circle.js": {
+          "bytes": 8406,
+          "gzipBytes": 2461,
+          "sha256": "ff8deee58da1b6fb12d6482697cfb4c979ec56d0d3ac8f57c735f13206c0bf6e",
+          "imports": []
+        },
+        "dist/ir/symbol-runtime.js": {
+          "bytes": 786,
+          "gzipBytes": 354,
+          "sha256": "7a3a0226218b04c5c31da0e40eab102aef5d8908ba448da6080bc0209aeb9639",
+          "imports": [
+            "dist/ir/request.js",
+            "dist/ir/author-request-runtime.js"
+          ]
+        },
+        "dist/ir/request.js": {
+          "bytes": 2356,
+          "gzipBytes": 1017,
+          "sha256": "cee50e7f82d5029e8baabf95baad569c3009abc46f8f3d44aa4c5f9888c255af",
+          "imports": []
+        },
+        "dist/ir/author-request-runtime.js": {
+          "bytes": 798,
+          "gzipBytes": 489,
+          "sha256": "4284632485b0d66cf70f316da75ebe4c45be5c94ac487bc3d29d5965b9a9e31b",
+          "imports": [
+            "dist/ir/request.js"
+          ]
+        }
+      },
+      "individualModuleTotals": {
+        "bytes": 12787,
+        "gzipBytes": 4545
+      }
+    },
+    "glyph": {
+      "bytes": 8882,
+      "gzipBytes": 3316,
+      "sha256": "affeee4f1660e7d59ce2595c75e4368efbefa01850ed83d327a0336865b57ed4",
+      "contributed": [
+        {
+          "file": "dist/ir/symbol-data/plus-circle.js",
+          "bytes": 5452
+        },
+        {
+          "file": "dist/ir/request.js",
+          "bytes": 2370
+        },
+        {
+          "file": "dist/ir/author-request-runtime.js",
+          "bytes": 755
+        },
+        {
+          "file": "dist/ir/symbol-runtime.js",
+          "bytes": 219
+        },
+        {
+          "file": "dist/symbols/plus-circle.js",
+          "bytes": 56
+        }
+      ]
+    },
+    "static": {
+      "bytes": 1102,
+      "gzipBytes": 564,
+      "sha256": "f85976db091642548f0084b5b677a57242585008da1726d0c0e59f4ad396a94b",
+      "contributed": [
+        {
+          "file": "dist/ir/symbol-data/plus-circle.js",
+          "bytes": 1074
+        }
+      ]
+    },
+    "scenarios": {
+      "glyph-one": {
+        "entry": "import { glyph } from '@labpics/icons/symbols/alert';\nconsole.log(glyph());\n",
+        "maxBytes": 12433,
+        "maxGzipBytes": 3265,
+        "bytes": 11253,
+        "gzipBytes": 3194,
+        "sha256": "439c5cc53e80a99492d53bc16faa58dc8743310c2ad3230f77f7570a3799e7cf",
+        "contributed": [
+          {
+            "file": "dist/ir/request.js",
+            "bytes": 2370
+          },
+          {
+            "file": "dist/ir/author-request-runtime.js",
+            "bytes": 755
+          },
+          {
+            "file": "dist/ir/symbol-runtime.js",
+            "bytes": 219
+          },
+          {
+            "file": "dist/symbols/alert.js",
+            "bytes": 7891
+          }
+        ]
+      },
+      "authored-time": {
+        "entry": "import { glyph } from '@labpics/icons/symbols/time';\nconsole.log(glyph());\n",
+        "maxBytes": 12652,
+        "maxGzipBytes": 3250,
+        "bytes": 8447,
+        "gzipBytes": 3138,
+        "sha256": "1b04371d2efca05d340f6937c47a3dbfbddcc3a0abae24535dda280668ab0444",
+        "contributed": [
+          {
+            "file": "dist/ir/request.js",
+            "bytes": 2370
+          },
+          {
+            "file": "dist/ir/author-request-runtime.js",
+            "bytes": 755
+          },
+          {
+            "file": "dist/ir/symbol-runtime.js",
+            "bytes": 219
+          },
+          {
+            "file": "dist/symbols/time.js",
+            "bytes": 5085
+          }
+        ]
+      },
+      "authored-static": {
+        "entry": "import { outline } from '@labpics/icons/symbols/time';\nconsole.log(outline);\n",
+        "maxBytes": 1155,
+        "maxGzipBytes": 583,
+        "bytes": 1155,
+        "gzipBytes": 583,
+        "sha256": "d0661efeffd81a318650ac42d25e2dd7772fd8d0b73d1fcbc207116e869a0630",
+        "contributed": [
+          {
+            "file": "dist/symbols/time.js",
+            "bytes": 1139
+          }
+        ]
+      }
+    }
+  }
+}
