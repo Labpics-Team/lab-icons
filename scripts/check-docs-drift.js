@@ -99,8 +99,9 @@ export function manualCorpusCountErrors(source) {
   const filePropertyContext = /(?:^|[^\p{L}\p{N}_])(?:(?:размер|длина)(?:\s+[\p{L}\p{N}_.\/-]+)?|(?:size|length)\s+of(?:\s+(?:this|the))?|baseline\s+(?:поля\s+этого|fields?\s+of\s+(?:this|the)))\s+$/iu;
   const byteUnit = '(?:B|bytes?|байт(?:а|ов)?)';
   const rangeTail = `(?:\\s*(?:→|->)\\s*${number})*`;
-  const measuredBytes = `${number}${rangeTail}\\s+${byteUnit}(?:\\s+(?:raw|gzip))?`;
-  const byteValueTail = new RegExp(`^${rangeTail}\\s+${byteUnit}(?:\\s+(?:raw|gzip))?(?:\\s+(?:и|and)\\s+${measuredBytes})*(?=$|\\s*[,.)!?])`, 'iu');
+  const byteEncoding = '(?:\\s+(?:raw|gzip|brotli))?';
+  const measuredBytes = `${number}${rangeTail}\\s+${byteUnit}${byteEncoding}`;
+  const byteValueTail = new RegExp(`^${rangeTail}\\s+${byteUnit}${byteEncoding}(?:\\s+(?:и|and)\\s+${measuredBytes})*(?=$|\\s*[,.)!?])`, 'iu');
   function artifactSizeProperty(match, text) {
     const end = match.index + match[0].length;
     const start = end - match[1].length;

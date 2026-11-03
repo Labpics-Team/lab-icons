@@ -33,6 +33,8 @@ describe('Ручные счётчики в документации', () => {
     'Размер **release-файла: 999** **B**-вариантов иконок.',
     'Size of the release-file: 999 B variants of source SVGs.',
     'Size of the **release-file: 999** **B** variants of source SVGs.',
+    'Размер release-файла: 999 B brotli variants of source SVGs.',
+    'Size of the **release-file: 999** **bytes brotli** variants of source SVGs.',
   ];
   for (const claim of claims) {
     it(`отклоняет ручной счётчик: ${claim}`, ({ root }) => {
@@ -61,6 +63,9 @@ describe('Ручные счётчики в документации', () => {
       'Размер **release-файла**: **124044 B**.',
       'Size of the release-file: 124044 bytes.',
       'Size of the **release-file**: **124044 bytes**.',
+      'Размер release-файла: 124044 B brotli.',
+      'Size of the **release-file**: **124044 bytes brotli**.',
+      'Размер release-файла: 124044 B raw и 12444 B gzip и 8444 B brotli.',
       '| Свойство | Значение |\n| --- | --- |\n| Размер | файла: 124044 B |',
     ];
     for (const file of ['README.md', 'docs/evidence/size.md']) {
@@ -83,6 +88,7 @@ describe('Ручные счётчики в документации', () => {
       [measurement + ', files: 999 B.', 'files: 999'],
       ['Размер release-файла: 124044 B, release-файла: 999 B variants of source SVGs.', 'release-файла: 999'],
       ['Size of the release-file: 124044 bytes, release-file: 999 B variants of source SVGs.', 'file: 999'],
+      ['Размер release-файла: 8444 B brotli, files: 999 B.', 'files: 999'],
       ['Размер файла измерен, files: 999 B.', 'files: 999'],
       ['Размер файла\n\nфайла: 999 B.', 'файла: 999'],
       ['| Свойство | Значение |\n| --- | --- |\n| Размер | файла: 124044 B |\n| Корпус | files: 999 B |', 'files: 999'],
