@@ -157,6 +157,20 @@ export function capsuleWidthObservationChecks(before, after, width) {
   };
 }
 
+/** Переключение жеста может заменить DOM; наблюдаем текущие части по их identity. */
+export function readSemanticPartOpacities(root, partIds, style = globalThis.getComputedStyle) {
+  if (!partIds.length) throw new Error('explorer journey: missing semantic opacity targets');
+  return partIds.map(id => {
+    const part = root.querySelector(`[data-part="${id}"]`);
+    if (!part) throw new Error(`explorer journey: missing semantic opacity target ${id}`);
+    const raw = style(part).opacity, opacity = Number(raw);
+    if (typeof raw !== 'string' || !raw.trim() || !Number.isFinite(opacity) || opacity < 0 || opacity > 1) {
+      throw new Error(`explorer journey: unobserved opacity ${id}`);
+    }
+    return opacity;
+  });
+}
+
 /** Проверка настоящего consumer UI; в продукт и статический пакет не входит. */
 export async function runExplorerJourney() {
   const checks = [];
@@ -457,6 +471,7 @@ export async function runExplorerJourney() {
       check(`${name}/${variant}/triad-authored-paths`, JSON.stringify(paths(stage.querySelector('svg'))) === JSON.stringify(paths(master)));
       const parts = [...stage.querySelectorAll('[data-part]')];
       const dots = parts.filter(part => part.dataset.role === 'content');
+      const dotIds = dots.map(part => part.dataset.part);
       const shell = parts.find(part => part.dataset.role === 'container');
       const shellBefore = shell?.outerHTML;
       check(`${name}/${variant}/triad-stable-ids`, dots.map(part => part.dataset.part).join(',') === 'dot-leading,dot-middle,dot-trailing');
@@ -470,7 +485,7 @@ export async function runExplorerJourney() {
       q('play').click();
       await wait(() => Number(q('progress').value) > 0.12 && Number(q('progress').value) < 0.7, 'triad active phase');
       q('pause').click();
-      const opacity = () => dots.map(dot => Number(getComputedStyle(dot).opacity));
+      const opacity = () => readSemanticPartOpacities(stage, dotIds);
       const before = opacity();
       for (let count = 0; count < 8; count++) await frame();
       check(`${name}/${variant}/triad-pause`, before.every((value, index) => value === opacity()[index]));
@@ -486,7 +501,8 @@ export async function runExplorerJourney() {
       q('play').click();
       setReduced(true);
       await wait(() => Number(q('progress').value) === 1 && opacity().every(value => value === 1), 'idle terminal');
-      check(`${name}/${variant}/idle-restores-master`, opacity().every(value => value === 1) && (!shell || shell.outerHTML === shellBefore));
+      check(`${name}/${variant}/idle-restores-master`, opacity().every(value => value === 1) &&
+        (!shell || stage.querySelector(`[data-part="${shell.dataset.part}"]`)?.outerHTML === shellBefore));
       check(`${name}/${variant}/triad-paths-unchanged-after-motion`, JSON.stringify(paths(stage.querySelector('svg'))) === JSON.stringify(paths(master)));
     }
     await choose('chatbubble-ellipses', 'filled');
