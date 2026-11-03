@@ -32,8 +32,8 @@
   },
   "status-circle-state": {
    "entry": "import { renderStateSvg, compileStateEffect } from '@labpics/icons/states/status-circle';\nconsole.log(renderStateSvg('question'), compileStateEffect('confirmation', { duration: 180 }));\n",
-   "baselineBytes": 9196,
-   "baselineGzipBytes": 3821,
+   "baselineBytes": 9170,
+   "baselineGzipBytes": 3815,
    "maxBytes": 13175,
    "maxGzipBytes": 5515
   },
@@ -53,15 +53,15 @@
   },
   "status-circle-state-variation": {
    "entry": "import { renderStateSvg, compileStateEffect, renderEnclosurePatch } from '@labpics/icons/state-variations/status-circle';\nconsole.log(renderStateSvg('question'), compileStateEffect('confirmation', { duration: 180 }), renderEnclosurePatch({ variation: { enclosureEmphasis: 1.1 } }));\n",
-   "baselineBytes": 13990,
-   "baselineGzipBytes": 5282,
+   "baselineBytes": 13964,
+   "baselineGzipBytes": 5273,
    "maxBytes": 13990,
    "maxGzipBytes": 5282
   },
   "playback-circle-state-variation": {
    "entry": "import { renderStateSvg, compileStateEffect, renderEnclosurePatch } from '@labpics/icons/state-variations/playback-circle';\nconsole.log(renderStateSvg('play'), compileStateEffect('pause', { duration: 180 }), renderEnclosurePatch({ variation: { enclosureEmphasis: 1.1 } }));\n",
-   "baselineBytes": 10512,
-   "baselineGzipBytes": 3828,
+   "baselineBytes": 10486,
+   "baselineGzipBytes": 3821,
    "maxBytes": 10512,
    "maxGzipBytes": 3828
   },
@@ -74,8 +74,8 @@
   },
   "recorded-motion": {
    "entry": "import { glyph, glyphCapabilities } from '@labpics/icons/ir';\nimport { compileSymbolEffect } from '@labpics/icons/motion';\nconsole.log(compileSymbolEffect(glyph({ icon: 'time' }), glyphCapabilities('time'), 'time.advance', { duration: 400 }));\n",
-   "baselineBytes": 858097,
-   "baselineGzipBytes": 214613,
+   "baselineBytes": 863407,
+   "baselineGzipBytes": 216697,
    "maxBytes": 865952,
    "maxGzipBytes": 217706
   },
@@ -130,15 +130,15 @@
   },
   "varied-microphone": {
    "entry": "import { glyph } from '@labpics/icons/variations/mic';\nconsole.log(glyph({ variation: { bodyWidth: 0.9 } }));\n",
-   "baselineBytes": 27620,
-   "baselineGzipBytes": 8783,
+   "baselineBytes": 27018,
+   "baselineGzipBytes": 8749,
    "maxBytes": 27620,
    "maxGzipBytes": 8783
   },
   "varied-microphone-circle": {
    "entry": "import { glyph } from '@labpics/icons/variations/mic-circle';\nconsole.log(glyph({ variant: 'filled', variation: { bodyWidth: 0.8 } }));\n",
-   "baselineBytes": 24720,
-   "baselineGzipBytes": 9192,
+   "baselineBytes": 24118,
+   "baselineGzipBytes": 9164,
    "maxBytes": 24720,
    "maxGzipBytes": 9192
   },
@@ -169,6 +169,90 @@
    "baselineGzipBytes": 2926,
    "maxBytes": 7887,
    "maxGzipBytes": 2926
+  },
+  "gesture-refresh-svg": {
+   "entry": "import { renderMotionSvg } from '@labpics/icons/gestures/refresh';\nconsole.log(renderMotionSvg());\n",
+   "baselineBytes": 4748,
+   "baselineGzipBytes": 2381,
+   "maxBytes": 4748,
+   "maxGzipBytes": 2381
+  },
+  "gesture-refresh-effect": {
+   "entry": "import { compileMotionEffect } from '@labpics/icons/gestures/refresh';\nconsole.log(compileMotionEffect('refresh.cycle', { duration: 400 }));\n",
+   "baselineBytes": 3578,
+   "baselineGzipBytes": 1351,
+   "maxBytes": 3578,
+   "maxGzipBytes": 1351
+  },
+  "gesture-refresh-combined": {
+   "entry": "import { renderMotionSvg, compileMotionEffect } from '@labpics/icons/gestures/refresh';\nconsole.log(renderMotionSvg(), compileMotionEffect('refresh.cycle', { duration: 400 }));\n",
+   "baselineBytes": 7716,
+   "baselineGzipBytes": 3419,
+   "maxBytes": 7716,
+   "maxGzipBytes": 3419
+  },
+  "gesture-reload-svg": {
+   "entry": "import { renderMotionSvg } from '@labpics/icons/gestures/reload';\nconsole.log(renderMotionSvg());\n",
+   "baselineBytes": 3207,
+   "baselineGzipBytes": 1631,
+   "maxBytes": 3207,
+   "maxGzipBytes": 1631
+  },
+  "gesture-reload-effect": {
+   "entry": "import { compileMotionEffect } from '@labpics/icons/gestures/reload';\nconsole.log(compileMotionEffect('reload.cycle', { duration: 400 }));\n",
+   "baselineBytes": 3574,
+   "baselineGzipBytes": 1349,
+   "maxBytes": 3574,
+   "maxGzipBytes": 1349
+  },
+  "gesture-reload-combined": {
+   "entry": "import { renderMotionSvg, compileMotionEffect } from '@labpics/icons/gestures/reload';\nconsole.log(renderMotionSvg(), compileMotionEffect('reload.cycle', { duration: 400 }));\n",
+   "baselineBytes": 6171,
+   "baselineGzipBytes": 2650,
+   "maxBytes": 6171,
+   "maxGzipBytes": 2650
+  },
+  "gesture-reload-ir-reference": {
+   "entry": "import { glyph, glyphCapabilities } from '@labpics/icons/symbols/reload';\nimport { renderGlyphSvg } from '@labpics/icons/ir/render';\nimport { compileSymbolEffect } from '@labpics/icons/motion';\nconst value = glyph();\nconsole.log(renderGlyphSvg(value), compileSymbolEffect(value, glyphCapabilities(), 'reload.cycle', { duration: 400 }));\n",
+   "baselineBytes": 31702,
+   "baselineGzipBytes": 9756,
+   "maxBytes": 31702,
+   "maxGzipBytes": 9756
+  },
+  "gesture-refresh-ir-reference": {
+   "entry": "import { glyph, glyphCapabilities } from '@labpics/icons/symbols/refresh';\nimport { renderGlyphSvg } from '@labpics/icons/ir/render';\nimport { compileSymbolEffect } from '@labpics/icons/motion';\nconst value = glyph();\nconsole.log(renderGlyphSvg(value), compileSymbolEffect(value, glyphCapabilities(), 'refresh.cycle', { duration: 400 }));\n",
+   "baselineBytes": 33313,
+   "baselineGzipBytes": 10573,
+   "maxBytes": 33313,
+   "maxGzipBytes": 10573
+  },
+  "gesture-mic-width": {
+   "entry": "import { prepareBodyWidth } from '@labpics/icons/gestures/mic';\nconst result = prepareBodyWidth('filled');\nconsole.log(result.ok && result.prepared.sample(0.9));\n",
+   "baselineBytes": 10756,
+   "baselineGzipBytes": 4442,
+   "maxBytes": 10756,
+   "maxGzipBytes": 4442
+  },
+  "gesture-mic-width-capabilities": {
+   "entry": "import { motionCapabilities } from '@labpics/icons/gestures/mic';\nconsole.log(motionCapabilities());\n",
+   "baselineBytes": 4580,
+   "baselineGzipBytes": 2039,
+   "maxBytes": 4580,
+   "maxGzipBytes": 2039
+  },
+  "gesture-mic-circle-width": {
+   "entry": "import { prepareBodyWidth } from '@labpics/icons/gestures/mic-circle';\nconst result = prepareBodyWidth('filled');\nconsole.log(result.ok && result.prepared.sample(0.9));\n",
+   "baselineBytes": 13035,
+   "baselineGzipBytes": 4668,
+   "maxBytes": 13035,
+   "maxGzipBytes": 4668
+  },
+  "gesture-mic-circle-width-capabilities": {
+   "entry": "import { motionCapabilities } from '@labpics/icons/gestures/mic-circle';\nconsole.log(motionCapabilities());\n",
+   "baselineBytes": 4591,
+   "baselineGzipBytes": 2134,
+   "maxBytes": 4591,
+   "maxGzipBytes": 2134
   }
  }
 }
