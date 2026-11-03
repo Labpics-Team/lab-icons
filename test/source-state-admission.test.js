@@ -15,8 +15,9 @@ const read = file => JSON.parse(readFileSync(new URL(file, new URL('..', import.
 const captured = read('semantics/author-state-groups.json');
 const document = { ...captured, groups: Object.fromEntries(Object.entries(captured.groups)
   .filter(([, group]) => group.law === 'source.replace')) };
-const groupNames = ['microphone', 'microphone-filled', 'visibility', 'visibility-filled'];
-const names = ['mic', 'mic-off', 'eye', 'eye-off'];
+const groupNames = ['microphone', 'microphone-filled', 'microphone-presentation', 'microphone-presentation-filled',
+  'plus-presentation', 'plus-presentation-filled', 'visibility', 'visibility-filled'];
+const names = [...new Set(Object.values(document.groups).flatMap(group => Object.values(group.states).map(state => state.icon)))];
 const manifest = read('semantics/figma-baseline.json');
 const baseline = loadAuthorBaseline(root, { manifest: { ...manifest,
   counts: { families: names.length, variants: names.length * 2 },

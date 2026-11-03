@@ -316,6 +316,111 @@
           ]
         }
       }
+    },
+    "microphone-presentation": {
+      "law": "source.replace",
+      "defaultState": "plain",
+      "sharedParts": [],
+      "states": {
+        "plain": {
+          "icon": "mic",
+          "variant": "outline",
+          "masterSha256": "c526c734a2225a29ec6e71f76d860546f5bccf8475bad6e1842915a75f2a5f9c",
+          "pathFingerprintSha256": "f7451fdcb743aaff3832866caea46af111a8d7ea39283472787996dc212978a6",
+          "contentPartIds": [
+            "plain-microphone-support",
+            "plain-microphone-body"
+          ]
+        },
+        "circle": {
+          "icon": "mic-circle",
+          "variant": "outline",
+          "masterSha256": "86a0ac827fea4a8294c35332ec606f1f9b992f28e28660af12c72eddce3c2d32",
+          "pathFingerprintSha256": "04e69ba05e75395f552b6828dc12caf853f452bab30c81aa572392468efc2cc6",
+          "contentPartIds": [
+            "circle-microphone-support",
+            "circle-microphone-body",
+            "circle-microphone-enclosure"
+          ]
+        }
+      }
+    },
+    "microphone-presentation-filled": {
+      "law": "source.replace",
+      "defaultState": "plain",
+      "sharedParts": [],
+      "states": {
+        "plain": {
+          "icon": "mic",
+          "variant": "filled",
+          "masterSha256": "e0efa7ec88dfdd01862ffd1b508de9b0789528046fb1b9d00442b9cdac093029",
+          "pathFingerprintSha256": "1cc371d2b7a2c52310e784e36b9827c4d50a245343b8f477e307fad650a28f6f",
+          "contentPartIds": [
+            "plain-microphone-support",
+            "plain-microphone-body"
+          ]
+        },
+        "circle": {
+          "icon": "mic-circle",
+          "variant": "filled",
+          "masterSha256": "a2b2c05074d1a8b791e1a31962c7c57658184cf7b16b737efedbed2cf792d8a7",
+          "pathFingerprintSha256": "2ab6c70b6036f654a3ef5f332a2a283509dadab0ccabd01f324a0ab3b7950ed9",
+          "contentPartIds": [
+            "circle-microphone-artwork"
+          ]
+        }
+      }
+    },
+    "plus-presentation": {
+      "law": "source.replace",
+      "defaultState": "plain",
+      "sharedParts": [],
+      "states": {
+        "plain": {
+          "icon": "plus",
+          "variant": "outline",
+          "masterSha256": "2501dc96515888becba19811807b83468f2edd5593eaa0ff2aea52ff4bd92162",
+          "pathFingerprintSha256": "688972131d171ef79d1ef255a5b375deab4014e58a73b432707bc9202ad01fda",
+          "contentPartIds": [
+            "plain-plus-mark"
+          ]
+        },
+        "circle": {
+          "icon": "plus-circle",
+          "variant": "outline",
+          "masterSha256": "1187b32d965b0d97f97dae969f8d62c9e573757b9588341d41368657bd6dde54",
+          "pathFingerprintSha256": "052020c37b091e1697ce6f7bcae632fdcc5a220150a0ffcbaee5e2ad9a9360c2",
+          "contentPartIds": [
+            "circle-plus-mark",
+            "circle-plus-enclosure"
+          ]
+        }
+      }
+    },
+    "plus-presentation-filled": {
+      "law": "source.replace",
+      "defaultState": "plain",
+      "sharedParts": [],
+      "states": {
+        "plain": {
+          "icon": "plus",
+          "variant": "filled",
+          "masterSha256": "dbbcbd8f5bd8e496432ff54827ede38fa7249a0629b908e6a6ae963200e7ea91",
+          "pathFingerprintSha256": "17d4b502ad319997fbe603ba23d695d96001f2f5d560e5fb05fa08665aa51650",
+          "contentPartIds": [
+            "plain-plus-mark"
+          ]
+        },
+        "circle": {
+          "icon": "plus-circle",
+          "variant": "filled",
+          "masterSha256": "f5d09b415f4d61fe92077f6fd73b3809323e1dd326a66351fc4ba8f4a881f565",
+          "pathFingerprintSha256": "1c379b118aea7bfffb63ca32365a426cad7b43148325386ece2c00b35e158feb",
+          "contentPartIds": [
+            "circle-plus-artwork"
+          ]
+        }
+      }
     }
   }
 }

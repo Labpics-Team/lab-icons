@@ -15,6 +15,8 @@ const root = fileURLToPath(new URL('..', import.meta.url));
 const read = file => JSON.parse(readFileSync(join(root, file), 'utf8'));
 const captured = read('semantics/author-state-groups.json');
 const document = { ...captured, groups: Object.fromEntries(Object.entries(captured.groups).filter(([, group]) => group.law === 'source.replace')) };
+const groupNames = ['microphone', 'microphone-filled', 'microphone-presentation', 'microphone-presentation-filled',
+  'plus-presentation', 'plus-presentation-filled', 'visibility', 'visibility-filled'];
 const names = [...new Set(Object.values(document.groups).flatMap(group => Object.values(group.states).map(state => state.icon)))];
 const manifest = read('semantics/figma-baseline.json');
 const baseline = loadAuthorBaseline(root, { manifest: { ...manifest,
@@ -57,8 +59,8 @@ describe('точная замена авторских состояний', () =
     }
   });
 
-  it('два настоящих семейства и оба начертания проходят общий закон без вымышленной оболочки', () => {
-    expect(Object.keys(document.groups).sort()).toEqual(['microphone', 'microphone-filled', 'visibility', 'visibility-filled']);
+  it('все авторские state и presentation пары проходят общий закон без вымышленной оболочки', () => {
+    expect(Object.keys(document.groups).sort()).toEqual([...groupNames].sort());
     const payloads = compile();
     for (const [name, payload] of Object.entries(payloads)) {
       expect(payload.proof.law).toBe('source.replace');
@@ -75,7 +77,7 @@ describe('точная замена авторских состояний', () =
     }
   });
 
-  it.each(['microphone', 'microphone-filled', 'visibility', 'visibility-filled'])('%s: endpoint, takeover, экспорт и отказ остаются одним installed протоколом', async name => {
+  it.each(groupNames)('%s: endpoint, takeover, экспорт и отказ остаются одним installed протоколом', async name => {
     const payload = compile()[name];
     const { api, source } = await importGroup(payload);
     expect(Object.keys(api).sort()).toEqual(read('release/export-surface.json')[`./states/${name}`]);

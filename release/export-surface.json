@@ -1970,7 +1970,35 @@
     "renderStateSvg",
     "stateCapabilities"
   ],
+  "./states/microphone-presentation": [
+    "compileStateEffect",
+    "exportStateTransition",
+    "render",
+    "renderStateSvg",
+    "stateCapabilities"
+  ],
+  "./states/microphone-presentation-filled": [
+    "compileStateEffect",
+    "exportStateTransition",
+    "render",
+    "renderStateSvg",
+    "stateCapabilities"
+  ],
   "./states/playback-circle": [
+    "compileStateEffect",
+    "exportStateTransition",
+    "render",
+    "renderStateSvg",
+    "stateCapabilities"
+  ],
+  "./states/plus-presentation": [
+    "compileStateEffect",
+    "exportStateTransition",
+    "render",
+    "renderStateSvg",
+    "stateCapabilities"
+  ],
+  "./states/plus-presentation-filled": [
     "compileStateEffect",
     "exportStateTransition",
     "render",

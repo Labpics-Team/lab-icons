@@ -45,6 +45,31 @@ nodes. Новый control принимает видимую смесь пере�
 «Включить микрофон», а декоративный SVG получает `aria-hidden="true"`.
 Состояние рисунка не включает реальное аудио и не изменяет права доступа.
 
+## Перейти к варианту в круге
+
+Тот же API принимает `plain` и `circle` в группах `microphone-presentation` и
+`plus-presentation`; суффикс `-filled` выбирает независимое Filled-начертание.
+Например:
+
+```js
+import { renderStateSvg, compileStateEffect } from '@labpics/icons/states/microphone-presentation';
+
+const mounted = renderStateSvg('plain');
+const transition = compileStateEffect('circle', { duration: 180 });
+```
+
+Оба конечных рисунка точно сохраняют соответствующий авторский master. Корпус,
+подставка и контрформы отличаются между контекстами, поэтому переход меняет
+композицию двух mounted групп. Он не обещает morph или неизменную общую часть.
+Имена состояний и effect protocol одинаковы для обоих семейств; приложение
+выбирает представление и передаёт эффект публичному исполнителю Motion.
+
+Самостоятельные `@labpics/icons/variations/mic` и `mic-circle` сохраняют ось
+`bodyWidth`. Совмещение этой оси с presentation-переходом ещё не принято:
+запрос `variation` в state API получает `VARIATION_UNSUPPORTED`. После отказа
+сохраняйте текущий рисунок. Эта поставка не является генератором круга для
+произвольной иконки.
+
 ## Проверить поддержку перед применением
 
 `stateCapabilities()` возвращает states с author provenance, начертание,
