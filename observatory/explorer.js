@@ -20,7 +20,7 @@ function displayStyle() {
 }
 
 const $ = (selector) => document.querySelector(selector);
-const ui = Object.fromEntries(['symbol-search', 'variant', 'symbol-grid', 'more-symbols', 'empty-search', 'corpus-count', 'visible-count', 'symbol-inspector', 'symbol-name', 'model-status', 'symbol-stage', 'size-samples', 'source-status', 'axis-controls', 'axis-status', 'parts', 'gesture', 'play', 'reverse', 'pause', 'progress', 'progress-label', 'gesture-progress-control', 'state-group-controls', 'state-choices', 'state-choice-label', 'reduce-motion', 'motion-status', 'consumer-import', 'export-format', 'export', 'export-status'].map((id) => [id, $(`#${id}`)]));
+const ui = Object.fromEntries(['symbol-search', 'variant', 'symbol-grid', 'more-symbols', 'empty-search', 'corpus-count', 'visible-count', 'symbol-inspector', 'symbol-name', 'model-status', 'symbol-stage', 'size-samples', 'source-status', 'axis-controls', 'axis-status', 'parts', 'gesture', 'state-family-control', 'state-family', 'play', 'reverse', 'pause', 'progress', 'progress-label', 'gesture-progress-control', 'state-group-controls', 'state-choices', 'state-choice-label', 'reduce-motion', 'motion-status', 'consumer-import', 'export-format', 'export', 'export-status'].map((id) => [id, $(`#${id}`)]));
 const reducedPreference = matchMedia('(prefers-reduced-motion: reduce)');
 const loadStatus = document.querySelector('#load-status');
 function loadMessage(message = '') {
@@ -58,7 +58,7 @@ function updateVariationStatus() {
 const REPLACEMENT_GESTURE = 'enclosure.replace';
 const stateLabels = Object.freeze({ confirmation: 'Подтверждение', dismissal: 'Закрыть',
   question: 'Вопрос', attention: 'Внимание', increase: 'Добавить', decrease: 'Убрать',
-  play: 'Воспроизвести', pause: 'Приостановить',
+  play: 'Воспроизвести', pause: 'Приостановить', plain: 'Без обрамления', circle: 'В круге',
   unmuted: 'Микрофон включён', muted: 'Микрофон выключен', visible: 'Видимо', hidden: 'Скрыто',
   aloof: 'Сдержанное выражение', sad: 'Грустное выражение', smile: 'Улыбка' });
 const orientationLabels = Object.freeze({ horizontal: 'Горизонтально', vertical: 'Вертикально' });
@@ -71,6 +71,25 @@ const replacementViewAvailable = view => view === 'original' ||
 const replacementMode = () => Boolean(state.replacement && ui.gesture.value === stateGesture(state.replacement) &&
   replacementViewAvailable(state.view) && !state.legacy);
 const replacementMember = () => state.replacement?.capabilities.states.find(member => member.id === state.replacement.target);
+
+function stateMemberships(name, variant) {
+  return state.data.stateGroups?.filter(group => group.members.some(member => member.icon === name && member.variant === variant)) ?? [];
+}
+
+function stateFamilyLabel(group) {
+  const states = new Set(group.members.map(member => member.state));
+  if (states.has('plain') && states.has('circle')) return 'Обрамление';
+  if (states.has('unmuted') && states.has('muted')) return 'Включение';
+  if (states.has('confirmation') && states.has('dismissal')) return 'Знак';
+  return [...states].map(stateLabel).join(' / ');
+}
+
+function updateStateFamilyChoices(memberships, membership) {
+  ui['state-family'].replaceChildren(...memberships.map(group => new Option(stateFamilyLabel(group), group.group)));
+  ui['state-family'].value = membership?.group ?? '';
+  ui['state-family'].disabled = memberships.length < 2;
+  ui['state-family-control'].hidden = memberships.length < 2;
+}
 
 function enclosurePatch(view = state.view, variation = state.variation) {
   const group = state.replacement;
@@ -584,7 +603,10 @@ function motionChoices() {
   replacementChoices();
 }
 
-async function select(name, { reveal = false } = {}) {
+async function select(name, { reveal = false, stateGroup = null } = {}) {
+  const memberships = stateMemberships(name, ui.variant.value);
+  const membership = stateGroup === null ? memberships[0] : memberships.find(group => group.group === stateGroup);
+  if (stateGroup !== null && !membership) throw new Error('Группа недоступна для выбранного символа и начертания.');
   stop();
   state.name = name;
   state.variant = ui.variant.value;
@@ -614,12 +636,13 @@ async function select(name, { reveal = false } = {}) {
   loadMessage();
   ui.progress.value = '0';
   clearInspector('Загрузка…');
+  // Другую группу можно выбрать и во время import; revision сохраняет новое намерение.
+  updateStateFamilyChoices(memberships, membership);
   inspectorBusy(true);
   ui['source-status'].textContent = 'Загружается авторский SVG.';
   ui['symbol-stage'].textContent = 'Загрузка…';
   grid();
   try {
-    const membership = state.data.stateGroups?.find(group => group.members.some(member => member.icon === name && member.variant === state.variant));
     const namespace = state.data.variationIconIds.includes(name) ? 'variations' : 'symbols';
     const [module, response, replacementModule, variationModule, motionModule] = await Promise.all([
       import(`./package/${namespace}/${name}.js`),
@@ -855,6 +878,9 @@ ui['symbol-search'].addEventListener('input', () => { state.limit = 48; grid(); 
 displaySize.addEventListener('input', displayStyle);
 displayColor.addEventListener('input', displayStyle);
 ui.variant.addEventListener('change', () => select(state.name));
+ui['state-family'].addEventListener('change', () => {
+  select(state.name, { stateGroup: ui['state-family'].value }).catch(error => loadMessage(error.message));
+});
 ui['more-symbols'].addEventListener('click', () => { state.limit += 48; grid(); });
 ui.gesture.addEventListener('change', () => state.replacement ? renderView(state.view) : updateMotionControls());
 for (const button of document.querySelectorAll('button[data-view]')) button.addEventListener('click', () => renderView(button.dataset.view, { preserveProgress: Boolean(variationAvailable()) }));

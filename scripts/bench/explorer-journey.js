@@ -1471,6 +1471,57 @@ export async function runExplorerJourney() {
     check('replacement-filled-unavailable', q('state-group-controls').hidden &&
       ![...q('gesture').options].some(option => option.value === 'enclosure.replace'));
 
+    for (const variant of ['outline', 'filled']) for (const name of ['mic', 'plus-circle']) {
+      await choose(name, variant);
+      const memberships = data.stateGroups.filter(group => group.members.some(member => member.icon === name && member.variant === variant));
+      const presentation = memberships.find(group => group.members.some(member => member.state === 'plain') &&
+        group.members.some(member => member.state === 'circle'));
+      const id = `presentation/${name}/${variant}`;
+      check(`${id}/all-memberships-accessible`, memberships.length > 0 &&
+        q('state-family-control').hidden === (memberships.length < 2) &&
+        q('state-family').disabled === (memberships.length < 2) &&
+        q('state-family').parentElement.textContent.startsWith('Варианты') &&
+        JSON.stringify([...q('state-family').options].map(option => option.value)) === JSON.stringify(memberships.map(group => group.group)));
+      if (memberships.length > 1) {
+        q('state-family').value = presentation.group;
+        q('state-family').dispatchEvent(new Event('change', { bubbles: true }));
+        await settle(name);
+      } else {
+        check(`${id}/single-group-already-selected`, memberships[0].group === presentation.group &&
+          q('state-family').value === presentation.group);
+      }
+      const module = await import(`./package/states/${presentation.group}.js`);
+      const caps = module.stateCapabilities();
+      check(`${id}/selected-public-group`, q('consumer-import').textContent.includes(`/states/${presentation.group}'`) &&
+        q('gesture').value === 'source.replace' && !q('state-group-controls').hidden);
+      const mounted = [...q('symbol-stage').querySelectorAll('[data-part]')];
+      setReduced(true);
+      for (const target of ['plain', 'circle']) {
+        const choice = q('state-choices').querySelector(`[data-state-target="${target}"]`);
+        const label = target === 'plain' ? 'Без обрамления' : 'В круге';
+        check(`${id}/${target}/accessible-choice`, choice?.getAttribute('aria-label') === label && choice.title === label);
+        choice.click();
+        await wait(() => q('state-choice-label').textContent === label && q('pause').disabled, `${id}/${target} terminal`);
+        check(`${id}/${target}/reduced-motion-keeps-mounted`, mounted.every((node, index) =>
+          q('symbol-stage').querySelectorAll('[data-part]')[index] === node) && caps.states.every(member => {
+          const node = q('symbol-stage').querySelector(`[data-part="${member.partId}"]`);
+          return node && Number(getComputedStyle(node).opacity) === (member.id === target ? 1 : 0);
+        }));
+        const member = caps.states.find(member => member.id === target);
+        const row = data.rows.find(row => row.name === member.icon && row.variant === variant);
+        const response = await originalFetch(row.views.master);
+        if (!response.ok) throw new Error(`explorer journey: ${id}/${target} master HTTP ${response.status}`);
+        const master = new DOMParser().parseFromString(await response.text(), 'image/svg+xml').documentElement;
+        const before = downloads.length;
+        q('export-format').value = 'svg'; q('export').click();
+        const artifact = downloads.at(-1);
+        check(`${id}/${target}/exact-author-export`, downloads.length === before + 1 &&
+          artifact.filename === `${presentation.group}-${target}-${variant}.svg` &&
+          JSON.stringify(paths(new DOMParser().parseFromString(await artifact.blob.text(), 'image/svg+xml').documentElement)) === JSON.stringify(paths(master)));
+        authority.push({ name: member.icon, variant, author: member.author, presentationGroup: caps.group });
+      }
+    }
+
     await choose('time', 'outline');
     check('latest-clock-motion-refuses', q('play').disabled && q('gesture').value === '');
     await choose('reload', 'outline');
@@ -1544,9 +1595,11 @@ export async function verifyLazyPause({ page, origin }) {
 
 /** Старый state-module может завершиться после нового выбора; он не владеет inspector. */
 export async function verifyLazyStateSelection({ page, origin }) {
-  let release, signalRequested, timeout;
+  let release, releaseFamily, signalRequested, signalFamilyRequested, timeout;
   const held = new Promise(resolve => { release = resolve; });
   const requested = new Promise(resolve => { signalRequested = resolve; });
+  const heldFamily = new Promise(resolve => { releaseFamily = resolve; });
+  const familyRequested = new Promise(resolve => { signalFamilyRequested = resolve; });
   await page.route('**/package/states/status-circle.js', async route => {
     signalRequested();
     await held;
@@ -1572,11 +1625,40 @@ export async function verifyLazyStateSelection({ page, origin }) {
       await page.locator('#symbol-stage').innerHTML() === before &&
       await page.locator('#state-group-controls').isHidden();
     if (!preserved) throw new Error('late state module replaced the newer selection');
-    return { pass: true, requested: true, preservedSelection: 'reload', preservedDom: true };
+    await page.route('**/package/states/microphone-presentation.js', async route => {
+      signalFamilyRequested();
+      await heldFamily;
+      await route.continue();
+    });
+    await page.locator('#symbol-search').fill('mic');
+    await page.locator('[data-symbol="mic"]').click();
+    await page.locator('#symbol-inspector[aria-busy="false"]').waitFor();
+    await page.locator('#state-family').selectOption('microphone-presentation');
+    await Promise.race([familyRequested, new Promise((_, reject) => {
+      timeout = setTimeout(() => reject(new Error('presentation group module was not requested')), 4000);
+    })]);
+    clearTimeout(timeout);
+    await page.locator('#state-family').selectOption('microphone');
+    await page.locator('#symbol-inspector[aria-busy="false"]').waitFor();
+    const currentFamilyDom = await page.locator('#symbol-stage').innerHTML();
+    releaseFamily();
+    await page.evaluate(async () => {
+      await import('/package/states/microphone-presentation.js');
+      for (let index = 0; index < 2; index++) await new Promise(resolve => requestAnimationFrame(resolve));
+    });
+    const familyPreserved = await page.locator('#state-family').inputValue() === 'microphone' &&
+      await page.locator('#symbol-stage').innerHTML() === currentFamilyDom &&
+      await page.locator('#state-choices [data-state-target="unmuted"]').count() === 1 &&
+      await page.locator('#state-choices [data-state-target="plain"]').count() === 0;
+    if (!familyPreserved) throw new Error('late presentation group replaced the newer family selection');
+    return { pass: true, requested: true, preservedSelection: 'reload', preservedDom: true,
+      familySelection: { requested: 'microphone-presentation', preserved: 'microphone', preservedDom: true } };
   } finally {
     clearTimeout(timeout);
     release();
+    releaseFamily();
     await page.unroute('**/package/states/status-circle.js');
+    await page.unroute('**/package/states/microphone-presentation.js');
   }
 }
 
