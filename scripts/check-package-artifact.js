@@ -109,6 +109,8 @@ export function stateTypeConsumerSource(expected, { dynamicImport = false } = {}
     const state = JSON.stringify(group.defaultState);
     const foreign = allStates.find(id => !states.includes(id));
     const contour = group.law === 'dots.orient';
+    const sourceReplacement = group.law === 'source.replace';
+    const admittedVariant = sourceReplacement ? group.states[0].variant : 'filled';
     return [
       dynamicImport ? `const ${module} = await import(${path});` : `import * as ${module} from ${path};`,
       `type ${stateType} = import(${path}).State;`,
@@ -142,9 +144,13 @@ export function stateTypeConsumerSource(expected, { dynamicImport = false } = {}
         `${module}.render(defaultState${index}, { variation: { radius: 1 } });`,
         `void rounding${index};`,
       ] : []),
-      // Filled — допустимый запрос с typed runtime refusal, не ошибка типов.
-      `const filled${index} = ${module}.render(defaultState${index}, { variant: 'filled' });`,
-      `if (!filled${index}.ok) { const code: string = filled${index}.reason.code; void code; }`,
+      // Проверяем начертание, закреплённое за группой source.replace.
+      `const variantResult${index} = ${module}.render(defaultState${index}, { variant: ${JSON.stringify(admittedVariant)} });`,
+      `if (!variantResult${index}.ok) { const code: string = variantResult${index}.reason.code; void code; }`,
+      ...(sourceReplacement ? [
+        `// @ts-expect-error другое начертание не входит в самостоятельный source entrypoint`,
+        `${module}.render(defaultState${index}, { variant: ${JSON.stringify(admittedVariant === 'outline' ? 'filled' : 'outline')} });`,
+      ] : []),
       `// @ts-expect-error неизвестный semantic state не входит в точный union`,
       `const invalidState${index}: ${stateType} = '__unsupported_state__';`,
       `// @ts-expect-error unknown state не принимается публичным render`,
@@ -174,7 +180,7 @@ export function stateTypeConsumerSource(expected, { dynamicImport = false } = {}
         `${module}.render(${JSON.stringify(foreign)});`,
         `void foreignState${index};`,
       ]),
-      `void [defaultState${index}, defaultSvg${index}, defaultMount${index}, exactState${index}, invalidState${index}, filled${index}];`,
+      `void [defaultState${index}, defaultSvg${index}, defaultMount${index}, exactState${index}, invalidState${index}, variantResult${index}];`,
       '',
     ].join('\n');
   }).join('\n');
