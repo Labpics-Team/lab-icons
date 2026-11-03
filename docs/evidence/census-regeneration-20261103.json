@@ -1,0 +1,154 @@
+{
+  "source": "599f91308ee00356b89fab4d84a3c7913bab0357",
+  "current": "599f91308ee00356b89fab4d84a3c7913bab0357",
+  "job": {
+    "conclusion": "failure",
+    "head_sha": "599f91308ee00356b89fab4d84a3c7913bab0357",
+    "id": 125757048688,
+    "labels": [
+      "ubuntu-latest"
+    ],
+    "run_id": 41587574307,
+    "runner_group_name": "GitHub Actions",
+    "runner_name": "GitHub Actions 1000050531"
+  },
+  "generatedSha256": "0b3ccff1b8e2ebfa68a84b8395fa82888967e8f6af5fe83a3e28f79aa9b290e4",
+  "generatedBytes": 5387,
+  "changes": [
+    {
+      "path": "bundle.totalBytes",
+      "before": 797784,
+      "after": 379932
+    },
+    {
+      "path": "bundle.modules.0.path",
+      "before": "semantics/catalog.json",
+      "after": "src/ir/index.ts"
+    },
+    {
+      "path": "bundle.modules.0.bytes",
+      "before": 593072,
+      "after": 379818
+    },
+    {
+      "path": "bundle.modules.1.bytes",
+      "before": 49591,
+      "after": 34
+    },
+    {
+      "path": "bundle.modules.2.path",
+      "before": "src/core/anatomy-gen.js",
+      "after": "src/ir/catalog.generated.ts"
+    },
+    {
+      "path": "bundle.modules.2.bytes",
+      "before": 48413,
+      "after": 31
+    },
+    {
+      "path": "bundle.modules.3.path",
+      "before": "src/ir/index.ts",
+      "after": "semantics/catalog.json"
+    },
+    {
+      "path": "bundle.modules.3.bytes",
+      "before": 23235,
+      "after": 26
+    },
+    {
+      "path": "bundle.modules.4.path",
+      "before": "src/core/circle-dictionary.js",
+      "after": "semantics/grid.json"
+    },
+    {
+      "path": "bundle.modules.4.bytes",
+      "before": 22043,
+      "after": 23
+    },
+    {
+      "path": "bundle.modules.5",
+      "before": {
+        "path": "src/core/calendar-geometry.js",
+        "bytes": 16474
+      }
+    },
+    {
+      "path": "bundle.modules.6",
+      "before": {
+        "path": "src/core/icon-geometry.js",
+        "bytes": 13813
+      }
+    },
+    {
+      "path": "bundle.modules.7",
+      "before": {
+        "path": "src/core/path-data.js",
+        "bytes": 10648
+      }
+    },
+    {
+      "path": "bundle.modules.8",
+      "before": {
+        "path": "src/core/glyph-operators.js",
+        "bytes": 5643
+      }
+    },
+    {
+      "path": "bundle.modules.9",
+      "before": {
+        "path": "semantics/grid.json",
+        "bytes": 5314
+      }
+    },
+    {
+      "path": "bundle.modules.10",
+      "before": {
+        "path": "src/ir/catalog.generated.ts",
+        "bytes": 3594
+      }
+    },
+    {
+      "path": "bundle.modules.11",
+      "before": {
+        "path": "src/ir/sha256.ts",
+        "bytes": 3067
+      }
+    },
+    {
+      "path": "bundle.modules.12",
+      "before": {
+        "path": "src/core/motion-sampler.js",
+        "bytes": 2724
+      }
+    },
+    {
+      "path": "bundle.modules.13",
+      "before": {
+        "path": "src/ir/recipes.ts",
+        "bytes": 86
+      }
+    },
+    {
+      "path": "bundle.modules.14",
+      "before": {
+        "path": "src/ir/index.ts",
+        "bytes": 67
+      }
+    },
+    {
+      "path": "consumerBudgets.glyphRuntime.raw",
+      "before": 797784,
+      "after": 379932
+    },
+    {
+      "path": "consumerBudgets.glyphRuntime.gzip",
+      "before": 120508,
+      "after": 74017
+    },
+    {
+      "path": "consumerBudgets.glyphRuntime.note",
+      "before": "один glyph() тянет весь IR-бандл: JSON-данные доминируют — кандидат на split/lazy в REL-волне",
+      "after": "полный @labpics/icons/ir entrypoint: размер файла, не транзитивный footprint одного consumer"
+    }
+  ]
+}
