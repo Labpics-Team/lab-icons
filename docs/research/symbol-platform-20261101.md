@@ -136,6 +136,25 @@ Native `./waapi` остаётся альтернативой, но добави�
 reduced-motion handling. Multipoint root sequence использует scheduler;
 compositor-only claim поэтому не делается.
 
+## Групповой запуск простых rotations · 2026-11-03
+
+Адаптер benchmark вызывал `animate` отдельно для каждой части каждого SVG.
+В [опубликованном Motion 0.5.0](https://registry.npmjs.org/@labpics/motion/-/motion-0.5.0.tgz)
+`animate(list)` подготавливает весь список до commit. [Runtime исходника этого выпуска](https://github.com/Labpics-Team/lab-motion/blob/68825562824353bca377e00a3107895796229ff4/src/motion/runtime.ts)
+сохраняет native playback для linear rotate; `sequence` очищает этот fast path.
+Поэтому выбран один `animate(list)` на semantic part, после подготовки styles
+всей сцены. Part IDs, anchors и геометрия остаются данными Icons, исполнение — Motion.
+
+Ограниченный style host с проверенным SHA512 tarball отличил варианты на трёх экземплярах:
+шесть отдельных вызовов дают шесть computed-style read после прежней записи,
+два групповых — два; оба вызывают native playback host шесть раз и достигают тех же targets.
+Общий sequence даёт один такой барьер, но не создаёт native effects в этом runtime.
+Это соответствует [правилу разделять чтение и запись](https://web.dev/articles/avoid-large-complex-layouts-and-layout-thrashing).
+Прерывание подхватывает текущую scalar pose; reduced motion сразу достигает цели,
+а отказ следующей группы останавливает уже принятую. Эти controls не измеряют
+browser layout, GPU или количественную причину задержки. Прежний незавершённый
+report сохранён; speedup требует нового сопоставимого self-hosted измерения.
+
 ## Ограничения исследования
 
 Primary Apple HIG/annotation страницам clean-text fetch вернул только оболочку. Конкретные Draw/annotation/enclosure assertions выше взяты из полного официального WWDC25 transcript и current SF Symbols overview. Полный экспорт закреплённой Figma-версии сохранён в [авторской основе](../evidence/figma-20261101.md). Полная оптическая приёмка, runtime performance и target fidelity остаются открытыми; внешние источники не подменяют их проверку.

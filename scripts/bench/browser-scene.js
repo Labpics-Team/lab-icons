@@ -105,6 +105,39 @@ export async function measureScene(create, count, cold) {
     ...(coldTiming ? { coldImportMs: coldTiming.coldImportMs, coldImportToUsefulRenderMs: coldTiming.coldImportToUsefulRenderMs, coldTiming } : {}) };
 }
 
+/** Styles всей сцены подготовлены до Motion; каждый part использует его native-capable list API. */
+export function executeLabMotion(animate, roots, effect) {
+  const batches = effect.targets.map(target => ({
+    target,
+    elements: roots.map(root => {
+      const element = root.querySelector(`[data-part="${target.partId}"]`);
+      if (!element) throw new Error('consumer: не найден semantic part');
+      return element;
+    }),
+  }));
+  for (const { target, elements } of batches) {
+    for (const element of elements) Object.assign(element.style, target.style);
+  }
+  const controls = [];
+  try {
+    for (const { target, elements } of batches) {
+      controls.push(animate(elements, { rotate: target.rotation.to }, {
+        duration: effect.options.duration,
+        ease: effect.options.easing,
+        reducedMotion: effect.options.duration === 0 ? 'always' : 'user',
+      }));
+    }
+  } catch (error) {
+    const errors = [error];
+    for (const control of controls) {
+      try { control.stop(); } catch (cleanupError) { errors.push(cleanupError); }
+    }
+    if (errors.length > 1) throw new AggregateError(errors, 'consumer: Motion admission и cleanup отказали');
+    throw error;
+  }
+  return controls;
+}
+
 /** Обычный WAAPI исполняет данные Lab Icons; движение не сравнивается с отсутствующим baseline API. */
 export async function measureMotion({ glyph, glyphCapabilities, renderGlyphSvg, compileSymbolEffect, executeLabMotion }, count, executor) {
   const stage = document.getElementById('stage');
@@ -134,8 +167,7 @@ export async function measureMotion({ glyph, glyphCapabilities, renderGlyphSvg, 
   const observerCounts = { attributes: 0, childList: 0 };
   const observer = new MutationObserver(records => records.forEach(record => observerCounts[record.type]++));
   observer.observe(stage, { childList: true, attributes: true, subtree: true });
-  const execute = data => roots.flatMap(root => {
-    if (executor === 'lab-motion') return executeLabMotion(root, data);
+  const execute = data => executor === 'lab-motion' ? executeLabMotion(roots, data) : roots.flatMap(root => {
     return data.targets.map(target => {
       const element = root.querySelector(`[data-part="${target.partId}"]`);
       Object.assign(element.style, target.style);
