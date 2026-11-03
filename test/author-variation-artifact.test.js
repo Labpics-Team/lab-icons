@@ -2,7 +2,7 @@ import { spawnSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { build } from 'esbuild';
 import { authorPackageExpectations } from '../scripts/check-package-artifact.js';
@@ -41,6 +41,7 @@ function runConsumer({ expectations = expected } = {}) {
   writeFileSync(join(directory, 'author-expected.json'), JSON.stringify(expectations));
   const source = `import { readFileSync } from 'node:fs';
 import { compileSymbolEffect } from '@labpics/icons/motion';
+import { observeAuthorGlyph } from ${JSON.stringify(pathToFileURL(join(root, 'scripts/bench/author-oracle.js')).href)};
 ${authorVariationArtifactConsumerSource()}
 const expectedSymbols = JSON.parse(readFileSync(new URL('./author-expected.json', import.meta.url), 'utf8'));
 for (const [icon, variants] of Object.entries(expectedSymbols)) {
@@ -48,7 +49,7 @@ for (const [icon, variants] of Object.entries(expectedSymbols)) {
   ${authorVariationFamilyConsumerSource()}
   for (const [variant, expected] of Object.entries(variants)) {
     const current = symbol.glyph({ variant }), capabilities = symbol.glyphCapabilities(variant);
-    verifyInstalledAuthorVariation({ icon, variant, expected, familyVariation, current, capabilities, symbol, variable, lottie: lottieVariation, compileSymbolEffect });
+    verifyInstalledAuthorVariation({ icon, variant, expected, familyVariation, current, capabilities, symbol, variable, lottie: lottieVariation, compileSymbolEffect, observeAuthorGlyph });
   }
 }
 console.log('author variation installed consumer PASS');

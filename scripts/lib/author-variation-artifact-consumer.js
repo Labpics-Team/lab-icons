@@ -1,5 +1,5 @@
-/** Встраивается целиком в installed consumer; зависимости приходят из public exports. */
-export function verifyInstalledAuthorVariation({ icon, variant, expected, familyVariation, current, capabilities, symbol, variable, lottie, compileSymbolEffect }) {
+/** Встраивается целиком в installed consumer; runtime приходит из public exports, oracle — из harness. */
+export function verifyInstalledAuthorVariation({ icon, variant, expected, familyVariation, current, capabilities, symbol, variable, lottie, compileSymbolEffect, observeAuthorGlyph }) {
   const require = (condition, message) => { if (!condition) throw new Error(`${message}: ${icon}/${variant}`); };
   const equal = (left, right) => JSON.stringify(left) === JSON.stringify(right);
   const refuses = (glyph, request, code) => {
@@ -40,13 +40,18 @@ export function verifyInstalledAuthorVariation({ icon, variant, expected, family
       equal(varied.provenance.variation.parameters, nondefault) && equal(varied.provenance.author, expected.author) &&
       equal(varied.provenance.anatomy, current.provenance.anatomy), 'authored variation not materialized');
     const identities = parts => parts.map(part => [part.id, part.fillRule, part.topologySignature, part.zIndex, part.role]);
-    require(equal(identities(varied.parts), identities(current.parts)) &&
-      varied.parts.every(part => varied.svg.includes('d="' + part.d + '"')), 'authored variation lost parts/SVG');
+    require(equal(identities(varied.parts), identities(current.parts)) && equal(varied.composition, expected.composition) &&
+      varied.d === varied.parts.map(part => part.d).join(''), 'authored variation lost parts/SVG');
+    // Semantic contour остаётся частью общего fill owner; oracle читает именно materialized SVG.
+    const physicalPaths = varied.composition.kind === 'compound'
+      ? [{ index: 0, d: varied.parts.map(part => part.d).join(''), fillRule: varied.composition.fillRule }]
+      : varied.parts.map((part, index) => ({ index, d: part.d, fillRule: part.fillRule }));
+    require(equal(observeAuthorGlyph(varied, expected.svg).paths, physicalPaths), 'authored variation lost parts/SVG');
     if (policy.law === 'dots.affine') {
       require(varied.parts.every((part, index) => part.d !== current.parts[index].d), 'authored variation changed-part contract');
     } else if (policy.law === 'capsule.width') {
       const bodyIndex = current.parts.findIndex(part => part.id === policy.bodyPartId);
-      require(bodyIndex >= 0 && current.parts[bodyIndex].role === 'content' &&
+      require(bodyIndex >= 0 && current.parts[bodyIndex].role === (expected.composition.kind === 'compound' ? 'counter' : 'content') &&
         varied.parts.every((part, index) => index === bodyIndex
           ? part.d !== current.parts[index].d && equal(part.anchor, current.parts[index].anchor)
           : part === current.parts[index]), 'authored variation changed-part contract');
