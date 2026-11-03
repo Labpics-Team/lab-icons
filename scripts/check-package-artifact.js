@@ -581,6 +581,7 @@ export function checkPackageArtifact({
     writeFileSync(
       join(consumer, 'smoke.mjs'),
       `import { readFileSync } from 'node:fs';\n` +
+        `import { isDeepStrictEqual } from 'node:util';\n` +
         `import { accessibilityOutline } from '@labpics/icons';\n` +
         `import * as fullIr from '@labpics/icons/ir';\n` +
         `import { axisNames, calendarNumberGlyph, glyph, glyphCapabilities, iconDesignContract, iconIds } from '@labpics/icons/ir';\n` +
@@ -628,7 +629,7 @@ export function checkPackageArtifact({
         `    verifyInstalledAuthorVariation({ icon, variant, expected, familyVariation, current, capabilities, symbol, variable, lottie: lottieVariation, compileSymbolEffect });\n` +
         `    for (const [gesture, expectedEffect] of Object.entries(expected.effects)) {\n` +
         `      const effect = compileSymbolEffect(current, capabilities, gesture, { duration: 360 });\n` +
-        `      if (!effect.ok || effect.effect.version !== expectedEffect.version || JSON.stringify(effect.effect.targets) !== JSON.stringify(expectedEffect.targets) || JSON.stringify(effect.effect.stages) !== JSON.stringify(expectedEffect.stages)) throw new Error('current declared motion differs: ' + icon + '/' + variant);\n` +
+        `      if (!effect.ok || effect.effect.version !== expectedEffect.version || !isDeepStrictEqual(effect.effect.targets, expectedEffect.targets) || !isDeepStrictEqual(effect.effect.stages, expectedEffect.stages)) throw new Error('current declared motion differs: ' + icon + '/' + variant);\n` +
         `    }\n` +
         `    for (const request of [{ variant, axes: { weight: 1 } }, { variant, axes: { opsz: 24 } }, { variant, axes: { corner: 1 } }, { variant, modelMode: 'allow-candidate' }]) {\n` +
         `      let refused = false;\n` +

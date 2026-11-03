@@ -10,6 +10,7 @@ import {
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve, win32 } from 'node:path';
+import { isDeepStrictEqual } from 'node:util';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   checkPackageArtifact,
@@ -30,6 +31,34 @@ import { lottieSymbolDeclaration, renderLottieSymbolModule } from '../scripts/li
 vi.mock('node:child_process', () => ({ execFileSync: vi.fn() }));
 
 const roots = [];
+
+it('installed motion smoke сравнивает значения и порядок стадий независимо от порядка ключей', () => {
+  const source = readFileSync(new URL('../scripts/check-package-artifact.js', import.meta.url), 'utf8');
+  const line = source.split('\n').find(entry => entry.includes("throw new Error('current declared motion differs:"));
+  const assertion = line.match(/` +(if .*?)\\n`/)[1];
+  const verify = new Function('effect', 'expectedEffect', 'icon', 'variant', 'isDeepStrictEqual', assertion);
+  const target = { partId: 'arrow', property: 'x', from: 0, to: 0, unit: 'viewBox' };
+  const stage = { partId: 'arrow', property: 'x', unit: 'viewBox', to: -1, at: 0, duration: 180 };
+  const expected = { version: 3, targets: [target], stages: [stage, { ...stage, to: 0, at: 180 }] };
+  const actual = { ok: true, effect: {
+    version: 3,
+    targets: [{ partId: 'arrow', property: 'x', unit: 'viewBox', from: 0, to: 0 }],
+    stages: expected.stages.map(entry => Object.fromEntries(Object.entries(entry).reverse())),
+  } };
+  expect(() => verify(actual, expected, 'arrow-back', 'outline', isDeepStrictEqual)).not.toThrow();
+  for (const change of [
+    effect => { effect.targets[0].unit = 'px'; },
+    effect => { effect.targets[0].from = 1; },
+    effect => { effect.stages.reverse(); },
+    effect => { effect.stages[0].duration = 179; },
+    effect => { effect.stages.pop(); },
+  ]) {
+    const changed = structuredClone(actual);
+    change(changed.effect);
+    expect(() => verify(changed, expected, 'arrow-back', 'outline', isDeepStrictEqual)).toThrow(/current declared motion differs/);
+  }
+  expect(() => verify({ ...actual, ok: false }, expected, 'arrow-back', 'outline', isDeepStrictEqual)).toThrow();
+});
 const CONTRACT = symbolReleaseProjection(JSON.parse(readFileSync(new URL('../release/contract.json', import.meta.url), 'utf8')), ['fixture']);
 
 function write(root, path, content = '') {
@@ -79,8 +108,10 @@ function validPackage() {
   write(root, 'dist/ir/candidates.d.ts', 'export declare function registerCandidates(): void;\n');
   write(root, 'dist/ir/compiler.js', 'import "./request.js"; export const fixture = 1;\n');
   write(root, 'dist/ir/compiler.d.ts', "export type { GlyphIR } from './glyph-types.js';\nexport type IconVariant = 'outline' | 'filled';\n");
-  write(root, 'dist/ir/glyph-types.d.ts', "import type { GlyphModelErrorCode } from './request.js';\nimport type { AuthorVariationProvenance } from './authored-variation.js';\nimport type { AuthorAnnulusVariationProvenance } from './author-annulus-types.js';\nimport type { FillPaint } from './paint-types.js';\nexport interface GlyphIR { readonly code: GlyphModelErrorCode; readonly variation?: AuthorVariationProvenance | AuthorAnnulusVariationProvenance; readonly paint?: FillPaint }\n");
+  write(root, 'dist/ir/glyph-types.d.ts', "import type { GlyphModelErrorCode } from './request.js';\nimport type { AuthorVariationProvenance } from './authored-variation.js';\nimport type { AuthorAnnulusVariationProvenance } from './author-annulus-types.js';\nimport type { AuthorCapsuleVariationProvenance } from './author-capsule-types.js';\nimport type { AuthorContentVariationProvenance } from './author-content-types.js';\nimport type { FillPaint } from './paint-types.js';\nexport interface GlyphIR { readonly code: GlyphModelErrorCode; readonly variation?: AuthorVariationProvenance | AuthorAnnulusVariationProvenance | AuthorCapsuleVariationProvenance | AuthorContentVariationProvenance; readonly paint?: FillPaint }\n");
   write(root, 'dist/ir/author-annulus-types.d.ts', "export interface AuthorAnnulusVariationProvenance { readonly kind: 'authored-variation' }\n");
+  write(root, 'dist/ir/author-capsule-types.d.ts', "export interface AuthorCapsuleVariationProvenance { readonly kind: 'authored-variation' }\n");
+  write(root, 'dist/ir/author-content-types.d.ts', "export interface AuthorContentVariationProvenance { readonly kind: 'authored-variation' }\n");
   write(root, 'dist/ir/paint-types.d.ts', "export interface FillPaint { readonly kind: 'fill' }\n");
   write(root, 'dist/ir/authored-variation.d.ts', "export interface AuthorVariationProvenance { readonly kind: 'authored-variation' }\n");
   write(root, 'dist/ir/request.js', 'export const fixture = 1;\n');
