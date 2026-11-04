@@ -11,6 +11,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { build } from 'esbuild';
 import { gzipSync } from 'fflate';
 import { brotliCompressSync, constants } from 'node:zlib';
+import { authorMotionTargets } from './lib/author-motion-targets.js';
 
 export const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const PACKAGE_JSON = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'));
@@ -58,6 +59,29 @@ const SCENARIO_FIELDS = [
 ];
 const SCENARIO_NAME = /^[a-z][a-z0-9-]*$/;
 const STATIC_PACKAGE_IMPORT = /\bimport\s+(?:[^'";]+?\s+from\s+)?['"](@labpics\/icons(?:\/[^'"]*)?)['"]/g;
+
+/** Измерение и проверка используют одни реальные способы потребления clock API. */
+export function clockConsumerEntries(icons) {
+  const entries = {};
+  for (const icon of icons) {
+    if (!SCENARIO_NAME.test(icon)) throw new TypeError(`clock consumer: невалидное имя ${icon}`);
+    const entry = `@labpics/icons/gestures/${icon}`;
+    entries[`gesture-${icon}-prepared`] = `import { prepareClockHands } from '${entry}';\nconst result = prepareClockHands();\nconsole.log(result.ok ? result.prepared.sample(0.5) : result);\n`;
+    entries[`gesture-${icon}-capabilities`] = `import { motionCapabilities } from '${entry}';\nconsole.log(motionCapabilities());\n`;
+    entries[`gesture-${icon}-combined`] = `import { prepareClockHands, motionCapabilities } from '${entry}';\nconsole.log(prepareClockHands(), motionCapabilities());\n`;
+  }
+  return Object.freeze(entries);
+}
+
+export function checkClockConsumerSizeCoverage(ratchet, icons) {
+  const errors = [];
+  for (const [name, entry] of Object.entries(clockConsumerEntries(icons))) {
+    const limits = ratchet.scenarios[name];
+    if (!limits) errors.push(`${name}: clock consumer отсутствует в size ratchet`);
+    else if (limits.entry !== entry) errors.push(`${name}: entry не совпадает с clock consumer`);
+  }
+  return errors;
+}
 
 function packageImports(entry) {
   return [...entry.matchAll(STATIC_PACKAGE_IMPORT)].map((match) => match[1]);
@@ -206,6 +230,13 @@ export async function checkConsumerSize({ root = ROOT } = {}) {
       measurements,
     };
   }
+  try {
+    const anatomy = JSON.parse(readFileSync(join(root, 'semantics/author-anatomy.json'), 'utf8'));
+    errors.push(...checkClockConsumerSizeCoverage(ratchet, authorMotionTargets(anatomy).clocks));
+  } catch (error) {
+    errors.push(`clock consumer coverage не проверен (${error.message})`);
+  }
+  if (errors.length > 0) return { errors, measurements };
   for (const [name, limits] of Object.entries(ratchet.scenarios)) {
     let measured;
     try {

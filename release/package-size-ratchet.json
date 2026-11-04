@@ -200,6 +200,26 @@
     "sourceMappingURL"
    ]
   },
+  "dist/gestures/history.d.ts": {
+   "baselineBytes": 355,
+   "baselineGzipBytes": 190,
+   "maxBytes": 355,
+   "maxGzipBytes": 190,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ]
+  },
+  "dist/gestures/history.js": {
+   "baselineBytes": 13706,
+   "baselineGzipBytes": 4995,
+   "maxBytes": 13706,
+   "maxGzipBytes": 4995,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ]
+  },
   "dist/gestures/mic-circle.d.ts": {
    "baselineBytes": 364,
    "baselineGzipBytes": 194,
@@ -275,6 +295,26 @@
    "baselineGzipBytes": 2421,
    "maxBytes": 5309,
    "maxGzipBytes": 2421,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ]
+  },
+  "dist/gestures/time.d.ts": {
+   "baselineBytes": 355,
+   "baselineGzipBytes": 190,
+   "maxBytes": 355,
+   "maxGzipBytes": 190,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ]
+  },
+  "dist/gestures/time.js": {
+   "baselineBytes": 6851,
+   "baselineGzipBytes": 2737,
+   "maxBytes": 6851,
+   "maxGzipBytes": 2737,
    "allowedModules": [],
    "forbiddenNeedles": [
     "sourceMappingURL"
@@ -361,6 +401,16 @@
    "baselineGzipBytes": 1631,
    "maxBytes": 5072,
    "maxGzipBytes": 1631,
+   "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ]
+  },
+  "dist/ir/author-clock-motion-types.d.ts": {
+   "baselineBytes": 1862,
+   "baselineGzipBytes": 638,
+   "maxBytes": 1862,
+   "maxGzipBytes": 638,
    "allowedModules": [],
    "forbiddenNeedles": [
     "sourceMappingURL"
@@ -478,6 +528,19 @@
    "maxBytes": 3602,
    "maxGzipBytes": 1407,
    "allowedModules": [],
+   "forbiddenNeedles": [
+    "sourceMappingURL"
+   ]
+  },
+  "dist/ir/clock-motion-runtime.js": {
+   "baselineBytes": 6581,
+   "baselineGzipBytes": 2936,
+   "maxBytes": 6581,
+   "maxGzipBytes": 2936,
+   "allowedModules": [
+    "src/ir/author-clock-motion-runtime.ts",
+    "src/ir/sha256.ts"
+   ],
    "forbiddenNeedles": [
     "sourceMappingURL"
    ]
@@ -716,8 +779,8 @@
    ]
   },
   "dist/ir/request.js": {
-   "baselineBytes": 2356,
-   "baselineGzipBytes": 1017,
+   "baselineBytes": 2328,
+   "baselineGzipBytes": 1023,
    "maxBytes": 2575,
    "maxGzipBytes": 1029,
    "allowedModules": [

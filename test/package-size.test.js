@@ -63,6 +63,15 @@ afterEach(() => {
 });
 
 describe('package size ratchet', () => {
+  it('покрывает весь опубликованный набор файлов до сборки', () => {
+    const contract = JSON.parse(readFileSync(new URL('../release/contract.json', import.meta.url), 'utf8'));
+    const ratchet = parsePackageSizeRatchet(
+      JSON.parse(readFileSync(new URL('../release/package-size-ratchet.json', import.meta.url), 'utf8')),
+    );
+
+    expect(Object.keys(ratchet.artifacts).sort()).toEqual([...contract.files].sort());
+  });
+
   it('канонический ratchet принимает emitted sections и отклоняет import specifiers', () => {
     const source = JSON.parse(readFileSync(new URL('../release/package-size-ratchet.json', import.meta.url), 'utf8'));
     const parsed = parsePackageSizeRatchet(source);

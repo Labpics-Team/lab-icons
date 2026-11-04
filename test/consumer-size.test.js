@@ -4,10 +4,13 @@ import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 import {
   bundleScenario,
+  checkClockConsumerSizeCoverage,
   checkConsumerSize,
+  clockConsumerEntries,
   CONSUMER_SIZE_MEASUREMENT,
   parseConsumerSizeRatchet,
 } from '../scripts/check-consumer-size.js';
+import { authorMotionTargets } from '../scripts/lib/author-motion-targets.js';
 
 const roots = [];
 
@@ -20,6 +23,8 @@ async function fixture() {
   roots.push(root);
   mkdirSync(join(root, 'dist/ir'), { recursive: true });
   mkdirSync(join(root, 'release'), { recursive: true });
+  mkdirSync(join(root, 'semantics'), { recursive: true });
+  writeFileSync(join(root, 'semantics/author-anatomy.json'), JSON.stringify({ icons: {} }));
   writeFileSync(
     join(root, 'dist/index.js'),
     `export const alertFilled = "<svg>alert</svg>";\n` +
@@ -51,6 +56,53 @@ function updateRatchet(root, update) {
 }
 
 describe('consumer size ratchet', () => {
+  it('clock coverage покрывает все объявленные author targets до bundling', () => {
+    const anatomy = JSON.parse(readFileSync(new URL('../semantics/author-anatomy.json', import.meta.url), 'utf8'));
+    const ratchet = parseConsumerSizeRatchet(
+      JSON.parse(readFileSync(new URL('../release/consumer-size-ratchet.json', import.meta.url), 'utf8')),
+    );
+    expect(checkClockConsumerSizeCoverage(ratchet, authorMotionTargets(anatomy).clocks)).toEqual([]);
+  });
+
+  it('clock coverage обнаруживает новый author target и подмену entry статическим import', () => {
+    const clocks = authorMotionTargets({ icons: { future: { outline: { joint: { law: 'joint.authored-elbow' } } } } }).clocks;
+    const entries = clockConsumerEntries(clocks);
+    const scenarios = Object.fromEntries(Object.entries(entries).map(([name, entry]) => [name, { entry }]));
+    expect(checkClockConsumerSizeCoverage({ scenarios }, clocks)).toEqual([]);
+    expect(checkClockConsumerSizeCoverage({ scenarios: {} }, clocks)).toHaveLength(3);
+    scenarios['gesture-future-prepared'].entry = "import { outline } from '@labpics/icons/symbols/future';\nconsole.log(outline);\n";
+    expect(checkClockConsumerSizeCoverage({ scenarios }, clocks)).toEqual([
+      'gesture-future-prepared: entry не совпадает с clock consumer',
+    ]);
+  });
+
+  it('clock coverage не требует clock сценарии для пустого author cohort', () => {
+    expect(checkClockConsumerSizeCoverage({ scenarios: {} }, authorMotionTargets({ icons: {} }).clocks)).toEqual([]);
+  });
+
+  it('clock coverage останавливает действующий checker до bundling при пропущенном target', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'lab-icons-clock-coverage-'));
+    roots.push(root);
+    mkdirSync(join(root, 'release'), { recursive: true });
+    mkdirSync(join(root, 'semantics'), { recursive: true });
+    writeFileSync(join(root, 'semantics/author-anatomy.json'), JSON.stringify({
+      icons: { future: { outline: { joint: { law: 'joint.authored-elbow' } } } },
+    }));
+    writeFileSync(join(root, 'release/consumer-size-ratchet.json'), JSON.stringify({
+      version: 1,
+      measurement: CONSUMER_SIZE_MEASUREMENT,
+      scenarios: { static: {
+        entry: "import { alertFilled } from '@labpics/icons';\nconsole.log(alertFilled);\n",
+        baselineBytes: 1, baselineGzipBytes: 1, maxBytes: 1, maxGzipBytes: 1,
+      } },
+    }));
+    // dist отсутствует: пропуск preflight даст bundle-error вместо причины отказа.
+    const result = await checkConsumerSize({ root });
+    expect(result.errors).toHaveLength(3);
+    expect(result.errors.every(error => error.includes('clock consumer отсутствует'))).toBe(true);
+    expect(result.measurements).toEqual({});
+  });
+
   it.each([
     ['lottie/time', 'dist/lottie/time.js'],
     ['authoring', 'dist/authoring/index.js'],

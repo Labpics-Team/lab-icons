@@ -8,7 +8,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { cpus, totalmem } from 'node:os';
 import { brotliCompressSync, constants } from 'node:zlib';
 import { measureArtifact, PACKAGE_SIZE_MEASUREMENT, parsePackageSizeRatchet } from './check-package-size.js';
-import { bundleScenario, CONSUMER_SIZE_MEASUREMENT, parseConsumerSizeRatchet } from './check-consumer-size.js';
+import { bundleScenario, clockConsumerEntries, CONSUMER_SIZE_MEASUREMENT, parseConsumerSizeRatchet } from './check-consumer-size.js';
 import { validateReleaseRuntimeDependencyGraph, validateReleaseTypeDependencyGraph } from './lib/release-contract.js';
 import { authorMotionTargets } from './lib/author-motion-targets.js';
 
@@ -74,7 +74,7 @@ function independentReportDestination(output) {
 
 const motionTargets = authorMotionTargets(read('semantics/author-anatomy.json'));
 const rotationEntries = {};
-const clockEntries = {};
+const clockEntries = clockConsumerEntries(motionTargets.clocks);
 for (const icon of motionTargets.clocks) {
   const file = `dist/gestures/${icon}.js`;
   if (!contract.files.includes(file)) throw new Error('measurement: clock target отсутствует в release contract');
@@ -83,10 +83,6 @@ for (const icon of motionTargets.clocks) {
   if (!admitted.ok || admitted.capabilities.icon !== icon || admitted.capabilities.parameter !== 'elapsed-hours') {
     throw new Error(`measurement: ${icon} не имеет подготовленных часов`);
   }
-  const entry = `@labpics/icons/gestures/${icon}`;
-  clockEntries[`gesture-${icon}-prepared`] = `import { prepareClockHands } from '${entry}';\nconst result = prepareClockHands();\nconsole.log(result.ok ? result.prepared.sample(0.5) : result);\n`;
-  clockEntries[`gesture-${icon}-capabilities`] = `import { motionCapabilities } from '${entry}';\nconsole.log(motionCapabilities());\n`;
-  clockEntries[`gesture-${icon}-combined`] = `import { prepareClockHands, motionCapabilities } from '${entry}';\nconsole.log(prepareClockHands(), motionCapabilities());\n`;
 }
 for (const icon of motionTargets.rotations) {
   const file = `dist/gestures/${icon}.js`;

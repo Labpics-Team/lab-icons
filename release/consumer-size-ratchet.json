@@ -2,6 +2,48 @@
  "version": 1,
  "measurement": "esbuild@0.28.1 bundle+minify+treeshake es2022 browser; fflate@0.8.3 gzipSync level=9 mtime=0",
  "scenarios": {
+  "gesture-history-prepared": {
+   "entry": "import { prepareClockHands } from '@labpics/icons/gestures/history';\nconst result = prepareClockHands();\nconsole.log(result.ok ? result.prepared.sample(0.5) : result);\n",
+   "baselineBytes": 16661,
+   "baselineGzipBytes": 6453,
+   "maxBytes": 16661,
+   "maxGzipBytes": 6453
+  },
+  "gesture-history-capabilities": {
+   "entry": "import { motionCapabilities } from '@labpics/icons/gestures/history';\nconsole.log(motionCapabilities());\n",
+   "baselineBytes": 4158,
+   "baselineGzipBytes": 1779,
+   "maxBytes": 4158,
+   "maxGzipBytes": 1779
+  },
+  "gesture-history-combined": {
+   "entry": "import { prepareClockHands, motionCapabilities } from '@labpics/icons/gestures/history';\nconsole.log(prepareClockHands(), motionCapabilities());\n",
+   "baselineBytes": 19376,
+   "baselineGzipBytes": 7318,
+   "maxBytes": 19376,
+   "maxGzipBytes": 7318
+  },
+  "gesture-time-prepared": {
+   "entry": "import { prepareClockHands } from '@labpics/icons/gestures/time';\nconst result = prepareClockHands();\nconsole.log(result.ok ? result.prepared.sample(0.5) : result);\n",
+   "baselineBytes": 10844,
+   "baselineGzipBytes": 4305,
+   "maxBytes": 10844,
+   "maxGzipBytes": 4305
+  },
+  "gesture-time-capabilities": {
+   "entry": "import { motionCapabilities } from '@labpics/icons/gestures/time';\nconsole.log(motionCapabilities());\n",
+   "baselineBytes": 3351,
+   "baselineGzipBytes": 1642,
+   "maxBytes": 3351,
+   "maxGzipBytes": 1642
+  },
+  "gesture-time-combined": {
+   "entry": "import { prepareClockHands, motionCapabilities } from '@labpics/icons/gestures/time';\nconsole.log(prepareClockHands(), motionCapabilities());\n",
+   "baselineBytes": 12752,
+   "baselineGzipBytes": 4885,
+   "maxBytes": 12752,
+   "maxGzipBytes": 4885
+  },
   "one-static": {
    "entry": "import { accessibilityFilled } from '@labpics/icons';\nconsole.log(accessibilityFilled);\n",
    "baselineBytes": 637,
