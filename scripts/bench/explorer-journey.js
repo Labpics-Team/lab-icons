@@ -415,6 +415,14 @@ export async function runExplorerJourney() {
           JSON.stringify(unchanged(stage())) === still && samples().length === 3 && samples().every(svg =>
             target(svg)?.getAttribute('d') === pose.d && JSON.stringify(unchanged(svg)) === still);
       };
+      // Native range не должен квантовать наблюдаемую непрерывную позу стрелок.
+      const progressInput = q('progress'), previousProgress = progressInput.value;
+      const continuousProgress = .12345678912345678;
+      progressInput.value = String(continuousProgress);
+      const observedProgress = Number(progressInput.value);
+      progressInput.value = previousProgress;
+      check(`${id}/continuous-native-progress`, observedProgress === continuousProgress,
+        { requested: continuousProgress, observed: observedProgress, step: progressInput.step });
       check(`${id}/author-identity`, caps.author.masterSha256 === source.provenance.author.masterSha256 &&
         caps.author.nodeSha256 === source.provenance.author.nodeSha256 && /^[a-f0-9]{64}$/.test(caps.geometrySha256));
       check(`${id}/exact-authored-rest`, JSON.stringify(paths(stage())) === rest && samples().every(svg => JSON.stringify(paths(svg)) === rest));
@@ -426,10 +434,10 @@ export async function runExplorerJourney() {
       await wait(() => Number(q('progress').value) > .12 && Number(q('progress').value) < .8, `${id} in flight`);
       q('pause').click();
       const paused = JSON.stringify(paths(stage())), pausedProgress = Number(q('progress').value);
+      capture('paused');
       check(`${id}/in-flight-public-pose`, poseMatches() && paused !== rest);
       for (let index = 0; index < 3; index++) await frame();
       check(`${id}/pause-retains-pose`, JSON.stringify(paths(stage())) === paused && Number(q('progress').value) === pausedProgress);
-      capture('paused');
       const beforeSvg = downloads.length;
       q('export-format').value = 'svg'; q('export').click();
       const artifact = downloads.at(-1);
