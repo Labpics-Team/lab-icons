@@ -43,6 +43,8 @@
    pnpm verify
    ```
 
+Для CI действуют [общие правила публичной экосистемы Lab UI](https://github.com/Labpics-Team/labui/blob/main/CONTRIBUTING.md#проверить-изменение).
+
 ## Пример предложения
 
 В примере ниже показана структура `proposal.json`. Подставьте измерения своей
