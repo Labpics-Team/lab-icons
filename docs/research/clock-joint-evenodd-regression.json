@@ -1,0 +1,32 @@
+{
+  "finding": "evenodd-counter-orientation-false-refusal",
+  "before": {
+    "compilerSha256": "5a1048fcc4c46527623a409e93c73a9b7491fa3568ecc5c67ee4deb0d2425bc2",
+    "red": {
+      "productionLoaderExecuted": true,
+      "mutation": "reverse only TimeFilled hand contour; rebind raw/path fingerprints",
+      "fillRule": "evenodd",
+      "occupancyComparisons": 576,
+      "occupancyMismatches": 0,
+      "compilerRefusal": "SOURCE_WINDING_UNSUPPORTED"
+    }
+  },
+  "after": {
+    "compilerSha256": "2989b256875ac1e39764c09964cb4830c4cfa839894acb09c91ab75d8f2239f5",
+    "testSha256": "29cac475f673772ed66b71d52111f317bd45f5f19e2285c21df653571176e447",
+    "verification": {
+      "command": "node node_modules/vitest/vitest.mjs run test/author-clock-joint.test.js --maxWorkers=1",
+      "cwd": "E:/AgentWork/lab-icons-platform-20261101",
+      "framework": "Vitest 4.1.12",
+      "passed": 28,
+      "total": 28,
+      "skipped": 0,
+      "durationSeconds": 3.47,
+      "scope": "four captured time/history masters; production baseline loader; both outer directions x both counter directions; zero-area and invalid-containment refusals"
+    }
+  },
+  "negativeWebAdmission": "unchanged; not admitted",
+  "sourceMastersModified": false,
+  "independentReview": "pending",
+  "observedAt": "2026-11-03T20:38:03.558Z"
+}

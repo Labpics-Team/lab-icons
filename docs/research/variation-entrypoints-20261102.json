@@ -1,0 +1,1437 @@
+{
+  "baseline": "1b9412237a8d1b2db6e929be746dd79274390292",
+  "candidateEmitterSha256": "297fe2bf57696aa7a7acfa39bb38a4d179ef3b4a051ca3227b93634de81fe027",
+  "sourceSha": "a97d6953552f334509ae55d43c1e48f0fa432037",
+  "scope": "two families/four masters; selective source bundles and real cold native loader graph; no full build/pack, published install, browser, timing or memory qualification",
+  "environment": {
+    "node": "v24.15.0",
+    "esbuild": "0.28.1",
+    "fflate": "0.8.3",
+    "brotli": "1.2.0",
+    "platform": "win32",
+    "arch": "x64",
+    "gzip": {
+      "level": 9,
+      "mtime": 0
+    },
+    "brotliQuality": 11
+  },
+  "rows": [
+    {
+      "icon": "ellipsis-horizontal",
+      "files": {
+        "baseline": {
+          "dist/ir/request.js": {
+            "bytes": 2565,
+            "gzipBytes": 1028,
+            "brotliBytes": 831,
+            "sha256": "8e73d17ec23aed055444db85cb1fb30e35d3a894dfde304e80f4d52d97f7af97"
+          },
+          "dist/ir/symbol-runtime.js": {
+            "bytes": 1442,
+            "gzipBytes": 675,
+            "brotliBytes": 529,
+            "sha256": "8014d57d2a63b353d9d43e8c93c45571fce68209518afa2aa353f25277613ce1"
+          },
+          "dist/ir/variation-runtime.js": {
+            "bytes": 12821,
+            "gzipBytes": 4772,
+            "brotliBytes": 3969,
+            "sha256": "2391e371e993cd8fa53a63955f30883c332be32ff336c449a84d8be6a7192dd1"
+          },
+          "dist/symbols/ellipsis-horizontal.js": {
+            "bytes": 26704,
+            "gzipBytes": 4002,
+            "brotliBytes": 3175,
+            "sha256": "e7db373f5af7d873815adde143543e9a5ccaad014bf9ddc60330df84f6874cba"
+          }
+        },
+        "actual": {
+          "dist/ir/request.js": {
+            "bytes": 2565,
+            "gzipBytes": 1028,
+            "brotliBytes": 831,
+            "sha256": "8e73d17ec23aed055444db85cb1fb30e35d3a894dfde304e80f4d52d97f7af97"
+          },
+          "dist/ir/symbol-runtime.js": {
+            "bytes": 1442,
+            "gzipBytes": 675,
+            "brotliBytes": 529,
+            "sha256": "8014d57d2a63b353d9d43e8c93c45571fce68209518afa2aa353f25277613ce1"
+          },
+          "dist/ir/variation-runtime.js": {
+            "bytes": 12821,
+            "gzipBytes": 4772,
+            "brotliBytes": 3969,
+            "sha256": "2391e371e993cd8fa53a63955f30883c332be32ff336c449a84d8be6a7192dd1"
+          },
+          "dist/symbols/ellipsis-horizontal.js": {
+            "bytes": 535,
+            "gzipBytes": 224,
+            "brotliBytes": 176,
+            "sha256": "a464a1ccda46049783267f599e5cf80087c5085ae797e6977a0046f4a5189b5f"
+          },
+          "dist/variations/ellipsis-horizontal.js": {
+            "bytes": 9530,
+            "gzipBytes": 1619,
+            "brotliBytes": 1340,
+            "sha256": "a0d3fd2d306fc8cc8fb19ceb756fce5b78ab5a5431734a43a9ad4afc855c2375"
+          },
+          "dist/ir/symbol-data/ellipsis-horizontal.js": {
+            "bytes": 15959,
+            "gzipBytes": 2646,
+            "brotliBytes": 2135,
+            "sha256": "22187d62f75641395fc9b1ec7570b8d34516748ed8cda9c2ef445b7904bc0163"
+          }
+        }
+      },
+      "consumers": {
+        "sourceGlyph": {
+          "baseline": {
+            "bytes": 27238,
+            "gzipBytes": 7411,
+            "brotliBytes": 6196,
+            "sha256": "0c0d7e80ae7237047d221da45d7c5759b646d95201f0eb189c112c001154a91c",
+            "retainedFiles": {
+              "projection:dist/ir/request.js": {
+                "bytesInOutput": 2364
+              },
+              "projection:dist/ir/symbol-runtime.js": {
+                "bytesInOutput": 918
+              },
+              "projection:dist/ir/variation-runtime.js": {
+                "bytesInOutput": 8832
+              },
+              "projection:dist/symbols/ellipsis-horizontal.js": {
+                "bytesInOutput": 15091
+              },
+              "<stdin>": {
+                "bytesInOutput": 11
+              }
+            },
+            "resolvedFiles": [
+              "<stdin>",
+              "projection:dist/ir/request.js",
+              "projection:dist/ir/symbol-runtime.js",
+              "projection:dist/ir/variation-runtime.js",
+              "projection:dist/symbols/ellipsis-horizontal.js"
+            ]
+          },
+          "actual": {
+            "bytes": 12970,
+            "gzipBytes": 3070,
+            "brotliBytes": 2545,
+            "sha256": "ec4c5ca900a2a195ee8d6cf862e03522796eb64dd45d9fba42a6911a7cda40bc",
+            "retainedFiles": {
+              "projection:dist/ir/symbol-data/ellipsis-horizontal.js": {
+                "bytesInOutput": 9605
+              },
+              "projection:dist/ir/request.js": {
+                "bytesInOutput": 2364
+              },
+              "projection:dist/ir/symbol-runtime.js": {
+                "bytesInOutput": 918
+              },
+              "projection:dist/symbols/ellipsis-horizontal.js": {
+                "bytesInOutput": 52
+              },
+              "<stdin>": {
+                "bytesInOutput": 10
+              }
+            },
+            "resolvedFiles": [
+              "<stdin>",
+              "projection:dist/ir/request.js",
+              "projection:dist/ir/symbol-data/ellipsis-horizontal.js",
+              "projection:dist/ir/symbol-runtime.js",
+              "projection:dist/symbols/ellipsis-horizontal.js"
+            ]
+          },
+          "resultEqual": true
+        },
+        "sourceCaps": {
+          "baseline": {
+            "bytes": 10545,
+            "gzipBytes": 2160,
+            "brotliBytes": 1792,
+            "sha256": "20e5661dd7e6e253c20d1be696ecd8bf70913a7d99adb0aee2e04c9e1d780daf",
+            "retainedFiles": {
+              "projection:dist/ir/request.js": {
+                "bytesInOutput": 271
+              },
+              "projection:dist/ir/symbol-runtime.js": {
+                "bytesInOutput": 189
+              },
+              "projection:dist/symbols/ellipsis-horizontal.js": {
+                "bytesInOutput": 10054
+              },
+              "<stdin>": {
+                "bytesInOutput": 10
+              }
+            },
+            "resolvedFiles": [
+              "<stdin>",
+              "projection:dist/ir/request.js",
+              "projection:dist/ir/symbol-runtime.js",
+              "projection:dist/ir/variation-runtime.js",
+              "projection:dist/symbols/ellipsis-horizontal.js"
+            ]
+          },
+          "actual": {
+            "bytes": 7125,
+            "gzipBytes": 1581,
+            "brotliBytes": 1349,
+            "sha256": "44c10e5a854341f5e13e8a138b3d567906509d4a43fdcc72d24d9a7344cbb129",
+            "retainedFiles": {
+              "projection:dist/ir/symbol-data/ellipsis-horizontal.js": {
+                "bytesInOutput": 6604
+              },
+              "projection:dist/ir/request.js": {
+                "bytesInOutput": 271
+              },
+              "projection:dist/ir/symbol-runtime.js": {
+                "bytesInOutput": 189
+              },
+              "projection:dist/symbols/ellipsis-horizontal.js": {
+                "bytesInOutput": 30
+              },
+              "<stdin>": {
+                "bytesInOutput": 10
+              }
+            },
+            "resolvedFiles": [
+              "<stdin>",
+              "projection:dist/ir/request.js",
+              "projection:dist/ir/symbol-data/ellipsis-horizontal.js",
+              "projection:dist/ir/symbol-runtime.js",
+              "projection:dist/symbols/ellipsis-horizontal.js"
+            ]
+          },
+          "resultEqual": true,
+          "intentionalContractDelta": "source capabilities omit opt-in variation"
+        },
+        "sourceBoth": {
+          "baseline": {
+            "bytes": 35982,
+            "gzipBytes": 8111,
+            "brotliBytes": 6751,
+            "sha256": "3b88a930d974caec3e9b423dd6d19afa447843c507892680fa02ff37794ec749",
+            "retainedFiles": {
+              "projection:dist/ir/request.js": {
+                "bytesInOutput": 2364
+              },
+              "projection:dist/ir/symbol-runtime.js": {
+                "bytesInOutput": 999
+              },
+              "projection:dist/ir/variation-runtime.js": {
+                "bytesInOutput": 8838
+              },
+              "projection:dist/symbols/ellipsis-horizontal.js": {
+                "bytesInOutput": 23742
+              },
+              "<stdin>": {
+                "bytesInOutput": 17
+              }
+            },
+            "resolvedFiles": [
+              "<stdin>",
+              "projection:dist/ir/request.js",
+              "projection:dist/ir/symbol-runtime.js",
+              "projection:dist/ir/variation-runtime.js",
+              "projection:dist/symbols/ellipsis-horizontal.js"
+            ]
+          },
+          "actual": {
+            "bytes": 18278,
+            "gzipBytes": 3674,
+            "brotliBytes": 3018,
+            "sha256": "282d044de26f0a50ff4074c4de25132c44185a10781ae9393f61a24ad9082cc4",
+            "retainedFiles": {
+              "projection:dist/ir/symbol-data/ellipsis-horizontal.js": {
+                "bytesInOutput": 14800
+              },
+              "projection:dist/ir/request.js": {
+                "bytesInOutput": 2364
+              },
+              "projection:dist/ir/symbol-runtime.js": {
+                "bytesInOutput": 999
+              },
+              "projection:dist/symbols/ellipsis-horizontal.js": {
+                "bytesInOutput": 78
+              },
+              "<stdin>": {
+                "bytesInOutput": 16
+              }
+            },
+            "resolvedFiles": [
+              "<stdin>",
+              "projection:dist/ir/request.js",
+              "projection:dist/ir/symbol-data/ellipsis-horizontal.js",
+              "projection:dist/ir/symbol-runtime.js",
+              "projection:dist/symbols/ellipsis-horizontal.js"
+            ]
+          },
+          "resultEqual": true,
+          "intentionalContractDelta": "source capabilities omit opt-in variation"
+        },
+        "static": {
+          "baseline": {
+            "bytes": 819,
+            "gzipBytes": 339,
+            "brotliBytes": 280,
+            "sha256": "806484dd1034148824b215ac4cff903305ecd444c717087e786326679814628f",
+            "retainedFiles": {
+              "projection:dist/symbols/ellipsis-horizontal.js": {
+                "bytesInOutput": 790
+              },
+              "<stdin>": {
+                "bytesInOutput": 8
+              }
+            },
+            "resolvedFiles": [
+              "<stdin>",
+              "projection:dist/ir/request.js",
+              "projection:dist/ir/symbol-runtime.js",
+              "projection:dist/ir/variation-runtime.js",
+              "projection:dist/symbols/ellipsis-horizontal.js"
+            ]
+          },
+          "actual": {
+            "bytes": 819,
+            "gzipBytes": 340,
+            "brotliBytes": 275,
+            "sha256": "b97d1b690b4061b02f136168336d200e751a4415ec6227ee013c08981c7489c8",
+            "retainedFiles": {
+              "projection:dist/ir/symbol-data/ellipsis-horizontal.js": {
+                "bytesInOutput": 790
+              },
+              "<stdin>": {
+                "bytesInOutput": 8
+              }
+            },
+            "resolvedFiles": [
+              "<stdin>",
+              "projection:dist/ir/request.js",
+              "projection:dist/ir/symbol-data/ellipsis-horizontal.js",
+              "projection:dist/ir/symbol-runtime.js",
+              "projection:dist/symbols/ellipsis-horizontal.js"
+            ]
+          },
+          "resultEqual": true
+        },
+        "variableGlyph": {
+          "baseline": {
+            "bytes": 27280,
+            "gzipBytes": 7425,
+            "brotliBytes": 6195,
+            "sha256": "d9cd4d8d081fbbeec5dc4874e38266a260c1d43835590c568c759d4765537628",
+            "retainedFiles": {
+              "projection:dist/ir/request.js": {
+                "bytesInOutput": 2364
+              },
+              "projection:dist/ir/symbol-runtime.js": {
+                "bytesInOutput": 918
+              },
+              "projection:dist/ir/variation-runtime.js": {
+                "bytesInOutput": 8832
+              },
+              "projection:dist/symbols/ellipsis-horizontal.js": {
+                "bytesInOutput": 15091
+              },
+              "<stdin>": {
+                "bytesInOutput": 53
+              }
+            },
+            "resolvedFiles": [
+              "<stdin>",
+              "projection:dist/ir/request.js",
+              "projection:dist/ir/symbol-runtime.js",
+              "projection:dist/ir/variation-runtime.js",
+              "projection:dist/symbols/ellipsis-horizontal.js"
+            ]
+          },
+          "actual": {
+            "bytes": 27288,
+            "gzipBytes": 7463,
+            "brotliBytes": 6209,
+            "sha256": "d9c83db8338640fe6773cfe25eb925934aa706edbf19dc90347f42f58d98afa2",
+            "retainedFiles": {
+              "projection:dist/ir/symbol-data/ellipsis-horizontal.js": {
+                "bytesInOutput": 9605
+              },
+              "projection:dist/ir/request.js": {
+                "bytesInOutput": 2364
+              },
+              "projection:dist/ir/symbol-runtime.js": {
+                "bytesInOutput": 918
+              },
+              "projection:dist/ir/variation-runtime.js": {
+                "bytesInOutput": 8838
+              },
+              "projection:dist/variations/ellipsis-horizontal.js": {
+                "bytesInOutput": 5488
+              },
+              "<stdin>": {
+                "bytesInOutput": 53
+              }
+            },
+            "resolvedFiles": [
+              "<stdin>",
+              "projection:dist/ir/request.js",
+              "projection:dist/ir/symbol-data/ellipsis-horizontal.js",
+              "projection:dist/ir/symbol-runtime.js",
+              "projection:dist/ir/variation-runtime.js",
+              "projection:dist/variations/ellipsis-horizontal.js"
+            ]
+          },
+          "resultEqual": true
+        },
+        "variableCaps": {
+          "baseline": {
+            "bytes": 10545,
+            "gzipBytes": 2160,
+            "brotliBytes": 1792,
+            "sha256": "20e5661dd7e6e253c20d1be696ecd8bf70913a7d99adb0aee2e04c9e1d780daf",
+            "retainedFiles": {
+              "projection:dist/ir/request.js": {
+                "bytesInOutput": 271
+              },
+              "projection:dist/ir/symbol-runtime.js": {
+                "bytesInOutput": 189
+              },
+              "projection:dist/symbols/ellipsis-horizontal.js": {
+                "bytesInOutput": 10054
+              },
+              "<stdin>": {
+                "bytesInOutput": 10
+              }
+            },
+            "resolvedFiles": [
+              "<stdin>",
+              "projection:dist/ir/request.js",
+              "projection:dist/ir/symbol-runtime.js",
+              "projection:dist/ir/variation-runtime.js",
+              "projection:dist/symbols/ellipsis-horizontal.js"
+            ]
+          },
+          "actual": {
+            "bytes": 10571,
+            "gzipBytes": 2167,
+            "brotliBytes": 1817,
+            "sha256": "d6b0f9529b9211e2f9e34a7c4518209fc32d258a36d51af3d4923eb5724ee950",
+            "retainedFiles": {
+              "projection:dist/ir/symbol-data/ellipsis-horizontal.js": {
+                "bytesInOutput": 6604
+              },
+              "projection:dist/ir/request.js": {
+                "bytesInOutput": 271
+              },
+              "projection:dist/ir/symbol-runtime.js": {
+                "bytesInOutput": 189
+              },
+              "projection:dist/variations/ellipsis-horizontal.js": {
+                "bytesInOutput": 3476
+              },
+              "<stdin>": {
+                "bytesInOutput": 10
+              }
+            },
+            "resolvedFiles": [
+              "<stdin>",
+              "projection:dist/ir/request.js",
+              "projection:dist/ir/symbol-data/ellipsis-horizontal.js",
+              "projection:dist/ir/symbol-runtime.js",
+              "projection:dist/ir/variation-runtime.js",
+              "projection:dist/variations/ellipsis-horizontal.js"
+            ]
+          },
+          "resultEqual": true
+        },
+        "variableBoth": {
+          "baseline": {
+            "bytes": 36024,
+            "gzipBytes": 8122,
+            "brotliBytes": 6761,
+            "sha256": "4b40f06981aeae2a19e1774e8e447b69ffa3f8b8c3c9195866f740e02b05cc3a",
+            "retainedFiles": {
+              "projection:dist/ir/request.js": {
+                "bytesInOutput": 2364
+              },
+              "projection:dist/ir/symbol-runtime.js": {
+                "bytesInOutput": 999
+              },
+              "projection:dist/ir/variation-runtime.js": {
+                "bytesInOutput": 8838
+              },
+              "projection:dist/symbols/ellipsis-horizontal.js": {
+                "bytesInOutput": 23742
+              },
+              "<stdin>": {
+                "bytesInOutput": 59
+              }
+            },
+            "resolvedFiles": [
+              "<stdin>",
+              "projection:dist/ir/request.js",
+              "projection:dist/ir/symbol-runtime.js",
+              "projection:dist/ir/variation-runtime.js",
+              "projection:dist/symbols/ellipsis-horizontal.js"
+            ]
+          },
+          "actual": {
+            "bytes": 36050,
+            "gzipBytes": 8167,
+            "brotliBytes": 6773,
+            "sha256": "734d157e8bdbd18f97cec2c0b3324dc8d1e46775e7ba6e3a585d8fca53f27f1e",
+            "retainedFiles": {
+              "projection:dist/ir/symbol-data/ellipsis-horizontal.js": {
+                "bytesInOutput": 14800
+              },
+              "projection:dist/ir/request.js": {
+                "bytesInOutput": 2366
+              },
+              "projection:dist/ir/symbol-runtime.js": {
+                "bytesInOutput": 999
+              },
+              "projection:dist/ir/variation-runtime.js": {
+                "bytesInOutput": 8844
+              },
+              "projection:dist/variations/ellipsis-horizontal.js": {
+                "bytesInOutput": 8960
+              },
+              "<stdin>": {
+                "bytesInOutput": 59
+              }
+            },
+            "resolvedFiles": [
+              "<stdin>",
+              "projection:dist/ir/request.js",
+              "projection:dist/ir/symbol-data/ellipsis-horizontal.js",
+              "projection:dist/ir/symbol-runtime.js",
+              "projection:dist/ir/variation-runtime.js",
+              "projection:dist/variations/ellipsis-horizontal.js"
+            ]
+          },
+          "resultEqual": true
+        }
+      },
+      "native": {
+        "baselineUnified": {
+          "loaded": [
+            "dist/symbols/ellipsis-horizontal.js",
+            "dist/ir/symbol-runtime.js",
+            "dist/ir/request.js",
+            "dist/ir/variation-runtime.js"
+          ],
+          "initialLoaded": [
+            "dist/symbols/ellipsis-horizontal.js",
+            "dist/ir/symbol-runtime.js",
+            "dist/ir/request.js",
+            "dist/ir/variation-runtime.js"
+          ],
+          "identity": null,
+          "privateRefused": true,
+          "defaultSvg": "<svg viewBox=\"0 0 24 24\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" fill=\"currentColor\"><path data-part=\"dot-leading\" data-role=\"content\" fill=\"currentColor\"  fill-rule=\"nonzero\" d=\"M4.99941 13.6004C5.88307 13.6004 6.59941 12.8841 6.59941 12.0004C6.59941 11.1168 5.88307 10.4004 4.99941 10.4004C4.11576 10.4004 3.39941 11.1168 3.39941 12.0004C3.39941 12.8841 4.11576 13.6004 4.99941 13.6004Z\"/><path data-part=\"dot-middle\" data-role=\"content\" fill=\"currentColor\"  fill-rule=\"nonzero\" d=\"M11.9994 13.6004C12.8831 13.6004 13.5994 12.8841 13.5994 12.0004C13.5994 11.1168 12.8831 10.4004 11.9994 10.4004C11.1157 10.4004 10.3994 11.1168 10.3994 12.0004C10.3994 12.8841 11.1157 13.6004 11.9994 13.6004Z\"/><path data-part=\"dot-trailing\" data-role=\"content\" fill=\"currentColor\"  fill-rule=\"nonzero\" d=\"M18.9994 13.6004C19.8831 13.6004 20.5994 12.8841 20.5994 12.0004C20.5994 11.1168 19.8831 10.4004 18.9994 10.4004C18.1157 10.4004 17.3994 11.1168 17.3994 12.0004C17.3994 12.8841 18.1157 13.6004 18.9994 13.6004Z\"/></svg>",
+          "capabilityVariation": true,
+          "totals": {
+            "bytes": 43532,
+            "gzipBytes": 10477,
+            "brotliBytes": 8504
+          },
+          "initialTotals": {
+            "bytes": 43532,
+            "gzipBytes": 10477,
+            "brotliBytes": 8504
+          },
+          "files": {
+            "dist/symbols/ellipsis-horizontal.js": {
+              "bytes": 26704,
+              "gzipBytes": 4002,
+              "brotliBytes": 3175,
+              "sha256": "e7db373f5af7d873815adde143543e9a5ccaad014bf9ddc60330df84f6874cba"
+            },
+            "dist/ir/symbol-runtime.js": {
+              "bytes": 1442,
+              "gzipBytes": 675,
+              "brotliBytes": 529,
+              "sha256": "8014d57d2a63b353d9d43e8c93c45571fce68209518afa2aa353f25277613ce1"
+            },
+            "dist/ir/request.js": {
+              "bytes": 2565,
+              "gzipBytes": 1028,
+              "brotliBytes": 831,
+              "sha256": "8e73d17ec23aed055444db85cb1fb30e35d3a894dfde304e80f4d52d97f7af97"
+            },
+            "dist/ir/variation-runtime.js": {
+              "bytes": 12821,
+              "gzipBytes": 4772,
+              "brotliBytes": 3969,
+              "sha256": "2391e371e993cd8fa53a63955f30883c332be32ff336c449a84d8be6a7192dd1"
+            }
+          }
+        },
+        "source": {
+          "loaded": [
+            "dist/symbols/ellipsis-horizontal.js",
+            "dist/ir/symbol-data/ellipsis-horizontal.js",
+            "dist/ir/symbol-runtime.js",
+            "dist/ir/request.js"
+          ],
+          "initialLoaded": [
+            "dist/symbols/ellipsis-horizontal.js",
+            "dist/ir/symbol-data/ellipsis-horizontal.js",
+            "dist/ir/symbol-runtime.js",
+            "dist/ir/request.js"
+          ],
+          "identity": null,
+          "privateRefused": true,
+          "defaultSvg": "<svg viewBox=\"0 0 24 24\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" fill=\"currentColor\"><path data-part=\"dot-leading\" data-role=\"content\" fill=\"currentColor\"  fill-rule=\"nonzero\" d=\"M4.99941 13.6004C5.88307 13.6004 6.59941 12.8841 6.59941 12.0004C6.59941 11.1168 5.88307 10.4004 4.99941 10.4004C4.11576 10.4004 3.39941 11.1168 3.39941 12.0004C3.39941 12.8841 4.11576 13.6004 4.99941 13.6004Z\"/><path data-part=\"dot-middle\" data-role=\"content\" fill=\"currentColor\"  fill-rule=\"nonzero\" d=\"M11.9994 13.6004C12.8831 13.6004 13.5994 12.8841 13.5994 12.0004C13.5994 11.1168 12.8831 10.4004 11.9994 10.4004C11.1157 10.4004 10.3994 11.1168 10.3994 12.0004C10.3994 12.8841 11.1157 13.6004 11.9994 13.6004Z\"/><path data-part=\"dot-trailing\" data-role=\"content\" fill=\"currentColor\"  fill-rule=\"nonzero\" d=\"M18.9994 13.6004C19.8831 13.6004 20.5994 12.8841 20.5994 12.0004C20.5994 11.1168 19.8831 10.4004 18.9994 10.4004C18.1157 10.4004 17.3994 11.1168 17.3994 12.0004C17.3994 12.8841 18.1157 13.6004 18.9994 13.6004Z\"/></svg>",
+          "capabilityVariation": false,
+          "totals": {
+            "bytes": 20501,
+            "gzipBytes": 4573,
+            "brotliBytes": 3671
+          },
+          "initialTotals": {
+            "bytes": 20501,
+            "gzipBytes": 4573,
+            "brotliBytes": 3671
+          },
+          "files": {
+            "dist/symbols/ellipsis-horizontal.js": {
+              "bytes": 535,
+              "gzipBytes": 224,
+              "brotliBytes": 176,
+              "sha256": "a464a1ccda46049783267f599e5cf80087c5085ae797e6977a0046f4a5189b5f"
+            },
+            "dist/ir/symbol-data/ellipsis-horizontal.js": {
+              "bytes": 15959,
+              "gzipBytes": 2646,
+              "brotliBytes": 2135,
+              "sha256": "22187d62f75641395fc9b1ec7570b8d34516748ed8cda9c2ef445b7904bc0163"
+            },
+            "dist/ir/symbol-runtime.js": {
+              "bytes": 1442,
+              "gzipBytes": 675,
+              "brotliBytes": 529,
+              "sha256": "8014d57d2a63b353d9d43e8c93c45571fce68209518afa2aa353f25277613ce1"
+            },
+            "dist/ir/request.js": {
+              "bytes": 2565,
+              "gzipBytes": 1028,
+              "brotliBytes": 831,
+              "sha256": "8e73d17ec23aed055444db85cb1fb30e35d3a894dfde304e80f4d52d97f7af97"
+            }
+          }
+        },
+        "variableAndSource": {
+          "loaded": [
+            "dist/variations/ellipsis-horizontal.js",
+            "dist/ir/symbol-data/ellipsis-horizontal.js",
+            "dist/ir/variation-runtime.js",
+            "dist/ir/symbol-runtime.js",
+            "dist/ir/request.js",
+            "dist/symbols/ellipsis-horizontal.js"
+          ],
+          "initialLoaded": [
+            "dist/variations/ellipsis-horizontal.js",
+            "dist/ir/symbol-data/ellipsis-horizontal.js",
+            "dist/ir/variation-runtime.js",
+            "dist/ir/symbol-runtime.js",
+            "dist/ir/request.js"
+          ],
+          "identity": true,
+          "privateRefused": true,
+          "defaultSvg": "<svg viewBox=\"0 0 24 24\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" fill=\"currentColor\"><path data-part=\"dot-leading\" data-role=\"content\" fill=\"currentColor\"  fill-rule=\"nonzero\" d=\"M4.99941 13.6004C5.88307 13.6004 6.59941 12.8841 6.59941 12.0004C6.59941 11.1168 5.88307 10.4004 4.99941 10.4004C4.11576 10.4004 3.39941 11.1168 3.39941 12.0004C3.39941 12.8841 4.11576 13.6004 4.99941 13.6004Z\"/><path data-part=\"dot-middle\" data-role=\"content\" fill=\"currentColor\"  fill-rule=\"nonzero\" d=\"M11.9994 13.6004C12.8831 13.6004 13.5994 12.8841 13.5994 12.0004C13.5994 11.1168 12.8831 10.4004 11.9994 10.4004C11.1157 10.4004 10.3994 11.1168 10.3994 12.0004C10.3994 12.8841 11.1157 13.6004 11.9994 13.6004Z\"/><path data-part=\"dot-trailing\" data-role=\"content\" fill=\"currentColor\"  fill-rule=\"nonzero\" d=\"M18.9994 13.6004C19.8831 13.6004 20.5994 12.8841 20.5994 12.0004C20.5994 11.1168 19.8831 10.4004 18.9994 10.4004C18.1157 10.4004 17.3994 11.1168 17.3994 12.0004C17.3994 12.8841 18.1157 13.6004 18.9994 13.6004Z\"/></svg>",
+          "capabilityVariation": true,
+          "totals": {
+            "bytes": 42852,
+            "gzipBytes": 10964,
+            "brotliBytes": 8980
+          },
+          "initialTotals": {
+            "bytes": 42317,
+            "gzipBytes": 10740,
+            "brotliBytes": 8804
+          },
+          "files": {
+            "dist/variations/ellipsis-horizontal.js": {
+              "bytes": 9530,
+              "gzipBytes": 1619,
+              "brotliBytes": 1340,
+              "sha256": "a0d3fd2d306fc8cc8fb19ceb756fce5b78ab5a5431734a43a9ad4afc855c2375"
+            },
+            "dist/ir/symbol-data/ellipsis-horizontal.js": {
+              "bytes": 15959,
+              "gzipBytes": 2646,
+              "brotliBytes": 2135,
+              "sha256": "22187d62f75641395fc9b1ec7570b8d34516748ed8cda9c2ef445b7904bc0163"
+            },
+            "dist/ir/variation-runtime.js": {
+              "bytes": 12821,
+              "gzipBytes": 4772,
+              "brotliBytes": 3969,
+              "sha256": "2391e371e993cd8fa53a63955f30883c332be32ff336c449a84d8be6a7192dd1"
+            },
+            "dist/ir/symbol-runtime.js": {
+              "bytes": 1442,
+              "gzipBytes": 675,
+              "brotliBytes": 529,
+              "sha256": "8014d57d2a63b353d9d43e8c93c45571fce68209518afa2aa353f25277613ce1"
+            },
+            "dist/ir/request.js": {
+              "bytes": 2565,
+              "gzipBytes": 1028,
+              "brotliBytes": 831,
+              "sha256": "8e73d17ec23aed055444db85cb1fb30e35d3a894dfde304e80f4d52d97f7af97"
+            },
+            "dist/symbols/ellipsis-horizontal.js": {
+              "bytes": 535,
+              "gzipBytes": 224,
+              "brotliBytes": 176,
+              "sha256": "a464a1ccda46049783267f599e5cf80087c5085ae797e6977a0046f4a5189b5f"
+            }
+          }
+        }
+      },
+      "declarations": {
+        "baselineUnified": {
+          "bytes": 718,
+          "gzipBytes": 257,
+          "brotliBytes": 206,
+          "sha256": "65202863a9966243a6a4a999c9627b36a9c20562ad241f0820543886b4503dd9"
+        },
+        "source": {
+          "bytes": 470,
+          "gzipBytes": 224,
+          "brotliBytes": 165,
+          "sha256": "0fb415a720f2ee3c20bb9114f2dd16cabbfb6840182bf2c8429f413bd0d67111"
+        },
+        "variable": {
+          "bytes": 692,
+          "gzipBytes": 252,
+          "brotliBytes": 186,
+          "sha256": "2cc0ff36438ac81fca2c2a07a6d713da2495ca2026b59af41bf05f05b6e9ce81"
+        }
+      },
+      "masters": {
+        "outline": {
+          "masterSha256": "2d809cc6e544a60ea8d97da5c3159b780263fd9637dba833a009a85c3cc6c681",
+          "geometrySha256": "b5e5a1509818edf6408ae7bea885fe2056174d2f624c499511a99792c11ffe6d"
+        },
+        "filled": {
+          "masterSha256": "117152d7d2fa2b9ffc41f864d1def693a238ffd50645949ecf11e49aa850142e",
+          "geometrySha256": "e6ba9389d340e577dfffafb3d0561e798f4faaa8998f941debd424149cea05ef"
+        }
+      }
+    },
+    {
+      "icon": "ellipsis-vertical",
+      "files": {
+        "baseline": {
+          "dist/ir/request.js": {
+            "bytes": 2565,
+            "gzipBytes": 1028,
+            "brotliBytes": 831,
+            "sha256": "8e73d17ec23aed055444db85cb1fb30e35d3a894dfde304e80f4d52d97f7af97"
+          },
+          "dist/ir/symbol-runtime.js": {
+            "bytes": 1442,
+            "gzipBytes": 675,
+            "brotliBytes": 529,
+            "sha256": "8014d57d2a63b353d9d43e8c93c45571fce68209518afa2aa353f25277613ce1"
+          },
+          "dist/ir/variation-runtime.js": {
+            "bytes": 12821,
+            "gzipBytes": 4772,
+            "brotliBytes": 3969,
+            "sha256": "2391e371e993cd8fa53a63955f30883c332be32ff336c449a84d8be6a7192dd1"
+          },
+          "dist/symbols/ellipsis-vertical.js": {
+            "bytes": 22142,
+            "gzipBytes": 3490,
+            "brotliBytes": 2816,
+            "sha256": "e2210ee7b36fb73f92f4061aa67442e460ec88116fe2a83195c7c435fc46f999"
+          }
+        },
+        "actual": {
+          "dist/ir/request.js": {
+            "bytes": 2565,
+            "gzipBytes": 1028,
+            "brotliBytes": 831,
+            "sha256": "8e73d17ec23aed055444db85cb1fb30e35d3a894dfde304e80f4d52d97f7af97"
+          },
+          "dist/ir/symbol-runtime.js": {
+            "bytes": 1442,
+            "gzipBytes": 675,
+            "brotliBytes": 529,
+            "sha256": "8014d57d2a63b353d9d43e8c93c45571fce68209518afa2aa353f25277613ce1"
+          },
+          "dist/ir/variation-runtime.js": {
+            "bytes": 12821,
+            "gzipBytes": 4772,
+            "brotliBytes": 3969,
+            "sha256": "2391e371e993cd8fa53a63955f30883c332be32ff336c449a84d8be6a7192dd1"
+          },
+          "dist/symbols/ellipsis-vertical.js": {
+            "bytes": 531,
+            "gzipBytes": 222,
+            "brotliBytes": 176,
+            "sha256": "f97f8d0830cf1043594bca2984da883536411dc70ba069d610911879ebfae397"
+          },
+          "dist/variations/ellipsis-vertical.js": {
+            "bytes": 9205,
+            "gzipBytes": 1581,
+            "brotliBytes": 1300,
+            "sha256": "aa6c8d86f7304dc3389e8717f41d06ba701646705868cd744172e5bc00ff64e7"
+          },
+          "dist/ir/symbol-data/ellipsis-vertical.js": {
+            "bytes": 12124,
+            "gzipBytes": 2154,
+            "brotliBytes": 1828,
+            "sha256": "438fe34342d890cc6c29fb517917749673906025742bb87fa44b5795a1f1f448"
+          }
+        }
+      },
+      "consumers": {
+        "sourceGlyph": {
+          "baseline": {
+            "bytes": 26985,
+            "gzipBytes": 7356,
+            "brotliBytes": 6180,
+            "sha256": "8061abc793cc7f9cf85f93d2737be16bb0dd29681eedcfa22f72a8719a0b3c50",
+            "retainedFiles": {
+              "projection:dist/ir/request.js": {
+                "bytesInOutput": 2364
+              },
+              "projection:dist/ir/symbol-runtime.js": {
+                "bytesInOutput": 918
+              },
+              "projection:dist/ir/variation-runtime.js": {
+                "bytesInOutput": 8832
+              },
+              "projection:dist/symbols/ellipsis-vertical.js": {
+                "bytesInOutput": 14838
+              },
+              "<stdin>": {
+                "bytesInOutput": 11
+              }
+            },
+            "resolvedFiles": [
+              "<stdin>",
+              "projection:dist/ir/request.js",
+              "projection:dist/ir/symbol-runtime.js",
+              "projection:dist/ir/variation-runtime.js",
+              "projection:dist/symbols/ellipsis-vertical.js"
+            ]
+          },
+          "actual": {
+            "bytes": 12911,
+            "gzipBytes": 3069,
+            "brotliBytes": 2543,
+            "sha256": "826120c40085056ab42fea305cf27e55cb62c20bb1a476a5c3311382aa19267a",
+            "retainedFiles": {
+              "projection:dist/ir/symbol-data/ellipsis-vertical.js": {
+                "bytesInOutput": 9548
+              },
+              "projection:dist/ir/request.js": {
+                "bytesInOutput": 2364
+              },
+              "projection:dist/ir/symbol-runtime.js": {
+                "bytesInOutput": 918
+              },
+              "projection:dist/symbols/ellipsis-vertical.js": {
+                "bytesInOutput": 50
+              },
+              "<stdin>": {
+                "bytesInOutput": 10
+              }
+            },
+            "resolvedFiles": [
+              "<stdin>",
+              "projection:dist/ir/request.js",
+              "projection:dist/ir/symbol-data/ellipsis-vertical.js",
+              "projection:dist/ir/symbol-runtime.js",
+              "projection:dist/symbols/ellipsis-vertical.js"
+            ]
+          },
+          "resultEqual": true
+        },
+        "sourceCaps": {
+          "baseline": {
+            "bytes": 5760,
+            "gzipBytes": 1642,
+            "brotliBytes": 1421,
+            "sha256": "225a1abc02712a14e21b4d15a7efdc604c82eba6102c25098888291323b248f2",
+            "retainedFiles": {
+              "projection:dist/ir/request.js": {
+                "bytesInOutput": 271
+              },
+              "projection:dist/ir/symbol-runtime.js": {
+                "bytesInOutput": 189
+              },
+              "projection:dist/symbols/ellipsis-vertical.js": {
+                "bytesInOutput": 5269
+              },
+              "<stdin>": {
+                "bytesInOutput": 10
+              }
+            },
+            "resolvedFiles": [
+              "<stdin>",
+              "projection:dist/ir/request.js",
+              "projection:dist/ir/symbol-runtime.js",
+              "projection:dist/ir/variation-runtime.js",
+              "projection:dist/symbols/ellipsis-vertical.js"
+            ]
+          },
+          "actual": {
+            "bytes": 2467,
+            "gzipBytes": 1103,
+            "brotliBytes": 968,
+            "sha256": "cc0c00f7019909eb519d8633ed5c42b2f748eea27703df58c13b938d598409c9",
+            "retainedFiles": {
+              "projection:dist/ir/symbol-data/ellipsis-vertical.js": {
+                "bytesInOutput": 1946
+              },
+              "projection:dist/ir/request.js": {
+                "bytesInOutput": 271
+              },
+              "projection:dist/ir/symbol-runtime.js": {
+                "bytesInOutput": 189
+              },
+              "projection:dist/symbols/ellipsis-vertical.js": {
+                "bytesInOutput": 30
+              },
+              "<stdin>": {
+                "bytesInOutput": 10
+              }
+            },
+            "resolvedFiles": [
+              "<stdin>",
+              "projection:dist/ir/request.js",
+              "projection:dist/ir/symbol-data/ellipsis-vertical.js",
+              "projection:dist/ir/symbol-runtime.js",
+              "projection:dist/symbols/ellipsis-vertical.js"
+            ]
+          },
+          "resultEqual": true,
+          "intentionalContractDelta": "source capabilities omit opt-in variation"
+        },
+        "sourceBoth": {
+          "baseline": {
+            "bytes": 30944,
+            "gzipBytes": 7636,
+            "brotliBytes": 6416,
+            "sha256": "1c64710db7a48706af7002776e01a6e1578175a8cc3c48dc7b9da8749af8ed66",
+            "retainedFiles": {
+              "projection:dist/ir/request.js": {
+                "bytesInOutput": 2364
+              },
+              "projection:dist/ir/symbol-runtime.js": {
+                "bytesInOutput": 999
+              },
+              "projection:dist/ir/variation-runtime.js": {
+                "bytesInOutput": 8838
+              },
+              "projection:dist/symbols/ellipsis-vertical.js": {
+                "bytesInOutput": 18704
+              },
+              "<stdin>": {
+                "bytesInOutput": 17
+              }
+            },
+            "resolvedFiles": [
+              "<stdin>",
+              "projection:dist/ir/request.js",
+              "projection:dist/ir/symbol-runtime.js",
+              "projection:dist/ir/variation-runtime.js",
+              "projection:dist/symbols/ellipsis-vertical.js"
+            ]
+          },
+          "actual": {
+            "bytes": 13561,
+            "gzipBytes": 3221,
+            "brotliBytes": 2699,
+            "sha256": "353a022fc72215b9d0c754ef511b20d2bbb48e4de38b953ac6c03573a1bfe0fe",
+            "retainedFiles": {
+              "projection:dist/ir/symbol-data/ellipsis-vertical.js": {
+                "bytesInOutput": 10085
+              },
+              "projection:dist/ir/request.js": {
+                "bytesInOutput": 2364
+              },
+              "projection:dist/ir/symbol-runtime.js": {
+                "bytesInOutput": 999
+              },
+              "projection:dist/symbols/ellipsis-vertical.js": {
+                "bytesInOutput": 76
+              },
+              "<stdin>": {
+                "bytesInOutput": 16
+              }
+            },
+            "resolvedFiles": [
+              "<stdin>",
+              "projection:dist/ir/request.js",
+              "projection:dist/ir/symbol-data/ellipsis-vertical.js",
+              "projection:dist/ir/symbol-runtime.js",
+              "projection:dist/symbols/ellipsis-vertical.js"
+            ]
+          },
+          "resultEqual": true,
+          "intentionalContractDelta": "source capabilities omit opt-in variation"
+        },
+        "static": {
+          "baseline": {
+            "bytes": 819,
+            "gzipBytes": 341,
+            "brotliBytes": 279,
+            "sha256": "356225274192c1cc77abdc58d1970da8e11f17007ac2742a350c17bd9ecd67e0",
+            "retainedFiles": {
+              "projection:dist/symbols/ellipsis-vertical.js": {
+                "bytesInOutput": 790
+              },
+              "<stdin>": {
+                "bytesInOutput": 8
+              }
+            },
+            "resolvedFiles": [
+              "<stdin>",
+              "projection:dist/ir/request.js",
+              "projection:dist/ir/symbol-runtime.js",
+              "projection:dist/ir/variation-runtime.js",
+              "projection:dist/symbols/ellipsis-vertical.js"
+            ]
+          },
+          "actual": {
+            "bytes": 819,
+            "gzipBytes": 341,
+            "brotliBytes": 283,
+            "sha256": "a36d2e63030b1953079ef34dbef3664e8bc0322a4dea2b97758884efc58118e1",
+            "retainedFiles": {
+              "projection:dist/ir/symbol-data/ellipsis-vertical.js": {
+                "bytesInOutput": 790
+              },
+              "<stdin>": {
+                "bytesInOutput": 8
+              }
+            },
+            "resolvedFiles": [
+              "<stdin>",
+              "projection:dist/ir/request.js",
+              "projection:dist/ir/symbol-data/ellipsis-vertical.js",
+              "projection:dist/ir/symbol-runtime.js",
+              "projection:dist/symbols/ellipsis-vertical.js"
+            ]
+          },
+          "resultEqual": true
+        },
+        "variableGlyph": {
+          "baseline": {
+            "bytes": 27027,
+            "gzipBytes": 7371,
+            "brotliBytes": 6216,
+            "sha256": "2f57ecd93fdaece6f3a77f10657475e5e80b8206a2ab477a3af880f2b1f76bc6",
+            "retainedFiles": {
+              "projection:dist/ir/request.js": {
+                "bytesInOutput": 2364
+              },
+              "projection:dist/ir/symbol-runtime.js": {
+                "bytesInOutput": 918
+              },
+              "projection:dist/ir/variation-runtime.js": {
+                "bytesInOutput": 8832
+              },
+              "projection:dist/symbols/ellipsis-vertical.js": {
+                "bytesInOutput": 14838
+              },
+              "<stdin>": {
+                "bytesInOutput": 53
+              }
+            },
+            "resolvedFiles": [
+              "<stdin>",
+              "projection:dist/ir/request.js",
+              "projection:dist/ir/symbol-runtime.js",
+              "projection:dist/ir/variation-runtime.js",
+              "projection:dist/symbols/ellipsis-vertical.js"
+            ]
+          },
+          "actual": {
+            "bytes": 27035,
+            "gzipBytes": 7406,
+            "brotliBytes": 6247,
+            "sha256": "2e83931f4ecd258d101d626de69c6c48fa3ebe7c4260c35bff7bdbf16f8bde4d",
+            "retainedFiles": {
+              "projection:dist/ir/symbol-data/ellipsis-vertical.js": {
+                "bytesInOutput": 9548
+              },
+              "projection:dist/ir/request.js": {
+                "bytesInOutput": 2364
+              },
+              "projection:dist/ir/symbol-runtime.js": {
+                "bytesInOutput": 918
+              },
+              "projection:dist/ir/variation-runtime.js": {
+                "bytesInOutput": 8838
+              },
+              "projection:dist/variations/ellipsis-vertical.js": {
+                "bytesInOutput": 5292
+              },
+              "<stdin>": {
+                "bytesInOutput": 53
+              }
+            },
+            "resolvedFiles": [
+              "<stdin>",
+              "projection:dist/ir/request.js",
+              "projection:dist/ir/symbol-data/ellipsis-vertical.js",
+              "projection:dist/ir/symbol-runtime.js",
+              "projection:dist/ir/variation-runtime.js",
+              "projection:dist/variations/ellipsis-vertical.js"
+            ]
+          },
+          "resultEqual": true
+        },
+        "variableCaps": {
+          "baseline": {
+            "bytes": 5760,
+            "gzipBytes": 1642,
+            "brotliBytes": 1421,
+            "sha256": "225a1abc02712a14e21b4d15a7efdc604c82eba6102c25098888291323b248f2",
+            "retainedFiles": {
+              "projection:dist/ir/request.js": {
+                "bytesInOutput": 271
+              },
+              "projection:dist/ir/symbol-runtime.js": {
+                "bytesInOutput": 189
+              },
+              "projection:dist/symbols/ellipsis-vertical.js": {
+                "bytesInOutput": 5269
+              },
+              "<stdin>": {
+                "bytesInOutput": 10
+              }
+            },
+            "resolvedFiles": [
+              "<stdin>",
+              "projection:dist/ir/request.js",
+              "projection:dist/ir/symbol-runtime.js",
+              "projection:dist/ir/variation-runtime.js",
+              "projection:dist/symbols/ellipsis-vertical.js"
+            ]
+          },
+          "actual": {
+            "bytes": 5786,
+            "gzipBytes": 1659,
+            "brotliBytes": 1437,
+            "sha256": "6ed83c49f3d4adc6f4992497f96fa08e30ff223a04154d47b4c7aa21d831f848",
+            "retainedFiles": {
+              "projection:dist/ir/symbol-data/ellipsis-vertical.js": {
+                "bytesInOutput": 1946
+              },
+              "projection:dist/ir/request.js": {
+                "bytesInOutput": 271
+              },
+              "projection:dist/ir/symbol-runtime.js": {
+                "bytesInOutput": 189
+              },
+              "projection:dist/variations/ellipsis-vertical.js": {
+                "bytesInOutput": 3349
+              },
+              "<stdin>": {
+                "bytesInOutput": 10
+              }
+            },
+            "resolvedFiles": [
+              "<stdin>",
+              "projection:dist/ir/request.js",
+              "projection:dist/ir/symbol-data/ellipsis-vertical.js",
+              "projection:dist/ir/symbol-runtime.js",
+              "projection:dist/ir/variation-runtime.js",
+              "projection:dist/variations/ellipsis-vertical.js"
+            ]
+          },
+          "resultEqual": true
+        },
+        "variableBoth": {
+          "baseline": {
+            "bytes": 30986,
+            "gzipBytes": 7649,
+            "brotliBytes": 6408,
+            "sha256": "d8e62c58fc9be9ccd6ca7e2645b161e2d246afaefe2d4c2e38d1d61d216f2427",
+            "retainedFiles": {
+              "projection:dist/ir/request.js": {
+                "bytesInOutput": 2364
+              },
+              "projection:dist/ir/symbol-runtime.js": {
+                "bytesInOutput": 999
+              },
+              "projection:dist/ir/variation-runtime.js": {
+                "bytesInOutput": 8838
+              },
+              "projection:dist/symbols/ellipsis-vertical.js": {
+                "bytesInOutput": 18704
+              },
+              "<stdin>": {
+                "bytesInOutput": 59
+              }
+            },
+            "resolvedFiles": [
+              "<stdin>",
+              "projection:dist/ir/request.js",
+              "projection:dist/ir/symbol-runtime.js",
+              "projection:dist/ir/variation-runtime.js",
+              "projection:dist/symbols/ellipsis-vertical.js"
+            ]
+          },
+          "actual": {
+            "bytes": 31012,
+            "gzipBytes": 7678,
+            "brotliBytes": 6452,
+            "sha256": "a64bba1154d08461e4eff6f112025bf809eab30192bad00c79acf35ea7153c1b",
+            "retainedFiles": {
+              "projection:dist/ir/symbol-data/ellipsis-vertical.js": {
+                "bytesInOutput": 10085
+              },
+              "projection:dist/ir/request.js": {
+                "bytesInOutput": 2366
+              },
+              "projection:dist/ir/symbol-runtime.js": {
+                "bytesInOutput": 999
+              },
+              "projection:dist/ir/variation-runtime.js": {
+                "bytesInOutput": 8844
+              },
+              "projection:dist/variations/ellipsis-vertical.js": {
+                "bytesInOutput": 8637
+              },
+              "<stdin>": {
+                "bytesInOutput": 59
+              }
+            },
+            "resolvedFiles": [
+              "<stdin>",
+              "projection:dist/ir/request.js",
+              "projection:dist/ir/symbol-data/ellipsis-vertical.js",
+              "projection:dist/ir/symbol-runtime.js",
+              "projection:dist/ir/variation-runtime.js",
+              "projection:dist/variations/ellipsis-vertical.js"
+            ]
+          },
+          "resultEqual": true
+        }
+      },
+      "native": {
+        "baselineUnified": {
+          "loaded": [
+            "dist/symbols/ellipsis-vertical.js",
+            "dist/ir/symbol-runtime.js",
+            "dist/ir/request.js",
+            "dist/ir/variation-runtime.js"
+          ],
+          "initialLoaded": [
+            "dist/symbols/ellipsis-vertical.js",
+            "dist/ir/symbol-runtime.js",
+            "dist/ir/request.js",
+            "dist/ir/variation-runtime.js"
+          ],
+          "identity": null,
+          "privateRefused": true,
+          "defaultSvg": "<svg viewBox=\"0 0 24 24\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" fill=\"currentColor\"><path data-part=\"dot-leading\" data-role=\"content\" fill=\"currentColor\"  fill-rule=\"nonzero\" d=\"M11.9994 6.60039C12.8831 6.60039 13.5994 5.88405 13.5994 5.00039C13.5994 4.11674 12.8831 3.40039 11.9994 3.40039C11.1157 3.40039 10.3994 4.11674 10.3994 5.00039C10.3994 5.88405 11.1157 6.60039 11.9994 6.60039Z\"/><path data-part=\"dot-middle\" data-role=\"content\" fill=\"currentColor\"  fill-rule=\"nonzero\" d=\"M11.9994 13.6004C12.8831 13.6004 13.5994 12.8841 13.5994 12.0004C13.5994 11.1168 12.8831 10.4004 11.9994 10.4004C11.1157 10.4004 10.3994 11.1168 10.3994 12.0004C10.3994 12.8841 11.1157 13.6004 11.9994 13.6004Z\"/><path data-part=\"dot-trailing\" data-role=\"content\" fill=\"currentColor\"  fill-rule=\"nonzero\" d=\"M11.9994 20.6004C12.8831 20.6004 13.5994 19.8841 13.5994 19.0004C13.5994 18.1168 12.8831 17.4004 11.9994 17.4004C11.1157 17.4004 10.3994 18.1168 10.3994 19.0004C10.3994 19.8841 11.1157 20.6004 11.9994 20.6004Z\"/></svg>",
+          "capabilityVariation": true,
+          "totals": {
+            "bytes": 38970,
+            "gzipBytes": 9965,
+            "brotliBytes": 8145
+          },
+          "initialTotals": {
+            "bytes": 38970,
+            "gzipBytes": 9965,
+            "brotliBytes": 8145
+          },
+          "files": {
+            "dist/symbols/ellipsis-vertical.js": {
+              "bytes": 22142,
+              "gzipBytes": 3490,
+              "brotliBytes": 2816,
+              "sha256": "e2210ee7b36fb73f92f4061aa67442e460ec88116fe2a83195c7c435fc46f999"
+            },
+            "dist/ir/symbol-runtime.js": {
+              "bytes": 1442,
+              "gzipBytes": 675,
+              "brotliBytes": 529,
+              "sha256": "8014d57d2a63b353d9d43e8c93c45571fce68209518afa2aa353f25277613ce1"
+            },
+            "dist/ir/request.js": {
+              "bytes": 2565,
+              "gzipBytes": 1028,
+              "brotliBytes": 831,
+              "sha256": "8e73d17ec23aed055444db85cb1fb30e35d3a894dfde304e80f4d52d97f7af97"
+            },
+            "dist/ir/variation-runtime.js": {
+              "bytes": 12821,
+              "gzipBytes": 4772,
+              "brotliBytes": 3969,
+              "sha256": "2391e371e993cd8fa53a63955f30883c332be32ff336c449a84d8be6a7192dd1"
+            }
+          }
+        },
+        "source": {
+          "loaded": [
+            "dist/symbols/ellipsis-vertical.js",
+            "dist/ir/symbol-data/ellipsis-vertical.js",
+            "dist/ir/symbol-runtime.js",
+            "dist/ir/request.js"
+          ],
+          "initialLoaded": [
+            "dist/symbols/ellipsis-vertical.js",
+            "dist/ir/symbol-data/ellipsis-vertical.js",
+            "dist/ir/symbol-runtime.js",
+            "dist/ir/request.js"
+          ],
+          "identity": null,
+          "privateRefused": true,
+          "defaultSvg": "<svg viewBox=\"0 0 24 24\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" fill=\"currentColor\"><path data-part=\"dot-leading\" data-role=\"content\" fill=\"currentColor\"  fill-rule=\"nonzero\" d=\"M11.9994 6.60039C12.8831 6.60039 13.5994 5.88405 13.5994 5.00039C13.5994 4.11674 12.8831 3.40039 11.9994 3.40039C11.1157 3.40039 10.3994 4.11674 10.3994 5.00039C10.3994 5.88405 11.1157 6.60039 11.9994 6.60039Z\"/><path data-part=\"dot-middle\" data-role=\"content\" fill=\"currentColor\"  fill-rule=\"nonzero\" d=\"M11.9994 13.6004C12.8831 13.6004 13.5994 12.8841 13.5994 12.0004C13.5994 11.1168 12.8831 10.4004 11.9994 10.4004C11.1157 10.4004 10.3994 11.1168 10.3994 12.0004C10.3994 12.8841 11.1157 13.6004 11.9994 13.6004Z\"/><path data-part=\"dot-trailing\" data-role=\"content\" fill=\"currentColor\"  fill-rule=\"nonzero\" d=\"M11.9994 20.6004C12.8831 20.6004 13.5994 19.8841 13.5994 19.0004C13.5994 18.1168 12.8831 17.4004 11.9994 17.4004C11.1157 17.4004 10.3994 18.1168 10.3994 19.0004C10.3994 19.8841 11.1157 20.6004 11.9994 20.6004Z\"/></svg>",
+          "capabilityVariation": false,
+          "totals": {
+            "bytes": 16662,
+            "gzipBytes": 4079,
+            "brotliBytes": 3364
+          },
+          "initialTotals": {
+            "bytes": 16662,
+            "gzipBytes": 4079,
+            "brotliBytes": 3364
+          },
+          "files": {
+            "dist/symbols/ellipsis-vertical.js": {
+              "bytes": 531,
+              "gzipBytes": 222,
+              "brotliBytes": 176,
+              "sha256": "f97f8d0830cf1043594bca2984da883536411dc70ba069d610911879ebfae397"
+            },
+            "dist/ir/symbol-data/ellipsis-vertical.js": {
+              "bytes": 12124,
+              "gzipBytes": 2154,
+              "brotliBytes": 1828,
+              "sha256": "438fe34342d890cc6c29fb517917749673906025742bb87fa44b5795a1f1f448"
+            },
+            "dist/ir/symbol-runtime.js": {
+              "bytes": 1442,
+              "gzipBytes": 675,
+              "brotliBytes": 529,
+              "sha256": "8014d57d2a63b353d9d43e8c93c45571fce68209518afa2aa353f25277613ce1"
+            },
+            "dist/ir/request.js": {
+              "bytes": 2565,
+              "gzipBytes": 1028,
+              "brotliBytes": 831,
+              "sha256": "8e73d17ec23aed055444db85cb1fb30e35d3a894dfde304e80f4d52d97f7af97"
+            }
+          }
+        },
+        "variableAndSource": {
+          "loaded": [
+            "dist/variations/ellipsis-vertical.js",
+            "dist/ir/symbol-data/ellipsis-vertical.js",
+            "dist/ir/variation-runtime.js",
+            "dist/ir/symbol-runtime.js",
+            "dist/ir/request.js",
+            "dist/symbols/ellipsis-vertical.js"
+          ],
+          "initialLoaded": [
+            "dist/variations/ellipsis-vertical.js",
+            "dist/ir/symbol-data/ellipsis-vertical.js",
+            "dist/ir/variation-runtime.js",
+            "dist/ir/symbol-runtime.js",
+            "dist/ir/request.js"
+          ],
+          "identity": true,
+          "privateRefused": true,
+          "defaultSvg": "<svg viewBox=\"0 0 24 24\" xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" fill=\"currentColor\"><path data-part=\"dot-leading\" data-role=\"content\" fill=\"currentColor\"  fill-rule=\"nonzero\" d=\"M11.9994 6.60039C12.8831 6.60039 13.5994 5.88405 13.5994 5.00039C13.5994 4.11674 12.8831 3.40039 11.9994 3.40039C11.1157 3.40039 10.3994 4.11674 10.3994 5.00039C10.3994 5.88405 11.1157 6.60039 11.9994 6.60039Z\"/><path data-part=\"dot-middle\" data-role=\"content\" fill=\"currentColor\"  fill-rule=\"nonzero\" d=\"M11.9994 13.6004C12.8831 13.6004 13.5994 12.8841 13.5994 12.0004C13.5994 11.1168 12.8831 10.4004 11.9994 10.4004C11.1157 10.4004 10.3994 11.1168 10.3994 12.0004C10.3994 12.8841 11.1157 13.6004 11.9994 13.6004Z\"/><path data-part=\"dot-trailing\" data-role=\"content\" fill=\"currentColor\"  fill-rule=\"nonzero\" d=\"M11.9994 20.6004C12.8831 20.6004 13.5994 19.8841 13.5994 19.0004C13.5994 18.1168 12.8831 17.4004 11.9994 17.4004C11.1157 17.4004 10.3994 18.1168 10.3994 19.0004C10.3994 19.8841 11.1157 20.6004 11.9994 20.6004Z\"/></svg>",
+          "capabilityVariation": true,
+          "totals": {
+            "bytes": 38688,
+            "gzipBytes": 10432,
+            "brotliBytes": 8633
+          },
+          "initialTotals": {
+            "bytes": 38157,
+            "gzipBytes": 10210,
+            "brotliBytes": 8457
+          },
+          "files": {
+            "dist/variations/ellipsis-vertical.js": {
+              "bytes": 9205,
+              "gzipBytes": 1581,
+              "brotliBytes": 1300,
+              "sha256": "aa6c8d86f7304dc3389e8717f41d06ba701646705868cd744172e5bc00ff64e7"
+            },
+            "dist/ir/symbol-data/ellipsis-vertical.js": {
+              "bytes": 12124,
+              "gzipBytes": 2154,
+              "brotliBytes": 1828,
+              "sha256": "438fe34342d890cc6c29fb517917749673906025742bb87fa44b5795a1f1f448"
+            },
+            "dist/ir/variation-runtime.js": {
+              "bytes": 12821,
+              "gzipBytes": 4772,
+              "brotliBytes": 3969,
+              "sha256": "2391e371e993cd8fa53a63955f30883c332be32ff336c449a84d8be6a7192dd1"
+            },
+            "dist/ir/symbol-runtime.js": {
+              "bytes": 1442,
+              "gzipBytes": 675,
+              "brotliBytes": 529,
+              "sha256": "8014d57d2a63b353d9d43e8c93c45571fce68209518afa2aa353f25277613ce1"
+            },
+            "dist/ir/request.js": {
+              "bytes": 2565,
+              "gzipBytes": 1028,
+              "brotliBytes": 831,
+              "sha256": "8e73d17ec23aed055444db85cb1fb30e35d3a894dfde304e80f4d52d97f7af97"
+            },
+            "dist/symbols/ellipsis-vertical.js": {
+              "bytes": 531,
+              "gzipBytes": 222,
+              "brotliBytes": 176,
+              "sha256": "f97f8d0830cf1043594bca2984da883536411dc70ba069d610911879ebfae397"
+            }
+          }
+        }
+      },
+      "declarations": {
+        "baselineUnified": {
+          "bytes": 712,
+          "gzipBytes": 257,
+          "brotliBytes": 205,
+          "sha256": "24fcb499d8623b462fb93d34f9dcfa0667fa5398b94076c1e5cbe6a9ccbac6cb"
+        },
+        "source": {
+          "bytes": 466,
+          "gzipBytes": 223,
+          "brotliBytes": 164,
+          "sha256": "5e2dfd46fc12d56d241a5d5b0a5cbb4c4749b63797733f216ccbe57efac4be2d"
+        },
+        "variable": {
+          "bytes": 686,
+          "gzipBytes": 252,
+          "brotliBytes": 210,
+          "sha256": "b84b4c210f1dfe311c984789de22ae71d577e89d4747a02724b2308cede3ec46"
+        }
+      },
+      "masters": {
+        "outline": {
+          "masterSha256": "c488b01da737ddf19adf1336b05a14c0c246d69d3456aea7e1c9dfe25e3ef9ed",
+          "geometrySha256": "d18a887ab1f3a39af597dc30d50e337c3d4cde54790a2137cd9ad20445a4f154"
+        },
+        "filled": {
+          "masterSha256": "a80a27a7e4d942c07bcd2f8788d88020ab67559113fde5083c10ab7461ba98ba",
+          "geometrySha256": "84fbaa25755863572f8bba7c172d4c896225d54bd049ef9e731ce7e6c8888373"
+        }
+      }
+    }
+  ]
+}

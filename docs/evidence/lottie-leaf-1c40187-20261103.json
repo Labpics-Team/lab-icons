@@ -1,0 +1,56 @@
+{
+  "sourceCommit": "1c40187b055a6f3884ff8532b8d81a477b10f4c9",
+  "scope": "two leaf artifacts; canonical bundle/renderer/fflate oracle; no full build, browser, tarball or benchmark",
+  "capturedAt": "2026-11-03T14:22:58.706Z",
+  "node": "v24.15.0",
+  "inputSha256": {
+    "src/lottie/runtime.ts": "b814bb583e6273d399923f6e2e2edabeee69af64721b3cb1898b34691049d635",
+    "scripts/lib/lottie-geometry.js": "7574f2174647702f883f323b3894be4e6f232f78d2884ce654b18fffab862d07",
+    "scripts/lib/generated-module.js": "dd945f00737e4800a5423a9ecd1df0de0c7564092f1f573cafecc4326c6ac573",
+    "scripts/build-ir.mjs": "39901c794b81df1233606280f92ddcba7ff44ae77f2259c66166ee16a4ea2083",
+    "scripts/check-package-size.js": "72c909f501c39ae3eec36f70ecc7fe4e47b26cbd47d4e283e9d3166602807c60",
+    "semantics/figma-baseline.json": "c1b585d916023c898405521c0e26c4241e5d72379e5300c92f2dc3e54b871ceb",
+    "semantics/author-anatomy.json": "756f8eafd796b07c6b7be30ecf719d9bfdae7ea1af591cb3360012bcf4df872f",
+    "pnpm-lock.yaml": "0bb03e42de120f119236cb4334f1bdd33659ce61bc8fc10901c65dff0d7df4c7"
+  },
+  "previousPolicies": {
+    "dist/ir/lottie-runtime.js": {
+      "baselineBytes": 9467,
+      "baselineGzipBytes": 3463,
+      "maxBytes": 11590,
+      "maxGzipBytes": 3776,
+      "allowedModules": [
+        "src/lottie/runtime.ts"
+      ],
+      "forbiddenNeedles": [
+        "sourceMappingURL"
+      ]
+    },
+    "dist/lottie/mic-circle.js": {
+      "baselineBytes": 4499,
+      "baselineGzipBytes": 1897,
+      "maxBytes": 7891,
+      "maxGzipBytes": 2845,
+      "allowedModules": [],
+      "forbiddenNeedles": [
+        "sourceMappingURL"
+      ]
+    }
+  },
+  "measurements": {
+    "dist/ir/lottie-runtime.js": {
+      "bytes": 10409,
+      "gzipBytes": 3724,
+      "modules": [
+        "src/lottie/runtime.ts"
+      ],
+      "sha256": "ecdbf014d72894e706dd231e90550c3fda56845fbf21c775025ce991818d6e5e"
+    },
+    "dist/lottie/mic-circle.js": {
+      "bytes": 7620,
+      "gzipBytes": 2706,
+      "modules": [],
+      "sha256": "85c589fb81211afbfb1e6e3dbe71832aaf9ce31ad9dbd4f226d3ceb8dcc6e971"
+    }
+  }
+}

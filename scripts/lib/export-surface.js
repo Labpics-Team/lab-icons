@@ -10,12 +10,27 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { expandReleaseExports } from './release-contract.js';
+
+/** Снимок обязан покрывать каждый публичный entrypoint до чтения runtime-файлов. */
+export function exportSurfaceEntryErrors(contract, surface) {
+  if (!surface || typeof surface !== 'object' || Array.isArray(surface)) {
+    return ['export-surface: снимок обязан быть объектом entrypoints'];
+  }
+  const entries = Object.keys(expandReleaseExports(contract));
+  const missing = entries.filter(entry => !Object.hasOwn(surface, entry));
+  const extra = Object.keys(surface).filter(entry => !entries.includes(entry));
+  return [
+    ...missing.map(entry => `export-surface: отсутствует публичный entrypoint ${entry}`),
+    ...extra.map(entry => `export-surface: неизвестный entrypoint ${entry}`),
+  ];
+}
 
 /** Entrypoints из контракта: subpath → относительный путь import-файла. */
 export function contractEntrypoints(root) {
   const contract = JSON.parse(readFileSync(join(root, 'release', 'contract.json'), 'utf8'));
   const entries = {};
-  for (const [subpath, target] of Object.entries(contract.exports)) {
+  for (const [subpath, target] of Object.entries(expandReleaseExports(contract))) {
     if (typeof target?.import !== 'string') {
       throw new Error(`export-surface: у entrypoint «${subpath}» нет поля import в release/contract.json`);
     }

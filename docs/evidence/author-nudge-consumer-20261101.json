@@ -1,0 +1,3159 @@
+{
+  "version": 1,
+  "recordedAt": "2026-11-01T07:39:37.724Z",
+  "sourceConsumer": {
+    "scope": "bounded source Observatory; no package/install/performance claim",
+    "baseline": false,
+    "baseSha": "fc2f1e163a8d04819aa98cbd9ed14975a8b892f1",
+    "sourceDigests": {
+      "src/motion/index.ts": "08b89ad89f48ed56e5b2271ffbf51bc8767e16d534ee68cd4e3e95add887fe34",
+      "src/ir/compiler.ts": "68e830aa5039a2f6c1b79850b74245e08a58888fb03e89f3ece71f409d0a6e72",
+      "src/core/motion-sampler.js": "2239d08ca2586fdd4c795f44c835fcb92cd9ab6cc2faccd01abcf463cc8d5093",
+      "src/ir/symbol-runtime.ts": "955d5b4d1b301f624b4307d300ccc09e6856a06db6e78efcec171144704befdf",
+      "src/ir/render.ts": "a5a7d90aa49521efd7d723f51418ba9bbf633e43c4997499de2bce055020e8a3",
+      "src/lottie/runtime.ts": "a88f788646ecfc5bbf1b8aa7502bc9ffedf900c96bc3af3cc79d9906b17250af",
+      "scripts/lib/author-anatomy.js": "cd9f53444c75a1eac4b5e6d8933f50303606e3476d9e3d80f60e4c7c7936a983",
+      "scripts/lib/author-baseline.js": "f72584f0fb7482194a4aab4c2fe2e0085ae684e7ed282091987a1c373333e848",
+      "scripts/lib/symbol-modules.js": "5253aed396cffb916ee201b03343e35cfcb2cad1f462114aa1d29ae0274946e3",
+      "scripts/lib/lottie-geometry.js": "fba65487e9e5398b85b138af033866164766a62afc58de9bef65e539d06a85e0",
+      "observatory/explorer.js": "ba172b427e561834bad2cf54838cac8e17cb1dcfa94a7014153945c436415b46",
+      "observatory/motion-execution.js": "32e5503b45f38bd705e7eda1d791b11dff94959e62059b0dbe9a8c1a0c925d69",
+      "scripts/bench/explorer-journey.js": "50eb6b1c1573031858a60546dbb19f12d3490f2f2fd2f083e0953ba6f3f28d14",
+      "semantics/figma-baseline.json": "c1b585d916023c898405521c0e26c4241e5d72379e5300c92f2dc3e54b871ceb",
+      "semantics/author-anatomy.json": "6bce0e6e04a420b19fd692f34d04b339278239471554038fc643cd121b7bc423"
+    },
+    "executorSha256": "32e5503b45f38bd705e7eda1d791b11dff94959e62059b0dbe9a8c1a0c925d69",
+    "browser": "156.0.8078.74",
+    "publicMotion": {
+      "name": "@labpics/motion",
+      "version": "0.5.0"
+    },
+    "errors": [],
+    "pass": true,
+    "report": {
+      "version": 1,
+      "scope": "source Observatory consumer journey; bounded controls, no performance claim",
+      "source": {
+        "kind": "figma",
+        "name": "🧪Lab UI (v2.1)",
+        "fileKey": "LuaiBd4anRi4DMZayKAnY2",
+        "version": "2416636003859748575",
+        "lastModified": "2026-11-01T01:18:02Z",
+        "pageId": "4045:632",
+        "frames": {
+          "outline": "8513:1000",
+          "filled": "6397:2241"
+        },
+        "capturedAt": "2026-11-01T02:22:39.173Z",
+        "geometrySnapshotSha256": "622f0ccb116c0dad940b6d11b590ca78952ee460c42cad69f8c3d0cc8353c967"
+      },
+      "counts": {
+        "glyphs": 330,
+        "variants": 660
+      },
+      "executionIdentity": {
+        "package": "@labpics/motion",
+        "version": "0.5.0"
+      },
+      "authority": [
+        {
+          "name": "reload",
+          "variant": "outline",
+          "author": {
+            "kind": "figma",
+            "fileKey": "LuaiBd4anRi4DMZayKAnY2",
+            "version": "2416636003859748575",
+            "nodeId": "6431:3898",
+            "nodeSha256": "feaaeb86b97b3013999ca9054bc166caf9b8e38bc62af0d5926b153d92f6c140",
+            "masterSha256": "9a6784d21805bb7374a37a62fab427be8a49b985bdb5ffc04876bfb3ed93bd80",
+            "normalizedSha256": "66ae7016611a7c639ac4b666959308e485fd4a90f9d029f5607eaccf5a121513",
+            "pathFingerprintSha256": "0539b295f7e1087d3f3fb12524d578c5cdfb0a19655ea99786cee975b52b8f7c"
+          },
+          "anatomy": {
+            "version": 1,
+            "annotationSha256": "1a1fb97986966df057cf0a50e67872e82ac3e4f9ed562e830bb9b61bfc022d5c",
+            "masterSha256": "9a6784d21805bb7374a37a62fab427be8a49b985bdb5ffc04876bfb3ed93bd80",
+            "pathFingerprintSha256": "0539b295f7e1087d3f3fb12524d578c5cdfb0a19655ea99786cee975b52b8f7c"
+          }
+        },
+        {
+          "name": "reload",
+          "variant": "filled",
+          "author": {
+            "kind": "figma",
+            "fileKey": "LuaiBd4anRi4DMZayKAnY2",
+            "version": "2416636003859748575",
+            "nodeId": "6413:79",
+            "nodeSha256": "73a64f7a2fb9ec448c00f8b627e2bb8dc744a0e5c0ec3cac504223792cb17601",
+            "masterSha256": "3c7a57edcdac59581175696289e383f78ec43381bcbb72ed49c5034ae8ae871a",
+            "normalizedSha256": "a52aa08e898c62cdf5cb57a73f67ad2385cd0b3b6ff3fd2a144741d04e83a322",
+            "pathFingerprintSha256": "3441f62d5640362954f6229439a867913aee6aae98c463ee11a326419b958c62"
+          },
+          "anatomy": {
+            "version": 1,
+            "annotationSha256": "0be0aa7b6b29ca6ee7763e212664f219fdc7d02bcc75206f977b329ba652865c",
+            "masterSha256": "3c7a57edcdac59581175696289e383f78ec43381bcbb72ed49c5034ae8ae871a",
+            "pathFingerprintSha256": "3441f62d5640362954f6229439a867913aee6aae98c463ee11a326419b958c62"
+          }
+        },
+        {
+          "name": "refresh",
+          "variant": "outline",
+          "author": {
+            "kind": "figma",
+            "fileKey": "LuaiBd4anRi4DMZayKAnY2",
+            "version": "2416636003859748575",
+            "nodeId": "6431:3984",
+            "nodeSha256": "38513cc267c2932f7e370a59a2215a206d2f1b8842e37c6a855212b3fe056e1e",
+            "masterSha256": "197a388b68b7038a978d1653f5c00a8c0676326a5ec5b74cc3b461c7c551e3af",
+            "normalizedSha256": "e9e057c8ca80cd6d07a8489f96d3a6f55655fdc5ad913417ecd5e09b1884f0c2",
+            "pathFingerprintSha256": "e8d0dff9194dca19f6223ee84e9c644f99dab9b10fe92da733acac9937fe8202"
+          },
+          "anatomy": {
+            "version": 1,
+            "annotationSha256": "efad4b11ef5c653acf4102d31ca3a9dc7a83c2f7f760a76698a0ab9cd4d7452f",
+            "masterSha256": "197a388b68b7038a978d1653f5c00a8c0676326a5ec5b74cc3b461c7c551e3af",
+            "pathFingerprintSha256": "e8d0dff9194dca19f6223ee84e9c644f99dab9b10fe92da733acac9937fe8202"
+          }
+        },
+        {
+          "name": "refresh",
+          "variant": "filled",
+          "author": {
+            "kind": "figma",
+            "fileKey": "LuaiBd4anRi4DMZayKAnY2",
+            "version": "2416636003859748575",
+            "nodeId": "6413:73",
+            "nodeSha256": "b7344400b024cdcd26d6f8fe8a09c96cc0c8f45b60dd54609e89512c9b45d8ff",
+            "masterSha256": "d087792f28dbe52e5fe4937a17885a8e502e2618a03eec5d8c0323cac560227a",
+            "normalizedSha256": "249df831e8b9cf9cfac19a146851e8634120eba7e58f28eadb87e25a24ed7596",
+            "pathFingerprintSha256": "210a3be010a2fa6118adcb8c41b7ab792533075783fc1cac2875a04ad4505d6a"
+          },
+          "anatomy": {
+            "version": 1,
+            "annotationSha256": "0d57f977afbb1c776f643f08177725aeb2f03294a977be635220fd925415f556",
+            "masterSha256": "d087792f28dbe52e5fe4937a17885a8e502e2618a03eec5d8c0323cac560227a",
+            "pathFingerprintSha256": "210a3be010a2fa6118adcb8c41b7ab792533075783fc1cac2875a04ad4505d6a"
+          }
+        },
+        {
+          "name": "chevron-back",
+          "variant": "outline",
+          "author": {
+            "kind": "figma",
+            "fileKey": "LuaiBd4anRi4DMZayKAnY2",
+            "version": "2416636003859748575",
+            "nodeId": "6431:4013",
+            "nodeSha256": "1b9538dcb6a8443955bc4c1dbd6c75354d9c17e9601d0ad31b93b98238ef8469",
+            "masterSha256": "4d678dbd20a63fb971d4607b5a52b175a24c2d87b878e220fa4c66562af92aac",
+            "normalizedSha256": "a3485376ae9627666492e65c033f6a7a6a10d78f4cd174bfb572a17725af3c1f",
+            "pathFingerprintSha256": "03bc0ac36ee41fcb13048497bb258e83d602fcfa91158cb1d30f5b0b2e8a7bda"
+          },
+          "anatomy": {
+            "version": 1,
+            "annotationSha256": "06986d8df974773aade6041e991bfe40fbf33f8f1783075f9e9a6dde8e6a5fa5",
+            "masterSha256": "4d678dbd20a63fb971d4607b5a52b175a24c2d87b878e220fa4c66562af92aac",
+            "pathFingerprintSha256": "03bc0ac36ee41fcb13048497bb258e83d602fcfa91158cb1d30f5b0b2e8a7bda"
+          }
+        },
+        {
+          "name": "chevron-back",
+          "variant": "filled",
+          "author": {
+            "kind": "figma",
+            "fileKey": "LuaiBd4anRi4DMZayKAnY2",
+            "version": "2416636003859748575",
+            "nodeId": "6413:148",
+            "nodeSha256": "afef5e22b10d654217f2987981027b35c88a2ee6593feb2c277ea12508f2ab54",
+            "masterSha256": "8172c40779ddfef12f2bfd711027f2942f229716e64ab1ab70fffbda1e65bc61",
+            "normalizedSha256": "ff2b30b2d636afa009c40c78d603dca11210aafca9d74a7cc6b08b1d94753666",
+            "pathFingerprintSha256": "ac80b0f2707f7f6b4c001b429c603f0013ba6437c4471d161d7d80a107516e0c"
+          },
+          "anatomy": {
+            "version": 1,
+            "annotationSha256": "dda30f28d0b1ee11ec5b578affff2480514b7c4cf04628a47d3ed0165456fe6d",
+            "masterSha256": "8172c40779ddfef12f2bfd711027f2942f229716e64ab1ab70fffbda1e65bc61",
+            "pathFingerprintSha256": "ac80b0f2707f7f6b4c001b429c603f0013ba6437c4471d161d7d80a107516e0c"
+          }
+        },
+        {
+          "name": "chevron-forward",
+          "variant": "outline",
+          "author": {
+            "kind": "figma",
+            "fileKey": "LuaiBd4anRi4DMZayKAnY2",
+            "version": "2416636003859748575",
+            "nodeId": "6431:4079",
+            "nodeSha256": "d1821bf3d941c6f25b559fb8fd1f0946133509125b30ea5c03c3534da27b0c61",
+            "masterSha256": "cd80e4cba160b97284705d2f4940d64ed7f775adc716bd72145ada4dd2e6843f",
+            "normalizedSha256": "2e40953b463a5f8b7cada059a03e5be6c772aa3d7df34a3fa55e8df4601d59bb",
+            "pathFingerprintSha256": "c262d82bec693c8b8be60f28b966444435076701a0c4c53ff7646a48241b2ad5"
+          },
+          "anatomy": {
+            "version": 1,
+            "annotationSha256": "910625f1a6a30069596de554d02749b19923db0c345a58712ee11117d5455eef",
+            "masterSha256": "cd80e4cba160b97284705d2f4940d64ed7f775adc716bd72145ada4dd2e6843f",
+            "pathFingerprintSha256": "c262d82bec693c8b8be60f28b966444435076701a0c4c53ff7646a48241b2ad5"
+          }
+        },
+        {
+          "name": "chevron-forward",
+          "variant": "filled",
+          "author": {
+            "kind": "figma",
+            "fileKey": "LuaiBd4anRi4DMZayKAnY2",
+            "version": "2416636003859748575",
+            "nodeId": "6413:256",
+            "nodeSha256": "8976e8ca632245f7c9e07c0baa2cf61f6145340a01722a917c2e67f3bbf16746",
+            "masterSha256": "273045f9d1d71dfd6fda2ea8de0503ab808c486c9fd63e72fcc386205f87faa6",
+            "normalizedSha256": "c9c028ebfff1f6f78a8a3b1a9ac052ca1f3f5a98a363e5d30000e1f488a0633f",
+            "pathFingerprintSha256": "75b86620899839c4d6291a74a76267eb85775fb54f3dd6ea9dc00a818ab77ff0"
+          },
+          "anatomy": {
+            "version": 1,
+            "annotationSha256": "6293535723877a36028addcc9d9e33ae5eb2e4e8b0c8a5977dc1ad054f5a8342",
+            "masterSha256": "273045f9d1d71dfd6fda2ea8de0503ab808c486c9fd63e72fcc386205f87faa6",
+            "pathFingerprintSha256": "75b86620899839c4d6291a74a76267eb85775fb54f3dd6ea9dc00a818ab77ff0"
+          }
+        },
+        {
+          "name": "chevron-up",
+          "variant": "outline",
+          "author": {
+            "kind": "figma",
+            "fileKey": "LuaiBd4anRi4DMZayKAnY2",
+            "version": "2416636003859748575",
+            "nodeId": "6431:4086",
+            "nodeSha256": "6638183bd8e8791fc38af36bf0502c46b1f8f1b0260eed572cfdc834ac0f2747",
+            "masterSha256": "107044a3c02856114c6c29dd37a7babdb51992f6e9a6f319b08586d4217899da",
+            "normalizedSha256": "1f31cb42e8607b90b37811d369891d81f359aeaecfc1594e9bbd5575cbf4b295",
+            "pathFingerprintSha256": "21f21801840f578475d7fe2641c94fa9d75a1bde35e9e5f79fcffa0724a944fb"
+          },
+          "anatomy": {
+            "version": 1,
+            "annotationSha256": "82fa8f7452603f5aa3a0d018b63b60b7d436951194ca55a224069453d11ef06c",
+            "masterSha256": "107044a3c02856114c6c29dd37a7babdb51992f6e9a6f319b08586d4217899da",
+            "pathFingerprintSha256": "21f21801840f578475d7fe2641c94fa9d75a1bde35e9e5f79fcffa0724a944fb"
+          }
+        },
+        {
+          "name": "chevron-up",
+          "variant": "filled",
+          "author": {
+            "kind": "figma",
+            "fileKey": "LuaiBd4anRi4DMZayKAnY2",
+            "version": "2416636003859748575",
+            "nodeId": "6413:165",
+            "nodeSha256": "9f3003045b1c39203b4caf24ce3ee9035b123e1f3e56ea8063a927c8655c0bec",
+            "masterSha256": "d1798c339f16ac99d6bdcf69b4c33011e4051a3854cc32fa793d9c8fc037bd7c",
+            "normalizedSha256": "e11e0e8645e0b9eb394fda440bd1d6b582d8d048c2626af64379d48bbd9a4eac",
+            "pathFingerprintSha256": "2336e11224c7afac65d05ca1fb2e5ad595d2c53db6e92d8d7f4759eaf8b87997"
+          },
+          "anatomy": {
+            "version": 1,
+            "annotationSha256": "0870681308dca503e4e9ac60c87cfc18690a410b270234acacace459f28beeb9",
+            "masterSha256": "d1798c339f16ac99d6bdcf69b4c33011e4051a3854cc32fa793d9c8fc037bd7c",
+            "pathFingerprintSha256": "2336e11224c7afac65d05ca1fb2e5ad595d2c53db6e92d8d7f4759eaf8b87997"
+          }
+        },
+        {
+          "name": "chevron-down",
+          "variant": "outline",
+          "author": {
+            "kind": "figma",
+            "fileKey": "LuaiBd4anRi4DMZayKAnY2",
+            "version": "2416636003859748575",
+            "nodeId": "6431:3752",
+            "nodeSha256": "4b8c05fb321707026af03982e95bfa2b2b764fe75298ae1dd8a2bb7a2f84796b",
+            "masterSha256": "9663e5889fd22fc96ef73c049f1730107fd1d087c6620a0931c960ef6519545a",
+            "normalizedSha256": "694335de788c8672dce8e4ab222b89d2992e44900997749e80ff455dbab911a2",
+            "pathFingerprintSha256": "f4c498c6b4cd3937299f081bb58627ed980ad79c5df650c4d2bbaa657acbcd70"
+          },
+          "anatomy": {
+            "version": 1,
+            "annotationSha256": "1b96fe21110a0de41a43205a5fa5bd2c68a7e0a58f27a50d33440b0fcc03e889",
+            "masterSha256": "9663e5889fd22fc96ef73c049f1730107fd1d087c6620a0931c960ef6519545a",
+            "pathFingerprintSha256": "f4c498c6b4cd3937299f081bb58627ed980ad79c5df650c4d2bbaa657acbcd70"
+          }
+        },
+        {
+          "name": "chevron-down",
+          "variant": "filled",
+          "author": {
+            "kind": "figma",
+            "fileKey": "LuaiBd4anRi4DMZayKAnY2",
+            "version": "2416636003859748575",
+            "nodeId": "6413:29",
+            "nodeSha256": "5bc6e84c2ea0da93dfb089448c9ad525042d6c5a7d1760e63c3d5b5efbe825c1",
+            "masterSha256": "235d673da7387588df6b01d83e470064d6fbc789a4c5b6eeead3554c375bbda3",
+            "normalizedSha256": "b96e86ecbfe0e35f4d04589988e2ef7923ae4d5c78157215443ffd8c19ccb4da",
+            "pathFingerprintSha256": "ad689e3a38486c6e0bc904232580e2b0d4f25112e5ef6b37461f78f4abbbf742"
+          },
+          "anatomy": {
+            "version": 1,
+            "annotationSha256": "070db28b62722db867304a88288260bd200df21a8b8f4d3afb7dfcc9fcdfc0ad",
+            "masterSha256": "235d673da7387588df6b01d83e470064d6fbc789a4c5b6eeead3554c375bbda3",
+            "pathFingerprintSha256": "ad689e3a38486c6e0bc904232580e2b0d4f25112e5ef6b37461f78f4abbbf742"
+          }
+        },
+        {
+          "name": "arrow-back",
+          "variant": "outline",
+          "author": {
+            "kind": "figma",
+            "fileKey": "LuaiBd4anRi4DMZayKAnY2",
+            "version": "2416636003859748575",
+            "nodeId": "6431:4023",
+            "nodeSha256": "e98ff19e0ca8ed59da975449e64e18f596236cfaddd9123ce412f73518196a37",
+            "masterSha256": "a1e403feb8fc7ab1913eceffd8da5c5c07ae6e1ea77d671daf420f6cec231771",
+            "normalizedSha256": "c154517940dce475bf56b9c70601812bad69ee068d10478ac16359ba5d541957",
+            "pathFingerprintSha256": "edefa0fbad31b4a4d8ea25532722ab8722a0717adbe7bbf9da495a5d79c3d1c5"
+          },
+          "anatomy": {
+            "version": 1,
+            "annotationSha256": "12bf5c5fe43a768fcf20486e7dd403f7602d467aa2a9e387f614f2a3cc1460ca",
+            "masterSha256": "a1e403feb8fc7ab1913eceffd8da5c5c07ae6e1ea77d671daf420f6cec231771",
+            "pathFingerprintSha256": "edefa0fbad31b4a4d8ea25532722ab8722a0717adbe7bbf9da495a5d79c3d1c5"
+          }
+        },
+        {
+          "name": "arrow-back",
+          "variant": "filled",
+          "author": {
+            "kind": "figma",
+            "fileKey": "LuaiBd4anRi4DMZayKAnY2",
+            "version": "2416636003859748575",
+            "nodeId": "6413:279",
+            "nodeSha256": "34db95905027fe2a1993f1f64339e4fda49d0e4eab67bd3cf9a6684536d74b67",
+            "masterSha256": "e3b43f67da4993fd70057cdd1a2c8cf9e5c300b8cc6c8d8ec864d78d63ba496b",
+            "normalizedSha256": "d8a1554d90acf99b275a5899bc362442562f26727537230bff86baa939319d8f",
+            "pathFingerprintSha256": "1db6ca3784e429048154eed1616e4bc30611c119341ecb8067dbeef8e5c307c0"
+          },
+          "anatomy": {
+            "version": 1,
+            "annotationSha256": "a248995eefe9e708b4f00905281db90faec52fcaffa692245c9e82fcdccf31b2",
+            "masterSha256": "e3b43f67da4993fd70057cdd1a2c8cf9e5c300b8cc6c8d8ec864d78d63ba496b",
+            "pathFingerprintSha256": "1db6ca3784e429048154eed1616e4bc30611c119341ecb8067dbeef8e5c307c0"
+          }
+        },
+        {
+          "name": "arrow-forward",
+          "variant": "outline",
+          "author": {
+            "kind": "figma",
+            "fileKey": "LuaiBd4anRi4DMZayKAnY2",
+            "version": "2416636003859748575",
+            "nodeId": "6431:3911",
+            "nodeSha256": "3ac6be7224174b52a5782833c48117b0b9f988884c3503b2f6d850d1be57f0f3",
+            "masterSha256": "e44d4d1e0b5cab5b42dc254a8a1a39ebbca17ee59c3fc9343a5c48e563a98b1d",
+            "normalizedSha256": "ebefd2515b0eabd4645716bf3ad0e570da66a251be8386954fab1e8471edf578",
+            "pathFingerprintSha256": "b21b90aaf06fcf1fc4b3213d468fa1e5ef6489776a5fd24a35714a91c0cf8522"
+          },
+          "anatomy": {
+            "version": 1,
+            "annotationSha256": "e8e3d5e5c3b920c0cb5044a6f9b487dac08161bc247514c14c05c49c5b28f580",
+            "masterSha256": "e44d4d1e0b5cab5b42dc254a8a1a39ebbca17ee59c3fc9343a5c48e563a98b1d",
+            "pathFingerprintSha256": "b21b90aaf06fcf1fc4b3213d468fa1e5ef6489776a5fd24a35714a91c0cf8522"
+          }
+        },
+        {
+          "name": "arrow-forward",
+          "variant": "filled",
+          "author": {
+            "kind": "figma",
+            "fileKey": "LuaiBd4anRi4DMZayKAnY2",
+            "version": "2416636003859748575",
+            "nodeId": "6413:302",
+            "nodeSha256": "88c7a06f4478070bf792a003c049c702161e42e9dd87ffae90f5ff55770a800c",
+            "masterSha256": "76027d7d4b6ef86c899bb4faa0553bf5b091b157820791890c37c4d6addab15b",
+            "normalizedSha256": "bb11e16d7b027e0ac1cce72686ef220ab2a1ed7ff4fa2a348c4c0d2971389d4a",
+            "pathFingerprintSha256": "3248c9f712c515ea2482b750383b066d5d26c614129ac439c263500946e53473"
+          },
+          "anatomy": {
+            "version": 1,
+            "annotationSha256": "124d55eb2ffac2776c14fcdf7425433eb29246f33f403ce0432db3c5bd7b0964",
+            "masterSha256": "76027d7d4b6ef86c899bb4faa0553bf5b091b157820791890c37c4d6addab15b",
+            "pathFingerprintSha256": "3248c9f712c515ea2482b750383b066d5d26c614129ac439c263500946e53473"
+          }
+        },
+        {
+          "name": "arrow-up",
+          "variant": "outline",
+          "author": {
+            "kind": "figma",
+            "fileKey": "LuaiBd4anRi4DMZayKAnY2",
+            "version": "2416636003859748575",
+            "nodeId": "6431:4021",
+            "nodeSha256": "163bfb4a2e42c5539ac9f37234fa2f5a6b657d22facaeedef61ae39a892b7247",
+            "masterSha256": "507d6321146eec1de6b2a877d1c6d0e5c82363dc299902fbb43be2709bc122df",
+            "normalizedSha256": "c6f0b32245eaf91c53c526f6e26d8618167d4dc3e8ee2f7a5e2311534c3c119e",
+            "pathFingerprintSha256": "faa5bb604d280b11586d89e0868b48ed3775403eab0fd4907c88a84cf834f582"
+          },
+          "anatomy": {
+            "version": 1,
+            "annotationSha256": "14bd01a742ab9d803512776642cf15ba4afa1ca39265c567e47272595ec1b1ea",
+            "masterSha256": "507d6321146eec1de6b2a877d1c6d0e5c82363dc299902fbb43be2709bc122df",
+            "pathFingerprintSha256": "faa5bb604d280b11586d89e0868b48ed3775403eab0fd4907c88a84cf834f582"
+          }
+        },
+        {
+          "name": "arrow-up",
+          "variant": "filled",
+          "author": {
+            "kind": "figma",
+            "fileKey": "LuaiBd4anRi4DMZayKAnY2",
+            "version": "2416636003859748575",
+            "nodeId": "6413:274",
+            "nodeSha256": "2b6a8aba26fc77bb3eb597fcaadf123728a5ed106924242d0d2d2a9e163eddaa",
+            "masterSha256": "d6ff20fb7c6029f941fbaf9d72c2c1b05333c7a2dcd6723c71a482b569ca500e",
+            "normalizedSha256": "5727f313e9c8d1f7413c7fa2c05c75b4a7213c3e2a4b129d3fe1e201aa6e51d6",
+            "pathFingerprintSha256": "9f5786395e025a4e1665f9e4f8ea124fae3fb1bf0faccc27c7bcd4b56a7ecc33"
+          },
+          "anatomy": {
+            "version": 1,
+            "annotationSha256": "3ac7a28deb48ebfd1a661dab1ae9f096836c373464c64775b3ee3fbfbf614d44",
+            "masterSha256": "d6ff20fb7c6029f941fbaf9d72c2c1b05333c7a2dcd6723c71a482b569ca500e",
+            "pathFingerprintSha256": "9f5786395e025a4e1665f9e4f8ea124fae3fb1bf0faccc27c7bcd4b56a7ecc33"
+          }
+        },
+        {
+          "name": "arrow-down",
+          "variant": "outline",
+          "author": {
+            "kind": "figma",
+            "fileKey": "LuaiBd4anRi4DMZayKAnY2",
+            "version": "2416636003859748575",
+            "nodeId": "6431:4025",
+            "nodeSha256": "a908003cdd01e45d6cf1183ca834602d47bb84e9ec0986df49cb4840c6b93faf",
+            "masterSha256": "0c5e93ca32295d4fb3cd6c9fcf2dc9a1783ef465a4f5475c3561aa16ffcec8f5",
+            "normalizedSha256": "3465340ef35af1b980bd2922ba89af1391a2c1b9cd3ac2c6e4a836fca244e12e",
+            "pathFingerprintSha256": "43b793884b975e064b9a4940ab5c4af4cf9ff2357849797cc884cc51e5a62d47"
+          },
+          "anatomy": {
+            "version": 1,
+            "annotationSha256": "59883c6d86feb0ac08effa5402d69d37ccfe72426275d904198add0653123917",
+            "masterSha256": "0c5e93ca32295d4fb3cd6c9fcf2dc9a1783ef465a4f5475c3561aa16ffcec8f5",
+            "pathFingerprintSha256": "43b793884b975e064b9a4940ab5c4af4cf9ff2357849797cc884cc51e5a62d47"
+          }
+        },
+        {
+          "name": "arrow-down",
+          "variant": "filled",
+          "author": {
+            "kind": "figma",
+            "fileKey": "LuaiBd4anRi4DMZayKAnY2",
+            "version": "2416636003859748575",
+            "nodeId": "6413:272",
+            "nodeSha256": "afbd1e557d7417b7174f659676b556c1f2a47182b0c9e350ba0f278ff073124f",
+            "masterSha256": "937930bf98ca317d95439c4c1aabfdbbc65e77ec7f8cb5195080e6a664ef835e",
+            "normalizedSha256": "3d8889d33ed6963b165d287ab5fa965bde03e21e65579cbb8f1c12bb2bcc0fa5",
+            "pathFingerprintSha256": "c179d8416e5556a441d0587f55c5ea78c06d49fdfabd1662f23d7646cdcd5e55"
+          },
+          "anatomy": {
+            "version": 1,
+            "annotationSha256": "b0817fb0381ea9354199b3592f509d9ac9708de1ea0bbc5bb116a6504be64530",
+            "masterSha256": "937930bf98ca317d95439c4c1aabfdbbc65e77ec7f8cb5195080e6a664ef835e",
+            "pathFingerprintSha256": "c179d8416e5556a441d0587f55c5ea78c06d49fdfabd1662f23d7646cdcd5e55"
+          }
+        }
+      ],
+      "checks": [
+        {
+          "id": "current-author-source",
+          "pass": true
+        },
+        {
+          "id": "complete-explorer-census",
+          "pass": true
+        },
+        {
+          "id": "reload/outline/author-paths",
+          "pass": true
+        },
+        {
+          "id": "reload/outline/semantic-part",
+          "pass": true
+        },
+        {
+          "id": "reload/outline/keyboard-focus",
+          "pass": true
+        },
+        {
+          "id": "reload/outline/accessible-preview",
+          "pass": true
+        },
+        {
+          "id": "reload/outline/source-motion-controls",
+          "pass": true
+        },
+        {
+          "id": "reload/outline/no-unproved-axes",
+          "pass": true
+        },
+        {
+          "id": "reload/outline/display-preserves-paths",
+          "pass": true
+        },
+        {
+          "id": "reload/outline/small-size-samples",
+          "pass": true
+        },
+        {
+          "id": "reload/outline/public-source-admission",
+          "pass": true
+        },
+        {
+          "id": "reload/outline/declared-reverse",
+          "pass": true
+        },
+        {
+          "id": "reload/outline/foreign-gesture-refusal",
+          "pass": true
+        },
+        {
+          "id": "reload/outline/svg-export-basis",
+          "pass": true
+        },
+        {
+          "id": "reload/outline/effect-export",
+          "pass": true
+        },
+        {
+          "id": "reload/outline/lottie-export",
+          "pass": true
+        },
+        {
+          "id": "reload/outline/sf-symbols-refusal",
+          "pass": true
+        },
+        {
+          "id": "reload/filled/author-paths",
+          "pass": true
+        },
+        {
+          "id": "reload/filled/semantic-part",
+          "pass": true
+        },
+        {
+          "id": "reload/filled/keyboard-focus",
+          "pass": true
+        },
+        {
+          "id": "reload/filled/accessible-preview",
+          "pass": true
+        },
+        {
+          "id": "reload/filled/source-motion-controls",
+          "pass": true
+        },
+        {
+          "id": "reload/filled/no-unproved-axes",
+          "pass": true
+        },
+        {
+          "id": "reload/filled/display-preserves-paths",
+          "pass": true
+        },
+        {
+          "id": "reload/filled/small-size-samples",
+          "pass": true
+        },
+        {
+          "id": "reload/filled/public-source-admission",
+          "pass": true
+        },
+        {
+          "id": "reload/filled/declared-reverse",
+          "pass": true
+        },
+        {
+          "id": "reload/filled/foreign-gesture-refusal",
+          "pass": true
+        },
+        {
+          "id": "reload/filled/svg-export-basis",
+          "pass": true
+        },
+        {
+          "id": "reload/filled/effect-export",
+          "pass": true
+        },
+        {
+          "id": "reload/filled/lottie-export",
+          "pass": true
+        },
+        {
+          "id": "reload/filled/sf-symbols-refusal",
+          "pass": true
+        },
+        {
+          "id": "refresh/outline/author-paths",
+          "pass": true
+        },
+        {
+          "id": "refresh/outline/semantic-part",
+          "pass": true
+        },
+        {
+          "id": "refresh/outline/keyboard-focus",
+          "pass": true
+        },
+        {
+          "id": "refresh/outline/accessible-preview",
+          "pass": true
+        },
+        {
+          "id": "refresh/outline/source-motion-controls",
+          "pass": true
+        },
+        {
+          "id": "refresh/outline/no-unproved-axes",
+          "pass": true
+        },
+        {
+          "id": "refresh/outline/display-preserves-paths",
+          "pass": true
+        },
+        {
+          "id": "refresh/outline/small-size-samples",
+          "pass": true
+        },
+        {
+          "id": "refresh/outline/public-source-admission",
+          "pass": true
+        },
+        {
+          "id": "refresh/outline/declared-reverse",
+          "pass": true
+        },
+        {
+          "id": "refresh/outline/foreign-gesture-refusal",
+          "pass": true
+        },
+        {
+          "id": "refresh/outline/svg-export-basis",
+          "pass": true
+        },
+        {
+          "id": "refresh/outline/effect-export",
+          "pass": true
+        },
+        {
+          "id": "refresh/outline/lottie-export",
+          "pass": true
+        },
+        {
+          "id": "refresh/outline/sf-symbols-refusal",
+          "pass": true
+        },
+        {
+          "id": "refresh/filled/author-paths",
+          "pass": true
+        },
+        {
+          "id": "refresh/filled/semantic-part",
+          "pass": true
+        },
+        {
+          "id": "refresh/filled/keyboard-focus",
+          "pass": true
+        },
+        {
+          "id": "refresh/filled/accessible-preview",
+          "pass": true
+        },
+        {
+          "id": "refresh/filled/source-motion-controls",
+          "pass": true
+        },
+        {
+          "id": "refresh/filled/no-unproved-axes",
+          "pass": true
+        },
+        {
+          "id": "refresh/filled/display-preserves-paths",
+          "pass": true
+        },
+        {
+          "id": "refresh/filled/small-size-samples",
+          "pass": true
+        },
+        {
+          "id": "refresh/filled/public-source-admission",
+          "pass": true
+        },
+        {
+          "id": "refresh/filled/declared-reverse",
+          "pass": true
+        },
+        {
+          "id": "refresh/filled/foreign-gesture-refusal",
+          "pass": true
+        },
+        {
+          "id": "refresh/filled/svg-export-basis",
+          "pass": true
+        },
+        {
+          "id": "refresh/filled/effect-export",
+          "pass": true
+        },
+        {
+          "id": "refresh/filled/lottie-export",
+          "pass": true
+        },
+        {
+          "id": "refresh/filled/sf-symbols-refusal",
+          "pass": true
+        },
+        {
+          "id": "pause-freezes-progress",
+          "pass": true
+        },
+        {
+          "id": "pause-freezes-visible-pose",
+          "pass": true
+        },
+        {
+          "id": "reverse-successor-admitted",
+          "pass": true
+        },
+        {
+          "id": "reverse-retains-visible-pose",
+          "pass": true,
+          "detail": {
+            "beforeReverse": 40.01800678913744,
+            "afterReverse": 40.01800678913744
+          }
+        },
+        {
+          "id": "reduced-motion-terminal",
+          "pass": true
+        },
+        {
+          "id": "scrub-clears-paused-occurrence",
+          "pass": true
+        },
+        {
+          "id": "scrub-keeps-selected-phase",
+          "pass": true
+        },
+        {
+          "id": "completed-cycle-repeats",
+          "pass": true
+        },
+        {
+          "id": "failed-selection-clears-old-projection",
+          "pass": true
+        },
+        {
+          "id": "failed-selection-visible-status",
+          "pass": true
+        },
+        {
+          "id": "late-failure-keeps-new-selection",
+          "pass": true
+        },
+        {
+          "id": "late-failure-keeps-new-visible-status",
+          "pass": true
+        },
+        {
+          "id": "filled-instance-effect-admitted",
+          "pass": true
+        },
+        {
+          "id": "filled-instances-independent",
+          "pass": true
+        },
+        {
+          "id": "rotation-envelope-visible",
+          "pass": true
+        },
+        {
+          "id": "fixture-cleanup",
+          "pass": true
+        },
+        {
+          "id": "ellipsis-horizontal/outline/triad-authored-paths",
+          "pass": true
+        },
+        {
+          "id": "ellipsis-horizontal/outline/triad-stable-ids",
+          "pass": true
+        },
+        {
+          "id": "ellipsis-horizontal/outline/triad-public-effect",
+          "pass": true
+        },
+        {
+          "id": "ellipsis-horizontal/outline/triad-pause",
+          "pass": true
+        },
+        {
+          "id": "ellipsis-horizontal/outline/triad-semantic-emphasis",
+          "pass": true
+        },
+        {
+          "id": "ellipsis-horizontal/outline/triad-reverse-admission",
+          "pass": true,
+          "detail": {
+            "before": [
+              0.707067,
+              0.35,
+              0.35
+            ],
+            "after": [
+              0.707067,
+              0.35,
+              0.35
+            ]
+          }
+        },
+        {
+          "id": "ellipsis-horizontal/outline/idle-restores-master",
+          "pass": true
+        },
+        {
+          "id": "ellipsis-horizontal/outline/triad-paths-unchanged-after-motion",
+          "pass": true
+        },
+        {
+          "id": "ellipsis-horizontal/filled/triad-authored-paths",
+          "pass": true
+        },
+        {
+          "id": "ellipsis-horizontal/filled/triad-stable-ids",
+          "pass": true
+        },
+        {
+          "id": "ellipsis-horizontal/filled/triad-public-effect",
+          "pass": true
+        },
+        {
+          "id": "ellipsis-horizontal/filled/triad-pause",
+          "pass": true
+        },
+        {
+          "id": "ellipsis-horizontal/filled/triad-semantic-emphasis",
+          "pass": true
+        },
+        {
+          "id": "ellipsis-horizontal/filled/triad-reverse-admission",
+          "pass": true,
+          "detail": {
+            "before": [
+              0.7088,
+              0.35,
+              0.35
+            ],
+            "after": [
+              0.7088,
+              0.35,
+              0.35
+            ]
+          }
+        },
+        {
+          "id": "ellipsis-horizontal/filled/idle-restores-master",
+          "pass": true
+        },
+        {
+          "id": "ellipsis-horizontal/filled/triad-paths-unchanged-after-motion",
+          "pass": true
+        },
+        {
+          "id": "chatbubble-ellipses/outline/triad-authored-paths",
+          "pass": true
+        },
+        {
+          "id": "chatbubble-ellipses/outline/triad-stable-ids",
+          "pass": true
+        },
+        {
+          "id": "chatbubble-ellipses/outline/triad-public-effect",
+          "pass": true
+        },
+        {
+          "id": "chatbubble-ellipses/outline/triad-pause",
+          "pass": true
+        },
+        {
+          "id": "chatbubble-ellipses/outline/triad-semantic-emphasis",
+          "pass": true
+        },
+        {
+          "id": "chatbubble-ellipses/outline/triad-reverse-admission",
+          "pass": true,
+          "detail": {
+            "before": [
+              0.707933,
+              0.35,
+              0.35
+            ],
+            "after": [
+              0.707933,
+              0.35,
+              0.35
+            ]
+          }
+        },
+        {
+          "id": "chatbubble-ellipses/outline/unchanged-enclosure",
+          "pass": true
+        },
+        {
+          "id": "chatbubble-ellipses/outline/idle-restores-master",
+          "pass": true
+        },
+        {
+          "id": "chatbubble-ellipses/outline/triad-paths-unchanged-after-motion",
+          "pass": true
+        },
+        {
+          "id": "filled-typing-compound-refuses",
+          "pass": true
+        },
+        {
+          "id": "vertical-menu-does-not-inherit-loading",
+          "pass": true
+        },
+        {
+          "id": "volume-high/outline/level-rest-matches-master",
+          "pass": true
+        },
+        {
+          "id": "volume-high/outline/level-authored-paths",
+          "pass": true
+        },
+        {
+          "id": "volume-high/outline/level-halfway",
+          "pass": true,
+          "detail": [
+            1,
+            0.5,
+            0
+          ]
+        },
+        {
+          "id": "volume-high/outline/level-interruption-pickup",
+          "pass": true,
+          "detail": {
+            "before": [
+              1,
+              0.188167,
+              0
+            ],
+            "after": [
+              1,
+              0.188167,
+              0
+            ]
+          }
+        },
+        {
+          "id": "volume-high/outline/level-reduced-latest-target",
+          "pass": true
+        },
+        {
+          "id": "volume-high/outline/level-stationary-speaker",
+          "pass": true
+        },
+        {
+          "id": "volume-high/outline/level-paths-unchanged",
+          "pass": true
+        },
+        {
+          "id": "volume-high/filled/level-rest-matches-master",
+          "pass": true
+        },
+        {
+          "id": "volume-high/filled/level-authored-paths",
+          "pass": true
+        },
+        {
+          "id": "volume-high/filled/level-halfway",
+          "pass": true,
+          "detail": [
+            1,
+            0.5,
+            0
+          ]
+        },
+        {
+          "id": "volume-high/filled/level-interruption-pickup",
+          "pass": true,
+          "detail": {
+            "before": [
+              1,
+              0.188333,
+              0
+            ],
+            "after": [
+              1,
+              0.188333,
+              0
+            ]
+          }
+        },
+        {
+          "id": "volume-high/filled/level-reduced-latest-target",
+          "pass": true
+        },
+        {
+          "id": "volume-high/filled/level-stationary-speaker",
+          "pass": true
+        },
+        {
+          "id": "volume-high/filled/level-paths-unchanged",
+          "pass": true
+        },
+        {
+          "id": "volume-middle/filled/level-rest-matches-master",
+          "pass": true
+        },
+        {
+          "id": "volume-middle/filled/level-authored-paths",
+          "pass": true
+        },
+        {
+          "id": "volume-middle/filled/level-halfway",
+          "pass": true,
+          "detail": [
+            1,
+            0
+          ]
+        },
+        {
+          "id": "volume-middle/filled/level-interruption-pickup",
+          "pass": true,
+          "detail": {
+            "before": [
+              0.792,
+              0
+            ],
+            "after": [
+              0.792,
+              0
+            ]
+          }
+        },
+        {
+          "id": "volume-middle/filled/level-reduced-latest-target",
+          "pass": true
+        },
+        {
+          "id": "volume-middle/filled/level-stationary-speaker",
+          "pass": true
+        },
+        {
+          "id": "volume-middle/filled/level-paths-unchanged",
+          "pass": true
+        },
+        {
+          "id": "split-volume-band-refuses-object-opacity",
+          "pass": true
+        },
+        {
+          "id": "chevron-back/outline/nudge-author-paths",
+          "pass": true
+        },
+        {
+          "id": "chevron-back/outline/nudge-declared-part",
+          "pass": true
+        },
+        {
+          "id": "chevron-back/outline/nudge-source-admission",
+          "pass": true
+        },
+        {
+          "id": "chevron-back/outline/nudge-phase-correspondence",
+          "pass": true
+        },
+        {
+          "id": "chevron-back/outline/nudge-no-unproved-axes",
+          "pass": true
+        },
+        {
+          "id": "chevron-back/outline/nudge-16px-viewbox-units",
+          "pass": true,
+          "detail": {
+            "size": 16,
+            "shift": [
+              -2,
+              0
+            ]
+          }
+        },
+        {
+          "id": "chevron-back/outline/nudge-16px-preserves-master",
+          "pass": true
+        },
+        {
+          "id": "chevron-back/outline/nudge-24px-viewbox-units",
+          "pass": true,
+          "detail": {
+            "size": 24,
+            "shift": [
+              -3,
+              0
+            ]
+          }
+        },
+        {
+          "id": "chevron-back/outline/nudge-24px-preserves-master",
+          "pass": true
+        },
+        {
+          "id": "chevron-back/outline/nudge-48px-viewbox-units",
+          "pass": true,
+          "detail": {
+            "size": 48,
+            "shift": [
+              -6,
+              0
+            ]
+          }
+        },
+        {
+          "id": "chevron-back/outline/nudge-48px-preserves-master",
+          "pass": true
+        },
+        {
+          "id": "chevron-back/outline/nudge-effect-export",
+          "pass": true
+        },
+        {
+          "id": "chevron-back/outline/nudge-lottie-export",
+          "pass": true
+        },
+        {
+          "id": "chevron-back/filled/nudge-author-paths",
+          "pass": true
+        },
+        {
+          "id": "chevron-back/filled/nudge-declared-part",
+          "pass": true
+        },
+        {
+          "id": "chevron-back/filled/nudge-source-admission",
+          "pass": true
+        },
+        {
+          "id": "chevron-back/filled/nudge-phase-correspondence",
+          "pass": true
+        },
+        {
+          "id": "chevron-back/filled/nudge-no-unproved-axes",
+          "pass": true
+        },
+        {
+          "id": "chevron-back/filled/nudge-16px-viewbox-units",
+          "pass": true,
+          "detail": {
+            "size": 16,
+            "shift": [
+              -2,
+              0
+            ]
+          }
+        },
+        {
+          "id": "chevron-back/filled/nudge-16px-preserves-master",
+          "pass": true
+        },
+        {
+          "id": "chevron-back/filled/nudge-24px-viewbox-units",
+          "pass": true,
+          "detail": {
+            "size": 24,
+            "shift": [
+              -3,
+              0
+            ]
+          }
+        },
+        {
+          "id": "chevron-back/filled/nudge-24px-preserves-master",
+          "pass": true
+        },
+        {
+          "id": "chevron-back/filled/nudge-48px-viewbox-units",
+          "pass": true,
+          "detail": {
+            "size": 48,
+            "shift": [
+              -6,
+              0
+            ]
+          }
+        },
+        {
+          "id": "chevron-back/filled/nudge-48px-preserves-master",
+          "pass": true
+        },
+        {
+          "id": "chevron-back/filled/nudge-effect-export",
+          "pass": true
+        },
+        {
+          "id": "chevron-back/filled/nudge-lottie-export",
+          "pass": true
+        },
+        {
+          "id": "chevron-forward/outline/nudge-author-paths",
+          "pass": true
+        },
+        {
+          "id": "chevron-forward/outline/nudge-declared-part",
+          "pass": true
+        },
+        {
+          "id": "chevron-forward/outline/nudge-source-admission",
+          "pass": true
+        },
+        {
+          "id": "chevron-forward/outline/nudge-phase-correspondence",
+          "pass": true
+        },
+        {
+          "id": "chevron-forward/outline/nudge-no-unproved-axes",
+          "pass": true
+        },
+        {
+          "id": "chevron-forward/outline/nudge-16px-viewbox-units",
+          "pass": true,
+          "detail": {
+            "size": 16,
+            "shift": [
+              2,
+              0
+            ]
+          }
+        },
+        {
+          "id": "chevron-forward/outline/nudge-16px-preserves-master",
+          "pass": true
+        },
+        {
+          "id": "chevron-forward/outline/nudge-24px-viewbox-units",
+          "pass": true,
+          "detail": {
+            "size": 24,
+            "shift": [
+              3,
+              0
+            ]
+          }
+        },
+        {
+          "id": "chevron-forward/outline/nudge-24px-preserves-master",
+          "pass": true
+        },
+        {
+          "id": "chevron-forward/outline/nudge-48px-viewbox-units",
+          "pass": true,
+          "detail": {
+            "size": 48,
+            "shift": [
+              6,
+              0
+            ]
+          }
+        },
+        {
+          "id": "chevron-forward/outline/nudge-48px-preserves-master",
+          "pass": true
+        },
+        {
+          "id": "chevron-forward/outline/nudge-effect-export",
+          "pass": true
+        },
+        {
+          "id": "chevron-forward/outline/nudge-lottie-export",
+          "pass": true
+        },
+        {
+          "id": "chevron-forward/filled/nudge-author-paths",
+          "pass": true
+        },
+        {
+          "id": "chevron-forward/filled/nudge-declared-part",
+          "pass": true
+        },
+        {
+          "id": "chevron-forward/filled/nudge-source-admission",
+          "pass": true
+        },
+        {
+          "id": "chevron-forward/filled/nudge-phase-correspondence",
+          "pass": true
+        },
+        {
+          "id": "chevron-forward/filled/nudge-no-unproved-axes",
+          "pass": true
+        },
+        {
+          "id": "chevron-forward/filled/nudge-16px-viewbox-units",
+          "pass": true,
+          "detail": {
+            "size": 16,
+            "shift": [
+              2,
+              0
+            ]
+          }
+        },
+        {
+          "id": "chevron-forward/filled/nudge-16px-preserves-master",
+          "pass": true
+        },
+        {
+          "id": "chevron-forward/filled/nudge-24px-viewbox-units",
+          "pass": true,
+          "detail": {
+            "size": 24,
+            "shift": [
+              3,
+              0
+            ]
+          }
+        },
+        {
+          "id": "chevron-forward/filled/nudge-24px-preserves-master",
+          "pass": true
+        },
+        {
+          "id": "chevron-forward/filled/nudge-48px-viewbox-units",
+          "pass": true,
+          "detail": {
+            "size": 48,
+            "shift": [
+              6,
+              0
+            ]
+          }
+        },
+        {
+          "id": "chevron-forward/filled/nudge-48px-preserves-master",
+          "pass": true
+        },
+        {
+          "id": "chevron-forward/filled/nudge-effect-export",
+          "pass": true
+        },
+        {
+          "id": "chevron-forward/filled/nudge-lottie-export",
+          "pass": true
+        },
+        {
+          "id": "chevron-up/outline/nudge-author-paths",
+          "pass": true
+        },
+        {
+          "id": "chevron-up/outline/nudge-declared-part",
+          "pass": true
+        },
+        {
+          "id": "chevron-up/outline/nudge-source-admission",
+          "pass": true
+        },
+        {
+          "id": "chevron-up/outline/nudge-phase-correspondence",
+          "pass": true
+        },
+        {
+          "id": "chevron-up/outline/nudge-no-unproved-axes",
+          "pass": true
+        },
+        {
+          "id": "chevron-up/outline/nudge-16px-viewbox-units",
+          "pass": true,
+          "detail": {
+            "size": 16,
+            "shift": [
+              0,
+              -2
+            ]
+          }
+        },
+        {
+          "id": "chevron-up/outline/nudge-16px-preserves-master",
+          "pass": true
+        },
+        {
+          "id": "chevron-up/outline/nudge-24px-viewbox-units",
+          "pass": true,
+          "detail": {
+            "size": 24,
+            "shift": [
+              0,
+              -3
+            ]
+          }
+        },
+        {
+          "id": "chevron-up/outline/nudge-24px-preserves-master",
+          "pass": true
+        },
+        {
+          "id": "chevron-up/outline/nudge-48px-viewbox-units",
+          "pass": true,
+          "detail": {
+            "size": 48,
+            "shift": [
+              0,
+              -6
+            ]
+          }
+        },
+        {
+          "id": "chevron-up/outline/nudge-48px-preserves-master",
+          "pass": true
+        },
+        {
+          "id": "chevron-up/outline/nudge-effect-export",
+          "pass": true
+        },
+        {
+          "id": "chevron-up/outline/nudge-lottie-export",
+          "pass": true
+        },
+        {
+          "id": "chevron-up/filled/nudge-author-paths",
+          "pass": true
+        },
+        {
+          "id": "chevron-up/filled/nudge-declared-part",
+          "pass": true
+        },
+        {
+          "id": "chevron-up/filled/nudge-source-admission",
+          "pass": true
+        },
+        {
+          "id": "chevron-up/filled/nudge-phase-correspondence",
+          "pass": true
+        },
+        {
+          "id": "chevron-up/filled/nudge-no-unproved-axes",
+          "pass": true
+        },
+        {
+          "id": "chevron-up/filled/nudge-16px-viewbox-units",
+          "pass": true,
+          "detail": {
+            "size": 16,
+            "shift": [
+              0,
+              -2
+            ]
+          }
+        },
+        {
+          "id": "chevron-up/filled/nudge-16px-preserves-master",
+          "pass": true
+        },
+        {
+          "id": "chevron-up/filled/nudge-24px-viewbox-units",
+          "pass": true,
+          "detail": {
+            "size": 24,
+            "shift": [
+              0,
+              -3
+            ]
+          }
+        },
+        {
+          "id": "chevron-up/filled/nudge-24px-preserves-master",
+          "pass": true
+        },
+        {
+          "id": "chevron-up/filled/nudge-48px-viewbox-units",
+          "pass": true,
+          "detail": {
+            "size": 48,
+            "shift": [
+              0,
+              -6
+            ]
+          }
+        },
+        {
+          "id": "chevron-up/filled/nudge-48px-preserves-master",
+          "pass": true
+        },
+        {
+          "id": "chevron-up/filled/nudge-effect-export",
+          "pass": true
+        },
+        {
+          "id": "chevron-up/filled/nudge-lottie-export",
+          "pass": true
+        },
+        {
+          "id": "chevron-down/outline/nudge-author-paths",
+          "pass": true
+        },
+        {
+          "id": "chevron-down/outline/nudge-declared-part",
+          "pass": true
+        },
+        {
+          "id": "chevron-down/outline/nudge-source-admission",
+          "pass": true
+        },
+        {
+          "id": "chevron-down/outline/nudge-phase-correspondence",
+          "pass": true
+        },
+        {
+          "id": "chevron-down/outline/nudge-no-unproved-axes",
+          "pass": true
+        },
+        {
+          "id": "chevron-down/outline/nudge-16px-viewbox-units",
+          "pass": true,
+          "detail": {
+            "size": 16,
+            "shift": [
+              0,
+              2
+            ]
+          }
+        },
+        {
+          "id": "chevron-down/outline/nudge-16px-preserves-master",
+          "pass": true
+        },
+        {
+          "id": "chevron-down/outline/nudge-24px-viewbox-units",
+          "pass": true,
+          "detail": {
+            "size": 24,
+            "shift": [
+              0,
+              3
+            ]
+          }
+        },
+        {
+          "id": "chevron-down/outline/nudge-24px-preserves-master",
+          "pass": true
+        },
+        {
+          "id": "chevron-down/outline/nudge-48px-viewbox-units",
+          "pass": true,
+          "detail": {
+            "size": 48,
+            "shift": [
+              0,
+              6
+            ]
+          }
+        },
+        {
+          "id": "chevron-down/outline/nudge-48px-preserves-master",
+          "pass": true
+        },
+        {
+          "id": "chevron-down/outline/nudge-effect-export",
+          "pass": true
+        },
+        {
+          "id": "chevron-down/outline/nudge-lottie-export",
+          "pass": true
+        },
+        {
+          "id": "chevron-down/filled/nudge-author-paths",
+          "pass": true
+        },
+        {
+          "id": "chevron-down/filled/nudge-declared-part",
+          "pass": true
+        },
+        {
+          "id": "chevron-down/filled/nudge-source-admission",
+          "pass": true
+        },
+        {
+          "id": "chevron-down/filled/nudge-phase-correspondence",
+          "pass": true
+        },
+        {
+          "id": "chevron-down/filled/nudge-no-unproved-axes",
+          "pass": true
+        },
+        {
+          "id": "chevron-down/filled/nudge-16px-viewbox-units",
+          "pass": true,
+          "detail": {
+            "size": 16,
+            "shift": [
+              0,
+              2
+            ]
+          }
+        },
+        {
+          "id": "chevron-down/filled/nudge-16px-preserves-master",
+          "pass": true
+        },
+        {
+          "id": "chevron-down/filled/nudge-24px-viewbox-units",
+          "pass": true,
+          "detail": {
+            "size": 24,
+            "shift": [
+              0,
+              3
+            ]
+          }
+        },
+        {
+          "id": "chevron-down/filled/nudge-24px-preserves-master",
+          "pass": true
+        },
+        {
+          "id": "chevron-down/filled/nudge-48px-viewbox-units",
+          "pass": true,
+          "detail": {
+            "size": 48,
+            "shift": [
+              0,
+              6
+            ]
+          }
+        },
+        {
+          "id": "chevron-down/filled/nudge-48px-preserves-master",
+          "pass": true
+        },
+        {
+          "id": "chevron-down/filled/nudge-effect-export",
+          "pass": true
+        },
+        {
+          "id": "chevron-down/filled/nudge-lottie-export",
+          "pass": true
+        },
+        {
+          "id": "arrow-back/outline/nudge-author-paths",
+          "pass": true
+        },
+        {
+          "id": "arrow-back/outline/nudge-declared-part",
+          "pass": true
+        },
+        {
+          "id": "arrow-back/outline/nudge-source-admission",
+          "pass": true
+        },
+        {
+          "id": "arrow-back/outline/nudge-phase-correspondence",
+          "pass": true
+        },
+        {
+          "id": "arrow-back/outline/nudge-no-unproved-axes",
+          "pass": true
+        },
+        {
+          "id": "arrow-back/outline/nudge-16px-viewbox-units",
+          "pass": true,
+          "detail": {
+            "size": 16,
+            "shift": [
+              -2,
+              0
+            ]
+          }
+        },
+        {
+          "id": "arrow-back/outline/nudge-16px-preserves-master",
+          "pass": true
+        },
+        {
+          "id": "arrow-back/outline/nudge-24px-viewbox-units",
+          "pass": true,
+          "detail": {
+            "size": 24,
+            "shift": [
+              -3,
+              0
+            ]
+          }
+        },
+        {
+          "id": "arrow-back/outline/nudge-24px-preserves-master",
+          "pass": true
+        },
+        {
+          "id": "arrow-back/outline/nudge-48px-viewbox-units",
+          "pass": true,
+          "detail": {
+            "size": 48,
+            "shift": [
+              -6,
+              0
+            ]
+          }
+        },
+        {
+          "id": "arrow-back/outline/nudge-48px-preserves-master",
+          "pass": true
+        },
+        {
+          "id": "arrow-back/outline/nudge-effect-export",
+          "pass": true
+        },
+        {
+          "id": "arrow-back/outline/nudge-lottie-export",
+          "pass": true
+        },
+        {
+          "id": "arrow-back/filled/nudge-author-paths",
+          "pass": true
+        },
+        {
+          "id": "arrow-back/filled/nudge-declared-part",
+          "pass": true
+        },
+        {
+          "id": "arrow-back/filled/nudge-source-admission",
+          "pass": true
+        },
+        {
+          "id": "arrow-back/filled/nudge-phase-correspondence",
+          "pass": true
+        },
+        {
+          "id": "arrow-back/filled/nudge-no-unproved-axes",
+          "pass": true
+        },
+        {
+          "id": "arrow-back/filled/nudge-16px-viewbox-units",
+          "pass": true,
+          "detail": {
+            "size": 16,
+            "shift": [
+              -2,
+              0
+            ]
+          }
+        },
+        {
+          "id": "arrow-back/filled/nudge-16px-preserves-master",
+          "pass": true
+        },
+        {
+          "id": "arrow-back/filled/nudge-24px-viewbox-units",
+          "pass": true,
+          "detail": {
+            "size": 24,
+            "shift": [
+              -3,
+              0
+            ]
+          }
+        },
+        {
+          "id": "arrow-back/filled/nudge-24px-preserves-master",
+          "pass": true
+        },
+        {
+          "id": "arrow-back/filled/nudge-48px-viewbox-units",
+          "pass": true,
+          "detail": {
+            "size": 48,
+            "shift": [
+              -6,
+              0
+            ]
+          }
+        },
+        {
+          "id": "arrow-back/filled/nudge-48px-preserves-master",
+          "pass": true
+        },
+        {
+          "id": "arrow-back/filled/nudge-effect-export",
+          "pass": true
+        },
+        {
+          "id": "arrow-back/filled/nudge-lottie-export",
+          "pass": true
+        },
+        {
+          "id": "arrow-forward/outline/nudge-author-paths",
+          "pass": true
+        },
+        {
+          "id": "arrow-forward/outline/nudge-declared-part",
+          "pass": true
+        },
+        {
+          "id": "arrow-forward/outline/nudge-source-admission",
+          "pass": true
+        },
+        {
+          "id": "arrow-forward/outline/nudge-phase-correspondence",
+          "pass": true
+        },
+        {
+          "id": "arrow-forward/outline/nudge-no-unproved-axes",
+          "pass": true
+        },
+        {
+          "id": "arrow-forward/outline/nudge-16px-viewbox-units",
+          "pass": true,
+          "detail": {
+            "size": 16,
+            "shift": [
+              2,
+              0
+            ]
+          }
+        },
+        {
+          "id": "arrow-forward/outline/nudge-16px-preserves-master",
+          "pass": true
+        },
+        {
+          "id": "arrow-forward/outline/nudge-24px-viewbox-units",
+          "pass": true,
+          "detail": {
+            "size": 24,
+            "shift": [
+              3,
+              0
+            ]
+          }
+        },
+        {
+          "id": "arrow-forward/outline/nudge-24px-preserves-master",
+          "pass": true
+        },
+        {
+          "id": "arrow-forward/outline/nudge-48px-viewbox-units",
+          "pass": true,
+          "detail": {
+            "size": 48,
+            "shift": [
+              6,
+              0
+            ]
+          }
+        },
+        {
+          "id": "arrow-forward/outline/nudge-48px-preserves-master",
+          "pass": true
+        },
+        {
+          "id": "arrow-forward/outline/nudge-effect-export",
+          "pass": true
+        },
+        {
+          "id": "arrow-forward/outline/nudge-lottie-export",
+          "pass": true
+        },
+        {
+          "id": "arrow-forward/filled/nudge-author-paths",
+          "pass": true
+        },
+        {
+          "id": "arrow-forward/filled/nudge-declared-part",
+          "pass": true
+        },
+        {
+          "id": "arrow-forward/filled/nudge-source-admission",
+          "pass": true
+        },
+        {
+          "id": "arrow-forward/filled/nudge-phase-correspondence",
+          "pass": true
+        },
+        {
+          "id": "arrow-forward/filled/nudge-no-unproved-axes",
+          "pass": true
+        },
+        {
+          "id": "arrow-forward/filled/nudge-16px-viewbox-units",
+          "pass": true,
+          "detail": {
+            "size": 16,
+            "shift": [
+              2,
+              0
+            ]
+          }
+        },
+        {
+          "id": "arrow-forward/filled/nudge-16px-preserves-master",
+          "pass": true
+        },
+        {
+          "id": "arrow-forward/filled/nudge-24px-viewbox-units",
+          "pass": true,
+          "detail": {
+            "size": 24,
+            "shift": [
+              3,
+              0
+            ]
+          }
+        },
+        {
+          "id": "arrow-forward/filled/nudge-24px-preserves-master",
+          "pass": true
+        },
+        {
+          "id": "arrow-forward/filled/nudge-48px-viewbox-units",
+          "pass": true,
+          "detail": {
+            "size": 48,
+            "shift": [
+              6,
+              0
+            ]
+          }
+        },
+        {
+          "id": "arrow-forward/filled/nudge-48px-preserves-master",
+          "pass": true
+        },
+        {
+          "id": "arrow-forward/filled/nudge-effect-export",
+          "pass": true
+        },
+        {
+          "id": "arrow-forward/filled/nudge-lottie-export",
+          "pass": true
+        },
+        {
+          "id": "arrow-up/outline/nudge-author-paths",
+          "pass": true
+        },
+        {
+          "id": "arrow-up/outline/nudge-declared-part",
+          "pass": true
+        },
+        {
+          "id": "arrow-up/outline/nudge-source-admission",
+          "pass": true
+        },
+        {
+          "id": "arrow-up/outline/nudge-phase-correspondence",
+          "pass": true
+        },
+        {
+          "id": "arrow-up/outline/nudge-no-unproved-axes",
+          "pass": true
+        },
+        {
+          "id": "arrow-up/outline/nudge-16px-viewbox-units",
+          "pass": true,
+          "detail": {
+            "size": 16,
+            "shift": [
+              0,
+              -2
+            ]
+          }
+        },
+        {
+          "id": "arrow-up/outline/nudge-16px-preserves-master",
+          "pass": true
+        },
+        {
+          "id": "arrow-up/outline/nudge-24px-viewbox-units",
+          "pass": true,
+          "detail": {
+            "size": 24,
+            "shift": [
+              0,
+              -3
+            ]
+          }
+        },
+        {
+          "id": "arrow-up/outline/nudge-24px-preserves-master",
+          "pass": true
+        },
+        {
+          "id": "arrow-up/outline/nudge-48px-viewbox-units",
+          "pass": true,
+          "detail": {
+            "size": 48,
+            "shift": [
+              0,
+              -6
+            ]
+          }
+        },
+        {
+          "id": "arrow-up/outline/nudge-48px-preserves-master",
+          "pass": true
+        },
+        {
+          "id": "arrow-up/outline/nudge-effect-export",
+          "pass": true
+        },
+        {
+          "id": "arrow-up/outline/nudge-lottie-export",
+          "pass": true
+        },
+        {
+          "id": "arrow-up/filled/nudge-author-paths",
+          "pass": true
+        },
+        {
+          "id": "arrow-up/filled/nudge-declared-part",
+          "pass": true
+        },
+        {
+          "id": "arrow-up/filled/nudge-source-admission",
+          "pass": true
+        },
+        {
+          "id": "arrow-up/filled/nudge-phase-correspondence",
+          "pass": true
+        },
+        {
+          "id": "arrow-up/filled/nudge-no-unproved-axes",
+          "pass": true
+        },
+        {
+          "id": "arrow-up/filled/nudge-16px-viewbox-units",
+          "pass": true,
+          "detail": {
+            "size": 16,
+            "shift": [
+              0,
+              -2
+            ]
+          }
+        },
+        {
+          "id": "arrow-up/filled/nudge-16px-preserves-master",
+          "pass": true
+        },
+        {
+          "id": "arrow-up/filled/nudge-24px-viewbox-units",
+          "pass": true,
+          "detail": {
+            "size": 24,
+            "shift": [
+              0,
+              -3
+            ]
+          }
+        },
+        {
+          "id": "arrow-up/filled/nudge-24px-preserves-master",
+          "pass": true
+        },
+        {
+          "id": "arrow-up/filled/nudge-48px-viewbox-units",
+          "pass": true,
+          "detail": {
+            "size": 48,
+            "shift": [
+              0,
+              -6
+            ]
+          }
+        },
+        {
+          "id": "arrow-up/filled/nudge-48px-preserves-master",
+          "pass": true
+        },
+        {
+          "id": "arrow-up/filled/nudge-effect-export",
+          "pass": true
+        },
+        {
+          "id": "arrow-up/filled/nudge-lottie-export",
+          "pass": true
+        },
+        {
+          "id": "arrow-down/outline/nudge-author-paths",
+          "pass": true
+        },
+        {
+          "id": "arrow-down/outline/nudge-declared-part",
+          "pass": true
+        },
+        {
+          "id": "arrow-down/outline/nudge-source-admission",
+          "pass": true
+        },
+        {
+          "id": "arrow-down/outline/nudge-phase-correspondence",
+          "pass": true
+        },
+        {
+          "id": "arrow-down/outline/nudge-no-unproved-axes",
+          "pass": true
+        },
+        {
+          "id": "arrow-down/outline/nudge-16px-viewbox-units",
+          "pass": true,
+          "detail": {
+            "size": 16,
+            "shift": [
+              0,
+              2
+            ]
+          }
+        },
+        {
+          "id": "arrow-down/outline/nudge-16px-preserves-master",
+          "pass": true
+        },
+        {
+          "id": "arrow-down/outline/nudge-24px-viewbox-units",
+          "pass": true,
+          "detail": {
+            "size": 24,
+            "shift": [
+              0,
+              3
+            ]
+          }
+        },
+        {
+          "id": "arrow-down/outline/nudge-24px-preserves-master",
+          "pass": true
+        },
+        {
+          "id": "arrow-down/outline/nudge-48px-viewbox-units",
+          "pass": true,
+          "detail": {
+            "size": 48,
+            "shift": [
+              0,
+              6
+            ]
+          }
+        },
+        {
+          "id": "arrow-down/outline/nudge-48px-preserves-master",
+          "pass": true
+        },
+        {
+          "id": "arrow-down/outline/nudge-effect-export",
+          "pass": true
+        },
+        {
+          "id": "arrow-down/outline/nudge-lottie-export",
+          "pass": true
+        },
+        {
+          "id": "arrow-down/filled/nudge-author-paths",
+          "pass": true
+        },
+        {
+          "id": "arrow-down/filled/nudge-declared-part",
+          "pass": true
+        },
+        {
+          "id": "arrow-down/filled/nudge-source-admission",
+          "pass": true
+        },
+        {
+          "id": "arrow-down/filled/nudge-phase-correspondence",
+          "pass": true
+        },
+        {
+          "id": "arrow-down/filled/nudge-no-unproved-axes",
+          "pass": true
+        },
+        {
+          "id": "arrow-down/filled/nudge-16px-viewbox-units",
+          "pass": true,
+          "detail": {
+            "size": 16,
+            "shift": [
+              0,
+              2
+            ]
+          }
+        },
+        {
+          "id": "arrow-down/filled/nudge-16px-preserves-master",
+          "pass": true
+        },
+        {
+          "id": "arrow-down/filled/nudge-24px-viewbox-units",
+          "pass": true,
+          "detail": {
+            "size": 24,
+            "shift": [
+              0,
+              3
+            ]
+          }
+        },
+        {
+          "id": "arrow-down/filled/nudge-24px-preserves-master",
+          "pass": true
+        },
+        {
+          "id": "arrow-down/filled/nudge-48px-viewbox-units",
+          "pass": true,
+          "detail": {
+            "size": 48,
+            "shift": [
+              0,
+              6
+            ]
+          }
+        },
+        {
+          "id": "arrow-down/filled/nudge-48px-preserves-master",
+          "pass": true
+        },
+        {
+          "id": "arrow-down/filled/nudge-effect-export",
+          "pass": true
+        },
+        {
+          "id": "arrow-down/filled/nudge-lottie-export",
+          "pass": true
+        },
+        {
+          "id": "nudge-phase-0.25/reverse-retains-pose",
+          "pass": true
+        },
+        {
+          "id": "nudge-phase-0.25/distinct-reverse-continuation",
+          "pass": true,
+          "detail": {
+            "before": 7,
+            "after": 6.678777694702148
+          }
+        },
+        {
+          "id": "nudge-phase-0.25/pause-freezes-visible-pose",
+          "pass": true
+        },
+        {
+          "id": "nudge-phase-0.25/new-target-pickup",
+          "pass": true
+        },
+        {
+          "id": "nudge-phase-0.75/reverse-retains-pose",
+          "pass": true
+        },
+        {
+          "id": "nudge-phase-0.75/distinct-reverse-continuation",
+          "pass": true,
+          "detail": {
+            "before": 7,
+            "after": 7.375666697819952
+          }
+        },
+        {
+          "id": "nudge-phase-0.75/pause-freezes-visible-pose",
+          "pass": true
+        },
+        {
+          "id": "nudge-phase-0.75/new-target-pickup",
+          "pass": true
+        },
+        {
+          "id": "nudge-equal-pose-distinct-histories",
+          "pass": true,
+          "detail": [
+            7,
+            7
+          ]
+        },
+        {
+          "id": "nudge-completed-cycle-repeats",
+          "pass": true
+        },
+        {
+          "id": "nudge-nonzero-viewbox/x/16px",
+          "pass": true,
+          "detail": {
+            "viewBox": [
+              10,
+              20,
+              48,
+              48
+            ],
+            "size": 16,
+            "shift": [
+              -2,
+              0
+            ]
+          }
+        },
+        {
+          "id": "nudge-nonzero-viewbox/x/24px",
+          "pass": true,
+          "detail": {
+            "viewBox": [
+              10,
+              20,
+              48,
+              48
+            ],
+            "size": 24,
+            "shift": [
+              -3,
+              0
+            ]
+          }
+        },
+        {
+          "id": "nudge-nonzero-viewbox/x/48px",
+          "pass": true,
+          "detail": {
+            "viewBox": [
+              10,
+              20,
+              48,
+              48
+            ],
+            "size": 48,
+            "shift": [
+              -6,
+              0
+            ]
+          }
+        },
+        {
+          "id": "nudge-nonzero-viewbox/y/16px",
+          "pass": true,
+          "detail": {
+            "viewBox": [
+              10,
+              20,
+              48,
+              48
+            ],
+            "size": 16,
+            "shift": [
+              0,
+              -2
+            ]
+          }
+        },
+        {
+          "id": "nudge-nonzero-viewbox/y/24px",
+          "pass": true,
+          "detail": {
+            "viewBox": [
+              10,
+              20,
+              48,
+              48
+            ],
+            "size": 24,
+            "shift": [
+              0,
+              -3
+            ]
+          }
+        },
+        {
+          "id": "nudge-nonzero-viewbox/y/48px",
+          "pass": true,
+          "detail": {
+            "viewBox": [
+              10,
+              20,
+              48,
+              48
+            ],
+            "size": 48,
+            "shift": [
+              0,
+              -6
+            ]
+          }
+        },
+        {
+          "id": "nudge-viewport-fixture-cleanup",
+          "pass": true
+        },
+        {
+          "id": "circle/outline/nudge-not-inferred",
+          "pass": true
+        },
+        {
+          "id": "circle/filled/nudge-not-inferred",
+          "pass": true
+        },
+        {
+          "id": "latest-clock-motion-refuses",
+          "pass": true
+        }
+      ],
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.0.0 Safari/537.36",
+      "downloadsChecked": 44
+    }
+  },
+  "baselineControl": {
+    "scope": "bounded source Observatory; no package/install/performance claim",
+    "baseline": true,
+    "baseSha": "fc2f1e163a8d04819aa98cbd9ed14975a8b892f1",
+    "sourceDigests": {
+      "src/motion/index.ts": "08b89ad89f48ed56e5b2271ffbf51bc8767e16d534ee68cd4e3e95add887fe34",
+      "src/ir/compiler.ts": "68e830aa5039a2f6c1b79850b74245e08a58888fb03e89f3ece71f409d0a6e72",
+      "src/core/motion-sampler.js": "2239d08ca2586fdd4c795f44c835fcb92cd9ab6cc2faccd01abcf463cc8d5093",
+      "src/ir/symbol-runtime.ts": "955d5b4d1b301f624b4307d300ccc09e6856a06db6e78efcec171144704befdf",
+      "src/ir/render.ts": "a5a7d90aa49521efd7d723f51418ba9bbf633e43c4997499de2bce055020e8a3",
+      "src/lottie/runtime.ts": "a88f788646ecfc5bbf1b8aa7502bc9ffedf900c96bc3af3cc79d9906b17250af",
+      "scripts/lib/author-anatomy.js": "cd9f53444c75a1eac4b5e6d8933f50303606e3476d9e3d80f60e4c7c7936a983",
+      "scripts/lib/author-baseline.js": "f72584f0fb7482194a4aab4c2fe2e0085ae684e7ed282091987a1c373333e848",
+      "scripts/lib/symbol-modules.js": "5253aed396cffb916ee201b03343e35cfcb2cad1f462114aa1d29ae0274946e3",
+      "scripts/lib/lottie-geometry.js": "fba65487e9e5398b85b138af033866164766a62afc58de9bef65e539d06a85e0",
+      "observatory/explorer.js": "ba172b427e561834bad2cf54838cac8e17cb1dcfa94a7014153945c436415b46",
+      "observatory/motion-execution.js": "32e5503b45f38bd705e7eda1d791b11dff94959e62059b0dbe9a8c1a0c925d69",
+      "scripts/bench/explorer-journey.js": "50eb6b1c1573031858a60546dbb19f12d3490f2f2fd2f083e0953ba6f3f28d14",
+      "semantics/figma-baseline.json": "c1b585d916023c898405521c0e26c4241e5d72379e5300c92f2dc3e54b871ceb",
+      "semantics/author-anatomy.json": "6bce0e6e04a420b19fd692f34d04b339278239471554038fc643cd121b7bc423"
+    },
+    "executorSha256": "5556e22e5f83d9e85cfab10e5ef22c5730271a0e983fb981438b57ed3d9b0a16",
+    "browser": "156.0.8078.74",
+    "publicMotion": {
+      "name": "@labpics/motion",
+      "version": "0.5.0"
+    },
+    "errors": [],
+    "pass": false,
+    "report": {
+      "version": 1,
+      "checks": [
+        {
+          "id": "current-author-source",
+          "pass": true
+        },
+        {
+          "id": "complete-explorer-census",
+          "pass": true
+        },
+        {
+          "id": "reload/outline/author-paths",
+          "pass": true
+        },
+        {
+          "id": "reload/outline/semantic-part",
+          "pass": true
+        },
+        {
+          "id": "reload/outline/keyboard-focus",
+          "pass": true
+        },
+        {
+          "id": "reload/outline/accessible-preview",
+          "pass": true
+        },
+        {
+          "id": "reload/outline/source-motion-controls",
+          "pass": true
+        },
+        {
+          "id": "reload/outline/no-unproved-axes",
+          "pass": true
+        },
+        {
+          "id": "reload/outline/display-preserves-paths",
+          "pass": true
+        },
+        {
+          "id": "reload/outline/small-size-samples",
+          "pass": true
+        },
+        {
+          "id": "reload/outline/public-source-admission",
+          "pass": true
+        },
+        {
+          "id": "reload/outline/declared-reverse",
+          "pass": true
+        },
+        {
+          "id": "reload/outline/foreign-gesture-refusal",
+          "pass": true
+        },
+        {
+          "id": "reload/outline/svg-export-basis",
+          "pass": true
+        },
+        {
+          "id": "reload/outline/effect-export",
+          "pass": true
+        },
+        {
+          "id": "reload/outline/lottie-export",
+          "pass": true
+        },
+        {
+          "id": "reload/outline/sf-symbols-refusal",
+          "pass": true
+        },
+        {
+          "id": "reload/filled/author-paths",
+          "pass": true
+        },
+        {
+          "id": "reload/filled/semantic-part",
+          "pass": true
+        },
+        {
+          "id": "reload/filled/keyboard-focus",
+          "pass": true
+        },
+        {
+          "id": "reload/filled/accessible-preview",
+          "pass": true
+        },
+        {
+          "id": "reload/filled/source-motion-controls",
+          "pass": true
+        },
+        {
+          "id": "reload/filled/no-unproved-axes",
+          "pass": true
+        },
+        {
+          "id": "reload/filled/display-preserves-paths",
+          "pass": true
+        },
+        {
+          "id": "reload/filled/small-size-samples",
+          "pass": true
+        },
+        {
+          "id": "reload/filled/public-source-admission",
+          "pass": true
+        },
+        {
+          "id": "reload/filled/declared-reverse",
+          "pass": true
+        },
+        {
+          "id": "reload/filled/foreign-gesture-refusal",
+          "pass": true
+        },
+        {
+          "id": "reload/filled/svg-export-basis",
+          "pass": true
+        },
+        {
+          "id": "reload/filled/effect-export",
+          "pass": true
+        },
+        {
+          "id": "reload/filled/lottie-export",
+          "pass": true
+        },
+        {
+          "id": "reload/filled/sf-symbols-refusal",
+          "pass": true
+        },
+        {
+          "id": "refresh/outline/author-paths",
+          "pass": true
+        },
+        {
+          "id": "refresh/outline/semantic-part",
+          "pass": true
+        },
+        {
+          "id": "refresh/outline/keyboard-focus",
+          "pass": true
+        },
+        {
+          "id": "refresh/outline/accessible-preview",
+          "pass": true
+        },
+        {
+          "id": "refresh/outline/source-motion-controls",
+          "pass": true
+        },
+        {
+          "id": "refresh/outline/no-unproved-axes",
+          "pass": true
+        },
+        {
+          "id": "refresh/outline/display-preserves-paths",
+          "pass": true
+        },
+        {
+          "id": "refresh/outline/small-size-samples",
+          "pass": true
+        },
+        {
+          "id": "refresh/outline/public-source-admission",
+          "pass": true
+        },
+        {
+          "id": "refresh/outline/declared-reverse",
+          "pass": true
+        },
+        {
+          "id": "refresh/outline/foreign-gesture-refusal",
+          "pass": true
+        },
+        {
+          "id": "refresh/outline/svg-export-basis",
+          "pass": true
+        },
+        {
+          "id": "refresh/outline/effect-export",
+          "pass": true
+        },
+        {
+          "id": "refresh/outline/lottie-export",
+          "pass": true
+        },
+        {
+          "id": "refresh/outline/sf-symbols-refusal",
+          "pass": true
+        },
+        {
+          "id": "refresh/filled/author-paths",
+          "pass": true
+        },
+        {
+          "id": "refresh/filled/semantic-part",
+          "pass": true
+        },
+        {
+          "id": "refresh/filled/keyboard-focus",
+          "pass": true
+        },
+        {
+          "id": "refresh/filled/accessible-preview",
+          "pass": true
+        },
+        {
+          "id": "refresh/filled/source-motion-controls",
+          "pass": true
+        },
+        {
+          "id": "refresh/filled/no-unproved-axes",
+          "pass": true
+        },
+        {
+          "id": "refresh/filled/display-preserves-paths",
+          "pass": true
+        },
+        {
+          "id": "refresh/filled/small-size-samples",
+          "pass": true
+        },
+        {
+          "id": "refresh/filled/public-source-admission",
+          "pass": true
+        },
+        {
+          "id": "refresh/filled/declared-reverse",
+          "pass": true
+        },
+        {
+          "id": "refresh/filled/foreign-gesture-refusal",
+          "pass": true
+        },
+        {
+          "id": "refresh/filled/svg-export-basis",
+          "pass": true
+        },
+        {
+          "id": "refresh/filled/effect-export",
+          "pass": true
+        },
+        {
+          "id": "refresh/filled/lottie-export",
+          "pass": true
+        },
+        {
+          "id": "refresh/filled/sf-symbols-refusal",
+          "pass": true
+        },
+        {
+          "id": "pause-freezes-progress",
+          "pass": true
+        },
+        {
+          "id": "pause-freezes-visible-pose",
+          "pass": true
+        },
+        {
+          "id": "reverse-successor-admitted",
+          "pass": true
+        },
+        {
+          "id": "reverse-retains-visible-pose",
+          "pass": true,
+          "detail": {
+            "beforeReverse": 39.98201622703256,
+            "afterReverse": 39.98201622703256
+          }
+        },
+        {
+          "id": "reduced-motion-terminal",
+          "pass": true
+        },
+        {
+          "id": "scrub-clears-paused-occurrence",
+          "pass": true
+        },
+        {
+          "id": "scrub-keeps-selected-phase",
+          "pass": true
+        },
+        {
+          "id": "completed-cycle-repeats",
+          "pass": true
+        },
+        {
+          "id": "failed-selection-clears-old-projection",
+          "pass": true
+        },
+        {
+          "id": "failed-selection-visible-status",
+          "pass": true
+        },
+        {
+          "id": "late-failure-keeps-new-selection",
+          "pass": true
+        },
+        {
+          "id": "late-failure-keeps-new-visible-status",
+          "pass": true
+        },
+        {
+          "id": "filled-instance-effect-admitted",
+          "pass": true
+        },
+        {
+          "id": "filled-instances-independent",
+          "pass": true
+        },
+        {
+          "id": "rotation-envelope-visible",
+          "pass": true
+        },
+        {
+          "id": "fixture-cleanup",
+          "pass": true
+        },
+        {
+          "id": "ellipsis-horizontal/outline/triad-authored-paths",
+          "pass": true
+        },
+        {
+          "id": "ellipsis-horizontal/outline/triad-stable-ids",
+          "pass": true
+        },
+        {
+          "id": "ellipsis-horizontal/outline/triad-public-effect",
+          "pass": true
+        },
+        {
+          "id": "ellipsis-horizontal/outline/triad-pause",
+          "pass": true
+        },
+        {
+          "id": "ellipsis-horizontal/outline/triad-semantic-emphasis",
+          "pass": true
+        },
+        {
+          "id": "ellipsis-horizontal/outline/triad-reverse-admission",
+          "pass": true,
+          "detail": {
+            "before": [
+              0.705333,
+              0.35,
+              0.35
+            ],
+            "after": [
+              0.705333,
+              0.35,
+              0.35
+            ]
+          }
+        },
+        {
+          "id": "ellipsis-horizontal/outline/idle-restores-master",
+          "pass": true
+        },
+        {
+          "id": "ellipsis-horizontal/outline/triad-paths-unchanged-after-motion",
+          "pass": true
+        },
+        {
+          "id": "ellipsis-horizontal/filled/triad-authored-paths",
+          "pass": true
+        },
+        {
+          "id": "ellipsis-horizontal/filled/triad-stable-ids",
+          "pass": true
+        },
+        {
+          "id": "ellipsis-horizontal/filled/triad-public-effect",
+          "pass": true
+        },
+        {
+          "id": "ellipsis-horizontal/filled/triad-pause",
+          "pass": true
+        },
+        {
+          "id": "ellipsis-horizontal/filled/triad-semantic-emphasis",
+          "pass": true
+        },
+        {
+          "id": "ellipsis-horizontal/filled/triad-reverse-admission",
+          "pass": true,
+          "detail": {
+            "before": [
+              0.707933,
+              0.35,
+              0.35
+            ],
+            "after": [
+              0.707933,
+              0.35,
+              0.35
+            ]
+          }
+        },
+        {
+          "id": "ellipsis-horizontal/filled/idle-restores-master",
+          "pass": true
+        },
+        {
+          "id": "ellipsis-horizontal/filled/triad-paths-unchanged-after-motion",
+          "pass": true
+        },
+        {
+          "id": "chatbubble-ellipses/outline/triad-authored-paths",
+          "pass": true
+        },
+        {
+          "id": "chatbubble-ellipses/outline/triad-stable-ids",
+          "pass": true
+        },
+        {
+          "id": "chatbubble-ellipses/outline/triad-public-effect",
+          "pass": true
+        },
+        {
+          "id": "chatbubble-ellipses/outline/triad-pause",
+          "pass": true
+        },
+        {
+          "id": "chatbubble-ellipses/outline/triad-semantic-emphasis",
+          "pass": true
+        },
+        {
+          "id": "chatbubble-ellipses/outline/triad-reverse-admission",
+          "pass": true,
+          "detail": {
+            "before": [
+              0.707933,
+              0.35,
+              0.35
+            ],
+            "after": [
+              0.707933,
+              0.35,
+              0.35
+            ]
+          }
+        },
+        {
+          "id": "chatbubble-ellipses/outline/unchanged-enclosure",
+          "pass": true
+        },
+        {
+          "id": "chatbubble-ellipses/outline/idle-restores-master",
+          "pass": true
+        },
+        {
+          "id": "chatbubble-ellipses/outline/triad-paths-unchanged-after-motion",
+          "pass": true
+        },
+        {
+          "id": "filled-typing-compound-refuses",
+          "pass": true
+        },
+        {
+          "id": "vertical-menu-does-not-inherit-loading",
+          "pass": true
+        },
+        {
+          "id": "volume-high/outline/level-rest-matches-master",
+          "pass": true
+        },
+        {
+          "id": "volume-high/outline/level-authored-paths",
+          "pass": true
+        },
+        {
+          "id": "volume-high/outline/level-halfway",
+          "pass": true,
+          "detail": [
+            1,
+            0.5,
+            0
+          ]
+        },
+        {
+          "id": "volume-high/outline/level-interruption-pickup",
+          "pass": true,
+          "detail": {
+            "before": [
+              1,
+              0.188333,
+              0
+            ],
+            "after": [
+              1,
+              0.188333,
+              0
+            ]
+          }
+        },
+        {
+          "id": "volume-high/outline/level-reduced-latest-target",
+          "pass": true
+        },
+        {
+          "id": "volume-high/outline/level-stationary-speaker",
+          "pass": true
+        },
+        {
+          "id": "volume-high/outline/level-paths-unchanged",
+          "pass": true
+        },
+        {
+          "id": "volume-high/filled/level-rest-matches-master",
+          "pass": true
+        },
+        {
+          "id": "volume-high/filled/level-authored-paths",
+          "pass": true
+        },
+        {
+          "id": "volume-high/filled/level-halfway",
+          "pass": true,
+          "detail": [
+            1,
+            0.5,
+            0
+          ]
+        },
+        {
+          "id": "volume-high/filled/level-interruption-pickup",
+          "pass": true,
+          "detail": {
+            "before": [
+              1,
+              0.188,
+              0
+            ],
+            "after": [
+              1,
+              0.188,
+              0
+            ]
+          }
+        },
+        {
+          "id": "volume-high/filled/level-reduced-latest-target",
+          "pass": true
+        },
+        {
+          "id": "volume-high/filled/level-stationary-speaker",
+          "pass": true
+        },
+        {
+          "id": "volume-high/filled/level-paths-unchanged",
+          "pass": true
+        },
+        {
+          "id": "volume-middle/filled/level-rest-matches-master",
+          "pass": true
+        },
+        {
+          "id": "volume-middle/filled/level-authored-paths",
+          "pass": true
+        },
+        {
+          "id": "volume-middle/filled/level-halfway",
+          "pass": true,
+          "detail": [
+            1,
+            0
+          ]
+        },
+        {
+          "id": "volume-middle/filled/level-interruption-pickup",
+          "pass": true,
+          "detail": {
+            "before": [
+              0.792111,
+              0
+            ],
+            "after": [
+              0.792111,
+              0
+            ]
+          }
+        },
+        {
+          "id": "volume-middle/filled/level-reduced-latest-target",
+          "pass": true
+        },
+        {
+          "id": "volume-middle/filled/level-stationary-speaker",
+          "pass": true
+        },
+        {
+          "id": "volume-middle/filled/level-paths-unchanged",
+          "pass": true
+        },
+        {
+          "id": "split-volume-band-refuses-object-opacity",
+          "pass": true
+        },
+        {
+          "id": "chevron-back/outline/nudge-author-paths",
+          "pass": true
+        },
+        {
+          "id": "chevron-back/outline/nudge-declared-part",
+          "pass": true
+        },
+        {
+          "id": "chevron-back/outline/nudge-source-admission",
+          "pass": true
+        },
+        {
+          "id": "chevron-back/outline/nudge-phase-correspondence",
+          "pass": true
+        },
+        {
+          "id": "chevron-back/outline/nudge-no-unproved-axes",
+          "pass": true
+        },
+        {
+          "id": "chevron-back/outline/nudge-16px-viewbox-units",
+          "pass": false,
+          "detail": {
+            "size": 16,
+            "shift": [
+              0,
+              0
+            ]
+          }
+        }
+      ],
+      "authority": [
+        {
+          "name": "reload",
+          "variant": "outline",
+          "author": {
+            "kind": "figma",
+            "fileKey": "LuaiBd4anRi4DMZayKAnY2",
+            "version": "2416636003859748575",
+            "nodeId": "6431:3898",
+            "nodeSha256": "feaaeb86b97b3013999ca9054bc166caf9b8e38bc62af0d5926b153d92f6c140",
+            "masterSha256": "9a6784d21805bb7374a37a62fab427be8a49b985bdb5ffc04876bfb3ed93bd80",
+            "normalizedSha256": "66ae7016611a7c639ac4b666959308e485fd4a90f9d029f5607eaccf5a121513",
+            "pathFingerprintSha256": "0539b295f7e1087d3f3fb12524d578c5cdfb0a19655ea99786cee975b52b8f7c"
+          },
+          "anatomy": {
+            "version": 1,
+            "annotationSha256": "1a1fb97986966df057cf0a50e67872e82ac3e4f9ed562e830bb9b61bfc022d5c",
+            "masterSha256": "9a6784d21805bb7374a37a62fab427be8a49b985bdb5ffc04876bfb3ed93bd80",
+            "pathFingerprintSha256": "0539b295f7e1087d3f3fb12524d578c5cdfb0a19655ea99786cee975b52b8f7c"
+          }
+        },
+        {
+          "name": "reload",
+          "variant": "filled",
+          "author": {
+            "kind": "figma",
+            "fileKey": "LuaiBd4anRi4DMZayKAnY2",
+            "version": "2416636003859748575",
+            "nodeId": "6413:79",
+            "nodeSha256": "73a64f7a2fb9ec448c00f8b627e2bb8dc744a0e5c0ec3cac504223792cb17601",
+            "masterSha256": "3c7a57edcdac59581175696289e383f78ec43381bcbb72ed49c5034ae8ae871a",
+            "normalizedSha256": "a52aa08e898c62cdf5cb57a73f67ad2385cd0b3b6ff3fd2a144741d04e83a322",
+            "pathFingerprintSha256": "3441f62d5640362954f6229439a867913aee6aae98c463ee11a326419b958c62"
+          },
+          "anatomy": {
+            "version": 1,
+            "annotationSha256": "0be0aa7b6b29ca6ee7763e212664f219fdc7d02bcc75206f977b329ba652865c",
+            "masterSha256": "3c7a57edcdac59581175696289e383f78ec43381bcbb72ed49c5034ae8ae871a",
+            "pathFingerprintSha256": "3441f62d5640362954f6229439a867913aee6aae98c463ee11a326419b958c62"
+          }
+        },
+        {
+          "name": "refresh",
+          "variant": "outline",
+          "author": {
+            "kind": "figma",
+            "fileKey": "LuaiBd4anRi4DMZayKAnY2",
+            "version": "2416636003859748575",
+            "nodeId": "6431:3984",
+            "nodeSha256": "38513cc267c2932f7e370a59a2215a206d2f1b8842e37c6a855212b3fe056e1e",
+            "masterSha256": "197a388b68b7038a978d1653f5c00a8c0676326a5ec5b74cc3b461c7c551e3af",
+            "normalizedSha256": "e9e057c8ca80cd6d07a8489f96d3a6f55655fdc5ad913417ecd5e09b1884f0c2",
+            "pathFingerprintSha256": "e8d0dff9194dca19f6223ee84e9c644f99dab9b10fe92da733acac9937fe8202"
+          },
+          "anatomy": {
+            "version": 1,
+            "annotationSha256": "efad4b11ef5c653acf4102d31ca3a9dc7a83c2f7f760a76698a0ab9cd4d7452f",
+            "masterSha256": "197a388b68b7038a978d1653f5c00a8c0676326a5ec5b74cc3b461c7c551e3af",
+            "pathFingerprintSha256": "e8d0dff9194dca19f6223ee84e9c644f99dab9b10fe92da733acac9937fe8202"
+          }
+        },
+        {
+          "name": "refresh",
+          "variant": "filled",
+          "author": {
+            "kind": "figma",
+            "fileKey": "LuaiBd4anRi4DMZayKAnY2",
+            "version": "2416636003859748575",
+            "nodeId": "6413:73",
+            "nodeSha256": "b7344400b024cdcd26d6f8fe8a09c96cc0c8f45b60dd54609e89512c9b45d8ff",
+            "masterSha256": "d087792f28dbe52e5fe4937a17885a8e502e2618a03eec5d8c0323cac560227a",
+            "normalizedSha256": "249df831e8b9cf9cfac19a146851e8634120eba7e58f28eadb87e25a24ed7596",
+            "pathFingerprintSha256": "210a3be010a2fa6118adcb8c41b7ab792533075783fc1cac2875a04ad4505d6a"
+          },
+          "anatomy": {
+            "version": 1,
+            "annotationSha256": "0d57f977afbb1c776f643f08177725aeb2f03294a977be635220fd925415f556",
+            "masterSha256": "d087792f28dbe52e5fe4937a17885a8e502e2618a03eec5d8c0323cac560227a",
+            "pathFingerprintSha256": "210a3be010a2fa6118adcb8c41b7ab792533075783fc1cac2875a04ad4505d6a"
+          }
+        }
+      ],
+      "failure": "explorer journey: chevron-back/outline/nudge-16px-viewbox-units"
+    }
+  },
+  "actualArtifactDigests": {
+    "motion-execution.js": "c51247df4c619ad263dd6525c01ef05f3f3d97c0ffe7a3e07b76d02c7f37b93f",
+    "package/motion/index.js": "12039087c27058100b8688c1424ade08a6ac38913c6c7d3bad2a8899685a4bfb",
+    "package/ir/symbol-runtime.js": "4ae4d1db4c711e58e4511a32ffea89c245368895fda788b8cff7effd6c5af601",
+    "package/ir/render.js": "0f95c085ddc06b152af96abc0947a385ab0eee989cb32fa36a0953fe8b692a3c",
+    "package/ir/lottie-runtime.js": "bd6c800f190549df20e850cb0af4500f66dbaca1d8eaa47e6c58576d6425a564",
+    "package/ir/request.js": "d599ae7c6c9dcf36b80515dcb8f3d4023a32c67c76ba32ae51b0cdf761eea910",
+    "journey.js": "50eb6b1c1573031858a60546dbb19f12d3490f2f2fd2f083e0953ba6f3f28d14"
+  },
+  "render": {
+    "file": "author-nudge-consumer-20261101.png",
+    "sha256": "b5ef61875e1c75fd2212d49c2d999d762b127b3bac33c4a8e5c118038b6e5534",
+    "observatoryPeakSha256": "870e61a964c089b050d7d497279abf600f8a79ca6aa9c5dd4b8d70ae63b48a6e"
+  }
+}

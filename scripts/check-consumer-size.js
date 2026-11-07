@@ -6,10 +6,12 @@
  * tree-shake обязан работать, рост baseline виден в обе стороны.
  */
 import { readFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { dirname, join, relative } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { build } from 'esbuild';
 import { gzipSync } from 'fflate';
+import { brotliCompressSync, constants } from 'node:zlib';
+import { authorMotionTargets } from './lib/author-motion-targets.js';
 
 export const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const PACKAGE_JSON = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'));
@@ -29,12 +31,23 @@ export const CONSUMER_SIZE_MEASUREMENT =
   `esbuild@${pinnedVersion('esbuild')} bundle+minify+treeshake es2022 browser; ` +
   `fflate@${pinnedVersion('fflate')} gzipSync level=9 mtime=0`;
 
-/** Subpath-резолюция как у потребителя опубликованного пакета: exports → dist. */
-const ENTRY_ALIAS = Object.freeze({
-  '@labpics/icons': 'dist/index.js',
-  '@labpics/icons/ir': 'dist/ir/index.js',
-  '@labpics/icons/ir/recipes': 'dist/ir/recipes.js',
-});
+/** ESM targets принадлежат package exports; измерение не ведёт второй список. */
+const ENTRY_EXPORTS = Object.freeze(Object.fromEntries(
+  Object.entries(PACKAGE_JSON.exports).map(([subpath, conditions]) => [subpath, conditions.import]),
+));
+
+function packageEntryTarget(specifier) {
+  const subpath = specifier === PACKAGE_JSON.name
+    ? '.' : `.${specifier.slice(PACKAGE_JSON.name.length)}`;
+  if (Object.hasOwn(ENTRY_EXPORTS, subpath)) return ENTRY_EXPORTS[subpath];
+  for (const [pattern, target] of Object.entries(ENTRY_EXPORTS)) {
+    if (!pattern.endsWith('/*') || !subpath.startsWith(pattern.slice(0, -1))) continue;
+    const name = subpath.slice(pattern.length - 1);
+    if (!/^[a-z][a-z0-9-]*$/.test(name)) return null;
+    return target.replace('*', name);
+  }
+  return null;
+}
 
 const ROOT_FIELDS = ['version', 'measurement', 'scenarios'];
 const SCENARIO_FIELDS = [
@@ -46,6 +59,29 @@ const SCENARIO_FIELDS = [
 ];
 const SCENARIO_NAME = /^[a-z][a-z0-9-]*$/;
 const STATIC_PACKAGE_IMPORT = /\bimport\s+(?:[^'";]+?\s+from\s+)?['"](@labpics\/icons(?:\/[^'"]*)?)['"]/g;
+
+/** Измерение и проверка используют одни реальные способы потребления clock API. */
+export function clockConsumerEntries(icons) {
+  const entries = {};
+  for (const icon of icons) {
+    if (!SCENARIO_NAME.test(icon)) throw new TypeError(`clock consumer: невалидное имя ${icon}`);
+    const entry = `@labpics/icons/gestures/${icon}`;
+    entries[`gesture-${icon}-prepared`] = `import { prepareClockHands } from '${entry}';\nconst result = prepareClockHands();\nconsole.log(result.ok ? result.prepared.sample(0.5) : result);\n`;
+    entries[`gesture-${icon}-capabilities`] = `import { motionCapabilities } from '${entry}';\nconsole.log(motionCapabilities());\n`;
+    entries[`gesture-${icon}-combined`] = `import { prepareClockHands, motionCapabilities } from '${entry}';\nconsole.log(prepareClockHands(), motionCapabilities());\n`;
+  }
+  return Object.freeze(entries);
+}
+
+export function checkClockConsumerSizeCoverage(ratchet, icons) {
+  const errors = [];
+  for (const [name, entry] of Object.entries(clockConsumerEntries(icons))) {
+    const limits = ratchet.scenarios[name];
+    if (!limits) errors.push(`${name}: clock consumer отсутствует в size ratchet`);
+    else if (limits.entry !== entry) errors.push(`${name}: entry не совпадает с clock consumer`);
+  }
+  return errors;
+}
 
 function packageImports(entry) {
   return [...entry.matchAll(STATIC_PACKAGE_IMPORT)].map((match) => match[1]);
@@ -129,10 +165,7 @@ export function parseConsumerSizeRatchet(value) {
   });
 }
 
-export async function bundleScenario(entry, { root = ROOT } = {}) {
-  const alias = Object.fromEntries(
-    Object.entries(ENTRY_ALIAS).map(([spec, target]) => [spec, join(root, target)]),
-  );
+export async function bundleScenario(entry, { root = ROOT, includeBrotli = false } = {}) {
   const out = await build({
     stdin: { contents: entry, resolveDir: root, loader: 'js' },
     bundle: true,
@@ -145,9 +178,9 @@ export async function bundleScenario(entry, { root = ROOT } = {}) {
       name: 'consumer-package-entry',
       setup(buildApi) {
         buildApi.onResolve({ filter: /^@labpics\/icons(?:\/.*)?$/ }, (args) => {
-          const path = alias[args.path];
-          if (!path) return { errors: [{ text: `неизвестный package subpath ${args.path}` }] };
-          return { path, namespace: 'consumer-package-entry' };
+          const target = packageEntryTarget(args.path);
+          if (!target) return { errors: [{ text: `неизвестный package subpath ${args.path}` }] };
+          return { path: join(root, target), namespace: 'consumer-package-entry' };
         });
         buildApi.onLoad({ filter: /.*/, namespace: 'consumer-package-entry' }, (args) => ({
           contents: readFileSync(args.path, 'utf8'),
@@ -173,6 +206,13 @@ export async function bundleScenario(entry, { root = ROOT } = {}) {
   return Object.freeze({
     bytes: bytes.byteLength,
     gzipBytes: gzipSync(bytes, { level: 9, mtime: 0 }).byteLength,
+    ...(includeBrotli ? { brotliBytes: brotliCompressSync(bytes, {
+      params: { [constants.BROTLI_PARAM_QUALITY]: 11 },
+    }).byteLength } : {}),
+    modules: Object.freeze(Object.keys(out.metafile.inputs).map(file => {
+      const normalized = file.replace(/^consumer-package-entry:/, '');
+      return relative(root, normalized).replaceAll('\\', '/');
+    }).sort()),
   });
 }
 
@@ -190,6 +230,13 @@ export async function checkConsumerSize({ root = ROOT } = {}) {
       measurements,
     };
   }
+  try {
+    const anatomy = JSON.parse(readFileSync(join(root, 'semantics/author-anatomy.json'), 'utf8'));
+    errors.push(...checkClockConsumerSizeCoverage(ratchet, authorMotionTargets(anatomy).clocks));
+  } catch (error) {
+    errors.push(`clock consumer coverage не проверен (${error.message})`);
+  }
+  if (errors.length > 0) return { errors, measurements };
   for (const [name, limits] of Object.entries(ratchet.scenarios)) {
     let measured;
     try {

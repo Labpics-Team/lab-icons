@@ -477,6 +477,88 @@
     "warningFilled",
     "warningOutline"
   ],
+  "./authoring": [
+    "DesignSpecError",
+    "compileDesignSpec",
+    "designSpecContract",
+    "lowerDesignSpec",
+    "parseDesignSpec",
+    "renderGlyphSvg"
+  ],
+  "./content-variations/alert-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./content-variations/checkmark-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./content-variations/close-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./content-variations/minus-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./content-variations/pause-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./content-variations/play-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./content-variations/plus-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./content-variations/question-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./gestures/history": [
+    "motionCapabilities",
+    "prepareClockHands"
+  ],
+  "./gestures/mic": [
+    "motionCapabilities",
+    "prepareBodyWidth"
+  ],
+  "./gestures/mic-circle": [
+    "motionCapabilities",
+    "prepareBodyWidth"
+  ],
+  "./gestures/refresh": [
+    "compileMotionEffect",
+    "motionCapabilities",
+    "renderMotionSvg"
+  ],
+  "./gestures/reload": [
+    "compileMotionEffect",
+    "motionCapabilities",
+    "renderMotionSvg"
+  ],
+  "./gestures/time": [
+    "motionCapabilities",
+    "prepareClockHands"
+  ],
   "./ir": [
     "GlyphModelError",
     "axisContracts",
@@ -515,5 +597,3493 @@
     "placeNotificationBadge",
     "resolveCalendarDay",
     "roundedDigitGeometry"
+  ],
+  "./ir/render": [
+    "renderGlyphSvg"
+  ],
+  "./lottie/accessibility": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/actions": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/alert": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/alert-circle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/align-bottom": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/align-horizontal-center": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/align-items-bottom": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/align-items-horizontal-center": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/align-items-left": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/align-items-right": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/align-items-top": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/align-items-vertical-center": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/align-left": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/align-right": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/align-top": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/align-vertical-center": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/aloof": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/apps": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/archive": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/archive-close": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/arrow-back": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/arrow-back-circle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/arrow-down": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/arrow-down-circle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/arrow-forward": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/arrow-forward-circle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/arrow-redo": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/arrow-redo-circle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/arrow-redo-curve": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/arrow-undo": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/arrow-undo-circle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/arrow-undo-curve": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/arrow-up": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/arrow-up-circle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/at": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/attach": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/bag": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/bag-checkmark": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/bag-close": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/bag-minus": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/bag-plus": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/ban": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/basket": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/bill": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/bin": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/book": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/bookmark": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/bookmarks": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/boolean": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/brain": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/branch": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/branches": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/brush": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/bulb": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/calendar": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/calendar-clear": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/calendar-number": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/calendar-today": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/camera": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/camera-reverse": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/cards": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/caret-back": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/caret-down": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/caret-forward": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/caret-up": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/caret-vertical": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/cart": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/chart": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/chart-area": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/chart-area-panel": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/chart-bars-horizontal": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/chart-columns": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/chart-combo": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/chart-donut": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/chart-flow": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/chart-lines": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/chart-metric": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/chart-nodes": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/chart-pie": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/chart-treemap-horizontal": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/chart-treemap-vertical": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/chart-trend-up": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/chatbubble": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/chatbubble-ellipses": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/chatbubbles": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/checkmark": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/checkmark-circle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/checkmarks": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/checkmarks-circle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/cherries": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/chevron-back": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/chevron-back-circle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/chevron-down": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/chevron-down-circle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/chevron-forward": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/chevron-forward-circle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/chevron-up": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/chevron-up-circle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/chevrons-down": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/close": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/close-circle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/close-octagon": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/cloud": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/cloud-checkmark": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/cloud-download": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/cloud-off": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/cloud-upload": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/code": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/code-frame": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/cog": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/coin-dollar": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/coin-ruble": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/collapse-horizontal": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/collapse-horizontal-line": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/collapse-vertical": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/collapse-vertical-line": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/color-filter": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/color-wand": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/commit": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/commits": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/compas": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/component": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/computer": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/connect": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/connectors": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/console": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/contrast": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/copy": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/corners-in": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/corners-out": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/cursor": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/cursor-click": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/dashboard": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/database": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/database-export": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/database-plus": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/database-search": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/database-settings": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/dice": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/download": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/duplicate": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/ear": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/earth": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/ellipse": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/ellipsis-horizontal": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/ellipsis-vertical": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/enter": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/exit": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/expand-horizontal-line": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/expand-vertical": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/extension-puzzle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/eye": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/eye-off": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/eyedrop": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/field-text": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/file": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/file-clear": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/files": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/filter": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/fingerprint": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/fire": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/flash": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/flash-off": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/folder": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/folder-open": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/fork": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/fullscreen-enter": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/fullscreen-exit": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/glasses": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/globe": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/golf": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/group": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/group-circle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/hand-point-down": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/hand-point-left": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/hand-point-right": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/hand-point-up": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/hand-two-fingers": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/hard-drive": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/hash": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/headphone": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/heart": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/heart-off": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/heart-pulse": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/history": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/home": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/hourglass": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/image": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/images": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/info": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/info-circle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/invert": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/justify-horizontal": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/justify-items-horizontal": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/justify-items-vertical": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/justify-vertical": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/key": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/keyboard": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/keys": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/layers": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/link": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/link-horizontal": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/link-horizontal-off": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/list": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/lock": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/mail": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/mail-open": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/mail-unread": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/mcp": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/megaphone": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/menu": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/merge": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/mic": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/mic-circle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/mic-off": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/minus": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/minus-circle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/monitor-pulse": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/moon": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/moon-sparkles": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/move": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/musical-note": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/musical-notes": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/navigate": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/notifications": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/notifications-off": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/notifications-unread": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/options": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/palette": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/pause": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/pause-circle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/paw": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/pencil": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/person": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/person-circle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/person-minus": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/person-plus": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/phone": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/pin": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/pin-vertical": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/pin-vertical-off": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/place": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/plane": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/play": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/play-back": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/play-back-circle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/play-circle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/play-forward": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/play-forward-circle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/play-skip-back": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/play-skip-back-circle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/play-skip-forward": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/play-skip-forward-circle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/plus": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/plus-circle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/print": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/priority": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/pull-request": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/push": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/qr": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/question": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/question-circle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/radio": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/refresh": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/reload": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/repeat": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/resize": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/revert": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/rhomb": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/rocket": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/sad": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/scan": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/school": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/search": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/send": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/server": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/settings": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/share": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/share-display": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/share-social": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/shield": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/shield-checkmark": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/sidebar-collapsed": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/sidebar-expanded": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/signature": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/smile": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/sparkle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/sparkles": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/speed": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/square": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/star": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/stats": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/steps": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/stop": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/stop-circle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/storefront": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/sun": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/sun-low": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/swap-horizontal": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/swap-vertical": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/sync": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/tablet-landscape": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/tablet-portrait": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/tag": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/tag-dollar": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/tag-ruble": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/tags": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/target": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/text": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/ticket": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/time": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/timer": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/translate": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/triangle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/trophy": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/turn-off": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/unlock": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/upload": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/video": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/video-camera": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/video-camera-off": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/volume": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/volume-high": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/volume-low": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/volume-middle": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/volume-mute": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/volume-muted": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/wallet": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/warning": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./lottie/waveform": [
+    "exportLottie",
+    "lottieCapabilities"
+  ],
+  "./motion": [
+    "compileSymbolEffect",
+    "prepareContourStateEffect"
+  ],
+  "./state-variations/playback-circle": [
+    "compileStateEffect",
+    "enclosureVariationCapabilities",
+    "exportStateTransition",
+    "render",
+    "renderEnclosurePatch",
+    "renderStateSvg",
+    "stateCapabilities"
+  ],
+  "./state-variations/status-circle": [
+    "compileStateEffect",
+    "enclosureVariationCapabilities",
+    "exportStateTransition",
+    "render",
+    "renderEnclosurePatch",
+    "renderStateSvg",
+    "stateCapabilities"
+  ],
+  "./states/ellipsis-orientation-filled": [
+    "compileStateEffect",
+    "exportStateTransition",
+    "render",
+    "renderStateSvg",
+    "stateCapabilities"
+  ],
+  "./states/ellipsis-orientation-outline": [
+    "compileStateEffect",
+    "exportStateTransition",
+    "render",
+    "renderStateSvg",
+    "stateCapabilities"
+  ],
+  "./states/expression-face": [
+    "compileStateEffect",
+    "exportStateTransition",
+    "render",
+    "renderStateSvg",
+    "stateCapabilities"
+  ],
+  "./states/microphone": [
+    "compileStateEffect",
+    "exportStateTransition",
+    "render",
+    "renderStateSvg",
+    "stateCapabilities"
+  ],
+  "./states/microphone-filled": [
+    "compileStateEffect",
+    "exportStateTransition",
+    "render",
+    "renderStateSvg",
+    "stateCapabilities"
+  ],
+  "./states/microphone-presentation": [
+    "compileStateEffect",
+    "exportStateTransition",
+    "render",
+    "renderStateSvg",
+    "stateCapabilities"
+  ],
+  "./states/microphone-presentation-filled": [
+    "compileStateEffect",
+    "exportStateTransition",
+    "render",
+    "renderStateSvg",
+    "stateCapabilities"
+  ],
+  "./states/playback-circle": [
+    "compileStateEffect",
+    "exportStateTransition",
+    "render",
+    "renderStateSvg",
+    "stateCapabilities"
+  ],
+  "./states/plus-presentation": [
+    "compileStateEffect",
+    "exportStateTransition",
+    "render",
+    "renderStateSvg",
+    "stateCapabilities"
+  ],
+  "./states/plus-presentation-filled": [
+    "compileStateEffect",
+    "exportStateTransition",
+    "render",
+    "renderStateSvg",
+    "stateCapabilities"
+  ],
+  "./states/status-circle": [
+    "compileStateEffect",
+    "exportStateTransition",
+    "render",
+    "renderStateSvg",
+    "stateCapabilities"
+  ],
+  "./states/visibility": [
+    "compileStateEffect",
+    "exportStateTransition",
+    "render",
+    "renderStateSvg",
+    "stateCapabilities"
+  ],
+  "./states/visibility-filled": [
+    "compileStateEffect",
+    "exportStateTransition",
+    "render",
+    "renderStateSvg",
+    "stateCapabilities"
+  ],
+  "./symbols/accessibility": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/actions": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/alert": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/alert-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/align-bottom": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/align-horizontal-center": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/align-items-bottom": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/align-items-horizontal-center": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/align-items-left": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/align-items-right": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/align-items-top": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/align-items-vertical-center": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/align-left": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/align-right": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/align-top": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/align-vertical-center": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/aloof": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/apps": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/archive": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/archive-close": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/arrow-back": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/arrow-back-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/arrow-down": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/arrow-down-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/arrow-forward": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/arrow-forward-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/arrow-redo": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/arrow-redo-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/arrow-redo-curve": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/arrow-undo": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/arrow-undo-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/arrow-undo-curve": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/arrow-up": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/arrow-up-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/at": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/attach": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/bag": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/bag-checkmark": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/bag-close": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/bag-minus": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/bag-plus": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/ban": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/basket": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/bill": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/bin": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/book": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/bookmark": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/bookmarks": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/boolean": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/brain": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/branch": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/branches": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/brush": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/bulb": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/calendar": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/calendar-clear": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/calendar-number": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/calendar-today": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/camera": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/camera-reverse": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/cards": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/caret-back": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/caret-down": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/caret-forward": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/caret-up": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/caret-vertical": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/cart": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/chart": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/chart-area": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/chart-area-panel": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/chart-bars-horizontal": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/chart-columns": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/chart-combo": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/chart-donut": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/chart-flow": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/chart-lines": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/chart-metric": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/chart-nodes": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/chart-pie": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/chart-treemap-horizontal": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/chart-treemap-vertical": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/chart-trend-up": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/chatbubble": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/chatbubble-ellipses": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/chatbubbles": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/checkmark": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/checkmark-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/checkmarks": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/checkmarks-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/cherries": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/chevron-back": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/chevron-back-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/chevron-down": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/chevron-down-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/chevron-forward": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/chevron-forward-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/chevron-up": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/chevron-up-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/chevrons-down": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/close": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/close-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/close-octagon": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/cloud": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/cloud-checkmark": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/cloud-download": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/cloud-off": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/cloud-upload": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/code": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/code-frame": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/cog": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/coin-dollar": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/coin-ruble": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/collapse-horizontal": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/collapse-horizontal-line": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/collapse-vertical": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/collapse-vertical-line": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/color-filter": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/color-wand": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/commit": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/commits": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/compas": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/component": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/computer": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/connect": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/connectors": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/console": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/contrast": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/copy": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/corners-in": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/corners-out": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/cursor": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/cursor-click": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/dashboard": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/database": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/database-export": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/database-plus": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/database-search": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/database-settings": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/dice": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/download": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/duplicate": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/ear": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/earth": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/ellipse": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/ellipsis-horizontal": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/ellipsis-vertical": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/enter": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/exit": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/expand-horizontal-line": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/expand-vertical": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/extension-puzzle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/eye": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/eye-off": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/eyedrop": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/field-text": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/file": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/file-clear": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/files": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/filter": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/fingerprint": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/fire": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/flash": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/flash-off": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/folder": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/folder-open": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/fork": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/fullscreen-enter": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/fullscreen-exit": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/glasses": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/globe": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/golf": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/group": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/group-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/hand-point-down": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/hand-point-left": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/hand-point-right": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/hand-point-up": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/hand-two-fingers": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/hard-drive": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/hash": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/headphone": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/heart": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/heart-off": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/heart-pulse": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/history": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/home": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/hourglass": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/image": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/images": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/info": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/info-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/invert": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/justify-horizontal": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/justify-items-horizontal": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/justify-items-vertical": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/justify-vertical": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/key": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/keyboard": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/keys": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/layers": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/link": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/link-horizontal": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/link-horizontal-off": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/list": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/lock": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/mail": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/mail-open": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/mail-unread": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/mcp": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/megaphone": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/menu": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/merge": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/mic": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/mic-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/mic-off": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/minus": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/minus-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/monitor-pulse": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/moon": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/moon-sparkles": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/move": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/musical-note": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/musical-notes": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/navigate": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/notifications": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/notifications-off": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/notifications-unread": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/options": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/palette": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/pause": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/pause-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/paw": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/pencil": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/person": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/person-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/person-minus": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/person-plus": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/phone": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/pin": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/pin-vertical": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/pin-vertical-off": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/place": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/plane": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/play": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/play-back": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/play-back-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/play-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/play-forward": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/play-forward-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/play-skip-back": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/play-skip-back-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/play-skip-forward": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/play-skip-forward-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/plus": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/plus-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/print": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/priority": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/pull-request": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/push": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/qr": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/question": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/question-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/radio": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/refresh": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/reload": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/repeat": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/resize": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/revert": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/rhomb": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/rocket": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/sad": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/scan": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/school": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/search": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/send": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/server": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/settings": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/share": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/share-display": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/share-social": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/shield": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/shield-checkmark": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/sidebar-collapsed": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/sidebar-expanded": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/signature": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/smile": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/sparkle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/sparkles": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/speed": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/square": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/star": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/stats": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/steps": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/stop": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/stop-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/storefront": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/sun": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/sun-low": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/swap-horizontal": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/swap-vertical": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/sync": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/tablet-landscape": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/tablet-portrait": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/tag": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/tag-dollar": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/tag-ruble": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/tags": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/target": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/text": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/ticket": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/time": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/timer": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/translate": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/triangle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/trophy": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/turn-off": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/unlock": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/upload": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/video": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/video-camera": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/video-camera-off": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/volume": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/volume-high": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/volume-low": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/volume-middle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/volume-mute": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/volume-muted": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/wallet": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/warning": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./symbols/waveform": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./variations/alert-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./variations/checkmark-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./variations/close-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./variations/ellipsis-horizontal": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./variations/ellipsis-vertical": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./variations/mic": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./variations/mic-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./variations/minus-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./variations/pause-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./variations/play-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./variations/plus-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
+  ],
+  "./variations/question-circle": [
+    "filled",
+    "glyph",
+    "glyphCapabilities",
+    "outline"
   ]
 }

@@ -10,6 +10,53 @@ const simpleFigmaSvg = ({ rootFill = 'none', pathFill = '#101012', body } = {}) 
   '</svg>';
 
 describe('Figma intake — каноническая граница source SVG', () => {
+  it.each(['m,0 0H24V24H0Z', 'm0,,0H24V24H0Z'])('не исправляет грамматику viewport clip при lowering %s', (d) => {
+    expect(() => normalizeFigmaSvg(simpleFigmaSvg({ rootFill: '#101012', body: `<g clip-path="url(#clip)"><path d="M2 2H22V22H2Z"/></g><defs><clipPath id="clip"><path d="${d}"/></clipPath></defs>` }))).toThrow();
+  });
+
+  it.each(['m,2 2H22V22H2Z', 'm2,,2H22V22H2Z'])('проверяет исходный path до нормализации начального moveto %s', (d) => {
+    expect(() => normalizeFigmaSvg(simpleFigmaSvg({ body: `<path d="${d}" fill="#101012"/>` }))).toThrow();
+  });
+
+  it.each([
+    simpleFigmaSvg().replace('d="', 'D="'),
+    simpleFigmaSvg().replace('viewBox=', 'viewbox='),
+    simpleFigmaSvg({ body: '<path d="M2 2H22V22H2Z M7 7H17V17H7Z" FILL-RULE="evenodd" fill="#101012"/>' }),
+  ])('сохраняет регистр XML-атрибутов', (svg) => {
+    expect(() => normalizeFigmaSvg(svg)).toThrow();
+  });
+
+  it('сохраняет inherited none, отказывая path без самостоятельной заливки', () => {
+    expect(() => normalizeFigmaSvg(simpleFigmaSvg({ body: '<path d="M2 2H22V22H2Z"/>' }))).toThrow();
+  });
+
+  it.each([
+    simpleFigmaSvg().replace('<svg ', '<SVG ').replace('</svg>', '</SVG>'),
+    simpleFigmaSvg({ body: '<PATH d="M2 2H22V22H2Z" fill="#101012"/>' }),
+    simpleFigmaSvg({ body: '<G id="neutral"><path d="M2 2H22V22H2Z" fill="#101012"/></G>' }),
+  ])('не меняет регистр XML-имён для получения рендерящегося SVG', (svg) => {
+    expect(() => normalizeFigmaSvg(svg)).toThrow();
+  });
+
+  it.each([
+    '<g / ><path d="M2 2H22V22H2Z" fill="#101012"/>',
+    '<g><path d="M2 2H22V22H2Z" fill="#101012"/></G>',
+    '<g id="a&b"><path d="M2 2H22V22H2Z" fill="#101012"/></g>',
+  ])('отвергает повреждённый XML до удаления нейтральной группы', (body) => {
+    expect(() => normalizeFigmaSvg(simpleFigmaSvg({ body }))).toThrow();
+  });
+
+  it.each([
+    'style="fill-rule:evenodd id=\'x\'"',
+    'd="M2 2H22V22H2Z id=\'x\' M7 7H17V17H7Z"',
+    'style="fill-rule:evenodd fill=\'#101012\'"',
+  ])('не переписывает текст внутри значения атрибута %s', (attribute) => {
+    const body = attribute.startsWith('d=')
+      ? `<path ${attribute} fill="#101012"/>`
+      : `<path d="M2 2H22V22H2ZM7 7H17V17H7Z" ${attribute}${attribute.includes(' fill=') ? '' : ' fill="#101012"'}/>`;
+    expect(() => normalizeFigmaSvg(simpleFigmaSvg({ body, rootFill: '#101012' }))).toThrow();
+  });
+
   it('сохраняет корневой svg, удаляя только нейтральную paint-семантику Figma', () => {
     const normalized = normalizeFigmaSvg(simpleFigmaSvg(), { source: 'square.svg' });
 
@@ -29,6 +76,46 @@ describe('Figma intake — каноническая граница source SVG', 
     expect(normalizeFigmaSvg(clipped, { source: 'clipped.svg' })).toContain(
       '<path d="M4 4H20V20H4Z"/>',
     );
+  });
+
+  it('сохраняет d, порядок и локальные fill-rule при удалении именованных экспортных групп', () => {
+    const first = 'M11.9922 5.15234C12.4892 5.15244 12.8926 5.55574 12.8926 6.05273Z';
+    const second = 'M12 1.5C17.7989 1.5 22.4998 6.20118 22.5 12Z';
+    const exported = simpleFigmaSvg({ body:
+      `<g id="time" data-node-id="6431:3963"><g id="Vector" data-node-id="6432:261">` +
+      `<path id="hand" data-node-id="6432:262" d="${first}" fill="#101012"/>` +
+      `<path d="${second}" fill-rule="evenodd" clip-rule="evenodd" fill="#101012"/>` +
+      '</g></g>',
+    });
+    const normalized = normalizeFigmaSvg(exported, { source: 'time.svg' });
+    expect(normalized).toBe(simpleFigmaSvg({ body:
+      `<path d="${first}"/><path d="${second}" fill-rule="evenodd" clip-rule="evenodd"/>`,
+    }).replace(' fill="none"', '') + '\n');
+  });
+
+  it.each([
+    'transform="translate(1 0)"',
+    'opacity="0.5"',
+    'fill="#101012"',
+    'fill-rule="evenodd"',
+    'style="fill-rule:evenodd"',
+    'clip-path="url(#unknown)"',
+    'mask="url(#cut)"',
+    'filter="url(#blur)"',
+  ])('отвергает экспортную группу с влияющим на изображение %s', (attribute) => {
+    const exported = simpleFigmaSvg({ body:
+      `<g id="time" ${attribute}><path d="M2 2H22V22H2Z" fill="#101012"/></g>`,
+    });
+    expect(() => normalizeFigmaSvg(exported, { source: 'unsafe.svg' })).toThrow();
+  });
+
+  it.each([
+    '<g id="time"><path d="M2 2H22V22H2Z" fill="#101012"/>',
+    '<path d="M2 2H22V22H2Z" fill="#101012"/></g>',
+    '<g id="time" id="again"><path d="M2 2H22V22H2Z" fill="#101012"/></g>',
+    '<path id="time" id="again" d="M2 2H22V22H2Z" fill="#101012"/>',
+  ])('отвергает повреждённую нейтральную обвязку', (body) => {
+    expect(() => normalizeFigmaSvg(simpleFigmaSvg({ body }), { source: 'malformed.svg' })).toThrow();
   });
 
   it('fail-closed отвергает мусор до root и цвет, меняющий смысл иконки', () => {

@@ -6,12 +6,15 @@ import {
   type RecipeResult,
   type RecipeStrokePaint,
 } from '../ir/recipes.js';
+import type { DesignSpecGlyphProvenance, GlyphIR, GlyphPart } from '../ir/glyph-types.js';
+import { assembleGlyphSvg } from '../ir/svg-assembly.js';
+import { sha256Hex } from '../ir/sha256.js';
 // @ts-ignore — существующий zero-IO geometry owner пока JS-only.
 import { _canonicalPoint, _negativeSpaceConstraint, buildConstructivePrimitive } from '../core/glyph-operators.js';
 // @ts-expect-error — существующий zero-IO geometry owner пока JS-only.
 import { genSuperellipse, topologySignature as computeTopologySignature } from '../core/anatomy-gen.js';
 // @ts-expect-error — существующий exact geometry utility пока JS-only.
-import { pathBBox } from '../core/path-data.js';
+import { parsePathData, pathBBox } from '../core/path-data.js';
 
 export type DesignSpecErrorCode =
   | 'UNSUPPORTED_VERSION'
@@ -26,6 +29,7 @@ export type DesignSpecErrorCode =
   | 'UNDERDEFINED_CONSTRAINT'
   | 'CONTRADICTORY_CONSTRAINT'
   | 'UNBOUNDED_RESIDUAL'
+  | 'UNSUPPORTED_COMPOSITION'
   | 'CONSTRAINT_VIOLATION';
 
 export class DesignSpecError extends Error {
@@ -121,22 +125,24 @@ export type DesignAnchor =
 
 export type DesignGeometry =
   | Readonly<{ kind: 'circle'; center: string; radius: number }>
-  | Readonly<{ kind: 'ellipse'; center: string; rx: number; ry: number; rotation: number }>
+  | Readonly<{ kind: 'ellipse'; center: string; rx: number; ry: number; rotation?: number }>
   | Readonly<{ kind: 'line'; from: string; to: string }>
   | Readonly<{ kind: 'arc'; center: string; radius: number; startAngle: number; endAngle: number; direction: 'cw' | 'ccw' }>
   | Readonly<{ kind: 'capsule'; from: string; to: string; radius: number }>
-  | Readonly<{ kind: 'rect'; center: string; width: number; height: number; cornerRadius: number }>
-  | Readonly<{ kind: 'residual'; recipe: 'superellipse'; center: string; rx: number; ry: number; exponent: number; rotation: number }>;
+  | Readonly<{ kind: 'rect'; center: string; width: number; height: number; cornerRadius?: number }>
+  | Readonly<{ kind: 'residual'; recipe: 'superellipse'; center: string; rx: number; ry: number; exponent: number; rotation?: number }>;
 
 export type DesignPaint =
   | Readonly<{ kind: 'fill' }>
-  | Readonly<{ kind: 'stroke'; width: number; linecap: 'round' | 'butt' }>;
+  | Readonly<{ kind: 'stroke'; width: number; linecap?: 'round' | 'butt' }>;
 
 export interface DesignPart {
   readonly id: string;
   readonly role: PartRole;
   readonly geometry: DesignGeometry;
   readonly paint: DesignPaint;
+  /** ID опоры в anchors. */
+  readonly anchor?: string;
   readonly morphGroup?: string;
 }
 
@@ -179,7 +185,27 @@ export interface LoweredDesignSpec extends RecipeResult {
 }
 
 export interface LoweredDesignPart extends RecipePart {
+  readonly anchor?: string;
   readonly morphGroup: string | null;
+}
+
+export interface CompileDesignSpecOptions<TIcon extends string = string> {
+  readonly icon: TIcon;
+  readonly variant?: 'outline' | 'filled';
+  /** Размер SVG в px. */
+  readonly size?: number;
+}
+
+export interface DesignSpecGlyph<TIcon extends string = string> extends GlyphIR<TIcon> {
+  readonly provenance: DesignSpecGlyphProvenance;
+  readonly designSpec: Readonly<{
+    specVersion: 1;
+    specSha256: `sha256:${string}`;
+    anchors: LoweredDesignSpec['anchors'];
+    decorators: LoweredDesignSpec['decorators'];
+    negativeSpace: LoweredDesignSpec['negativeSpace'];
+    topologyKey: string;
+  }>;
 }
 
 function fail(code: DesignSpecErrorCode, at: string, message: string): never {
@@ -214,8 +240,8 @@ function exact(
 ): Record<string, unknown> {
   const source = record(value, at);
   const allowed = new Set([...required, ...optional]);
-  for (const key of Object.keys(source)) {
-    if (!allowed.has(key)) classifyUnknownField(key, at);
+  for (const key of Reflect.ownKeys(source)) {
+    if (typeof key !== 'string' || !allowed.has(key)) classifyUnknownField(String(key), at);
   }
   for (const key of required) {
     if (!Object.hasOwn(source, key)) fail('INVALID_VALUE', at, `нет обязательного поля ${key}`);
@@ -250,10 +276,26 @@ function oneOf<T extends string>(value: unknown, allowed: readonly T[], at: stri
 }
 
 function idList(value: unknown, at: string, minimum = 1): string[] {
-  if (!Array.isArray(value) || value.length < minimum) fail('INVALID_VALUE', at, `нужно минимум ${minimum} id`);
-  const ids = value.map((item, index) => stableId(item, `${at}[${index}]`));
+  const ids = denseList(value, at, minimum).map((item, index) => stableId(item, `${at}[${index}]`));
   if (new Set(ids).size !== ids.length) fail('INVALID_VALUE', at, 'дубликаты id запрещены');
   return ids;
+}
+
+function denseList(value: unknown, at: string, minimum = 0): unknown[] {
+  if (!Array.isArray(value) || value.length < minimum) {
+    fail('INVALID_VALUE', at, `нужен массив минимум из ${minimum} элементов`);
+  }
+  for (const key of Reflect.ownKeys(value)) {
+    if (key === 'length') continue;
+    const index = typeof key === 'string' ? Number(key) : NaN;
+    if (!Number.isInteger(index) || index < 0 || index >= value.length || String(index) !== key) {
+      classifyUnknownField(String(key), at);
+    }
+  }
+  for (let index = 0; index < value.length; index++) {
+    if (!Object.hasOwn(value, index)) fail('INVALID_VALUE', `${at}[${index}]`, 'разреженный массив запрещён');
+  }
+  return value;
 }
 
 function parseAnchor(value: unknown, index: number): DesignAnchor {
@@ -267,15 +309,16 @@ function parseAnchor(value: unknown, index: number): DesignAnchor {
   }
   if (kind === 'midpoint') {
     const source = exact(value, at, ['id', 'kind', 'between']);
-    if (!Array.isArray(source.between) || source.between.length !== 2) {
+    const between = denseList(source.between, `${at}.between`, 2);
+    if (between.length !== 2) {
       fail('INVALID_VALUE', `${at}.between`, 'нужны ровно два named anchors');
     }
     return {
       id,
       kind,
       between: [
-        stableId(source.between[0], `${at}.between[0]`),
-        stableId(source.between[1], `${at}.between[1]`),
+        stableId(between[0], `${at}.between[0]`),
+        stableId(between[1], `${at}.between[1]`),
       ],
     };
   }
@@ -351,7 +394,7 @@ function parseGeometry(value: unknown, at: string): DesignGeometry {
       center: stableId(source.center, `${at}.center`),
       rx: positive(source.rx, `${at}.rx`, 0.5),
       ry: positive(source.ry, `${at}.ry`, 0.5),
-      rotation: finite(source.rotation ?? 0, `${at}.rotation`, -180, 180),
+      rotation: finite(source.rotation === undefined ? 0 : source.rotation, `${at}.rotation`, -180, 180),
     };
   }
   if (kind === 'line') {
@@ -402,7 +445,7 @@ function parseGeometryTail(
       width,
       height,
       cornerRadius: finite(
-        source.cornerRadius ?? 0,
+        source.cornerRadius === undefined ? 0 : source.cornerRadius,
         `${at}.cornerRadius`,
         0,
         Math.min(width, height) / 2,
@@ -436,7 +479,7 @@ function parseGeometryTail(
     rx: bounded(source.rx, `${at}.rx`, 0, domain.rx.max, true),
     ry: bounded(source.ry, `${at}.ry`, 0, domain.ry.max, true),
     exponent: bounded(source.exponent, `${at}.exponent`, domain.exponent.min, domain.exponent.max),
-    rotation: bounded(source.rotation ?? 0, `${at}.rotation`, domain.rotation.min, domain.rotation.max),
+    rotation: bounded(source.rotation === undefined ? 0 : source.rotation, `${at}.rotation`, domain.rotation.min, domain.rotation.max),
   };
 }
 
@@ -451,7 +494,7 @@ function parsePaint(value: unknown, at: string): DesignPaint {
   return {
     kind,
     width: positive(source.width, `${at}.width`, 0.5),
-    linecap: oneOf(source.linecap ?? 'round', ['round', 'butt'] as const, `${at}.linecap`),
+    linecap: oneOf(source.linecap === undefined ? 'round' : source.linecap, ['round', 'butt'] as const, `${at}.linecap`),
   };
 }
 
@@ -462,7 +505,7 @@ function geometryAnchorReferences(geometry: DesignGeometry): readonly string[] {
 
 function parsePart(value: unknown, index: number): DesignPart {
   const at = `parts[${index}]`;
-  const source = exact(value, at, ['id', 'role', 'geometry', 'paint'], ['morphGroup']);
+  const source = exact(value, at, ['id', 'role', 'geometry', 'paint'], ['morphGroup', 'anchor']);
   const geometry = parseGeometry(source.geometry, `${at}.geometry`);
   const paint = parsePaint(source.paint, `${at}.paint`);
   if ((geometry.kind === 'line' || geometry.kind === 'arc') && paint.kind !== 'stroke') {
@@ -473,6 +516,7 @@ function parsePart(value: unknown, index: number): DesignPart {
     role: oneOf(source.role, PART_ROLES, `${at}.role`),
     geometry,
     paint,
+    ...(source.anchor === undefined ? {} : { anchor: stableId(source.anchor, `${at}.anchor`) }),
   };
   if (source.morphGroup !== undefined) {
     return { ...parsed, morphGroup: stableId(source.morphGroup, `${at}.morphGroup`) };
@@ -570,6 +614,9 @@ function assertReferences(spec: Omit<DesignSpec, 'version'>): void {
   const partIds = new Set(spec.parts.map(({ id }) => id));
   const partsById = new Map(spec.parts.map((part) => [part.id, part]));
   for (const part of spec.parts) {
+    if (part.anchor !== undefined && !anchorIds.has(part.anchor)) {
+      fail('UNKNOWN_REFERENCE', `parts.${part.id}.anchor`, `неизвестный anchor ${part.anchor}`);
+    }
     for (const anchorId of geometryAnchorReferences(part.geometry)) {
       if (!anchorIds.has(anchorId)) {
         fail('UNKNOWN_REFERENCE', `parts.${part.id}.geometry`, `неизвестный anchor ${anchorId}`);
@@ -651,20 +698,11 @@ export function parseDesignSpec(value: unknown): DesignSpec {
     'version', 'anchors', 'parts', 'composition', 'decorators', 'negativeSpace',
   ]);
   if (root.version !== 1) fail('UNSUPPORTED_VERSION', 'version', 'поддерживается только version=1');
-  if (!Array.isArray(root.anchors) || root.anchors.length === 0) {
-    fail('INVALID_VALUE', 'anchors', 'нужен непустой массив');
-  }
-  if (!Array.isArray(root.parts) || root.parts.length === 0) {
-    fail('INVALID_VALUE', 'parts', 'нужен непустой массив');
-  }
-  if (!Array.isArray(root.decorators)) fail('INVALID_VALUE', 'decorators', 'ожидается массив');
-  if (!Array.isArray(root.negativeSpace)) fail('INVALID_VALUE', 'negativeSpace', 'ожидается массив');
-
-  const anchors = root.anchors.map(parseAnchor);
-  const parts = root.parts.map(parsePart);
+  const anchors = denseList(root.anchors, 'anchors', 1).map(parseAnchor);
+  const parts = denseList(root.parts, 'parts', 1).map(parsePart);
   const composition = parseComposition(root.composition);
-  const decorators = root.decorators.map(parseDecorator);
-  const negativeSpace = root.negativeSpace.map(parseNegativeSpace);
+  const decorators = denseList(root.decorators, 'decorators').map(parseDecorator);
+  const negativeSpace = denseList(root.negativeSpace, 'negativeSpace').map(parseNegativeSpace);
   assertUniqueIds(anchors, 'anchors');
   assertUniqueIds(parts, 'parts');
   assertUniqueIds(decorators, 'decorators');
@@ -759,7 +797,7 @@ function lowerPaint(paint: DesignPaint): RecipeFillPaint | RecipeStrokePaint {
     fill: 'none',
     stroke: 'currentColor',
     strokeWidth: paint.width,
-    linecap: paint.linecap,
+    linecap: paint.linecap ?? 'round',
     linejoin: 'round',
   });
 }
@@ -849,6 +887,9 @@ function lowerNegativeSpace(
 
 export function lowerDesignSpec(value: unknown): LoweredDesignSpec {
   const spec = parseDesignSpec(value);
+  if (spec.composition.kind === 'compound' && spec.parts.some(({ paint }) => paint.kind === 'stroke')) {
+    fail('UNSUPPORTED_COMPOSITION', 'composition', 'compound поддерживает только fill; stroke требует layers или mask-subtract');
+  }
   const anchors = resolveAnchors(spec.anchors);
   const parts = spec.parts.map((part): LoweredDesignPart => {
     let lowered: ReturnType<typeof lowerGeometry>;
@@ -857,6 +898,18 @@ export function lowerDesignSpec(value: unknown): LoweredDesignSpec {
     } catch (error) {
       if (error instanceof DesignSpecError) throw error;
       fail('INVALID_VALUE', `parts.${part.id}.geometry`, String(error));
+    }
+    // Проверяем реальный сериализованный контур: положительный residual radius
+    // может округлиться до точки и больше не выражать объявленную фигуру.
+    const serializedBounds = pathBBox(lowered.geometry.d) as RecipePart['bbox'];
+    const width = serializedBounds.maxX - serializedBounds.minX;
+    const height = serializedBounds.maxY - serializedBounds.minY;
+    const open = part.geometry.kind === 'line' || part.geometry.kind === 'arc';
+    const zeroArc = (parsePathData(lowered.geometry.d) as { cmd: string; rx?: number; ry?: number }[])
+      .some(({ cmd, rx, ry }) => cmd === 'A' && (rx === 0 || ry === 0));
+    if (!Number.isFinite(width) || !Number.isFinite(height)
+      || zeroArc || (open ? width <= 0 && height <= 0 : width <= 0 || height <= 0)) {
+      fail('INVALID_VALUE', `parts.${part.id}.geometry`, 'сериализация выродила объявленную геометрию');
     }
     const paint = lowerPaint(part.paint);
     const bbox = inkBounds(lowered.bbox, paint);
@@ -869,6 +922,7 @@ export function lowerDesignSpec(value: unknown): LoweredDesignSpec {
       bbox,
       topologySignature: lowered.topologySignature,
       morphGroup: part.morphGroup ?? null,
+      ...(part.anchor === undefined ? {} : { anchor: part.anchor }),
     });
   });
   const byId = new Map(parts.map((part) => [part.id, part]));
@@ -887,5 +941,72 @@ export function lowerDesignSpec(value: unknown): LoweredDesignSpec {
     decorators: spec.decorators,
     anchors,
     specVersion: 1,
+  });
+}
+
+function canonicalSpecJson(value: unknown): string {
+  if (Array.isArray(value)) return `[${value.map(canonicalSpecJson).join(',')}]`;
+  if (value !== null && typeof value === 'object') {
+    const source = value as Record<string, unknown>;
+    return `{${Object.keys(source).sort().map((key) => (
+      `${JSON.stringify(key)}:${canonicalSpecJson(source[key])}`
+    )).join(',')}}`;
+  }
+  return JSON.stringify(value);
+}
+
+/** DesignSpec → GlyphIR. */
+export function compileDesignSpec<TIcon extends string>(
+  value: unknown,
+  options: CompileDesignSpecOptions<TIcon>,
+): DesignSpecGlyph<TIcon> {
+  const source = exact(options, 'options', ['icon'], ['variant', 'size']);
+  const icon = stableId(source.icon, 'options.icon') as TIcon;
+  const variant = !Object.hasOwn(source, 'variant') || source.variant === undefined
+    ? 'outline'
+    : oneOf(source.variant, ['outline', 'filled'] as const, 'options.variant');
+  const size = !Object.hasOwn(source, 'size') || source.size === undefined
+    ? 24
+    : positive(source.size, 'options.size', Number.MAX_VALUE);
+  const spec = parseDesignSpec(value);
+  const lowered = lowerDesignSpec(spec);
+  const specSha256 = `sha256:${sha256Hex(canonicalSpecJson(spec))}` as const;
+  const parts: readonly GlyphPart[] = Object.freeze(lowered.parts.map((part, zIndex): GlyphPart => {
+    const declaredAnchor = part.anchor === undefined ? undefined : lowered.anchors[part.anchor]!;
+    const bbox = declaredAnchor ? undefined : pathBBox(part.geometry.d) as RecipePart['bbox'];
+    return deepFreeze({
+      id: part.id,
+      role: spec.parts[zIndex]!.role,
+      zIndex,
+      d: part.geometry.d,
+      fillRule: lowered.composition.kind === 'compound' ? null : 'nonzero',
+      paint: part.paint,
+      anchor: declaredAnchor
+        ? [declaredAnchor.x, declaredAnchor.y] as const
+        : [(bbox!.minX + bbox!.maxX) / 2, (bbox!.minY + bbox!.maxY) / 2] as const,
+      anchorSource: declaredAnchor ? 'declared' : 'geometry-bbox-center',
+      topologySignature: part.topologySignature,
+      morphGroup: part.morphGroup,
+      provenance: { kind: 'recipe', identity: 'declared', recipe: 'design-spec/1' },
+    });
+  }));
+  const viewBox = [0, 0, 1, 1] as const;
+  return deepFreeze({
+    icon,
+    variant,
+    viewBox,
+    parts,
+    d: parts.map(({ d }) => d).join(''),
+    svg: assembleGlyphSvg(viewBox, parts, lowered.composition, [size, size]),
+    composition: lowered.composition,
+    provenance: { kind: 'design-spec', specVersion: 1, specSha256, state: 'candidate' },
+    designSpec: {
+      specVersion: 1,
+      specSha256,
+      anchors: lowered.anchors,
+      decorators: lowered.decorators,
+      negativeSpace: lowered.negativeSpace,
+      topologyKey: lowered.topologyKey!,
+    },
   });
 }

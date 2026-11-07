@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { writeFile } from 'node:fs/promises';
 import { describe, expect } from 'vitest';
 import { it } from './fixtures/documentation.js';
-import { ROOT, auditRepo, documentationLinkErrors, distributionClaimErrors, findInkHexClaims, writePackageReference } from '../scripts/check-docs-drift.js';
+import { ROOT, auditRepo, documentationLinkErrors, distributionClaimErrors, findInkHexClaims, manualCorpusCountErrors, writePackageReference } from '../scripts/check-docs-drift.js';
 import { packageReferenceErrors, renderPackageReference } from '../scripts/lib/docs-reference.js';
 
 const pkg = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'));
@@ -44,6 +44,117 @@ describe('Справка поставки', () => {
 });
 
 describe('Согласованность документации', () => {
+  it('не принимает часть составного имени типа SVG-строка за счётчик корпуса', () => {
+    expect(manualCorpusCountErrors('Текущий авторский символ подключается одной SVG-строкой.')).toEqual([]);
+    expect(manualCorpusCountErrors('A symbol returns one SVG string.')).toEqual([]);
+    expect(manualCorpusCountErrors('В библиотеке одна SVG.')).toHaveLength(1);
+    expect(manualCorpusCountErrors('В библиотеке 660 SVG-файлов.')).toHaveLength(1);
+  });
+
+  it('отделяет помеченную числовую версию от соседнего счётчика файлов', () => {
+    expect(manualCorpusCountErrors('Figma-версия `2416636003859748575` файла `LuaiBd4anRi4DMZayKAnY2`.')).toEqual([]);
+    expect(manualCorpusCountErrors('Version: `2416636003859748575` files source.')).toEqual([]);
+    expect(manualCorpusCountErrors('Figma-версия\n`2416636003859748575` файла `LuaiBd4anRi4DMZayKAnY2`.')).toEqual([]);
+    expect(manualCorpusCountErrors('Figma-**версия** `2416636003859748575` файла `LuaiBd4anRi4DMZayKAnY2`.')).toEqual([]);
+    expect(manualCorpusCountErrors('**Figma-версия `2416636003859748575` файла**.')).toEqual([]);
+    expect(manualCorpusCountErrors('Figma-версия **`2416636003859748575`** файла.')).toEqual([]);
+    expect(manualCorpusCountErrors('Figma-версия ***`2416636003859748575`*** файла.')).toEqual([]);
+    expect(manualCorpusCountErrors('Версия `2416636003859748575` файла; в текущем пакете `999` файлов.')).toHaveLength(1);
+    expect(manualCorpusCountErrors('В текущем пакете `660` SVG.')).toHaveLength(1);
+    expect(manualCorpusCountErrors('# Version\n\n`999` files.')).toHaveLength(1);
+    expect(manualCorpusCountErrors('Версия\n\n`999` файлов.')).toHaveLength(1);
+    expect(manualCorpusCountErrors('| Source | Version |\n| --- | --- |\n| Figma | Version: `2416636003859748575` files source. |')).toEqual([]);
+    expect(manualCorpusCountErrors('| Source | Count |\n| --- | --- |\n| Figma | Version: `2416636003859748575` files source; `999` files. |')).toHaveLength(1);
+  });
+
+  it('отделяет датированные результаты исследования от текущих ручных счётчиков', ({ root }) => {
+    mkdirSync(join(root, 'docs/evidence'), { recursive: true });
+    mkdirSync(join(root, 'docs/research'), { recursive: true });
+    writeFileSync(join(root, 'docs/evidence/snapshot.md'), 'На 2026-11-01: 660 SVG. Страница Icons: 4045:632.');
+    writeFileSync(join(root, 'docs/research/comparison.md'), 'Baseline commit 03a4ca3: 476 SVG.');
+    expect(auditRepo(root).errors).toEqual([]);
+    for (const file of ['docs/evidence/current.md', 'docs/research/current.md']) {
+      for (const claim of ['В текущем пакете 999 иконок.', 'На 2026-11-01: в текущем пакете 999 иконок.', 'На 2026-11-01: 476 SVG. В пакете 999 icons.', 'Baseline commit abc: 999 icons.']) {
+        writeFileSync(join(root, file), claim);
+        expect(auditRepo(root).errors.some(error => error.replaceAll('\\', '/').includes(file) && error.includes('ручной счётчик'))).toBe(true);
+      }
+      unlinkSync(join(root, file));
+    }
+    writeFileSync(join(root, 'docs/guide.md'), 'В пакете 660 SVG.');
+    expect(auditRepo(root).errors.some(error => error.replaceAll('\\', '/').includes('docs/guide.md') && error.includes('ручной счётчик'))).toBe(true);
+    unlinkSync(join(root, 'docs/guide.md'));
+    writeFileSync(join(root, 'docs/evidence/snapshot.md'), 'Нужен GH_PAT.');
+    expect(auditRepo(root).errors.some(error => error.replaceAll('\\', '/').includes('docs/evidence/snapshot.md') && error.includes('каналу поставки'))).toBe(true);
+  });
+
+  it('сохраняет полный node ID и не маскирует соседний счётчик', () => {
+    expect(manualCorpusCountErrors('Icons: 4045:632; Lab icons: 6431:3712.')).toEqual([]);
+    expect(manualCorpusCountErrors('Icons: 4045:632; icons: 999.')).toHaveLength(1);
+    expect(manualCorpusCountErrors('Icons: 4045:632; icons: 999:')).toHaveLength(1);
+    expect(manualCorpusCountErrors('Icons: 4045:632:')).toHaveLength(1);
+    expect(manualCorpusCountErrors('95 tests / 6 test files.')).toEqual([]);
+    expect(manualCorpusCountErrors('На baseline 03a4ca3 сохранены 238 имён.')).toEqual([]);
+    expect(manualCorpusCountErrors('На 2026-11-01 экспортированы 660 SVG с fill=currentColor.')).toEqual([]);
+    expect(manualCorpusCountErrors('Baseline commit 03a4ca3: 476 SVG с currentColor.')).toEqual([]);
+    expect(manualCorpusCountErrors('На baseline 03a4ca3 сохранены 238 имён. Теперь 999 icons.')).toHaveLength(1);
+  });
+
+  it('ограничивает историческую ссылку её блоком Markdown и частью до точки с запятой', () => {
+    for (const source of [
+      '- На 2026-11-01: 660 SVG\n- В пакете 999 icons',
+      'Baseline commit 03a4ca3: 476 SVG\n\n999 icons',
+      '# Baseline commit 03a4ca3: 476 SVG\n\n999 icons',
+      '> Baseline commit 03a4ca3: 476 SVG\n\n999 icons',
+      '| Срез | Корпус |\n| --- | --- |\n| На 2026-11-01 | 660 SVG |\n| Пакет | 999 icons |',
+      'Baseline commit 03a4ca3: 476 SVG; 999 icons.',
+      'Baseline commit 03a4ca3: 476 SVG; теперь 999 icons.',
+    ]) {
+      expect(manualCorpusCountErrors(source), source).toHaveLength(1);
+    }
+    for (const source of [
+      'Baseline commit **03a4ca3**:\n476 SVG.',
+      '- На 2026-11-01: 660 SVG\n- Baseline commit 03a4ca3: 476 SVG',
+      '| Срез | Корпус |\n| --- | --- |\n| На 2026-11-01 | 660 SVG |\n| Baseline commit 03a4ca3 | 476 SVG |',
+      'Текущий символ возвращает одну\nSVG-строку.',
+      'Icons: 4045:632; Lab icons: 6431:3712.',
+    ]) {
+      expect(manualCorpusCountErrors(source), source).toEqual([]);
+    }
+  });
+
+  it('не выдаёт текущий счётчик за исторический по русским и английским маркерам', () => {
+    for (const marker of ['теперь', 'ныне', 'в настоящее время', 'на настоящее время', 'currently']) {
+      expect(manualCorpusCountErrors(`На baseline 03a4ca3 ${marker} 999 icons.`), marker).toHaveLength(1);
+    }
+    expect(manualCorpusCountErrors('На baseline 03a4ca3: 476 SVG соответствует настоящей авторской форме.')).toEqual([]);
+    expect(manualCorpusCountErrors('На baseline 03a4ca3: 476 SVG с currentColor.')).toEqual([]);
+  });
+
+  it('связывает исторический anchor с его утверждениями, сохраняя датированные перечисления', () => {
+    for (const source of [
+      'На baseline 03a4ca3 было 476 SVG, а пакет содержит 999 icons.',
+      'На baseline 03a4ca3 было 476 SVG, но пакет содержит 999 icons.',
+      'As of 2026-11-01 there were 476 SVG, but the package contains 999 icons.',
+      'As of 2026-11-01 there were 476 SVG, whereas the package contains 999 icons.',
+      'Baseline commit 03a4ca3: 476 SVG, теперь 999 icons.',
+      'Baseline commit 03a4ca3: 476 SVG, в настоящее время 999 icons.',
+      'Baseline commit 03a4ca3: 476 SVG, currently 999 icons.',
+    ]) {
+      const errors = manualCorpusCountErrors(source);
+      expect(errors, source).toHaveLength(1);
+      expect(errors[0], source).toContain('999 icons');
+    }
+    for (const source of [
+      'На baseline 03a4ca3 было 238 имён и 476 SVG.',
+      'На baseline 03a4ca3 было 238 имён, 476 SVG.',
+      'На baseline 03a4ca3 было 476 SVG, а 238 имён.',
+      'На baseline 03a4ca3 было 476 SVG, а двести тридцать восемь имён.',
+      'As of 2026-11-01 there were 476 SVG, but two hundred and thirty-eight icons.',
+      'На baseline 03a4ca3 было 476 SVG, а на 2026-11-01 было 660 SVG.',
+      'As of 2026-11-01 there were 476 SVG, whereas baseline commit 03a4ca3 had 238 icons.',
+    ]) expect(manualCorpusCountErrors(source), source).toEqual([]);
+  });
+
   it('отклоняет неверный канал установки с учётом Markdown', () => {
     for (const text of ['private: true', 'Пакет не **публикуется**\nв `npm`', 'Ставится только как git-зависимость', 'Нужен GH_PAT', 'Нужен **GH_PAT**', 'Пакет _не публикуется_ в `npm`']) {
       expect(distributionClaimErrors(text).length).toBeGreaterThan(0);

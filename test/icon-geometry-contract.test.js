@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  authorPathEntries,
   iconGeometry,
   renderedPathEntries,
   sourcePathEntries,
@@ -46,5 +47,21 @@ describe('icon-geometry SVG contract', () => {
 
     expect(content.match(new RegExp(d, 'g'))).toHaveLength(1);
     expect(() => sourcePathEntries(content)).toThrow(/ровно один корневой <svg>/);
+  });
+  it.each([['source', sourcePathEntries], ['author', authorPathEntries]])('%s сохраняет raw attribute grammar и duplicate guard', (_lane, read) => {
+    const content = svg(
+      'xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24"',
+      '<path fill="currentColor" d="M2 2H18V18H2Z"/>',
+    );
+    expect(read(content)).toEqual(read(content.replaceAll('"', "'")));
+    for (const changed of [
+      content.replace('<path ', '<path fill="#000" '),
+      content.replace('fill="currentColor" d=', 'fill="currentColor" fill="#000" d='),
+      content.replace('<svg ', '<svg fill="#000" '),
+      content.replace('fill="currentColor" viewBox=', 'fill="currentColor" fill="#000" viewBox='),
+      content.replace('d="M2 2H18V18H2Z"', 'd="M0 0Z" d="M2 2H18V18H2Z"'),
+      content.replace('d="M2 2H18V18H2Z"', 'd="M2 2H18V18H2Z" d="M0 0Z"'),
+    ]) expect(() => read(changed)).toThrow(/повторён атрибут/);
+    expect(() => read(content.replace('" d=', '"d='))).toThrow(/невалидные атрибуты/);
   });
 });

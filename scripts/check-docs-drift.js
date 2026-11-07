@@ -10,9 +10,13 @@ import { parseDocumentation } from './lib/docs-markdown.js';
 
 export const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
-export function normalizeDistributionText(text) {
-  return parseDocumentation(text).text.normalize('NFKC')
-    .replace(/[‐‑‒–—―]/g, '-').replace(/\s+/g, ' ').trim();
+export function normalizeDistributionText(text, { preserveBlocks = false, maskVersionIdentifiers = false } = {}) {
+  // Перенос строки внутри абзаца остаётся пробелом; границу блока задаёт parser.
+  const separator = '\u2029';
+  const blocks = parseDocumentation(text, { blockSeparator: separator, maskVersionIdentifiers }).text.split(separator);
+  return blocks.map(block => block.normalize('NFKC')
+    .replace(/[‐‑‒–—―]/g, '-').replace(/\s+/g, ' ').trim())
+    .filter(Boolean).join(preserveBlocks ? '\n' : ' ');
 }
 
 // Это контроль известных противоречий, не доказательство истинности произвольной прозы.
@@ -38,10 +42,15 @@ export function distributionClaimErrors(text) {
  * стандартные cardinal number words, их падежные формы для обычных count claims
  * и масштабные слова. Мы не пытаемся решить NLP-задачу; вместо этого запрещаем
  * поддерживаемые точные количественные конструкции рядом с защищаемой единицей.
- * Исторические эксперименты не входят в текущую пользовательскую справку.
+ * Исторический счётчик требует даты или baseline SHA в том же утверждении.
+ * Каталог документа не освобождает текущие утверждения от проверки.
  */
 export function manualCorpusCountErrors(source) {
-  const text = normalizeDistributionText(source);
+  // Помеченный code literal версии — identity источника, не размер корпуса.
+  // Обычные числовые code literals рядом с SVG/файлами остаются count claims.
+  // marked кодирует > в ASCII-стрелке; entity не задаёт границу утверждения.
+  const sentences = normalizeDistributionText(source, { preserveBlocks: true, maskVersionIdentifiers: true })
+    .replaceAll('-&gt;', '->').split(/\n|;|[.!?]\s+/u);
   const ru = [
     'ноль', 'нуль',
     'один', 'одна', 'одно', 'одну', 'одного', 'одной',
@@ -70,12 +79,52 @@ export function manualCorpusCountErrors(source) {
   const connector = '(?:and|и)';
   const words = `${word}(?:[\\s-]+(?:${word}|${connector})){0,12}`;
   const number = `(?:\\d+(?:[.,]\\d+)?|${words})`;
-  const unit = '(?:икон(?:ка|ки|ок|ку)|имён|имени|имен|SVG|глиф(?:а|ов)?|(?:именованных\\s+)?(?:ESM[- ]?)?экспорт(?:а|ов)?|(?:release[- ]?)?файл(?:а|ов)?|icons?|glyphs?|exports?|files?)';
+  // SVG-строка называет представление значения, а не элемент census.
+  // Частичное совпадение SVG внутри такого типа давало ложный corpus claim.
+  const svgUnit = 'SVG(?![-\\s]+(?:строк[\\p{L}]*|strings?)(?=$|[^\\p{L}\\p{N}_]))';
+  const unit = `(?:икон(?:ка|ки|ок|ку)|имён|имени|имен|${svgUnit}|глиф(?:а|ов)?|(?:именованных\\s+)?(?:ESM[- ]?)?экспорт(?:а|ов)?|(?:release[- ]?)?файл(?:а|ов)?|icons?|glyphs?|exports?|files?)`;
   const patterns = [
     new RegExp(`(?:^|[^\\p{L}\\p{N}_])(${number}\\s+${unit})(?=$|[^\\p{L}\\p{N}_])`, 'giu'),
     new RegExp(`(?:^|[^\\p{L}\\p{N}_])(${unit}\\s*[:=]\\s*${number})(?=$|[^\\p{L}\\p{N}_])`, 'giu'),
   ];
-  return [...new Set(patterns.flatMap((pattern) => [...text.matchAll(pattern)].map((match) => match[1])))]
+  const currentMarker = /(?:текущ[\p{L}]*|сейчас|сегодня|теперь|ныне|настоящ[\p{L}]*\s+врем[\p{L}]*|\bcurrent(?:ly)?\b|\btoday\b|\bnow\b)/iu;
+  // Противопоставленная фраза получает собственный anchor. Однородное
+  // перечисление count claims продолжает датированное утверждение.
+  const countStart = `${number}\\s+${unit}(?=$|[^\\p{L}\\p{N}_])`;
+  const clauseSeparator = new RegExp(`,\\s*(?=(?:(?:а|но|but|whereas)\\s+(?!${countStart})|(?:(?:в|на|in|at)\\s+)?${currentMarker.source}))`, 'iu');
+  const clauses = sentences.flatMap(sentence => sentence.split(clauseSeparator));
+  const singularFileValue = /^(?:(?:release[- ]?)?файл(?:а)?|file)\s*[:=]/iu;
+  // Свойство заканчивается у конкретного файла. Одно определение допускает имя
+  // артефакта; признак соседнего счётчика, предложения или блока не переносится.
+  const filePropertyContext = /(?:^|[^\p{L}\p{N}_])(?:(?:размер|длина)(?:\s+[\p{L}\p{N}_.\/-]+)?|(?:size|length)\s+of(?:\s+(?:this|the))?|baseline\s+(?:поля\s+этого|fields?\s+of\s+(?:this|the)))\s+$/iu;
+  const byteUnit = '(?:B|bytes?|байт(?:а|ов)?)';
+  const rangeTail = `(?:\\s*(?:→|->)\\s*${number})*`;
+  const byteEncoding = '(?:\\s+(?:raw|gzip|brotli))?';
+  const measuredBytes = `${number}${rangeTail}\\s+${byteUnit}${byteEncoding}`;
+  const byteValueTail = new RegExp(`^${rangeTail}\\s+${byteUnit}${byteEncoding}(?:\\s+(?:и|and)\\s+${measuredBytes})*(?=$|\\s*[,.)!?])`, 'iu');
+  function artifactSizeProperty(match, text) {
+    const end = match.index + match[0].length;
+    const start = end - match[1].length;
+    // Английская конструкция начинается с file внутри release-file;
+    // определение release относится к этому артефакту, не к его свойству.
+    const propertyPrefix = text.slice(0, start).replace(/\brelease[- ]$/iu, '');
+    // Байтовая единица сама бывает определением. Исключение требует одновременно
+    // явного свойства файла и законченной величины, а не только суффикса B.
+    return singularFileValue.test(match[1]) && filePropertyContext.test(propertyPrefix) &&
+      byteValueTail.test(text.slice(end));
+  }
+  function nodeIdentifier(match, text) {
+    return /:\s*\d+$/.test(match[1]) &&
+      /^:\d+(?=$|[^\p{L}\p{N}_:])/u.test(text.slice(match.index + match[0].length));
+  }
+  function historical(sentence) {
+    // Датированное «в текущем пакете» всё ещё проецирует текущую поставку.
+    if (currentMarker.test(sentence)) return false;
+    return /(?:на|as of)\s+\d{4}-\d{2}-\d{2}(?=$|[^\d])|(?:baseline commit|на baseline)\s+[a-f\d]{7,40}(?=$|[^a-f\d])/iu.test(sentence);
+  }
+  return [...new Set(clauses.flatMap(sentence => historical(sentence) ? [] :
+    patterns.flatMap(pattern => [...sentence.matchAll(pattern)]
+      .filter(match => !nodeIdentifier(match, sentence) && !artifactSizeProperty(match, sentence)).map(match => match[1]))))]
     .map((claim) => `ручной счётчик «${claim}»: используйте ссылку на контракт или генерируемую справку`);
 }
 
@@ -170,7 +219,8 @@ export function auditRepo(root = ROOT) {
   for (const file of files) {
     const source = readFileSync(join(root, file), 'utf8');
     errors.push(...documentationLinkErrors(root, file, source));
-    if (file.replaceAll('\\', '/') !== 'docs/package.md') {
+    const normalizedPath = file.replaceAll('\\', '/');
+    if (normalizedPath !== 'docs/package.md') {
       errors.push(...manualCorpusCountErrors(source).map((error) => `${file}: ${error}`));
     }
     for (const error of distributionClaimErrors(source)) {

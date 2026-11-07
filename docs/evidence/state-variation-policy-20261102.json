@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "sourceCommit": "53d26c12fd3771195139a52ee2e7ba3ebd5176bf",
+  "consumerCommit": "880bd9c7c41ab5dd89b563f1a10f08a9e517702e",
+  "run": "https://github.com/Labpics-Team/labui/actions/runs/41452194349/job/125299868333",
+  "measurementSha256": "0f603cd6fc2f1a84f0c4bcebdd6538aa509b7b8f75632aa485ce2e91208bc85e",
+  "receiptSha256": "03fe6f7c08217c9cb8c9da0e1aa40d032232b327f209d6b12ef789c87b4d6ee2",
+  "previousPolicyCommit": "53d26c12fd3771195139a52ee2e7ba3ebd5176bf",
+  "consumerPolicySha256": "fc9b300a0e03b08e9934713edac4ea95720e2181150dde41ebb8cf9b719fbe7d",
+  "preservedConsumerPolicies": 14,
+  "measuredConsumerPolicies": 18,
+  "newConsumers": [
+    "status-circle-enclosure-patch",
+    "playback-circle-enclosure-patch",
+    "status-circle-state-variation",
+    "playback-circle-state-variation"
+  ],
+  "preservedFields": ["entry", "baselineBytes", "baselineGzipBytes", "maxBytes", "maxGzipBytes"],
+  "policyViolations": [],
+  "readback": "Отчёт и native receipt извлечены из аутентифицированного job log; порядок gzip/base64 CHUNK, длина и SHA256 проверены. Четыре новых consumer expressions совпадают с владельцем измерения, их потолки равны измеренным raw/gzip байтам. Все прежние 14 записей сохранены целиком; package policy и код исполнения не изменены.",
+  "scope": "Размер установленного пакета и четыре варианта импорта на указанных source/consumer. Измерение не подтверждает более поздний harness, Timer, полную оптическую приёмку или сравнительные latency/frame-time результаты BENCH-01."
+}

@@ -10,6 +10,8 @@ import {
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve, win32 } from 'node:path';
+import { isDeepStrictEqual } from 'node:util';
+import { pathToFileURL } from 'node:url';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   checkPackageArtifact,
@@ -21,14 +23,99 @@ import {
   mutateExportWithoutRootAttribute,
   mutateFirstPathCoordinate,
   pnpmInvocation,
+  refusalModuleRunnerSource,
   shouldCopyCleanPackPath,
   validateInstalledPackage,
 } from '../scripts/check-package-artifact.js';
+import { symbolReleaseProjection } from '../scripts/lib/symbol-modules.js';
+import { lottieSymbolDeclaration, renderLottieSymbolModule } from '../scripts/lib/lottie-geometry.js';
 
 vi.mock('node:child_process', () => ({ execFileSync: vi.fn() }));
 
 const roots = [];
-const CONTRACT = JSON.parse(readFileSync(new URL('../release/contract.json', import.meta.url), 'utf8'));
+
+it('refusal runner сохраняет компактную ошибку большого transitive module и завершает pending output', async () => {
+  const { spawnSync } = await vi.importActual('node:child_process');
+  const root = mkdtempSync(join(tmpdir(), 'lab-icons-refusal-runner-'));
+  roots.push(root);
+  const marker = 'installed source svg.fill обязан быть currentColor';
+  const encoded = Buffer.from(marker).toString('base64');
+  write(root, 'compiler.mjs', 'void 0;'.repeat(10_000) +
+    `setImmediate(() => process.stdout.write('refusal-output-drained'));` +
+    `throw Object.assign(new TypeError(Buffer.from('${encoded}', 'base64').toString()), { code: 'SOURCE_REFUSAL' });\n`);
+  write(root, 'consumer.mjs', `import './compiler.mjs';\n`);
+  write(root, 'runner.mjs', refusalModuleRunnerSource());
+  const run = args => spawnSync(process.execPath, args, {
+    cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true,
+  });
+  const direct = run([join(root, 'consumer.mjs')]);
+  expect(direct.status).toBe(1);
+  expect(direct.error).toBeUndefined();
+  // В macOS receipt сохранились ровно первые 65536 bytes stderr, до настоящего message.
+  // Здесь квалифицируется та же проекция; потеря OS pipe на этой платформе не утверждается.
+  expect(Buffer.from(direct.stderr).subarray(0, 65536).toString().includes(marker)).toBe(false);
+  expect(() => JSON.parse(direct.stderr)).toThrow();
+
+  const caught = run([join(root, 'runner.mjs'), pathToFileURL(join(root, 'consumer.mjs')).href]);
+  expect(caught.status).toBe(1);
+  expect(caught.error).toBeUndefined();
+  expect(JSON.parse(caught.stderr)).toEqual({ name: 'TypeError', message: marker, code: 'SOURCE_REFUSAL' });
+  expect(caught.stdout).toBe('refusal-output-drained');
+  expect(Buffer.from(caught.stderr).subarray(0, 65536).toString().includes(marker)).toBe(true);
+});
+
+it('refusal runner не принимает успешный consumer или чужую ошибку за ожидаемый source отказ', async () => {
+  const { spawnSync } = await vi.importActual('node:child_process');
+  const root = mkdtempSync(join(tmpdir(), 'lab-icons-refusal-controls-'));
+  roots.push(root);
+  const marker = 'fingerprint drift accessibility/outline';
+  write(root, 'runner.mjs', refusalModuleRunnerSource());
+  const run = source => {
+    write(root, 'consumer.mjs', source);
+    return spawnSync(process.execPath, [join(root, 'runner.mjs'), pathToFileURL(join(root, 'consumer.mjs')).href], {
+      cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true,
+    });
+  };
+  const success = run(`console.log(${JSON.stringify(marker)});\n`);
+  expect(success.status).toBe(0);
+  expect(success.stderr).toBe('');
+  const unrelated = run(`throw new Error('unrelated loader failure');\n`);
+  expect(unrelated.status).toBe(1);
+  expect(JSON.parse(unrelated.stderr)).toEqual({ name: 'Error', message: 'unrelated loader failure' });
+  expect(unrelated.stderr.includes(marker)).toBe(false);
+  const refused = run(`throw new Error(${JSON.stringify(marker)});\n`);
+  expect(refused.status).toBe(1);
+  expect(JSON.parse(refused.stderr).message).toBe(marker);
+});
+
+it('installed motion smoke сравнивает значения и порядок стадий независимо от порядка ключей', () => {
+  const source = readFileSync(new URL('../scripts/check-package-artifact.js', import.meta.url), 'utf8');
+  const line = source.split('\n').find(entry => entry.includes("throw new Error('current declared motion differs:"));
+  const assertion = line.match(/` +(if .*?)\\n`/)[1];
+  const verify = new Function('effect', 'expectedEffect', 'icon', 'variant', 'isDeepStrictEqual', assertion);
+  const target = { partId: 'arrow', property: 'x', from: 0, to: 0, unit: 'viewBox' };
+  const stage = { partId: 'arrow', property: 'x', unit: 'viewBox', to: -1, at: 0, duration: 180 };
+  const expected = { version: 3, targets: [target], stages: [stage, { ...stage, to: 0, at: 180 }] };
+  const actual = { ok: true, effect: {
+    version: 3,
+    targets: [{ partId: 'arrow', property: 'x', unit: 'viewBox', from: 0, to: 0 }],
+    stages: expected.stages.map(entry => Object.fromEntries(Object.entries(entry).reverse())),
+  } };
+  expect(() => verify(actual, expected, 'arrow-back', 'outline', isDeepStrictEqual)).not.toThrow();
+  for (const change of [
+    effect => { effect.targets[0].unit = 'px'; },
+    effect => { effect.targets[0].from = 1; },
+    effect => { effect.stages.reverse(); },
+    effect => { effect.stages[0].duration = 179; },
+    effect => { effect.stages.pop(); },
+  ]) {
+    const changed = structuredClone(actual);
+    change(changed.effect);
+    expect(() => verify(changed, expected, 'arrow-back', 'outline', isDeepStrictEqual)).toThrow(/current declared motion differs/);
+  }
+  expect(() => verify({ ...actual, ok: false }, expected, 'arrow-back', 'outline', isDeepStrictEqual)).toThrow();
+});
+const CONTRACT = symbolReleaseProjection(JSON.parse(readFileSync(new URL('../release/contract.json', import.meta.url), 'utf8')), ['fixture']);
 
 function write(root, path, content = '') {
   const absolute = join(root, path);
@@ -59,18 +146,52 @@ function validPackage() {
   write(root, 'LICENSE', 'MIT\n');
   write(root, 'dist/index.js', 'export const accessibilityOutline = `<svg/>`;\n');
   write(root, 'dist/index.d.ts', 'export declare const accessibilityOutline: string;\n');
-  write(root, 'dist/ir/index.js', 'export const iconIds = []; export const glyph = () => ({});\n');
+  write(root, 'dist/ir/index.js', 'import "./compiler.js"; export const iconIds = []; export const glyph = () => ({});\n');
   write(
     root,
     'dist/ir/index.d.ts',
     `import type { CatalogIconId } from './catalog.generated.js';\n` +
+      `export type { GlyphIR } from './compiler.js';\n` +
       'export declare const iconIds: readonly CatalogIconId[]; export declare function glyph(): unknown;\n',
   );
   write(root, 'dist/ir/catalog.generated.d.ts', "export type CatalogIconId = 'fixture';\n");
+  write(root, 'dist/ir/author-catalog.generated.d.ts', "export type AuthorIconId = 'fixture';\n");
+  write(root, 'dist/ir/author-provenance.d.ts', "export interface AuthorSourceProvenance { readonly kind: 'figma' }\n");
+  write(root, 'dist/ir/author-source.d.ts', "import type { AuthorIconId } from './author-catalog.generated.js';\nimport type { GlyphIR } from './compiler.js';\nexport type { AuthorSourceProvenance } from './author-provenance.js';\nexport type AuthorSourceGlyph = GlyphIR & { readonly icon: AuthorIconId };\n");
   write(root, 'dist/ir/recipes.js', 'export const buildDirectionalArrow = () => ({});\n');
   write(root, 'dist/ir/recipes.d.ts', 'export declare function buildDirectionalArrow(): unknown;\n');
   write(root, 'dist/ir/candidates.js', 'export const registerCandidates = () => {};\n');
   write(root, 'dist/ir/candidates.d.ts', 'export declare function registerCandidates(): void;\n');
+  write(root, 'dist/ir/compiler.js', 'import "./request.js"; export const fixture = 1;\n');
+  write(root, 'dist/ir/compiler.d.ts', "export type { GlyphIR } from './glyph-types.js';\nexport type IconVariant = 'outline' | 'filled';\n");
+  write(root, 'dist/ir/glyph-types.d.ts', "import type { GlyphModelErrorCode } from './request.js';\nimport type { AuthorVariationProvenance } from './authored-variation.js';\nimport type { AuthorAnnulusVariationProvenance } from './author-annulus-types.js';\nimport type { AuthorCapsuleVariationProvenance } from './author-capsule-types.js';\nimport type { AuthorContentVariationProvenance } from './author-content-types.js';\nimport type { FillPaint } from './paint-types.js';\nexport interface GlyphIR { readonly code: GlyphModelErrorCode; readonly variation?: AuthorVariationProvenance | AuthorAnnulusVariationProvenance | AuthorCapsuleVariationProvenance | AuthorContentVariationProvenance; readonly paint?: FillPaint }\n");
+  write(root, 'dist/ir/author-annulus-types.d.ts', "export interface AuthorAnnulusVariationProvenance { readonly kind: 'authored-variation' }\n");
+  write(root, 'dist/ir/author-capsule-types.d.ts', "export interface AuthorCapsuleVariationProvenance { readonly kind: 'authored-variation' }\n");
+  write(root, 'dist/ir/author-content-types.d.ts', "export interface AuthorContentVariationProvenance { readonly kind: 'authored-variation' }\n");
+  write(root, 'dist/ir/paint-types.d.ts', "export interface FillPaint { readonly kind: 'fill' }\n");
+  write(root, 'dist/ir/authored-variation.d.ts', "export interface AuthorVariationProvenance { readonly kind: 'authored-variation' }\n");
+  write(root, 'dist/ir/request.js', 'export const fixture = 1;\n');
+  write(root, 'dist/ir/request.d.ts', "export type GlyphModelErrorCode = 'CANDIDATES_REQUIRED';\n");
+  write(root, 'dist/ir/author-request-runtime.js', 'export const fixture = 1;\n');
+  write(root, 'dist/ir/symbol-runtime.js', 'import "./request.js"; import "./author-request-runtime.js"; export const fixture = 1;\n');
+  write(root, 'dist/ir/contour-runtime.js', 'export const fixture = 1;\n');
+  write(root, 'dist/ir/state-types.d.ts', "export type { StateRefusal } from './state-common-types.js';\n");
+  write(root, 'dist/ir/state-common-types.d.ts', 'export interface StateRefusal { readonly ok: false }\n');
+  write(root, 'dist/ir/contour-state-types.d.ts', "import type { StateRefusal } from './state-common-types.js';\nexport type PreparedContourStateEffect = StateRefusal | { readonly ok: true };\n");
+  write(root, 'dist/ir/render.js', 'export const fixture = 1;\n');
+  write(root, 'dist/ir/render.d.ts', "import type { GlyphIR } from './compiler.js';\nexport declare function renderGlyphSvg(glyph: GlyphIR): string;\n");
+  write(root, 'dist/authoring/index.js', 'export const compileDesignSpec = () => ({});\n');
+  write(root, 'dist/authoring/index.d.ts', "export { compileDesignSpec } from './design-spec.js';\n");
+  write(root, 'dist/authoring/design-spec.d.ts', "import type { GlyphIR } from '../ir/compiler.js';\nexport declare function compileDesignSpec(spec: unknown): GlyphIR;\n");
+  write(root, 'dist/motion/index.js', 'import "../ir/contour-runtime.js"; export const fixture = 1;\n');
+  write(root, 'dist/motion/index.d.ts', "import type { StateRefusal } from '../ir/state-types.js'; import type { PreparedContourStateEffect } from '../ir/contour-state-types.js'; export declare const fixture: StateRefusal | PreparedContourStateEffect;\n");
+  write(root, 'dist/ir/lottie-runtime.js', 'import "../motion/index.js"; export const createLottieSymbol = () => ({});\n');
+  write(root, 'dist/ir/lottie-types.d.ts', readFileSync(new URL('../src/lottie/types.ts', import.meta.url), 'utf8'));
+  write(root, 'dist/symbols/fixture.js', 'import "../ir/symbol-runtime.js"; export const glyph = () => ({}); export const glyphCapabilities = () => ({});\n');
+  write(root, 'dist/symbols/fixture.d.ts', "import type { AuthorSourceGlyph } from '../ir/author-source.js';\nexport declare function glyph(): AuthorSourceGlyph;\n");
+  const unavailableTarget = { ok: false, reason: { code: 'PATH_INVALID', message: 'fixture' } };
+  write(root, 'dist/lottie/fixture.js', renderLottieSymbolModule('fixture', { outline: unavailableTarget, filled: unavailableTarget }));
+  write(root, 'dist/lottie/fixture.d.ts', lottieSymbolDeclaration());
   return root;
 }
 
@@ -92,7 +213,11 @@ describe('check-package-artifact', () => {
     write(
       fixture,
       'package.json',
-      readFileSync(new URL('../package.json', import.meta.url), 'utf8'),
+      JSON.stringify({
+        ...JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')),
+        files: CONTRACT.files,
+        exports: CONTRACT.exports,
+      }),
     );
     write(fixture, 'release/contract.json', JSON.stringify(CONTRACT));
     mkdirSync(join(fixture, 'node_modules'));

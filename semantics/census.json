@@ -296,67 +296,27 @@
   }
  ],
  "bundle": {
-  "totalBytes": 797784,
+  "totalBytes": 379932,
   "modules": [
    {
-    "path": "semantics/catalog.json",
-    "bytes": 593072
+    "path": "src/ir/index.ts",
+    "bytes": 379818
    },
    {
     "path": "semantics/anatomy.runtime.json",
-    "bytes": 49591
-   },
-   {
-    "path": "src/core/anatomy-gen.js",
-    "bytes": 48413
-   },
-   {
-    "path": "src/ir/index.ts",
-    "bytes": 23235
-   },
-   {
-    "path": "src/core/circle-dictionary.js",
-    "bytes": 22043
-   },
-   {
-    "path": "src/core/calendar-geometry.js",
-    "bytes": 16474
-   },
-   {
-    "path": "src/core/icon-geometry.js",
-    "bytes": 13813
-   },
-   {
-    "path": "src/core/path-data.js",
-    "bytes": 10648
-   },
-   {
-    "path": "src/core/glyph-operators.js",
-    "bytes": 5643
-   },
-   {
-    "path": "semantics/grid.json",
-    "bytes": 5314
+    "bytes": 34
    },
    {
     "path": "src/ir/catalog.generated.ts",
-    "bytes": 3594
+    "bytes": 31
    },
    {
-    "path": "src/ir/sha256.ts",
-    "bytes": 3067
+    "path": "semantics/catalog.json",
+    "bytes": 26
    },
    {
-    "path": "src/core/motion-sampler.js",
-    "bytes": 2724
-   },
-   {
-    "path": "src/ir/recipes.ts",
-    "bytes": 86
-   },
-   {
-    "path": "src/ir/index.ts",
-    "bytes": 67
+    "path": "semantics/grid.json",
+    "bytes": 23
    }
   ]
  },
@@ -367,9 +327,9 @@
    "gzip": 96297
   },
   "glyphRuntime": {
-   "raw": 797784,
-   "gzip": 120508,
-   "note": "один glyph() тянет весь IR-бандл: JSON-данные доминируют — кандидат на split/lazy в REL-волне"
+   "raw": 379932,
+   "gzip": 74017,
+   "note": "полный @labpics/icons/ir entrypoint: размер файла, не транзитивный footprint одного consumer"
   }
  }
 }
