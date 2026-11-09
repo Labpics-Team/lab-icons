@@ -1,11 +1,7 @@
 /**
- * Target-neutral motion contracts and trajectory proof.
- *
- * A gesture is data, not a renderer: progress is normalized to [0, 1], tracks
- * describe semantic part rotations, and the proof samples the resulting
- * boolean composition at target raster sizes and phases. Lottie/SF Symbols
- * adapters can consume the same frames without becoming a second geometry
- * source of truth.
+ * Проверка геометрической topology для вращений на fixed canvas.
+ * Opacity не меняет контуры; translation требует другого viewport proof.
+ * Этот legacy checker не удостоверяет target rendering или optical admission.
  */
 
 import { rotatePath } from '../../src/core/anatomy-gen.js';
@@ -62,6 +58,11 @@ export function motionEntriesAt(parts, composition, gesture, progress, canvas = 
   const known = new Set(parts.map((part) => part.id));
   for (const track of sampled) {
     if (!known.has(track.partId)) throw new Error(`motion-trajectory: track ${track.partId} отсутствует среди parts`);
+    if (track.kind === 'translate') {
+      throw Object.assign(new Error(`motion-trajectory: translation части ${track.partId} требует viewport-aware proof; fixed canvas не поддержан`), {
+        code: 'MOTION_PROOF_UNSUPPORTED', partId: track.partId, trackKind: track.kind,
+      });
+    }
   }
   return compositionEntries(parts, composition, rotations, canvas);
 }

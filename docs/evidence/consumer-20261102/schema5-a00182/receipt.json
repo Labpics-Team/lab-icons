@@ -1,0 +1,211 @@
+{
+  "uiSha": "a00182aa6bce61f964fbee29426e235efeae2022",
+  "iconsSha": "700f863f7cef3d7d17b3eadf29df699cdf144d4c",
+  "run": "41379836604",
+  "job": 125067993666,
+  "jobConclusion": "failure",
+  "sourceMaterialsVerified": 38,
+  "figmaCounts": {
+    "families": 330,
+    "variants": 660
+  },
+  "stateGroups": [
+    "expression-face",
+    "playback-circle",
+    "status-circle",
+    "ellipsis-orientation-outline",
+    "ellipsis-orientation-filled"
+  ],
+  "reportSha256": "c126e6c395ca555410b266cb4e741a1ed2e32307b3c29dde30584df6720a476f",
+  "logSha256": "b546e1bab406e1d147f139de8737efa02a37deae7df2967c034ec44e00733dde",
+  "artifactCount": 1361,
+  "consumerCount": 10,
+  "policyViolationCount": 21,
+  "uniquePolicyViolations": [
+    "dist/authoring/design-spec.d.ts: budget 7654 B / 2250 B gzip; measured 7819 B / 2301 B gzip",
+    "dist/authoring/index.js: budget 70596 B / 19660 B gzip; measured 71145 B / 19766 B gzip",
+    "dist/ir/author-source.d.ts: budget 983 B / 345 B gzip; measured 1022 B / 361 B gzip",
+    "dist/ir/compiler.d.ts: budget 10290 B / 2736 B gzip; measured 10534 B / 2782 B gzip",
+    "dist/ir/compiler.js: budget 154789 B / 42120 B gzip; measured 155213 B / 42175 B gzip",
+    "dist/ir/lottie-runtime.js: budget 11590 B / 3776 B gzip; measured 11878 B / 3866 B gzip",
+    "dist/ir/lottie-types.d.ts: budget 2113 B / 926 B gzip; measured 2139 B / 933 B gzip",
+    "dist/ir/request.d.ts: budget 987 B / 556 B gzip; measured 1020 B / 574 B gzip",
+    "dist/ir/state-runtime.js: budget 4936 B / 1845 B gzip; measured 4985 B / 1852 B gzip",
+    "dist/ir/state-types.d.ts: budget 2576 B / 908 B gzip; measured 6385 B / 1636 B gzip",
+    "dist/ir/symbol-runtime.js: budget 1160 B / 638 B gzip; measured 1459 B / 684 B gzip",
+    "dist/motion/index.d.ts: budget 4625 B / 1441 B gzip; measured 5081 B / 1555 B gzip",
+    "dist/motion/index.js: budget 14620 B / 3817 B gzip; measured 15801 B / 4074 B gzip",
+    "dist/symbols/ellipsis-horizontal.d.ts: budget 470 B / 224 B gzip; measured 718 B / 257 B gzip",
+    "dist/symbols/ellipsis-horizontal.js: budget 18401 B / 2920 B gzip; measured 26704 B / 4002 B gzip",
+    "dist/symbols/ellipsis-vertical.d.ts: budget 466 B / 223 B gzip; measured 712 B / 257 B gzip",
+    "dist/symbols/ellipsis-vertical.js: budget 13144 B / 2349 B gzip; measured 22142 B / 3490 B gzip",
+    "dist/symbols/notifications-unread.js: budget 30360 B / 5034 B gzip; measured 31296 B / 5535 B gzip",
+    "dist/symbols/notifications.js: budget 23951 B / 4165 B gzip; measured 24910 B / 4661 B gzip",
+    "recorded-model-axis: consumer budget 853339 B / 214703 B gzip; measured 853589 B / 214748 B gzip",
+    "recorded-motion: consumer budget 865952 B / 217706 B gzip; measured 867159 B / 217909 B gzip"
+  ],
+  "independentlyOver": [
+    "dist/authoring/design-spec.d.ts",
+    "dist/authoring/index.js",
+    "dist/ir/author-source.d.ts",
+    "dist/ir/compiler.d.ts",
+    "dist/ir/compiler.js",
+    "dist/ir/lottie-runtime.js",
+    "dist/ir/lottie-types.d.ts",
+    "dist/ir/request.d.ts",
+    "dist/ir/state-runtime.js",
+    "dist/ir/state-types.d.ts",
+    "dist/ir/symbol-runtime.js",
+    "dist/motion/index.d.ts",
+    "dist/motion/index.js",
+    "dist/symbols/ellipsis-horizontal.d.ts",
+    "dist/symbols/ellipsis-horizontal.js",
+    "dist/symbols/ellipsis-vertical.d.ts",
+    "dist/symbols/ellipsis-vertical.js",
+    "dist/symbols/notifications-unread.js",
+    "dist/symbols/notifications.js",
+    "recorded-model-axis",
+    "recorded-motion"
+  ],
+  "browserOutcome": "failed",
+  "browserObservationsReported": 34,
+  "browserRawReceiptAvailable": false,
+  "browserFailure": {
+    "phase": "browser"
+  },
+  "browserAssertion": "icons-authored-dots-consumer.mjs:802: interrupted.after vs interrupted.before during change(vertical -> horizontal); middle unchanged. Temporal origin not captured by source.",
+  "environment": {
+    "node": "v22.19.0",
+    "versions": {
+      "node": "22.19.0",
+      "acorn": "8.15.0",
+      "ada": "2.9.2",
+      "amaro": "1.1.0",
+      "ares": "1.34.5",
+      "brotli": "1.1.0",
+      "cjs_module_lexer": "2.1.0",
+      "cldr": "47.0",
+      "icu": "77.1",
+      "llhttp": "9.3.0",
+      "modules": "127",
+      "napi": "10",
+      "nbytes": "0.1.1",
+      "ncrypto": "0.0.1",
+      "nghttp2": "1.64.0",
+      "openssl": "3.0.17",
+      "simdjson": "3.13.0",
+      "simdutf": "6.4.2",
+      "sqlite": "3.50.4",
+      "tz": "2025b",
+      "undici": "6.21.2",
+      "unicode": "16.0",
+      "uv": "1.51.0",
+      "uvwasi": "0.0.21",
+      "v8": "12.4.254.21-node.29",
+      "zlib": "1.3.1-470d3a2",
+      "zstd": "1.5.7"
+    },
+    "platform": "linux",
+    "arch": "x64",
+    "cpu": "AMD Ryzen 9 9950X 16-Core Processor",
+    "cpuCount": 8,
+    "totalMemory": 25181212672
+  },
+  "runner": {
+    "node": "v22.19.0",
+    "platform": "linux",
+    "architecture": "x64",
+    "runId": "41379836604",
+    "runAttempt": "1",
+    "environment": "self-hosted",
+    "name": "labpics-ci-runner-x2nbd",
+    "os": "Linux",
+    "browser": "140.0.7339.186"
+  },
+  "archives": [
+    {
+      "key": "icons",
+      "inputName": "labpics-icons-0.3.0.tgz",
+      "archiveSha256": "9d624689d774f9339f701e5f5e2528e6f0d8784baa6e2f27c827c15c4e97f716",
+      "archiveBytes": 1961695,
+      "integrity": "sha512-Vgf+UEU6ToHlc25ylVnqpBnovdyOOCGOWAQMbAb9NxUky9AyTiyXxwyQT99MscV3qD9Se7Q3N3LQbn9GHBYh2Q==",
+      "snapshot": "archives/icons.tgz"
+    },
+    {
+      "key": "uiCore",
+      "inputName": "labpics-ui-core-0.0.0.tgz",
+      "archiveSha256": "ae386863e6597b06b1a2d4db7fab25d76e9e7c256b9cd316caea378b020eabe8",
+      "archiveBytes": 747591,
+      "integrity": "sha512-wa+IJPuzDOvKSVX+2IyUZ0b1MaPBQGi4hqLhuedxarUsXMdNZEpn3DDWyxtPTHgq9DI6d8UP4ftFL5gxc62d9Q==",
+      "snapshot": "archives/uiCore.tgz"
+    },
+    {
+      "key": "uiShadow",
+      "inputName": "labpics-ui-shadow-0.0.0.tgz",
+      "archiveSha256": "96d5c575d6dc9ffc8c7071a314fd0cb36981cc33d6966a551cff2315850fde52",
+      "archiveBytes": 28635,
+      "integrity": "sha512-zqqHWplkl2t/hZpVl5+KpWbqTtrubiGW80FMzIkLvU1FQhR86J4Rf7SuW1HSm5i0ABUMKK3dzDfU9sePdMqHig==",
+      "snapshot": "archives/uiShadow.tgz"
+    }
+  ],
+  "consumers": {
+    "one-static": {
+      "bytes": 637,
+      "gzipBytes": 394,
+      "brotliBytes": 353
+    },
+    "authored-static": {
+      "bytes": 1155,
+      "gzipBytes": 583,
+      "brotliBytes": 512
+    },
+    "glyph-one": {
+      "bytes": 11120,
+      "gzipBytes": 3108,
+      "brotliBytes": 2589
+    },
+    "authored-time": {
+      "bytes": 11341,
+      "gzipBytes": 3093,
+      "brotliBytes": 2623
+    },
+    "status-circle-state": {
+      "bytes": 9196,
+      "gzipBytes": 3821,
+      "brotliBytes": 3110
+    },
+    "recorded-model-axis": {
+      "bytes": 853589,
+      "gzipBytes": 214748,
+      "brotliBytes": 161089
+    },
+    "recorded-motion": {
+      "bytes": 867159,
+      "gzipBytes": 217909,
+      "brotliBytes": 163454
+    },
+    "full-ir-opt-in": {
+      "bytes": 853553,
+      "gzipBytes": 214736,
+      "brotliBytes": 161043
+    },
+    "full-catalog": {
+      "bytes": 362391,
+      "gzipBytes": 102372,
+      "brotliBytes": 72054
+    },
+    "recipes-only": {
+      "bytes": 11537,
+      "gzipBytes": 4590,
+      "brotliBytes": 4055
+    }
+  },
+  "visuals": [
+    {
+      "file": "result/no-preference-failure.png",
+      "sha256": "2efafeb99a02a9a0dea005a149f8cd2b707fcdfab77270e5b4a2ef92914ccb07",
+      "bytes": 112159
+    }
+  ],
+  "limitations": "Authenticated bytes and exact pinned budgets; browser failed before complete schema5 records/reduced-motion coverage. No latency/memory/frame benchmark or visual acceptance claim."
+}

@@ -36,13 +36,155 @@ import {
   validatePackageProjection,
   validateReleaseContract,
   validateReleaseTypeDependencyGraph,
+  validateReleaseRuntimeDependencyGraph,
 } from './lib/release-contract.js';
 import {
   EXPECTED_ICON_NAMES,
   EXPECTED_SOURCE_VARIANTS,
 } from './lib/corpus-contract.js';
+import { loadAuthorBaseline } from './lib/author-baseline.js';
+import { compileAuthorAnatomy } from './lib/author-anatomy.js';
+import { expectedAuthorEffect, expectedAuthorMotion, expectedAuthorObservation } from './bench/author-oracle.js';
+import { statePackageExpectations, stateArtifactConsumerSource } from './lib/state-artifact-consumer.js';
+import { authorVariationArtifactConsumerSource, authorVariationFamilyConsumerSource } from './lib/author-variation-artifact-consumer.js';
 
 export const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
+
+/** Expected metadata относится только к проверенному annotation/master, не к installed output. */
+export function authorPackageExpectations(baseline, annotations) {
+  const contracts = compileAuthorAnatomy(baseline, annotations);
+  return Object.fromEntries(Object.entries(baseline.icons).map(([icon, variants]) => [icon,
+    Object.fromEntries(Object.entries(variants).map(([variant, record]) => {
+      const contract = contracts[`${icon}/${variant}`] ?? record.sourceContract;
+      const sourcePaths = [...record.normalizedSvg.matchAll(/<path\b[^>]*\bd="([^"]+)"/g)].map(match => match[1]);
+      const observation = expectedAuthorObservation(icon, variant, record, contract);
+      const { composition } = observation;
+      const compound = composition.kind === 'compound';
+      const variation = contract.variation;
+      let variationExpected = variation ? { law: variation.law, geometrySha256: variation.geometrySha256, domain: variation.domain } : null;
+      if (variation?.law === 'annulus.counter-scale') {
+        const { enclosure, domain } = variation;
+        const emphasisForScale = scale => (enclosure.outerRadius - scale * enclosure.referenceInnerRadius) / enclosure.referenceThickness;
+        // Свидетель берётся внутри доказанного radial interval, а отказ — ниже него.
+        // Это параметры проверки, а не второй геометрический компилятор.
+        const scale = (1 + (domain.scale.minimum < 1 ? domain.scale.minimum : domain.scale.maximum)) / 2;
+        variationExpected = { ...variationExpected, enclosurePartId: enclosure.id, enclosureOuterD: enclosure.outerD,
+          nondefault: { enclosureEmphasis: emphasisForScale(scale) },
+          outsideDomain: { enclosureEmphasis: emphasisForScale(domain.scale.minimum / 2) } };
+      } else if (variation?.law === 'capsule.width') {
+        variationExpected = { ...variationExpected, bodyPartId: variation.body.id,
+          nondefault: { bodyWidth: (variation.domain.minimum + 1) / 2 },
+          outsideDomain: { bodyWidth: variation.domain.minimum / 2 } };
+      }
+      return [variant, {
+        master: record.master, author: record.author, svg: record.artifactSvg,
+        anatomy: contract.anatomy ?? null,
+        composition,
+        observation,
+        variation: variationExpected,
+        motion: expectedAuthorMotion(contract, { kind: 'package', svg: record.normalizedSvg, compositionKind: composition.kind }),
+        effects: Object.fromEntries((contract.gestures ?? []).map(gesture => [gesture.id, expectedAuthorEffect(gesture)])),
+        parts: contract.parts.map(({ id, role, identity, fillRule, zIndex, sourceFingerprint, artifactFingerprint, anchor }, index) => ({
+          id, fillRule, zIndex, sourceFingerprint, artifactFingerprint,
+          d: compound ? sourcePaths[0].slice(...contract.parts[index].sourceSpan) : sourcePaths[index], role, identity,
+          anchorSource: contract.anatomy && anchor ? 'declared' : 'geometry-bbox-center',
+          ...(contract.anatomy && anchor && { anchor }),
+        })),
+      }];
+    })),
+  ]));
+}
+
+/** Оба type consumers получают весь semantic census, а не один выбранный модуль. */
+export function stateTypeConsumerSource(expected, { dynamicImport = false } = {}) {
+  const entries = Object.entries(expected).sort(([left], [right]) => left.localeCompare(right));
+  const allStates = [...new Set(entries.flatMap(([, group]) => group.states.map(state => state.id)))];
+  const sampler = entries.some(([, group]) => group.law === 'dots.orient')
+    ? (dynamicImport ? "const { prepareContourStateEffect } = await import('@labpics/icons/motion');\n" : "import { prepareContourStateEffect } from '@labpics/icons/motion';\n") : '';
+  return sampler + entries.map(([name, group], index) => {
+    const module = `stateGroup${index}`;
+    const stateType = `State${index}`;
+    const path = JSON.stringify(`@labpics/icons/states/${name}`);
+    const states = group.states.map(state => state.id);
+    const state = JSON.stringify(group.defaultState);
+    const foreign = allStates.find(id => !states.includes(id));
+    const contour = group.law === 'dots.orient';
+    const sourceReplacement = group.law === 'source.replace';
+    const admittedVariant = sourceReplacement ? group.states[0].variant : 'filled';
+    return [
+      dynamicImport ? `const ${module} = await import(${path});` : `import * as ${module} from ${path};`,
+      `type ${stateType} = import(${path}).State;`,
+      `const defaultState${index}: ${stateType} = ${state};`,
+      `const defaultSvg${index} = ${module}.render();`,
+      `const defaultMount${index} = ${module}.renderStateSvg();`,
+      `const declaredStates${index}: readonly ${stateType}[] = ${JSON.stringify(states)};`,
+      `const exactState${index}: ${states.map(id => JSON.stringify(id)).join(' | ')} = ${module}.stateCapabilities().states[0]!.id;`,
+      `for (const state of declaredStates${index}) {`,
+      `  const svg = ${module}.render(state);`,
+      `  const mounted = ${module}.renderStateSvg(state);`,
+      `  const effect = ${module}.compileStateEffect(state, { duration: 300, reducedMotion: true });`,
+      `  const exported = ${module}.exportStateTransition(state, { duration: 300, format: 'web-effect' });`,
+      `  if (svg.ok) { const markup: string = svg.svg; void markup; }`,
+      ...(contour ? [
+        `  if (effect.ok) {`,
+        `    const property: 'd' = effect.effect.targets[0]!.property;`,
+        `    const prepared = prepareContourStateEffect(effect.effect);`,
+        `    if (prepared.ok) { const pose = prepared.sample(.37); if (pose.ok) { const d: string = pose.parts[0]!.d; void d; } }`,
+        `    // @ts-expect-error контурный переход не получает opacity stages`,
+        `    const stages = effect.effect.stages;`,
+        `    void [property, prepared, stages];`,
+        `  }`,
+      ] : [`  if (effect.ok) { const property: 'opacity' = effect.effect.stages[0]!.property; void property; }`]),
+      `  void [mounted, exported];`,
+      `}`,
+      ...(contour ? [
+        `${module}.compileStateEffect(defaultState${index}, { duration: 300, from: .37, variation: { dotScale: 1, spacingScale: 1 } });`,
+        `const rounding${index}: string = ${module}.stateCapabilities().proof.roundingNormUpper.numerator;`,
+        `// @ts-expect-error variation не принимает координаты или произвольный radius`,
+        `${module}.render(defaultState${index}, { variation: { radius: 1 } });`,
+        `void rounding${index};`,
+      ] : []),
+      // Проверяем начертание, закреплённое за группой source.replace.
+      `const variantResult${index} = ${module}.render(defaultState${index}, { variant: ${JSON.stringify(admittedVariant)} });`,
+      `if (!variantResult${index}.ok) { const code: string = variantResult${index}.reason.code; void code; }`,
+      ...(sourceReplacement ? [
+        `// @ts-expect-error другое начертание не входит в самостоятельный source entrypoint`,
+        `${module}.render(defaultState${index}, { variant: ${JSON.stringify(admittedVariant === 'outline' ? 'filled' : 'outline')} });`,
+      ] : []),
+      `// @ts-expect-error неизвестный semantic state не входит в точный union`,
+      `const invalidState${index}: ${stateType} = '__unsupported_state__';`,
+      `// @ts-expect-error unknown state не принимается публичным render`,
+      `${module}.render('__unsupported_state__');`,
+      ...(states.includes('error') ? [] : [
+        `// @ts-expect-error application error не назначается знаком без явного declaration`,
+        `${module}.render('error');`,
+      ]),
+      `// @ts-expect-error state request не принимает private path coordinates`,
+      `${module}.render(defaultState${index}, { d: 'M0 0' });`,
+      `// @ts-expect-error null не подменяет optional render request`,
+      `${module}.renderStateSvg(defaultState${index}, null);`,
+      `// @ts-expect-error variant имеет конечный публичный domain`,
+      `${module}.render(defaultState${index}, { variant: 'weight' });`,
+      contour ? `// @ts-expect-error from — численное положение, имя состояния не принимается` : `// @ts-expect-error takeover получает current opacity от executor, from не объявлен`,
+      `${module}.compileStateEffect(defaultState${index}, { duration: 300, from: ${state} });`,
+      `// @ts-expect-error effect duration принимает число`,
+      `${module}.compileStateEffect(defaultState${index}, { duration: '300' });`,
+      `// @ts-expect-error effect request не принимает null`,
+      `${module}.compileStateEffect(defaultState${index}, null);`,
+      `// @ts-expect-error неизвестный format не входит в публичный export request`,
+      `${module}.exportStateTransition(defaultState${index}, { duration: 300, format: '__unsupported_format__' });`,
+      ...(foreign === undefined ? [] : [
+        `// @ts-expect-error знак другой semantic group не расширяет State`,
+        `const foreignState${index}: ${stateType} = ${JSON.stringify(foreign)};`,
+        `// @ts-expect-error render не принимает знак другой semantic group`,
+        `${module}.render(${JSON.stringify(foreign)});`,
+        `void foreignState${index};`,
+      ]),
+      `void [defaultState${index}, defaultSvg${index}, defaultMount${index}, exactState${index}, invalidState${index}, variantResult${index}];`,
+      '',
+    ].join('\n');
+  }).join('\n');
+}
 
 const CLEAN_PACK_EXCLUDES = new Set([
   '.git',
@@ -143,6 +285,10 @@ export function validateInstalledPackage(packageRoot, contract) {
     readText(file) {
       return readFileSync(join(packageRoot, file), 'utf8');
     },
+  }));
+  errors.push(...validateReleaseRuntimeDependencyGraph({
+    contract,
+    readText(file) { return readFileSync(join(packageRoot, file), 'utf8'); },
   }));
 
   let pkg = null;
@@ -354,6 +500,16 @@ function commandFailure(error) {
   return [error.message, stdout.trim(), stderr.trim()].filter(Boolean).join('\n');
 }
 
+/** Refusal probe сообщает ошибку, не печатая minified source перед её message. */
+export function refusalModuleRunnerSource() {
+  return `try {\n` +
+    `  await import(process.argv[2]);\n` +
+    `} catch (error) {\n` +
+    `  console.error(JSON.stringify({ name: error?.name ?? 'Error', message: error?.message ?? String(error), code: error?.code }));\n` +
+    `  process.exitCode = 1;\n` +
+    `}\n`;
+}
+
 /** Полный pack/install/import/typecheck smoke. */
 export function checkPackageArtifact({
   root = ROOT,
@@ -436,14 +592,30 @@ export function checkPackageArtifact({
     const installed = join(consumer, 'node_modules', '@labpics', 'icons');
     const result = validateInstalledPackage(installed, contract);
     if (result.errors.length > 0) return result;
+    const authorBaseline = loadAuthorBaseline(cleanSource);
+    const authorExpected = authorPackageExpectations(authorBaseline, JSON.parse(readFileSync(join(cleanSource, 'semantics/author-anatomy.json'), 'utf8')));
+    writeFileSync(join(consumer, 'author-expected.json'), `${JSON.stringify(authorExpected)}\n`, 'utf8');
+    const stateExpected = statePackageExpectations(authorBaseline,
+      JSON.parse(readFileSync(join(cleanSource, 'semantics/author-state-groups.json'), 'utf8')),
+      JSON.parse(readFileSync(join(cleanSource, 'semantics/grid.json'), 'utf8')));
+    writeFileSync(join(consumer, 'state-expected.json'), `${JSON.stringify(stateExpected)}\n`, 'utf8');
 
     writeFileSync(
       join(consumer, 'smoke.mjs'),
-      `import { accessibilityOutline } from '@labpics/icons';\n` +
+      `import { readFileSync } from 'node:fs';\n` +
+        `import { isDeepStrictEqual } from 'node:util';\n` +
+        // Oracle принадлежит test harness; публичные импорты ниже идут из установленного tarball.
+        `import { observeAuthorGlyph, validateAuthorObservation } from ${JSON.stringify(pathToFileURL(join(cleanSource, 'scripts/bench/author-oracle.js')).href)};\n` +
+        `import { matchesAuthoredCapsulePath } from ${JSON.stringify(pathToFileURL(join(cleanSource, 'scripts/bench/explorer-journey.js')).href)};\n` +
+        `import { accessibilityOutline } from '@labpics/icons';\n` +
         `import * as fullIr from '@labpics/icons/ir';\n` +
         `import { axisNames, calendarNumberGlyph, glyph, glyphCapabilities, iconDesignContract, iconIds } from '@labpics/icons/ir';\n` +
         `import { buildDirectionalArrow } from '@labpics/icons/ir/recipes';\n` +
         `import { registerCandidates } from '@labpics/icons/ir/candidates';\n` +
+        `import * as timeSymbol from '@labpics/icons/symbols/time';\n` +
+        `import { compileSymbolEffect } from '@labpics/icons/motion';\n` +
+        `import { renderGlyphSvg } from '@labpics/icons/ir/render';\n` +
+        authorVariationArtifactConsumerSource() +
         `if (typeof accessibilityOutline !== 'string' || !accessibilityOutline.includes('<svg')) throw new Error('root ESM export broken');\n` +
         `if ('buildDirectionalArrow' in fullIr) throw new Error('full IR leaks lightweight recipe surface');\n` +
         `if (typeof registerCandidates !== 'function') throw new Error('candidates ESM export broken');\n` +
@@ -453,10 +625,50 @@ export function checkPackageArtifact({
         `if (iconIds.length !== ${EXPECTED_ICON_NAMES} || axisNames.length !== 3 || !Object.isFrozen(iconIds) || !Object.isFrozen(axisNames) || ir.provenance.kind !== 'source' || ir.parts.length < 1) throw new Error('ir ESM export broken');\n` +
         `if (iconDesignContract.targets.lottie !== 'not-exported' || glyphCapabilities('time', 'outline').motion.state !== 'gesture-ready' || glyphCapabilities('time', 'outline').motion.gestures[0]?.id !== 'time.advance') throw new Error('capability contract broken');\n` +
         `for (const icon of iconIds) for (const variant of ['outline', 'filled']) glyph({ icon, variant, modelMode: 'source-only' });\n` +
+        `const authorExpected = JSON.parse(readFileSync(new URL('./author-expected.json', import.meta.url), 'utf8'));\n` +
+        `if (Object.keys(authorExpected).length !== ${authorBaseline.counts.families}) throw new Error('current author census broken');\n` +
+        `for (const [icon, variants] of Object.entries(authorExpected)) {\n` +
+        `  const symbol = await import('@labpics/icons/symbols/' + icon);\n` +
+        authorVariationFamilyConsumerSource() +
+        `  if (symbol.glyph() !== symbol.glyph() || !Object.isFrozen(symbol.glyph().parts)) throw new Error('symbol cache broken: ' + icon);\n` +
+        `  for (const variant of ['outline', 'filled']) {\n` +
+        `    const expected = variants[variant];\n` +
+        `    const current = symbol.glyph({ variant });\n` +
+        `    if (symbol[variant] !== expected.svg) throw new Error('current static master differs: ' + icon + '/' + variant);\n` +
+        `    if (symbol.glyph({ variant, modelMode: 'source-only' }) !== current || current.icon !== icon || current.variant !== variant || !isDeepStrictEqual(current.composition, expected.composition)) throw new Error('current source/default differs: ' + icon + '/' + variant);\n` +
+        `    if (JSON.stringify(current.viewBox) !== '[0,0,24,24]' || !/<svg\\b[^>]*\\bfill="currentColor"/.test(current.svg) || current.parts.some(part => part.paint.kind !== 'fill' || part.paint.fill !== 'currentColor')) throw new Error('current viewport/paint differs: ' + icon + '/' + variant);\n` +
+        `    if (current.provenance.kind !== 'source' || current.provenance.file !== expected.master || JSON.stringify(current.provenance.author) !== JSON.stringify(expected.author) || JSON.stringify(current.provenance.anatomy ?? null) !== JSON.stringify(expected.anatomy)) throw new Error('current author provenance differs: ' + icon + '/' + variant);\n` +
+        `    const actualParts = current.parts.map((part, index) => ({ id: part.id, fillRule: part.fillRule, zIndex: part.zIndex, sourceFingerprint: part.provenance.sourceFingerprint, artifactFingerprint: part.provenance.artifactFingerprint, d: part.d, role: part.role, identity: part.provenance.identity, anchorSource: part.anchorSource, ...(expected.parts[index].anchor && { anchor: part.anchor }) }));\n` +
+        `    if (!isDeepStrictEqual(actualParts, expected.parts) || current.parts.some(part => part.provenance.kind !== 'source' || part.morphGroup !== null)) throw new Error('current source path/fill/z-order differs: ' + icon + '/' + variant);\n` +
+        `    validateAuthorObservation(observeAuthorGlyph(current, expected.svg), expected.observation);\n` +
+        `    const capabilities = symbol.glyphCapabilities(variant);\n` +
+        `    if (Object.hasOwn(capabilities, 'variation')) throw new Error('source symbol advertised opt-in variation: ' + icon + '/' + variant);\n` +
+        `    if (capabilities.icon !== icon || capabilities.variant !== variant || capabilities.modelState !== null || capabilities.supportedAxes.length || Object.keys(capabilities.axes).length || JSON.stringify(capabilities.motion) !== JSON.stringify(expected.motion) || JSON.stringify(capabilities.anatomy ?? null) !== JSON.stringify(expected.anatomy) || JSON.stringify(capabilities.author) !== JSON.stringify(expected.author)) throw new Error('current source inherited stale admission: ' + icon + '/' + variant);\n` +
+        `    const foreignMotion = compileSymbolEffect(current, capabilities, 'time.advance', { duration: 360 });\n` +
+        `    if (foreignMotion.ok || foreignMotion.reason.code !== (expected.motion.state === 'gesture-ready' ? 'GESTURE_UNSUPPORTED' : 'SEMANTIC_MOTION_UNAVAILABLE')) throw new Error('current motion did not refuse precisely: ' + icon + '/' + variant);\n` +
+        `    verifyInstalledAuthorVariation({ icon, variant, expected, familyVariation, current, capabilities, symbol, variable, lottie: lottieVariation, compileSymbolEffect, observeAuthorGlyph, matchesAuthoredCapsulePath });\n` +
+        `    for (const [gesture, expectedEffect] of Object.entries(expected.effects)) {\n` +
+        `      const effect = compileSymbolEffect(current, capabilities, gesture, { duration: 360 });\n` +
+        `      if (!effect.ok || effect.effect.version !== expectedEffect.version || !isDeepStrictEqual(effect.effect.targets, expectedEffect.targets) || !isDeepStrictEqual(effect.effect.stages, expectedEffect.stages)) throw new Error('current declared motion differs: ' + icon + '/' + variant);\n` +
+        `    }\n` +
+        `    for (const request of [{ variant, axes: { weight: 1 } }, { variant, axes: { opsz: 24 } }, { variant, axes: { corner: 1 } }, { variant, modelMode: 'allow-candidate' }]) {\n` +
+        `      let refused = false;\n` +
+        `      try { symbol.glyph(request); } catch (error) { refused = error.code === 'AUTHOR_PARITY_REQUIRED'; }\n` +
+        `      if (!refused) throw new Error('current author capability did not refuse precisely: ' + icon + '/' + variant);\n` +
+        `    }\n` +
+        `  }\n` +
+        `}\n` +
+        `const currentEffect = compileSymbolEffect(timeSymbol.glyph(), timeSymbol.glyphCapabilities(), 'time.advance', { duration: 200 });\n` +
+        `if (currentEffect.ok || currentEffect.reason.code !== 'SEMANTIC_MOTION_UNAVAILABLE') throw new Error('current author inherited stale motion');\n` +
+        `const effect = compileSymbolEffect(glyph({ icon: 'time' }), glyphCapabilities('time'), 'time.advance', { duration: 200 });\n` +
+        `if (!effect.ok || effect.effect.targets.length !== 2) throw new Error('recorded symbol motion export broken');\n` +
+        `const maskGlyph = glyph({ icon: 'time', variant: 'filled' });\n` +
+        `if (renderGlyphSvg(maskGlyph, { instanceId: 'one' }) === renderGlyphSvg(maskGlyph, { instanceId: 'two' })) throw new Error('symbol mask instance isolation broken');\n` +
         `registerCandidates();\n` +
         `for (const icon of iconIds) for (const variant of ['outline', 'filled']) glyph({ icon, variant, modelMode: 'allow-candidate' });\n` +
         `if (calendar.provenance.kind !== 'recipe' || calendar.provenance.context.day !== 16) throw new Error('calendar recipe broken');\n` +
-        `if (arrow.parts.length !== 2 || arrow.joins?.[0]?.lowering !== 'expand-strokes-then-union') throw new Error('operator recipe broken');\n`,
+        `if (arrow.parts.length !== 2 || arrow.joins?.[0]?.lowering !== 'expand-strokes-then-union') throw new Error('operator recipe broken');\n` +
+        stateArtifactConsumerSource(),
       'utf8',
     );
     execFileSync(process.execPath, [join(consumer, 'smoke.mjs')], {
@@ -470,6 +682,34 @@ export function checkPackageArtifact({
       `import { accessibilityOutline, type IconName } from '@labpics/icons';\n` +
         `import { calendarNumberGlyph, glyph, iconDesignContract, type GlyphIR, type IconDesignContract, type IconId } from '@labpics/icons/ir';\n` +
         `import { buildDirectionalArrow, type RecipeResult } from '@labpics/icons/ir/recipes';\n` +
+        `import { glyph as symbolGlyph, glyphCapabilities as symbolCapabilities } from '@labpics/icons/symbols/time';\n` +
+        `import { glyph as addedGlyph, glyphCapabilities as addedCapabilities } from '@labpics/icons/symbols/align-bottom';\n` +
+        `import { glyph as activityGlyph, glyphCapabilities as activityCapabilities } from '@labpics/icons/variations/ellipsis-horizontal';\n` +
+        `import { glyph as verticalGlyph } from '@labpics/icons/variations/ellipsis-vertical';\n` +
+        `import { glyph as sourceActivityGlyph } from '@labpics/icons/symbols/ellipsis-horizontal';\n` +
+        `import { glyph as ellipseGlyph } from '@labpics/icons/symbols/ellipse';\n` +
+        `import { exportLottie as exportActivityLottie } from '@labpics/icons/lottie/ellipsis-horizontal';\n` +
+        `import { compileSymbolEffect, type SymbolEffectResult, type SymbolOpacityStage } from '@labpics/icons/motion';\n` +
+        `import { renderGlyphSvg } from '@labpics/icons/ir/render';\n` +
+        `const varied: GlyphIR = activityGlyph({ variation: { dotScale: 1.1, spacingScale: 0.9 } });\n` +
+        `const verticalVaried: GlyphIR = verticalGlyph({ variant: 'filled', variation: { spacingScale: 1.1 } });\n` +
+        `const authoredDomain: 'convex-linear' = activityCapabilities().variation.domain.kind;\n` +
+        `type AuthorVariationGlyphRequest = Parameters<typeof activityGlyph>[0];\n` +
+        `const typedVariationRequest: AuthorVariationGlyphRequest = { variation: { dotScale: 1.1 } };\n` +
+        `const namedVariationKind: 'source' | 'authored-variation' = activityGlyph(typedVariationRequest).provenance.kind;\n` +
+        `const exactDefaultKind: 'source' = activityGlyph().provenance.kind;\n` +
+        `// @ts-expect-error: named variation не обещает exact source.\n` +
+        `const falseSourcePromise: 'source' = activityGlyph(typedVariationRequest).provenance.kind;\n` +
+        `// @ts-expect-error: неподдержанный symbol отвергает named variation.\n` +
+        `ellipseGlyph(typedVariationRequest);\n` +
+        `// @ts-expect-error: геометрия ellipse не получает triad variation по сходству.\n` +
+        `ellipseGlyph({ variation: { dotScale: 1.1 } });\n` +
+        `// @ts-expect-error: обычный source импорт не принимает opt-in variation.\n` +
+        `sourceActivityGlyph(typedVariationRequest);\n` +
+        `// @ts-expect-error: runtime не принимает controls или raw path.\n` +
+        `activityGlyph({ variation: { d: 'M0 0Z' } });\n` +
+        `// @ts-expect-error: target с авторскими contours не объявляет variation export.\n` +
+        `exportActivityLottie({ variation: { dotScale: 1.1 } });\n` +
         `const svg: string = accessibilityOutline;\n` +
         `const name: IconName = 'accessibilityOutline';\n` +
         `const icon: IconId = 'reload';\n` +
@@ -477,7 +717,28 @@ export function checkPackageArtifact({
         `const calendar: GlyphIR = calendarNumberGlyph({ date: new Date(0), timeZone: 'UTC' });\n` +
         `const recipe: RecipeResult = buildDirectionalArrow();\n` +
         `const contract: IconDesignContract = iconDesignContract;\n` +
-        `void [svg, name, icon, ir, calendar, recipe, contract];\n`,
+        `const sliced: GlyphIR = symbolGlyph({ variant: 'outline' });\n` +
+        `const effect: SymbolEffectResult = compileSymbolEffect(sliced, symbolCapabilities(), 'time.advance', { duration: 200 });\n` +
+        `const mounted: string = renderGlyphSvg(sliced, { instanceId: 'consumer' });\n` +
+        `const added = addedGlyph();\n` +
+        `const addedName: 'align-bottom' = added.icon;\n` +
+        `const authorVersion: string = added.provenance.author.version;\n` +
+        `const addedEffect: SymbolEffectResult = compileSymbolEffect(added, addedCapabilities(), 'time.advance', { duration: 200 });\n` +
+        `const addedMounted: string = renderGlyphSvg(added, { instanceId: 'added' });\n` +
+        `const activity = compileSymbolEffect(activityGlyph(), activityCapabilities(), 'ellipsis-horizontal.activity', { duration: 900 });\n` +
+        `if (activity.ok && activity.effect.version === 2) {\n` +
+        `  const stages: readonly SymbolOpacityStage[] = activity.effect.stages;\n` +
+        `  const property: 'opacity' = stages[0].property;\n` +
+        `  // @ts-expect-error opacity не объявляет rotate канал\n` +
+        `  const rotation = activity.effect.targets[0].rotation;\n` +
+        `  void [stages, property, rotation];\n` +
+        `}\n` +
+        `// @ts-expect-error записанный IR сохраняет собственный census\n` +
+        `glyph({ icon: 'align-bottom' });\n` +
+        `// @ts-expect-error символ уже связан с icon; private coordinates не принимаются\n` +
+        `symbolGlyph({ icon: 'alert' });\n` +
+        `void [svg, name, icon, ir, calendar, recipe, contract, sliced, effect, mounted, addedName, authorVersion, addedEffect, addedMounted, activity];\n` +
+        stateTypeConsumerSource(stateExpected),
       'utf8',
     );
     writeFileSync(
@@ -511,8 +772,14 @@ export function checkPackageArtifact({
       `import { accessibilityOutline } from '@labpics/icons';\n` +
         `import { glyph, type GlyphIR } from '@labpics/icons/ir';\n` +
         `import { buildDirectionalArrow } from '@labpics/icons/ir/recipes';\n` +
+        `import { glyph as symbolGlyph } from '@labpics/icons/symbols/alert';\n` +
+        `import { glyph as addedGlyph } from '@labpics/icons/symbols/align-bottom';\n` +
         `const ir: GlyphIR = glyph({ icon: 'reload' });\n` +
-        `void [accessibilityOutline, ir, buildDirectionalArrow];\n`,
+        `const symbol: GlyphIR = symbolGlyph();\n` +
+        `const added: GlyphIR<string> = addedGlyph();\n` +
+        `const addedName: 'align-bottom' = addedGlyph().icon;\n` +
+        `void [accessibilityOutline, ir, buildDirectionalArrow, symbol, added, addedName];\n` +
+        stateTypeConsumerSource(stateExpected, { dynamicImport: true }),
       'utf8',
     );
     writeFileSync(
@@ -563,6 +830,8 @@ export function checkPackageArtifact({
 
     const rootEntry = join(installed, 'dist/index.js');
     const originalRootEntry = readFileSync(rootEntry, 'utf8');
+    const refusalRunner = join(consumer, 'refusal-runner.mjs');
+    writeFileSync(refusalRunner, refusalModuleRunnerSource(), 'utf8');
     // Root contract bites не меняют path-data. Каждый обязан остановить
     // installed consumer на source boundary до render/hash claim.
     const hostileRootScript = join(consumer, 'hostile-root-attribute.mjs');
@@ -586,7 +855,7 @@ export function checkPackageArtifact({
       );
       let rootAttributeFailure = '';
       try {
-        execFileSync(process.execPath, [hostileRootScript], {
+        execFileSync(process.execPath, [refusalRunner, pathToFileURL(hostileRootScript).href], {
           cwd: consumer,
           encoding: 'utf8',
           stdio: ['ignore', 'pipe', 'pipe'],
@@ -616,7 +885,7 @@ export function checkPackageArtifact({
     );
     let hostileFailure = '';
     try {
-      execFileSync(process.execPath, [join(consumer, 'hostile-coordinate.mjs')], {
+      execFileSync(process.execPath, [refusalRunner, pathToFileURL(join(consumer, 'hostile-coordinate.mjs')).href], {
         cwd: consumer,
         encoding: 'utf8',
         stdio: ['ignore', 'pipe', 'pipe'],
@@ -642,7 +911,7 @@ export function checkPackageArtifact({
     );
     let hostileClipFailure = '';
     try {
-      execFileSync(process.execPath, [join(consumer, 'hostile-clip.mjs')], {
+      execFileSync(process.execPath, [refusalRunner, pathToFileURL(join(consumer, 'hostile-clip.mjs')).href], {
         cwd: consumer,
         encoding: 'utf8',
         stdio: ['ignore', 'pipe', 'pipe'],
@@ -667,7 +936,7 @@ export function checkPackageArtifact({
     );
     let hostileViewportFailure = '';
     try {
-      execFileSync(process.execPath, [join(consumer, 'hostile-nested-viewport.mjs')], {
+      execFileSync(process.execPath, [refusalRunner, pathToFileURL(join(consumer, 'hostile-nested-viewport.mjs')).href], {
         cwd: consumer,
         encoding: 'utf8',
         stdio: ['ignore', 'pipe', 'pipe'],
@@ -693,7 +962,7 @@ export function checkPackageArtifact({
     );
     let hostileFillRuleFailure = '';
     try {
-      execFileSync(process.execPath, [join(consumer, 'hostile-fill-rule.mjs')], {
+      execFileSync(process.execPath, [refusalRunner, pathToFileURL(join(consumer, 'hostile-fill-rule.mjs')).href], {
         cwd: consumer,
         encoding: 'utf8',
         stdio: ['ignore', 'pipe', 'pipe'],

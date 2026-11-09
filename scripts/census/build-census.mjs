@@ -11,6 +11,8 @@ import { gzipSync } from 'node:zlib';
 import { pathBBox } from '../../src/core/path-data.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
+const stdoutOnly = process.argv.length === 3 && process.argv[2] === '--stdout';
+if (process.argv.length > 2 && !stdoutOnly) throw new Error('census: допустим только --stdout');
 const read = (p) => JSON.parse(readFileSync(join(ROOT, p), 'utf8'));
 
 const catalog = read('semantics/catalog.json');
@@ -45,14 +47,15 @@ for (const n of sourceOnly) {
 // --- аттрибуция dist/ir/index.js по маркерам esbuild + consumer-бюджеты ---
 // dist обязателен: census без bundle-секции недетерминирован относительно
 // состояния рабочей копии (finding изолированного ревью PR #81).
-const irSrc = readFileSync(join(ROOT, 'dist', 'ir', 'index.js'), 'utf8');
+const irBytes = readFileSync(join(ROOT, 'dist', 'ir', 'index.js'));
+const irSrc = irBytes.toString('utf8');
 const markers = [...irSrc.matchAll(/^\/\/ ([^\n]+)$/gm)].map((m) => ({ path: m[1], idx: m.index }));
 const mods = markers.map((m, i) => ({
   path: m.path,
-  bytes: (i + 1 < markers.length ? markers[i + 1].idx : irSrc.length) - m.idx,
+  bytes: Buffer.byteLength(irSrc.slice(m.idx, i + 1 < markers.length ? markers[i + 1].idx : irSrc.length)),
 }));
 mods.sort((a, b) => b.bytes - a.bytes);
-const bundle = { totalBytes: irSrc.length, modules: mods };
+const bundle = { totalBytes: irBytes.length, modules: mods };
 
 const staticSrc = readFileSync(join(ROOT, 'dist', 'index.js'));
 const consumerBudgets = {
@@ -60,9 +63,9 @@ const consumerBudgets = {
     'SIZE-01: цена потребителю по маршрутам импорта; one-icon цену доказывает check-treeshake (rollup), здесь замер полных артефактов',
   fullStaticCatalog: { raw: staticSrc.length, gzip: gzipSync(staticSrc).length },
   glyphRuntime: {
-    raw: irSrc.length,
-    gzip: gzipSync(Buffer.from(irSrc)).length,
-    note: 'один glyph() тянет весь IR-бандл: JSON-данные доминируют — кандидат на split/lazy в REL-волне',
+    raw: irBytes.length,
+    gzip: gzipSync(irBytes).length,
+    note: 'полный @labpics/icons/ir entrypoint: размер файла, не транзитивный footprint одного consumer',
   },
 };
 
@@ -134,10 +137,14 @@ const census = {
   consumerBudgets,
 };
 
-writeFileSync(join(ROOT, 'semantics', 'census.json'), JSON.stringify(census, null, 1) + '\n');
-console.log(
-  `census: ${census.modeledCount} modeled / ${census.sourceOnlyCount} source-only; ` +
-    `families: enclosure ${structural.enclosure.length}, directional ${structural.directional.length}, ` +
-    `off-slash ${structural['off-slash'].length}, badge ${structural.badge.length}, singleton ${structural.singleton.length}` +
-    (bundle ? `; bundle ${bundle.totalBytes}B` : ''),
-);
+const serialized = JSON.stringify(census, null, 1) + '\n';
+if (stdoutOnly) process.stdout.write(serialized);
+else {
+  writeFileSync(join(ROOT, 'semantics', 'census.json'), serialized);
+  console.log(
+    `census: ${census.modeledCount} modeled / ${census.sourceOnlyCount} source-only; ` +
+      `families: enclosure ${structural.enclosure.length}, directional ${structural.directional.length}, ` +
+      `off-slash ${structural['off-slash'].length}, badge ${structural.badge.length}, singleton ${structural.singleton.length}` +
+      (bundle ? `; bundle ${bundle.totalBytes}B` : ''),
+  );
+}

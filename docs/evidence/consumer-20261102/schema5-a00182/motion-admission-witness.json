@@ -1,0 +1,20 @@
+{
+  "motionVersion": "0.5.0",
+  "visibleBefore": 0.2,
+  "from": 0.2,
+  "afterGet": 0.2,
+  "afterAnimate": 0.20416666666666666,
+  "frames": [
+    {
+      "time": 100,
+      "p": 0.2
+    },
+    {
+      "time": 105,
+      "p": 0.20416666666666666
+    }
+  ],
+  "firstState": "stopped",
+  "secondState": "running",
+  "sourceDifference": "5ms elapsed after seek before successor admission; no browser layout/frames involved"
+}

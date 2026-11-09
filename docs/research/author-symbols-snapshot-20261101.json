@@ -1,0 +1,176 @@
+{
+  "algorithm": "sha256 over canonical JSON of sorted path+sha256 records",
+  "snapshot": "c562f79bc128fb8af44d0f6e7ad0d27569f878ef05c49dbfbd69a18aa95ba8a1",
+  "capturedAt": "2026-11-01T03:37:45.857Z",
+  "sourceSha": "eae3db4bc4788db74dce29aafcf2e01bc50d0db9",
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "021a32ee79d2b9616a082c86ce436c2c805067bfbeead33b6163c638f6081bc9"
+    },
+    {
+      "path": "docs/README.md",
+      "sha256": "a1be09e34c503cc8c36b702453538b3337d263a093001d04d13ac4b32d3d954c"
+    },
+    {
+      "path": "docs/package.md",
+      "sha256": "9461d567ece01c4ad28434b445064226dbcb5f400cef462174df91f8ce8d9bc3"
+    },
+    {
+      "path": "docs/symbol-modules.md",
+      "sha256": "6ce3817c013e9e5c28aa47b3449f87abde331bf7b806baba138944be48226051"
+    },
+    {
+      "path": "package.json",
+      "sha256": "a7ff8b908bfe8f49855c6c4db303d3b5a41fe51145503a02a8bfe307fce88b59"
+    },
+    {
+      "path": "release/contract.json",
+      "sha256": "7efe37063c1537575079a19f57c48824e3854c303b71b03f4e64e7293e06c674"
+    },
+    {
+      "path": "scripts/build-ir.mjs",
+      "sha256": "a73b36dccf2c3daecc7ffe81db99ce3402366f8423813a4a6282b801c69fbf74"
+    },
+    {
+      "path": "scripts/check-package-artifact.js",
+      "sha256": "3ccd9f5224ff37a3a712f0b487ef872aa9ab98cf6ea6c994ccdb6353379ed550"
+    },
+    {
+      "path": "scripts/generate-symbol-surface.mjs",
+      "sha256": "1d5e80258b887377c2e99fb56df4d37a91c3b93d51d635c2314c6c66fe183e10"
+    },
+    {
+      "path": "scripts/lib/author-baseline.js",
+      "sha256": "6aef6c68d7860da7c49188c0ab7f3f844ef1e46e11fe804e7ec4a857b7a329a4"
+    },
+    {
+      "path": "scripts/lib/icon-catalog.js",
+      "sha256": "ce257ecc5f381dc8c46a58f1af8c91e241e0d0a8f317bf7124982736115787f3"
+    },
+    {
+      "path": "scripts/lib/symbol-modules.js",
+      "sha256": "cfdc458be8971387641e14fe25d93b9498ba2bc3ae804db4e7787832fdf08545"
+    },
+    {
+      "path": "scripts/measure-platform-artifacts.mjs",
+      "sha256": "5e20d34ed751f824ae57795a03a1fe3ecc228560a8bb1c198639b324e8677f1d"
+    },
+    {
+      "path": "src/ir/author-catalog.generated.ts",
+      "sha256": "63c7491482b4376d1ae1a2e908539f99d954dc42a1cfb9c34c420366b1755b08"
+    },
+    {
+      "path": "src/ir/author-source.ts",
+      "sha256": "9a93eaafcc1f616730ca37fd84f0fc03547aa3a658530d8d60e07d1358273244"
+    },
+    {
+      "path": "src/ir/compiler.ts",
+      "sha256": "c06211b22e5b9e42eb6cf055675c1537437ef8d9a7b885289204d24ca281ee93"
+    },
+    {
+      "path": "src/ir/render.ts",
+      "sha256": "a5a7d90aa49521efd7d723f51418ba9bbf633e43c4997499de2bce055020e8a3"
+    },
+    {
+      "path": "src/ir/request.ts",
+      "sha256": "edca631b41ebb27795b685ef6aba9e35ca1ab8db910341b07bcdc34936f31da5"
+    },
+    {
+      "path": "src/ir/symbol-runtime.ts",
+      "sha256": "955d5b4d1b301f624b4307d300ccc09e6856a06db6e78efcec171144704befdf"
+    },
+    {
+      "path": "test/author-baseline.test.js",
+      "sha256": "b474d30e6220368923ae166751dc0565dd02f90f9a3b1eebbc110a2e2f433c48"
+    },
+    {
+      "path": "test/package-artifact.test.js",
+      "sha256": "2892f9d00b16cfcd78c677298452864f9f8eee2404eadaa10f7f03c2eeee5891"
+    },
+    {
+      "path": "test/release-contract.test.js",
+      "sha256": "31714d421cb32c6b2042947702f4dd624690dfa4016e81d7fe94e8df7b3f8727"
+    },
+    {
+      "path": "test/symbol-modules.test.js",
+      "sha256": "02870c836478332461116dabcb78120a14b477a7e6bab7b6a7215b1b005f479a"
+    },
+    {
+      "path": "test/symbol-runtime.test.ts",
+      "sha256": "669dc4dcb24a91cf7d1c19f87e9f77523aa1516a370b4c056394b14c97756e44"
+    }
+  ],
+  "dependencies": [
+    {
+      "path": "pnpm-lock.yaml",
+      "sha256": "7e768bf8f638239ac555ca9b1f97716525701b10fadd1089559040a4b3299a92"
+    },
+    {
+      "path": "scripts/lib/figma-import.js",
+      "sha256": "986fe46c977633757ed2d4aa628a435e698a3a3326510d929c2594d3a3e86170"
+    },
+    {
+      "path": "semantics/catalog.json",
+      "sha256": "8e96756bae73619b78d881a7c8ed72fcf6bceed52b1a3426c0c9e3b51bd853cb"
+    },
+    {
+      "path": "semantics/figma-baseline.json",
+      "sha256": "c1b585d916023c898405521c0e26c4241e5d72379e5300c92f2dc3e54b871ceb"
+    },
+    {
+      "path": "semantics/grid.json",
+      "sha256": "791f5c0990f1b68bc470a698dd8a068996b3697e35d2319fa9cb80427ea93d05"
+    },
+    {
+      "path": "src/core/anatomy-gen.js",
+      "sha256": "e07903ea872df05f535e7216faec6a99f8cdf30640031ab74668f290d888a860"
+    },
+    {
+      "path": "src/core/icon-geometry.js",
+      "sha256": "44b6157ec144e32268453bfb93e74f0df237ac1f4263463ce3a5b7e116a2bbbc"
+    },
+    {
+      "path": "src/core/path-data.js",
+      "sha256": "2accdbbd3fa6c325dcf355b2dcc9f956d7a9ce9aac7624970cf972b268d23982"
+    },
+    {
+      "path": "src/ir/catalog.generated.ts",
+      "sha256": "a24b90e9254e502d12c82621aa5b0f9c38458ccd982cb82b6dd3944035f3cd32"
+    },
+    {
+      "path": "src/ir/index.ts",
+      "sha256": "9b24d8fc9702b72ba0e385bfe07d7e57b0ae4d24124e03b8650f11a9b6fc980d"
+    },
+    {
+      "path": "src/motion/index.ts",
+      "sha256": "1b15e1c5f3aa98ca3a4829c4c963cabf12c284aa5f023433a50ad9ad7d94e60f"
+    },
+    {
+      "path": "tsconfig.build.json",
+      "sha256": "ddfd9ffabca8c29fe2c4a32002ea090c3ab8d17a301e06943cbdba913ffa53f1"
+    },
+    {
+      "path": "tsconfig.json",
+      "sha256": "ebc459a24dbb048f6d921a93fa0fb736acbc88b1d828037f294908a46a931912"
+    }
+  ],
+  "verification": {
+    "targetedSourceTests": {
+      "command": "pnpm exec vitest run test/author-baseline.test.js test/symbol-modules.test.js test/symbol-runtime.test.ts test/symbol-render.test.ts --maxWorkers=1",
+      "passed": 41,
+      "testFiles": 4,
+      "durationSeconds": 1.21
+    },
+    "sourceTypes": {
+      "command": "node node_modules/typescript/bin/tsc --noEmit -p tsconfig.json",
+      "exitCode": 0
+    },
+    "previousPackageFixtures": {
+      "passed": 41,
+      "testFiles": 2,
+      "durationSeconds": 4.88
+    },
+    "openGate": "README single-symbol API phrase «одной SVG» is misclassified as corpus census by docs guard; root owns repair. Full build, packed consumer and measurements not executed locally."
+  }
+}

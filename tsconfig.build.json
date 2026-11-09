@@ -6,7 +6,7 @@
     "emitDeclarationOnly": true,
     "stripInternal": true,
     "noEmit": false,
-    "rootDir": "./src/ir"
+    "rootDir": "./src"
   },
-  "include": ["src/ir/**/*.ts"]
+  "include": ["src/ir/**/*.ts", "src/motion/**/*.ts", "src/lottie/**/*.ts", "src/authoring/**/*.ts", "src/states/**/*.ts"]
 }

@@ -278,10 +278,11 @@ if (isMain) {
   if (result.errors.length > 0) {
     console.error(`check-package-size: HARD — ${result.errors.length} нарушений:`);
     for (const error of result.errors) console.error(`  - ${error}`);
-    process.exit(1);
+    process.exitCode = 1;
+  } else {
+    const report = Object.entries(result.measurements)
+      .map(([file, value]) => `${file}: ${value.bytes} B / ${value.gzipBytes} B gzip`)
+      .join('; ');
+    console.log(`check-package-size: OK — ${report}`);
   }
-  const report = Object.entries(result.measurements)
-    .map(([file, value]) => `${file}: ${value.bytes} B / ${value.gzipBytes} B gzip`)
-    .join('; ');
-  console.log(`check-package-size: OK — ${report}`);
 }

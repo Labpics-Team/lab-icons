@@ -12,5 +12,5 @@
     "skipLibCheck": true,
     "noEmit": true
   },
-  "include": ["src/ir/**/*.ts", "test/**/*.ts"]
+  "include": ["src/ir/**/*.ts", "src/motion/**/*.ts", "src/lottie/**/*.ts", "src/authoring/**/*.ts", "src/states/**/*.ts", "test/**/*.ts"]
 }

@@ -1,0 +1,43 @@
+{
+  "baseline": "8681b97",
+  "sourceSha256": "d03e0dcf7aa2c988ad8c3363a1011a81b361c9294d526c13ae7999fa10d9764a",
+  "checkedAt": "2026-11-02T06:16:30.536Z",
+  "scope": "strict native declaration emit, readonly/optional member equivalence and interface augmentation in Bundler/NodeNext; normalized runtime; no package build/install/browser/benchmark",
+  "before": {
+    "additional": {
+      "authoring/design-spec.d.ts": {
+        "bytes": 7822,
+        "gzipBytes": 2303,
+        "sha256": "187482f50202b9ce55313254c7a8932dc19779df4068de3fa574d1203bf37cad"
+      },
+      "lottie/types.d.ts": {
+        "bytes": 2142,
+        "gzipBytes": 935,
+        "sha256": "cf78ac45c711630303b779f8a0f559b55d97a20e8651f1afe26b40a123212d70"
+      }
+    },
+    "bytes": 5096,
+    "gzipBytes": 1559,
+    "sha256": "cb272d787be63b3a390c7e9167f61449fc16b86c74b4eb88690e22d70e6e31a7"
+  },
+  "after": {
+    "additional": {
+      "authoring/design-spec.d.ts": {
+        "bytes": 7567,
+        "gzipBytes": 2132,
+        "sha256": "f22f9948308f9e375b4516b790a4b5dda4c9789b42b461c3637e85186b5805a2"
+      },
+      "lottie/types.d.ts": {
+        "bytes": 2091,
+        "gzipBytes": 912,
+        "sha256": "de1668f123c141cd16ebe8217558b3fefde55359f230c89208a263238aa9092f"
+      }
+    },
+    "bytes": 4530,
+    "gzipBytes": 1281,
+    "sha256": "e1e69d01346b7551d131ea251cc2ebb00afb6b6d590fee1631ab9e2f2d5e00b8"
+  },
+  "normalizedRuntimeSha256": "f80cf91fa07a9d23f423c9a7653cd643071a66472d8c4e0aa7eb662e3899e448",
+  "consumerSourceSha256": "052dbf4b8c6076014af1c6f4ef20585d0a51111ea57c0f5988d5089611b17238",
+  "findings": []
+}

@@ -1,0 +1,382 @@
+{
+  "capturedAt": "2026-11-02T08:14:59.342Z",
+  "baseline": "8fbb434",
+  "scope": "production compiler/index/request emit, npm pack and offline install in isolated external consumer; bounded static source fixture; no full build, registry parity or full-consumer ratchet qualification",
+  "environment": {
+    "node": "v24.15.0",
+    "esbuild": "0.28.1",
+    "platform": "win32",
+    "arch": "x64"
+  },
+  "sourceDigests": {
+    "src/ir/compiler.ts": "778f7d9c855bb48313d6c02790fd4c166cce4a2e547ab303e21d22dfe0289d7f",
+    "src/ir/index.ts": "9e254ab83f8e21fad057a54546189593b316522c743cb9f4bf6e2caff647d41b",
+    "test/compiler-entrypoints.test.js": "d6c6eb3232c3c3a167b517e35465f880cce6d1d71f5d0ac006f215b61c19d8fa",
+    "scripts/build-ir.mjs": "1955819f0127dfdbd2298d6601ed6d5b9d623d5377c871e14e69fc3f8ed34632",
+    "svgo.config.cjs": "ec6847303ff4bb5804fa446cdfa3d800f5b903ea30f802574eb1bfdff65116cd",
+    "semantics/catalog.json": "8e96756bae73619b78d881a7c8ed72fcf6bceed52b1a3426c0c9e3b51bd853cb",
+    "semantics/grid.json": "791f5c0990f1b68bc470a698dd8a068996b3697e35d2319fa9cb80427ea93d05",
+    "semantics/anatomy.runtime.json": "1ae873ddd5226dbb5efb76f970056acf6073ab6f303e9fbfe045c422c27f6c58",
+    "semantics/anatomy.candidates.json": "bcf87d1d4f284741379167cf4f222136f39cc6968a5c082babb5d31e54b5ce8a",
+    "semantics/candidate-variants.json": "e7a10229adb06ee269bff2edcb748de91d0b363b26525d410180f9209b57578a",
+    "release/package-size-ratchet.json": "b68431629ee2c6ce0fa175476b5d2904bd3b9c45701a5aa7bd88a6d02e2e5e95"
+  },
+  "current": {
+    "tarball": {
+      "sha256": "df019706c461397de0fad69ea2492775ad3fc70ce7b350c2bf7b78788ef5e276",
+      "files": [
+        "dist/index.d.ts",
+        "dist/index.js",
+        "dist/ir/author-annulus-types.d.ts",
+        "dist/ir/author-catalog.generated.d.ts",
+        "dist/ir/author-provenance.d.ts",
+        "dist/ir/author-request-runtime.d.ts",
+        "dist/ir/author-source.d.ts",
+        "dist/ir/authored-variation.d.ts",
+        "dist/ir/catalog.generated.d.ts",
+        "dist/ir/compiler.d.ts",
+        "dist/ir/compiler.js",
+        "dist/ir/glyph-types.d.ts",
+        "dist/ir/index.d.ts",
+        "dist/ir/index.js",
+        "dist/ir/paint-types.d.ts",
+        "dist/ir/recipes.d.ts",
+        "dist/ir/request.d.ts",
+        "dist/ir/request.js",
+        "dist/ir/sha256.d.ts",
+        "dist/ir/svg-assembly.d.ts",
+        "dist/ir/symbol-runtime.d.ts",
+        "package.json"
+      ]
+    },
+    "nativeCompiler": {
+      "bytes": 122393,
+      "gzipBytes": 37364,
+      "sha256": "e9b26fbe249a4a39329e6709db3fb134a72a9638c6693c58706f26e7e45067ad"
+    },
+    "declarations": {
+      "compiler.d.ts": {
+        "bytes": 7800,
+        "gzipBytes": 2588,
+        "sha256": "3fce31745ac737eee4c78dfa832f55b65044335b8272d849b3b1e905c30115c5"
+      },
+      "index.d.ts": {
+        "bytes": 1937,
+        "gzipBytes": 559,
+        "sha256": "44489109dbebf4c2949850ee54528c43cd6abacb63cf7db0b33c88ab20a124a3"
+      }
+    },
+    "scenarios": {
+      "glyph": {
+        "bytes": 482464,
+        "gzipBytes": 110029,
+        "sha256": "e0f4b910abd164bf05e32401055805fb3beddb79092a47c37e9f2295e5972b1a",
+        "contributed": {
+          "node_modules/@labpics/icons/dist/index.js": {
+            "bytesInOutput": 4757
+          },
+          "node_modules/@labpics/icons/dist/ir/request.js": {
+            "bytesInOutput": 2376
+          },
+          "node_modules/@labpics/icons/dist/ir/compiler.js": {
+            "bytesInOutput": 81341
+          },
+          "node_modules/@labpics/icons/dist/ir/index.js": {
+            "bytesInOutput": 393825
+          },
+          "glyph.mjs": {
+            "bytesInOutput": 51
+          }
+        },
+        "retainedFunctions": {
+          "calendarNumberGlyph": false,
+          "compileCalendarNumberGlyph": false,
+          "motionCapabilities": false,
+          "registerCandidateAnatomy": false,
+          "registerCandidateAnatomyValue": false
+        }
+      },
+      "capabilities": {
+        "bytes": 407831,
+        "gzipBytes": 85897,
+        "sha256": "a2ec90c488763956e817883e1950b3bc1c670ce427422a1807a2ea422928183a",
+        "contributed": {
+          "node_modules/@labpics/icons/dist/index.js": {
+            "bytesInOutput": 4738
+          },
+          "node_modules/@labpics/icons/dist/ir/request.js": {
+            "bytesInOutput": 271
+          },
+          "node_modules/@labpics/icons/dist/ir/compiler.js": {
+            "bytesInOutput": 8869
+          },
+          "node_modules/@labpics/icons/dist/ir/index.js": {
+            "bytesInOutput": 393825
+          },
+          "capabilities.mjs": {
+            "bytesInOutput": 17
+          }
+        },
+        "retainedFunctions": {
+          "calendarNumberGlyph": false,
+          "compileCalendarNumberGlyph": false,
+          "motionCapabilities": true,
+          "registerCandidateAnatomy": false,
+          "registerCandidateAnatomyValue": false
+        }
+      },
+      "calendar": {
+        "bytes": 439703,
+        "gzipBytes": 95379,
+        "sha256": "6c47de5cc689ffe94cb90d9f2df53af575bbddf4a520e1ad718a53bb1053e07a",
+        "contributed": {
+          "node_modules/@labpics/icons/dist/index.js": {
+            "bytesInOutput": 4757
+          },
+          "node_modules/@labpics/icons/dist/ir/request.js": {
+            "bytesInOutput": 272
+          },
+          "node_modules/@labpics/icons/dist/ir/compiler.js": {
+            "bytesInOutput": 40675
+          },
+          "node_modules/@labpics/icons/dist/ir/index.js": {
+            "bytesInOutput": 393819
+          },
+          "calendar.mjs": {
+            "bytesInOutput": 66
+          }
+        },
+        "retainedFunctions": {
+          "calendarNumberGlyph": true,
+          "compileCalendarNumberGlyph": true,
+          "motionCapabilities": false,
+          "registerCandidateAnatomy": false,
+          "registerCandidateAnatomyValue": false
+        }
+      },
+      "parse": {
+        "bytes": 407557,
+        "gzipBytes": 85623,
+        "sha256": "00ceb51334a57e8dc6e6ef2495f17cb10ab0f2f0d871a6a3e5220747bb993af9",
+        "contributed": {
+          "node_modules/@labpics/icons/dist/index.js": {
+            "bytesInOutput": 4738
+          },
+          "node_modules/@labpics/icons/dist/ir/request.js": {
+            "bytesInOutput": 2275
+          },
+          "node_modules/@labpics/icons/dist/ir/compiler.js": {
+            "bytesInOutput": 6596
+          },
+          "node_modules/@labpics/icons/dist/ir/index.js": {
+            "bytesInOutput": 393811
+          },
+          "parse.mjs": {
+            "bytesInOutput": 26
+          }
+        },
+        "retainedFunctions": {
+          "calendarNumberGlyph": false,
+          "compileCalendarNumberGlyph": false,
+          "motionCapabilities": false,
+          "registerCandidateAnatomy": false,
+          "registerCandidateAnatomyValue": false
+        }
+      },
+      "namespace": {
+        "bytes": 501426,
+        "gzipBytes": 114813,
+        "sha256": "bdcd305690d0d1abaf6fdf1a67656b6bd9780e09d4de3adb0a1ecb48fdb14f4b",
+        "contributed": {
+          "node_modules/@labpics/icons/dist/ir/index.js": {
+            "bytesInOutput": 394327
+          },
+          "node_modules/@labpics/icons/dist/index.js": {
+            "bytesInOutput": 4757
+          },
+          "node_modules/@labpics/icons/dist/ir/request.js": {
+            "bytesInOutput": 2376
+          },
+          "node_modules/@labpics/icons/dist/ir/compiler.js": {
+            "bytesInOutput": 99855
+          },
+          "namespace.mjs": {
+            "bytesInOutput": 0
+          }
+        },
+        "retainedFunctions": {
+          "calendarNumberGlyph": true,
+          "compileCalendarNumberGlyph": true,
+          "motionCapabilities": true,
+          "registerCandidateAnatomy": true,
+          "registerCandidateAnatomyValue": true
+        }
+      }
+    }
+  },
+  "previous": {
+    "tarball": {
+      "sha256": "b51b4ef3355f786bd6e4caf650754100272fc7c919102aa32a02f069339b7df8",
+      "files": [
+        "dist/index.js",
+        "dist/ir/compiler.js",
+        "dist/ir/index.js",
+        "dist/ir/request.js",
+        "package.json"
+      ]
+    },
+    "nativeCompiler": {
+      "bytes": 120591,
+      "gzipBytes": 37074,
+      "sha256": "269761cc9b3c5c118b21a841c492739e638269dea3aedd8f39fffb90f5e81943"
+    },
+    "declarations": {},
+    "scenarios": {
+      "glyph": {
+        "bytes": 495973,
+        "gzipBytes": 113952,
+        "sha256": "12bcf2a120e3892e2f780bacc2b7790c98834fa53ec5e785e9ad5b0d28ef321a",
+        "contributed": {
+          "node_modules/@labpics/icons/dist/index.js": {
+            "bytesInOutput": 4757
+          },
+          "node_modules/@labpics/icons/dist/ir/request.js": {
+            "bytesInOutput": 2376
+          },
+          "node_modules/@labpics/icons/dist/ir/compiler.js": {
+            "bytesInOutput": 94735
+          },
+          "node_modules/@labpics/icons/dist/ir/index.js": {
+            "bytesInOutput": 393940
+          },
+          "glyph.mjs": {
+            "bytesInOutput": 51
+          }
+        },
+        "retainedFunctions": {
+          "calendarNumberGlyph": false,
+          "compileCalendarNumberGlyph": false,
+          "motionCapabilities": true,
+          "registerCandidateAnatomy": false,
+          "registerCandidateAnatomyValue": false
+        }
+      },
+      "capabilities": {
+        "bytes": 495940,
+        "gzipBytes": 113934,
+        "sha256": "1b82390f141dac8bd94a8ce3a92a98379de7e0c97a3e128e503df2dc6095b35b",
+        "contributed": {
+          "node_modules/@labpics/icons/dist/index.js": {
+            "bytesInOutput": 4757
+          },
+          "node_modules/@labpics/icons/dist/ir/request.js": {
+            "bytesInOutput": 2376
+          },
+          "node_modules/@labpics/icons/dist/ir/compiler.js": {
+            "bytesInOutput": 94735
+          },
+          "node_modules/@labpics/icons/dist/ir/index.js": {
+            "bytesInOutput": 393940
+          },
+          "capabilities.mjs": {
+            "bytesInOutput": 18
+          }
+        },
+        "retainedFunctions": {
+          "calendarNumberGlyph": false,
+          "compileCalendarNumberGlyph": false,
+          "motionCapabilities": true,
+          "registerCandidateAnatomy": false,
+          "registerCandidateAnatomyValue": false
+        }
+      },
+      "calendar": {
+        "bytes": 495988,
+        "gzipBytes": 113972,
+        "sha256": "de9842368377ca724f872f873ae6b657963f10ff908870d920008ed8af16d1f9",
+        "contributed": {
+          "node_modules/@labpics/icons/dist/index.js": {
+            "bytesInOutput": 4757
+          },
+          "node_modules/@labpics/icons/dist/ir/request.js": {
+            "bytesInOutput": 2376
+          },
+          "node_modules/@labpics/icons/dist/ir/compiler.js": {
+            "bytesInOutput": 94735
+          },
+          "node_modules/@labpics/icons/dist/ir/index.js": {
+            "bytesInOutput": 393940
+          },
+          "calendar.mjs": {
+            "bytesInOutput": 66
+          }
+        },
+        "retainedFunctions": {
+          "calendarNumberGlyph": false,
+          "compileCalendarNumberGlyph": false,
+          "motionCapabilities": true,
+          "registerCandidateAnatomy": false,
+          "registerCandidateAnatomyValue": false
+        }
+      },
+      "parse": {
+        "bytes": 495949,
+        "gzipBytes": 113940,
+        "sha256": "7e6bd7a58a3074c2d9849f743265f37e8ad8f5ac6b93b01b6f46dfea467a82e9",
+        "contributed": {
+          "node_modules/@labpics/icons/dist/index.js": {
+            "bytesInOutput": 4757
+          },
+          "node_modules/@labpics/icons/dist/ir/request.js": {
+            "bytesInOutput": 2376
+          },
+          "node_modules/@labpics/icons/dist/ir/compiler.js": {
+            "bytesInOutput": 94735
+          },
+          "node_modules/@labpics/icons/dist/ir/index.js": {
+            "bytesInOutput": 393940
+          },
+          "parse.mjs": {
+            "bytesInOutput": 27
+          }
+        },
+        "retainedFunctions": {
+          "calendarNumberGlyph": false,
+          "compileCalendarNumberGlyph": false,
+          "motionCapabilities": true,
+          "registerCandidateAnatomy": false,
+          "registerCandidateAnatomyValue": false
+        }
+      },
+      "namespace": {
+        "bytes": 501058,
+        "gzipBytes": 114886,
+        "sha256": "5152ad9f429385b818fff019c0ea24abce681593a888f9b4266a12abdee44046",
+        "contributed": {
+          "node_modules/@labpics/icons/dist/ir/index.js": {
+            "bytesInOutput": 394245
+          },
+          "node_modules/@labpics/icons/dist/index.js": {
+            "bytesInOutput": 4757
+          },
+          "node_modules/@labpics/icons/dist/ir/request.js": {
+            "bytesInOutput": 2376
+          },
+          "node_modules/@labpics/icons/dist/ir/compiler.js": {
+            "bytesInOutput": 99569
+          },
+          "namespace.mjs": {
+            "bytesInOutput": 0
+          }
+        },
+        "retainedFunctions": {
+          "calendarNumberGlyph": false,
+          "compileCalendarNumberGlyph": false,
+          "motionCapabilities": true,
+          "registerCandidateAnatomy": false,
+          "registerCandidateAnatomyValue": false
+        }
+      }
+    }
+  }
+}

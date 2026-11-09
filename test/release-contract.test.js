@@ -16,9 +16,12 @@ import {
   validateSourceReleaseRef,
 } from '../scripts/check-release-ref.js';
 import { stageReleaseDist, validateReleaseFiles } from '../scripts/stage-release-dist.js';
+import { symbolReleaseProjection } from '../scripts/lib/symbol-modules.js';
 
-const CONTRACT = JSON.parse(readFileSync(new URL('../release/contract.json', import.meta.url), 'utf8'));
-const PACKAGE = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
+const REPO_CONTRACT = JSON.parse(readFileSync(new URL('../release/contract.json', import.meta.url), 'utf8'));
+const REPO_PACKAGE = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
+const CONTRACT = symbolReleaseProjection(REPO_CONTRACT, ['fixture']);
+const PACKAGE = { ...REPO_PACKAGE, files: CONTRACT.files, exports: CONTRACT.exports };
 const roots = [];
 const SOURCE_COMMIT = 'a'.repeat(40);
 const DIST_COMMIT = 'b'.repeat(40);
@@ -26,11 +29,33 @@ const DIST_COMMIT = 'b'.repeat(40);
 const DECLARATIONS = Object.freeze({
   'dist/index.d.ts': 'export declare const accessibilityOutline: string;\n',
   'dist/ir/catalog.generated.d.ts': "export type CatalogIconId = 'fixture';\n",
+  'dist/ir/author-catalog.generated.d.ts': "export type AuthorIconId = 'fixture';\n",
+  'dist/ir/author-provenance.d.ts': "export interface AuthorSourceProvenance { readonly kind: 'figma' }\n",
+  'dist/ir/author-source.d.ts': "import type { AuthorIconId } from './author-catalog.generated.js';\nimport type { GlyphIR } from './glyph-types.js';\nexport type { AuthorSourceProvenance } from './author-provenance.js';\nexport type AuthorSourceGlyph = GlyphIR & { readonly icon: AuthorIconId };\n",
   'dist/ir/index.d.ts':
     `import type { CatalogIconId } from './catalog.generated.js';\n` +
     `export type { RecipeResult } from './recipes.js';\n` +
+    `export type { GlyphIR } from './compiler.js';\n` +
     'export declare const iconIds: readonly CatalogIconId[];\n',
-  'dist/ir/recipes.d.ts': 'export interface RecipeResult { readonly kind: string }\n',
+  'dist/ir/compiler.d.ts': "import type { GlyphModelErrorCode } from './request.js';\nexport type { GlyphIR } from './glyph-types.js';\nexport interface GlyphCompiler { readonly code: GlyphModelErrorCode }\n",
+  'dist/ir/glyph-types.d.ts': "import type { AuthorVariationProvenance } from './authored-variation.js';\nimport type { AuthorAnnulusVariationProvenance } from './author-annulus-types.js';\nimport type { AuthorContentVariationProvenance } from './author-content-types.js';\nimport type { AuthorCapsuleVariationProvenance } from './author-capsule-types.js';\nimport type { RecipeFillPaint } from './paint-types.js';\nexport interface GlyphIR { readonly paint: RecipeFillPaint; readonly variation?: AuthorVariationProvenance | AuthorAnnulusVariationProvenance | AuthorContentVariationProvenance | AuthorCapsuleVariationProvenance }\n",
+  'dist/ir/paint-types.d.ts': "export interface RecipeFillPaint { readonly kind: 'fill' }\n",
+  'dist/ir/authored-variation.d.ts': "export interface AuthorVariationProvenance { readonly kind: 'authored-variation' }\n",
+  'dist/ir/author-annulus-types.d.ts': "import type { AuthorSourceProvenance } from './author-provenance.js';\nexport interface AuthorAnnulusVariationProvenance { readonly author: AuthorSourceProvenance }\n",
+  'dist/ir/author-content-types.d.ts': "import type { AuthorSourceProvenance } from './author-provenance.js';\nexport interface AuthorContentVariationProvenance { readonly author: AuthorSourceProvenance }\n",
+  'dist/ir/author-capsule-types.d.ts': "import type { AuthorSourceProvenance } from './author-provenance.js';\nexport interface AuthorCapsuleVariationProvenance { readonly author: AuthorSourceProvenance }\n",
+  'dist/ir/request.d.ts': "export type GlyphModelErrorCode = 'CANDIDATES_REQUIRED';\n",
+  'dist/ir/render.d.ts': "import type { GlyphIR } from './glyph-types.js';\nexport declare function renderGlyphSvg(glyph: GlyphIR): string;\n",
+  'dist/authoring/index.d.ts': "export { compileDesignSpec } from './design-spec.js';\n",
+  'dist/authoring/design-spec.d.ts': "import type { GlyphIR } from '../ir/glyph-types.js';\nexport declare function compileDesignSpec(spec: unknown): GlyphIR;\n",
+  'dist/motion/index.d.ts': "import type { GlyphIR } from '../ir/index.js';\nimport type { StateRefusal } from '../ir/state-types.js';\nimport type { PreparedContourStateEffect } from '../ir/contour-state-types.js';\nexport declare function compileSymbolEffect(glyph: GlyphIR): StateRefusal | PreparedContourStateEffect;\n",
+  'dist/ir/state-types.d.ts': "export type { StateRefusal } from './state-common-types.js';\n",
+  'dist/ir/state-common-types.d.ts': "export interface StateRefusal { readonly ok: false }\n",
+  'dist/ir/contour-state-types.d.ts': "import type { StateRefusal } from './state-common-types.js';\nexport type PreparedContourStateEffect = StateRefusal | { readonly ok: true };\n",
+  'dist/symbols/fixture.d.ts': "import type { AuthorSourceGlyph } from '../ir/author-source.js';\nexport declare function glyph(): AuthorSourceGlyph;\n",
+  'dist/lottie/fixture.d.ts': "import type { LottieExportResult } from '../ir/lottie-types.js';\nexport declare function exportLottie(): LottieExportResult;\n",
+  'dist/ir/lottie-types.d.ts': "import type { GlyphIR } from './glyph-types.js';\nexport interface LottieExportResult { readonly glyph: GlyphIR }\n",
+  'dist/ir/recipes.d.ts': "export type { RecipeFillPaint } from './paint-types.js';\nexport interface RecipeResult { readonly kind: string }\n",
   'dist/ir/candidates.d.ts': 'export declare function registerCandidates(): void;\n',
 });
 
@@ -91,7 +116,17 @@ afterEach(() => {
 });
 
 describe('release contract', () => {
+  it('отказывает declaration-only модулю под публичным wildcard', () => {
+    for (const directory of ['symbols', 'lottie']) {
+      const ghost = `dist/${directory}/private-types.d.ts`;
+      const contract = { ...CONTRACT, files: [...CONTRACT.files, ghost].sort(),
+        typeDependencies: [...CONTRACT.typeDependencies, ghost].sort() };
+      expect(validateReleaseContract(contract)).toContain(`release ${directory} wildcard имеет types без runtime: ${ghost}`);
+    }
+  });
   it('является точным SSOT для npm projection и физических outputs', () => {
+    expect(validateReleaseContract(REPO_CONTRACT)).toEqual([]);
+    expect(validatePackageProjection(REPO_PACKAGE, REPO_CONTRACT)).toEqual([]);
     expect(validateReleaseContract(CONTRACT)).toEqual([]);
     expect(validatePackageProjection(PACKAGE, CONTRACT)).toEqual([]);
     expect(validateReleaseFiles(stagingRoot(), CONTRACT)).toEqual([]);
@@ -164,7 +199,7 @@ describe('release contract', () => {
       },
     });
     expect(errors).toContain(
-      'release typeDependencies не равен import closure: declared [dist/ir/catalog.generated.d.ts, dist/ir/orphan.d.ts], actual [dist/ir/catalog.generated.d.ts]',
+      `release typeDependencies не равен import closure: declared [${contract.typeDependencies.join(', ')}], actual [${CONTRACT.typeDependencies.join(', ')}]`,
     );
   });
 
@@ -241,7 +276,7 @@ describe('release contract', () => {
   it('не допускает ни одного файла manifest вне export surface', () => {
     const files = [...CONTRACT.files, 'dist/orphan.js'].sort();
     expect(validateReleaseContract({ ...CONTRACT, files })).toContain(
-      'release file не достижим ни из export, ни как typeDependency: dist/orphan.js',
+      'release file не достижим из export или dependency: dist/orphan.js',
     );
   });
 

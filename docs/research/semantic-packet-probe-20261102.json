@@ -1,0 +1,858 @@
+{
+  "capturedAt": "2026-11-02T11:03:41.708Z",
+  "baselineSha": "ebec9e952c795d63c7d6c8c8e72bd44cda099ba3",
+  "baselineEmitterSha256": "80d08832720b5058bfe97e39cb0667ba255edc57177945ef10e0e4a8ac637b76",
+  "environment": {
+    "node": "v24.15.0",
+    "esbuild": "0.28.1",
+    "platform": "win32",
+    "gzip": {
+      "level": 9,
+      "mtime": 0
+    }
+  },
+  "experimentSha256": "90d894f51525fa7ee31493631025680802d9ff4f9cc241ed55313bca7d7f0eb3",
+  "rows": [
+    {
+      "icon": "notifications",
+      "baseline": {
+        "module": {
+          "bytes": 16660,
+          "gzipBytes": 4584,
+          "sha256": "75f4e0ec95b6fd4fb7b6c86c087312de31914e11f4c13a4d055cd465bc63820f"
+        },
+        "consumers": {
+          "glyph": {
+            "bytes": 12459,
+            "gzipBytes": 4812,
+            "sha256": "8beea224e20e70ff5d692a0c5dea0ad7cd10940c743689c7b58fe62a4cb1c5a3",
+            "graph": {
+              "dist/ir/request.js": 2370,
+              "dist/ir/author-request-runtime.js": 755,
+              "dist/ir/symbol-runtime.js": 219,
+              "dist/symbols/notifications.js": 9084,
+              "<stdin>": 10
+            }
+          },
+          "caps": {
+            "bytes": 4531,
+            "gzipBytes": 1511,
+            "sha256": "fb1fd11cfb3eb8d4ccc2ab3deef010bf9eb7765d98e7112a41733eaab23aca9a",
+            "graph": {
+              "dist/ir/request.js": 271,
+              "dist/ir/symbol-runtime.js": 189,
+              "dist/symbols/notifications.js": 4040,
+              "<stdin>": 10
+            }
+          },
+          "both": {
+            "bytes": 15185,
+            "gzipBytes": 5378,
+            "sha256": "0570df43991b665de185090357335ff69042e72d126d34cad9fb9c7be8a1b054",
+            "graph": {
+              "dist/ir/request.js": 2370,
+              "dist/ir/author-request-runtime.js": 755,
+              "dist/ir/symbol-runtime.js": 300,
+              "dist/symbols/notifications.js": 11723,
+              "<stdin>": 16
+            }
+          },
+          "outline": {
+            "bytes": 2982,
+            "gzipBytes": 1483,
+            "sha256": "81750d334037df64c0e74897fc5afb0d349a59c88fa83c09e9928259904a604e",
+            "graph": {
+              "dist/symbols/notifications.js": 2953,
+              "<stdin>": 8
+            }
+          },
+          "filled": {
+            "bytes": 1690,
+            "gzipBytes": 889,
+            "sha256": "4c72437af5aa99b80f8290ae94bda6ad4ba26181cfea4034f4ac75f28df42ee9",
+            "graph": {
+              "dist/symbols/notifications.js": 1661,
+              "<stdin>": 8
+            }
+          }
+        }
+      },
+      "alternatives": {
+        "wholeSource": {
+          "module": {
+            "bytes": 14983,
+            "gzipBytes": 4305,
+            "sha256": "1a1a69af5337e8f027f0201399f4d783fecb4160f20967e0cfe7a6a57e0ff7e6"
+          },
+          "helperCost": {
+            "bytes": 507,
+            "gzipBytes": 330,
+            "sha256": "d205d70971a71f853fc8fbbb4e63e286e9837c5d009cc639db7f37635aa3ed7e"
+          },
+          "consumers": {
+            "glyph": {
+              "bytes": 11323,
+              "gzipBytes": 4839,
+              "sha256": "e0bd6dee3a0519ac11f4cab9a9c67d1b4330ebeeb916308d4490f5ed370033d1",
+              "graph": {
+                "dist/ir/request.js": 2370,
+                "dist/ir/author-request-runtime.js": 755,
+                "dist/ir/symbol-runtime.js": 659,
+                "dist/symbols/notifications.js": 7508,
+                "<stdin>": 10
+              }
+            },
+            "caps": {
+              "bytes": 4531,
+              "gzipBytes": 1511,
+              "sha256": "e7e367a71acef02e18120273c4b17789286d9cce8da6c85109629d1308a7eb07",
+              "graph": {
+                "dist/ir/request.js": 271,
+                "dist/ir/symbol-runtime.js": 189,
+                "dist/symbols/notifications.js": 4040,
+                "<stdin>": 10
+              }
+            },
+            "both": {
+              "bytes": 14049,
+              "gzipBytes": 5428,
+              "sha256": "f6b5e08fa41ded236071adb592bfd0b59f619644f3e2d42fb33f042fe27da055",
+              "graph": {
+                "dist/ir/request.js": 2370,
+                "dist/ir/author-request-runtime.js": 755,
+                "dist/ir/symbol-runtime.js": 740,
+                "dist/symbols/notifications.js": 10147,
+                "<stdin>": 16
+              }
+            },
+            "outline": {
+              "bytes": 2982,
+              "gzipBytes": 1483,
+              "sha256": "7a30df027afaa65a7b6811fa570453be1c58472fe7f9dca57e2c87e0ab7b8ef3",
+              "graph": {
+                "dist/symbols/notifications.js": 2953,
+                "<stdin>": 8
+              }
+            },
+            "filled": {
+              "bytes": 1690,
+              "gzipBytes": 889,
+              "sha256": "8882390c536b5c17838bc2f6ee8798a44604ef38d77125904650195a24e1be9d",
+              "graph": {
+                "dist/symbols/notifications.js": 1661,
+                "<stdin>": 8
+              }
+            }
+          },
+          "regressions": [
+            "glyph",
+            "both"
+          ]
+        },
+        "wholeMetadata": {
+          "module": {
+            "bytes": 14623,
+            "gzipBytes": 4249,
+            "sha256": "0dba10c2ad5cf0ceebce0a62bda375283b437dd9545ea68452015f791220ce63"
+          },
+          "helperCost": {
+            "bytes": 882,
+            "gzipBytes": 447,
+            "sha256": "e31f5f4c86b88ddeb616a0f2c9143ba0fcbe5d348820bbccb28ba52479e577bd"
+          },
+          "consumers": {
+            "glyph": {
+              "bytes": 11026,
+              "gzipBytes": 4866,
+              "sha256": "20292e6381a904268b4c3facea22bc0fad0b2b082b14ba20eeb4b9e4d1c915fc",
+              "graph": {
+                "dist/ir/request.js": 2370,
+                "dist/ir/author-request-runtime.js": 755,
+                "dist/ir/symbol-runtime.js": 940,
+                "dist/symbols/notifications.js": 6930,
+                "<stdin>": 10
+              }
+            },
+            "caps": {
+              "bytes": 4234,
+              "gzipBytes": 1543,
+              "sha256": "f6a65bb28ed3dcba3588c11d91fe625a8bed7201830c5161559a0fd703208a97",
+              "graph": {
+                "dist/ir/request.js": 271,
+                "dist/ir/symbol-runtime.js": 470,
+                "dist/symbols/notifications.js": 3462,
+                "<stdin>": 10
+              }
+            },
+            "both": {
+              "bytes": 13752,
+              "gzipBytes": 5457,
+              "sha256": "80ccdc56d2a0b13cf01908ddf85b6da783bf5746af4174bbb7e8f57164baf2ac",
+              "graph": {
+                "dist/ir/request.js": 2370,
+                "dist/ir/author-request-runtime.js": 755,
+                "dist/ir/symbol-runtime.js": 1021,
+                "dist/symbols/notifications.js": 9569,
+                "<stdin>": 16
+              }
+            },
+            "outline": {
+              "bytes": 2982,
+              "gzipBytes": 1482,
+              "sha256": "d16b9e46132dd7889582241edbf84da782e43dd394c8bede7274404317c0b0ec",
+              "graph": {
+                "dist/symbols/notifications.js": 2953,
+                "<stdin>": 8
+              }
+            },
+            "filled": {
+              "bytes": 1690,
+              "gzipBytes": 889,
+              "sha256": "0dae67ca629aacf9664db144f87057f34783cebe561461c8ad6b85cd5a3f46ac",
+              "graph": {
+                "dist/symbols/notifications.js": 1661,
+                "<stdin>": 8
+              }
+            }
+          },
+          "regressions": [
+            "glyph",
+            "caps",
+            "both"
+          ]
+        },
+        "wholeSemantic": {
+          "module": {
+            "bytes": 13591,
+            "gzipBytes": 3990,
+            "sha256": "1fd303ee7b431e46af42ac1586555c1e1cdc590cf890785e6adad6c586e3acd5"
+          },
+          "helperCost": {
+            "bytes": 1509,
+            "gzipBytes": 698,
+            "sha256": "1a63515e8290b28d1a4cd80f7da00bc212d093c854a957077cd52353d7f2c9df"
+          },
+          "consumers": {
+            "glyph": {
+              "bytes": 11026,
+              "gzipBytes": 4866,
+              "sha256": "cf2e01b3b0787a4fa96db4850236c4823d5ca987cc9572d05b8844452aca7bf8",
+              "graph": {
+                "dist/ir/request.js": 2370,
+                "dist/ir/author-request-runtime.js": 755,
+                "dist/ir/symbol-runtime.js": 940,
+                "dist/symbols/notifications.js": 6930,
+                "<stdin>": 10
+              }
+            },
+            "caps": {
+              "bytes": 3604,
+              "gzipBytes": 1523,
+              "sha256": "e890c2260a5926e02bffb80a15f2fe7270d6085aa96f2876c9117042dce55b97",
+              "graph": {
+                "dist/ir/request.js": 271,
+                "dist/ir/symbol-runtime.js": 978,
+                "dist/symbols/notifications.js": 2324,
+                "<stdin>": 10
+              }
+            },
+            "both": {
+              "bytes": 13122,
+              "gzipBytes": 5429,
+              "sha256": "bed9fcd59c1d85b398c31bbe4d9e4f9119d7a542f3bd5ed110b8332fe762fc68",
+              "graph": {
+                "dist/ir/request.js": 2370,
+                "dist/ir/author-request-runtime.js": 755,
+                "dist/ir/symbol-runtime.js": 1529,
+                "dist/symbols/notifications.js": 8431,
+                "<stdin>": 16
+              }
+            },
+            "outline": {
+              "bytes": 2982,
+              "gzipBytes": 1482,
+              "sha256": "14a345a9e6a5f3f3439becb662e2bea28ba6ebf4f939367346a4c24166a4fddd",
+              "graph": {
+                "dist/symbols/notifications.js": 2953,
+                "<stdin>": 8
+              }
+            },
+            "filled": {
+              "bytes": 1690,
+              "gzipBytes": 889,
+              "sha256": "ab709f11bb58e4338d123fc8374f5b470de18275fd40e0500e07f1e00818a7a4",
+              "graph": {
+                "dist/symbols/notifications.js": 1661,
+                "<stdin>": 8
+              }
+            }
+          },
+          "regressions": [
+            "glyph",
+            "caps",
+            "both"
+          ]
+        },
+        "sourceAndCycle": {
+          "module": {
+            "bytes": 13951,
+            "gzipBytes": 4055,
+            "sha256": "46e7fa7439f606075b9058d51169f322b6c008c11eb5565fc7e96406e6eec5ff"
+          },
+          "helperCost": {
+            "bytes": 1134,
+            "gzipBytes": 588,
+            "sha256": "8f331513abb0e8812a2bbcf04f4a4adaf9ada24cace1e6e16715d846a5387941"
+          },
+          "consumers": {
+            "glyph": {
+              "bytes": 11323,
+              "gzipBytes": 4839,
+              "sha256": "84b005fde0be96f0b4db7a95b0afe1636b00ccaa9f4c10fff28643d129657e65",
+              "graph": {
+                "dist/ir/request.js": 2370,
+                "dist/ir/author-request-runtime.js": 755,
+                "dist/ir/symbol-runtime.js": 659,
+                "dist/symbols/notifications.js": 7508,
+                "<stdin>": 10
+              }
+            },
+            "caps": {
+              "bytes": 3901,
+              "gzipBytes": 1489,
+              "sha256": "59aee45800228c469147ba7c811893b228d3d795fd93f8e4f86a39caeccc354c",
+              "graph": {
+                "dist/ir/request.js": 271,
+                "dist/ir/symbol-runtime.js": 697,
+                "dist/symbols/notifications.js": 2902,
+                "<stdin>": 10
+              }
+            },
+            "both": {
+              "bytes": 13419,
+              "gzipBytes": 5400,
+              "sha256": "6a01438b9761e3d2687c6940776573f6a274551a5342d375d20e32ea52b2ae9d",
+              "graph": {
+                "dist/ir/request.js": 2370,
+                "dist/ir/author-request-runtime.js": 755,
+                "dist/ir/symbol-runtime.js": 1248,
+                "dist/symbols/notifications.js": 9009,
+                "<stdin>": 16
+              }
+            },
+            "outline": {
+              "bytes": 2982,
+              "gzipBytes": 1483,
+              "sha256": "fb6bd5625d3f3c77ab4b9524a88f32fbeb0c58a89d7d0b750f32a63e4ef9bedc",
+              "graph": {
+                "dist/symbols/notifications.js": 2953,
+                "<stdin>": 8
+              }
+            },
+            "filled": {
+              "bytes": 1690,
+              "gzipBytes": 886,
+              "sha256": "df7c433652398dc04bfed6e4e85dc33225bd403fc79b1832ea7a29faa23ef814",
+              "graph": {
+                "dist/symbols/notifications.js": 1661,
+                "<stdin>": 8
+              }
+            }
+          },
+          "regressions": [
+            "glyph",
+            "both"
+          ]
+        },
+        "denseSourceAndCycle": {
+          "module": {
+            "bytes": 13951,
+            "gzipBytes": 4055,
+            "sha256": "46e7fa7439f606075b9058d51169f322b6c008c11eb5565fc7e96406e6eec5ff"
+          },
+          "helperCost": {
+            "bytes": 1185,
+            "gzipBytes": 570,
+            "sha256": "35a387f1b03c764a8709535d5e9c6185ad9f78c1538fd0fc3e8677328a099e7c"
+          },
+          "consumers": {
+            "glyph": {
+              "bytes": 11312,
+              "gzipBytes": 4850,
+              "sha256": "2268a65ec6ab22ae634812d5a8d576087cc30e53a0e64b18f4903bdcddb90d48",
+              "graph": {
+                "dist/ir/request.js": 2370,
+                "dist/ir/author-request-runtime.js": 755,
+                "dist/ir/symbol-runtime.js": 648,
+                "dist/symbols/notifications.js": 7508,
+                "<stdin>": 10
+              }
+            },
+            "caps": {
+              "bytes": 3901,
+              "gzipBytes": 1489,
+              "sha256": "59aee45800228c469147ba7c811893b228d3d795fd93f8e4f86a39caeccc354c",
+              "graph": {
+                "dist/ir/request.js": 271,
+                "dist/ir/symbol-runtime.js": 697,
+                "dist/symbols/notifications.js": 2902,
+                "<stdin>": 10
+              }
+            },
+            "both": {
+              "bytes": 13408,
+              "gzipBytes": 5409,
+              "sha256": "70ad4905c6ee20e4e209743c043e7c39c80bdd5e4a6e23b2d47d757895dcca68",
+              "graph": {
+                "dist/ir/request.js": 2370,
+                "dist/ir/author-request-runtime.js": 755,
+                "dist/ir/symbol-runtime.js": 1237,
+                "dist/symbols/notifications.js": 9009,
+                "<stdin>": 16
+              }
+            },
+            "outline": {
+              "bytes": 2982,
+              "gzipBytes": 1483,
+              "sha256": "fb6bd5625d3f3c77ab4b9524a88f32fbeb0c58a89d7d0b750f32a63e4ef9bedc",
+              "graph": {
+                "dist/symbols/notifications.js": 2953,
+                "<stdin>": 8
+              }
+            },
+            "filled": {
+              "bytes": 1690,
+              "gzipBytes": 886,
+              "sha256": "df7c433652398dc04bfed6e4e85dc33225bd403fc79b1832ea7a29faa23ef814",
+              "graph": {
+                "dist/symbols/notifications.js": 1661,
+                "<stdin>": 8
+              }
+            }
+          },
+          "regressions": [
+            "glyph",
+            "both"
+          ]
+        }
+      }
+    },
+    {
+      "icon": "notifications-unread",
+      "baseline": {
+        "module": {
+          "bytes": 21576,
+          "gzipBytes": 5463,
+          "sha256": "0aafd7e7f19c5ab9b56d1f4f688579f4b3c27bfe50c0f9c5664f882d4dc16d9b"
+        },
+        "consumers": {
+          "glyph": {
+            "bytes": 16101,
+            "gzipBytes": 5649,
+            "sha256": "3af071db7c53e19303a928aa3e6c2614815f263eaff30f11fc63d107ab324148",
+            "graph": {
+              "dist/ir/request.js": 2370,
+              "dist/ir/author-request-runtime.js": 755,
+              "dist/ir/symbol-runtime.js": 219,
+              "dist/symbols/notifications-unread.js": 12726,
+              "<stdin>": 10
+            }
+          },
+          "caps": {
+            "bytes": 4668,
+            "gzipBytes": 1529,
+            "sha256": "83e2e8002e17196ec0bfe54ecd83b08aa929e58d8a02c2e95b5c33585ccfbf70",
+            "graph": {
+              "dist/ir/request.js": 271,
+              "dist/ir/symbol-runtime.js": 189,
+              "dist/symbols/notifications-unread.js": 4177,
+              "<stdin>": 10
+            }
+          },
+          "both": {
+            "bytes": 18964,
+            "gzipBytes": 6230,
+            "sha256": "409129cf3e21071a84b815a555260cf54da096a3d93d49a0d162bdbc003a6dba",
+            "graph": {
+              "dist/ir/request.js": 2370,
+              "dist/ir/author-request-runtime.js": 755,
+              "dist/ir/symbol-runtime.js": 300,
+              "dist/symbols/notifications-unread.js": 15502,
+              "<stdin>": 16
+            }
+          },
+          "outline": {
+            "bytes": 3535,
+            "gzipBytes": 1716,
+            "sha256": "a973b04311d0322402d6252b57a43cec520b4cf7d9727518829eea9e3294d2bc",
+            "graph": {
+              "dist/symbols/notifications-unread.js": 3506,
+              "<stdin>": 8
+            }
+          },
+          "filled": {
+            "bytes": 2010,
+            "gzipBytes": 1029,
+            "sha256": "1d5a5ab5b9bac2567e33fa5c898f12dc5ec34e7a0f9d33ad481cb3db5c2646b0",
+            "graph": {
+              "dist/symbols/notifications-unread.js": 1981,
+              "<stdin>": 8
+            }
+          }
+        }
+      },
+      "alternatives": {
+        "wholeSource": {
+          "module": {
+            "bytes": 18496,
+            "gzipBytes": 5120,
+            "sha256": "7d2e8d2fa8be9bdc56f12140fba29ecb5c4c1d68f97dc7dfc9c95fc6be93a08f"
+          },
+          "helperCost": {
+            "bytes": 507,
+            "gzipBytes": 330,
+            "sha256": "d205d70971a71f853fc8fbbb4e63e286e9837c5d009cc639db7f37635aa3ed7e"
+          },
+          "consumers": {
+            "glyph": {
+              "bytes": 13570,
+              "gzipBytes": 5624,
+              "sha256": "ced5cbb2e81b1e98a69b16ab11a0bb63834ba7986ec01ff11486f47c0c00b117",
+              "graph": {
+                "dist/ir/request.js": 2370,
+                "dist/ir/author-request-runtime.js": 755,
+                "dist/ir/symbol-runtime.js": 659,
+                "dist/symbols/notifications-unread.js": 9755,
+                "<stdin>": 10
+              }
+            },
+            "caps": {
+              "bytes": 4668,
+              "gzipBytes": 1527,
+              "sha256": "3e62b9c853f90a591782aa1fc12775617b5933bcc8994b0b37a5c61aa3df3454",
+              "graph": {
+                "dist/ir/request.js": 271,
+                "dist/ir/symbol-runtime.js": 189,
+                "dist/symbols/notifications-unread.js": 4177,
+                "<stdin>": 10
+              }
+            },
+            "both": {
+              "bytes": 16433,
+              "gzipBytes": 6234,
+              "sha256": "366c1b017ea864adb5c234dcadd0020fdf9ed9717b3ac110f4e8c90adbe11293",
+              "graph": {
+                "dist/ir/request.js": 2370,
+                "dist/ir/author-request-runtime.js": 755,
+                "dist/ir/symbol-runtime.js": 740,
+                "dist/symbols/notifications-unread.js": 12531,
+                "<stdin>": 16
+              }
+            },
+            "outline": {
+              "bytes": 3535,
+              "gzipBytes": 1716,
+              "sha256": "01aa491f06c44d9d83e552f550d3f3ac69aa51635d06bd67bedf3cf7edef1fe1",
+              "graph": {
+                "dist/symbols/notifications-unread.js": 3506,
+                "<stdin>": 8
+              }
+            },
+            "filled": {
+              "bytes": 2010,
+              "gzipBytes": 1029,
+              "sha256": "0f270cbdd6eade385511b93ec80da7791a87478c80c9a2adae70a19f8b2f9c44",
+              "graph": {
+                "dist/symbols/notifications-unread.js": 1981,
+                "<stdin>": 8
+              }
+            }
+          },
+          "regressions": [
+            "both"
+          ]
+        },
+        "wholeMetadata": {
+          "module": {
+            "bytes": 18136,
+            "gzipBytes": 5059,
+            "sha256": "e89c589290e2295ea4bd34cc648b1691ab55115f38357c496cb0c0769ab1985f"
+          },
+          "helperCost": {
+            "bytes": 882,
+            "gzipBytes": 447,
+            "sha256": "e31f5f4c86b88ddeb616a0f2c9143ba0fcbe5d348820bbccb28ba52479e577bd"
+          },
+          "consumers": {
+            "glyph": {
+              "bytes": 13273,
+              "gzipBytes": 5653,
+              "sha256": "8c3b673c4a14394d7310d0f9aac18ea3f51d1be788dedf6008013a5aba6c7507",
+              "graph": {
+                "dist/ir/request.js": 2370,
+                "dist/ir/author-request-runtime.js": 755,
+                "dist/ir/symbol-runtime.js": 940,
+                "dist/symbols/notifications-unread.js": 9177,
+                "<stdin>": 10
+              }
+            },
+            "caps": {
+              "bytes": 4371,
+              "gzipBytes": 1565,
+              "sha256": "6e7abeec4595d4d83e425cc1d7e477bd7226150b624b6221784b44db020472a7",
+              "graph": {
+                "dist/ir/request.js": 271,
+                "dist/ir/symbol-runtime.js": 470,
+                "dist/symbols/notifications-unread.js": 3599,
+                "<stdin>": 10
+              }
+            },
+            "both": {
+              "bytes": 16136,
+              "gzipBytes": 6259,
+              "sha256": "bf05d00f8cfd300b2c1ea9cd94b14c4a88eb63006bdb705b9b60d966bed1f708",
+              "graph": {
+                "dist/ir/request.js": 2370,
+                "dist/ir/author-request-runtime.js": 755,
+                "dist/ir/symbol-runtime.js": 1021,
+                "dist/symbols/notifications-unread.js": 11953,
+                "<stdin>": 16
+              }
+            },
+            "outline": {
+              "bytes": 3535,
+              "gzipBytes": 1716,
+              "sha256": "01aa491f06c44d9d83e552f550d3f3ac69aa51635d06bd67bedf3cf7edef1fe1",
+              "graph": {
+                "dist/symbols/notifications-unread.js": 3506,
+                "<stdin>": 8
+              }
+            },
+            "filled": {
+              "bytes": 2010,
+              "gzipBytes": 1029,
+              "sha256": "0f270cbdd6eade385511b93ec80da7791a87478c80c9a2adae70a19f8b2f9c44",
+              "graph": {
+                "dist/symbols/notifications-unread.js": 1981,
+                "<stdin>": 8
+              }
+            }
+          },
+          "regressions": [
+            "glyph",
+            "caps",
+            "both"
+          ]
+        },
+        "wholeSemantic": {
+          "module": {
+            "bytes": 17108,
+            "gzipBytes": 4802,
+            "sha256": "cd93fcc99f1950de808f7bad7b58f4e3a851d0b1a43a50bf9dc5310c0edfb514"
+          },
+          "helperCost": {
+            "bytes": 1509,
+            "gzipBytes": 698,
+            "sha256": "1a63515e8290b28d1a4cd80f7da00bc212d093c854a957077cd52353d7f2c9df"
+          },
+          "consumers": {
+            "glyph": {
+              "bytes": 13273,
+              "gzipBytes": 5652,
+              "sha256": "5c440d650e0e8e1f2e2257fa9560f7a092a032c447983021947d35d4a9b848ee",
+              "graph": {
+                "dist/ir/request.js": 2370,
+                "dist/ir/author-request-runtime.js": 755,
+                "dist/ir/symbol-runtime.js": 940,
+                "dist/symbols/notifications-unread.js": 9177,
+                "<stdin>": 10
+              }
+            },
+            "caps": {
+              "bytes": 3745,
+              "gzipBytes": 1545,
+              "sha256": "8815c72b4fc50bf3089f6f14b921f68366d81b0214eb5416bb679a019223ab34",
+              "graph": {
+                "dist/ir/request.js": 271,
+                "dist/ir/symbol-runtime.js": 978,
+                "dist/symbols/notifications-unread.js": 2465,
+                "<stdin>": 10
+              }
+            },
+            "both": {
+              "bytes": 15510,
+              "gzipBytes": 6237,
+              "sha256": "d96e1f275bd9a893402fede1c7bc761152d59ca3c435b368bcd7f606e395b3c1",
+              "graph": {
+                "dist/ir/request.js": 2370,
+                "dist/ir/author-request-runtime.js": 755,
+                "dist/ir/symbol-runtime.js": 1529,
+                "dist/symbols/notifications-unread.js": 10819,
+                "<stdin>": 16
+              }
+            },
+            "outline": {
+              "bytes": 3535,
+              "gzipBytes": 1716,
+              "sha256": "65c2eb1ce610b54d9b6ade8bf6bb654a87e30f1da055ab99e321bc212e407a08",
+              "graph": {
+                "dist/symbols/notifications-unread.js": 3506,
+                "<stdin>": 8
+              }
+            },
+            "filled": {
+              "bytes": 2010,
+              "gzipBytes": 1029,
+              "sha256": "d6dfb7bb5950defb05f6c93da5f4c26d286e91368a59e687635c548d8b91462e",
+              "graph": {
+                "dist/symbols/notifications-unread.js": 1981,
+                "<stdin>": 8
+              }
+            }
+          },
+          "regressions": [
+            "glyph",
+            "caps",
+            "both"
+          ]
+        },
+        "sourceAndCycle": {
+          "module": {
+            "bytes": 17468,
+            "gzipBytes": 4871,
+            "sha256": "c243048a00717e43a2ec4a8b642d8f99619c0c432f9493f46608e68bc8e65db7"
+          },
+          "helperCost": {
+            "bytes": 1134,
+            "gzipBytes": 588,
+            "sha256": "8f331513abb0e8812a2bbcf04f4a4adaf9ada24cace1e6e16715d846a5387941"
+          },
+          "consumers": {
+            "glyph": {
+              "bytes": 13570,
+              "gzipBytes": 5626,
+              "sha256": "a7e7864acaf17e3c3335446742e1a4838373bfe9fd0d26017d5715949b93faeb",
+              "graph": {
+                "dist/ir/request.js": 2370,
+                "dist/ir/author-request-runtime.js": 755,
+                "dist/ir/symbol-runtime.js": 659,
+                "dist/symbols/notifications-unread.js": 9755,
+                "<stdin>": 10
+              }
+            },
+            "caps": {
+              "bytes": 4042,
+              "gzipBytes": 1510,
+              "sha256": "a427f86fc3cf361720d421b7466b52e9987918af84fe8a923e47a6239a3c443f",
+              "graph": {
+                "dist/ir/request.js": 271,
+                "dist/ir/symbol-runtime.js": 697,
+                "dist/symbols/notifications-unread.js": 3043,
+                "<stdin>": 10
+              }
+            },
+            "both": {
+              "bytes": 15807,
+              "gzipBytes": 6209,
+              "sha256": "2cc263fa3b90ecf23e5a2829db1adbc9184a31b382b6296ddc5d33dac84b883d",
+              "graph": {
+                "dist/ir/request.js": 2370,
+                "dist/ir/author-request-runtime.js": 755,
+                "dist/ir/symbol-runtime.js": 1248,
+                "dist/symbols/notifications-unread.js": 11397,
+                "<stdin>": 16
+              }
+            },
+            "outline": {
+              "bytes": 3535,
+              "gzipBytes": 1716,
+              "sha256": "01aa491f06c44d9d83e552f550d3f3ac69aa51635d06bd67bedf3cf7edef1fe1",
+              "graph": {
+                "dist/symbols/notifications-unread.js": 3506,
+                "<stdin>": 8
+              }
+            },
+            "filled": {
+              "bytes": 2010,
+              "gzipBytes": 1029,
+              "sha256": "0f270cbdd6eade385511b93ec80da7791a87478c80c9a2adae70a19f8b2f9c44",
+              "graph": {
+                "dist/symbols/notifications-unread.js": 1981,
+                "<stdin>": 8
+              }
+            }
+          },
+          "regressions": []
+        },
+        "denseSourceAndCycle": {
+          "module": {
+            "bytes": 17468,
+            "gzipBytes": 4871,
+            "sha256": "c243048a00717e43a2ec4a8b642d8f99619c0c432f9493f46608e68bc8e65db7"
+          },
+          "helperCost": {
+            "bytes": 1185,
+            "gzipBytes": 570,
+            "sha256": "35a387f1b03c764a8709535d5e9c6185ad9f78c1538fd0fc3e8677328a099e7c"
+          },
+          "consumers": {
+            "glyph": {
+              "bytes": 13561,
+              "gzipBytes": 5627,
+              "sha256": "e5d750ae0f9f330a620f7284f5a8645dbe4d876e61e4b5bf57a35a00c238d088",
+              "graph": {
+                "dist/ir/request.js": 2370,
+                "dist/ir/author-request-runtime.js": 755,
+                "dist/ir/symbol-runtime.js": 648,
+                "dist/symbols/notifications-unread.js": 9755,
+                "<stdin>": 11
+              }
+            },
+            "caps": {
+              "bytes": 4042,
+              "gzipBytes": 1511,
+              "sha256": "d99ede7a1619482ee335f558dc24dc98dcd4b360bd28f48a16166b797c75530e",
+              "graph": {
+                "dist/ir/request.js": 271,
+                "dist/ir/symbol-runtime.js": 697,
+                "dist/symbols/notifications-unread.js": 3043,
+                "<stdin>": 10
+              }
+            },
+            "both": {
+              "bytes": 15798,
+              "gzipBytes": 6213,
+              "sha256": "5cdba7e14f54be27ab76a3a26adc08ed0d768e1232f57b2d10489f69f6cf54f6",
+              "graph": {
+                "dist/ir/request.js": 2370,
+                "dist/ir/author-request-runtime.js": 755,
+                "dist/ir/symbol-runtime.js": 1237,
+                "dist/symbols/notifications-unread.js": 11397,
+                "<stdin>": 17
+              }
+            },
+            "outline": {
+              "bytes": 3535,
+              "gzipBytes": 1716,
+              "sha256": "01aa491f06c44d9d83e552f550d3f3ac69aa51635d06bd67bedf3cf7edef1fe1",
+              "graph": {
+                "dist/symbols/notifications-unread.js": 3506,
+                "<stdin>": 8
+              }
+            },
+            "filled": {
+              "bytes": 2010,
+              "gzipBytes": 1029,
+              "sha256": "0f270cbdd6eade385511b93ec80da7791a87478c80c9a2adae70a19f8b2f9c44",
+              "graph": {
+                "dist/symbols/notifications-unread.js": 1981,
+                "<stdin>": 8
+              }
+            }
+          },
+          "regressions": []
+        }
+      }
+    }
+  ]
+}

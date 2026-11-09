@@ -1,0 +1,51 @@
+﻿[
+    {
+        "readDate":  "2026-11-03",
+        "url":  "https://www.w3.org/TR/css-masking-1/",
+        "file":  "css-masking-1.html",
+        "bytes":  489424,
+        "sha256":  "79ff953b47472ae5bc1eace14c0c470d7bd75d128e933806c97c50b640194671"
+    },
+    {
+        "readDate":  "2026-11-03",
+        "url":  "https://www.w3.org/TR/css-transforms-1/",
+        "file":  "css-transforms-1.html",
+        "bytes":  310421,
+        "sha256":  "4672e86844bfbe7af670c6702e873a36aee5a925d7fa30f374b79e88a1e18351"
+    },
+    {
+        "readDate":  "2026-11-03",
+        "url":  "https://www.w3.org/TR/SVG2/painting.html",
+        "file":  "svg2-painting.html",
+        "bytes":  164046,
+        "sha256":  "49f3f71568cec71d40d04dd5695abf4055698c0522ee269b5ad1210c0b774876"
+    },
+    {
+        "readDate":  "2026-11-03",
+        "url":  "https://www.w3.org/TR/SVG11/painting.html",
+        "file":  "svg11-painting.html",
+        "bytes":  146832,
+        "sha256":  "8705784776f7ae94cf8a17b56fe0fdacc8a2b5ae2993d8f507176b5c729c247c"
+    },
+    {
+        "readDate":  "2026-11-03",
+        "url":  "https://www.w3.org/TR/SVG11/masking.html",
+        "file":  "svg11-masking.html",
+        "bytes":  97325,
+        "sha256":  "03e88856fda50b1c9ef727b6b8ec12d0c79150a9a548d1c1464b518c83e49727"
+    },
+    {
+        "readDate":  "2026-11-03",
+        "url":  "https://developer.apple.com/videos/play/wwdc2025/337/",
+        "file":  "wwdc2025-337.html",
+        "bytes":  165355,
+        "sha256":  "100dbcdd3f8dc81d93ea7b353c443796e07c21d1ef20a63349b2ff20c5d546dd"
+    },
+    {
+        "readDate":  "2026-11-03",
+        "url":  "https://developer.apple.com/tutorials/data/documentation/technologyoverviews/annotating-sf-symbols.json",
+        "file":  "annotating-sf-symbols.json",
+        "bytes":  23296,
+        "sha256":  "fcc89437a7e031b1ca0279b61f1f63f2bca1256f6d8745e027e59b83b0708be8"
+    }
+]

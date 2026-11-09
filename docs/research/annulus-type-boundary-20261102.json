@@ -1,0 +1,668 @@
+{
+  "baseline": "3d59683295adf903a6aea32aafd36b0caa331526",
+  "sourceSha": "3a41fa2fa94f33d077623a3bf87751796fea7ca8",
+  "capturedAt": "2026-11-02T05:28:05.905Z",
+  "scope": "two families; actual declaration emit and public type consumers; no runtime/build/pack/browser/timing qualification",
+  "environment": {
+    "node": "v24.15.0",
+    "typescript": "7.0.2",
+    "platform": "win32",
+    "arch": "x64",
+    "gzip": {
+      "fflate": "0.8.3",
+      "level": 9,
+      "mtime": 0
+    },
+    "brotli": "1.2.0",
+    "quality": 11
+  },
+  "sourceDigests": {
+    "src/authoring/design-spec.ts": "b0ea97c846b8c1b1be52f95e356943f0f8572cb1477c24b52d2e0d8206272bde",
+    "src/authoring/index.ts": "848011af3d8e0127fca53f51aa4a3dc8d1c832708b9b3b47d6dbb0d659bb8c44",
+    "src/core/motion-sampler.d.ts": "73d1eff69ad352a409485fb5d89919602f3b9851bf6b3f22ca50294418b4ce67",
+    "src/ir/author-catalog.generated.ts": "63c7491482b4376d1ae1a2e908539f99d954dc42a1cfb9c34c420366b1755b08",
+    "src/ir/author-provenance.ts": "386c621980cd27b2af7b0e7b68e41d410709b193f0b9775ff32d89dd407f2b29",
+    "src/ir/author-source.ts": "8795b7f50ddc29a2b5a35eab9d2d0d0f9eca6487fe6849b1a8e98f92c20ec783",
+    "src/ir/authored-variation.ts": "fa357662b2274a967adcc3e74ad4d1aa36254ff77e10b3b79bd40f347f4534eb",
+    "src/ir/candidates.ts": "41fd4dc110907589e593a87c729dacf1832f214fa2eeb829ffcd5b722adcbbff",
+    "src/ir/catalog.generated.ts": "a24b90e9254e502d12c82621aa5b0f9c38458ccd982cb82b6dd3944035f3cd32",
+    "src/ir/compiler.ts": "935b7d97f7234eec7de38282191e297f7756fa9e0a4c049b0b962fc4c0b6eb7b",
+    "src/ir/contour-runtime.ts": "5d326970a78cf957aace57edb39c4b8e962841cf404a0741ed17e0ec6dc1e783",
+    "src/ir/glyph-types.ts": "f1ee5caa14988a20bb21b951f222c20f91d871ebc2560cbf55b5802f720a627c",
+    "src/ir/index.ts": "5ba9d404267f702a7834bad4a50d78f6d32262a1ac797ffa7d831c87ed7de300",
+    "src/ir/paint-types.ts": "715740773b7630db873e5c95a2695bfe9502c6859f50322617d3f9cd1539dc9b",
+    "src/ir/recipes.ts": "83c9bbef10a83f1529d704f2fdd809a20ee33f8d472fbed6dd48f3656081ccec",
+    "src/ir/render.ts": "6349e98adec26ae36b419b34dcaddd615aedecb21076c686085781958bc04978",
+    "src/ir/request.ts": "babec5f66357ebfd7ac8a6b42463f9f4ba06963f45d638cc5420b1a99b8e0695",
+    "src/ir/root-package.d.ts": "fa3b6436d61f39e89ad7c83a31d95c238d64adb1ffac840926c344d6a6922cad",
+    "src/ir/sha256.ts": "abe206e6ffda75406d724f292e361ebef7294798124884a77eb2c9301dd449e6",
+    "src/ir/svg-assembly.ts": "a5eaf1545492ac56a34792478365912880f8cd041aacce6d15da5d6eee8b82ae",
+    "src/ir/symbol-runtime.ts": "ee41926ebb04762b14fa55e4b8592345f9c308cd28a01e76c47ad5012494411d",
+    "src/lottie/runtime.ts": "c33a74108f49aefef05a82c15ffbe6ed2518138bf80b7d97df50984aaf32b0c1",
+    "src/lottie/types.ts": "857e7b76bafa0617c4d287a919b40f3eb6811b79d9032e70a325f9582ec50d49",
+    "src/motion/index.ts": "ab6283a7bbb5a2394f499fb2e9096e81b7912f3f1d7c41e02c1d5387509ae9b5",
+    "src/states/common-types.ts": "263dfde127bd844d99344ebc9c652d7eaf55cc2a2f4cb4a9595a7c7df1d5bf28",
+    "src/states/contour-types.ts": "9574b211b0f1d504aaa71f4004b5fe490cd0ba392ad9004f556d53969c255e6a",
+    "src/states/runtime.ts": "492d875d45515beaf0d673cffcd32fd36f20c5c897943b2b0f1d61e323dd5019",
+    "src/states/types.ts": "4d6b7bd8c6d955f4d818dae8725ef2c230f8e05d80b8a476508b1316cfe7aaaf",
+    "src/ir/author-annulus-types.ts": "9a77a33bf653286b23816664d4aca8eae68deee49f5613974db45c5b06436d92",
+    "scripts/lib/symbol-modules.js": "da3e7768575ea025d406e084a86d60f1fdad0a02eae7bf5d847f8a158c27270f"
+  },
+  "observations": {
+    "baseline": {
+      "artifacts": {
+        "ir/author-catalog.generated.d.ts": {
+          "bytes": 5072,
+          "gzipBytes": 1631,
+          "brotliBytes": 1359,
+          "sha256": "efe77421e2fbbc57f28e7e38b7a58b21f5734aac06ef6bbcd55a16ff049850ee"
+        },
+        "ir/author-provenance.d.ts": {
+          "bytes": 778,
+          "gzipBytes": 383,
+          "brotliBytes": 317,
+          "sha256": "d925ff8961a7b256fef6a900cbaefab50ddc2edc7225a8ff37212cb646e00e9f"
+        },
+        "ir/author-source.d.ts": {
+          "bytes": 1041,
+          "gzipBytes": 371,
+          "brotliBytes": 329,
+          "sha256": "3ffc27de0b7ba0ef51937ab0c3dbd80cb7e88170897543b397be14ad34bc145a"
+        },
+        "ir/authored-variation.d.ts": {
+          "bytes": 3174,
+          "gzipBytes": 1073,
+          "brotliBytes": 876,
+          "sha256": "db562685d816039583a457366c438cb4211130bec0c290c47adbd340bd888959"
+        },
+        "ir/catalog.generated.d.ts": {
+          "bytes": 3602,
+          "gzipBytes": 1407,
+          "brotliBytes": 1166,
+          "sha256": "1e1b742b925ca20a818554f5f5c13ea3084c957d265efdcee4c5a382860cba4c"
+        },
+        "ir/compiler.d.ts": {
+          "bytes": 10534,
+          "gzipBytes": 2782,
+          "brotliBytes": 2324,
+          "sha256": "0868575fd0a26469dc8326f7a0ff1a155d6cb339d485afbcffeb866112c842d4"
+        },
+        "ir/index.d.ts": {
+          "bytes": 4898,
+          "gzipBytes": 1495,
+          "brotliBytes": 1292,
+          "sha256": "204c08193b9e5b22a51d449d77f5c3d42ed52b9c6da34a8460a68c8f80371f3f"
+        },
+        "ir/recipes.d.ts": {
+          "bytes": 9239,
+          "gzipBytes": 2341,
+          "brotliBytes": 1991,
+          "sha256": "44be0b2a8347e3116b17ee83f801590d325e1d31b013b7a084d57b643cf3c94e"
+        },
+        "ir/request.d.ts": {
+          "bytes": 1020,
+          "gzipBytes": 574,
+          "brotliBytes": 415,
+          "sha256": "27b9e193e251151f8bca5487d2dfe8d154429bd85d460955b657de52d951f306"
+        },
+        "ir/sha256.d.ts": {
+          "bytes": 151,
+          "gzipBytes": 162,
+          "brotliBytes": 135,
+          "sha256": "43e8dc6a6ebf5c11f23e74993ef289557f8ab9947e0edeb7262fb245e06585fe"
+        },
+        "ir/svg-assembly.d.ts": {
+          "bytes": 755,
+          "gzipBytes": 390,
+          "brotliBytes": 290,
+          "sha256": "5c0cfe3afc627c9d4814cfe8ac9f3848584d16561b1e96eca61ee478fd27d0e7"
+        },
+        "ir/symbol-runtime.d.ts": {
+          "bytes": 112,
+          "gzipBytes": 103,
+          "brotliBytes": 92,
+          "sha256": "4c202ad85575498e7bd41af733607f86edc5035579f87bd55ae05ee1edf267e1"
+        },
+        "symbols/ellipse.d.ts": {
+          "bytes": 446,
+          "gzipBytes": 216,
+          "brotliBytes": 188,
+          "sha256": "b816940296977c40e50c0fc9e42a2c403ac5ce9de291d9dd0eefdd786c7e655e"
+        },
+        "symbols/ellipsis-horizontal.d.ts": {
+          "bytes": 470,
+          "gzipBytes": 224,
+          "brotliBytes": 165,
+          "sha256": "0fb415a720f2ee3c20bb9114f2dd16cabbfb6840182bf2c8429f413bd0d67111"
+        },
+        "variations/ellipsis-horizontal.d.ts": {
+          "bytes": 692,
+          "gzipBytes": 252,
+          "brotliBytes": 186,
+          "sha256": "2cc0ff36438ac81fca2c2a07a6d713da2495ca2026b59af41bf05f05b6e9ce81"
+        }
+      },
+      "closures": {
+        "source": {
+          "files": [
+            "ir/author-catalog.generated.d.ts",
+            "ir/author-provenance.d.ts",
+            "ir/author-source.d.ts",
+            "ir/authored-variation.d.ts",
+            "ir/catalog.generated.d.ts",
+            "ir/compiler.d.ts",
+            "ir/recipes.d.ts",
+            "ir/request.d.ts",
+            "symbols/ellipse.d.ts"
+          ],
+          "individuallyCompressedTotals": {
+            "bytes": 34906,
+            "gzipBytes": 10778,
+            "brotliBytes": 8965
+          },
+          "concatenated": {
+            "bytes": 34914,
+            "gzipBytes": 8801,
+            "brotliBytes": 7025,
+            "sha256": "35f1f868cd5210633fdde60fd36ef5e2b9715bbb25ec3bb546c5ff32e4583903"
+          }
+        },
+        "variation": {
+          "files": [
+            "ir/author-catalog.generated.d.ts",
+            "ir/author-provenance.d.ts",
+            "ir/author-source.d.ts",
+            "ir/authored-variation.d.ts",
+            "ir/catalog.generated.d.ts",
+            "ir/compiler.d.ts",
+            "ir/recipes.d.ts",
+            "ir/request.d.ts",
+            "variations/ellipsis-horizontal.d.ts"
+          ],
+          "individuallyCompressedTotals": {
+            "bytes": 35152,
+            "gzipBytes": 10814,
+            "brotliBytes": 8963
+          },
+          "concatenated": {
+            "bytes": 35160,
+            "gzipBytes": 8838,
+            "brotliBytes": 7093,
+            "sha256": "0e4354c191e4ac25e442cfc75d160faf64d64ae6653b37e41f7fa86a56ac8998"
+          }
+        },
+        "compiler": {
+          "files": [
+            "ir/author-catalog.generated.d.ts",
+            "ir/author-provenance.d.ts",
+            "ir/author-source.d.ts",
+            "ir/authored-variation.d.ts",
+            "ir/catalog.generated.d.ts",
+            "ir/compiler.d.ts",
+            "ir/index.d.ts",
+            "ir/recipes.d.ts",
+            "ir/request.d.ts"
+          ],
+          "individuallyCompressedTotals": {
+            "bytes": 39358,
+            "gzipBytes": 12057,
+            "brotliBytes": 10069
+          },
+          "concatenated": {
+            "bytes": 39366,
+            "gzipBytes": 9834,
+            "brotliBytes": 7803,
+            "sha256": "dc9e3af16986b71341163c731805da3689ed3993f81b672f5716a2cc4d02a64c"
+          }
+        },
+        "recipes": {
+          "files": [
+            "ir/recipes.d.ts"
+          ],
+          "individuallyCompressedTotals": {
+            "bytes": 9239,
+            "gzipBytes": 2341,
+            "brotliBytes": 1991
+          },
+          "concatenated": {
+            "bytes": 9239,
+            "gzipBytes": 2341,
+            "brotliBytes": 1991,
+            "sha256": "44be0b2a8347e3116b17ee83f801590d325e1d31b013b7a084d57b643cf3c94e"
+          }
+        },
+        "all": {
+          "files": [
+            "ir/author-catalog.generated.d.ts",
+            "ir/author-provenance.d.ts",
+            "ir/author-source.d.ts",
+            "ir/authored-variation.d.ts",
+            "ir/catalog.generated.d.ts",
+            "ir/compiler.d.ts",
+            "ir/index.d.ts",
+            "ir/recipes.d.ts",
+            "ir/request.d.ts",
+            "ir/sha256.d.ts",
+            "ir/svg-assembly.d.ts",
+            "ir/symbol-runtime.d.ts",
+            "symbols/ellipse.d.ts",
+            "symbols/ellipsis-horizontal.d.ts",
+            "variations/ellipsis-horizontal.d.ts"
+          ],
+          "individuallyCompressedTotals": {
+            "bytes": 41984,
+            "gzipBytes": 13404,
+            "brotliBytes": 11125
+          },
+          "concatenated": {
+            "bytes": 41998,
+            "gzipBytes": 10259,
+            "brotliBytes": 8147,
+            "sha256": "94ccd3085f638843d0295c3c07239edba2e7e39cd1e74c7446a4350c6123a37e"
+          }
+        }
+      },
+      "consumers": {
+        "Bundler": {
+          "positive": {
+            "codes": [],
+            "output": ""
+          },
+          "negative": {
+            "codes": [
+              2322,
+              2322,
+              2345,
+              2339,
+              2345,
+              2345
+            ],
+            "output": "consumer.ts(17,7): error TS2322: Type '\"authored-variation\" | \"source\"' is not assignable to type '\"source\"'.\n  Type '\"authored-variation\"' is not assignable to type '\"source\"'.\nconsumer.ts(18,7): error TS2322: Type '\"authored-variation\" | \"source\"' is not assignable to type '\"source\"'.\n  Type '\"authored-variation\"' is not assignable to type '\"source\"'.\nconsumer.ts(19,7): error TS2345: Argument of type 'AuthorVariationGlyphRequest' is not assignable to parameter of type 'AuthorSymbolGlyphRequest | undefined'.\n  Type 'AuthorVariationGlyphRequest' is not assignable to type 'AuthorSymbolGlyphRequest'.\n    Type 'AuthorVariationGlyphRequest' is not assignable to type 'Readonly<{ variation?: undefined; }>'.\n      Types of property 'variation' are incompatible.\n        Type 'AuthoredDotVariation | undefined' is not assignable to type 'undefined'.\n          Type 'AuthoredDotVariation' is not assignable to type 'undefined'.\nconsumer.ts(20,13): error TS2339: Property 'variation' does not exist on type 'AuthorSourceCapabilities<\"ellipse\">'.\nconsumer.ts(21,11): error TS2345: Argument of type 'AuthorVariationGlyphRequest' is not assignable to parameter of type 'AuthorSymbolGlyphRequest | undefined'.\n  Type 'AuthorVariationGlyphRequest' is not assignable to type 'AuthorSymbolGlyphRequest'.\n    Type 'AuthorVariationGlyphRequest' is not assignable to type 'Readonly<{ variation?: undefined; }>'.\n      Types of property 'variation' are incompatible.\n        Type 'AuthoredDotVariation | undefined' is not assignable to type 'undefined'.\n          Type 'AuthoredDotVariation' is not assignable to type 'undefined'.\nconsumer.ts(22,19): error TS2345: Argument of type '\"foreign\"' is not assignable to parameter of type 'IconVariant | undefined'.\n"
+          },
+          "augmentation": {
+            "codes": [],
+            "output": ""
+          },
+          "augmentationNegative": {
+            "codes": [
+              2322,
+              2322,
+              2322,
+              2322
+            ],
+            "output": "consumer.ts(20,7): error TS2322: Type '\"glyph\" | undefined' is not assignable to type '\"other\" | undefined'.\n  Type '\"glyph\"' is not assignable to type '\"other\"'.\nconsumer.ts(21,7): error TS2322: Type '\"caps\" | undefined' is not assignable to type '\"other\" | undefined'.\n  Type '\"caps\"' is not assignable to type '\"other\"'.\nconsumer.ts(22,7): error TS2322: Type '\"part\" | undefined' is not assignable to type '\"other\" | undefined'.\n  Type '\"part\"' is not assignable to type '\"other\"'.\nconsumer.ts(23,7): error TS2322: Type '\"point\" | undefined' is not assignable to type '\"other\" | undefined'.\n  Type '\"point\"' is not assignable to type '\"other\"'.\n"
+          }
+        },
+        "NodeNext": {
+          "positive": {
+            "codes": [],
+            "output": ""
+          },
+          "negative": {
+            "codes": [
+              2322,
+              2322,
+              2345,
+              2339,
+              2345,
+              2345
+            ],
+            "output": "consumer.ts(17,7): error TS2322: Type '\"authored-variation\" | \"source\"' is not assignable to type '\"source\"'.\n  Type '\"authored-variation\"' is not assignable to type '\"source\"'.\nconsumer.ts(18,7): error TS2322: Type '\"authored-variation\" | \"source\"' is not assignable to type '\"source\"'.\n  Type '\"authored-variation\"' is not assignable to type '\"source\"'.\nconsumer.ts(19,7): error TS2345: Argument of type 'AuthorVariationGlyphRequest' is not assignable to parameter of type 'AuthorSymbolGlyphRequest | undefined'.\n  Type 'AuthorVariationGlyphRequest' is not assignable to type 'AuthorSymbolGlyphRequest'.\n    Type 'AuthorVariationGlyphRequest' is not assignable to type 'Readonly<{ variation?: undefined; }>'.\n      Types of property 'variation' are incompatible.\n        Type 'AuthoredDotVariation | undefined' is not assignable to type 'undefined'.\n          Type 'AuthoredDotVariation' is not assignable to type 'undefined'.\nconsumer.ts(20,13): error TS2339: Property 'variation' does not exist on type 'AuthorSourceCapabilities<\"ellipse\">'.\nconsumer.ts(21,11): error TS2345: Argument of type 'AuthorVariationGlyphRequest' is not assignable to parameter of type 'AuthorSymbolGlyphRequest | undefined'.\n  Type 'AuthorVariationGlyphRequest' is not assignable to type 'AuthorSymbolGlyphRequest'.\n    Type 'AuthorVariationGlyphRequest' is not assignable to type 'Readonly<{ variation?: undefined; }>'.\n      Types of property 'variation' are incompatible.\n        Type 'AuthoredDotVariation | undefined' is not assignable to type 'undefined'.\n          Type 'AuthoredDotVariation' is not assignable to type 'undefined'.\nconsumer.ts(22,19): error TS2345: Argument of type '\"foreign\"' is not assignable to parameter of type 'IconVariant | undefined'.\n"
+          },
+          "augmentation": {
+            "codes": [],
+            "output": ""
+          },
+          "augmentationNegative": {
+            "codes": [
+              2322,
+              2322,
+              2322,
+              2322
+            ],
+            "output": "consumer.ts(20,7): error TS2322: Type '\"glyph\" | undefined' is not assignable to type '\"other\" | undefined'.\n  Type '\"glyph\"' is not assignable to type '\"other\"'.\nconsumer.ts(21,7): error TS2322: Type '\"caps\" | undefined' is not assignable to type '\"other\" | undefined'.\n  Type '\"caps\"' is not assignable to type '\"other\"'.\nconsumer.ts(22,7): error TS2322: Type '\"part\" | undefined' is not assignable to type '\"other\" | undefined'.\n  Type '\"part\"' is not assignable to type '\"other\"'.\nconsumer.ts(23,7): error TS2322: Type '\"point\" | undefined' is not assignable to type '\"other\" | undefined'.\n  Type '\"point\"' is not assignable to type '\"other\"'.\n"
+          }
+        }
+      },
+      "emitted": {
+        "ir/author-catalog.generated.d.ts": "/** GENERATED: конечные имена semantics/figma-baseline.json; geometry сюда не попадает. */\nexport type AuthorIconId = 'accessibility' | 'actions' | 'alert' | 'alert-circle' | 'align-bottom' | 'align-horizontal-center' | 'align-items-bottom' | 'align-items-horizontal-center' | 'align-items-left' | 'align-items-right' | 'align-items-top' | 'align-items-vertical-center' | 'align-left' | 'align-right' | 'align-top' | 'align-vertical-center' | 'aloof' | 'apps' | 'archive' | 'archive-close' | 'arrow-back' | 'arrow-back-circle' | 'arrow-down' | 'arrow-down-circle' | 'arrow-forward' | 'arrow-forward-circle' | 'arrow-redo' | 'arrow-redo-circle' | 'arrow-redo-curve' | 'arrow-undo' | 'arrow-undo-circle' | 'arrow-undo-curve' | 'arrow-up' | 'arrow-up-circle' | 'at' | 'attach' | 'bag' | 'bag-checkmark' | 'bag-close' | 'bag-minus' | 'bag-plus' | 'ban' | 'basket' | 'bill' | 'bin' | 'book' | 'bookmark' | 'bookmarks' | 'boolean' | 'brain' | 'branch' | 'branches' | 'brush' | 'bulb' | 'calendar' | 'calendar-clear' | 'calendar-number' | 'calendar-today' | 'camera' | 'camera-reverse' | 'cards' | 'caret-back' | 'caret-down' | 'caret-forward' | 'caret-up' | 'caret-vertical' | 'cart' | 'chart' | 'chart-area' | 'chart-area-panel' | 'chart-bars-horizontal' | 'chart-columns' | 'chart-combo' | 'chart-donut' | 'chart-flow' | 'chart-lines' | 'chart-metric' | 'chart-nodes' | 'chart-pie' | 'chart-treemap-horizontal' | 'chart-treemap-vertical' | 'chart-trend-up' | 'chatbubble' | 'chatbubble-ellipses' | 'chatbubbles' | 'checkmark' | 'checkmark-circle' | 'checkmarks' | 'checkmarks-circle' | 'cherries' | 'chevron-back' | 'chevron-back-circle' | 'chevron-down' | 'chevron-down-circle' | 'chevron-forward' | 'chevron-forward-circle' | 'chevron-up' | 'chevron-up-circle' | 'chevrons-down' | 'close' | 'close-circle' | 'close-octagon' | 'cloud' | 'cloud-checkmark' | 'cloud-download' | 'cloud-off' | 'cloud-upload' | 'code' | 'code-frame' | 'cog' | 'coin-dollar' | 'coin-ruble' | 'collapse-horizontal' | 'collapse-horizontal-line' | 'collapse-vertical' | 'collapse-vertical-line' | 'color-filter' | 'color-wand' | 'commit' | 'commits' | 'compas' | 'component' | 'computer' | 'connect' | 'connectors' | 'console' | 'contrast' | 'copy' | 'corners-in' | 'corners-out' | 'cursor' | 'cursor-click' | 'dashboard' | 'database' | 'database-export' | 'database-plus' | 'database-search' | 'database-settings' | 'dice' | 'download' | 'duplicate' | 'ear' | 'earth' | 'ellipse' | 'ellipsis-horizontal' | 'ellipsis-vertical' | 'enter' | 'exit' | 'expand-horizontal-line' | 'expand-vertical' | 'extension-puzzle' | 'eye' | 'eye-off' | 'eyedrop' | 'field-text' | 'file' | 'file-clear' | 'files' | 'filter' | 'fingerprint' | 'fire' | 'flash' | 'flash-off' | 'folder' | 'folder-open' | 'fork' | 'fullscreen-enter' | 'fullscreen-exit' | 'glasses' | 'globe' | 'golf' | 'group' | 'group-circle' | 'hand-point-down' | 'hand-point-left' | 'hand-point-right' | 'hand-point-up' | 'hand-two-fingers' | 'hard-drive' | 'hash' | 'headphone' | 'heart' | 'heart-off' | 'heart-pulse' | 'history' | 'home' | 'hourglass' | 'image' | 'images' | 'info' | 'info-circle' | 'invert' | 'justify-horizontal' | 'justify-items-horizontal' | 'justify-items-vertical' | 'justify-vertical' | 'key' | 'keyboard' | 'keys' | 'layers' | 'link' | 'link-horizontal' | 'link-horizontal-off' | 'list' | 'lock' | 'mail' | 'mail-open' | 'mail-unread' | 'mcp' | 'megaphone' | 'menu' | 'merge' | 'mic' | 'mic-circle' | 'mic-off' | 'minus' | 'minus-circle' | 'monitor-pulse' | 'moon' | 'moon-sparkles' | 'move' | 'musical-note' | 'musical-notes' | 'navigate' | 'notifications' | 'notifications-off' | 'notifications-unread' | 'options' | 'palette' | 'pause' | 'pause-circle' | 'paw' | 'pencil' | 'person' | 'person-circle' | 'person-minus' | 'person-plus' | 'phone' | 'pin' | 'pin-vertical' | 'pin-vertical-off' | 'place' | 'plane' | 'play' | 'play-back' | 'play-back-circle' | 'play-circle' | 'play-forward' | 'play-forward-circle' | 'play-skip-back' | 'play-skip-back-circle' | 'play-skip-forward' | 'play-skip-forward-circle' | 'plus' | 'plus-circle' | 'print' | 'priority' | 'pull-request' | 'push' | 'qr' | 'question' | 'question-circle' | 'radio' | 'refresh' | 'reload' | 'repeat' | 'resize' | 'revert' | 'rhomb' | 'rocket' | 'sad' | 'scan' | 'school' | 'search' | 'send' | 'server' | 'settings' | 'share' | 'share-display' | 'share-social' | 'shield' | 'shield-checkmark' | 'sidebar-collapsed' | 'sidebar-expanded' | 'signature' | 'smile' | 'sparkle' | 'sparkles' | 'speed' | 'square' | 'star' | 'stats' | 'steps' | 'stop' | 'stop-circle' | 'storefront' | 'sun' | 'sun-low' | 'swap-horizontal' | 'swap-vertical' | 'sync' | 'tablet-landscape' | 'tablet-portrait' | 'tag' | 'tag-dollar' | 'tag-ruble' | 'tags' | 'target' | 'text' | 'ticket' | 'time' | 'timer' | 'translate' | 'triangle' | 'trophy' | 'turn-off' | 'unlock' | 'upload' | 'video' | 'video-camera' | 'video-camera-off' | 'volume' | 'volume-high' | 'volume-low' | 'volume-middle' | 'volume-mute' | 'volume-muted' | 'wallet' | 'warning' | 'waveform';\n",
+        "ir/author-provenance.d.ts": "/** Привязка анатомии к мастеру; конструктивную модель или оси не удостоверяет. */\nexport interface AuthorAnatomyReceipt {\n    readonly version: 1;\n    readonly annotationSha256: string;\n    readonly masterSha256: string;\n    readonly pathFingerprintSha256: string;\n}\n/** Хеши относятся к закреплённым bytes/node/version, не к геометрической модели. */\nexport interface AuthorSourceProvenance {\n    readonly kind: 'figma';\n    readonly fileKey: string;\n    readonly version: string;\n    readonly nodeId: string;\n    readonly nodeSha256: string;\n    readonly masterSha256: string;\n    readonly normalizedSha256: string;\n    readonly pathFingerprintSha256: string;\n}\n",
+        "ir/author-source.d.ts": "import type { GlyphCapabilities, GlyphIR, GlyphRequest, SourceGlyphProvenance } from './compiler.js';\nimport type { AuthorIconId } from './author-catalog.generated.js';\nimport type { AuthorSourceProvenance } from './author-provenance.js';\nexport type { AuthorIconId } from './author-catalog.generated.js';\nexport type { AuthorAnatomyReceipt, AuthorSourceProvenance } from './author-provenance.js';\nexport type AuthorSymbolGlyphRequest = Omit<GlyphRequest<AuthorIconId>, 'icon'> & Readonly<{\n    variation?: never;\n}>;\nexport interface AuthorSourceGlyph<TIcon extends AuthorIconId = AuthorIconId> extends GlyphIR<TIcon> {\n    readonly provenance: SourceGlyphProvenance & Readonly<{\n        author: AuthorSourceProvenance;\n    }>;\n}\nexport interface AuthorSourceCapabilities<TIcon extends AuthorIconId = AuthorIconId> extends Omit<GlyphCapabilities<TIcon>, 'variation'> {\n    readonly modelState: null;\n    readonly supportedAxes: readonly [];\n    readonly axes: Readonly<Record<string, never>>;\n    readonly author: AuthorSourceProvenance;\n}\n",
+        "ir/authored-variation.d.ts": "import type { GlyphIR, SourcePartProvenance } from './compiler.js';\nimport type { AuthorSourceGlyph, AuthorSourceCapabilities, AuthorSymbolGlyphRequest } from './author-source.js';\nimport type { AuthorSourceProvenance, AuthorAnatomyReceipt } from './author-provenance.js';\nimport type { AuthorIconId } from './author-catalog.generated.js';\nexport interface AuthoredDotVariation {\n    readonly dotScale?: number;\n    readonly spacingScale?: number;\n}\nexport type AuthorVariationGlyphRequest = Omit<AuthorSymbolGlyphRequest, 'variation'> & Readonly<{\n    variation?: AuthoredDotVariation;\n}>;\nexport interface AuthorVariationReceipt {\n    readonly version: 1;\n    readonly law: 'dots.affine';\n    readonly geometrySha256: string;\n    readonly parameters: Readonly<{\n        dotScale: number;\n        spacingScale: number;\n    }>;\n}\nexport interface AuthorVariationProvenance {\n    readonly kind: 'authored-variation';\n    readonly file: string;\n    readonly author: AuthorSourceProvenance;\n    readonly anatomy: AuthorAnatomyReceipt;\n    readonly variation: AuthorVariationReceipt;\n}\nexport interface AuthorVariationPartProvenance {\n    readonly kind: 'authored-variation';\n    readonly identity: 'declared';\n    readonly source: SourcePartProvenance;\n    readonly variation: AuthorVariationReceipt;\n    readonly artifactFingerprint: `sha256:${string}`;\n}\nexport interface AuthoredVariationDomain {\n    readonly kind: 'convex-linear';\n    readonly bound: 'control-hull';\n    readonly positive: readonly ['dotScale', 'spacingScale'];\n    /** a*dotScale + b*spacingScale >= minimum; положительность проверяется отдельно. */\n    readonly constraints: readonly Readonly<{\n        kind: 'margin' | 'gap';\n        dotScale: number;\n        spacingScale: number;\n        minimum: number;\n    }>[];\n    readonly policy: Readonly<{\n        gridVersion: number;\n        gridSha256: string;\n        marginRatio: number;\n        minimumGapRatio: number;\n    }>;\n}\nexport interface AuthorVariationCapability {\n    readonly version: 1;\n    readonly law: 'dots.affine';\n    readonly geometrySha256: string;\n    readonly defaults: Readonly<{\n        dotScale: 1;\n        spacingScale: 1;\n    }>;\n    readonly domain: AuthoredVariationDomain;\n    readonly targets: Readonly<{\n        svg: 'supported';\n        webEffect: 'existing-part-gestures';\n        lottie: 'not-exported';\n        sfSymbols: 'not-exported';\n    }>;\n}\nexport interface AuthorVariationGlyph<TIcon extends AuthorIconId = AuthorIconId> extends GlyphIR<TIcon> {\n    readonly provenance: AuthorSourceGlyph<TIcon>['provenance'] | AuthorVariationProvenance;\n}\nexport interface AuthorVariationCapabilities<TIcon extends AuthorIconId = AuthorIconId> extends AuthorSourceCapabilities<TIcon> {\n    readonly variation: AuthorVariationCapability;\n}\n/** Машинный код не зависит от текста ошибки. */\nexport declare class AuthoredVariationError extends RangeError {\n    readonly code: 'INVALID_VARIATION' | 'VARIATION_OUTSIDE_DOMAIN' | 'VARIATION_UNREPRESENTABLE' | 'VARIATION_SOURCE_MISMATCH';\n    constructor(code: AuthoredVariationError['code'], message: string);\n}\n",
+        "ir/catalog.generated.d.ts": "/**\n * Компактная type-level проекция semantics/catalog.json.\n * Runtime всё равно использует полный канонический каталог; этот список не\n * дублирует геометрию, а не даёт генератору .d.ts раскрыть весь JSON на сотни КБ.\n */\nexport declare const ICON_IDS: readonly ['accessibility', 'actions', 'alert', 'alert-circle', 'aloof', 'apps', 'archive', 'archive-close', 'arrow-back', 'arrow-back-circle', 'arrow-down', 'arrow-down-circle', 'arrow-forward', 'arrow-forward-circle', 'arrow-redo', 'arrow-redo-circle', 'arrow-undo', 'arrow-undo-circle', 'arrow-up', 'arrow-up-circle', 'attach', 'bag', 'bag-checkmark', 'bag-close', 'bag-minus', 'bag-plus', 'ban', 'bill', 'bin', 'book', 'bookmark', 'bookmarks', 'boolean', 'brain', 'branch', 'branches', 'brush', 'bulb', 'calendar', 'calendar-clear', 'calendar-number', 'calendar-today', 'camera', 'camera-reverse', 'cart', 'chart', 'chatbubble', 'chatbubble-ellipses', 'chatbubbles', 'checkmark', 'checkmark-circle', 'checkmarks', 'checkmarks-circle', 'chevron-back', 'chevron-back-circle', 'chevron-down', 'chevron-down-circle', 'chevron-forward', 'chevron-forward-circle', 'chevron-up', 'chevron-up-circle', 'close', 'close-circle', 'cloud', 'cloud-checkmark', 'cloud-download', 'cloud-off', 'cloud-upload', 'cog', 'color-filter', 'color-wand', 'commit', 'commits', 'compas', 'component', 'connect', 'console', 'contrast', 'copy', 'database', 'dice', 'download', 'duplicate', 'ear', 'earth', 'ellipse', 'ellipsis-horizontal', 'ellipsis-vertical', 'enter', 'exit', 'extension-puzzle', 'eye', 'eye-off', 'eyedrop', 'file', 'file-clear', 'files', 'filter', 'fire', 'flash', 'flash-off', 'folder', 'fork', 'glasses', 'globe', 'golf', 'group', 'group-circle', 'hash', 'headphone', 'heart', 'heart-off', 'history', 'home', 'hourglass', 'image', 'images', 'info', 'info-circle', 'invert', 'key', 'layers', 'link', 'link-horizontal', 'link-horizontal-off', 'list', 'lock', 'mail', 'mail-open', 'mail-unread', 'mcp', 'megaphone', 'menu', 'merge', 'mic', 'mic-circle', 'mic-off', 'minus', 'minus-circle', 'moon', 'moon-sparkles', 'move', 'musical-note', 'musical-notes', 'navigate', 'notifications', 'notifications-off', 'notifications-unread', 'options', 'palette', 'pause', 'pause-circle', 'paw', 'pencil', 'person', 'person-circle', 'person-minus', 'person-plus', 'phone', 'pin', 'place', 'plane', 'play', 'play-back', 'play-back-circle', 'play-circle', 'play-forward', 'play-forward-circle', 'play-skip-back', 'play-skip-back-circle', 'play-skip-forward', 'play-skip-forward-circle', 'plus', 'plus-circle', 'print', 'priority', 'pull-request', 'push', 'qr', 'question', 'question-circle', 'radio', 'refresh', 'reload', 'repeat', 'resize', 'revert', 'rhomb', 'rocket', 'sad', 'scan', 'school', 'search', 'send', 'settings', 'share', 'share-display', 'share-social', 'shield', 'shield-checkmark', 'signature', 'smile', 'sparkle', 'sparkles', 'speed', 'square', 'star', 'stats', 'steps', 'sun', 'sun-low', 'swap-horizontal', 'swap-vertical', 'sync', 'tablet-landscape', 'tablet-portrait', 'tag', 'text', 'ticket', 'time', 'timer', 'translate', 'triangle', 'trophy', 'turn-off', 'unlock', 'upload', 'video', 'video-camera', 'video-camera-off', 'volume', 'volume-high', 'volume-low', 'volume-middle', 'volume-mute', 'volume-muted', 'wallet', 'warning'];\nexport type CatalogIconId = (typeof ICON_IDS)[number];\nexport declare const AXIS_NAMES: readonly ['corner', 'opsz', 'weight'];\nexport type CatalogAxisName = (typeof AXIS_NAMES)[number];\n",
+        "ir/compiler.d.ts": "/**\n * Публичный Glyph IR: строгая граница между точным SVG-источником и\n * доказанной параметрической моделью. Модуль не читает файлы, часы и DOM:\n * все данные попадают в браузер как статические импорты сборщика.\n */\nimport { type CatalogAxisName, type CatalogIconId } from './catalog.generated.js';\nimport { type CalendarNumberInput, type RecipeFillPaint, type RecipeStrokePaint } from './recipes.js';\nimport type { AuthorAnatomyReceipt, AuthorSourceProvenance } from './author-provenance.js';\nimport type { AuthorVariationCapability, AuthorVariationPartProvenance, AuthorVariationProvenance } from './authored-variation.js';\nexport { GlyphModelError } from './request.js';\nexport type { GlyphModelErrorCode } from './request.js';\nexport type IconId = CatalogIconId;\nexport type AxisName = CatalogAxisName;\nexport type IconVariant = 'outline' | 'filled';\nexport type ModelMode = 'accepted-only' | 'allow-candidate' | 'source-only';\nexport type ModelState = 'accepted' | 'candidate';\nexport type FillRule = 'nonzero' | 'evenodd';\nexport type PartRole = 'body' | 'content' | 'ink' | 'counter' | 'container' | 'control' | 'detail' | 'decorator' | 'unclassified';\nexport interface GlyphRequest<TIcon extends string = IconId> {\n    readonly icon: TIcon;\n    readonly variant?: IconVariant;\n    readonly modelMode?: ModelMode;\n    readonly axes?: Readonly<Partial<Record<AxisName, number>>>;\n}\nexport interface ParsedGlyphRequest<TIcon extends string = IconId> {\n    readonly icon: TIcon;\n    readonly variant: IconVariant;\n    readonly modelMode: ModelMode;\n    readonly axes: Readonly<Partial<Record<AxisName, number>>>;\n}\nexport interface SourcePartProvenance {\n    readonly kind: 'source';\n    readonly identity: 'geometry-derived' | 'declared';\n    readonly file: string;\n    /** Fingerprint авторского source-path до build-оптимизации. */\n    readonly sourceFingerprint: `sha256:${string}`;\n    /** Fingerprint реально установленного root export после deterministic SVGO. */\n    readonly artifactFingerprint: `sha256:${string}`;\n}\nexport interface ModelPartProvenance {\n    readonly kind: 'model';\n    readonly identity: 'declared';\n    readonly declaration: IconId;\n    readonly state: ModelState;\n}\nexport interface RecipePartProvenance {\n    readonly kind: 'recipe';\n    readonly identity: 'declared';\n    readonly recipe: string;\n    readonly sourceDependency?: IconId;\n}\nexport type PartProvenance = SourcePartProvenance | ModelPartProvenance | RecipePartProvenance | AuthorVariationPartProvenance;\nexport interface GlyphPart {\n    readonly id: string;\n    readonly role: PartRole;\n    readonly zIndex: number;\n    readonly d: string;\n    /** null означает: часть имеет смысл только внутри GlyphIR.composition. */\n    readonly fillRule: FillRule | null;\n    readonly paint: RecipeFillPaint | RecipeStrokePaint;\n    /** Нормализованный якорь в долях viewBox, а не экранные пиксели. */\n    readonly anchor: readonly [number, number];\n    readonly anchorSource: 'declared' | 'geometry-bbox-center';\n    readonly topologySignature: string;\n    readonly morphGroup: string | null;\n    readonly provenance: PartProvenance;\n}\nexport interface SourceGlyphProvenance {\n    readonly kind: 'source';\n    readonly file: string;\n    readonly author?: AuthorSourceProvenance;\n    readonly anatomy?: AuthorAnatomyReceipt;\n}\nexport interface ModelGlyphProvenance {\n    readonly kind: 'model';\n    readonly declaration: IconId;\n    readonly archetype: string;\n    readonly state: ModelState;\n    /** Эффективные значения только реально поддержанных моделью осей. */\n    readonly axes: Readonly<Partial<Record<AxisName, number>>>;\n}\nexport interface RecipeGlyphProvenance {\n    readonly kind: 'recipe';\n    readonly recipe: string;\n    readonly state: 'candidate';\n    readonly sourceDependencies: readonly IconId[];\n    readonly axes: Readonly<{\n        opsz: number;\n    }>;\n    readonly context: Readonly<{\n        day: number;\n        epochMilliseconds: number;\n        timeZone: string;\n    }>;\n}\nexport interface DesignSpecGlyphProvenance {\n    readonly kind: 'design-spec';\n    readonly specVersion: 1;\n    readonly specSha256: `sha256:${string}`;\n    readonly state: 'candidate';\n}\nexport type GlyphProvenance = SourceGlyphProvenance | ModelGlyphProvenance | RecipeGlyphProvenance | DesignSpecGlyphProvenance | AuthorVariationProvenance;\nexport interface GlyphIR<TIcon extends string = IconId> {\n    readonly icon: TIcon;\n    readonly variant: IconVariant;\n    readonly viewBox: readonly [number, number, number, number];\n    readonly parts: readonly GlyphPart[];\n    /** Удобная сборка геометрии; способ paint задаёт composition, не порядок parts. */\n    readonly d: string;\n    readonly svg: string;\n    readonly composition: GlyphComposition;\n    readonly provenance: GlyphProvenance;\n}\nexport type GlyphComposition = Readonly<{\n    kind: 'layers';\n}> | Readonly<{\n    kind: 'compound';\n    fillRule: FillRule;\n}> | Readonly<{\n    kind: 'mask-subtract';\n    basePartIds: readonly string[];\n    subtractPartIds: readonly string[];\n}>;\nexport interface GlyphCapabilities<TIcon extends string = IconId> {\n    readonly icon: TIcon;\n    readonly variant: IconVariant;\n    readonly modelState: ModelState | null;\n    readonly supportedAxes: readonly AxisName[];\n    readonly axes: Readonly<Partial<Record<AxisName, AxisContract>>>;\n    readonly motion: MotionCapabilities;\n    readonly author?: AuthorSourceProvenance;\n    readonly anatomy?: AuthorAnatomyReceipt;\n    readonly variation?: AuthorVariationCapability;\n}\nexport interface AxisContract {\n    readonly kind: 'continuous';\n    readonly min: number;\n    readonly default: number;\n    readonly max: number;\n    readonly lifecycle: string;\n}\nexport type MotionCapabilityState = 'source-only' | 'candidate' | 'semantic-parts' | 'anchored-parts' | 'gesture-ready';\nexport interface MotionGestureRotationTrackContract {\n    readonly partId: string;\n    readonly kind: 'rotate';\n    readonly anchor: readonly [number, number];\n    readonly from: number;\n    readonly to: number;\n    readonly unit: 'degrees';\n    readonly interpolation: 'linear';\n}\nexport interface MotionGestureOpacityTrackContract {\n    readonly partId: string;\n    readonly kind: 'opacity';\n    readonly unit: 'fraction';\n    readonly interpolation: 'linear';\n    readonly stops: readonly Readonly<{\n        at: number;\n        value: number;\n    }>[];\n}\nexport interface MotionGestureTranslationTrackContract {\n    readonly partId: string;\n    readonly kind: 'translate';\n    readonly axis: 'x' | 'y';\n    readonly unit: 'viewBox';\n    readonly interpolation: 'linear';\n    readonly stops: readonly Readonly<{\n        at: number;\n        value: number;\n    }>[];\n}\nexport type MotionGestureTrackContract = MotionGestureRotationTrackContract | MotionGestureOpacityTrackContract | MotionGestureTranslationTrackContract;\nexport interface MotionGestureContract {\n    readonly id: string;\n    readonly kind: string;\n    readonly partIds: readonly string[];\n    readonly meaning: string;\n    readonly progress: 'normalized-0-to-1';\n    /** Поза неподвижного мастера; отсутствие сохраняет прежний прогресс 0. */\n    readonly restProgress?: number;\n    readonly tracks: readonly MotionGestureTrackContract[];\n}\nexport interface MotionGestureRotationSample {\n    readonly partId: string;\n    readonly kind: 'rotate';\n    readonly anchor: readonly [number, number];\n    readonly rotation: number;\n}\nexport type MotionGestureSample = MotionGestureRotationSample | Readonly<{\n    partId: string;\n    kind: 'opacity';\n    opacity: number;\n}> | Readonly<{\n    partId: string;\n    kind: 'translate';\n    axis: 'x' | 'y';\n    unit: 'viewBox';\n    translation: number;\n}>;\nexport interface MotionRotationTrackContract {\n    readonly id: string;\n    readonly kind: 'rotate';\n    readonly partIds: readonly string[];\n    readonly anchor: readonly [number, number];\n}\nexport type MotionTrackContract = MotionRotationTrackContract | Readonly<{\n    id: string;\n    kind: 'opacity';\n    partIds: readonly string[];\n}> | Readonly<{\n    id: string;\n    kind: 'translate';\n    partIds: readonly string[];\n    axis: 'x' | 'y';\n    unit: 'viewBox';\n}>;\nexport interface MotionCapabilities {\n    readonly state: MotionCapabilityState;\n    readonly partIds: readonly string[];\n    readonly tracks: readonly MotionTrackContract[];\n    readonly gestures: readonly MotionGestureContract[];\n    readonly adapters: Readonly<{\n        readonly lottie: 'not-exported' | 'lottie-web-svg-5.13';\n        readonly sfSymbols: 'not-exported';\n    }>;\n}\nexport declare function sampleMotionGesture(gesture: MotionGestureContract, progress: number): readonly MotionGestureSample[];\nexport interface IconDesignContract {\n    readonly version: 1;\n    readonly canvas: Readonly<{\n        readonly viewBox: readonly [number, number, number, number];\n        readonly declarationUnits: 'fraction-of-canvas';\n    }>;\n    readonly variants: readonly IconVariant[];\n    readonly source: Readonly<{\n        readonly paint: 'currentColor';\n        readonly geometry: 'path-only';\n        readonly intake: 'figma-import';\n    }>;\n    readonly constraints: Readonly<{\n        readonly margin: number;\n        readonly clearanceMin: number;\n        readonly opticalCenterBias: number;\n        readonly angleScale: readonly number[];\n    }>;\n    readonly axes: Readonly<Record<AxisName, AxisContract>>;\n    readonly lifecycle: Readonly<{\n        readonly sourceOnly: 'exact-source-fallback';\n        readonly candidate: 'research-only';\n        readonly accepted: 'public-after-proof';\n    }>;\n    readonly targets: Readonly<{\n        readonly staticSvg: 'supported';\n        readonly glyphIr: 'supported';\n        readonly lottie: 'not-exported';\n        readonly sfSymbols: 'not-exported';\n    }>;\n    readonly agent: Readonly<{\n        readonly proposalCommand: 'pnpm validate:proposal';\n        readonly promotionCommand: 'pnpm import:figma --write';\n        readonly finalGate: 'pnpm verify';\n    }>;\n}\nexport interface CalendarNumberGlyphInput extends Omit<CalendarNumberInput, 'aperture'> {\n    readonly variant?: IconVariant;\n}\n",
+        "ir/index.d.ts": "export { GlyphModelError, sampleMotionGesture } from './compiler.js';\nexport type { IconId, AxisName, IconVariant, ModelMode, ModelState, FillRule, PartRole, GlyphRequest, ParsedGlyphRequest, SourcePartProvenance, ModelPartProvenance, RecipePartProvenance, PartProvenance, GlyphPart, SourceGlyphProvenance, ModelGlyphProvenance, RecipeGlyphProvenance, GlyphProvenance, GlyphIR, GlyphComposition, GlyphCapabilities, AxisContract, MotionCapabilityState, MotionGestureTrackContract, MotionGestureContract, MotionGestureSample, MotionTrackContract, MotionCapabilities, IconDesignContract, GlyphModelErrorCode, CalendarNumberGlyphInput } from './compiler.js';\nexport declare const glyph: (request: import(\"./compiler.js\").GlyphRequest) => import(\"./compiler.js\").GlyphIR;\nexport declare const glyphCapabilities: (iconValue: unknown, variantValue?: unknown) => import(\"./compiler.js\").GlyphCapabilities;\nexport declare const parseGlyphRequest: (value: unknown) => import(\"./compiler.js\").ParsedGlyphRequest;\nexport declare const parseIconId: (value: unknown) => import(\"./compiler.js\").IconId;\nexport declare const isIconId: (value: unknown) => value is import(\"./compiler.js\").IconId;\nexport declare const calendarNumberGlyph: (input: import(\"./compiler.js\").CalendarNumberGlyphInput) => import(\"./compiler.js\").GlyphIR;\nexport declare const iconIds: readonly (\"accessibility\" | \"actions\" | \"alert\" | \"alert-circle\" | \"aloof\" | \"apps\" | \"archive\" | \"archive-close\" | \"arrow-back\" | \"arrow-back-circle\" | \"arrow-down\" | \"arrow-down-circle\" | \"arrow-forward\" | \"arrow-forward-circle\" | \"arrow-redo\" | \"arrow-redo-circle\" | \"arrow-undo\" | \"arrow-undo-circle\" | \"arrow-up\" | \"arrow-up-circle\" | \"attach\" | \"bag\" | \"bag-checkmark\" | \"bag-close\" | \"bag-minus\" | \"bag-plus\" | \"ban\" | \"bill\" | \"bin\" | \"book\" | \"bookmark\" | \"bookmarks\" | \"boolean\" | \"brain\" | \"branch\" | \"branches\" | \"brush\" | \"bulb\" | \"calendar\" | \"calendar-clear\" | \"calendar-number\" | \"calendar-today\" | \"camera\" | \"camera-reverse\" | \"cart\" | \"chart\" | \"chatbubble\" | \"chatbubble-ellipses\" | \"chatbubbles\" | \"checkmark\" | \"checkmark-circle\" | \"checkmarks\" | \"checkmarks-circle\" | \"chevron-back\" | \"chevron-back-circle\" | \"chevron-down\" | \"chevron-down-circle\" | \"chevron-forward\" | \"chevron-forward-circle\" | \"chevron-up\" | \"chevron-up-circle\" | \"close\" | \"close-circle\" | \"cloud\" | \"cloud-checkmark\" | \"cloud-download\" | \"cloud-off\" | \"cloud-upload\" | \"cog\" | \"color-filter\" | \"color-wand\" | \"commit\" | \"commits\" | \"compas\" | \"component\" | \"connect\" | \"console\" | \"contrast\" | \"copy\" | \"database\" | \"dice\" | \"download\" | \"duplicate\" | \"ear\" | \"earth\" | \"ellipse\" | \"ellipsis-horizontal\" | \"ellipsis-vertical\" | \"enter\" | \"exit\" | \"extension-puzzle\" | \"eye\" | \"eye-off\" | \"eyedrop\" | \"file\" | \"file-clear\" | \"files\" | \"filter\" | \"fire\" | \"flash\" | \"flash-off\" | \"folder\" | \"fork\" | \"glasses\" | \"globe\" | \"golf\" | \"group\" | \"group-circle\" | \"hash\" | \"headphone\" | \"heart\" | \"heart-off\" | \"history\" | \"home\" | \"hourglass\" | \"image\" | \"images\" | \"info\" | \"info-circle\" | \"invert\" | \"key\" | \"layers\" | \"link\" | \"link-horizontal\" | \"link-horizontal-off\" | \"list\" | \"lock\" | \"mail\" | \"mail-open\" | \"mail-unread\" | \"mcp\" | \"megaphone\" | \"menu\" | \"merge\" | \"mic\" | \"mic-circle\" | \"mic-off\" | \"minus\" | \"minus-circle\" | \"moon\" | \"moon-sparkles\" | \"move\" | \"musical-note\" | \"musical-notes\" | \"navigate\" | \"notifications\" | \"notifications-off\" | \"notifications-unread\" | \"options\" | \"palette\" | \"pause\" | \"pause-circle\" | \"paw\" | \"pencil\" | \"person\" | \"person-circle\" | \"person-minus\" | \"person-plus\" | \"phone\" | \"pin\" | \"place\" | \"plane\" | \"play\" | \"play-back\" | \"play-back-circle\" | \"play-circle\" | \"play-forward\" | \"play-forward-circle\" | \"play-skip-back\" | \"play-skip-back-circle\" | \"play-skip-forward\" | \"play-skip-forward-circle\" | \"plus\" | \"plus-circle\" | \"print\" | \"priority\" | \"pull-request\" | \"push\" | \"qr\" | \"question\" | \"question-circle\" | \"radio\" | \"refresh\" | \"reload\" | \"repeat\" | \"resize\" | \"revert\" | \"rhomb\" | \"rocket\" | \"sad\" | \"scan\" | \"school\" | \"search\" | \"send\" | \"settings\" | \"share\" | \"share-display\" | \"share-social\" | \"shield\" | \"shield-checkmark\" | \"signature\" | \"smile\" | \"sparkle\" | \"sparkles\" | \"speed\" | \"square\" | \"star\" | \"stats\" | \"steps\" | \"sun\" | \"sun-low\" | \"swap-horizontal\" | \"swap-vertical\" | \"sync\" | \"tablet-landscape\" | \"tablet-portrait\" | \"tag\" | \"text\" | \"ticket\" | \"time\" | \"timer\" | \"translate\" | \"triangle\" | \"trophy\" | \"turn-off\" | \"unlock\" | \"upload\" | \"video\" | \"video-camera\" | \"video-camera-off\" | \"volume\" | \"volume-high\" | \"volume-low\" | \"volume-middle\" | \"volume-mute\" | \"volume-muted\" | \"wallet\" | \"warning\")[];\nexport declare const axisNames: readonly (\"corner\" | \"opsz\" | \"weight\")[];\nexport declare const axisContracts: Readonly<Record<\"corner\" | \"opsz\" | \"weight\", import(\"./compiler.js\").AxisContract>>;\nexport declare const iconDesignContract: import(\"./compiler.js\").IconDesignContract;\n",
+        "ir/recipes.d.ts": "/**\n * Публичные recipe-kernels. Их path — редактируемая centerline/primitive\n * геометрия; target compiler обязан expand stroke перед font/filled-SVG export.\n */\nexport interface NormalizedPoint {\n    readonly x: number;\n    readonly y: number;\n}\nexport interface NormalizedBBox extends NormalizedPoint {\n    readonly width: number;\n    readonly height: number;\n}\nexport interface ViewBoxBBox {\n    readonly x: number;\n    readonly y: number;\n    readonly width: number;\n    readonly height: number;\n}\nexport interface RecipePathGeometry {\n    readonly kind: 'path';\n    readonly d: string;\n}\nexport interface RecipeStrokePaint {\n    readonly kind: 'stroke';\n    readonly fill: 'none';\n    readonly stroke: 'currentColor';\n    readonly strokeWidth: number;\n    readonly linecap: 'round' | 'butt';\n    readonly linejoin: 'round';\n}\nexport interface RecipeFillPaint {\n    readonly kind: 'fill';\n    readonly fill: 'currentColor';\n}\nexport interface RecipePart {\n    readonly id: string;\n    readonly role: string;\n    readonly geometry: RecipePathGeometry;\n    readonly paint: RecipeStrokePaint | RecipeFillPaint;\n    readonly bbox: Readonly<{\n        minX: number;\n        minY: number;\n        maxX: number;\n        maxY: number;\n    }>;\n    readonly topologySignature: string;\n    readonly angle?: number;\n    readonly weld?: Readonly<{\n        to: string;\n        at: NormalizedPoint;\n    }>;\n}\nexport interface RecipeJoin {\n    readonly id: string;\n    readonly at: NormalizedPoint;\n    readonly members: readonly string[];\n    readonly lowering: 'expand-strokes-then-union';\n}\nexport type NegativeSpaceKind = 'exterior-margin' | 'aperture' | 'gap' | 'knockout';\nexport type NegativeSpaceMeasurementMethod = 'ink-bounds-to-canvas' | 'polyline-endpoint-distance-minus-stroke' | 'radial-farthest-corner-to-inner-stroke' | 'concentric-stroke-half-width-difference' | 'corner-to-ellipse-radial-distance' | 'radial-centerline-to-body-minus-half-stroke' | 'adjacent-inner-endpoint-chord-minus-stroke' | 'axis-aligned-group-bounds-separation' | 'horizontal-ink-bounds-separation';\n/**\n * Успешный proof без boolean verdict: если measured ниже requiredMinimum,\n * recipe не возвращается и построение завершается RangeError.\n */\nexport interface NegativeSpaceConstraint {\n    readonly unit: 'normalized-canvas';\n    readonly kind: NegativeSpaceKind;\n    readonly requiredMinimum: number;\n    readonly measured: number;\n    readonly measurementMethod: NegativeSpaceMeasurementMethod;\n    readonly participants: readonly string[];\n}\nexport interface NegativeSpaceContract {\n    readonly constraints: readonly NegativeSpaceConstraint[];\n}\nexport interface RecipeResult {\n    readonly kind: string;\n    readonly canvas: Readonly<NormalizedBBox>;\n    readonly parts: readonly RecipePart[];\n    readonly negativeSpace: NegativeSpaceContract;\n    readonly metrics?: Readonly<Record<string, unknown>>;\n    readonly topologyKey?: string;\n    readonly joins?: readonly RecipeJoin[];\n}\nexport interface OpticalOptions {\n    readonly opsz?: number;\n}\nexport interface OpticalLimits {\n    readonly opsz: number;\n    readonly minStroke: number;\n    readonly minClearance: number;\n    readonly minDetail: number;\n    readonly raster: Readonly<{\n        strokePixels: number;\n        clearancePixels: number;\n        detailPixels: number;\n    }>;\n}\nexport interface DirectionalOptions extends OpticalOptions {\n    readonly orientation?: 'up' | 'down' | 'back' | 'forward';\n    readonly center?: NormalizedPoint;\n    readonly margin?: number;\n    readonly weight?: number;\n    readonly clearance?: number;\n    readonly headLength?: number;\n    readonly headSpan?: number;\n}\nexport interface DirectionalArrowOptions extends DirectionalOptions {\n    readonly shaftLength?: number;\n}\nexport interface EnclosureOptions extends OpticalOptions {\n    readonly contentKeyline: NormalizedBBox;\n    readonly weight?: number;\n    readonly clearance?: number;\n    readonly margin?: number;\n}\nexport interface StrikeOptions extends OpticalOptions {\n    readonly targetBBox: NormalizedBBox;\n    readonly weight?: number;\n    readonly clearance?: number;\n    readonly margin?: number;\n    readonly overshoot?: number;\n    readonly angle?: number;\n}\nexport interface NotificationBadgeOptions extends OpticalOptions {\n    readonly targetBBox: NormalizedBBox;\n    readonly clearance?: number;\n    readonly radius?: number;\n    readonly margin?: number;\n}\nexport interface RadialRaysOptions extends OpticalOptions {\n    readonly weight?: number;\n    readonly clearance?: number;\n    readonly margin?: number;\n    readonly center?: NormalizedPoint;\n    readonly bodyRadius?: number;\n    /** Дискретная topology: 4..16. */\n    readonly count?: number;\n    /** Непрерывная координата sun-low→sun: 0..1. */\n    readonly length?: number;\n    readonly rotation?: number;\n}\nexport interface MusicalNoteOptions extends OpticalOptions {\n    readonly id?: string;\n    readonly weight?: number;\n    readonly margin?: number;\n    readonly headCenter?: NormalizedPoint;\n    readonly headRadiusX?: number;\n    readonly headRadiusY?: number;\n    readonly headAngle?: number;\n    readonly stemDirection?: 'up' | 'down';\n    readonly stemLength?: number;\n    readonly flag?: boolean;\n}\nexport interface MusicalNotesItem extends MusicalNoteOptions {\n    readonly id: string;\n}\nexport interface MusicalNotesOptions extends Omit<MusicalNoteOptions, 'id' | 'headCenter' | 'flag'> {\n    readonly notes: readonly MusicalNotesItem[];\n    readonly beam?: boolean;\n    readonly beamThickness?: number;\n}\nexport declare const glyphOpszRange: Readonly<{\n    min: 16;\n    default: 24;\n    max: 48;\n}>;\nexport declare const glyphRasterPolicy: Readonly<Record<string, unknown>>;\nexport declare const glyphOperatorTokens: Readonly<Record<string, unknown>>;\nexport declare const opticalLimits: (options?: OpticalOptions) => OpticalLimits;\nexport declare const buildDirectionalChevron: (options?: DirectionalOptions) => RecipeResult;\nexport declare const buildDirectionalArrow: (options?: DirectionalArrowOptions) => RecipeResult;\nexport declare const decorateCircleEnclosure: (options: EnclosureOptions) => RecipeResult;\nexport declare const decorateStrike: (options: StrikeOptions) => RecipeResult & Readonly<{\n    masks: readonly unknown[];\n    compositionOrder: readonly string[];\n}>;\nexport declare const placeNotificationBadge: (options: NotificationBadgeOptions) => RecipeResult;\nexport declare const generateRadialRays: (options?: RadialRaysOptions) => RecipeResult;\nexport declare const buildMusicalNote: (options?: MusicalNoteOptions) => RecipeResult;\nexport declare const buildMusicalNotes: (options: MusicalNotesOptions) => RecipeResult;\nexport type CalendarPrimitive = Readonly<{\n    kind: 'move' | 'line';\n    x: number;\n    y: number;\n}> | Readonly<{\n    kind: 'cubic';\n    x1: number;\n    y1: number;\n    x2: number;\n    y2: number;\n    x: number;\n    y: number;\n}> | Readonly<{\n    kind: 'close';\n}>;\nexport interface CalendarCell {\n    readonly centerX: number;\n    readonly centerY: number;\n    readonly width: number;\n    readonly height: number;\n}\nexport interface RoundedDigitGeometry {\n    readonly digit: number;\n    readonly d: string;\n    readonly primitives: readonly CalendarPrimitive[];\n    readonly topologySignature: string;\n    readonly advanceWidth: number;\n    readonly cell: Readonly<CalendarCell>;\n    readonly paint: Readonly<{\n        fill: 'none';\n        stroke: 'currentColor';\n        strokeWidth: number;\n        linecap: 'round';\n        linejoin: 'round';\n    }>;\n    readonly axis: Readonly<{\n        opsz: number;\n        masterInterval: string;\n        topologyStable: true;\n    }>;\n}\nexport interface CalendarDayInput {\n    readonly date: Date;\n    readonly timeZone: string;\n}\nexport interface CalendarNumberInput extends CalendarDayInput {\n    readonly opsz?: number;\n    readonly aperture?: Readonly<ViewBoxBBox>;\n}\nexport declare const calendarOpszRange: Readonly<{\n    min: 16;\n    default: 24;\n    max: 48;\n}>;\nexport declare const calendarCanvasSize: 24;\nexport declare const calendarApertureRatio: Readonly<ViewBoxBBox>;\nexport declare const defaultCalendarAperture: Readonly<ViewBoxBBox>;\nexport declare const roundedDigitGeometry: (digit: number, options?: Readonly<{\n    opsz?: number;\n    cell?: CalendarCell;\n}>) => RoundedDigitGeometry;\nexport declare const resolveCalendarDay: (input: CalendarDayInput) => Readonly<{\n    day: number;\n    epochMilliseconds: number;\n    timeZone: string;\n}>;\nexport declare const buildCalendarNumberGeometry: (input: CalendarNumberInput) => Readonly<{\n    day: number;\n    timeZone: string;\n    epochMilliseconds: number;\n    parts: readonly (RoundedDigitGeometry & Readonly<{\n        id: 'calendar.date.tens' | 'calendar.date.ones';\n        role: 'calendar-date-digit';\n        slot: 'tens' | 'ones';\n    }>)[];\n    negativeSpace: NegativeSpaceContract;\n    axis: Readonly<{\n        opsz: number;\n        masterInterval: string;\n        topologyStableWithinInterval: true;\n        profile: Readonly<Record<string, number>>;\n    }>;\n    layout: Readonly<Record<string, unknown>>;\n}>;\n",
+        "ir/request.d.ts": "import type { AxisContract, AxisName, IconVariant, ModelMode } from './compiler.js';\nexport type GlyphModelErrorCode = 'CANDIDATES_REQUIRED' | 'AUTHOR_PARITY_REQUIRED' | 'AUTHOR_VARIATION_UNSUPPORTED';\n/** Потребитель проверяет code; сообщение не является машинным контрактом. */\nexport declare class GlyphModelError extends Error {\n    readonly code: GlyphModelErrorCode;\n    constructor(code: GlyphModelErrorCode, message: string);\n}\nexport interface SymbolOptions {\n    readonly variant: IconVariant;\n    readonly modelMode: ModelMode;\n    readonly axes: Readonly<Partial<Record<AxisName, number>>>;\n}\nexport declare function parseSymbolVariant(value: unknown): IconVariant;\n/** Общая граница запроса для полного каталога и предварительно собранного символа. */\nexport declare function parseSymbolOptions(value: unknown, contracts?: Readonly<Record<AxisName, AxisContract>>): SymbolOptions;\n",
+        "ir/sha256.d.ts": "/** Минимальный synchronous SHA-256 для browser/runtime provenance binding. */\nexport declare function sha256Hex(value: string): string;\n",
+        "ir/svg-assembly.d.ts": "import type { GlyphPart, GlyphComposition } from './compiler.js';\n/** Общая сериализация самостоятельных слоёв для glyph и build-time state groups. */\nexport declare function assembleGlyphLayers(parts: readonly GlyphPart[]): string;\n/** Рамка готовится при сборке; state runtime получает только строки. */\nexport declare function assembleGlyphFrame(viewBox: readonly [number, number, number, number], dimensions?: readonly [number, number]): readonly [string, string];\nexport declare function assembleGlyphSvg(viewBox: readonly [number, number, number, number], parts: readonly GlyphPart[], composition: GlyphComposition, dimensions?: readonly [number, number]): string;\n",
+        "ir/symbol-runtime.d.ts": "import type { GlyphRequest } from './compiler.js';\nexport type SymbolGlyphRequest = Omit<GlyphRequest, 'icon'>;\n",
+        "symbols/ellipse.d.ts": "import type { AuthorSourceGlyph, AuthorSourceCapabilities, AuthorSymbolGlyphRequest } from '../ir/author-source.js';\nimport type { IconVariant } from '../ir/compiler.js';\nexport declare const outline: string;\nexport declare const filled: string;\nexport declare function glyph(request?: AuthorSymbolGlyphRequest): AuthorSourceGlyph<'ellipse'>;\nexport declare function glyphCapabilities(variant?: IconVariant): AuthorSourceCapabilities<'ellipse'>;\n",
+        "symbols/ellipsis-horizontal.d.ts": "import type { AuthorSourceGlyph, AuthorSourceCapabilities, AuthorSymbolGlyphRequest } from '../ir/author-source.js';\nimport type { IconVariant } from '../ir/compiler.js';\nexport declare const outline: string;\nexport declare const filled: string;\nexport declare function glyph(request?: AuthorSymbolGlyphRequest): AuthorSourceGlyph<'ellipsis-horizontal'>;\nexport declare function glyphCapabilities(variant?: IconVariant): AuthorSourceCapabilities<'ellipsis-horizontal'>;\n",
+        "variations/ellipsis-horizontal.d.ts": "import type { AuthorSourceGlyph, AuthorSymbolGlyphRequest } from '../ir/author-source.js';\nimport type { AuthorVariationGlyph, AuthorVariationCapabilities, AuthorVariationGlyphRequest } from '../ir/authored-variation.js';\nimport type { IconVariant } from '../ir/compiler.js';\nexport declare const outline: string;\nexport declare const filled: string;\nexport declare function glyph(request?: AuthorSymbolGlyphRequest): AuthorSourceGlyph<'ellipsis-horizontal'>;\nexport declare function glyph(request: AuthorVariationGlyphRequest): AuthorVariationGlyph<'ellipsis-horizontal'>;\nexport declare function glyphCapabilities(variant?: IconVariant): AuthorVariationCapabilities<'ellipsis-horizontal'>;\n"
+      }
+    },
+    "actual": {
+      "artifacts": {
+        "ir/author-annulus-types.d.ts": {
+          "bytes": 3001,
+          "gzipBytes": 974,
+          "brotliBytes": 800,
+          "sha256": "d82836cedbdf522cd437b3d0a83e7e29366df738c2d85ea1d5daffe7663c7b64"
+        },
+        "ir/author-catalog.generated.d.ts": {
+          "bytes": 5072,
+          "gzipBytes": 1631,
+          "brotliBytes": 1359,
+          "sha256": "efe77421e2fbbc57f28e7e38b7a58b21f5734aac06ef6bbcd55a16ff049850ee"
+        },
+        "ir/author-provenance.d.ts": {
+          "bytes": 778,
+          "gzipBytes": 383,
+          "brotliBytes": 317,
+          "sha256": "d925ff8961a7b256fef6a900cbaefab50ddc2edc7225a8ff37212cb646e00e9f"
+        },
+        "ir/author-source.d.ts": {
+          "bytes": 1044,
+          "gzipBytes": 371,
+          "brotliBytes": 316,
+          "sha256": "830391819ffd2c4ff8bbaaa2bb2a6552e3c57c0b598116b6bfa0964cdf0f36bc"
+        },
+        "ir/authored-variation.d.ts": {
+          "bytes": 3177,
+          "gzipBytes": 1073,
+          "brotliBytes": 876,
+          "sha256": "b21838598620c918cb62e2fd393b42c81480deed5f5e7710642b40626436e4c0"
+        },
+        "ir/catalog.generated.d.ts": {
+          "bytes": 3602,
+          "gzipBytes": 1407,
+          "brotliBytes": 1166,
+          "sha256": "1e1b742b925ca20a818554f5f5c13ea3084c957d265efdcee4c5a382860cba4c"
+        },
+        "ir/compiler.d.ts": {
+          "bytes": 3941,
+          "gzipBytes": 1412,
+          "brotliBytes": 1160,
+          "sha256": "7b739a0929f28724f721c25045e4d599e27e1d547cb7dba81d674b3e19e85d3b"
+        },
+        "ir/glyph-types.d.ts": {
+          "bytes": 8622,
+          "gzipBytes": 2266,
+          "brotliBytes": 1891,
+          "sha256": "e726bbf0387d36d6a478cb5b9dc05d733207164dbeb1e242e4b72695e47b71c7"
+        },
+        "ir/index.d.ts": {
+          "bytes": 1375,
+          "gzipBytes": 398,
+          "brotliBytes": 328,
+          "sha256": "2f1558cdb566d3674737aef0f7b9466185ed0911bafd29047e4d25bce51ecc96"
+        },
+        "ir/paint-types.d.ts": {
+          "bytes": 443,
+          "gzipBytes": 264,
+          "brotliBytes": 208,
+          "sha256": "b41889f18da526b2931e9e9b35e53857445a1af4566cb60bc23903bef0949302"
+        },
+        "ir/recipes.d.ts": {
+          "bytes": 9054,
+          "gzipBytes": 2338,
+          "brotliBytes": 1989,
+          "sha256": "51c208e6677be9ed487d01570b9e793a3c34c30ecdc96a7123bb5f5664d6dc92"
+        },
+        "ir/request.d.ts": {
+          "bytes": 1023,
+          "gzipBytes": 574,
+          "brotliBytes": 414,
+          "sha256": "9282acb34bf6f1e0e1fdb2577a56252259c88b26198073e7bb3a3cdcefec736e"
+        },
+        "ir/sha256.d.ts": {
+          "bytes": 151,
+          "gzipBytes": 162,
+          "brotliBytes": 135,
+          "sha256": "43e8dc6a6ebf5c11f23e74993ef289557f8ab9947e0edeb7262fb245e06585fe"
+        },
+        "ir/svg-assembly.d.ts": {
+          "bytes": 758,
+          "gzipBytes": 389,
+          "brotliBytes": 287,
+          "sha256": "b43f5bb28700e55b6dc812152706559392184aab88799a07f2de6ac0adda2383"
+        },
+        "ir/symbol-runtime.d.ts": {
+          "bytes": 115,
+          "gzipBytes": 102,
+          "brotliBytes": 90,
+          "sha256": "69c64034b4bdead74a001137803fa205fa0c6d0b260f29a88a37e14082c11b16"
+        },
+        "symbols/ellipse.d.ts": {
+          "bytes": 416,
+          "gzipBytes": 201,
+          "brotliBytes": 145,
+          "sha256": "0f8661e245e2da81fb370652206ca41467fbb3312224664b85ab628ed21cb3c0"
+        },
+        "symbols/ellipsis-horizontal.d.ts": {
+          "bytes": 440,
+          "gzipBytes": 214,
+          "brotliBytes": 149,
+          "sha256": "687830fa8ed1fb1f978cd35c96bdff36f17a32dbbb81590740a99fd5a7f174c8"
+        },
+        "variations/ellipsis-horizontal.d.ts": {
+          "bytes": 665,
+          "gzipBytes": 247,
+          "brotliBytes": 179,
+          "sha256": "1a33f8863eaff0de738abc47ee2902e1afdbb160158f1dc997a94e03ab41464b"
+        }
+      },
+      "closures": {
+        "source": {
+          "files": [
+            "ir/author-annulus-types.d.ts",
+            "ir/author-catalog.generated.d.ts",
+            "ir/author-provenance.d.ts",
+            "ir/author-source.d.ts",
+            "ir/authored-variation.d.ts",
+            "ir/catalog.generated.d.ts",
+            "ir/glyph-types.d.ts",
+            "ir/paint-types.d.ts",
+            "symbols/ellipse.d.ts"
+          ],
+          "individuallyCompressedTotals": {
+            "bytes": 26155,
+            "gzipBytes": 8570,
+            "brotliBytes": 7078
+          },
+          "concatenated": {
+            "bytes": 26163,
+            "gzipBytes": 6623,
+            "brotliBytes": 5142,
+            "sha256": "6e19af4176529f5f0eef0c467056f5ea6ae09dfa5af2cc59184f6fc870719f5a"
+          }
+        },
+        "variation": {
+          "files": [
+            "ir/author-annulus-types.d.ts",
+            "ir/author-catalog.generated.d.ts",
+            "ir/author-provenance.d.ts",
+            "ir/author-source.d.ts",
+            "ir/authored-variation.d.ts",
+            "ir/catalog.generated.d.ts",
+            "ir/glyph-types.d.ts",
+            "ir/paint-types.d.ts",
+            "variations/ellipsis-horizontal.d.ts"
+          ],
+          "individuallyCompressedTotals": {
+            "bytes": 26404,
+            "gzipBytes": 8616,
+            "brotliBytes": 7112
+          },
+          "concatenated": {
+            "bytes": 26412,
+            "gzipBytes": 6655,
+            "brotliBytes": 5191,
+            "sha256": "d63903a5c576c9fcac98c9ca970bb0ea8d69923f5da0c3fdfcb9de4d2a4320f2"
+          }
+        },
+        "compiler": {
+          "files": [
+            "ir/author-annulus-types.d.ts",
+            "ir/author-catalog.generated.d.ts",
+            "ir/author-provenance.d.ts",
+            "ir/author-source.d.ts",
+            "ir/authored-variation.d.ts",
+            "ir/catalog.generated.d.ts",
+            "ir/compiler.d.ts",
+            "ir/glyph-types.d.ts",
+            "ir/index.d.ts",
+            "ir/paint-types.d.ts",
+            "ir/recipes.d.ts",
+            "ir/request.d.ts"
+          ],
+          "individuallyCompressedTotals": {
+            "bytes": 41132,
+            "gzipBytes": 13091,
+            "brotliBytes": 10824
+          },
+          "concatenated": {
+            "bytes": 41143,
+            "gzipBytes": 9797,
+            "brotliBytes": 7862,
+            "sha256": "3a23e048349bc7fc7f55588fc93c5d0226c2a78f04b6d3091f3f66ff81448c4a"
+          }
+        },
+        "recipes": {
+          "files": [
+            "ir/paint-types.d.ts",
+            "ir/recipes.d.ts"
+          ],
+          "individuallyCompressedTotals": {
+            "bytes": 9497,
+            "gzipBytes": 2602,
+            "brotliBytes": 2197
+          },
+          "concatenated": {
+            "bytes": 9498,
+            "gzipBytes": 2452,
+            "brotliBytes": 2074,
+            "sha256": "fb85466ded4557427f38fbdb06033dfaf4827a72dfe98371fc1fcd3c12e99693"
+          }
+        },
+        "all": {
+          "files": [
+            "ir/author-annulus-types.d.ts",
+            "ir/author-catalog.generated.d.ts",
+            "ir/author-provenance.d.ts",
+            "ir/author-source.d.ts",
+            "ir/authored-variation.d.ts",
+            "ir/catalog.generated.d.ts",
+            "ir/compiler.d.ts",
+            "ir/glyph-types.d.ts",
+            "ir/index.d.ts",
+            "ir/paint-types.d.ts",
+            "ir/recipes.d.ts",
+            "ir/request.d.ts",
+            "ir/sha256.d.ts",
+            "ir/svg-assembly.d.ts",
+            "ir/symbol-runtime.d.ts",
+            "symbols/ellipse.d.ts",
+            "symbols/ellipsis-horizontal.d.ts",
+            "variations/ellipsis-horizontal.d.ts"
+          ],
+          "individuallyCompressedTotals": {
+            "bytes": 43677,
+            "gzipBytes": 14406,
+            "brotliBytes": 11809
+          },
+          "concatenated": {
+            "bytes": 43694,
+            "gzipBytes": 10208,
+            "brotliBytes": 8194,
+            "sha256": "9134016c148f7c171c153ea6bf1cdd788023bbe7acefd8a0fe4bddc7766d8ea6"
+          }
+        }
+      },
+      "consumers": {
+        "Bundler": {
+          "positive": {
+            "codes": [],
+            "output": ""
+          },
+          "negative": {
+            "codes": [
+              2322,
+              2322,
+              2345,
+              2339,
+              2345,
+              2345
+            ],
+            "output": "consumer.ts(17,7): error TS2322: Type '\"authored-variation\" | \"source\"' is not assignable to type '\"source\"'.\n  Type '\"authored-variation\"' is not assignable to type '\"source\"'.\nconsumer.ts(18,7): error TS2322: Type '\"authored-variation\" | \"source\"' is not assignable to type '\"source\"'.\n  Type '\"authored-variation\"' is not assignable to type '\"source\"'.\nconsumer.ts(19,7): error TS2345: Argument of type 'AuthorVariationGlyphRequest' is not assignable to parameter of type 'AuthorSymbolGlyphRequest | undefined'.\n  Type 'AuthorVariationGlyphRequest' is not assignable to type 'AuthorSymbolGlyphRequest'.\n    Type 'AuthorVariationGlyphRequest' is not assignable to type 'Readonly<{ variation?: undefined; }>'.\n      Types of property 'variation' are incompatible.\n        Type 'AuthoredDotVariation | undefined' is not assignable to type 'undefined'.\n          Type 'AuthoredDotVariation' is not assignable to type 'undefined'.\nconsumer.ts(20,13): error TS2339: Property 'variation' does not exist on type 'AuthorSourceCapabilities<\"ellipse\">'.\nconsumer.ts(21,11): error TS2345: Argument of type 'AuthorVariationGlyphRequest' is not assignable to parameter of type 'AuthorSymbolGlyphRequest | undefined'.\n  Type 'AuthorVariationGlyphRequest' is not assignable to type 'AuthorSymbolGlyphRequest'.\n    Type 'AuthorVariationGlyphRequest' is not assignable to type 'Readonly<{ variation?: undefined; }>'.\n      Types of property 'variation' are incompatible.\n        Type 'AuthoredDotVariation | undefined' is not assignable to type 'undefined'.\n          Type 'AuthoredDotVariation' is not assignable to type 'undefined'.\nconsumer.ts(22,19): error TS2345: Argument of type '\"foreign\"' is not assignable to parameter of type 'IconVariant | undefined'.\n"
+          },
+          "augmentation": {
+            "codes": [],
+            "output": ""
+          },
+          "augmentationNegative": {
+            "codes": [
+              2322,
+              2322,
+              2322,
+              2322
+            ],
+            "output": "consumer.ts(20,7): error TS2322: Type '\"glyph\" | undefined' is not assignable to type '\"other\" | undefined'.\n  Type '\"glyph\"' is not assignable to type '\"other\"'.\nconsumer.ts(21,7): error TS2322: Type '\"caps\" | undefined' is not assignable to type '\"other\" | undefined'.\n  Type '\"caps\"' is not assignable to type '\"other\"'.\nconsumer.ts(22,7): error TS2322: Type '\"part\" | undefined' is not assignable to type '\"other\" | undefined'.\n  Type '\"part\"' is not assignable to type '\"other\"'.\nconsumer.ts(23,7): error TS2322: Type '\"point\" | undefined' is not assignable to type '\"other\" | undefined'.\n  Type '\"point\"' is not assignable to type '\"other\"'.\n"
+          }
+        },
+        "NodeNext": {
+          "positive": {
+            "codes": [],
+            "output": ""
+          },
+          "negative": {
+            "codes": [
+              2322,
+              2322,
+              2345,
+              2339,
+              2345,
+              2345
+            ],
+            "output": "consumer.ts(17,7): error TS2322: Type '\"authored-variation\" | \"source\"' is not assignable to type '\"source\"'.\n  Type '\"authored-variation\"' is not assignable to type '\"source\"'.\nconsumer.ts(18,7): error TS2322: Type '\"authored-variation\" | \"source\"' is not assignable to type '\"source\"'.\n  Type '\"authored-variation\"' is not assignable to type '\"source\"'.\nconsumer.ts(19,7): error TS2345: Argument of type 'AuthorVariationGlyphRequest' is not assignable to parameter of type 'AuthorSymbolGlyphRequest | undefined'.\n  Type 'AuthorVariationGlyphRequest' is not assignable to type 'AuthorSymbolGlyphRequest'.\n    Type 'AuthorVariationGlyphRequest' is not assignable to type 'Readonly<{ variation?: undefined; }>'.\n      Types of property 'variation' are incompatible.\n        Type 'AuthoredDotVariation | undefined' is not assignable to type 'undefined'.\n          Type 'AuthoredDotVariation' is not assignable to type 'undefined'.\nconsumer.ts(20,13): error TS2339: Property 'variation' does not exist on type 'AuthorSourceCapabilities<\"ellipse\">'.\nconsumer.ts(21,11): error TS2345: Argument of type 'AuthorVariationGlyphRequest' is not assignable to parameter of type 'AuthorSymbolGlyphRequest | undefined'.\n  Type 'AuthorVariationGlyphRequest' is not assignable to type 'AuthorSymbolGlyphRequest'.\n    Type 'AuthorVariationGlyphRequest' is not assignable to type 'Readonly<{ variation?: undefined; }>'.\n      Types of property 'variation' are incompatible.\n        Type 'AuthoredDotVariation | undefined' is not assignable to type 'undefined'.\n          Type 'AuthoredDotVariation' is not assignable to type 'undefined'.\nconsumer.ts(22,19): error TS2345: Argument of type '\"foreign\"' is not assignable to parameter of type 'IconVariant | undefined'.\n"
+          },
+          "augmentation": {
+            "codes": [],
+            "output": ""
+          },
+          "augmentationNegative": {
+            "codes": [
+              2322,
+              2322,
+              2322,
+              2322
+            ],
+            "output": "consumer.ts(20,7): error TS2322: Type '\"glyph\" | undefined' is not assignable to type '\"other\" | undefined'.\n  Type '\"glyph\"' is not assignable to type '\"other\"'.\nconsumer.ts(21,7): error TS2322: Type '\"caps\" | undefined' is not assignable to type '\"other\" | undefined'.\n  Type '\"caps\"' is not assignable to type '\"other\"'.\nconsumer.ts(22,7): error TS2322: Type '\"part\" | undefined' is not assignable to type '\"other\" | undefined'.\n  Type '\"part\"' is not assignable to type '\"other\"'.\nconsumer.ts(23,7): error TS2322: Type '\"point\" | undefined' is not assignable to type '\"other\" | undefined'.\n  Type '\"point\"' is not assignable to type '\"other\"'.\n"
+          }
+        }
+      },
+      "emitted": {
+        "ir/author-annulus-types.d.ts": "import type { GlyphIR, SourcePartProvenance } from './glyph-types.js';\nimport type { AuthorSourceGlyph, AuthorSourceCapabilities, AuthorSymbolGlyphRequest } from './author-source.js';\nimport type { AuthorSourceProvenance, AuthorAnatomyReceipt } from './author-provenance.js';\nimport type { AuthorIconId } from './author-catalog.generated.js';\n/** Изменяется только контрформа обрамления; это не общая ось веса. */\nexport interface AuthoredAnnulusVariation {\n    readonly enclosureEmphasis?: number;\n}\nexport type AuthorAnnulusVariationGlyphRequest = Omit<AuthorSymbolGlyphRequest, 'variant' | 'variation'> & Readonly<{\n    variant?: 'outline';\n    variation?: AuthoredAnnulusVariation;\n}>;\nexport interface AuthorAnnulusVariationReceipt {\n    readonly version: 1;\n    readonly law: 'annulus.counter-scale';\n    readonly geometrySha256: string;\n    readonly parameters: Readonly<{\n        enclosureEmphasis: number;\n    }>;\n    readonly scale: number;\n}\nexport interface AuthorAnnulusVariationProvenance {\n    readonly kind: 'authored-variation';\n    readonly file: string;\n    readonly author: AuthorSourceProvenance;\n    readonly anatomy: AuthorAnatomyReceipt;\n    readonly variation: AuthorAnnulusVariationReceipt;\n}\nexport interface AuthorAnnulusVariationPartProvenance {\n    readonly kind: 'authored-variation';\n    readonly identity: 'declared';\n    readonly source: SourcePartProvenance;\n    readonly variation: AuthorAnnulusVariationReceipt;\n    readonly fingerprintBasis: 'literal-path';\n    /** SHA-256 точного материализованного d и fillRule; parser на запросе не нужен. */\n    readonly artifactFingerprint: `sha256:${string}`;\n}\nexport interface AuthorAnnulusVariationDomain {\n    readonly kind: 'radial-bernstein';\n    readonly parameter: 'enclosureEmphasis';\n    readonly evaluated: 'actual-binary64-scale';\n    readonly scale: Readonly<{\n        minimum: number;\n        minimumInclusive: true;\n        maximum: number;\n        maximumInclusive: false;\n    }>;\n}\nexport interface AuthorAnnulusVariationCapability {\n    readonly version: 1;\n    readonly law: 'annulus.counter-scale';\n    readonly geometrySha256: string;\n    readonly defaults: Readonly<{\n        enclosureEmphasis: 1;\n    }>;\n    readonly domain: AuthorAnnulusVariationDomain;\n    readonly targets: Readonly<{\n        svg: 'supported';\n        webEffect: 'not-declared';\n        lottie: 'not-exported';\n        sfSymbols: 'not-exported';\n    }>;\n}\nexport interface AuthorAnnulusVariationGlyph<TIcon extends AuthorIconId = AuthorIconId> extends GlyphIR<TIcon> {\n    readonly variant: 'outline';\n    readonly provenance: AuthorSourceGlyph<TIcon>['provenance'] | AuthorAnnulusVariationProvenance;\n}\nexport interface AuthorAnnulusVariationCapabilities<TIcon extends AuthorIconId = AuthorIconId> extends AuthorSourceCapabilities<TIcon> {\n    readonly variant: 'outline';\n    readonly variation: AuthorAnnulusVariationCapability;\n}\n",
+        "ir/author-catalog.generated.d.ts": "/** GENERATED: конечные имена semantics/figma-baseline.json; geometry сюда не попадает. */\nexport type AuthorIconId = 'accessibility' | 'actions' | 'alert' | 'alert-circle' | 'align-bottom' | 'align-horizontal-center' | 'align-items-bottom' | 'align-items-horizontal-center' | 'align-items-left' | 'align-items-right' | 'align-items-top' | 'align-items-vertical-center' | 'align-left' | 'align-right' | 'align-top' | 'align-vertical-center' | 'aloof' | 'apps' | 'archive' | 'archive-close' | 'arrow-back' | 'arrow-back-circle' | 'arrow-down' | 'arrow-down-circle' | 'arrow-forward' | 'arrow-forward-circle' | 'arrow-redo' | 'arrow-redo-circle' | 'arrow-redo-curve' | 'arrow-undo' | 'arrow-undo-circle' | 'arrow-undo-curve' | 'arrow-up' | 'arrow-up-circle' | 'at' | 'attach' | 'bag' | 'bag-checkmark' | 'bag-close' | 'bag-minus' | 'bag-plus' | 'ban' | 'basket' | 'bill' | 'bin' | 'book' | 'bookmark' | 'bookmarks' | 'boolean' | 'brain' | 'branch' | 'branches' | 'brush' | 'bulb' | 'calendar' | 'calendar-clear' | 'calendar-number' | 'calendar-today' | 'camera' | 'camera-reverse' | 'cards' | 'caret-back' | 'caret-down' | 'caret-forward' | 'caret-up' | 'caret-vertical' | 'cart' | 'chart' | 'chart-area' | 'chart-area-panel' | 'chart-bars-horizontal' | 'chart-columns' | 'chart-combo' | 'chart-donut' | 'chart-flow' | 'chart-lines' | 'chart-metric' | 'chart-nodes' | 'chart-pie' | 'chart-treemap-horizontal' | 'chart-treemap-vertical' | 'chart-trend-up' | 'chatbubble' | 'chatbubble-ellipses' | 'chatbubbles' | 'checkmark' | 'checkmark-circle' | 'checkmarks' | 'checkmarks-circle' | 'cherries' | 'chevron-back' | 'chevron-back-circle' | 'chevron-down' | 'chevron-down-circle' | 'chevron-forward' | 'chevron-forward-circle' | 'chevron-up' | 'chevron-up-circle' | 'chevrons-down' | 'close' | 'close-circle' | 'close-octagon' | 'cloud' | 'cloud-checkmark' | 'cloud-download' | 'cloud-off' | 'cloud-upload' | 'code' | 'code-frame' | 'cog' | 'coin-dollar' | 'coin-ruble' | 'collapse-horizontal' | 'collapse-horizontal-line' | 'collapse-vertical' | 'collapse-vertical-line' | 'color-filter' | 'color-wand' | 'commit' | 'commits' | 'compas' | 'component' | 'computer' | 'connect' | 'connectors' | 'console' | 'contrast' | 'copy' | 'corners-in' | 'corners-out' | 'cursor' | 'cursor-click' | 'dashboard' | 'database' | 'database-export' | 'database-plus' | 'database-search' | 'database-settings' | 'dice' | 'download' | 'duplicate' | 'ear' | 'earth' | 'ellipse' | 'ellipsis-horizontal' | 'ellipsis-vertical' | 'enter' | 'exit' | 'expand-horizontal-line' | 'expand-vertical' | 'extension-puzzle' | 'eye' | 'eye-off' | 'eyedrop' | 'field-text' | 'file' | 'file-clear' | 'files' | 'filter' | 'fingerprint' | 'fire' | 'flash' | 'flash-off' | 'folder' | 'folder-open' | 'fork' | 'fullscreen-enter' | 'fullscreen-exit' | 'glasses' | 'globe' | 'golf' | 'group' | 'group-circle' | 'hand-point-down' | 'hand-point-left' | 'hand-point-right' | 'hand-point-up' | 'hand-two-fingers' | 'hard-drive' | 'hash' | 'headphone' | 'heart' | 'heart-off' | 'heart-pulse' | 'history' | 'home' | 'hourglass' | 'image' | 'images' | 'info' | 'info-circle' | 'invert' | 'justify-horizontal' | 'justify-items-horizontal' | 'justify-items-vertical' | 'justify-vertical' | 'key' | 'keyboard' | 'keys' | 'layers' | 'link' | 'link-horizontal' | 'link-horizontal-off' | 'list' | 'lock' | 'mail' | 'mail-open' | 'mail-unread' | 'mcp' | 'megaphone' | 'menu' | 'merge' | 'mic' | 'mic-circle' | 'mic-off' | 'minus' | 'minus-circle' | 'monitor-pulse' | 'moon' | 'moon-sparkles' | 'move' | 'musical-note' | 'musical-notes' | 'navigate' | 'notifications' | 'notifications-off' | 'notifications-unread' | 'options' | 'palette' | 'pause' | 'pause-circle' | 'paw' | 'pencil' | 'person' | 'person-circle' | 'person-minus' | 'person-plus' | 'phone' | 'pin' | 'pin-vertical' | 'pin-vertical-off' | 'place' | 'plane' | 'play' | 'play-back' | 'play-back-circle' | 'play-circle' | 'play-forward' | 'play-forward-circle' | 'play-skip-back' | 'play-skip-back-circle' | 'play-skip-forward' | 'play-skip-forward-circle' | 'plus' | 'plus-circle' | 'print' | 'priority' | 'pull-request' | 'push' | 'qr' | 'question' | 'question-circle' | 'radio' | 'refresh' | 'reload' | 'repeat' | 'resize' | 'revert' | 'rhomb' | 'rocket' | 'sad' | 'scan' | 'school' | 'search' | 'send' | 'server' | 'settings' | 'share' | 'share-display' | 'share-social' | 'shield' | 'shield-checkmark' | 'sidebar-collapsed' | 'sidebar-expanded' | 'signature' | 'smile' | 'sparkle' | 'sparkles' | 'speed' | 'square' | 'star' | 'stats' | 'steps' | 'stop' | 'stop-circle' | 'storefront' | 'sun' | 'sun-low' | 'swap-horizontal' | 'swap-vertical' | 'sync' | 'tablet-landscape' | 'tablet-portrait' | 'tag' | 'tag-dollar' | 'tag-ruble' | 'tags' | 'target' | 'text' | 'ticket' | 'time' | 'timer' | 'translate' | 'triangle' | 'trophy' | 'turn-off' | 'unlock' | 'upload' | 'video' | 'video-camera' | 'video-camera-off' | 'volume' | 'volume-high' | 'volume-low' | 'volume-middle' | 'volume-mute' | 'volume-muted' | 'wallet' | 'warning' | 'waveform';\n",
+        "ir/author-provenance.d.ts": "/** Привязка анатомии к мастеру; конструктивную модель или оси не удостоверяет. */\nexport interface AuthorAnatomyReceipt {\n    readonly version: 1;\n    readonly annotationSha256: string;\n    readonly masterSha256: string;\n    readonly pathFingerprintSha256: string;\n}\n/** Хеши относятся к закреплённым bytes/node/version, не к геометрической модели. */\nexport interface AuthorSourceProvenance {\n    readonly kind: 'figma';\n    readonly fileKey: string;\n    readonly version: string;\n    readonly nodeId: string;\n    readonly nodeSha256: string;\n    readonly masterSha256: string;\n    readonly normalizedSha256: string;\n    readonly pathFingerprintSha256: string;\n}\n",
+        "ir/author-source.d.ts": "import type { GlyphCapabilities, GlyphIR, GlyphRequest, SourceGlyphProvenance } from './glyph-types.js';\nimport type { AuthorIconId } from './author-catalog.generated.js';\nimport type { AuthorSourceProvenance } from './author-provenance.js';\nexport type { AuthorIconId } from './author-catalog.generated.js';\nexport type { AuthorAnatomyReceipt, AuthorSourceProvenance } from './author-provenance.js';\nexport type AuthorSymbolGlyphRequest = Omit<GlyphRequest<AuthorIconId>, 'icon'> & Readonly<{\n    variation?: never;\n}>;\nexport interface AuthorSourceGlyph<TIcon extends AuthorIconId = AuthorIconId> extends GlyphIR<TIcon> {\n    readonly provenance: SourceGlyphProvenance & Readonly<{\n        author: AuthorSourceProvenance;\n    }>;\n}\nexport interface AuthorSourceCapabilities<TIcon extends AuthorIconId = AuthorIconId> extends Omit<GlyphCapabilities<TIcon>, 'variation'> {\n    readonly modelState: null;\n    readonly supportedAxes: readonly [];\n    readonly axes: Readonly<Record<string, never>>;\n    readonly author: AuthorSourceProvenance;\n}\n",
+        "ir/authored-variation.d.ts": "import type { GlyphIR, SourcePartProvenance } from './glyph-types.js';\nimport type { AuthorSourceGlyph, AuthorSourceCapabilities, AuthorSymbolGlyphRequest } from './author-source.js';\nimport type { AuthorSourceProvenance, AuthorAnatomyReceipt } from './author-provenance.js';\nimport type { AuthorIconId } from './author-catalog.generated.js';\nexport interface AuthoredDotVariation {\n    readonly dotScale?: number;\n    readonly spacingScale?: number;\n}\nexport type AuthorVariationGlyphRequest = Omit<AuthorSymbolGlyphRequest, 'variation'> & Readonly<{\n    variation?: AuthoredDotVariation;\n}>;\nexport interface AuthorVariationReceipt {\n    readonly version: 1;\n    readonly law: 'dots.affine';\n    readonly geometrySha256: string;\n    readonly parameters: Readonly<{\n        dotScale: number;\n        spacingScale: number;\n    }>;\n}\nexport interface AuthorVariationProvenance {\n    readonly kind: 'authored-variation';\n    readonly file: string;\n    readonly author: AuthorSourceProvenance;\n    readonly anatomy: AuthorAnatomyReceipt;\n    readonly variation: AuthorVariationReceipt;\n}\nexport interface AuthorVariationPartProvenance {\n    readonly kind: 'authored-variation';\n    readonly identity: 'declared';\n    readonly source: SourcePartProvenance;\n    readonly variation: AuthorVariationReceipt;\n    readonly artifactFingerprint: `sha256:${string}`;\n}\nexport interface AuthoredVariationDomain {\n    readonly kind: 'convex-linear';\n    readonly bound: 'control-hull';\n    readonly positive: readonly ['dotScale', 'spacingScale'];\n    /** a*dotScale + b*spacingScale >= minimum; положительность проверяется отдельно. */\n    readonly constraints: readonly Readonly<{\n        kind: 'margin' | 'gap';\n        dotScale: number;\n        spacingScale: number;\n        minimum: number;\n    }>[];\n    readonly policy: Readonly<{\n        gridVersion: number;\n        gridSha256: string;\n        marginRatio: number;\n        minimumGapRatio: number;\n    }>;\n}\nexport interface AuthorVariationCapability {\n    readonly version: 1;\n    readonly law: 'dots.affine';\n    readonly geometrySha256: string;\n    readonly defaults: Readonly<{\n        dotScale: 1;\n        spacingScale: 1;\n    }>;\n    readonly domain: AuthoredVariationDomain;\n    readonly targets: Readonly<{\n        svg: 'supported';\n        webEffect: 'existing-part-gestures';\n        lottie: 'not-exported';\n        sfSymbols: 'not-exported';\n    }>;\n}\nexport interface AuthorVariationGlyph<TIcon extends AuthorIconId = AuthorIconId> extends GlyphIR<TIcon> {\n    readonly provenance: AuthorSourceGlyph<TIcon>['provenance'] | AuthorVariationProvenance;\n}\nexport interface AuthorVariationCapabilities<TIcon extends AuthorIconId = AuthorIconId> extends AuthorSourceCapabilities<TIcon> {\n    readonly variation: AuthorVariationCapability;\n}\n/** Машинный код не зависит от текста ошибки. */\nexport declare class AuthoredVariationError extends RangeError {\n    readonly code: 'INVALID_VARIATION' | 'VARIATION_OUTSIDE_DOMAIN' | 'VARIATION_UNREPRESENTABLE' | 'VARIATION_SOURCE_MISMATCH';\n    constructor(code: AuthoredVariationError['code'], message: string);\n}\n",
+        "ir/catalog.generated.d.ts": "/**\n * Компактная type-level проекция semantics/catalog.json.\n * Runtime всё равно использует полный канонический каталог; этот список не\n * дублирует геометрию, а не даёт генератору .d.ts раскрыть весь JSON на сотни КБ.\n */\nexport declare const ICON_IDS: readonly ['accessibility', 'actions', 'alert', 'alert-circle', 'aloof', 'apps', 'archive', 'archive-close', 'arrow-back', 'arrow-back-circle', 'arrow-down', 'arrow-down-circle', 'arrow-forward', 'arrow-forward-circle', 'arrow-redo', 'arrow-redo-circle', 'arrow-undo', 'arrow-undo-circle', 'arrow-up', 'arrow-up-circle', 'attach', 'bag', 'bag-checkmark', 'bag-close', 'bag-minus', 'bag-plus', 'ban', 'bill', 'bin', 'book', 'bookmark', 'bookmarks', 'boolean', 'brain', 'branch', 'branches', 'brush', 'bulb', 'calendar', 'calendar-clear', 'calendar-number', 'calendar-today', 'camera', 'camera-reverse', 'cart', 'chart', 'chatbubble', 'chatbubble-ellipses', 'chatbubbles', 'checkmark', 'checkmark-circle', 'checkmarks', 'checkmarks-circle', 'chevron-back', 'chevron-back-circle', 'chevron-down', 'chevron-down-circle', 'chevron-forward', 'chevron-forward-circle', 'chevron-up', 'chevron-up-circle', 'close', 'close-circle', 'cloud', 'cloud-checkmark', 'cloud-download', 'cloud-off', 'cloud-upload', 'cog', 'color-filter', 'color-wand', 'commit', 'commits', 'compas', 'component', 'connect', 'console', 'contrast', 'copy', 'database', 'dice', 'download', 'duplicate', 'ear', 'earth', 'ellipse', 'ellipsis-horizontal', 'ellipsis-vertical', 'enter', 'exit', 'extension-puzzle', 'eye', 'eye-off', 'eyedrop', 'file', 'file-clear', 'files', 'filter', 'fire', 'flash', 'flash-off', 'folder', 'fork', 'glasses', 'globe', 'golf', 'group', 'group-circle', 'hash', 'headphone', 'heart', 'heart-off', 'history', 'home', 'hourglass', 'image', 'images', 'info', 'info-circle', 'invert', 'key', 'layers', 'link', 'link-horizontal', 'link-horizontal-off', 'list', 'lock', 'mail', 'mail-open', 'mail-unread', 'mcp', 'megaphone', 'menu', 'merge', 'mic', 'mic-circle', 'mic-off', 'minus', 'minus-circle', 'moon', 'moon-sparkles', 'move', 'musical-note', 'musical-notes', 'navigate', 'notifications', 'notifications-off', 'notifications-unread', 'options', 'palette', 'pause', 'pause-circle', 'paw', 'pencil', 'person', 'person-circle', 'person-minus', 'person-plus', 'phone', 'pin', 'place', 'plane', 'play', 'play-back', 'play-back-circle', 'play-circle', 'play-forward', 'play-forward-circle', 'play-skip-back', 'play-skip-back-circle', 'play-skip-forward', 'play-skip-forward-circle', 'plus', 'plus-circle', 'print', 'priority', 'pull-request', 'push', 'qr', 'question', 'question-circle', 'radio', 'refresh', 'reload', 'repeat', 'resize', 'revert', 'rhomb', 'rocket', 'sad', 'scan', 'school', 'search', 'send', 'settings', 'share', 'share-display', 'share-social', 'shield', 'shield-checkmark', 'signature', 'smile', 'sparkle', 'sparkles', 'speed', 'square', 'star', 'stats', 'steps', 'sun', 'sun-low', 'swap-horizontal', 'swap-vertical', 'sync', 'tablet-landscape', 'tablet-portrait', 'tag', 'text', 'ticket', 'time', 'timer', 'translate', 'triangle', 'trophy', 'turn-off', 'unlock', 'upload', 'video', 'video-camera', 'video-camera-off', 'volume', 'volume-high', 'volume-low', 'volume-middle', 'volume-mute', 'volume-muted', 'wallet', 'warning'];\nexport type CatalogIconId = (typeof ICON_IDS)[number];\nexport declare const AXIS_NAMES: readonly ['corner', 'opsz', 'weight'];\nexport type CatalogAxisName = (typeof AXIS_NAMES)[number];\n",
+        "ir/compiler.d.ts": "/**\n * Публичный Glyph IR: строгая граница между точным SVG-источником и\n * доказанной параметрической моделью. Модуль не читает файлы, часы и DOM:\n * все данные попадают в браузер как статические импорты сборщика.\n */\nimport { type CalendarNumberInput } from './recipes.js';\nimport type * as IR from './glyph-types.js';\nexport type { IconId, AxisName, IconVariant, ModelMode, ModelState, FillRule, PartRole, GlyphRequest, SourcePartProvenance, ModelPartProvenance, RecipePartProvenance, PartProvenance, GlyphPart, SourceGlyphProvenance, ModelGlyphProvenance, RecipeGlyphProvenance, DesignSpecGlyphProvenance, GlyphProvenance, GlyphIR, GlyphComposition, GlyphCapabilities, AxisContract, MotionCapabilityState, MotionGestureRotationTrackContract, MotionGestureOpacityTrackContract, MotionGestureTranslationTrackContract, MotionGestureTrackContract, MotionGestureContract, MotionGestureRotationSample, MotionGestureSample, MotionRotationTrackContract, MotionTrackContract, MotionCapabilities } from './glyph-types.js';\nexport { GlyphModelError } from './request.js';\nexport type { GlyphModelErrorCode } from './request.js';\nexport interface ParsedGlyphRequest<TIcon extends string = IR.IconId> {\n    readonly icon: TIcon;\n    readonly variant: IR.IconVariant;\n    readonly modelMode: IR.ModelMode;\n    readonly axes: Readonly<Partial<Record<IR.AxisName, number>>>;\n}\nexport declare function sampleMotionGesture(gesture: IR.MotionGestureContract, progress: number): readonly IR.MotionGestureSample[];\nexport interface IconDesignContract {\n    readonly version: 1;\n    readonly canvas: Readonly<{\n        readonly viewBox: readonly [number, number, number, number];\n        readonly declarationUnits: 'fraction-of-canvas';\n    }>;\n    readonly variants: readonly IR.IconVariant[];\n    readonly source: Readonly<{\n        readonly paint: 'currentColor';\n        readonly geometry: 'path-only';\n        readonly intake: 'figma-import';\n    }>;\n    readonly constraints: Readonly<{\n        readonly margin: number;\n        readonly clearanceMin: number;\n        readonly opticalCenterBias: number;\n        readonly angleScale: readonly number[];\n    }>;\n    readonly axes: Readonly<Record<IR.AxisName, IR.AxisContract>>;\n    readonly lifecycle: Readonly<{\n        readonly sourceOnly: 'exact-source-fallback';\n        readonly candidate: 'research-only';\n        readonly accepted: 'public-after-proof';\n    }>;\n    readonly targets: Readonly<{\n        readonly staticSvg: 'supported';\n        readonly glyphIr: 'supported';\n        readonly lottie: 'not-exported';\n        readonly sfSymbols: 'not-exported';\n    }>;\n    readonly agent: Readonly<{\n        readonly proposalCommand: 'pnpm validate:proposal';\n        readonly promotionCommand: 'pnpm import:figma --write';\n        readonly finalGate: 'pnpm verify';\n    }>;\n}\nexport interface CalendarNumberGlyphInput extends Omit<CalendarNumberInput, 'aperture'> {\n    readonly variant?: IR.IconVariant;\n}\n/** Контракт значений runtime; constructor и его входные данные остаются внутренними. */\nexport interface GlyphCompiler {\n    readonly glyph: (request: IR.GlyphRequest) => IR.GlyphIR;\n    readonly glyphCapabilities: (iconValue: unknown, variantValue?: unknown) => IR.GlyphCapabilities;\n    readonly parseGlyphRequest: (value: unknown) => ParsedGlyphRequest;\n    readonly parseIconId: (value: unknown) => IR.IconId;\n    readonly isIconId: (value: unknown) => value is IR.IconId;\n    readonly calendarNumberGlyph: (input: CalendarNumberGlyphInput) => IR.GlyphIR;\n    readonly iconIds: readonly IR.IconId[];\n    readonly axisNames: readonly IR.AxisName[];\n    readonly axisContracts: Readonly<Record<IR.AxisName, IR.AxisContract>>;\n    readonly iconDesignContract: IconDesignContract;\n}\n",
+        "ir/glyph-types.d.ts": "/** Данные Glyph IR доступны compiler, motion и экспортёрам без функций компиляции. */\nimport type { CatalogAxisName, CatalogIconId } from './catalog.generated.js';\nimport type { AuthorAnatomyReceipt, AuthorSourceProvenance } from './author-provenance.js';\nimport type { AuthorVariationCapability, AuthorVariationPartProvenance, AuthorVariationProvenance } from './authored-variation.js';\nimport type { AuthorAnnulusVariationCapability, AuthorAnnulusVariationPartProvenance, AuthorAnnulusVariationProvenance } from './author-annulus-types.js';\nimport type { RecipeFillPaint, RecipeStrokePaint } from './paint-types.js';\nexport type IconId = CatalogIconId;\nexport type AxisName = CatalogAxisName;\nexport type IconVariant = 'outline' | 'filled';\nexport type ModelMode = 'accepted-only' | 'allow-candidate' | 'source-only';\nexport type ModelState = 'accepted' | 'candidate';\nexport type FillRule = 'nonzero' | 'evenodd';\nexport type PartRole = 'body' | 'content' | 'ink' | 'counter' | 'container' | 'control' | 'detail' | 'decorator' | 'unclassified';\nexport interface GlyphRequest<TIcon extends string = IconId> {\n    readonly icon: TIcon;\n    readonly variant?: IconVariant;\n    readonly modelMode?: ModelMode;\n    readonly axes?: Readonly<Partial<Record<AxisName, number>>>;\n}\nexport interface SourcePartProvenance {\n    readonly kind: 'source';\n    readonly identity: 'geometry-derived' | 'declared';\n    readonly file: string;\n    /** Fingerprint авторского source-path до build-оптимизации. */\n    readonly sourceFingerprint: `sha256:${string}`;\n    /** Fingerprint реально установленного root export после deterministic SVGO. */\n    readonly artifactFingerprint: `sha256:${string}`;\n}\nexport interface ModelPartProvenance {\n    readonly kind: 'model';\n    readonly identity: 'declared';\n    readonly declaration: IconId;\n    readonly state: ModelState;\n}\nexport interface RecipePartProvenance {\n    readonly kind: 'recipe';\n    readonly identity: 'declared';\n    readonly recipe: string;\n    readonly sourceDependency?: IconId;\n}\nexport type PartProvenance = SourcePartProvenance | ModelPartProvenance | RecipePartProvenance | AuthorVariationPartProvenance | AuthorAnnulusVariationPartProvenance;\nexport interface GlyphPart {\n    readonly id: string;\n    readonly role: PartRole;\n    readonly zIndex: number;\n    readonly d: string;\n    /** null означает: часть имеет смысл только внутри GlyphIR.composition. */\n    readonly fillRule: FillRule | null;\n    readonly paint: RecipeFillPaint | RecipeStrokePaint;\n    /** Нормализованный якорь в долях viewBox, а не экранные пиксели. */\n    readonly anchor: readonly [number, number];\n    readonly anchorSource: 'declared' | 'geometry-bbox-center';\n    readonly topologySignature: string;\n    readonly morphGroup: string | null;\n    readonly provenance: PartProvenance;\n}\nexport interface SourceGlyphProvenance {\n    readonly kind: 'source';\n    readonly file: string;\n    readonly author?: AuthorSourceProvenance;\n    readonly anatomy?: AuthorAnatomyReceipt;\n}\nexport interface ModelGlyphProvenance {\n    readonly kind: 'model';\n    readonly declaration: IconId;\n    readonly archetype: string;\n    readonly state: ModelState;\n    /** Эффективные значения только реально поддержанных моделью осей. */\n    readonly axes: Readonly<Partial<Record<AxisName, number>>>;\n}\nexport interface RecipeGlyphProvenance {\n    readonly kind: 'recipe';\n    readonly recipe: string;\n    readonly state: 'candidate';\n    readonly sourceDependencies: readonly IconId[];\n    readonly axes: Readonly<{\n        opsz: number;\n    }>;\n    readonly context: Readonly<{\n        day: number;\n        epochMilliseconds: number;\n        timeZone: string;\n    }>;\n}\nexport interface DesignSpecGlyphProvenance {\n    readonly kind: 'design-spec';\n    readonly specVersion: 1;\n    readonly specSha256: `sha256:${string}`;\n    readonly state: 'candidate';\n}\nexport type GlyphProvenance = SourceGlyphProvenance | ModelGlyphProvenance | RecipeGlyphProvenance | DesignSpecGlyphProvenance | AuthorVariationProvenance | AuthorAnnulusVariationProvenance;\nexport interface GlyphIR<TIcon extends string = IconId> {\n    readonly icon: TIcon;\n    readonly variant: IconVariant;\n    readonly viewBox: readonly [number, number, number, number];\n    readonly parts: readonly GlyphPart[];\n    /** Удобная сборка геометрии; способ paint задаёт composition, не порядок parts. */\n    readonly d: string;\n    readonly svg: string;\n    readonly composition: GlyphComposition;\n    readonly provenance: GlyphProvenance;\n}\nexport type GlyphComposition = Readonly<{\n    kind: 'layers';\n}> | Readonly<{\n    kind: 'compound';\n    fillRule: FillRule;\n}> | Readonly<{\n    kind: 'mask-subtract';\n    basePartIds: readonly string[];\n    subtractPartIds: readonly string[];\n}>;\nexport interface GlyphCapabilities<TIcon extends string = IconId> {\n    readonly icon: TIcon;\n    readonly variant: IconVariant;\n    readonly modelState: ModelState | null;\n    readonly supportedAxes: readonly AxisName[];\n    readonly axes: Readonly<Partial<Record<AxisName, AxisContract>>>;\n    readonly motion: MotionCapabilities;\n    readonly author?: AuthorSourceProvenance;\n    readonly anatomy?: AuthorAnatomyReceipt;\n    readonly variation?: AuthorVariationCapability | AuthorAnnulusVariationCapability;\n}\nexport interface AxisContract {\n    readonly kind: 'continuous';\n    readonly min: number;\n    readonly default: number;\n    readonly max: number;\n    readonly lifecycle: string;\n}\nexport type MotionCapabilityState = 'source-only' | 'candidate' | 'semantic-parts' | 'anchored-parts' | 'gesture-ready';\nexport interface MotionGestureRotationTrackContract {\n    readonly partId: string;\n    readonly kind: 'rotate';\n    readonly anchor: readonly [number, number];\n    readonly from: number;\n    readonly to: number;\n    readonly unit: 'degrees';\n    readonly interpolation: 'linear';\n}\nexport interface MotionGestureOpacityTrackContract {\n    readonly partId: string;\n    readonly kind: 'opacity';\n    readonly unit: 'fraction';\n    readonly interpolation: 'linear';\n    readonly stops: readonly Readonly<{\n        at: number;\n        value: number;\n    }>[];\n}\nexport interface MotionGestureTranslationTrackContract {\n    readonly partId: string;\n    readonly kind: 'translate';\n    readonly axis: 'x' | 'y';\n    readonly unit: 'viewBox';\n    readonly interpolation: 'linear';\n    readonly stops: readonly Readonly<{\n        at: number;\n        value: number;\n    }>[];\n}\nexport type MotionGestureTrackContract = MotionGestureRotationTrackContract | MotionGestureOpacityTrackContract | MotionGestureTranslationTrackContract;\nexport interface MotionGestureContract {\n    readonly id: string;\n    readonly kind: string;\n    readonly partIds: readonly string[];\n    readonly meaning: string;\n    readonly progress: 'normalized-0-to-1';\n    /** Поза неподвижного мастера; отсутствие сохраняет прежний прогресс 0. */\n    readonly restProgress?: number;\n    readonly tracks: readonly MotionGestureTrackContract[];\n}\nexport interface MotionGestureRotationSample {\n    readonly partId: string;\n    readonly kind: 'rotate';\n    readonly anchor: readonly [number, number];\n    readonly rotation: number;\n}\nexport type MotionGestureSample = MotionGestureRotationSample | Readonly<{\n    partId: string;\n    kind: 'opacity';\n    opacity: number;\n}> | Readonly<{\n    partId: string;\n    kind: 'translate';\n    axis: 'x' | 'y';\n    unit: 'viewBox';\n    translation: number;\n}>;\nexport interface MotionRotationTrackContract {\n    readonly id: string;\n    readonly kind: 'rotate';\n    readonly partIds: readonly string[];\n    readonly anchor: readonly [number, number];\n}\nexport type MotionTrackContract = MotionRotationTrackContract | Readonly<{\n    id: string;\n    kind: 'opacity';\n    partIds: readonly string[];\n}> | Readonly<{\n    id: string;\n    kind: 'translate';\n    partIds: readonly string[];\n    axis: 'x' | 'y';\n    unit: 'viewBox';\n}>;\nexport interface MotionCapabilities {\n    readonly state: MotionCapabilityState;\n    readonly partIds: readonly string[];\n    readonly tracks: readonly MotionTrackContract[];\n    readonly gestures: readonly MotionGestureContract[];\n    readonly adapters: Readonly<{\n        readonly lottie: 'not-exported' | 'lottie-web-svg-5.13';\n        readonly sfSymbols: 'not-exported';\n    }>;\n}\n",
+        "ir/index.d.ts": "import type { GlyphCompiler } from './compiler.js';\nexport { GlyphModelError, sampleMotionGesture } from './compiler.js';\nexport type { IconId, AxisName, IconVariant, ModelMode, ModelState, FillRule, PartRole, GlyphRequest, ParsedGlyphRequest, SourcePartProvenance, ModelPartProvenance, RecipePartProvenance, PartProvenance, GlyphPart, SourceGlyphProvenance, ModelGlyphProvenance, RecipeGlyphProvenance, GlyphProvenance, GlyphIR, GlyphComposition, GlyphCapabilities, AxisContract, MotionCapabilityState, MotionGestureTrackContract, MotionGestureContract, MotionGestureSample, MotionTrackContract, MotionCapabilities, IconDesignContract, GlyphModelErrorCode, CalendarNumberGlyphInput } from './compiler.js';\nexport declare const glyph: GlyphCompiler['glyph'];\nexport declare const glyphCapabilities: GlyphCompiler['glyphCapabilities'];\nexport declare const parseGlyphRequest: GlyphCompiler['parseGlyphRequest'];\nexport declare const parseIconId: GlyphCompiler['parseIconId'];\nexport declare const isIconId: GlyphCompiler['isIconId'];\nexport declare const calendarNumberGlyph: GlyphCompiler['calendarNumberGlyph'];\nexport declare const iconIds: GlyphCompiler['iconIds'];\nexport declare const axisNames: GlyphCompiler['axisNames'];\nexport declare const axisContracts: GlyphCompiler['axisContracts'];\nexport declare const iconDesignContract: GlyphCompiler['iconDesignContract'];\n",
+        "ir/paint-types.d.ts": "/** Общие paint primitives не зависят от каталога, рецептов и motion. */\nexport interface RecipeStrokePaint {\n    readonly kind: 'stroke';\n    readonly fill: 'none';\n    readonly stroke: 'currentColor';\n    readonly strokeWidth: number;\n    readonly linecap: 'round' | 'butt';\n    readonly linejoin: 'round';\n}\nexport interface RecipeFillPaint {\n    readonly kind: 'fill';\n    readonly fill: 'currentColor';\n}\n",
+        "ir/recipes.d.ts": "/**\n * Публичные recipe-kernels. Их path — редактируемая centerline/primitive\n * геометрия; target compiler обязан expand stroke перед font/filled-SVG export.\n */\nimport type { RecipeFillPaint, RecipeStrokePaint } from './paint-types.js';\nexport type { RecipeFillPaint, RecipeStrokePaint } from './paint-types.js';\nexport interface NormalizedPoint {\n    readonly x: number;\n    readonly y: number;\n}\nexport interface NormalizedBBox extends NormalizedPoint {\n    readonly width: number;\n    readonly height: number;\n}\nexport interface ViewBoxBBox {\n    readonly x: number;\n    readonly y: number;\n    readonly width: number;\n    readonly height: number;\n}\nexport interface RecipePathGeometry {\n    readonly kind: 'path';\n    readonly d: string;\n}\nexport interface RecipePart {\n    readonly id: string;\n    readonly role: string;\n    readonly geometry: RecipePathGeometry;\n    readonly paint: RecipeStrokePaint | RecipeFillPaint;\n    readonly bbox: Readonly<{\n        minX: number;\n        minY: number;\n        maxX: number;\n        maxY: number;\n    }>;\n    readonly topologySignature: string;\n    readonly angle?: number;\n    readonly weld?: Readonly<{\n        to: string;\n        at: NormalizedPoint;\n    }>;\n}\nexport interface RecipeJoin {\n    readonly id: string;\n    readonly at: NormalizedPoint;\n    readonly members: readonly string[];\n    readonly lowering: 'expand-strokes-then-union';\n}\nexport type NegativeSpaceKind = 'exterior-margin' | 'aperture' | 'gap' | 'knockout';\nexport type NegativeSpaceMeasurementMethod = 'ink-bounds-to-canvas' | 'polyline-endpoint-distance-minus-stroke' | 'radial-farthest-corner-to-inner-stroke' | 'concentric-stroke-half-width-difference' | 'corner-to-ellipse-radial-distance' | 'radial-centerline-to-body-minus-half-stroke' | 'adjacent-inner-endpoint-chord-minus-stroke' | 'axis-aligned-group-bounds-separation' | 'horizontal-ink-bounds-separation';\n/**\n * Успешный proof без boolean verdict: если measured ниже requiredMinimum,\n * recipe не возвращается и построение завершается RangeError.\n */\nexport interface NegativeSpaceConstraint {\n    readonly unit: 'normalized-canvas';\n    readonly kind: NegativeSpaceKind;\n    readonly requiredMinimum: number;\n    readonly measured: number;\n    readonly measurementMethod: NegativeSpaceMeasurementMethod;\n    readonly participants: readonly string[];\n}\nexport interface NegativeSpaceContract {\n    readonly constraints: readonly NegativeSpaceConstraint[];\n}\nexport interface RecipeResult {\n    readonly kind: string;\n    readonly canvas: Readonly<NormalizedBBox>;\n    readonly parts: readonly RecipePart[];\n    readonly negativeSpace: NegativeSpaceContract;\n    readonly metrics?: Readonly<Record<string, unknown>>;\n    readonly topologyKey?: string;\n    readonly joins?: readonly RecipeJoin[];\n}\nexport interface OpticalOptions {\n    readonly opsz?: number;\n}\nexport interface OpticalLimits {\n    readonly opsz: number;\n    readonly minStroke: number;\n    readonly minClearance: number;\n    readonly minDetail: number;\n    readonly raster: Readonly<{\n        strokePixels: number;\n        clearancePixels: number;\n        detailPixels: number;\n    }>;\n}\nexport interface DirectionalOptions extends OpticalOptions {\n    readonly orientation?: 'up' | 'down' | 'back' | 'forward';\n    readonly center?: NormalizedPoint;\n    readonly margin?: number;\n    readonly weight?: number;\n    readonly clearance?: number;\n    readonly headLength?: number;\n    readonly headSpan?: number;\n}\nexport interface DirectionalArrowOptions extends DirectionalOptions {\n    readonly shaftLength?: number;\n}\nexport interface EnclosureOptions extends OpticalOptions {\n    readonly contentKeyline: NormalizedBBox;\n    readonly weight?: number;\n    readonly clearance?: number;\n    readonly margin?: number;\n}\nexport interface StrikeOptions extends OpticalOptions {\n    readonly targetBBox: NormalizedBBox;\n    readonly weight?: number;\n    readonly clearance?: number;\n    readonly margin?: number;\n    readonly overshoot?: number;\n    readonly angle?: number;\n}\nexport interface NotificationBadgeOptions extends OpticalOptions {\n    readonly targetBBox: NormalizedBBox;\n    readonly clearance?: number;\n    readonly radius?: number;\n    readonly margin?: number;\n}\nexport interface RadialRaysOptions extends OpticalOptions {\n    readonly weight?: number;\n    readonly clearance?: number;\n    readonly margin?: number;\n    readonly center?: NormalizedPoint;\n    readonly bodyRadius?: number;\n    /** Дискретная topology: 4..16. */\n    readonly count?: number;\n    /** Непрерывная координата sun-low→sun: 0..1. */\n    readonly length?: number;\n    readonly rotation?: number;\n}\nexport interface MusicalNoteOptions extends OpticalOptions {\n    readonly id?: string;\n    readonly weight?: number;\n    readonly margin?: number;\n    readonly headCenter?: NormalizedPoint;\n    readonly headRadiusX?: number;\n    readonly headRadiusY?: number;\n    readonly headAngle?: number;\n    readonly stemDirection?: 'up' | 'down';\n    readonly stemLength?: number;\n    readonly flag?: boolean;\n}\nexport interface MusicalNotesItem extends MusicalNoteOptions {\n    readonly id: string;\n}\nexport interface MusicalNotesOptions extends Omit<MusicalNoteOptions, 'id' | 'headCenter' | 'flag'> {\n    readonly notes: readonly MusicalNotesItem[];\n    readonly beam?: boolean;\n    readonly beamThickness?: number;\n}\nexport declare const glyphOpszRange: Readonly<{\n    min: 16;\n    default: 24;\n    max: 48;\n}>;\nexport declare const glyphRasterPolicy: Readonly<Record<string, unknown>>;\nexport declare const glyphOperatorTokens: Readonly<Record<string, unknown>>;\nexport declare const opticalLimits: (options?: OpticalOptions) => OpticalLimits;\nexport declare const buildDirectionalChevron: (options?: DirectionalOptions) => RecipeResult;\nexport declare const buildDirectionalArrow: (options?: DirectionalArrowOptions) => RecipeResult;\nexport declare const decorateCircleEnclosure: (options: EnclosureOptions) => RecipeResult;\nexport declare const decorateStrike: (options: StrikeOptions) => RecipeResult & Readonly<{\n    masks: readonly unknown[];\n    compositionOrder: readonly string[];\n}>;\nexport declare const placeNotificationBadge: (options: NotificationBadgeOptions) => RecipeResult;\nexport declare const generateRadialRays: (options?: RadialRaysOptions) => RecipeResult;\nexport declare const buildMusicalNote: (options?: MusicalNoteOptions) => RecipeResult;\nexport declare const buildMusicalNotes: (options: MusicalNotesOptions) => RecipeResult;\nexport type CalendarPrimitive = Readonly<{\n    kind: 'move' | 'line';\n    x: number;\n    y: number;\n}> | Readonly<{\n    kind: 'cubic';\n    x1: number;\n    y1: number;\n    x2: number;\n    y2: number;\n    x: number;\n    y: number;\n}> | Readonly<{\n    kind: 'close';\n}>;\nexport interface CalendarCell {\n    readonly centerX: number;\n    readonly centerY: number;\n    readonly width: number;\n    readonly height: number;\n}\nexport interface RoundedDigitGeometry {\n    readonly digit: number;\n    readonly d: string;\n    readonly primitives: readonly CalendarPrimitive[];\n    readonly topologySignature: string;\n    readonly advanceWidth: number;\n    readonly cell: Readonly<CalendarCell>;\n    readonly paint: Readonly<{\n        fill: 'none';\n        stroke: 'currentColor';\n        strokeWidth: number;\n        linecap: 'round';\n        linejoin: 'round';\n    }>;\n    readonly axis: Readonly<{\n        opsz: number;\n        masterInterval: string;\n        topologyStable: true;\n    }>;\n}\nexport interface CalendarDayInput {\n    readonly date: Date;\n    readonly timeZone: string;\n}\nexport interface CalendarNumberInput extends CalendarDayInput {\n    readonly opsz?: number;\n    readonly aperture?: Readonly<ViewBoxBBox>;\n}\nexport declare const calendarOpszRange: Readonly<{\n    min: 16;\n    default: 24;\n    max: 48;\n}>;\nexport declare const calendarCanvasSize: 24;\nexport declare const calendarApertureRatio: Readonly<ViewBoxBBox>;\nexport declare const defaultCalendarAperture: Readonly<ViewBoxBBox>;\nexport declare const roundedDigitGeometry: (digit: number, options?: Readonly<{\n    opsz?: number;\n    cell?: CalendarCell;\n}>) => RoundedDigitGeometry;\nexport declare const resolveCalendarDay: (input: CalendarDayInput) => Readonly<{\n    day: number;\n    epochMilliseconds: number;\n    timeZone: string;\n}>;\nexport declare const buildCalendarNumberGeometry: (input: CalendarNumberInput) => Readonly<{\n    day: number;\n    timeZone: string;\n    epochMilliseconds: number;\n    parts: readonly (RoundedDigitGeometry & Readonly<{\n        id: 'calendar.date.tens' | 'calendar.date.ones';\n        role: 'calendar-date-digit';\n        slot: 'tens' | 'ones';\n    }>)[];\n    negativeSpace: NegativeSpaceContract;\n    axis: Readonly<{\n        opsz: number;\n        masterInterval: string;\n        topologyStableWithinInterval: true;\n        profile: Readonly<Record<string, number>>;\n    }>;\n    layout: Readonly<Record<string, unknown>>;\n}>;\n",
+        "ir/request.d.ts": "import type { AxisContract, AxisName, IconVariant, ModelMode } from './glyph-types.js';\nexport type GlyphModelErrorCode = 'CANDIDATES_REQUIRED' | 'AUTHOR_PARITY_REQUIRED' | 'AUTHOR_VARIATION_UNSUPPORTED';\n/** Потребитель проверяет code; сообщение не является машинным контрактом. */\nexport declare class GlyphModelError extends Error {\n    readonly code: GlyphModelErrorCode;\n    constructor(code: GlyphModelErrorCode, message: string);\n}\nexport interface SymbolOptions {\n    readonly variant: IconVariant;\n    readonly modelMode: ModelMode;\n    readonly axes: Readonly<Partial<Record<AxisName, number>>>;\n}\nexport declare function parseSymbolVariant(value: unknown): IconVariant;\n/** Общая граница запроса для полного каталога и предварительно собранного символа. */\nexport declare function parseSymbolOptions(value: unknown, contracts?: Readonly<Record<AxisName, AxisContract>>): SymbolOptions;\n",
+        "ir/sha256.d.ts": "/** Минимальный synchronous SHA-256 для browser/runtime provenance binding. */\nexport declare function sha256Hex(value: string): string;\n",
+        "ir/svg-assembly.d.ts": "import type { GlyphPart, GlyphComposition } from './glyph-types.js';\n/** Общая сериализация самостоятельных слоёв для glyph и build-time state groups. */\nexport declare function assembleGlyphLayers(parts: readonly GlyphPart[]): string;\n/** Рамка готовится при сборке; state runtime получает только строки. */\nexport declare function assembleGlyphFrame(viewBox: readonly [number, number, number, number], dimensions?: readonly [number, number]): readonly [string, string];\nexport declare function assembleGlyphSvg(viewBox: readonly [number, number, number, number], parts: readonly GlyphPart[], composition: GlyphComposition, dimensions?: readonly [number, number]): string;\n",
+        "ir/symbol-runtime.d.ts": "import type { GlyphRequest } from './glyph-types.js';\nexport type SymbolGlyphRequest = Omit<GlyphRequest, 'icon'>;\n",
+        "symbols/ellipse.d.ts": "import type { AuthorSourceGlyph, AuthorSourceCapabilities, AuthorSymbolGlyphRequest } from '../ir/author-source.js';\nexport declare const outline: string;\nexport declare const filled: string;\nexport declare function glyph(request?: AuthorSymbolGlyphRequest): AuthorSourceGlyph<'ellipse'>;\nexport declare function glyphCapabilities(variant?: AuthorSourceCapabilities['variant']): AuthorSourceCapabilities<'ellipse'>;\n",
+        "symbols/ellipsis-horizontal.d.ts": "import type { AuthorSourceGlyph, AuthorSourceCapabilities, AuthorSymbolGlyphRequest } from '../ir/author-source.js';\nexport declare const outline: string;\nexport declare const filled: string;\nexport declare function glyph(request?: AuthorSymbolGlyphRequest): AuthorSourceGlyph<'ellipsis-horizontal'>;\nexport declare function glyphCapabilities(variant?: AuthorSourceCapabilities['variant']): AuthorSourceCapabilities<'ellipsis-horizontal'>;\n",
+        "variations/ellipsis-horizontal.d.ts": "import type { AuthorSourceGlyph, AuthorSymbolGlyphRequest } from '../ir/author-source.js';\nimport type { AuthorVariationGlyph, AuthorVariationCapabilities, AuthorVariationGlyphRequest } from '../ir/authored-variation.js';\nexport declare const outline: string;\nexport declare const filled: string;\nexport declare function glyph(request?: AuthorSymbolGlyphRequest): AuthorSourceGlyph<'ellipsis-horizontal'>;\nexport declare function glyph(request: AuthorVariationGlyphRequest): AuthorVariationGlyph<'ellipsis-horizontal'>;\nexport declare function glyphCapabilities(variant?: AuthorVariationCapabilities['variant']): AuthorVariationCapabilities<'ellipsis-horizontal'>;\n"
+      }
+    }
+  },
+  "findings": []
+}

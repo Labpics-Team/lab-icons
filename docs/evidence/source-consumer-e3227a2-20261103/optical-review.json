@@ -1,0 +1,124 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "/root/adjacent_consumer_review",
+  "reviewedAt": "2026-11-02T22:15:39Z",
+  "axis": "Оптическая согласованность настоящих mic-circle/question-circle/play-circle в соседних Lab UI кнопках",
+  "verdict": "PASS",
+  "findings": [],
+  "scope": {
+    "icons": ["mic-circle", "question-circle", "play-circle"],
+    "variants": ["outline", "filled"],
+    "sizesPx": [16, 24, 48],
+    "bodyWidths": [1, 0.8],
+    "samplesPerCapture": 18,
+    "groupsPerCapture": 6,
+    "surface": "Светлая поверхность и одинаковые icon-only Lab UI кнопки фактического consumer",
+    "sourceCommit": "2bf18f9903511d5b0ed703118e7134188253571a",
+    "uiCommit": "e3227a2fabc9136997f58cf710076bce614940df",
+    "run": "41530330458",
+    "job": "125568562377"
+  },
+  "githubReadback": {
+    "endpoint": "repos/Labpics-Team/labui/actions/jobs/125568562377",
+    "headSha": "e3227a2fabc9136997f58cf710076bce614940df",
+    "status": "completed",
+    "conclusion": "success",
+    "startedAt": "2026-11-02T21:55:16Z",
+    "completedAt": "2026-11-02T22:07:54Z",
+    "url": "https://github.com/Labpics-Team/labui/actions/runs/41530330458/job/125568562377"
+  },
+  "artifacts": [
+    {
+      "file": "E:\\AgentWork\\source-consumer-e3227a2-20261103\\no-preference-microphone-adjacent-width-1.png",
+      "bodyWidth": 1,
+      "dimensions": [544, 440],
+      "bytes": 26879,
+      "sha256": "32741ef48969d76d4d42face80c9a8e4f93463d992019c2e560fa90d4d2c3c85",
+      "receiptDigestMatches": true
+    },
+    {
+      "file": "E:\\AgentWork\\source-consumer-e3227a2-20261103\\no-preference-microphone-adjacent-width-0.8.png",
+      "bodyWidth": 0.8,
+      "dimensions": [544, 440],
+      "bytes": 27147,
+      "sha256": "4a0df6740ca7e7c7d87c7392f2b3807a0c23deae071f4e4eec75927ff50356d3",
+      "receiptDigestMatches": true
+    },
+    {
+      "file": "E:\\AgentWork\\source-consumer-e3227a2-20261103\\reduce-microphone-adjacent-width-1.png",
+      "bodyWidth": 1,
+      "dimensions": [544, 440],
+      "bytes": 26879,
+      "sha256": "32741ef48969d76d4d42face80c9a8e4f93463d992019c2e560fa90d4d2c3c85",
+      "receiptDigestMatches": true,
+      "byteEqualToNoPreferencePose": true
+    },
+    {
+      "file": "E:\\AgentWork\\source-consumer-e3227a2-20261103\\reduce-microphone-adjacent-width-0.8.png",
+      "bodyWidth": 0.8,
+      "dimensions": [544, 440],
+      "bytes": 27147,
+      "sha256": "4a0df6740ca7e7c7d87c7392f2b3807a0c23deae071f4e4eec75927ff50356d3",
+      "receiptDigestMatches": true,
+      "byteEqualToNoPreferencePose": true
+    }
+  ],
+  "receipts": {
+    "visual": {
+      "file": "E:\\AgentWork\\source-consumer-e3227a2-20261103\\visual-receipt.json",
+      "sha256": "940ecb99e5b67f52517e1fde46d9480426e4e8c7ece34465afca440bb10ec29e"
+    },
+    "consumer": {
+      "file": "E:\\AgentWork\\source-consumer-e3227a2-20261103\\receipt.json",
+      "sha256": "4dcaddb845b75ba3c82124efecf45c2d6cb9efcf32bfb0057958a4d9e7c15639",
+      "outcome": "passed",
+      "harnessCommit": "e3227a2fabc9136997f58cf710076bce614940df",
+      "captureRecordsMatchPng": true,
+      "captureComposition": "Каждый capture record фиксирует три icons, два variants, три sizes, groups6/samples18 и соответствующий PNG digest."
+    }
+  },
+  "method": {
+    "skill": "E:\\AgentWork\\agents-config-lab-icons-platform-20261101\\skills\\design\\SKILL.md",
+    "tool": "view_image, original detail",
+    "naturalScale": "Просмотр обоих no-preference PNG целиком. Reduced PNG побайтно тождественны соответствующей статической позе и поэтому имеют тот же видимый результат.",
+    "zoomPasses": [
+      {
+        "pass": 1,
+        "scale": "48 px при4x nearest-neighbor",
+        "rows": ["Outline width1", "Outline width0.8", "Filled width1", "Filled width0.8"],
+        "columns": ["mic-circle", "question-circle", "play-circle"],
+        "focus": "Общие круги, толщина обрамления, опора, масса внутреннего рисунка, корпус/стойка/просветы микрофона",
+        "defects": []
+      },
+      {
+        "pass": 2,
+        "scale": "16 px при8x и24 px при6x nearest-neighbor",
+        "focus": "Читаемость маленьких форм, сохранность negative capsule, слияние деталей, внутренний вес рядом с вопросительным знаком и play",
+        "defects": []
+      }
+    ]
+  },
+  "observations": [
+    "На натуральном масштабе три Outline круга воспринимаются единым рядом: apparent diameter, круговая толщина и вертикальная опора согласованы при16/24/48 px. У Filled одинаковый внешний диск удерживает общую массу и силуэт соседних кнопок.",
+    "Внутренний рисунок микрофона плотнее вопросительного знака и сложнее треугольника play. Эта разница видна, но общий вес обрамления сохраняет связность ряда. Микрофон не выглядит случайно увеличенным целиком или чужим по толщине круга.",
+    "При bodyWidth0.8 корпус становится более вытянутым и между ним и держателем появляется дополнительный воздух; круг и стойка сохраняют опору. Изменение не превращает микрофон в круг, не сливает капсулу с держателем и не создаёт clipping.",
+    "В24 и48 px форма микрофона уверенно узнаётся в обоих начертаниях. В16 px детализация ограничена растровым масштабом, но capsule/U/stem остаются читаемой конфигурацией; у Filled узкий светлый корпус не исчезает.",
+    "Сужение светлого корпуса Filled немного увеличивает окружающую тёмную массу, а Outline становится свободнее внутри. В показанных двух значениях это не нарушает согласованность с соседями. Apparent width независимых Outline/Filled не требуется уравнивать механически."
+  ],
+  "checks": {
+    "actualAdjacentPngOpticalInspection": "Да",
+    "fourPngReceiptDigestVerification": "Да",
+    "normalReducedByteEquality": "Да",
+    "nativeConsumerReceiptCaptureMatrix": "Да",
+    "githubExactUiJobReadback": "Да",
+    "newBrowserTestsOrBuild": "Не было",
+    "repoOrRemoteMutation": "Не было"
+  },
+  "limits": [
+    "PASS ограничен указанными тремя круговыми семействами, двумя начертаниями, размерами16/24/48 и width1/0.8 в конкретном установленном consumer.",
+    "Данный review рассматривает статические соседние позы. Равные reduced PNG не удостоверяют качество motion execution, interruption или latency.",
+    "Новый browser/test/build reviewer не запускал. Native activation records находятся в self-hosted receipt, но управление не является осью этого оптического review.",
+    "Иные значения bodyWidth, DPR, фон, StyleProfile, weight/opsz и прочие семейства не получили оптическую приёмку этим просмотром.",
+    "Глобальная Figma parity, all-corpus coverage, production readiness, публикация и performance/latency не выводятся из этих PNG."
+  ]
+}

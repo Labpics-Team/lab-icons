@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Создать символ — Lab Icons</title>
+  <link rel="icon" href="originals/apps/outline.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="explorer.css">
+</head>
+<body class="authoring-page">
+  <header class="topbar"><a class="brand" href="index.html">Lab Icons</a><nav class="site-nav" aria-label="Разделы"><a href="index.html">Символы</a><a href="authoring.html" aria-current="page">Создать символ</a></nav><a class="audit-link" href="observatory.html">Проверка прежних моделей</a></header>
+  <main class="authoring-workspace">
+    <section class="authoring-preview" aria-labelledby="authoring-title">
+      <div class="authoring-heading"><div><p class="eyebrow">DesignSpec</p><h1 id="authoring-title">Создать символ</h1></div><span class="status">Кандидат</span></div>
+      <p class="authoring-intro">Опишите части и их построение. Проверьте рисунок и сохраните SVG.</p>
+      <div id="authoring-stage" class="symbol-stage" role="img" aria-label="Предпросмотр кандидата" aria-busy="true" tabindex="-1"></div>
+      <div id="authoring-samples" class="size-samples" aria-label="Кандидат на размерах 16, 24 и 48 пикселей"></div>
+      <p class="authoring-size-note">16, 24 и 48 px — размеры SVG. Геометрия при масштабировании сохраняется.</p>
+      <section class="authoring-export" aria-label="Экспорт SVG"><label for="authoring-size">Размер SVG</label><select id="authoring-size"><option value="16">16 px</option><option value="24" selected>24 px</option><option value="48">48 px</option></select><button id="authoring-download" type="button" disabled>Скачать SVG</button></section>
+      <p id="authoring-status" class="authoring-status" role="status">Загружаем пример…</p>
+      <details class="authoring-anatomy"><summary>Части и происхождение</summary><ul id="authoring-parts"></ul><p id="authoring-digest"></p><p>Кандидат требует визуального принятия в дизайн-систему.</p></details>
+    </section>
+    <form id="authoring-form" class="authoring-editor" aria-label="Спецификация символа" aria-busy="true" novalidate>
+      <div class="editor-heading"><h2>Спецификация</h2><button id="authoring-reset" type="button" disabled>Вернуть пример</button></div>
+      <label class="authoring-name" for="authoring-name">Имя символа<input id="authoring-name" type="text" aria-describedby="authoring-error" autocomplete="off" spellcheck="false" disabled></label>
+      <label class="spec-label" for="authoring-spec">DesignSpec JSON</label>
+      <p id="authoring-hint" class="authoring-hint">Начертание задаётся геометрией и окраской частей в спецификации.</p>
+      <textarea id="authoring-spec" aria-describedby="authoring-hint authoring-error" spellcheck="false" autocapitalize="off" disabled></textarea>
+      <pre id="authoring-error" class="authoring-error" role="alert" hidden></pre>
+      <button id="authoring-build" class="authoring-build" type="submit" disabled>Построить превью</button>
+    </form>
+  </main>
+  <script type="module" src="authoring.js"></script>
+</body>
+</html>

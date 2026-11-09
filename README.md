@@ -1,39 +1,47 @@
 # Lab Icons
 
-Библиотека статических SVG и геометрического представления иконок Labpics.
-Статические иконки наследуют `currentColor`. Доступность параметрической модели,
-оптических осей и смысловых жестов определяется для каждого варианта отдельно.
+Авторские SVG и геометрическое представление символов Labpics.
+Модули отдельных символов используют закреплённые masters Lab UI v2.1 и
+наследуют `currentColor`. Возможности модели, осей и жестов читаются из контракта варианта.
 
 ## Начало работы
 
 [Установка, требования к среде и точки входа](docs/package.md) формируются из
 контракта поставки. Основной канал установки: публичный npm.
 
-После установки пакет предоставляет именованные SVG-строки:
+Примеры описывают собранный checkout; публикация выпуска проверяется отдельно.
+Текущий авторский символ подключается одной SVG-строкой:
 
 ```js
-import { accessibilityOutline } from '@labpics/icons';
+import { outline } from '@labpics/icons/symbols/accessibility';
 
-console.log(accessibilityOutline);
+console.log(outline);
 ```
 
-Геометрическую модель и доступные оси запрашивают отдельно:
+Части и возможности символа подключают через его собственный модуль:
 
 ```js
-import { glyph, glyphCapabilities } from '@labpics/icons/ir';
+import { glyph, glyphCapabilities } from '@labpics/icons/symbols/time';
 
 const source = glyph({
-  icon: 'accessibility',
   variant: 'outline',
   modelMode: 'source-only',
 });
-const capabilities = glyphCapabilities('reload', 'outline');
+const capabilities = glyphCapabilities('outline');
 console.log(source, capabilities);
 ```
 
-Перед использованием оси проверяйте возможности конкретного варианта.
-Режим `source-only` возвращает авторскую геометрию без придуманной
-декомпозиции. Исследовательские модели подключаются явно.
+Default и `source-only` возвращают один неизменяемый авторский результат.
+`source.provenance.author` связывает его с Figma file/node/version и хешами master.
+До доказательства паритета текущей авторской формы запрос оси или candidate-модели
+получает `AUTHOR_PARITY_REQUIRED`.
+
+[Отдельные символы, части, оси и эффекты](docs/symbol-modules.md) показывают полный
+путь подключения. Корневой `@labpics/icons` и полный `@labpics/icons/ir` сохраняют
+записанный ранее корпус для совместимости; его модели и жесты относятся к тому baseline.
+
+[Создать собственный символ](docs/authoring.md): DesignSpec задаёт конструкцию,
+анатомию и ограничения; opt-in authoring-компилятор выдаёт GlyphIR и статический SVG.
 
 ## Работа с исходниками
 

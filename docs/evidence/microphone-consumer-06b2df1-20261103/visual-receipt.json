@@ -1,0 +1,84 @@
+{
+  "run": "41519738213",
+  "job": "125532379401",
+  "records": [
+    {
+      "schemaVersion": 1,
+      "encoding": "gzip-base64",
+      "file": "result/no-preference-microphone-width-0.8.png",
+      "sourceSha": "44f9c10f6d3349ce061b56497cafc66b901f5a81",
+      "uiCommit": "06b2df1cb043175cb48a443eba377e1227e740c9",
+      "width": 544,
+      "height": 417,
+      "pngSha256": "33f49d31bd91b3fd5660dcaec4c09f705c16ee49ab568a0d5d348aae380a18eb",
+      "bytes": 26225,
+      "compressedBytes": 24857,
+      "chunks": 9
+    },
+    {
+      "schemaVersion": 1,
+      "encoding": "gzip-base64",
+      "file": "result/no-preference-microphone-width-0.9.png",
+      "sourceSha": "44f9c10f6d3349ce061b56497cafc66b901f5a81",
+      "uiCommit": "06b2df1cb043175cb48a443eba377e1227e740c9",
+      "width": 544,
+      "height": 417,
+      "pngSha256": "f647b2988875213b73a5bb732ac752f98a1fe27c473e4adcf6ebd0cbc702cbfd",
+      "bytes": 26264,
+      "compressedBytes": 24993,
+      "chunks": 9
+    },
+    {
+      "schemaVersion": 1,
+      "encoding": "gzip-base64",
+      "file": "result/no-preference.png",
+      "sourceSha": "44f9c10f6d3349ce061b56497cafc66b901f5a81",
+      "uiCommit": "06b2df1cb043175cb48a443eba377e1227e740c9",
+      "width": 640,
+      "height": 7811,
+      "pngSha256": "f9f908d96112d69cd714ef4f407dd509bea5b078d395f2f4e05117c88ab4bdaf",
+      "bytes": 479799,
+      "compressedBytes": 444329,
+      "chunks": 145
+    },
+    {
+      "schemaVersion": 1,
+      "encoding": "gzip-base64",
+      "file": "result/reduce-microphone-width-0.8.png",
+      "sourceSha": "44f9c10f6d3349ce061b56497cafc66b901f5a81",
+      "uiCommit": "06b2df1cb043175cb48a443eba377e1227e740c9",
+      "width": 544,
+      "height": 417,
+      "pngSha256": "33f49d31bd91b3fd5660dcaec4c09f705c16ee49ab568a0d5d348aae380a18eb",
+      "bytes": 26225,
+      "compressedBytes": 24857,
+      "chunks": 9
+    },
+    {
+      "schemaVersion": 1,
+      "encoding": "gzip-base64",
+      "file": "result/reduce-microphone-width-0.9.png",
+      "sourceSha": "44f9c10f6d3349ce061b56497cafc66b901f5a81",
+      "uiCommit": "06b2df1cb043175cb48a443eba377e1227e740c9",
+      "width": 544,
+      "height": 417,
+      "pngSha256": "f647b2988875213b73a5bb732ac752f98a1fe27c473e4adcf6ebd0cbc702cbfd",
+      "bytes": 26264,
+      "compressedBytes": 24993,
+      "chunks": 9
+    },
+    {
+      "schemaVersion": 1,
+      "encoding": "gzip-base64",
+      "file": "result/reduce.png",
+      "sourceSha": "44f9c10f6d3349ce061b56497cafc66b901f5a81",
+      "uiCommit": "06b2df1cb043175cb48a443eba377e1227e740c9",
+      "width": 640,
+      "height": 7811,
+      "pngSha256": "33fcd5e2d30381f4e0d71bc5c448bad79facd11aa1f660ae38945d5a18799107",
+      "bytes": 477507,
+      "compressedBytes": 420410,
+      "chunks": 137
+    }
+  ]
+}

@@ -59,8 +59,13 @@ export function buildSourceVariantContract(root, name, variant, svgoConfig) {
   const svg = readFileSync(join(root, file), 'utf8');
   const optimized = optimize(svg, { ...svgoConfig, path: join(root, file) });
   if (optimized.error) throw new Error(`icon-catalog: SVGO не собрал ${file}: ${optimized.error}`);
-  const sourceEntries = authorPathEntries(svg);
-  const artifactEntries = sourcePathEntries(optimized.data);
+  return buildSourceVariantContractFromSvg({ file, sourceSvg: svg, artifactSvg: optimized.data });
+}
+
+/** Один владелец source identity для записанного корпуса и новых авторских masters. */
+export function buildSourceVariantContractFromSvg({ file, sourceSvg, artifactSvg }) {
+  const sourceEntries = authorPathEntries(sourceSvg);
+  const artifactEntries = sourcePathEntries(artifactSvg);
   if (sourceEntries.length !== artifactEntries.length) {
     throw new Error(`icon-catalog: SVGO изменил path count ${file}`);
   }

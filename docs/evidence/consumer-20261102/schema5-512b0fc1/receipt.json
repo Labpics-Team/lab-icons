@@ -1,0 +1,132 @@
+{
+    "uiSha":  "512b0fc1cf64c1302ef248c83006a6f5008b3c0b",
+    "iconsSha":  "3d59683295adf903a6aea32aafd36b0caa331526",
+    "run":  "41390938941",
+    "job":  "125101960764",
+    "jobConclusion":  "failure",
+    "outcome":  "failed",
+    "browserOutcome":  "passed",
+    "sourceMaterialsVerified":  38,
+    "figmaCounts":  {
+                        "families":  330,
+                        "variants":  660
+                    },
+    "runner":  {
+                   "node":  "v22.19.0",
+                   "platform":  "linux",
+                   "architecture":  "x64",
+                   "runId":  "41390938941",
+                   "runAttempt":  "1",
+                   "environment":  "self-hosted",
+                   "name":  "labpics-ci-runner-lw4fc",
+                   "os":  "Linux",
+                   "browser":  "140.0.7339.186"
+               },
+    "harness":  {
+                    "commit":  "512b0fc1cf64c1302ef248c83006a6f5008b3c0b",
+                    "sourceSha256":  "0b04aa07ad0d84dac8e51f016b0bcbef997c3e6f34377d3cc8eec291f0211435",
+                    "dirty":  false,
+                    "diffSha256":  "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                    "files":  [
+                                  {
+                                      "file":  "apps/docs/tests/icons-packed.mjs",
+                                      "sha256":  "0b04aa07ad0d84dac8e51f016b0bcbef997c3e6f34377d3cc8eec291f0211435"
+                                  },
+                                  {
+                                      "file":  "apps/docs/tests/icons-notification-consumer.mjs",
+                                      "sha256":  "4ce6cd44017ddc959bf6faec4d2d4ef55d59f10116ea759647b7ae0d716a7ce7"
+                                  },
+                                  {
+                                      "file":  "apps/docs/tests/icons-authored-dots-consumer.mjs",
+                                      "sha256":  "8e485213830dc94aa6618ddbab4eeb435ce0ac0e17df5add14a871e83e2e08af"
+                                  }
+                              ]
+                },
+    "measurement":  {
+                        "artifactCount":  1369,
+                        "sha256":  "5729e44646e735e86bf7f5bb73f78da79de6a238f1916a1b02dcacea47c26c42",
+                        "policyViolationCount":  16,
+                        "bytes":  758188,
+                        "consumerCount":  14
+                    },
+    "archives":  [
+                     {
+                         "key":  "icons",
+                         "inputName":  "labpics-icons-0.3.0.tgz",
+                         "archiveSha256":  "29731381fb424dd3083db7f83c0095828eb589c90694e597f330d884f8b9321a",
+                         "archiveBytes":  1962300,
+                         "integrity":  "sha512-oWsO3g9dksCg6Hq5pESSnLJt3EocEAn1ujQOjZYL2uMlBI7BglOtYZl1f9L5miAwkoH3IYw2YmWFGW1T+fGVmQ==",
+                         "snapshot":  "archives/icons.tgz"
+                     },
+                     {
+                         "key":  "uiCore",
+                         "inputName":  "labpics-ui-core-0.0.0.tgz",
+                         "archiveSha256":  "ae386863e6597b06b1a2d4db7fab25d76e9e7c256b9cd316caea378b020eabe8",
+                         "archiveBytes":  747591,
+                         "integrity":  "sha512-wa+IJPuzDOvKSVX+2IyUZ0b1MaPBQGi4hqLhuedxarUsXMdNZEpn3DDWyxtPTHgq9DI6d8UP4ftFL5gxc62d9Q==",
+                         "snapshot":  "archives/uiCore.tgz"
+                     },
+                     {
+                         "key":  "uiShadow",
+                         "inputName":  "labpics-ui-shadow-0.0.0.tgz",
+                         "archiveSha256":  "96d5c575d6dc9ffc8c7071a314fd0cb36981cc33d6966a551cff2315850fde52",
+                         "archiveBytes":  28635,
+                         "integrity":  "sha512-zqqHWplkl2t/hZpVl5+KpWbqTtrubiGW80FMzIkLvU1FQhR86J4Rf7SuW1HSm5i0ABUMKK3dzDfU9sePdMqHig==",
+                         "snapshot":  "archives/uiShadow.tgz"
+                     }
+                 ],
+    "policyFailure":  {
+                          "code":  "PLATFORM_POLICY_REFUSED",
+                          "violations":  [
+                                             "dist/authoring/design-spec.d.ts: budget 7654 B / 2250 B gzip; measured 7819 B / 2301 B gzip",
+                                             "dist/authoring/index.js: budget 70596 B / 19660 B gzip; measured 71145 B / 19766 B gzip",
+                                             "dist/ir/author-source.d.ts: budget 983 B / 345 B gzip; measured 1041 B / 371 B gzip",
+                                             "dist/ir/compiler.d.ts: budget 10290 B / 2736 B gzip; measured 10534 B / 2782 B gzip",
+                                             "dist/ir/compiler.js: budget 154789 B / 42120 B gzip; measured 155213 B / 42175 B gzip",
+                                             "dist/ir/lottie-runtime.js: budget 11590 B / 3776 B gzip; measured 11878 B / 3866 B gzip",
+                                             "dist/ir/lottie-types.d.ts: budget 2113 B / 926 B gzip; measured 2139 B / 933 B gzip",
+                                             "dist/ir/request.d.ts: budget 987 B / 556 B gzip; measured 1020 B / 574 B gzip",
+                                             "dist/ir/state-runtime.js: budget 4936 B / 1845 B gzip; measured 4985 B / 1852 B gzip",
+                                             "dist/ir/symbol-runtime.js: budget 1160 B / 638 B gzip; measured 1459 B / 684 B gzip",
+                                             "dist/motion/index.d.ts: budget 4625 B / 1441 B gzip; measured 5097 B / 1559 B gzip",
+                                             "dist/motion/index.js: budget 14620 B / 3817 B gzip; measured 15801 B / 4074 B gzip",
+                                             "dist/symbols/notifications-unread.js: budget 30360 B / 5034 B gzip; measured 31296 B / 5535 B gzip",
+                                             "dist/symbols/notifications.js: budget 23951 B / 4165 B gzip; measured 24910 B / 4661 B gzip",
+                                             "recorded-model-axis: consumer budget 853339 B / 214703 B gzip; measured 853589 B / 214748 B gzip",
+                                             "recorded-motion: consumer budget 865952 B / 217706 B gzip; measured 867159 B / 217909 B gzip",
+                                             "artifact dist/authoring/design-spec.d.ts: bytes 7819 \u003e maxBytes 7654",
+                                             "artifact dist/authoring/design-spec.d.ts: gzipBytes 2301 \u003e maxGzipBytes 2250",
+                                             "artifact dist/authoring/index.js: bytes 71145 \u003e maxBytes 70596",
+                                             "artifact dist/authoring/index.js: gzipBytes 19766 \u003e maxGzipBytes 19660",
+                                             "artifact dist/ir/author-source.d.ts: bytes 1041 \u003e maxBytes 983",
+                                             "artifact dist/ir/author-source.d.ts: gzipBytes 371 \u003e maxGzipBytes 345",
+                                             "artifact dist/ir/compiler.d.ts: bytes 10534 \u003e maxBytes 10290",
+                                             "artifact dist/ir/compiler.d.ts: gzipBytes 2782 \u003e maxGzipBytes 2736",
+                                             "artifact dist/ir/compiler.js: bytes 155213 \u003e maxBytes 154789",
+                                             "artifact dist/ir/compiler.js: gzipBytes 42175 \u003e maxGzipBytes 42120",
+                                             "artifact dist/ir/lottie-runtime.js: bytes 11878 \u003e maxBytes 11590",
+                                             "artifact dist/ir/lottie-runtime.js: gzipBytes 3866 \u003e maxGzipBytes 3776",
+                                             "artifact dist/ir/lottie-types.d.ts: bytes 2139 \u003e maxBytes 2113",
+                                             "artifact dist/ir/lottie-types.d.ts: gzipBytes 933 \u003e maxGzipBytes 926",
+                                             "artifact dist/ir/request.d.ts: bytes 1020 \u003e maxBytes 987",
+                                             "artifact dist/ir/request.d.ts: gzipBytes 574 \u003e maxGzipBytes 556",
+                                             "artifact dist/ir/state-runtime.js: bytes 4985 \u003e maxBytes 4936",
+                                             "artifact dist/ir/state-runtime.js: gzipBytes 1852 \u003e maxGzipBytes 1845",
+                                             "artifact dist/ir/symbol-runtime.js: bytes 1459 \u003e maxBytes 1160",
+                                             "artifact dist/ir/symbol-runtime.js: gzipBytes 684 \u003e maxGzipBytes 638",
+                                             "artifact dist/motion/index.d.ts: bytes 5097 \u003e maxBytes 4625",
+                                             "artifact dist/motion/index.d.ts: gzipBytes 1559 \u003e maxGzipBytes 1441",
+                                             "artifact dist/motion/index.js: bytes 15801 \u003e maxBytes 14620",
+                                             "artifact dist/motion/index.js: gzipBytes 4074 \u003e maxGzipBytes 3817",
+                                             "artifact dist/symbols/notifications-unread.js: bytes 31296 \u003e maxBytes 30360",
+                                             "artifact dist/symbols/notifications-unread.js: gzipBytes 5535 \u003e maxGzipBytes 5034",
+                                             "artifact dist/symbols/notifications.js: bytes 24910 \u003e maxBytes 23951",
+                                             "artifact dist/symbols/notifications.js: gzipBytes 4661 \u003e maxGzipBytes 4165",
+                                             "consumer recorded-model-axis: bytes 853589 \u003e maxBytes 853339",
+                                             "consumer recorded-model-axis: gzipBytes 214748 \u003e maxGzipBytes 214703",
+                                             "consumer recorded-motion: bytes 867159 \u003e maxBytes 865952",
+                                             "consumer recorded-motion: gzipBytes 217909 \u003e maxGzipBytes 217706"
+                                         ]
+                      },
+    "logSha256":  "9fbe093978f2445cb87befaf4bc88f8c2c175d58b00921e0be4d89a63f0eb3cf"
+}
