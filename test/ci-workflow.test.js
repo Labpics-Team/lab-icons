@@ -13,13 +13,9 @@ const sources = () => new Map(readdirSync(directory)
 const events = (value) => typeof value === 'string' ? [value]
   : Array.isArray(value) ? value : Object.keys(value);
 const candidateEvents = new Set(['pull_request', 'pull_request_target', 'merge_group']);
-const matrix = [
-  { os: 'ubuntu-latest', node: '22.14.0' },
-  { os: 'ubuntu-latest', node: '24' },
-  { os: 'ubuntu-latest', node: '26' },
-  { os: 'windows-latest', node: '24' },
-  { os: 'macos-latest', node: '24' },
-];
+// Поддерживаемые версии и платформы задаёт workflow. Контракт проверяет,
+// что каждая объявленная комбинация обязательна и входит в общий результат.
+const matrix = parse(sources().get('ci.yml')).jobs.verify.strategy.matrix.include;
 // Одно условие: bash 3.2 на macOS не прерывает скрипт по set -e на упавшем [[ ]] в середине.
 const gateCommand = `set -euo pipefail
 [[ "$MATRIX_RESULT" == 'success' && "$SECURITY_RESULT" == 'success' ]]`;
@@ -209,6 +205,14 @@ function assertNativeGraph(files) {
   expect(verify['continue-on-error']).toBeUndefined();
   expect(verify.permissions).toBeUndefined();
   expect(verify.defaults).toBeUndefined();
+  expect(matrix.length).toBeGreaterThan(0);
+  expect(new Set(matrix.map(({ os, node }) => `${os}/${node}`)).size).toBe(matrix.length);
+  for (const { os, node } of matrix) {
+    expect(typeof os).toBe('string');
+    expect(os.length).toBeGreaterThan(0);
+    expect(typeof node).toBe('string');
+    expect(node.length).toBeGreaterThan(0);
+  }
   expect(verify.strategy).toEqual({ 'fail-fast': false, matrix: { include: matrix } });
   for (const command of ['pnpm install --frozen-lockfile', 'pnpm verify']) {
     const steps = verify.steps.filter((step) => step.run === command);
