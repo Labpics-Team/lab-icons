@@ -1,36 +1,37 @@
 /**
- * test/wave7-transfer.test.js — per-icon гейты Волны-7 (WAVE7-PREP):
- * семья «transfer/manipulate» (resize, далее move → download → upload →
- * push → share), composite stroke-path per-variant weight — прямое
- * переиспользование машинерии Волны-5 (стыки тангенс-солвером БЕЗ
- * перекрытия — отсюда адресный EO≡NZ-ассерт).
+ * Кольцевые оболочки: сходство buildGlyph и правила заливки (WAVE4-RING-PREP).
  *
- * Полы = замер 2026-07-09 (шаг 0.12) минус ε≈0.2 п.п. (шум сетки).
- * Все иконки hand (< промоушен-порога 0.995): рука кладёт filled-капы
- * диагоналей с заступом на кромки скобок (перекрытие ~0.4 px), генерат
- * обязан тангенс-касание — прецедент Волны-5. Чтение ТОЛЬКО через
- * buildGlyph — без захардкоженных контуров.
+ * Три bootstrap-декларации (#6, e1701a1) до сих пор держал ТОЛЬКО корпусный
+ * check-anatomy-drift: поломка любой из них валила общий гейт без адресного
+ * сигнала. Здесь — дедицированный per-icon регресс (класс Б, characterization):
+ * замеренные IoU фиксируются как пол (замер 2026-07-05, шаг 0.12), плюс
+ * EO≡NZ-ассерт на генераты (урок №5 препа: кольца наследуют genRing-fix
+ * Волны-3 — доказываем чистоту намотки адресно).
+ *
+ * Пол пер-иконный, НЕ только общий 0.95: chevron-down-circle и minus-circle
+ * идут с запасом >99.9% (кандидаты generated), pause-circle 97.22/98.80
+ * остаётся hand (капсульные торцы чувствительны).
  */
 
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { buildGlyph } from '../src/core/anatomy-gen.js';
-import { inkIoU } from '../scripts/check-anatomy-drift.js';
-import { samplePolylines } from '../scripts/lib/curve-sampling.js';
-import { renderedPathData } from '../src/core/icon-geometry.js';
+import { buildGlyph } from '../../src/core/anatomy-gen.js';
+import { inkIoU } from '../../scripts/check-anatomy-drift.js';
+import { samplePolylines } from '../../scripts/lib/curve-sampling.js';
+import { renderedPathData } from '../../src/core/icon-geometry.js';
 
-const root = join(import.meta.dirname, '..');
+const root = join(import.meta.dirname, '../..');
 const grid = JSON.parse(readFileSync(join(root, 'semantics', 'grid.json'), 'utf8'));
 const anatomy = JSON.parse(readFileSync(join(root, 'semantics', 'anatomy.json'), 'utf8'));
 const cw = grid.canvas.width;
 
-// Пер-иконные полы: замер (outline/filled) −0.2 п.п.
+// Пер-иконные полы = замер 2026-07-05 минус ε≈0.2 п.п. (шум сетки),
+// но не ниже корпусного hand-порога 0.95.
 const FLOORS = {
-  resize: { outline: 0.977, filled: 0.9657 }, // замер .9790/.9677 (оба варианта — тангенс-кламп капов диагонали, запас 0.02px под мелкосеточный корпусный скан)
-  move: { outline: 0.9546, filled: 0.9664 }, // замер .9566/.9684 (крест: полная вертикаль + 2 полуоси, 6 тангенс-стыков — прецедент close из WAVE7-PREP)
-  download: { outline: 0.998 }, // замер 1.0000 (регенерат заменил руку: файл ≡ buildGlyph; стык палочка↔наконечник — сокет-встык, класс time)
-  upload: { outline: 0.998 }, // замер 1.0000 (регенерат заменил руку после фикса донца: терминалы дуг startA/endA=90 вместо деген-стабов, сокет-встык стрелки)
+  'chevron-down-circle': { outline: 0.9990, filled: 0.9990 },
+  'minus-circle': { outline: 0.9995, filled: 0.9998 },
+  'pause-circle': { outline: 0.9700, filled: 0.9860 },
 };
 
 function handFile(name, variant) {
@@ -39,7 +40,7 @@ function handFile(name, variant) {
     : join(root, 'svg', 'Filled', `${name}_filled.svg`);
 }
 
-/** Чернила под evenodd и nonzero за один проход (как в wave4-ring.test.js). */
+/** Чернила под evenodd и nonzero за один проход (как в playback.test.js). */
 function inkBoth(polys, x, y) {
   let hits = 0;
   let wind = 0;
@@ -68,7 +69,7 @@ function eoNzMismatch(pathData, step) {
   return mismatch;
 }
 
-describe('wave7-transfer — семья transfer/manipulate: пер-иконный IoU-пол', () => {
+describe('buildGlyph — кольцевые оболочки сохраняют авторский рисунок', () => {
   for (const [name, floors] of Object.entries(FLOORS)) {
     it(`${name}: IoU против рук не ниже замороженного пола`, () => {
       const entry = anatomy.glyphs[name];
@@ -86,7 +87,7 @@ describe('wave7-transfer — семья transfer/manipulate: пер-иконны
   }
 });
 
-describe('wave7-transfer — EO≡NZ на генератах (стыки без перекрытия)', () => {
+describe('buildGlyph — кольцевые оболочки сохраняют заливку evenodd ≡ nonzero', () => {
   for (const name of Object.keys(FLOORS)) {
     it(`${name}: ТОЧНОЕ равенство EO≡NZ по всем вариантам (шаг 0.12)`, () => {
       const entry = anatomy.glyphs[name];
