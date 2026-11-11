@@ -32,11 +32,15 @@ pnpm verify
 pnpm test anatomy-generation
 pnpm test anatomy-generation/arrows -t 'заливку' --reporter=tree
 pnpm exec vitest list anatomy-generation
+pnpm exec vitest list anatomy-generation/arrows -t 'заливку'
 ```
 
 Путь выбирает набор, `-t` уточняет полное имя теста, а `tree` показывает
 файл → поведение → результат. Такой запуск проверяет только выбранную часть;
 полный `pnpm verify` и обязательный итог CI остаются прежними.
+`-t` без совпадений может завершиться с кодом 0 и только skipped-тестами.
+Проверка состоялась, только если итог показывает непустой выполненный набор.
+`vitest list` с теми же фильтрами помогает проверить выбор, но не выполняет тесты.
 
 Для визуального сравнения выполните:
 
