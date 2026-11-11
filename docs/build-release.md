@@ -21,8 +21,9 @@ pnpm verify
 Например, [anatomy-generation/](../test/anatomy-generation/) проверяет генерацию
 семейств: сходство с авторским рисунком и правила заливки. Архивные эксперименты
 в `epics/` имеют собственную конфигурацию и не входят в продуктовый прогон.
-Термины набора, задания CI и параллельной части определяет
-[общая справка](https://github.com/Labpics-Team/.github/blob/main/docs/testing.md#наборы-и-навигация).
+[Набор Vitest](https://vitest.dev/api/describe) объединяет проверяемое поведение;
+[задание CI](https://docs.github.com/en/actions/about-github-actions/understanding-github-actions#jobs)
+и [shard](https://vitest.dev/guide/cli#shard) определяют исполнение, а не принадлежность теста.
 
 Для адресной проверки используйте штатную фильтрацию Vitest, без отдельного
 списка групп. Команды выполняются из корня репозитория:
