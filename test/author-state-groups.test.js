@@ -586,6 +586,15 @@ describe('enclosure.replace: adversarial admission и compatibility', () => {
     expect(group.compileStateEffect('confirmation', request)).toMatchObject({ ok: false, reason: { code: 'INVALID_REQUEST' } });
   });
 
+  it.each(['fileKey', 'version'])('retained master with a substituted %s is refused', key => {
+    const source = structuredClone(baseline);
+    const member = document.groups['status-circle'].states.confirmation;
+    const record = source.icons[member.icon][member.variant];
+    record.version = record.author.version;
+    record.author[key] = '1';
+    expect(() => compile(source)).toThrow(expect.objectContaining({ code: 'MASTER_MISMATCH' }));
+  });
+
   it.each([
     ['stale source', input => { input.source.version = '1'; }, 'SOURCE_MISMATCH'],
     ['unknown law', input => { input.groups['status-circle'].law = 'morph'; }, 'LAW_UNSUPPORTED'],

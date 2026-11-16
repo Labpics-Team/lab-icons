@@ -75,6 +75,15 @@ describe('явная анатомия неизменённых авторски�
       .not.toBe(original['reload/outline'].anatomy.annotationSha256);
   });
 
+  it.each(['fileKey', 'version'])('retained anatomy master with a substituted %s is refused', key => {
+    const source = structuredClone(baseline);
+    for (const variants of Object.values(source.icons)) for (const record of Object.values(variants)) {
+      record.version = record.author.version;
+      record.author[key] = '1';
+    }
+    expect(() => compileAuthorAnatomy(source, document)).toThrow(expect.objectContaining({ code: 'MASTER_MISMATCH' }));
+  });
+
   it.each([
     ['другая версия', value => { value.source.version = '1'; }, 'SOURCE_MISMATCH'],
     ['другой файл', value => { value.source.fileKey = 'anotherFile'; }, 'SOURCE_MISMATCH'],

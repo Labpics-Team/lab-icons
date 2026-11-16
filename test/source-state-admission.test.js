@@ -168,6 +168,14 @@ describe('source.replace: точный допуск авторских сост�
     expect(() => compile(baseline, input)).toThrow(expect.objectContaining({ code: 'VARIANT_MISMATCH' }));
   });
 
+  it.each(['fileKey', 'version'])('retained master with a substituted %s is refused', key => {
+    const source = structuredClone(baseline), input = oneGroup('microphone');
+    const record = source.icons.mic.outline;
+    record.version = record.author.version;
+    record.author[key] = '1';
+    expect(() => compile(source, input)).toThrow(expect.objectContaining({ code: 'MASTER_MISMATCH' }));
+  });
+
   it.each([
     ['чужая версия', input => { input.source.version = '1'; }, 'SOURCE_MISMATCH'],
     ['подменённый master receipt', input => { input.groups.microphone.states.unmuted.masterSha256 = '0'.repeat(64); }, 'MASTER_MISMATCH'],

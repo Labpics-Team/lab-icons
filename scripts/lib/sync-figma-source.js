@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve, sep } from 'node:path';
 import { createHash } from 'node:crypto';
-import { authorIconNames, loadAuthorBaseline } from './author-baseline.js';
+import { authorIconNames, authorMasterVersion, loadAuthorBaseline } from './author-baseline.js';
 import { loadSymbolSource, SYMBOL_VARIANTS, verifySymbolComponents, writeSymbolSourceProjections } from './symbol-source.js';
 
 /** Import a read-only Figma capture. Only changed master bytes are copied.
@@ -22,7 +22,7 @@ export function syncFigmaSource({ root, captureRoot, manifest, write = false }) 
     const incoming = manifest.icons[id][variant];
     const same = previous.provenance.sha256 === incoming.sha256;
     if (same) {
-      next.symbols[id].variants[variant].provenance.version = previous.provenance.version ?? source.capture.source.version;
+      next.symbols[id].variants[variant].provenance.version = authorMasterVersion(previous.provenance, source.capture.source);
       continue;
     }
     const destination = resolve(root, incoming.master);

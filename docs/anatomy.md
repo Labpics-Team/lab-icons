@@ -1,9 +1,11 @@
 # Анатомия иконок — справка
 
-[Сетка](../semantics/grid.json) задаёт параметры геометрии,
-[декларации](../semantics/anatomy.json) — конструкцию вариантов.
-Для объявленной генерируемой формы редактируется декларация с последующей
-перегенерацией, а не вручную скопированный SVG path.
+[SymbolSource](symbol-source.md) задаёт текущие masters, смысловые части и общие
+компоненты. Редактируется `symbols/source.json`; masters неизменяемы.
+[Сетка](../semantics/grid.json) и описанные ниже конструктивные параметры
+относятся к compatibility-моделям. Их декларации хранятся в
+`symbols[id].compatibilityModel`, а [semantics/anatomy.json](../semantics/anatomy.json)
+генерируется командой `pnpm generate:source` и вручную не редактируется.
 
 ## Единицы
 
@@ -62,5 +64,6 @@ Outline. У штриховой формы Filled является самосто
 после чего обязателен `pnpm verify`.
 
 Внутренний `buildGlyph()` не является публичной точкой входа npm-пакета.
-Потребитель получает геометрию через `@labpics/icons/ir` и проверяет возможности
-варианта через `glyphCapabilities()`.
+Текущий авторский символ подключается через `@labpics/icons/symbols/<id>`;
+возможности варианта сообщает `glyphCapabilities(variant)` этого модуля.
+Полный `@labpics/icons/ir` сохраняет прежнюю геометрию compatibility-снимка.

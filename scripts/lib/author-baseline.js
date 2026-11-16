@@ -16,6 +16,11 @@ const stableJSON = value => JSON.stringify(value, (_, item) =>
     ? Object.fromEntries(Object.keys(item).sort().map(key => [key, item[key]]))
     : item);
 
+/** A retained immutable master belongs to its original capture, not the latest corpus snapshot. */
+export function authorMasterVersion(receipt, capture) {
+  return receipt.version ?? capture.version;
+}
+
 /** Одна identity геометрии для intake и компактных target projections. */
 export function authorPathFingerprint(svg) {
   return sha256(stableJSON(authorPathEntries(svg)));
@@ -73,7 +78,11 @@ export function authorIconNames(manifest) {
           !HASH.test(item.normalizedSource.sha256) || !HASH.test(item.normalizedSource.pathFingerprintSha256)) {
         refuse('MANIFEST_INVALID', `${name}/${variant} не имеет полного supported master receipt`);
       }
-      const expected = `masters/figma/${item.version ?? manifest.source.version}/${variant === 'outline' ? 'Outline' : 'Filled'}/${name}.svg`;
+      const version = authorMasterVersion(item, manifest.source);
+      if (typeof version !== 'string' || !/^\d+$/.test(version)) {
+        refuse('MANIFEST_INVALID', `${name}/${variant}: master version должна быть Figma version ID`);
+      }
+      const expected = `masters/figma/${version}/${variant === 'outline' ? 'Outline' : 'Filled'}/${name}.svg`;
       if (item.master !== expected) refuse('MASTER_PATH_INVALID', `${name}/${variant}: нужен canonical master ${expected}`);
     }
   }
@@ -121,7 +130,7 @@ export function loadAuthorBaseline(repoRoot, { manifest } = {}) {
       const author = {
         kind: 'figma',
         fileKey: input.source.fileKey,
-        version: item.version ?? input.source.version,
+        version: authorMasterVersion(item, input.source),
         nodeId: item.nodeId,
         nodeSha256: item.nodeSha256,
         masterSha256: item.sha256,

@@ -10,8 +10,9 @@
 semantic parts → contours. Для `source-only` канон — авторский SVG без
 придуманной декомпозиции.
 
-Package отгружает статический SVG и Glyph IR. Icon font, Lottie, SF Symbols,
-canvas и нативные path API — возможные adapters, а не поддержанные форматы.
+Package отгружает статический SVG и Glyph IR; текущие авторские символы имеют
+отдельный [Lottie-адаптер](lottie.md). Icon font, SF Symbols, canvas и нативные
+path API — возможные adapters, а не поддержанные форматы.
 Цель становится capability только после появления компилятора и проверки его
 артефакта.
 

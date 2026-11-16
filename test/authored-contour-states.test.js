@@ -37,6 +37,14 @@ const allGroups = read('semantics/author-state-groups.json');
 const document = { ...allGroups, groups: Object.fromEntries(Object.entries(allGroups.groups).filter(([, group]) => group.law === 'dots.orient')) };
 const compile = (source = baseline, spec = document, owner = compiler, policy = grid) => compileAuthorStateGroups(source, spec, { compiler: owner, grid: policy });
 const payloads = compile();
+it.each(['fileKey', 'version'])('retained contour master with a substituted %s is refused', key => {
+  const source = structuredClone(baseline);
+  for (const variants of Object.values(source.icons)) for (const record of Object.values(variants)) {
+    record.version = record.author.version;
+    record.author[key] = '1';
+  }
+  expect(() => compile(source)).toThrow(expect.objectContaining({ code: 'MASTER_MISMATCH' }));
+});
 const groupName = variant => `ellipsis-orientation-${variant}`;
 function runtime(payload) {
   const states = payload.states.map(state => state.id);

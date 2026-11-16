@@ -3,6 +3,7 @@ import { authorPathEntries } from '../../src/core/icon-geometry.js';
 import { parsePathData } from '../../src/core/path-data.js';
 import { jsonDataLiteral } from './generated-module.js';
 import { createAuthorExactArithmetic } from './author-exact-arithmetic.js';
+import { authorMasterVersion } from './author-baseline.js';
 
 const hash = value => createHash('sha256').update(JSON.stringify(value)).digest('hex');
 const stableJSON = value => JSON.stringify(value, (_, item) => item && typeof item === 'object' && !Array.isArray(item)
@@ -83,7 +84,7 @@ export function compileAuthorContourStateGroup(baseline, name, group, { compiler
     if (!source || createHash('sha256').update(source.rawSvg).digest('hex') !== member.masterSha256 ||
         createHash('sha256').update(stableJSON(entries)).digest('hex') !== member.pathFingerprintSha256 ||
         source.author.masterSha256 !== member.masterSha256 || source.author.pathFingerprintSha256 !== member.pathFingerprintSha256 ||
-        source.author.fileKey !== baseline.source.fileKey || source.author.version !== baseline.source.version ||
+        source.author.fileKey !== baseline.source.fileKey || source.author.version !== authorMasterVersion(source, baseline.source) ||
         glyph.provenance.kind !== 'source' || !glyph.provenance.anatomy || glyph.composition.kind !== 'layers' ||
         JSON.stringify(glyph.viewBox) !== '[0,0,24,24]' || glyph.parts.length !== 3 || entries.length !== 3 ||
         glyph.parts.some((part, index) => part.id !== DOTS[index] || part.role !== 'content' || part.zIndex !== index ||

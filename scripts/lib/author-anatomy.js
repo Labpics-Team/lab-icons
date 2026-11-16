@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { iconGeometry } from '../../src/core/icon-geometry.js';
 import { validateMotionGesture } from '../../src/core/motion-sampler.js';
 import { compileAuthorVariation } from './author-variation.js';
+import { authorMasterVersion } from './author-baseline.js';
 import { compileAuthorCapsule, projectAuthorCapsuleRuntime } from './author-capsule.js';
 import { compileAuthorClockJoint } from './author-clock-joint.js';
 import { projectAuthorSourceContours } from './author-source-contours.js';
@@ -297,6 +298,7 @@ function compileAuthorAnatomyResult(baseline, document, grid, options) {
       }
       const source = baseline.icons[icon][variant];
       if (!HASH.test(declaration.masterSha256) || !HASH.test(declaration.pathFingerprintSha256) ||
+          source.author?.fileKey !== baseline.source.fileKey || source.author.version !== authorMasterVersion(source, baseline.source) ||
           declaration.masterSha256 !== source.author.masterSha256 ||
           declaration.pathFingerprintSha256 !== source.author.pathFingerprintSha256) {
         refuse('MASTER_MISMATCH', `${label}: raw master и path receipt не совпадают`);
@@ -345,12 +347,13 @@ function compileAuthorAnatomyResult(baseline, document, grid, options) {
       }
       // Семантический закон не угадывается по форме. Source receipt выводится
       // из одного author spec, а полный annulus proof не входит в runtime contract.
+      const masterSource = { ...document.source, version: authorMasterVersion(source, baseline.source),
+        masterSha256: declaration.masterSha256, pathFingerprintSha256: declaration.pathFingerprintSha256 };
       let variation;
       if (declaration.variation?.law === 'annulus.counter-scale') {
         fields(declaration.variation, ['law', 'parameter', 'enclosurePartId'], `${label}.variation`);
         const compiled = compileAuthorAnnulus(source, parts, { ...declaration.variation, variant,
-          source: { ...document.source, masterSha256: declaration.masterSha256,
-            pathFingerprintSha256: declaration.pathFingerprintSha256 } }, grid);
+          source: masterSource }, grid);
         variation = projectAuthorAnnulusRuntime(compiled);
         evidence[label] = compiled;
       } else if (declaration.variation?.law === 'capsule.width') {
@@ -372,8 +375,7 @@ function compileAuthorAnatomyResult(baseline, document, grid, options) {
           refuse('LAW_UNSUPPORTED', `${label}: contentScale требует уже доказанное авторское обрамление`);
         }
         const compiled = compileAuthorContentVariation(source, parts, { ...declaration.contentVariation, variant,
-          source: { ...document.source, masterSha256: declaration.masterSha256,
-            pathFingerprintSha256: declaration.pathFingerprintSha256 } }, grid, evidence[label]);
+          source: masterSource }, grid, evidence[label]);
         contentVariation = projectAuthorContentVariationRuntime(compiled);
         contentEvidence[label] = compiled;
       }

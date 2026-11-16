@@ -3,9 +3,12 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
+import { spawnSync } from 'node:child_process';
 import { afterEach, expect, it } from 'vitest';
+import { createCleanPackSource, pnpmInvocation } from '../scripts/check-package-artifact.js';
 import { authorPathFingerprint, loadAuthorBaseline } from '../scripts/lib/author-baseline.js';
 import { loadSymbolSource, projectAuthorBaseline } from '../scripts/lib/symbol-source.js';
+import { stateArtifactConsumerSource, statePackageExpectations } from '../scripts/lib/state-artifact-consumer.js';
 import { normalizeFigmaSvg } from '../scripts/lib/figma-import.js';
 import { syncFigmaSource } from '../scripts/lib/sync-figma-source.js';
 const repository = fileURLToPath(new URL('..', import.meta.url));
@@ -60,4 +63,46 @@ it('refuses to replace an immutable master before changing the active source', (
   const original = readFileSync(join(input.root, 'symbols/source.json'), 'utf8');
   expect(() => syncFigmaSource({ ...input, write: true })).toThrow('immutable master would be overwritten');
   expect(readFileSync(join(input.root, 'symbols/source.json'), 'utf8')).toBe(original);
+});
+
+it('a new full snapshot preserves every unchanged master and builds all production state laws', () => {
+  const temporaryRoot = mkdtempSync(join(tmpdir(), 'lab-icons-sync-')); temporary.push(temporaryRoot);
+  const root = createCleanPackSource(repository, join(temporaryRoot, 'repository'));
+  const captureRoot = join(temporaryRoot, 'capture');
+  const source = loadSymbolSource(root), manifest = projectAuthorBaseline(source);
+  manifest.source.version = (BigInt(manifest.source.version) + 1n).toString();
+  for (const [id, variants] of Object.entries(manifest.icons)) for (const [variant, receipt] of Object.entries(variants)) {
+    const bytes = readFileSync(join(root, receipt.master));
+    delete receipt.version;
+    receipt.master = `masters/figma/${manifest.source.version}/${variant === 'outline' ? 'Outline' : 'Filled'}/${id}.svg`;
+    write(captureRoot, receipt.master, bytes);
+  }
+  write(captureRoot, 'receipt.json', JSON.stringify(manifest));
+  const run = (file, args) => {
+    const result = spawnSync(file, args, { cwd: root, encoding: 'utf8', windowsHide: true, timeout: 90_000, maxBuffer: 10 * 1024 * 1024 });
+    expect(result.status, `${result.error ?? ''}\n${result.stdout}\n${result.stderr}`).toBe(0);
+    return result.stdout;
+  };
+  const synced = JSON.parse(run(process.execPath, ['scripts/sync-figma-source.mjs', '--capture', captureRoot,
+    '--manifest', join(captureRoot, 'receipt.json'), '--write']));
+  expect(synced).toMatchObject({ changed: [], unchanged: manifest.counts.variants });
+  const next = loadAuthorBaseline(root);
+  expect(next.source.version).toBe(manifest.source.version);
+  expect(existsSync(join(root, 'masters/figma', manifest.source.version))).toBe(false);
+  for (const [id, variants] of Object.entries(next.icons)) for (const [variant, receipt] of Object.entries(variants)) {
+    const previous = source.symbols[id].variants[variant].provenance;
+    expect(receipt.master).toBe(previous.master);
+    expect(receipt.author.version).toBe(previous.version ?? source.capture.source.version);
+    expect(receipt.author.masterSha256).toBe(previous.sha256);
+  }
+  const document = JSON.parse(readFileSync(join(root, 'semantics/author-state-groups.json'), 'utf8'));
+  expect([...new Set(Object.values(document.groups).map(group => group.law))].sort())
+    .toEqual(['dots.orient', 'enclosure.replace', 'source.replace']);
+  const build = pnpmInvocation(['build']);
+  run(build.file, build.args);
+  // The consumer reads actual package exports and checks geometry, provenance and transitions for every group.
+  const grid = JSON.parse(readFileSync(join(root, 'semantics/grid.json'), 'utf8'));
+  write(root, 'state-expected.json', JSON.stringify(statePackageExpectations(next, document, grid)));
+  write(root, 'state-consumer.mjs', "import { readFileSync } from 'node:fs';\n" + stateArtifactConsumerSource());
+  run(process.execPath, ['state-consumer.mjs']);
 });

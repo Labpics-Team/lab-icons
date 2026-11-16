@@ -3,6 +3,7 @@ import { compactDataLiteral, compactGeneratedModule, jsonDataLiteral, literalKey
 import { authorPathEntries, sourcePathEntries } from '../../src/core/icon-geometry.js';
 import { exactClosedFillPathKey } from './exact-closed-fill-path.js';
 import { normalizeFigmaSvg } from './figma-import.js';
+import { authorMasterVersion } from './author-baseline.js';
 import { compileAuthorContourStateGroup, renderContourStateGroupModule, contourStateGroupDeclaration } from './author-contour-states.js';
 
 const NAME = /^[a-z][a-z0-9-]*$/;
@@ -167,7 +168,7 @@ export function compileAuthorStateGroups(baseline, document, { compiler, grid, a
       }
       members.add(`${member.icon}/${member.variant}`);
       const source = baseline.icons?.[member.icon]?.[member.variant];
-      if (!source || source.author?.fileKey !== document.source.fileKey || source.author.version !== document.source.version ||
+      if (!source || source.author?.fileKey !== document.source.fileKey || source.author.version !== authorMasterVersion(source, baseline.source) ||
           typeof source.rawSvg !== 'string' || typeof source.normalizedSvg !== 'string' || typeof source.artifactSvg !== 'string' ||
           source.author.masterSha256 !== member.masterSha256 ||
           source.author.pathFingerprintSha256 !== member.pathFingerprintSha256 ||

@@ -151,6 +151,8 @@ describe('текущий author baseline в production compiler', () => {
     ['normalized SHA', manifest => { manifest.icons.time.outline.normalizedSource.sha256 = 'a'.repeat(64); }, 'NORMALIZED_HASH_MISMATCH'],
     ['path fingerprint', manifest => { manifest.icons.time.outline.normalizedSource.pathFingerprintSha256 = 'b'.repeat(64); }, 'PATH_FINGERPRINT_MISMATCH'],
     ['source path', manifest => { manifest.icons.time.outline.master = '../time.svg'; }, 'MASTER_PATH_INVALID'],
+    ['invalid retained master version', manifest => { manifest.icons.time.outline.version = '../1'; }, 'MANIFEST_INVALID'],
+    ['numeric retained master version', manifest => { manifest.icons.time.outline.version = 1; }, 'MANIFEST_INVALID'],
     ['missing variant', manifest => { delete manifest.icons.time.filled; }, 'MANIFEST_INVALID'],
     ['false census', manifest => { manifest.counts.variants = 1; }, 'MANIFEST_INVALID'],
     ['missing node receipt', manifest => { delete manifest.icons.time.outline.nodeSha256; }, 'MANIFEST_INVALID'],
