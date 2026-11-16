@@ -87,8 +87,8 @@ export function symbolReleaseProjection(base, iconIds, stateGroupIds = [], varia
     key.includes('*')
       ? (key === './states/*' ? groups : key === './state-variations/*' ? stateVariations : key === './content-variations/*' ? contentVariations : key === './gestures/*' ? motions : key === './variations/*' ? [...variationIconIds].sort() : ids).flatMap(id => Object.values(conditions).map(target => target.replace('*', id).slice(2)))
       : Object.values(conditions).map(target => target.slice(2)));
-  const typeDependencies = ['dist/authoring/design-spec.d.ts', 'dist/ir/author-annulus-types.d.ts', 'dist/ir/author-content-types.d.ts', 'dist/ir/author-capsule-types.d.ts', 'dist/ir/author-catalog.generated.d.ts', 'dist/ir/author-provenance.d.ts', 'dist/ir/author-source.d.ts', 'dist/ir/authored-variation.d.ts', 'dist/ir/catalog.generated.d.ts', 'dist/ir/compiler.d.ts', 'dist/ir/glyph-types.d.ts', 'dist/ir/paint-types.d.ts', 'dist/ir/request.d.ts', 'dist/ir/lottie-types.d.ts', 'dist/ir/state-types.d.ts', 'dist/ir/state-common-types.d.ts', 'dist/ir/contour-state-types.d.ts'].sort();
-  const runtimeDependencies = ['dist/ir/author-request-runtime.js', 'dist/ir/compiler.js', 'dist/ir/contour-runtime.js', 'dist/ir/request.js', 'dist/ir/symbol-runtime.js', 'dist/ir/lottie-runtime.js'].sort();
+  const typeDependencies = ['dist/authoring/symbol-source.d.ts', 'dist/authoring/design-spec.d.ts', 'dist/ir/author-annulus-types.d.ts', 'dist/ir/author-content-types.d.ts', 'dist/ir/author-capsule-types.d.ts', 'dist/ir/author-catalog.generated.d.ts', 'dist/ir/author-provenance.d.ts', 'dist/ir/author-source.d.ts', 'dist/ir/authored-variation.d.ts', 'dist/ir/catalog.generated.d.ts', 'dist/ir/compiler.d.ts', 'dist/ir/glyph-types.d.ts', 'dist/ir/paint-types.d.ts', 'dist/ir/request.d.ts', 'dist/ir/lottie-types.d.ts', 'dist/ir/state-types.d.ts', 'dist/ir/state-common-types.d.ts', 'dist/ir/contour-state-types.d.ts'].sort();
+  const runtimeDependencies = ['dist/legacy-static.js', 'dist/ir/author-request-runtime.js', 'dist/ir/compiler.js', 'dist/ir/contour-runtime.js', 'dist/ir/request.js', 'dist/ir/symbol-runtime.js', 'dist/ir/lottie-runtime.js'].sort();
   if (motions.some(id => !capsuleMotions.includes(id) && !clockMotions.includes(id))) {
     typeDependencies.push('dist/ir/gesture-types.d.ts'); typeDependencies.sort();
     runtimeDependencies.push('dist/ir/gesture-runtime.js');
@@ -232,6 +232,8 @@ export function renderSymbolModule(input) {
     "import { createCompiledGlyph, createCompiledCapabilities } from '../ir/symbol-runtime.js';",
     ...(packet ? ["import { materializeSourceV1, materializeTranslationCycleV1 } from '../ir/source-packet-runtime.js';"] : []),
     ...records.paths, ...records.static, ...records.shared,
+    `export const symbol = /* @__PURE__ */ Object.freeze({ id: ${jsonDataLiteral(input.icon)}, outline, filled });`,
+    'export default symbol;',
     `const outlineSource = ${records.sources.outline};`,
     `const filledSource = ${records.sources.filled};`,
     `export const glyph = /* @__PURE__ */ createCompiledGlyph(${jsonDataLiteral(input.icon)}, { outline: outlineSource, filled: filledSource });`,
@@ -250,6 +252,8 @@ export function symbolModuleDeclaration(icon) {
     "import type { AuthorSourceGlyph, AuthorSourceCapabilities, AuthorSymbolGlyphRequest } from '../ir/author-source.js';",
     'export declare const outline: string;',
     'export declare const filled: string;',
+    `export declare const symbol: Readonly<{ id: '${icon}'; outline: string; filled: string }>;`,
+    'export default symbol;',
     `export declare function glyph(request?: AuthorSymbolGlyphRequest): AuthorSourceGlyph<'${icon}'>;`,
     `export declare function glyphCapabilities(variant?: AuthorSourceCapabilities['variant']): AuthorSourceCapabilities<'${icon}'>;`,
     '',
@@ -290,6 +294,8 @@ export function renderSymbolModules(input) {
   const imports = `import { outline, filled, outlineSource, filledSource, outlineCapabilities, filledCapabilities } from '${dataPath}';`;
   const exports = 'export { outline, filled };';
   const base = [imports, "import { createCompiledGlyph, createCompiledCapabilities } from '../ir/symbol-runtime.js';", exports,
+    `export const symbol = /* @__PURE__ */ Object.freeze({ id: ${jsonDataLiteral(icon)}, outline, filled });`,
+    'export default symbol;',
     `export const glyph = /* @__PURE__ */ createCompiledGlyph(${jsonDataLiteral(icon)}, { outline: outlineSource, filled: filledSource });`,
     'export const glyphCapabilities = /* @__PURE__ */ createCompiledCapabilities({ outline: outlineCapabilities, filled: filledCapabilities });', ''].join('\n');
   const variable = compact => [imports,

@@ -61,6 +61,7 @@ pnpm add @labpics/icons
 - `dist/authoring/design-spec.d.ts`
 - `dist/authoring/index.d.ts`
 - `dist/authoring/index.js`
+- `dist/authoring/symbol-source.d.ts`
 - `dist/content-variations/alert-circle.d.ts`
 - `dist/content-variations/alert-circle.js`
 - `dist/content-variations/checkmark-circle.d.ts`
@@ -151,6 +152,7 @@ pnpm add @labpics/icons
 - `dist/ir/symbol-data/question-circle.js`
 - `dist/ir/symbol-runtime.js`
 - `dist/ir/variation-runtime.js`
+- `dist/legacy-static.js`
 - `dist/lottie/accessibility.d.ts`
 - `dist/lottie/accessibility.js`
 - `dist/lottie/actions.d.ts`
@@ -1531,6 +1533,7 @@ pnpm add @labpics/icons
 ## Транзитивные декларации типов
 
 - `dist/authoring/design-spec.d.ts`
+- `dist/authoring/symbol-source.d.ts`
 - `dist/ir/author-annulus-types.d.ts`
 - `dist/ir/author-capsule-motion-types.d.ts`
 - `dist/ir/author-capsule-types.d.ts`

@@ -828,7 +828,7 @@ export function checkPackageArtifact({
       stdio: ['ignore', 'pipe', 'pipe'],
     });
 
-    const rootEntry = join(installed, 'dist/index.js');
+    const rootEntry = join(installed, 'dist/legacy-static.js');
     const originalRootEntry = readFileSync(rootEntry, 'utf8');
     const refusalRunner = join(consumer, 'refusal-runner.mjs');
     writeFileSync(refusalRunner, refusalModuleRunnerSource(), 'utf8');

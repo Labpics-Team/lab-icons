@@ -6,7 +6,7 @@
  * tree-shake обязан работать, рост baseline виден в обе стороны.
  */
 import { readFileSync } from 'node:fs';
-import { dirname, join, relative } from 'node:path';
+import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { build } from 'esbuild';
 import { gzipSync } from 'fflate';
@@ -195,7 +195,8 @@ export async function bundleScenario(entry, { root = ROOT, includeBrotli = false
   });
   const contributedBytes = Object.values(out.metafile.outputs).reduce(
     (sum, output) => sum + Object.entries(output.inputs)
-      .filter(([input]) => input.includes('consumer-package-entry:'))
+      .filter(([input]) => input.includes('consumer-package-entry:') ||
+        relative(root, resolve(input)).replaceAll('\\', '/').startsWith('dist/'))
       .reduce((subtotal, [, input]) => subtotal + input.bytesInOutput, 0),
     0,
   );

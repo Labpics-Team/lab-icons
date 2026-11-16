@@ -46,10 +46,10 @@
   },
   "one-static": {
    "entry": "import { accessibilityFilled } from '@labpics/icons';\nconsole.log(accessibilityFilled);\n",
-   "baselineBytes": 637,
-   "baselineGzipBytes": 394,
-   "maxBytes": 700,
-   "maxGzipBytes": 433
+   "baselineBytes": 3046,
+   "baselineGzipBytes": 1537,
+   "maxBytes": 3046,
+   "maxGzipBytes": 1537
   },
   "authored-static": {
    "entry": "import { outline } from '@labpics/icons/symbols/time';\nconsole.log(outline);\n",
@@ -60,15 +60,15 @@
   },
   "glyph-one": {
    "entry": "import { glyph } from '@labpics/icons/symbols/alert';\nconsole.log(glyph());\n",
-   "baselineBytes": 11182,
-   "baselineGzipBytes": 3158,
+   "baselineBytes": 11142,
+   "baselineGzipBytes": 3159,
    "maxBytes": 12433,
    "maxGzipBytes": 3265
   },
   "authored-time": {
    "entry": "import { glyph } from '@labpics/icons/symbols/time';\nconsole.log(glyph());\n",
-   "baselineBytes": 8380,
-   "baselineGzipBytes": 3098,
+   "baselineBytes": 8340,
+   "baselineGzipBytes": 3099,
    "maxBytes": 12652,
    "maxGzipBytes": 3250
   },
@@ -109,31 +109,31 @@
   },
   "recorded-model-axis": {
    "entry": "import { glyph } from '@labpics/icons/ir';\nconsole.log(glyph({ icon: 'chevron-forward', axes: { weight: 1.1, opsz: 32 } }));\n",
-   "baselineBytes": 841281,
-   "baselineGzipBytes": 210797,
+   "baselineBytes": 839226,
+   "baselineGzipBytes": 210290,
    "maxBytes": 853339,
    "maxGzipBytes": 214703
   },
   "recorded-motion": {
    "entry": "import { glyph, glyphCapabilities } from '@labpics/icons/ir';\nimport { compileSymbolEffect } from '@labpics/icons/motion';\nconsole.log(compileSymbolEffect(glyph({ icon: 'time' }), glyphCapabilities('time'), 'time.advance', { duration: 400 }));\n",
-   "baselineBytes": 863417,
-   "baselineGzipBytes": 216690,
+   "baselineBytes": 861362,
+   "baselineGzipBytes": 216164,
    "maxBytes": 865952,
    "maxGzipBytes": 217706
   },
   "full-ir-opt-in": {
    "entry": "import { glyph } from '@labpics/icons/ir';\nconsole.log(glyph({ icon: 'alert' }));\n",
-   "baselineBytes": 841245,
-   "baselineGzipBytes": 210782,
+   "baselineBytes": 839190,
+   "baselineGzipBytes": 210274,
    "maxBytes": 921319,
    "maxGzipBytes": 231011
   },
   "full-catalog": {
    "entry": "import * as icons from '@labpics/icons';\nconsole.log(icons);\n",
-   "baselineBytes": 362391,
-   "baselineGzipBytes": 102372,
-   "maxBytes": 398630,
-   "maxGzipBytes": 112609
+   "baselineBytes": 1349541,
+   "baselineGzipBytes": 478476,
+   "maxBytes": 1349541,
+   "maxGzipBytes": 478476
   },
   "recipes-only": {
    "entry": "import { buildCalendarNumberGeometry } from '@labpics/icons/ir/recipes';\nconsole.log(buildCalendarNumberGeometry);\n",
@@ -144,43 +144,43 @@
   },
   "source-ellipsis-horizontal": {
    "entry": "import { glyph } from '@labpics/icons/symbols/ellipsis-horizontal';\nconsole.log(glyph());\n",
-   "baselineBytes": 13019,
-   "baselineGzipBytes": 3109,
+   "baselineBytes": 12975,
+   "baselineGzipBytes": 3102,
    "maxBytes": 13019,
    "maxGzipBytes": 3109
   },
   "varied-ellipsis-horizontal": {
    "entry": "import { glyph } from '@labpics/icons/variations/ellipsis-horizontal';\nconsole.log(glyph({ variation: { dotScale: 1.1, spacingScale: 0.9 } }));\n",
-   "baselineBytes": 25811,
-   "baselineGzipBytes": 6985,
+   "baselineBytes": 25767,
+   "baselineGzipBytes": 6976,
    "maxBytes": 27351,
    "maxGzipBytes": 7509
   },
   "source-ellipsis-vertical": {
    "entry": "import { glyph } from '@labpics/icons/symbols/ellipsis-vertical';\nconsole.log(glyph());\n",
-   "baselineBytes": 12960,
-   "baselineGzipBytes": 3110,
+   "baselineBytes": 12916,
+   "baselineGzipBytes": 3103,
    "maxBytes": 12960,
    "maxGzipBytes": 3110
   },
   "varied-ellipsis-vertical": {
    "entry": "import { glyph } from '@labpics/icons/variations/ellipsis-vertical';\nconsole.log(glyph({ variation: { dotScale: 1.1, spacingScale: 0.9 } }));\n",
-   "baselineBytes": 25558,
-   "baselineGzipBytes": 6933,
+   "baselineBytes": 25514,
+   "baselineGzipBytes": 6924,
    "maxBytes": 27098,
    "maxGzipBytes": 7453
   },
   "varied-microphone": {
    "entry": "import { glyph } from '@labpics/icons/variations/mic';\nconsole.log(glyph({ variation: { bodyWidth: 0.9 } }));\n",
-   "baselineBytes": 27018,
-   "baselineGzipBytes": 8749,
+   "baselineBytes": 26974,
+   "baselineGzipBytes": 8742,
    "maxBytes": 27620,
    "maxGzipBytes": 8783
   },
   "varied-microphone-circle": {
    "entry": "import { glyph } from '@labpics/icons/variations/mic-circle';\nconsole.log(glyph({ variant: 'filled', variation: { bodyWidth: 0.8 } }));\n",
-   "baselineBytes": 24118,
-   "baselineGzipBytes": 9164,
+   "baselineBytes": 24074,
+   "baselineGzipBytes": 9156,
    "maxBytes": 24720,
    "maxGzipBytes": 9192
   },
@@ -256,15 +256,15 @@
   },
   "gesture-reload-ir-reference": {
    "entry": "import { glyph, glyphCapabilities } from '@labpics/icons/symbols/reload';\nimport { renderGlyphSvg } from '@labpics/icons/ir/render';\nimport { compileSymbolEffect } from '@labpics/icons/motion';\nconst value = glyph();\nconsole.log(renderGlyphSvg(value), compileSymbolEffect(value, glyphCapabilities(), 'reload.cycle', { duration: 400 }));\n",
-   "baselineBytes": 31702,
-   "baselineGzipBytes": 9756,
+   "baselineBytes": 31662,
+   "baselineGzipBytes": 9753,
    "maxBytes": 31702,
    "maxGzipBytes": 9756
   },
   "gesture-refresh-ir-reference": {
    "entry": "import { glyph, glyphCapabilities } from '@labpics/icons/symbols/refresh';\nimport { renderGlyphSvg } from '@labpics/icons/ir/render';\nimport { compileSymbolEffect } from '@labpics/icons/motion';\nconst value = glyph();\nconsole.log(renderGlyphSvg(value), compileSymbolEffect(value, glyphCapabilities(), 'refresh.cycle', { duration: 400 }));\n",
-   "baselineBytes": 33313,
-   "baselineGzipBytes": 10573,
+   "baselineBytes": 33273,
+   "baselineGzipBytes": 10572,
    "maxBytes": 33313,
    "maxGzipBytes": 10573
   },
@@ -295,6 +295,13 @@
    "baselineGzipBytes": 2134,
    "maxBytes": 4591,
    "maxGzipBytes": 2134
+  },
+  "one-family-static": {
+   "entry": "import { outline } from \"@labpics/icons/symbols/plus-circle\"; console.log(outline);\n",
+   "maxBytes": 1090,
+   "maxGzipBytes": 553,
+   "baselineBytes": 1090,
+   "baselineGzipBytes": 553
   }
  }
 }

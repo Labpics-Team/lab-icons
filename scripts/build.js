@@ -20,6 +20,8 @@ import { createRequire } from 'module';
 import { optimize } from 'svgo';
 import { authorPathEntries, sourcePathEntries } from '../src/core/icon-geometry.js';
 import { EXPECTED_SOURCE_VARIANTS } from './lib/corpus-contract.js';
+import { loadAuthorBaseline } from './lib/author-baseline.js';
+import { symbolExportName } from './lib/symbol-modules.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -180,8 +182,23 @@ const dtsContent = dtsLines.join('\n') + '\n';
 writeFileSync(join(DIST_DIR, 'index.js'), jsContent, 'utf8');
 writeFileSync(join(DIST_DIR, 'index.d.ts'), dtsContent, 'utf8');
 
+// Keep the recorded IR's source geometry isolated from the current author corpus.
+// It is a compatibility snapshot, never the root package's default artwork.
+writeFileSync(join(DIST_DIR, 'legacy-static.js'), `${jsContent}\nexport default { ${exportNames.join(', ')} };\n`, 'utf8');
+const author = loadAuthorBaseline(ROOT);
+const authorNames = Object.keys(author.icons).sort();
+const authorExports = authorNames.flatMap(icon => ['outline', 'filled'].map(variant => ({
+  name: symbolExportName(icon, variant), svg: author.icons[icon][variant].artifactSvg,
+})));
+writeFileSync(join(DIST_DIR, 'index.js'), '// GENERATED from symbols/source.json; static SVG literals only.\n' +
+  authorExports.map(({ name, svg }) => `export const ${name} = \`${escapeSvg(svg)}\`;`).join('\n') + '\n');
+writeFileSync(join(DIST_DIR, 'index.d.ts'), '// GENERATED from symbols/source.json.\n' +
+  authorExports.map(({ name }) => `export declare const ${name}: string;`).join('\n') +
+  `\nexport type IconName = ${authorExports.map(({ name }) => JSON.stringify(name)).join(' | ')};\n`);
+console.log(`✓  Author corpus: ${authorNames.length} families / ${authorExports.length} static SVG exports`);
+
 const totalExports = filledResults.length + outlineResults.length;
-console.log(`✓  dist/index.js + dist/index.d.ts — ${totalExports} named exports`);
+console.log(`✓  legacy-static.js — ${totalExports} compatibility exports`);
 
 // ── validate export count ─────────────────────────────────────────────────────
 

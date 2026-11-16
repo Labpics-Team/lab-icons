@@ -8,6 +8,30 @@
     "alertCircleOutline",
     "alertFilled",
     "alertOutline",
+    "alignBottomFilled",
+    "alignBottomOutline",
+    "alignHorizontalCenterFilled",
+    "alignHorizontalCenterOutline",
+    "alignItemsBottomFilled",
+    "alignItemsBottomOutline",
+    "alignItemsHorizontalCenterFilled",
+    "alignItemsHorizontalCenterOutline",
+    "alignItemsLeftFilled",
+    "alignItemsLeftOutline",
+    "alignItemsRightFilled",
+    "alignItemsRightOutline",
+    "alignItemsTopFilled",
+    "alignItemsTopOutline",
+    "alignItemsVerticalCenterFilled",
+    "alignItemsVerticalCenterOutline",
+    "alignLeftFilled",
+    "alignLeftOutline",
+    "alignRightFilled",
+    "alignRightOutline",
+    "alignTopFilled",
+    "alignTopOutline",
+    "alignVerticalCenterFilled",
+    "alignVerticalCenterOutline",
     "aloofFilled",
     "aloofOutline",
     "appsFilled",
@@ -30,16 +54,22 @@
     "arrowForwardOutline",
     "arrowRedoCircleFilled",
     "arrowRedoCircleOutline",
+    "arrowRedoCurveFilled",
+    "arrowRedoCurveOutline",
     "arrowRedoFilled",
     "arrowRedoOutline",
     "arrowUndoCircleFilled",
     "arrowUndoCircleOutline",
+    "arrowUndoCurveFilled",
+    "arrowUndoCurveOutline",
     "arrowUndoFilled",
     "arrowUndoOutline",
     "arrowUpCircleFilled",
     "arrowUpCircleOutline",
     "arrowUpFilled",
     "arrowUpOutline",
+    "atFilled",
+    "atOutline",
     "attachFilled",
     "attachOutline",
     "bagCheckmarkFilled",
@@ -54,6 +84,8 @@
     "bagPlusOutline",
     "banFilled",
     "banOutline",
+    "basketFilled",
+    "basketOutline",
     "billFilled",
     "billOutline",
     "binFilled",
@@ -88,10 +120,50 @@
     "cameraOutline",
     "cameraReverseFilled",
     "cameraReverseOutline",
+    "cardsFilled",
+    "cardsOutline",
+    "caretBackFilled",
+    "caretBackOutline",
+    "caretDownFilled",
+    "caretDownOutline",
+    "caretForwardFilled",
+    "caretForwardOutline",
+    "caretUpFilled",
+    "caretUpOutline",
+    "caretVerticalFilled",
+    "caretVerticalOutline",
     "cartFilled",
     "cartOutline",
+    "chartAreaFilled",
+    "chartAreaOutline",
+    "chartAreaPanelFilled",
+    "chartAreaPanelOutline",
+    "chartBarsHorizontalFilled",
+    "chartBarsHorizontalOutline",
+    "chartColumnsFilled",
+    "chartColumnsOutline",
+    "chartComboFilled",
+    "chartComboOutline",
+    "chartDonutFilled",
+    "chartDonutOutline",
     "chartFilled",
+    "chartFlowFilled",
+    "chartFlowOutline",
+    "chartLinesFilled",
+    "chartLinesOutline",
+    "chartMetricFilled",
+    "chartMetricOutline",
+    "chartNodesFilled",
+    "chartNodesOutline",
     "chartOutline",
+    "chartPieFilled",
+    "chartPieOutline",
+    "chartTreemapHorizontalFilled",
+    "chartTreemapHorizontalOutline",
+    "chartTreemapVerticalFilled",
+    "chartTreemapVerticalOutline",
+    "chartTrendUpFilled",
+    "chartTrendUpOutline",
     "chatbubbleEllipsesFilled",
     "chatbubbleEllipsesOutline",
     "chatbubbleFilled",
@@ -106,6 +178,8 @@
     "checkmarksCircleOutline",
     "checkmarksFilled",
     "checkmarksOutline",
+    "cherriesFilled",
+    "cherriesOutline",
     "chevronBackCircleFilled",
     "chevronBackCircleOutline",
     "chevronBackFilled",
@@ -122,9 +196,13 @@
     "chevronUpCircleOutline",
     "chevronUpFilled",
     "chevronUpOutline",
+    "chevronsDownFilled",
+    "chevronsDownOutline",
     "closeCircleFilled",
     "closeCircleOutline",
     "closeFilled",
+    "closeOctagonFilled",
+    "closeOctagonOutline",
     "closeOutline",
     "cloudCheckmarkFilled",
     "cloudCheckmarkOutline",
@@ -136,8 +214,24 @@
     "cloudOutline",
     "cloudUploadFilled",
     "cloudUploadOutline",
+    "codeFilled",
+    "codeFrameFilled",
+    "codeFrameOutline",
+    "codeOutline",
     "cogFilled",
     "cogOutline",
+    "coinDollarFilled",
+    "coinDollarOutline",
+    "coinRubleFilled",
+    "coinRubleOutline",
+    "collapseHorizontalFilled",
+    "collapseHorizontalLineFilled",
+    "collapseHorizontalLineOutline",
+    "collapseHorizontalOutline",
+    "collapseVerticalFilled",
+    "collapseVerticalLineFilled",
+    "collapseVerticalLineOutline",
+    "collapseVerticalOutline",
     "colorFilterFilled",
     "colorFilterOutline",
     "colorWandFilled",
@@ -150,16 +244,38 @@
     "compasOutline",
     "componentFilled",
     "componentOutline",
+    "computerFilled",
+    "computerOutline",
     "connectFilled",
     "connectOutline",
+    "connectorsFilled",
+    "connectorsOutline",
     "consoleFilled",
     "consoleOutline",
     "contrastFilled",
     "contrastOutline",
     "copyFilled",
     "copyOutline",
+    "cornersInFilled",
+    "cornersInOutline",
+    "cornersOutFilled",
+    "cornersOutOutline",
+    "cursorClickFilled",
+    "cursorClickOutline",
+    "cursorFilled",
+    "cursorOutline",
+    "dashboardFilled",
+    "dashboardOutline",
+    "databaseExportFilled",
+    "databaseExportOutline",
     "databaseFilled",
     "databaseOutline",
+    "databasePlusFilled",
+    "databasePlusOutline",
+    "databaseSearchFilled",
+    "databaseSearchOutline",
+    "databaseSettingsFilled",
+    "databaseSettingsOutline",
     "diceFilled",
     "diceOutline",
     "downloadFilled",
@@ -180,6 +296,10 @@
     "enterOutline",
     "exitFilled",
     "exitOutline",
+    "expandHorizontalLineFilled",
+    "expandHorizontalLineOutline",
+    "expandVerticalFilled",
+    "expandVerticalOutline",
     "extensionPuzzleFilled",
     "extensionPuzzleOutline",
     "eyeFilled",
@@ -188,6 +308,8 @@
     "eyeOutline",
     "eyedropFilled",
     "eyedropOutline",
+    "fieldTextFilled",
+    "fieldTextOutline",
     "fileClearFilled",
     "fileClearOutline",
     "fileFilled",
@@ -196,6 +318,8 @@
     "filesOutline",
     "filterFilled",
     "filterOutline",
+    "fingerprintFilled",
+    "fingerprintOutline",
     "fireFilled",
     "fireOutline",
     "flashFilled",
@@ -203,9 +327,15 @@
     "flashOffOutline",
     "flashOutline",
     "folderFilled",
+    "folderOpenFilled",
+    "folderOpenOutline",
     "folderOutline",
     "forkFilled",
     "forkOutline",
+    "fullscreenEnterFilled",
+    "fullscreenEnterOutline",
+    "fullscreenExitFilled",
+    "fullscreenExitOutline",
     "glassesFilled",
     "glassesOutline",
     "globeFilled",
@@ -216,6 +346,18 @@
     "groupCircleOutline",
     "groupFilled",
     "groupOutline",
+    "handPointDownFilled",
+    "handPointDownOutline",
+    "handPointLeftFilled",
+    "handPointLeftOutline",
+    "handPointRightFilled",
+    "handPointRightOutline",
+    "handPointUpFilled",
+    "handPointUpOutline",
+    "handTwoFingersFilled",
+    "handTwoFingersOutline",
+    "hardDriveFilled",
+    "hardDriveOutline",
     "hashFilled",
     "hashOutline",
     "headphoneFilled",
@@ -224,6 +366,8 @@
     "heartOffFilled",
     "heartOffOutline",
     "heartOutline",
+    "heartPulseFilled",
+    "heartPulseOutline",
     "historyFilled",
     "historyOutline",
     "homeFilled",
@@ -240,8 +384,20 @@
     "infoOutline",
     "invertFilled",
     "invertOutline",
+    "justifyHorizontalFilled",
+    "justifyHorizontalOutline",
+    "justifyItemsHorizontalFilled",
+    "justifyItemsHorizontalOutline",
+    "justifyItemsVerticalFilled",
+    "justifyItemsVerticalOutline",
+    "justifyVerticalFilled",
+    "justifyVerticalOutline",
     "keyFilled",
     "keyOutline",
+    "keyboardFilled",
+    "keyboardOutline",
+    "keysFilled",
+    "keysOutline",
     "layersFilled",
     "layersOutline",
     "linkFilled",
@@ -278,6 +434,8 @@
     "minusCircleOutline",
     "minusFilled",
     "minusOutline",
+    "monitorPulseFilled",
+    "monitorPulseOutline",
     "moonFilled",
     "moonOutline",
     "moonSparklesFilled",
@@ -320,6 +478,10 @@
     "phoneOutline",
     "pinFilled",
     "pinOutline",
+    "pinVerticalFilled",
+    "pinVerticalOffFilled",
+    "pinVerticalOffOutline",
+    "pinVerticalOutline",
     "placeFilled",
     "placeOutline",
     "planeFilled",
@@ -388,6 +550,8 @@
     "searchOutline",
     "sendFilled",
     "sendOutline",
+    "serverFilled",
+    "serverOutline",
     "settingsFilled",
     "settingsOutline",
     "shareDisplayFilled",
@@ -400,6 +564,10 @@
     "shieldCheckmarkOutline",
     "shieldFilled",
     "shieldOutline",
+    "sidebarCollapsedFilled",
+    "sidebarCollapsedOutline",
+    "sidebarExpandedFilled",
+    "sidebarExpandedOutline",
     "signatureFilled",
     "signatureOutline",
     "smileFilled",
@@ -418,6 +586,12 @@
     "statsOutline",
     "stepsFilled",
     "stepsOutline",
+    "stopCircleFilled",
+    "stopCircleOutline",
+    "stopFilled",
+    "stopOutline",
+    "storefrontFilled",
+    "storefrontOutline",
     "sunFilled",
     "sunLowFilled",
     "sunLowOutline",
@@ -432,8 +606,16 @@
     "tabletLandscapeOutline",
     "tabletPortraitFilled",
     "tabletPortraitOutline",
+    "tagDollarFilled",
+    "tagDollarOutline",
     "tagFilled",
     "tagOutline",
+    "tagRubleFilled",
+    "tagRubleOutline",
+    "tagsFilled",
+    "tagsOutline",
+    "targetFilled",
+    "targetOutline",
     "textFilled",
     "textOutline",
     "ticketFilled",
@@ -475,7 +657,9 @@
     "walletFilled",
     "walletOutline",
     "warningFilled",
-    "warningOutline"
+    "warningOutline",
+    "waveformFilled",
+    "waveformOutline"
   ],
   "./authoring": [
     "DesignSpecError",
@@ -2035,1984 +2219,2644 @@
     "stateCapabilities"
   ],
   "./symbols/accessibility": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/actions": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/alert": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/alert-circle": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/align-bottom": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/align-horizontal-center": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/align-items-bottom": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/align-items-horizontal-center": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/align-items-left": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/align-items-right": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/align-items-top": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/align-items-vertical-center": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/align-left": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/align-right": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/align-top": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/align-vertical-center": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/aloof": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/apps": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/archive": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/archive-close": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/arrow-back": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/arrow-back-circle": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/arrow-down": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/arrow-down-circle": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/arrow-forward": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/arrow-forward-circle": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/arrow-redo": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/arrow-redo-circle": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/arrow-redo-curve": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/arrow-undo": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/arrow-undo-circle": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/arrow-undo-curve": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/arrow-up": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/arrow-up-circle": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/at": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/attach": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/bag": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/bag-checkmark": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/bag-close": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/bag-minus": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/bag-plus": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/ban": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/basket": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/bill": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/bin": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/book": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/bookmark": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/bookmarks": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/boolean": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/brain": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/branch": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/branches": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/brush": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/bulb": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/calendar": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/calendar-clear": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/calendar-number": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/calendar-today": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/camera": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/camera-reverse": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/cards": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/caret-back": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/caret-down": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/caret-forward": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/caret-up": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/caret-vertical": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/cart": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/chart": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/chart-area": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/chart-area-panel": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/chart-bars-horizontal": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/chart-columns": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/chart-combo": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/chart-donut": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/chart-flow": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/chart-lines": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/chart-metric": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/chart-nodes": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/chart-pie": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/chart-treemap-horizontal": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/chart-treemap-vertical": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/chart-trend-up": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/chatbubble": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/chatbubble-ellipses": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/chatbubbles": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/checkmark": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/checkmark-circle": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/checkmarks": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/checkmarks-circle": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/cherries": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/chevron-back": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/chevron-back-circle": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/chevron-down": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/chevron-down-circle": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/chevron-forward": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/chevron-forward-circle": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/chevron-up": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/chevron-up-circle": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/chevrons-down": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/close": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/close-circle": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/close-octagon": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/cloud": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/cloud-checkmark": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/cloud-download": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/cloud-off": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/cloud-upload": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/code": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/code-frame": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/cog": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/coin-dollar": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/coin-ruble": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/collapse-horizontal": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/collapse-horizontal-line": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/collapse-vertical": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/collapse-vertical-line": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/color-filter": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/color-wand": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/commit": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/commits": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/compas": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/component": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/computer": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/connect": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/connectors": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/console": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/contrast": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/copy": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/corners-in": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/corners-out": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/cursor": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/cursor-click": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/dashboard": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/database": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/database-export": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/database-plus": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/database-search": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/database-settings": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/dice": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/download": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/duplicate": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/ear": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/earth": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/ellipse": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/ellipsis-horizontal": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/ellipsis-vertical": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/enter": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/exit": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/expand-horizontal-line": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/expand-vertical": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/extension-puzzle": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/eye": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/eye-off": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/eyedrop": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/field-text": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/file": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/file-clear": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/files": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/filter": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/fingerprint": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/fire": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/flash": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/flash-off": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/folder": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/folder-open": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/fork": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/fullscreen-enter": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/fullscreen-exit": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/glasses": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/globe": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/golf": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/group": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/group-circle": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/hand-point-down": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/hand-point-left": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/hand-point-right": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/hand-point-up": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/hand-two-fingers": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/hard-drive": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/hash": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/headphone": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/heart": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/heart-off": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/heart-pulse": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/history": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/home": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/hourglass": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/image": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/images": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/info": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/info-circle": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/invert": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/justify-horizontal": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/justify-items-horizontal": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/justify-items-vertical": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/justify-vertical": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/key": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/keyboard": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/keys": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/layers": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/link": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/link-horizontal": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/link-horizontal-off": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/list": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/lock": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/mail": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/mail-open": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/mail-unread": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/mcp": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/megaphone": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/menu": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/merge": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/mic": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/mic-circle": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/mic-off": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/minus": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/minus-circle": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/monitor-pulse": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/moon": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/moon-sparkles": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/move": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/musical-note": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/musical-notes": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/navigate": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/notifications": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/notifications-off": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/notifications-unread": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/options": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/palette": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/pause": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/pause-circle": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/paw": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/pencil": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/person": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/person-circle": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/person-minus": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/person-plus": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/phone": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/pin": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/pin-vertical": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/pin-vertical-off": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/place": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/plane": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/play": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/play-back": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/play-back-circle": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/play-circle": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/play-forward": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/play-forward-circle": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/play-skip-back": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/play-skip-back-circle": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/play-skip-forward": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/play-skip-forward-circle": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/plus": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/plus-circle": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/print": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/priority": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/pull-request": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/push": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/qr": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/question": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/question-circle": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/radio": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/refresh": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/reload": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/repeat": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/resize": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/revert": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/rhomb": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/rocket": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/sad": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/scan": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/school": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/search": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/send": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/server": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/settings": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/share": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/share-display": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/share-social": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/shield": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/shield-checkmark": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/sidebar-collapsed": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/sidebar-expanded": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/signature": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/smile": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/sparkle": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/sparkles": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/speed": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/square": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/star": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/stats": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/steps": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/stop": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/stop-circle": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/storefront": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/sun": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/sun-low": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/swap-horizontal": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/swap-vertical": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/sync": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/tablet-landscape": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/tablet-portrait": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/tag": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/tag-dollar": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/tag-ruble": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/tags": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/target": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/text": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/ticket": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/time": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/timer": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/translate": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/triangle": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/trophy": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/turn-off": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/unlock": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/upload": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/video": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/video-camera": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/video-camera-off": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/volume": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/volume-high": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/volume-low": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/volume-middle": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/volume-mute": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/volume-muted": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/wallet": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/warning": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./symbols/waveform": [
+    "default",
     "filled",
     "glyph",
     "glyphCapabilities",
-    "outline"
+    "outline",
+    "symbol"
   ],
   "./variations/alert-circle": [
     "filled",

@@ -296,11 +296,11 @@
   }
  ],
  "bundle": {
-  "totalBytes": 379932,
+  "totalBytes": 379934,
   "modules": [
    {
     "path": "src/ir/index.ts",
-    "bytes": 379818
+    "bytes": 379820
    },
    {
     "path": "semantics/anatomy.runtime.json",
@@ -323,12 +323,12 @@
  "consumerBudgets": {
   "comment": "SIZE-01: цена потребителю по маршрутам импорта; one-icon цену доказывает check-treeshake (rollup), здесь замер полных артефактов",
   "fullStaticCatalog": {
-   "raw": 365324,
-   "gzip": 96297
+   "raw": 1353536,
+   "gzip": 451688
   },
   "glyphRuntime": {
-   "raw": 379932,
-   "gzip": 74017,
+   "raw": 379934,
+   "gzip": 74020,
    "note": "полный @labpics/icons/ir entrypoint: размер файла, не транзитивный footprint одного consumer"
   }
  }

@@ -21,3 +21,4 @@ export type {
   LoweredDesignSpec,
 } from './design-spec.js';
 export { renderGlyphSvg } from '../ir/render.js';
+export type { SymbolSource, SymbolVariantSource, SymbolSourcePart } from './symbol-source.js';

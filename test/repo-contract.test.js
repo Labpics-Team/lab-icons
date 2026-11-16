@@ -135,7 +135,7 @@ function fixture({ packagePatch = {}, filesPatch = {}, existingPatch = {} } = {}
     engines: { node: '>=22.14.0', pnpm: '>=11.13.1' },
     scripts: {
       build: 'pnpm build:static && pnpm build:catalog && pnpm build:ir',
-      'build:static': 'node scripts/build.js && node scripts/build-anatomy.js',
+      'build:static': 'pnpm generate:source && node scripts/build.js && node scripts/build-anatomy.js',
       'build:catalog': 'node scripts/build-catalog.mjs',
       'build:ir': 'node scripts/build-ir.mjs',
       'check:repo-contract': 'node scripts/check-repo-contract.js',
@@ -510,7 +510,7 @@ jobs:
       packagePatch: {
         scripts: {
           build: 'pnpm build:static && pnpm build:catalog && pnpm build:ir',
-          'build:static': 'node scripts/build.js && node scripts/build-anatomy.js',
+          'build:static': 'pnpm generate:source && node scripts/build.js && node scripts/build-anatomy.js',
           'build:catalog': 'node scripts/build-catalog.mjs',
           'build:ir': 'node scripts/build-ir.mjs',
           'check:repo-contract': 'node scripts/check-repo-contract.js',
@@ -529,7 +529,7 @@ jobs:
       packagePatch: {
         scripts: {
           build: 'node scripts/build.js',
-          'build:static': 'node scripts/build.js && node scripts/build-anatomy.js',
+          'build:static': 'pnpm generate:source && node scripts/build.js && node scripts/build-anatomy.js',
           'build:catalog': 'node scripts/build-catalog.mjs',
           'build:ir': 'node scripts/build-ir.mjs',
           'check:repo-contract': 'node scripts/check-repo-contract.js',
@@ -549,7 +549,7 @@ jobs:
       packagePatch: {
         scripts: {
           build: 'pnpm build:static && pnpm build:catalog && pnpm build:ir',
-          'build:static': 'node scripts/build.js && node scripts/build-anatomy.js',
+          'build:static': 'pnpm generate:source && node scripts/build.js && node scripts/build-anatomy.js',
           'build:catalog': 'node -e "process.exit(0)"',
           'build:ir': 'node scripts/build-ir.mjs',
           'check:repo-contract': 'node scripts/check-repo-contract.js',

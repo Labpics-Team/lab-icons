@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import { normalizeFigmaSvg } from './figma-import.js';
 import { buildSourceVariantContractFromSvg } from './icon-catalog.js';
 import { authorPathEntries } from '../../src/core/icon-geometry.js';
+import { loadSymbolSource, projectAuthorBaseline } from './symbol-source.js';
 
 const NAME = /^[a-z][a-z0-9-]*$/;
 const HASH = /^[a-f0-9]{64}$/;
@@ -72,7 +73,7 @@ export function authorIconNames(manifest) {
           !HASH.test(item.normalizedSource.sha256) || !HASH.test(item.normalizedSource.pathFingerprintSha256)) {
         refuse('MANIFEST_INVALID', `${name}/${variant} не имеет полного supported master receipt`);
       }
-      const expected = `masters/figma/${manifest.source.version}/${variant === 'outline' ? 'Outline' : 'Filled'}/${name}.svg`;
+      const expected = `masters/figma/${item.version ?? manifest.source.version}/${variant === 'outline' ? 'Outline' : 'Filled'}/${name}.svg`;
       if (item.master !== expected) refuse('MASTER_PATH_INVALID', `${name}/${variant}: нужен canonical master ${expected}`);
     }
   }
@@ -81,7 +82,7 @@ export function authorIconNames(manifest) {
 
 /** Общая граница build/Observatory: до выдачи любого источника проверяется весь снимок. */
 export function loadAuthorBaseline(repoRoot, { manifest } = {}) {
-  const input = manifest ?? JSON.parse(readFileSync(join(repoRoot, 'semantics', 'figma-baseline.json'), 'utf8'));
+  const input = manifest ?? projectAuthorBaseline(loadSymbolSource(repoRoot));
   const names = authorIconNames(input);
   const icons = {};
   for (const name of names) {
@@ -120,7 +121,7 @@ export function loadAuthorBaseline(repoRoot, { manifest } = {}) {
       const author = {
         kind: 'figma',
         fileKey: input.source.fileKey,
-        version: input.source.version,
+        version: item.version ?? input.source.version,
         nodeId: item.nodeId,
         nodeSha256: item.nodeSha256,
         masterSha256: item.sha256,

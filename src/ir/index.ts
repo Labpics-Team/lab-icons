@@ -1,5 +1,5 @@
 /** Полный каталог — явный opt-in; для одного символа используйте ./symbols/<icon>. */
-import * as staticIcons from '@labpics/icons';
+import staticIcons from '../legacy-static.js';
 import anatomy from '../../semantics/anatomy.runtime.json';
 import catalog from '../../semantics/catalog.json';
 import grid from '../../semantics/grid.json';

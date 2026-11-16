@@ -130,7 +130,7 @@ async function compileIrTargets({ root, staging }) {
     for (const name of TARGETS) mkdirSync(join(staging, name));
     mkdirSync(join(staging, 'ir/symbol-data'));
     const bundles = await Promise.allSettled([
-      bundle(root, staging, 'src/ir/index.ts', 'ir/index.js', ['@labpics/icons', './compiler.js']),
+      bundle(root, staging, 'src/ir/index.ts', 'ir/index.js', ['../legacy-static.js', './compiler.js']),
       bundle(root, staging, 'src/ir/compiler.ts', 'ir/compiler.js', ['./request.js']),
       bundle(root, staging, 'src/ir/request.ts', 'ir/request.js'),
       bundle(root, staging, 'src/ir/author-request-runtime.ts', 'ir/author-request-runtime.js', ['./request.js']),
@@ -178,6 +178,7 @@ async function compileIrTargets({ root, staging }) {
     }
     copyFileSync(join(declarations, 'authoring/index.d.ts'), join(staging, 'authoring/index.d.ts'));
     copyFileSync(join(declarations, 'authoring/design-spec.d.ts'), join(staging, 'authoring/design-spec.d.ts'));
+    copyFileSync(join(declarations, 'authoring/symbol-source.d.ts'), join(staging, 'authoring/symbol-source.d.ts'));
     for (const [source, target] of [['types', 'state-types'], ['common-types', 'state-common-types'], ['contour-types', 'contour-state-types']]) {
       writeFileSync(join(staging, 'ir', `${target}.d.ts`), readFileSync(join(declarations, 'states', `${source}.d.ts`), 'utf8')
         .replaceAll('./common-types.js', './state-common-types.js'));

@@ -48,7 +48,7 @@ const FORBIDDEN_LOCKFILES = [
 ];
 const CANONICAL_BUILD_SCRIPTS = Object.freeze({
   build: 'pnpm build:static && pnpm build:catalog && pnpm build:ir',
-  'build:static': 'node scripts/build.js && node scripts/build-anatomy.js',
+  'build:static': 'pnpm generate:source && node scripts/build.js && node scripts/build-anatomy.js',
   'build:catalog': 'node scripts/build-catalog.mjs',
   'build:ir': 'node scripts/build-ir.mjs',
   prepack: 'pnpm build',

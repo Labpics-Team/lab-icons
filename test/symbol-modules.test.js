@@ -341,8 +341,8 @@ describe('замкнутые symbol modules', () => {
     const stale = module
       .replace('export const glyph = /* @__PURE__ */', 'const symbolGlyph = /* @__PURE__ */')
       .replace('export const glyphCapabilities = /* @__PURE__ */', 'const symbolCapabilities = /* @__PURE__ */') +
-      '\nconst symbol = { glyph: symbolGlyph, glyphCapabilities: symbolCapabilities };\n' +
-      'export const glyph = symbol.glyph;\nexport const glyphCapabilities = symbol.glyphCapabilities;\n';
+      '\nconst legacySymbol = { glyph: symbolGlyph, glyphCapabilities: symbolCapabilities };\n' +
+      'export const glyph = legacySymbol.glyph;\nexport const glyphCapabilities = legacySymbol.glyphCapabilities;\n';
     expect(await consume(stale)).toContain('AUTHOR_IR_SENTINEL');
   });
 
@@ -357,7 +357,7 @@ describe('замкнутые symbol modules', () => {
   it('orphan или внешняя runtime dependency не становится разрешённой через manifest', () => {
     const contract = symbolReleaseProjection(base, ['alert']);
     const files = Object.fromEntries(contract.files.filter(file => file.endsWith('.js')).map(file => [file, 'export const value=1;']));
-    files['dist/ir/index.js'] = 'import "./compiler.js";export const value=1;';
+    files['dist/ir/index.js'] = 'import "../legacy-static.js";import "./compiler.js";export const value=1;';
     files['dist/ir/compiler.js'] = 'import "./request.js";export const value=1;';
     files['dist/ir/symbol-runtime.js'] = 'import "./request.js";import "./author-request-runtime.js";export const value=1;';
     files['dist/ir/author-request-runtime.js'] = 'import "./request.js";export const value=1;';
