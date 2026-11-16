@@ -1,8 +1,9 @@
 /**
- * test/wave3-play.test.js — гейты Волны-3 (play ×5, WAVE3-PLAY-PREP).
+ * Управление воспроизведением: сходство buildGlyph и правила заливки.
+ * Источник набора — WAVE3-PLAY-PREP.
  *
  * Часть 1: inkIoU-гейт деклараций против рук svg/Outline/<name>.svg —
- * порог и растеризатор как в test/wave1-decls.test.js (IoU ≥ 0.95, шаг 0.12).
+ * порог и растеризатор как в symbols.test.js (IoU ≥ 0.95, шаг 0.12).
  *
  * Часть 2: EO≡NZ-регресс (обязательство №2 адверсарки Волны-2):
  * генерируемые контуры обязаны давать одинаковые чернила под evenodd
@@ -16,13 +17,13 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { buildGlyph, buildGlyphParts } from '../src/core/anatomy-gen.js';
-import { inkIoU } from '../scripts/check-anatomy-drift.js';
-import { samplePolylines } from '../scripts/lib/curve-sampling.js';
-import { renderedPathData } from '../src/core/icon-geometry.js';
-import { lowerModelComposition } from '../scripts/lib/model-composition.js';
+import { buildGlyph, buildGlyphParts } from '../../src/core/anatomy-gen.js';
+import { inkIoU } from '../../scripts/check-anatomy-drift.js';
+import { samplePolylines } from '../../scripts/lib/curve-sampling.js';
+import { renderedPathData } from '../../src/core/icon-geometry.js';
+import { lowerModelComposition } from '../../scripts/lib/model-composition.js';
 
-const root = join(import.meta.dirname, '..');
+const root = join(import.meta.dirname, '../..');
 const grid = JSON.parse(readFileSync(join(root, 'semantics', 'grid.json'), 'utf8'));
 const anatomy = JSON.parse(readFileSync(join(root, 'semantics', 'anatomy.json'), 'utf8'));
 const catalog = JSON.parse(readFileSync(join(root, 'semantics', 'catalog.json'), 'utf8'));
@@ -106,7 +107,7 @@ function variantEntries(name, entry, variant, d) {
     built: d,
     parts,
     composition,
-    label: `wave3-play: ${name}/${variant}`,
+    label: `buildGlyph/playback: ${name}/${variant}`,
   });
 }
 
@@ -115,7 +116,7 @@ function variantEoNzMismatch(name, entry, variant, d, step) {
     .reduce((sum, path) => sum + eoNzMismatch(path.d, step), 0);
 }
 
-describe('wave3-play — генерат декларации сходится с рукой (IoU ≥ 0.95)', () => {
+describe('buildGlyph — управление воспроизведением сохраняет авторский рисунок (IoU ≥ 0.95)', () => {
   for (const name of WAVE3) {
     it(`${name}: IoU против svg/Outline/${name}.svg`, () => {
       const entry = anatomy.glyphs[name];
@@ -132,7 +133,7 @@ describe('wave3-play — генерат декларации сходится с
   }
 });
 
-describe('wave3-play — EO≡NZ (evenodd-гейт ≡ nonzero-браузер)', () => {
+describe('buildGlyph — управление воспроизведением сохраняет заливку evenodd ≡ nonzero', () => {
   for (const name of WAVE3) {
     it(`${name}: ТОЧНОЕ равенство EO≡NZ по всем вариантам (шаг 0.12)`, () => {
       const entry = anatomy.glyphs[name];

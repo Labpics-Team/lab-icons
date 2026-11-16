@@ -180,7 +180,7 @@ describe('stroke-path — сокет-торец «встык» (socket, клас
     ],
   });
 
-  /** Чернила под evenodd и nonzero за один проход (паттерн wave3-play). */
+  /** Чернила под evenodd и nonzero за один проход (anatomy-generation/playback). */
   const inkBoth = (polys, x, y) => {
     let hits = 0;
     let wind = 0;

@@ -1,5 +1,5 @@
 /**
- * test/wave5-arrows.test.js — per-icon гейты Волны-5 (WAVE5-COMPOSITE-PREP):
+ * Стрелки: сходство buildGlyph и правила заливки (WAVE5-COMPOSITE-PREP):
  * стрелковая семья ×6 (arrow-up/down/back/forward, swap-horizontal/vertical),
  * composite stroke-path (head 3т + shaft 2т, стык БЕЗ перекрытия: тангенс-
  * солвер, у swap-horizontal — сокет-встык по клину шеврона (socket, 2026-07-09)
@@ -14,12 +14,12 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { buildGlyph } from '../src/core/anatomy-gen.js';
-import { inkIoU } from '../scripts/check-anatomy-drift.js';
-import { samplePolylines } from '../scripts/lib/curve-sampling.js';
-import { renderedPathData } from '../src/core/icon-geometry.js';
+import { buildGlyph } from '../../src/core/anatomy-gen.js';
+import { inkIoU } from '../../scripts/check-anatomy-drift.js';
+import { samplePolylines } from '../../scripts/lib/curve-sampling.js';
+import { renderedPathData } from '../../src/core/icon-geometry.js';
 
-const root = join(import.meta.dirname, '..');
+const root = join(import.meta.dirname, '../..');
 const grid = JSON.parse(readFileSync(join(root, 'semantics', 'grid.json'), 'utf8'));
 const anatomy = JSON.parse(readFileSync(join(root, 'semantics', 'anatomy.json'), 'utf8'));
 const cw = grid.canvas.width;
@@ -44,7 +44,7 @@ function handFile(name, variant) {
     : join(root, 'svg', 'Filled', `${name}_filled.svg`);
 }
 
-/** Чернила под evenodd и nonzero за один проход (как в wave4-ring.test.js). */
+/** Чернила под evenodd и nonzero за один проход (как в rings.test.js). */
 function inkBoth(polys, x, y) {
   let hits = 0;
   let wind = 0;
@@ -73,7 +73,7 @@ function eoNzMismatch(pathData, step) {
   return mismatch;
 }
 
-describe('wave5-arrows — стрелковая семья: пер-иконный IoU-пол', () => {
+describe('buildGlyph — стрелки сохраняют авторский рисунок', () => {
   for (const [name, floors] of Object.entries(FLOORS)) {
     it(`${name}: IoU против рук не ниже замороженного пола`, () => {
       const entry = anatomy.glyphs[name];
@@ -93,7 +93,7 @@ describe('wave5-arrows — стрелковая семья: пер-иконны�
   }
 });
 
-describe('wave5-arrows — EO≡NZ на генератах (стык head+shaft без перекрытия)', () => {
+describe('buildGlyph — стрелки сохраняют заливку evenodd ≡ nonzero', () => {
   for (const name of Object.keys(FLOORS)) {
     it(`${name}: ТОЧНОЕ равенство EO≡NZ по всем вариантам (шаг 0.12)`, () => {
       const entry = anatomy.glyphs[name];

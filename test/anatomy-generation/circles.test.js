@@ -1,5 +1,5 @@
 /**
- * test/wave6-circles.test.js — per-icon гейты Волны-6 (WAVE6-CIRCLES-PREP):
+ * Конструктивные окружности: сходство buildGlyph (WAVE6-CIRCLES-PREP):
  * словарь конструктивных окружностей. Полы = замер (шаг 0.12) − ε 0.2 п.п.
  * (шум сетки, прецедент Волны-5). Чтение ТОЛЬКО через buildGlyph.
  *
@@ -12,12 +12,12 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { buildGlyph } from '../src/core/anatomy-gen.js';
-import { inkIoU } from '../scripts/check-anatomy-drift.js';
-import { renderedPathData } from '../src/core/icon-geometry.js';
-import { resolveTangentChain } from '../src/core/circle-dictionary.js';
+import { buildGlyph } from '../../src/core/anatomy-gen.js';
+import { inkIoU } from '../../scripts/check-anatomy-drift.js';
+import { renderedPathData } from '../../src/core/icon-geometry.js';
+import { resolveTangentChain } from '../../src/core/circle-dictionary.js';
 
-const root = join(import.meta.dirname, '..');
+const root = join(import.meta.dirname, '../..');
 const grid = JSON.parse(readFileSync(join(root, 'semantics', 'grid.json'), 'utf8'));
 const anatomy = JSON.parse(readFileSync(join(root, 'semantics', 'anatomy.json'), 'utf8'));
 const cw = grid.canvas.width;
@@ -39,7 +39,7 @@ function handFile(name, variant) {
     : join(root, 'svg', 'Filled', `${name}_filled.svg`);
 }
 
-describe('wave6-circles — генерат декларации сходится с рукой (полы вплотную к замеру)', () => {
+describe('buildGlyph — конструктивные окружности сохраняют авторский рисунок', () => {
   for (const [name, floors] of Object.entries(FLOORS)) {
     for (const [variant, floor] of Object.entries(floors)) {
       it(`${name}/${variant}: IoU против ${handFile(name, variant).includes('Filled') ? 'Filled' : 'Outline'} ≥ ${floor}`, () => {
