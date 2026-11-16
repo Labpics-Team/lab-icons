@@ -35,12 +35,22 @@ describe('Свежесть census без изменения проверяемо
     expect(JSON.parse(expected)).toMatchObject({ sourceOnlyCount: 1, modeledCount: 0 });
     const irBytes = readFileSync(join(root, 'dist/ir/index.js')).length;
     expect(JSON.parse(expected).bundle.totalBytes).toBe(irBytes);
-    expect(JSON.parse(expected).bundle.modules[0].bytes).toBe(irBytes);
+    expect(JSON.parse(expected).bundle.modules).toEqual([{ path: 'src/first.js' }]);
+    expect(JSON.parse(expected).bundle.moduleByteAttribution).toBe('unavailable');
     expect(JSON.parse(expected).consumerBudgets.glyphRuntime.raw).toBe(irBytes);
     generate();
     expect(census()).toBe(expected);
     expect(check().status).toBe(0);
     expect(census()).toBe(expected);
+  });
+
+  it('не выдаёт сгруппированные provenance headers за границы модулей', () => {
+    const body = '// src/first.js\n// src/second.js\nexport const plain = "Микрофон";\n';
+    writeFileSync(join(root, 'dist/ir/index.js'), body);
+    expect(JSON.parse(generate('--stdout')).bundle).toEqual({
+      totalBytes: Buffer.byteLength(body), moduleByteAttribution: 'unavailable',
+      modules: [{ path: 'src/first.js' }, { path: 'src/second.js' }],
+    });
   });
 
   it('отклоняет stale projection и отдаёт точную генерацию, сохраняя прежний файл', () => {

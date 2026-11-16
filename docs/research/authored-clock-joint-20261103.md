@@ -27,7 +27,8 @@
 `SOURCE_WINDING_UNSUPPORTED`. Исправление принимает все четыре комбинации
 outer/counter winding, сохраняя проверки ненулевой площади, простоты и
 вложенности. [RED/GREEN receipt](clock-joint-evenodd-regression.json) содержит
-точные source digests и область выполненных тестов.
+точные compiler/test digests и область выполненных тестов; master digests
+этот receipt не фиксирует.
 
 ## Анатомия и точка вращения
 

@@ -51,7 +51,7 @@ JSON содержит состав closure, хеш каждого output и от
 Сумма gzip полного IR выросла на 27 байт; сумма всех уникальных outputs снизилась.
 Это измерение деклараций, без вывода об import latency, памяти, runtime bundle,
 установке пакета или готовности к production. Полные outputs и прежние budgets
-должны проверяться self-hosted CI на публикуемом SHA.
+должны проверяться GitHub-hosted CI (`pnpm verify`, включая `check-package-artifact`) на публикуемом SHA.
 
 ## Проверка потребителя
 
@@ -105,4 +105,4 @@ raw/gzip выросли. Namespace imports отдельно дали 9011 / 2357
 с ясными короткими комментариями укладывается в оба прежних лимита.
 [JSON](glyph-declaration-budget-20261102.json) содержит размеры, хеши,
 точную среду и границы проверки. Это узкий type emit, без полного build,
-pack/install, runtime и CI; shipping artifact остаётся обязанностью self-hosted CI.
+pack/install, runtime и CI; shipping artifact остаётся обязанностью GitHub-hosted CI (`pnpm verify`, включая `check-package-artifact`).

@@ -73,8 +73,9 @@ describe('авторский motion target без стоимости полно�
     const legacyDocument = { ...document, icons: Object.fromEntries(['reload', 'refresh'].map(icon => [icon, document.icons[icon]])) };
     const selected = { ...document, icons: Object.fromEntries(allNames.map(icon => [icon, document.icons[icon]])) };
     expect(compileAuthorAnatomy(author, selected)).toEqual(old.compileAuthorAnatomy(author, legacyDocument));
-    const oldModules = await importBaseline('scripts/lib/symbol-modules.js');
-    for (const icon of allNames) expect(renderSymbolModules(source[icon])).toEqual(oldModules.renderSymbolModules(source[icon]));
+    const beforeMotion = structuredClone(source);
+    for (const icon of names) projectAuthorMotionSymbol(rich[icon], compileSymbolEffect);
+    for (const icon of allNames) expect(renderSymbolModules(source[icon])).toEqual(renderSymbolModules(beforeMotion[icon]));
     expect(source.timer.capabilities.outline.motion.state).toBe('source-only');
     expect(source.timer.source.outline.provenance.anatomy).toBeUndefined();
     expect(source.timer.source.filled).toEqual(rich.timer.source.filled);

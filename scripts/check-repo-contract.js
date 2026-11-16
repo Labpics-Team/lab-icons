@@ -292,8 +292,8 @@ export function benchmarkWorkflowErrors(text) {
       !required?.text.includes("\"$BENCHMARK_RESULT\" == 'success'")) {
     errors.push('.github/workflows/ci.yml: consumer benchmark обязан блокировать стабильный CI context');
   }
-  if (!/^\s*run: node scripts\/bench\/compare-consumers\.mjs benchmark-results\s*$/m.test(benchmark.text) ||
-      !/^\s*run: pnpm exec playwright install --with-deps chromium\s*$/m.test(benchmark.text) ||
+  if (!/^\s*(?:-\s+)?run: node scripts\/bench\/compare-consumers\.mjs benchmark-results\s*$/m.test(benchmark.text) ||
+      !/^\s*(?:-\s+)?run: pnpm exec playwright install --with-deps chromium\s*$/m.test(benchmark.text) ||
       !/^\s*BENCHMARK_RUNNER_ENVIRONMENT: \$\{\{ runner\.environment \}\}\s*$/m.test(benchmark.text)) {
     errors.push('.github/workflows/ci.yml: benchmark обязан измерять clean packed consumer и настоящий Chromium на runner');
   }

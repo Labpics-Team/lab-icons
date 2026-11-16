@@ -12,6 +12,13 @@ source-артефактов. Vitest проверяет источник, sync н
 аннотаций, неизменность старых masters, shared circle, все root/per-family строки,
 публичный surface и совместимость build/repo/consumer-size контрактов.
 
+Повторный `pnpm verify` 2026-11-17: 180 suites, 2724 tests PASS, 27 skipped.
+Проверки inherited/non-enumerable variation и sourceSpan сохранены после emit.
+Request runtime уменьшился 798→779 B, annulus geometry 2507→2467 B. Фактические
+consumer sizes обновлены; единственная поправка потолка — refresh IR-reference
+10573→10574 B gzip при уменьшении raw 33273→33266 B. Это стоимость исправленного
+admission, не заявление об ускорении.
+
 Снимки `atlas-1.png` … `atlas-7.png` покрывают весь авторский корпус при 16/24/48 px.
 Они получены в настоящем Chrome, DPR 1, viewport 1600×2000. Переполнений карточек нет.
 Верхняя сцена показывает plus/minus/checkmark/mic в обычных и выбранных кнопках обеих
@@ -20,7 +27,8 @@ Geist относится к OPTICS-01. Для воспроизведения: `n
 
 [Размеры до и после](size-changes.json) фиксируют рост полного импорта из-за
 перехода на весь авторский корпус и сохранения точных path. Один статический
-plus-circle занимает 1090 B JS / 553 B gzip; bundle содержит только SVG-литерал.
+consumer `plus-circle` с `console.log(outline)` занимает 1090 B JS / 553 B gzip;
+вклад пакета в этот bundle — только SVG-литерал.
 Compiler, motion и соседние символы в него не входят. Полный старый IR остаётся
 отдельным compatibility-импортом.
 

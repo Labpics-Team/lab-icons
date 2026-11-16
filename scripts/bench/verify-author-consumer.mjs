@@ -47,7 +47,7 @@ try {
             stableJSON(result.effect.targets) !== stableJSON(expectedEffect.targets) ||
             stableJSON(result.effect.stages) !== stableJSON(expectedEffect.stages)) throw new Error(`${icon}/${variant}: объявленный motion не сохраняет цели, anchor или траекторию`);
       }
-      report.icons[icon][variant] = { ...expected, svgSha256: observed.svgSha256, complexity: observed.complexity, refusals, motionRefusal: motion.reason.code };
+      report.icons[icon][variant] = { ...expected, artifactLength: record.artifactSvg.length, svgSha256: observed.svgSha256, complexity: observed.complexity, refusals, motionRefusal: motion.reason.code };
       report.completed++;
     }
     writeFileSync(request.output, JSON.stringify(report, null, 2));

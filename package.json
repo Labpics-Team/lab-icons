@@ -1556,7 +1556,7 @@
     "build:ir": "node scripts/build-ir.mjs",
     "build:anatomy": "node scripts/build-anatomy.js",
     "build:catalog": "node scripts/build-catalog.mjs",
-    "observatory": "node scripts/build-observatory.mjs",
+    "observatory": "pnpm build && node scripts/build-observatory.mjs",
     "typecheck": "tsc --noEmit",
     "check:security": "pnpm audit --audit-level=low",
     "check:publint": "publint --strict",

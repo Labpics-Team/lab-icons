@@ -174,7 +174,8 @@ describe('настоящий компактный build в отдельном sy
     class Request { #variant = 'filled'; get variant() { return this.#variant; } }
     expect(glyph(new Request())).toBe(glyph({ variant: 'filled' }));
     expect(glyph(Object.defineProperty({}, 'variant', { value: 'filled' })).variant).toBe('filled');
-    for (const request of [{ variant: 'filled', variation: {} }, { variation: undefined }]) {
+    expect(glyph({ variation: undefined })).toBe(glyph());
+    for (const request of [{ variant: 'filled', variation: {} }, Object.create({ variation: {} })]) {
       expect(() => glyph(request)).toThrow(expect.objectContaining({ code: 'AUTHOR_VARIATION_UNSUPPORTED' }));
     }
     for (const request of [{ axes: { weight: 1.1 } }, Object.create({ modelMode: 'allow-candidate' })]) {

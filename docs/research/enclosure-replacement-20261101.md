@@ -36,8 +36,8 @@ Paths не перенумеровываются по близости: IDs за�
 
 ## Точное равенство при другом начале контура
 
-Source-срез 2026-11-02 расширяет проверку только у build-time владельца
-`enclosure.replace`. Outline `arrow-back-circle` и `arrow-down-circle` имеют
+Source-срез 2026-11-02 расширил проверку у build-time `enclosure.replace`. Текущий compiler
+требует поддержанную closed-path syntax также для content закона `source.replace`. Outline `arrow-back-circle` и `arrow-down-circle` имеют
 точно одинаковые восемь кубических рёбер кольца; начало каждого контура и
 направление обхода различаются. Независимая проверка raw masters сопоставляет
 `(P0,C1,C2,P1)` с `(P1,C2,C1,P0)` и сохраняет каждую десятичную координату.

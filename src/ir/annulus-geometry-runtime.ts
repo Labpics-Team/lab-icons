@@ -25,11 +25,10 @@ export class AuthoredAnnulusVariationError extends RangeError {
 /** @internal Одна граница параметра для glyph и общего state-обрамления. */
 export function annulusEmphasisParameter(value: unknown): number {
   if (!value || typeof value !== 'object' || Object.getPrototypeOf(value) !== Object.prototype ||
-      Object.keys(value).some(key => key !== 'enclosureEmphasis')) {
+      Reflect.ownKeys(value).some(key => key !== 'enclosureEmphasis')) {
     throw new AuthoredAnnulusVariationError('INVALID_VARIATION', 'Нужен только enclosureEmphasis.');
   }
-  const requested = (value as AuthoredAnnulusVariation).enclosureEmphasis;
-  const emphasis = requested === undefined ? 1 : requested;
+  const { enclosureEmphasis: emphasis = 1 } = value as AuthoredAnnulusVariation;
   if (typeof emphasis !== 'number' || !Number.isFinite(emphasis) || emphasis <= 0) {
     throw new AuthoredAnnulusVariationError('INVALID_VARIATION', 'enclosureEmphasis обязан быть конечным положительным числом.');
   }

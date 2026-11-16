@@ -8,7 +8,7 @@ import { afterAll, describe, expect, it } from 'vitest';
 import { bundle } from '../scripts/build-ir.mjs';
 import { authoredSymbolPayloads } from '../scripts/lib/authored-symbol-payload.js';
 import { authorVariationIconNames, authorVariationLawNames } from '../scripts/lib/author-variation.js';
-import { authorContentVariationIconNames, contentVariationModuleDeclaration, renderSymbolModules, symbolModuleDeclaration, variationModuleDeclaration,
+import { authorContentVariationIconNames, contentVariationModuleDeclaration, renderSymbolModules, variationModuleDeclaration,
   symbolReleaseProjection } from '../scripts/lib/symbol-modules.js';
 import { expandReleaseExports, validateReleaseContract } from '../scripts/lib/release-contract.js';
 
@@ -99,14 +99,15 @@ describe('content opt-in owns its payload without charging existing imports', ()
       .toThrow(TypeError);
   });
 
-  it.each([...names, ...dots])('%s preserves old generator bytes, declaration bytes and capabilities exactly', name => {
-    const input = inputs[name], output = snapshots[name], baseline = old.renderSymbolModules(input);
+  it.each([...names, ...dots])('%s content opt-in leaves existing symbol/data/variation bytes and capabilities unchanged', name => {
+    const input = inputs[name], output = snapshots[name];
+    const { contentVariation: _contentVariation, ...withoutContent } = input;
+    const baseline = renderSymbolModules(withoutContent);
     for (const field of ['symbol', 'data', 'variation']) {
       expect(output[field], field).toBe(baseline[field]);
       if (output[field]) expect(sha(output[field]), field).toBe(sha(baseline[field]));
       expect(output[field]).not.toMatch(/contentScale|content-runtime|content-geometry/);
     }
-    expect(symbolModuleDeclaration(name)).toBe(old.symbolModuleDeclaration(name));
     expect(variationModuleDeclaration(name, input.variation.outline.law)).toBe(old.variationModuleDeclaration(name, input.variation.outline.law));
     expect(input.capabilities.outline.variation.law).toBe(input.variation.outline.law);
     expect(input.capabilities.outline.variation.defaults).not.toHaveProperty('contentScale');

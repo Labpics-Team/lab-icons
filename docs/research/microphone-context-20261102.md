@@ -21,7 +21,8 @@
 [оптической квалификации](capsule-optical-domain-20261102.md).
 Дополнительный [независимый просмотр установленного consumer](../evidence/microphone-optical-06b2df1-20261103.md)
 подтвердил показанные Outline/Filled при 16/24/48 px и ширине 1/0.9/0.8;
-сравнение с соседними status/playback остаётся отдельной проверкой.
+сравнение mic-circle/question-circle/play-circle в заявленной области также
+получило PASS в [consumer-отчёте](../evidence/source-consumer-e3227a2-20261103/optical-review.json).
 
 Этот выбор поддерживают первичные источники, прочитанные 2026-11-02:
 

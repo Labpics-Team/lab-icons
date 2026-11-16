@@ -65,6 +65,14 @@ it('refuses to replace an immutable master before changing the active source', (
   expect(readFileSync(join(input.root, 'symbols/source.json'), 'utf8')).toBe(original);
 });
 
+it('an incoming receipt cannot overwrite the trusted Outline/Filled style', () => {
+  const input = fixture();
+  input.manifest.icons.accessibility.outline.style = 'Filled';
+  syncFigmaSource({ ...input, write: true });
+  expect(loadSymbolSource(input.root).symbols.accessibility.variants.outline.provenance.style).toBe('Outline');
+  expect(() => loadAuthorBaseline(input.root)).not.toThrow();
+});
+
 it('a new full snapshot preserves every unchanged master and builds all production state laws', () => {
   const temporaryRoot = mkdtempSync(join(tmpdir(), 'lab-icons-sync-')); temporary.push(temporaryRoot);
   const root = createCleanPackSource(repository, join(temporaryRoot, 'repository'));

@@ -1,4 +1,5 @@
-/** Отдельный diagnostic: перехват freeze не входит в latency/heap observations. */
+/** Diagnostic отложенной проекции: текущий eager emitter намеренно не проходит.
+ * Это не package acceptance; перехват freeze не входит в latency/heap observations. */
 export async function observeNativeStaticLifecycle(loadSymbol, expectedStatic) {
   const descriptor = Object.getOwnPropertyDescriptor(Object, 'freeze');
   const freezes = { import: 0, capabilities: 0, glyph: 0, warm: 0, explicitRequest: 0 };

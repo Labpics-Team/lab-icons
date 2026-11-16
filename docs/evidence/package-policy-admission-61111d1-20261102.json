@@ -9,7 +9,7 @@
   "initialPolicyCandidatesSha256": "cedbb75302456edd57d5a0dce4de392f73ad96c56dd9bd6cf3d5c92812d3412c",
   "previousPolicyCommit": "61111d12f58642cc6d6f6c45e17166765bd2ca8f",
   "packagePolicySha256": "b56069a4a7541930ef638bfc260649c2883dc25709be95e0b118a14634e6819c",
-  "consumerPolicySha256": "f04f0afd158ffcc339395fe01cbea4058153e6a4da7b396e14bde3f80924ce80",
+  "consumerPolicySha256": "fc9b300a0e03b08e9934713edac4ea95720e2181150dde41ebb8cf9b719fbe7d",
   "preservedArtifactPolicies": 1406,
   "measuredArtifactPolicies": 1433,
   "preservedConsumerPolicies": 18,

@@ -18,8 +18,10 @@ Journey прошёл сравнения многоточий и отказал �
 сами по себе не изменяют координаты; frame и viewport сохраняют собственный смысл.
 
 Author observer допускает только нейтральные SVG-группы с metadata и конечные
-path leaves. Transform, opacity, style, filter, handlers, чужой namespace и новый
-viewport не принимаются. Канонический output и экспорт сохраняют отдельное
+path leaves. Ограничение transform, opacity, style, filter и handlers относится
+к атрибутам групп и frame transforms; произвольные paint-атрибуты path этим
+observer не проверяются. Чужой namespace и новый viewport не принимаются.
+Канонический output и экспорт сохраняют отдельное
 требование direct paths. Dimensions, viewBox, отсутствие преобразований и
 проверка живого экранного масштаба сохранены; failure теперь содержит оба frames.
 Ни master, ни production compiler/runtime не изменены.

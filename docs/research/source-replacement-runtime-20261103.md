@@ -1,9 +1,12 @@
 # Цена и граница авторской замены
 
-**Diátaxis:** explanation. Исследование 2026-11-03; исходный срез
-`c2d0f557784922ee8fe0e8b9bcc76e5eed7933f9`, интеграция `2bf18f9`.
-Полная упаковка, browser acceptance и comparative benchmark этого среза
-ещё не установлены.
+**Diátaxis:** explanation. Историческое исследование 2026-11-03. Указанный
+в первоначальной записи `c2d0f557784922ee8fe0e8b9bcc76e5eed7933f9` не разрешается
+в репозитории; source-leaf receipt не сохраняет tested-tree identity. Его числа
+ниже — архивное наблюдение без воспроизводимого source pin. Интеграция
+`2bf18f9903511d5b0ed703118e7134188253571a` прошла [browser consumer](../evidence/source-consumer-e3227a2-20261103.md):
+четыре группы, interruption и reduced motion. Этот результат не переносится
+на последующие изменения; полная packaging/benchmark квалификация остаётся отдельной.
 
 ## Решение
 
@@ -39,7 +42,7 @@ esbuild 0.28.1, fflate 0.8.3; он не устанавливает окруже�
 [source runtime](source-state-budget-20261103/source-leaf.json). Поля max в них
 являются прежними ceilings; таблица использует измеренные bytes/gzipBytes.
 
-| Объект | `44f9c10`, raw/gzip B | `c2d0f557`, raw/gzip B |
+| Объект | `44f9c10`, raw/gzip B | Архивный worktree без source pin, raw/gzip B |
 |---|---:|---:|
 | Прежний state runtime | 4003 / 1583 | 4036 / 1581 |
 | Status state-variation consumer | 13990 / 5282 | 13964 / 5273 |

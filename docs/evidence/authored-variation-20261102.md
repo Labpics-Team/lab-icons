@@ -3,6 +3,9 @@
 Дата: 2026-11-02. Base source: `75c67fc32a3f6b037df091f1383adfae754f21f8`.
 Worktree: `E:/AgentWork/lab-icons-author-variation-20261102`.
 
+Исторический результат локального worktree: точный tested-tree SHA не сохранён.
+Числа ниже не описывают нынешнюю suite; её состав изменился после эксперимента.
+
 Исходный RED: narrow Vitest witness запросил у прежнего `createCompiledGlyph`
 `variation: { dotScale: 1.1, spacingScale: 0.9 }` и потребовал изменённый `d`.
 Он упал с предметным отказом `TypeError: неизвестные поля запроса: variation`;

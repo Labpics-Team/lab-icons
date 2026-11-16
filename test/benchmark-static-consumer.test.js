@@ -48,7 +48,8 @@ describe('matched static SVG consumer', () => {
   });
   it('один graph predicate отказывает IR, authoring, motion и catalog на обеих ОС', () => {
     for (const file of ['/installed/dist/ir/index.js', '/installed/dist/authoring/index.js',
-      '/installed/dist/motion/index.js', '/installed/catalog.json', '/installed/anatomy.json', 'E:\\installed\\dist\\ir\\index.js']) {
+      '/installed/dist/motion/index.js', '/installed/catalog.json', '/installed/anatomy.json',
+      '/installed/anatomy.runtime.json', 'E:\\installed\\anatomy.runtime.json', 'E:\\installed\\dist\\ir\\index.js']) {
       expect(inspectStaticRuntime([{ file, bytesInOutput: 1 }]).verdict).toBe('FAIL');
     }
     expect(inspectStaticRuntime([{ file: '/installed/dist/symbols/accessibility.js', bytesInOutput: 1 }]).verdict).toBe('PASS');

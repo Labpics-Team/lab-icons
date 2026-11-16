@@ -33,8 +33,9 @@ Node 24.15.0, esbuild 0.28.1; gzip — fflate 0.8.3, level 9, mtime 0.
 
 Три точных entry из `consumer-size-ratchet.json` также соблюдают неизменённые
 потолки: `alert` — 11182/3158 B, `time` — 11403/3142 B, статический `time` —
-1155/583 B. Их bundle исполняется; обе независимые авторские формы совпадают
-с контролем. Семь compiled-consumer tests и 53 проверки fixtures/fidelity
+1155/583 B. Эти точные bundles построены и измерены. Отдельные `glyph.mjs`
+и `static.mjs` исполнены; обе независимые авторские формы совпадают с контролем.
+Семь compiled-consumer tests и 53 проверки fixtures/fidelity
 прошли. Literal-only consumer удаляет admission и metadata; снятие PURE
 аннотаций сохраняло SVG, но удерживало runtime и вызывало точный отказ теста.
 

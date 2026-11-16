@@ -1,8 +1,9 @@
 # Авторское кольцо с изменяемым обрамлением
 
-Проверено 2026-11-02. Это build-only геометрический срез для `plus-circle` и
+Проверено 2026-11-02. Ниже описан первоначальный build-only геометрический срез для `plus-circle` и
 `minus-circle`, Outline. Публичный runtime, export map, state group и Figma
-не изменены. Оптическая приёмка nondefault и browser/performance проверка
+в том опыте не изменялись. Последующая интеграция добавила runtime, state group
+и публичные exports; исходная фраза не описывает текущий пакет. Оптическая приёмка nondefault и browser/performance проверка
 этого закона ещё не проведены.
 
 ## Источник и смысл
@@ -119,12 +120,10 @@ installation и тяжёлые suites локально не запускалис
 радиальные bounds; нынешний Bernstein certificate уже пропускает полезные
 nondefault, поэтому дополнительный движок не требуется.
 
-В `author-contour-states.js` уже есть приватные exact arithmetic primitives.
-Они **не изменялись** из-за параллельного ownership. Этот build-only compiler
-пока содержит локальные операции; до общей интеграции их необходимо совместно
-вынести к одному численному владельцу. Это явное условие интеграции, а не новая
-постоянная архитектурная норма. Public variants/capabilities/runtime/types и
-format adapters остаются у владельца `author-variation`.
+До интеграции этот build-only compiler содержал локальные exact arithmetic
+операции. Общая extraction уже выполнена: оба compiler используют единый
+численный модуль, описанный в дополнении ниже. Public variants, capabilities,
+runtime, types и format adapters относятся к `author-variation`.
 
 Admission plus/minus не расширяет `status-circle`: каждый участник перехода
 должен подтвердить тот же запрос на обрамление и свой content clearance.

@@ -21,7 +21,7 @@ overloads и literal symbol IDs сохранялись; сокращались �
 | ellipsis-vertical | 712/257/205 | 596/261/195 |
 
 Raw уменьшился, gzip вырос во всех четырёх controls. Многоточия остаются
-выше существующих raw/gzip ceilings `470/224` и `466/223` из
+выше существующих raw/gzip ceilings `566/248` и `560/247` из
 `release/package-size-ratchet.json`. Опыт отклонён; прежний emitter
 восстановлен. Дополнительный подбор имён или новый type mechanism не запускались.
 

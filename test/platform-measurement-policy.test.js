@@ -48,6 +48,7 @@ function fixture({ source = original, other = source, modules = ['scripts/lib/ke
     }
   `);
   writeFileSync(join(root, 'scripts/check-consumer-size.js'), `
+    export { clockConsumerEntries } from ${JSON.stringify(new URL('../scripts/check-consumer-size.js', import.meta.url).href)};
     export const CONSUMER_SIZE_MEASUREMENT = 'fixture consumer oracle';
     export const parseConsumerSizeRatchet = value => value;
     export async function bundleScenario() { return { bytes: 10, gzipBytes: 11, modules: ['dist/fixture.js'] }; }

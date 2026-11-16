@@ -13,7 +13,7 @@ import { chromium } from 'playwright';
 import { localTarballSpecifier, pnpmInvocation } from '../check-package-artifact.js';
 import { assertRemoteBenchmark, summarize } from './measurement.js';
 import { analyzeConsumerReport } from './report-analysis.js';
-import { observeAuthorGlyph, validateAuthorObservation, validateRetainedPair } from './author-oracle.js';
+import { observeAuthorGlyph, validateAuthorObservation, validateAuthorStaticObservation, validateRetainedPair } from './author-oracle.js';
 import { verifyExplorer } from './verify-explorer.mjs';
 import { verifyLottieConsumer } from './verify-lottie.mjs';
 import { verifyAuthoringConsumer } from './verify-authoring.mjs';
@@ -25,7 +25,7 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const BASELINE = '03a4ca3ac1bf7978f9e8f554106c132a69668afb';
 const COUNTS = [1, 100, 10000];
 const CASES = [
-  { id: 'retained-static-accessibility', lane: 'retained-identical-output', kind: 'static', icon: 'accessibility' },
+  { id: 'current-author-static-accessibility', lane: 'current-author', kind: 'static', icon: 'accessibility' },
   { id: 'retained-source-alert', lane: 'retained-identical-output', kind: 'glyph', icon: 'alert' },
   { id: 'retained-model-time', lane: 'retained-identical-output', kind: 'glyph', icon: 'time' },
   { id: 'retained-default-chevron-forward', lane: 'retained-identical-output', kind: 'glyph', icon: 'chevron-forward' },
@@ -226,7 +226,7 @@ const temp = mkdtempSync(join(tmpdir(), 'lab-icons-benchmark-'));
 let browser, server, report;
 try {
   const revision = command('git', ['rev-parse', 'HEAD'], ROOT).trim();
-  report = { version: 2, baseline: BASELINE, candidate: revision, timestamp: new Date().toISOString(), environment: { node: process.version, v8: process.versions.v8, platform: platform(), osRelease: release(), hostname: hostname(), cpus: cpus().map(cpu => ({ model: cpu.model, speed: cpu.speed })), totalmem: totalmem(), freemem: freemem(), runnerEnvironment: process.env.BENCHMARK_RUNNER_ENVIRONMENT, githubRunId: process.env.GITHUB_RUN_ID, githubRunAttempt: process.env.GITHUB_RUN_ATTEMPT }, protocol: { serverRepetitions: 7, browserRepetitions: 3, counts: COUNTS, cpuSlowdowns: [1, 4], comparison: 'baseline/candidate чередуются; каждый server sample — новый Node process; каждый browser sample — новый context', lanes: { 'retained-identical-output': 'root/full IR: тот же SVG, без снятия equality oracle', 'current-author': 'sliced current master против recorded baseline: geometry/representation confound; не same-geometry speedup' }, caveats: ['4× CDP slowdown — синтетическое замедление, не физическое constrained hardware', '10000 mounted symbols включают offscreen DOM; viewport 1280×800', 'rAF интервал — frame opportunity, не GPU presentation time', 'peak heap не заявляется: CDP и Node сохраняют точечные наблюдения', '7/3 повторов характеризуют среднее и разброс, не редкие хвосты', 'pack/install и bundler compile — одиночные наблюдения, не latency distribution', 'server измеряет создание SVG, browser измеряет DOM/layout', 'motion принадлежит recorded full IR, не текущим source-only Figma masters', 'current-author lane меняет author geometry и representation: причинный same-geometry speedup не заявляется'] }, packages: [], cases: [], motion: [] };
+  report = { version: 2, baseline: BASELINE, candidate: revision, timestamp: new Date().toISOString(), environment: { node: process.version, v8: process.versions.v8, platform: platform(), osRelease: release(), hostname: hostname(), cpus: cpus().map(cpu => ({ model: cpu.model, speed: cpu.speed })), totalmem: totalmem(), freemem: freemem(), runnerEnvironment: process.env.BENCHMARK_RUNNER_ENVIRONMENT, githubRunId: process.env.GITHUB_RUN_ID, githubRunAttempt: process.env.GITHUB_RUN_ATTEMPT }, protocol: { serverRepetitions: 7, browserRepetitions: 3, counts: COUNTS, cpuSlowdowns: [1, 4], comparison: 'baseline/candidate чередуются; каждый server sample — новый Node process; каждый browser sample — новый context', lanes: { 'retained-identical-output': 'full IR: тот же SVG, без снятия equality oracle', 'current-author': 'root static и sliced current master против recorded baseline: geometry/representation confound; не same-geometry speedup' }, caveats: ['4× CDP slowdown — синтетическое замедление, не физическое constrained hardware', '10000 mounted symbols включают offscreen DOM; viewport 1280×800', 'rAF интервал — frame opportunity, не GPU presentation time', 'peak heap не заявляется: CDP и Node сохраняют точечные наблюдения', '7/3 повторов характеризуют среднее и разброс, не редкие хвосты', 'pack/install и bundler compile — одиночные наблюдения, не latency distribution', 'server измеряет создание SVG, browser измеряет DOM/layout', 'motion принадлежит recorded full IR, не текущим source-only Figma masters', 'current-author lane меняет author geometry и representation: причинный same-geometry speedup не заявляется'] }, packages: [], cases: [], motion: [] };
   writeFileSync(join(output, 'consumer-comparison.json'), JSON.stringify(report, null, 2));
   const prepared = [prepare(temp, 'baseline', BASELINE), prepare(temp, 'candidate', revision)];
   report.packages = prepared.map(({ source, consumer, packageRoot, ...facts }) => facts);
@@ -283,14 +283,15 @@ try {
       result.server.push(...serverRows);
       for (let repeat = 0; repeat < 7; repeat++) {
         for (const packageCase of repeat % 2 ? [...selected].reverse() : selected) {
-          const sliced = testCase.lane === 'current-author' && packageCase.label === 'candidate';
+          const sliced = testCase.kind !== 'static' && testCase.lane === 'current-author' && packageCase.label === 'candidate';
           const request = { ...testCase, count, sliced, inspectAuthor: sliced, modulePath: join(packageCase.packageRoot, testCase.kind === 'static' ? 'dist/index.js' : sliced ? `dist/symbols/${testCase.icon}.js` : 'dist/ir/index.js') };
           const input = join(temp, 'request.json');
           writeFileSync(input, JSON.stringify(request));
           const sample = JSON.parse(command(process.execPath, ['--expose-gc', join(ROOT, 'scripts/bench/probe.mjs'), input], packageCase.consumer));
           observations[packageCase.label].push(sample);
-          if (sliced) validateAuthorObservation(sample, author);
-          else if (testCase.lane === 'current-author') {
+          if (testCase.kind === 'static' && packageCase.label === 'candidate') validateAuthorStaticObservation(sample, author, count);
+          else if (sliced) validateAuthorObservation(sample, author);
+          else if (testCase.lane === 'current-author' && testCase.kind !== 'static') {
             const reference = report.cases.find(item => item.id === testCase.baselineReference)?.server.find(item => item.label === 'baseline' && item.count === count)?.observations[0];
             if (!reference) throw new Error(`${testCase.id}: recorded baseline reference отсутствует`);
             validateRetainedPair(reference, sample);

@@ -23,7 +23,8 @@ snapshot: `2416636003859748575`. Более новая наблюдённая в
 | `shield-checkmark` | `6431:3884` | `6413:234` | Outline |
 
 Исходные `d`, fill rule, path order и master fingerprints остаются прежними.
-В Outline отметка — path 0, оболочка — path 1. У трёх enclosed Filled
+У трёх enclosed Outline отметка — path 0, оболочка — path 1; plain `checkmark`
+имеет только path 0. У трёх enclosed Filled
 variants одна evenodd-композиция объединяет тело и отрицательную галочку;
 она получает отказ при попытке назначить независимый presence.
 

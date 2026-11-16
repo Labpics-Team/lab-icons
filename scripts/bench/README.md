@@ -9,12 +9,14 @@
 `pnpm pack` с настоящим `prepack`. Tarball устанавливается offline в новый проект.
 Отчёт сохраняет source SHA, lockfile и tarball SHA-256, версию пакета и окружение.
 
-Сравнение имеет две области. Retained использует root и полный IR: статический
-accessibility, исходный alert, принятую модель time, default и поддержанные
+Сравнение имеет две области. Retained использует полный IR:
+исходный alert, принятую модель time, default и поддержанные
 weight/opsz у chevron-forward. В этой области SHA-256 полученного SVG обязан
 совпасть; отличающийся результат останавливает сравнение.
 
-Current author использует новые symbol modules с captured Figma geometry.
+Current author использует root static accessibility и новые symbol modules с captured Figma geometry.
+Root SVG проверяется точным SHA-256 и длиной из author manifest; старый root
+содержит другую геометрию и не считается retained equality comparison.
 Изменённый рисунок проверяется против точного master/manifest: контуры,
 эффективный fill-rule, z-order, part identity и author provenance. Все 660
 вариантов установленного пакета проверяются отдельным process перед benchmark.
@@ -121,15 +123,10 @@ CI не запускает `--update` и не принимает собстве�
 число аллокаций, ускорение или zero-work import текущей проекции. Полная
 сравнительная квалификация производительности остаётся открытой.
 
-Источник исполнения — [ARC owner](https://github.com/Labpics-Team/Labpics-infra/blob/main/services/github-runners/arc/README.md).
-Проверенный 2026-11-01 infra commit `8a7194f1dcc1bb6d630abb2946e8c72d0b9d501f`:
-Ubuntu 26.04, одноразовый Pod, Linux/amd64, sudo для runner. Playwright 1.64.1
-объявляет Ubuntu 26.04-x64 и native dependencies; `install --with-deps chromium`
-использует этот штатный путь. Фактическое исполнение подтверждает только CI.
-Trusted native jobs сохраняют `pnpm verify` и стандартные labels
-`self-hosted, Windows/macOS, X64`. Self-hosted native capacity этим источником
-не установлена; org inventory вернул HTTP 403. Эта очередь остаётся открытым
-delivery gate. Linux-результат не закрывает native проверки.
+Исполнение определено в [CI workflow](../../.github/workflows/ci.yml):
+GitHub-hosted Linux, Windows и macOS запускают `pnpm verify`; отдельный
+Ubuntu job устанавливает Chromium и выполняет consumer benchmark. Фактические
+OS/browser versions сохраняются в отчёте exact SHA. Linux не заменяет native проверки.
 
 Первичные источники метода:
 

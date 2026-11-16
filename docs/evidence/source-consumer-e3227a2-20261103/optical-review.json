@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "evidenceScope": "Historical PASS for sourceCommit in scope. Images do not qualify later static-symbol or capsule-runtime revisions.",
   "reviewer": "/root/adjacent_consumer_review",
   "reviewedAt": "2026-11-02T22:15:39Z",
   "axis": "Оптическая согласованность настоящих mic-circle/question-circle/play-circle в соседних Lab UI кнопках",

@@ -60,15 +60,15 @@
   },
   "glyph-one": {
    "entry": "import { glyph } from '@labpics/icons/symbols/alert';\nconsole.log(glyph());\n",
-   "baselineBytes": 11142,
-   "baselineGzipBytes": 3159,
+   "baselineBytes": 11135,
+   "baselineGzipBytes": 3160,
    "maxBytes": 12433,
    "maxGzipBytes": 3265
   },
   "authored-time": {
    "entry": "import { glyph } from '@labpics/icons/symbols/time';\nconsole.log(glyph());\n",
-   "baselineBytes": 8340,
-   "baselineGzipBytes": 3099,
+   "baselineBytes": 8333,
+   "baselineGzipBytes": 3100,
    "maxBytes": 12652,
    "maxGzipBytes": 3250
   },
@@ -81,29 +81,29 @@
   },
   "status-circle-enclosure-patch": {
    "entry": "import { renderEnclosurePatch } from '@labpics/icons/state-variations/status-circle';\nconsole.log(renderEnclosurePatch({ variation: { enclosureEmphasis: 1.1 } }));\n",
-   "baselineBytes": 4808,
-   "baselineGzipBytes": 1936,
+   "baselineBytes": 4798,
+   "baselineGzipBytes": 1931,
    "maxBytes": 4808,
    "maxGzipBytes": 1936
   },
   "playback-circle-enclosure-patch": {
    "entry": "import { renderEnclosurePatch } from '@labpics/icons/state-variations/playback-circle';\nconsole.log(renderEnclosurePatch({ variation: { enclosureEmphasis: 1.1 } }));\n",
-   "baselineBytes": 4812,
-   "baselineGzipBytes": 1935,
+   "baselineBytes": 4802,
+   "baselineGzipBytes": 1931,
    "maxBytes": 4812,
    "maxGzipBytes": 1935
   },
   "status-circle-state-variation": {
    "entry": "import { renderStateSvg, compileStateEffect, renderEnclosurePatch } from '@labpics/icons/state-variations/status-circle';\nconsole.log(renderStateSvg('question'), compileStateEffect('confirmation', { duration: 180 }), renderEnclosurePatch({ variation: { enclosureEmphasis: 1.1 } }));\n",
-   "baselineBytes": 13964,
-   "baselineGzipBytes": 5273,
+   "baselineBytes": 13954,
+   "baselineGzipBytes": 5269,
    "maxBytes": 13990,
    "maxGzipBytes": 5282
   },
   "playback-circle-state-variation": {
    "entry": "import { renderStateSvg, compileStateEffect, renderEnclosurePatch } from '@labpics/icons/state-variations/playback-circle';\nconsole.log(renderStateSvg('play'), compileStateEffect('pause', { duration: 180 }), renderEnclosurePatch({ variation: { enclosureEmphasis: 1.1 } }));\n",
-   "baselineBytes": 10486,
-   "baselineGzipBytes": 3821,
+   "baselineBytes": 10476,
+   "baselineGzipBytes": 3816,
    "maxBytes": 10512,
    "maxGzipBytes": 3828
   },
@@ -144,43 +144,43 @@
   },
   "source-ellipsis-horizontal": {
    "entry": "import { glyph } from '@labpics/icons/symbols/ellipsis-horizontal';\nconsole.log(glyph());\n",
-   "baselineBytes": 12975,
+   "baselineBytes": 12968,
    "baselineGzipBytes": 3102,
    "maxBytes": 13019,
    "maxGzipBytes": 3109
   },
   "varied-ellipsis-horizontal": {
    "entry": "import { glyph } from '@labpics/icons/variations/ellipsis-horizontal';\nconsole.log(glyph({ variation: { dotScale: 1.1, spacingScale: 0.9 } }));\n",
-   "baselineBytes": 25767,
-   "baselineGzipBytes": 6976,
+   "baselineBytes": 25760,
+   "baselineGzipBytes": 6975,
    "maxBytes": 27351,
    "maxGzipBytes": 7509
   },
   "source-ellipsis-vertical": {
    "entry": "import { glyph } from '@labpics/icons/symbols/ellipsis-vertical';\nconsole.log(glyph());\n",
-   "baselineBytes": 12916,
-   "baselineGzipBytes": 3103,
+   "baselineBytes": 12909,
+   "baselineGzipBytes": 3104,
    "maxBytes": 12960,
    "maxGzipBytes": 3110
   },
   "varied-ellipsis-vertical": {
    "entry": "import { glyph } from '@labpics/icons/variations/ellipsis-vertical';\nconsole.log(glyph({ variation: { dotScale: 1.1, spacingScale: 0.9 } }));\n",
-   "baselineBytes": 25514,
-   "baselineGzipBytes": 6924,
+   "baselineBytes": 25507,
+   "baselineGzipBytes": 6925,
    "maxBytes": 27098,
    "maxGzipBytes": 7453
   },
   "varied-microphone": {
    "entry": "import { glyph } from '@labpics/icons/variations/mic';\nconsole.log(glyph({ variation: { bodyWidth: 0.9 } }));\n",
-   "baselineBytes": 26974,
-   "baselineGzipBytes": 8742,
+   "baselineBytes": 26967,
+   "baselineGzipBytes": 8745,
    "maxBytes": 27620,
    "maxGzipBytes": 8783
   },
   "varied-microphone-circle": {
    "entry": "import { glyph } from '@labpics/icons/variations/mic-circle';\nconsole.log(glyph({ variant: 'filled', variation: { bodyWidth: 0.8 } }));\n",
-   "baselineBytes": 24074,
-   "baselineGzipBytes": 9156,
+   "baselineBytes": 24067,
+   "baselineGzipBytes": 9159,
    "maxBytes": 24720,
    "maxGzipBytes": 9192
   },
@@ -256,17 +256,17 @@
   },
   "gesture-reload-ir-reference": {
    "entry": "import { glyph, glyphCapabilities } from '@labpics/icons/symbols/reload';\nimport { renderGlyphSvg } from '@labpics/icons/ir/render';\nimport { compileSymbolEffect } from '@labpics/icons/motion';\nconst value = glyph();\nconsole.log(renderGlyphSvg(value), compileSymbolEffect(value, glyphCapabilities(), 'reload.cycle', { duration: 400 }));\n",
-   "baselineBytes": 31662,
-   "baselineGzipBytes": 9753,
+   "baselineBytes": 31655,
+   "baselineGzipBytes": 9755,
    "maxBytes": 31702,
    "maxGzipBytes": 9756
   },
   "gesture-refresh-ir-reference": {
    "entry": "import { glyph, glyphCapabilities } from '@labpics/icons/symbols/refresh';\nimport { renderGlyphSvg } from '@labpics/icons/ir/render';\nimport { compileSymbolEffect } from '@labpics/icons/motion';\nconst value = glyph();\nconsole.log(renderGlyphSvg(value), compileSymbolEffect(value, glyphCapabilities(), 'refresh.cycle', { duration: 400 }));\n",
-   "baselineBytes": 33273,
-   "baselineGzipBytes": 10572,
+   "baselineBytes": 33266,
+   "baselineGzipBytes": 10574,
    "maxBytes": 33313,
-   "maxGzipBytes": 10573
+   "maxGzipBytes": 10574
   },
   "gesture-mic-width": {
    "entry": "import { prepareBodyWidth } from '@labpics/icons/gestures/mic';\nconst result = prepareBodyWidth('filled');\nconsole.log(result.ok && result.prepared.sample(0.9));\n",

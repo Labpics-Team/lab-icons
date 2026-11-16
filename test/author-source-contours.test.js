@@ -4,6 +4,7 @@ import { createHash } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
 import { loadAuthorBaseline } from '../scripts/lib/author-baseline.js';
 import { compileAuthorAnatomy } from '../scripts/lib/author-anatomy.js';
+import { projectAuthorSourceContours } from '../scripts/lib/author-source-contours.js';
 import { closedSourceContourLiterals } from '../src/core/source-contours.js';
 import { authorPathEntries } from '../src/core/icon-geometry.js';
 import { createGlyphCompiler } from '../src/ir/compiler.js';
@@ -14,6 +15,13 @@ const manifest = read('semantics/figma-baseline.json'), all = read('semantics/au
 const baseline = loadAuthorBaseline(fileURLToPath(new URL('..', import.meta.url)), { manifest: { ...manifest,
   counts: { families: 1, variants: 2 }, icons: { 'mic-circle': manifest.icons['mic-circle'] } } });
 const master = baseline.icons['mic-circle'].filled;
+
+it('source spans refuse a lowercase initial moveto that changes during lowering', () => {
+  const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill-rule="evenodd" d="m0 0 24 0 0 24 -24 0zM4 4L4 8L8 8L8 4Z"/></svg>';
+  const source = { ...master, artifactSvg: svg, normalizedSvg: svg };
+  expect(() => projectAuthorSourceContours(source, [], { kind: 'compound', fillRule: 'evenodd' },
+    (code, message) => { throw new Error(`${code}: ${message}`); })).toThrow(/literal absolute-M/);
+});
 const declaration = {
   masterSha256: master.author.masterSha256, pathFingerprintSha256: master.author.pathFingerprintSha256,
   composition: { kind: 'compound', fillRule: 'evenodd' },

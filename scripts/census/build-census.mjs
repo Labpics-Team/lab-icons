@@ -44,18 +44,17 @@ for (const n of sourceOnly) {
   else structural.singleton.push(n);
 }
 
-// --- аттрибуция dist/ir/index.js по маркерам esbuild + consumer-бюджеты ---
+// --- состав dist/ir/index.js и точный размер целого артефакта ---
 // dist обязателен: census без bundle-секции недетерминирован относительно
 // состояния рабочей копии (finding изолированного ревью PR #81).
 const irBytes = readFileSync(join(ROOT, 'dist', 'ir', 'index.js'));
 const irSrc = irBytes.toString('utf8');
-const markers = [...irSrc.matchAll(/^\/\/ ([^\n]+)$/gm)].map((m) => ({ path: m[1], idx: m.index }));
-const mods = markers.map((m, i) => ({
-  path: m.path,
-  bytes: Buffer.byteLength(irSrc.slice(m.idx, i + 1 < markers.length ? markers[i + 1].idx : irSrc.length)),
-}));
-mods.sort((a, b) => b.bytes - a.bytes);
-const bundle = { totalBytes: irBytes.length, modules: mods };
+// build-ir помещает все provenance headers перед body: их смещения не задают
+// границы модулей. Они доказывают только присутствие кода. Вклад в consumer
+// измеряется через esbuild outputs.inputs.bytesInOutput в consumer reports.
+const modules = [...new Set([...irSrc.matchAll(/^\/\/ ([^\r\n]+)$/gm)].map(m => m[1]))]
+  .sort().map(path => ({ path }));
+const bundle = { totalBytes: irBytes.length, moduleByteAttribution: 'unavailable', modules };
 
 const staticSrc = readFileSync(join(ROOT, 'dist', 'index.js'));
 const consumerBudgets = {

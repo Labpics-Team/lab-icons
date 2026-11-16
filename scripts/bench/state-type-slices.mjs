@@ -38,6 +38,7 @@ try {
     outputs[name] = { ...measure(bytes), emitted: bytes.toString('utf8') };
   }
   const provenance = readFileSync(join(after, 'ir/author-provenance.d.ts'));
+  const oldProvenance = readFileSync(join(before, 'ir/author-provenance.d.ts'));
   const report = {
     baseline, capturedAt: new Date().toISOString(), node: process.version,
     typescript: JSON.parse(readFileSync(join(root, 'node_modules/typescript/package.json'))).version,
@@ -46,7 +47,7 @@ try {
     previous: { ...measure(oldBytes), emitted: oldBytes.toString('utf8') },
     outputs,
     transitiveRawBytes: {
-      before: oldBytes.byteLength + provenance.byteLength,
+      before: oldBytes.byteLength + oldProvenance.byteLength,
       enclosure: outputs.types.bytes + outputs['common-types'].bytes + provenance.byteLength,
       contour: outputs['contour-types'].bytes + outputs['common-types'].bytes + provenance.byteLength,
       all: Object.values(outputs).reduce((sum, item) => sum + item.bytes, provenance.byteLength),

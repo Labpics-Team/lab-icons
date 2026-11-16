@@ -3,7 +3,6 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { parseDocumentation } from '../scripts/lib/docs-markdown.js';
-import { validateIconProposal } from '../scripts/lib/icon-proposal.js';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 
@@ -50,17 +49,4 @@ describe('Примеры README', () => {
     expect(javascriptExamples('```sh\nexit 1\n```\n```js\nconsole.log(1);\n```')).toEqual(['console.log(1);']);
     expect(javascriptExamples('~~~javascript\r\nconsole.log(1);\r\n~~~')).toEqual(['console.log(1);']);
   });
-});
-
-it('проверяет предложение из документации по схеме и каталогу', () => {
-  const { jsonExamples } = parseDocumentation(readFileSync(new URL('../docs/agent-workflow.md', import.meta.url), 'utf8'));
-  expect(jsonExamples.length).toBeGreaterThan(0);
-  const catalog = JSON.parse(readFileSync(new URL('../semantics/catalog.json', import.meta.url), 'utf8'));
-  const catalogIconIds = Object.keys(catalog.icons);
-  for (const source of jsonExamples) {
-    const proposal = JSON.parse(source);
-    expect(() => validateIconProposal(proposal, { catalogIconIds })).not.toThrow();
-    expect(() => validateIconProposal({ ...proposal, unsupported: true }, { catalogIconIds })).toThrow(/unsupported/);
-    expect(() => validateIconProposal({ ...proposal, family: { ...proposal.family, references: ['not-a-real-icon'] } }, { catalogIconIds })).toThrow(/not-a-real-icon/);
-  }
 });

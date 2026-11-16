@@ -288,3 +288,11 @@ export function validateRetainedPair(baseline, candidate) {
     throw new Error('benchmark oracle: retained lane меняет полезный SVG output');
   }
 }
+
+/** Root static output now follows the current author master, independently of recorded IR. */
+export function validateAuthorStaticObservation(observation, expected, count) {
+  if (observation.svgSha256 !== expected.artifactSha256 || observation.completed !== count ||
+      observation.completedBytes !== expected.artifactLength * count) {
+    throw new Error('benchmark oracle: root static output differs from the current author master');
+  }
+}

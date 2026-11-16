@@ -44,6 +44,8 @@ async function slice(label, old = false) {
       const file = join(root, read('semantics/catalog.json').icons[icon].source[variant].file);
       return `export const ${icon.replace(/-([a-z])/g, (_, c) => c.toUpperCase())}${directory} = ${JSON.stringify(optimize(readFileSync(file, 'utf8'), { ...svgo, path: file }).data)};`;
     })).join('\n'));
+  const staticNames = [...readFileSync(join(pkg, 'dist/index.js'), 'utf8').matchAll(/export const (\w+)/g)].map(match => match[1]);
+  write(join(pkg, 'dist/legacy-static.js'), readFileSync(join(pkg, 'dist/index.js'), 'utf8') + `\nexport default { ${staticNames.join(', ')} };\n`);
   await bundle(root, join(pkg, 'dist'), 'src/ir/request.ts', 'ir/request.js');
   for (const [entry, external] of [['compiler', ['./request.js']], ['index', ['@labpics/icons', './compiler.js']]]) {
     if (old) {
@@ -53,7 +55,7 @@ async function slice(label, old = false) {
       const modules = Object.entries(Object.values(result.metafile.outputs)[0].inputs)
         .filter(([, input]) => input.bytesInOutput > 0).map(([name]) => name).sort();
       write(join(pkg, `dist/ir/${entry}.js`), modules.map(name => `// ${name}\n`).join('') + result.outputFiles[0].text);
-    } else await bundle(root, join(pkg, 'dist'), `src/ir/${entry}.ts`, `ir/${entry}.js`, external);
+    } else await bundle(root, join(pkg, 'dist'), `src/ir/${entry}.ts`, `ir/${entry}.js`, [...external, '../legacy-static.js']);
   }
   const declarations = {};
   if (!old) {

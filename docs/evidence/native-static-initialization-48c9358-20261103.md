@@ -1,6 +1,9 @@
 # Отложенная инициализация семантических данных
 
 Источник: `48c9358d96ab989ee408a6bf695d64b08a642835`, срез RUNTIME-SLICE-01.
+Это историческая отложенная проекция. Нынешний emitter создаёт готовые записи
+при импорте; текущий static lifecycle test — diagnostic synthetic fixture,
+который намеренно отвергает eager initialization.
 Статический native import не создаёт source, capabilities и metadata records.
 Сгенерированный модуль создаёт соответствующую фабрику при первом обращении.
 Данные остаются замороженными, повторный default возвращает тот же объект.
@@ -17,8 +20,9 @@ data provider сохраняет identity исходника при исполь
 125/125 bounded checks прошли на точном источнике: исходные данные и SVG,
 публичные имена/arity, frozen/shared identity, getters, точные отказы,
 вариации mic `bodyWidth` 0.8/0.9/1, сохранённые byte budgets и deliberate
-eager-initialization controls. Native marker witness проверяет два настоящих
-семейства и оба порядка первого обращения к source/capabilities.
+eager-initialization controls. Сохранённый текущий native marker test проверяет
+synthetic alert с первым обращением к capabilities; двухсемейный witness и
+оба порядка первоначального опыта этим тестом не воспроизводятся.
 
 [Числа и source digests](native-static-initialization-48c9358-20261103.json)
 получены в малом installed-layout fixture на Windows x64, Node v24.15.0,

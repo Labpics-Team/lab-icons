@@ -1,6 +1,5 @@
 {
   "baseline": "1dd91b1bf3e58af5e2f72f634fd37a506bae942d",
-  "producerHead": "3a41fa2fa94f33d077623a3bf87751796fea7ca8",
   "emitterSha256": "da3e7768575ea025d406e084a86d60f1fdad0a02eae7bf5d847f8a158c27270f",
   "capturedAt": "2026-11-02T05:33:44.807Z",
   "scope": "two annulus families/four masters and one dots control; exact emitted packets/browser bundles/cold native graphs; no package build/install, browser renders, timing, memory or optical acceptance",
@@ -414,5 +413,8 @@
       "brotliBytes": 8820
     }
   },
-  "retained": "E:\\AgentWork\\annulus-runtime-observation-optimized-20261102"
+  "retained": "E:\\AgentWork\\annulus-runtime-observation-optimized-20261102",
+  "recordedProducerHead": "3a41fa2fa94f33d077623a3bf87751796fea7ca8",
+  "emitterSourceCommit": "b654ac210ac5e2ab96c97203c2c5b91c5e1cded7",
+  "sourceIdentityStatus": "Historical worktree: emitter digest matches emitterSourceCommit; recordedProducerHead is an earlier tree. Full tested-tree identity was not saved."
 }

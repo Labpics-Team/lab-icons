@@ -146,7 +146,8 @@ function validPackage() {
   write(root, 'LICENSE', 'MIT\n');
   write(root, 'dist/index.js', 'export const accessibilityOutline = `<svg/>`;\n');
   write(root, 'dist/index.d.ts', 'export declare const accessibilityOutline: string;\n');
-  write(root, 'dist/ir/index.js', 'import "./compiler.js"; export const iconIds = []; export const glyph = () => ({});\n');
+  write(root, 'dist/legacy-static.js', 'export default {};\n');
+  write(root, 'dist/ir/index.js', 'import "./compiler.js"; import "../legacy-static.js"; export const iconIds = []; export const glyph = () => ({});\n');
   write(
     root,
     'dist/ir/index.d.ts',
@@ -182,7 +183,8 @@ function validPackage() {
   write(root, 'dist/ir/render.d.ts', "import type { GlyphIR } from './compiler.js';\nexport declare function renderGlyphSvg(glyph: GlyphIR): string;\n");
   write(root, 'dist/authoring/index.js', 'export const compileDesignSpec = () => ({});\n');
   write(root, 'dist/authoring/index.d.ts', "export { compileDesignSpec } from './design-spec.js';\n");
-  write(root, 'dist/authoring/design-spec.d.ts', "import type { GlyphIR } from '../ir/compiler.js';\nexport declare function compileDesignSpec(spec: unknown): GlyphIR;\n");
+  write(root, 'dist/authoring/design-spec.d.ts', "import type { GlyphIR } from '../ir/compiler.js';\nexport type { SymbolSource } from './symbol-source.js';\nexport declare function compileDesignSpec(spec: unknown): GlyphIR;\n");
+  write(root, 'dist/authoring/symbol-source.d.ts', "export interface SymbolSource { readonly id: string }\n");
   write(root, 'dist/motion/index.js', 'import "../ir/contour-runtime.js"; export const fixture = 1;\n');
   write(root, 'dist/motion/index.d.ts', "import type { StateRefusal } from '../ir/state-types.js'; import type { PreparedContourStateEffect } from '../ir/contour-state-types.js'; export declare const fixture: StateRefusal | PreparedContourStateEffect;\n");
   write(root, 'dist/ir/lottie-runtime.js', 'import "../motion/index.js"; export const createLottieSymbol = () => ({});\n');

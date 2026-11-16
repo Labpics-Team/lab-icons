@@ -27,6 +27,6 @@ export function inspectStaticRuntime(retainedInputs) {
   if (!Array.isArray(retainedInputs)) return { verdict: 'INCOMPLETE', reason: 'MISSING_RETAINED_GRAPH' };
   if (Array.from(retainedInputs).some(row => !row || typeof row.file !== 'string' || !row.file.length ||
       !Number.isSafeInteger(row.bytesInOutput) || row.bytesInOutput <= 0)) return { verdict: 'INCOMPLETE', reason: 'INVALID_RETAINED_GRAPH' };
-  const forbidden = retainedInputs.filter(row => /\/(?:dist\/(?:ir|motion|authoring)\/|(?:catalog|anatomy)\.json$)/.test(row.file.replaceAll('\\', '/')));
+  const forbidden = retainedInputs.filter(row => /\/(?:dist\/(?:ir|motion|authoring)\/|(?:catalog\.json|anatomy(?:\.runtime)?\.json)$)/.test(row.file.replaceAll('\\', '/')));
   return { verdict: forbidden.length ? 'FAIL' : 'PASS', forbidden };
 }

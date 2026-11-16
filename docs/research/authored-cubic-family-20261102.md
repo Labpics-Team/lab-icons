@@ -54,7 +54,7 @@ Provenance для изменённой геометрии должно пока�
 
 | Подход | Результат и ограничение |
 |---|---|
-| Analytic A/circle replacement | Исключён точным rational radial counterexample; старый genRing ещё использует другую authored radius policy |
+| Analytic circle replacement | Radius-10.5 circle исключён точным rational radial counterexample. Общая эллиптическая SVG A-дуга этим доказательством не исключена; старый genRing использует другую authored radius policy |
 | Общий circular cubic r+kappa | Недостаточен: handles и cardinal symmetry отличаются; exact fitted profile с отдельными handles потребует дополнительных чисел |
 | Полный labelled cardinal/handle/residual schema | Возможен, но сложнее source-owned semantic deformation и пока не даёт доказанного потребительского преимущества; нельзя считать его невозможным |
 | Variable contour masters / font | Штатная сильная альтернатива при дополнительных авторских masters. OpenType/Apple требуют совместимых paths/points [3,4]; совпадение количества не удостоверяет семантическое correspondence, start order и качество промежуточных форм [5,6]. Текущие Outline/Filled не являются small/display optical masters |

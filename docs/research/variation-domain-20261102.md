@@ -19,7 +19,8 @@ object literal. Обе PURE-фабрики получали прямую ссы�
 Combined glyph/capabilities consumer уменьшился на 2872/2745 raw bytes и
 23/21 gzip bytes. Однако glyph-only получил дополнительные 12 raw bytes,
 capabilities-only — 8; gzip и Brotli обоих сценариев также выросли.
-Static consumer совпал по raw/gzip/Brotli и SHA256. Результат каждого
+Static consumer совпал по raw/gzip/Brotli; SHA256 совпал только у horizontal,
+у vertical изменился `94124b2e…` → `433c6957…`. Результат каждого
 исполнимого consumer совпал с baseline по JSON fingerprint.
 
 Уменьшение module raw не доказывает выигрыша потребителя. Пinned esbuild

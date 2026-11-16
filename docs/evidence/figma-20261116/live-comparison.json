@@ -11,5 +11,38 @@
   "missing": [],
   "added": [],
   "changed": [],
-  "identicalComponents": 660
+  "identicalComponents": 660,
+  "query": {
+    "endpoint": "https://api.figma.com/v1/files/LuaiBd4anRi4DMZayKAnY2/nodes",
+    "ids": [
+      "6397:2241",
+      "8513:1000"
+    ],
+    "options": {
+      "geometry": "omitted",
+      "depth": "omitted",
+      "plugin_data": "omitted"
+    },
+    "baselineVersion": "2416636003859748575",
+    "currentRequest": "saved current file (version read from response)"
+  },
+  "frames": [
+    {
+      "id": "6397:2241",
+      "baselineSha256": "eaee23ead40e79dcc12e37fdd9c0e18015d784bd149af0a5ac851481c22cf88e",
+      "currentSha256": "eaee23ead40e79dcc12e37fdd9c0e18015d784bd149af0a5ac851481c22cf88e",
+      "identical": true
+    },
+    {
+      "id": "8513:1000",
+      "baselineSha256": "bc566f4436ba6a9f6e82c832100bde7958cc51ec420dae89a90f8d9438498545",
+      "currentSha256": "bc566f4436ba6a9f6e82c832100bde7958cc51ec420dae89a90f8d9438498545",
+      "identical": true
+    }
+  ],
+  "componentDigest": {
+    "scope": "id-to-complete-COMPONENT-document-SHA256 map; recursive key ordering; array order retained",
+    "baselineSha256": "b45fb22fd7737a23ee1f6443421d648e0b987638626cac8ec3a988688e6c4c86",
+    "currentSha256": "b45fb22fd7737a23ee1f6443421d648e0b987638626cac8ec3a988688e6c4c86"
+  }
 }

@@ -519,5 +519,10 @@
       },
       "previousGeometrySha256": "7eaceddc63436bb673fd47983033a2e3ebcb096911411ef08c004a17c77622b7"
     }
+  ],
+  "sourceIdentityStatus": "Historical partial worktree snapshot: head does not contain author-capsule.js. Full tested-tree identity was not saved; sourceSnapshotSha256 covers only files listed below.",
+  "unhashedTestSources": [
+    "test/author-source-contours.test.js",
+    "test/capsule-width-consumer.test.js"
   ]
 }

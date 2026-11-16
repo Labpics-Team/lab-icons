@@ -10,6 +10,11 @@ export function projectAuthorSourceContours(source, declarations, composition, r
     refuse('ANNOTATION_INVALID', 'Нужен явный compound fill owner.');
   }
   const entries = authorPathEntries(source.artifactSvg), originals = authorPathEntries(source.normalizedSvg);
+  // Spans index the literal source d, which normalizeHead may otherwise lengthen.
+  const literalSource = /<path\b[^>]*\bd=(?:"([^"]*)"|'([^']*)')/.exec(source.normalizedSvg);
+  if ((literalSource?.[1] ?? literalSource?.[2]) !== originals[0]?.d) {
+    refuse('PARTS_INVALID', 'Contour selection требует literal absolute-M source без изменения длины при lowering.');
+  }
   if (composition.fillRule !== 'evenodd' || entries.length !== 1 || originals.length !== 1 ||
       entries[0].fillRule !== 'evenodd' || originals[0].fillRule !== 'evenodd' || declarations.length < 2 || declarations.length > 16 ||
       declarations[0].role !== 'container' || declarations.slice(1).some(part => part.role !== 'counter')) {

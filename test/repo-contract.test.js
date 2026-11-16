@@ -344,6 +344,16 @@ jobs:
     expect(source).toContain('run: pnpm verify');
   });
 
+  it('принимает benchmark команды в эквивалентной форме - run:', () => {
+    const source = readFileSync(new URL('../.github/workflows/ci.yml', import.meta.url), 'utf8');
+    const shorthand = source
+      .replace(/      - name: [^\r\n]+\r?\n        run: pnpm exec playwright/, '      - run: pnpm exec playwright')
+      .replace(/      - name: [^\r\n]+\r?\n        env:\r?\n          (BENCHMARK_RUNNER_ENVIRONMENT: [^\r\n]+)\r?\n        run: ([^\r\n]+)/,
+        '      - run: $2\n        env:\n          $1');
+    expect(shorthand).not.toBe(source);
+    expect(benchmarkWorkflowErrors(shorthand)).toEqual([]);
+  });
+
   it('запрещает pull_request_target независимо от выбора runner', () => {
     const source = readFileSync(new URL('../.github/workflows/ci.yml', import.meta.url), 'utf8');
     const target = source.replace('  pull_request:', '  pull_request_target:')

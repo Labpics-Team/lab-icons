@@ -59,8 +59,12 @@ for (const target of effect.targets) {
   part.style.opacity = String(target.from);
 }
 document.body.append(host);
+const visible = new Map(effect.stages.map(stage => {
+  const part = byPart.get(stage.partId)!;
+  return [stage.partId, Number(getComputedStyle(part).opacity)] as const;
+}));
 const control = sequence(effect.stages.map(stage => [
-  byPart.get(stage.partId)!, { opacity: stage.to },
+  byPart.get(stage.partId)!, { opacity: [visible.get(stage.partId)!, stage.to] },
   { at: stage.at, duration: stage.duration, ease: effect.options.easing },
 ]), { reducedMotion: effect.options.duration === 0 ? 'always' : 'user' });
 ```

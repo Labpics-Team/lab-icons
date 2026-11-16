@@ -297,26 +297,22 @@
  ],
  "bundle": {
   "totalBytes": 379934,
+  "moduleByteAttribution": "unavailable",
   "modules": [
    {
-    "path": "src/ir/index.ts",
-    "bytes": 379820
+    "path": "semantics/anatomy.runtime.json"
    },
    {
-    "path": "semantics/anatomy.runtime.json",
-    "bytes": 34
+    "path": "semantics/catalog.json"
    },
    {
-    "path": "src/ir/catalog.generated.ts",
-    "bytes": 31
+    "path": "semantics/grid.json"
    },
    {
-    "path": "semantics/catalog.json",
-    "bytes": 26
+    "path": "src/ir/catalog.generated.ts"
    },
    {
-    "path": "semantics/grid.json",
-    "bytes": 23
+    "path": "src/ir/index.ts"
    }
   ]
  },

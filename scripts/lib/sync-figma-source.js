@@ -36,7 +36,7 @@ export function syncFigmaSource({ root, captureRoot, manifest, write = false }) 
       parts: sourceShape.sourceContract.parts.map((part, pathIndex) => ({ pathIndex, id: `path-${pathIndex + 1}`, role: 'unclassified' })),
     };
     if (anatomy.masterSha256) anatomy.masterSha256 = incoming.sha256;
-    next.symbols[id].variants[variant] = { provenance: { style: previous.provenance.style, ...incoming }, anatomy };
+    next.symbols[id].variants[variant] = { provenance: { ...incoming, style: previous.provenance.style }, anatomy };
     changes.push({ id, variant, geometryChanged: !sameContours, master: incoming.master });
     staged.set(destination, bytes);
   }

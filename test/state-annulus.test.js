@@ -193,7 +193,7 @@ describe('authored shared state enclosure: one geometry law and retained state p
     const projected = symbolReleaseProjection(captured, Object.keys(manifest.icons), Object.keys(capturedStates.groups),
       authorVariationIconNames(originalAnatomy), authorVariationLawNames(originalAnatomy), packet,
       authorStateVariationGroupNames(capturedStates, originalAnatomy), authorContentVariationIconNames(originalAnatomy), authorStateLawNames(capturedStates),
-      motionTargets.names, motionTargets.capsules);
+      motionTargets.names, motionTargets.capsules, motionTargets.clocks);
     expect(projected).toEqual(captured);
     expect(projected.runtimeDependencies.filter(file => file.endsWith('source-packet-runtime.js'))).toHaveLength(1);
     expect(projected.runtimeDependencies.filter(file => file.endsWith('annulus-geometry-runtime.js'))).toHaveLength(1);

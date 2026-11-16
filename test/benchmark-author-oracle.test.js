@@ -9,7 +9,7 @@ import { createCompiledGlyph, createCompiledCapabilities } from '../src/ir/symbo
 import { compileSymbolEffect } from '../src/motion/index.js';
 import { authorPackageExpectations } from '../scripts/check-package-artifact.js';
 import { authoredSymbolPayloads } from './helpers/authored-symbol-payload.js';
-import { expectedAuthorMotionRefusal, expectedAuthorObservation, inspectAuthorSvg, observeAuthorGlyph, sha256, stableJSON, validateAuthorAdmission, validateAuthorObservation, validateRetainedPair } from '../scripts/bench/author-oracle.js';
+import { expectedAuthorMotionRefusal, expectedAuthorObservation, inspectAuthorSvg, observeAuthorGlyph, sha256, stableJSON, validateAuthorAdmission, validateAuthorObservation, validateAuthorStaticObservation, validateRetainedPair } from '../scripts/bench/author-oracle.js';
 
 const root = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">';
 const paths = [
@@ -280,5 +280,13 @@ describe('benchmark author oracle и сохранённый output', () => {
     expect(() => validateRetainedPair(sample, { ...sample })).not.toThrow();
     expect(() => validateRetainedPair(sample, { ...sample, svgSha256: sha256(artifact.replace('M2 2', 'M3 2')) })).toThrow(/retained/);
     expect(() => validateRetainedPair(sample, { ...sample, completed: 0 })).toThrow(/retained/);
+  });
+  it('root static output must match the current author bytes and completed work', () => {
+    const expected = { artifactSha256: sha256(artifact), artifactLength: artifact.length };
+    const sample = { svgSha256: expected.artifactSha256, completedBytes: artifact.length * 10, completed: 10 };
+    expect(() => validateAuthorStaticObservation(sample, expected, 10)).not.toThrow();
+    for (const drift of [{ svgSha256: sha256('old static master') }, { completed: 9 }, { completedBytes: 0 }]) {
+      expect(() => validateAuthorStaticObservation({ ...sample, ...drift }, expected, 10)).toThrow(/current author master/);
+    }
   });
 });

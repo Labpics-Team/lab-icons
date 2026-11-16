@@ -90,7 +90,7 @@ Observatory получает список жестов из capabilities чер�
 
 - **Да:** исходный feature RED — `LAW_UNSUPPORTED` для `notification.ring`.
 - **Да:** 26/26 targeted tests в `test/author-notification-ring.test.js` проверяют
-  независимые raw paths/fill-rule/z-order, source receipts, ширину через
+  независимые raw paths/fill-rule/z-order, author provenance, ширину через
   экстремумы Bernstein-полиномов, шкалу и reverse/partial intervals,
   одинаковые позы разных фаз, reduced motion, неизменные Lottie curves и
   точные отказы для off, muted/disabled и ошибочных аннотаций.

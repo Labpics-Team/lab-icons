@@ -266,5 +266,6 @@
     "scripts/lib/author-anatomy.js": "0d8e824fb588e2fbb7851b1d1237d409242b3f95c9bdde97d55b43457950d559",
     "semantics/author-anatomy.json": "74f13c37c3cb2f39846e7ab4a2557a030c7ce0227dea542ac9e1e1401440ac18",
     "test/author-notification-ring.test.js": "504ddb4e31599657b5780d0d52c834b53ef0d3f29ef35a2a017cd18cf77723d3"
-  }
+  },
+  "evidenceScope": "Historical 2026-11-01 source worktree only. Recorded digests do not certify the current implementation."
 }

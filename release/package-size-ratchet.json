@@ -351,8 +351,8 @@
    ]
   },
   "dist/ir/annulus-geometry-runtime.js": {
-   "baselineBytes": 2507,
-   "baselineGzipBytes": 1135,
+   "baselineBytes": 2467,
+   "baselineGzipBytes": 1124,
    "maxBytes": 2507,
    "maxGzipBytes": 1135,
    "allowedModules": [
@@ -447,8 +447,8 @@
    ]
   },
   "dist/ir/author-request-runtime.js": {
-   "baselineBytes": 798,
-   "baselineGzipBytes": 489,
+   "baselineBytes": 779,
+   "baselineGzipBytes": 485,
    "maxBytes": 798,
    "maxGzipBytes": 489,
    "allowedModules": [

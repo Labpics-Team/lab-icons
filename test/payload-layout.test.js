@@ -12,7 +12,7 @@ import { symbolPayloads } from './helpers/symbol-payloads.js';
 const names = ['component', 'notifications', 'notifications-unread', 'time'];
 const payloads = symbolPayloads(names);
 
-/** Неизменяемый emitter 75c67fc: положительный baseline, не другой production path. */
+/** Layout 75c67fc with the current additive static symbol exports: compare the same public surface. */
 function baselineModule({ icon, source, capabilities, staticSvg }) {
   const json = JSON.stringify, declarations = [], sources = {}, refs = {};
   const record = (value, replace) => `{${Object.entries(value).map(([key, item]) => `${json(key)}:${replace[key] ?? json(item)}`).join(',')}}`;
@@ -30,6 +30,8 @@ function baselineModule({ icon, source, capabilities, staticSvg }) {
     '/** GENERATED: проверенные текущие авторские masters одного символа. */',
     "import { createCompiledGlyph, createCompiledCapabilities } from '../ir/symbol-runtime.js';",
     `export const outline = ${json(staticSvg.outline)};`, `export const filled = ${json(staticSvg.filled)};`,
+    `export const symbol = /* @__PURE__ */ Object.freeze({ id: ${json(icon)}, outline, filled });`,
+    'export default symbol;',
     ...declarations, `const outlineSource = ${sources.outline};`, `const filledSource = ${sources.filled};`,
     `export const glyph = /* @__PURE__ */ createCompiledGlyph(${json(icon)}, { outline: outlineSource, filled: filledSource });`,
     `export const glyphCapabilities = /* @__PURE__ */ createCompiledCapabilities(${record(capabilities, refs)});`, '',

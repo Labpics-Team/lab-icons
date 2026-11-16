@@ -28,6 +28,10 @@ PURE-вызовы фабрик были проверены и отклонены
 
 ## Проверка
 
+Это исторический замер от 2026-11-02. Source digests в отчёте фиксируют тот
+эксперимент и не удостоверяют последующие изменения compiler, fixture и emitter.
+Текущий контракт проверяют `test/compiler-entrypoints.test.js` и CI exact SHA.
+
 2026-11-02, Windows x64, Node 24.15.0, esbuild 0.28.1, fflate 0.8.3,
 gzip level 9 / mtime 0. Production helper выпускает compiler/index/request.
 Ограниченный static fixture использует настоящие исходники `reload`, `time`
@@ -39,7 +43,7 @@ gzip level 9 / mtime 0. Production helper выпускает compiler/index/requ
 проверяет достижимость конкретных функций, а не строки состояний в catalog.
 Каждый minified bundle исполняется и сравнивается с baseline.
 
-| Consumer | Baseline raw/gzip, B | Изменение raw/gzip, B |
+| Consumer | Baseline raw/gzip, B | Итог raw/gzip, B |
 | --- | ---: | ---: |
 | glyph | 495973/113952 | 482464/110029 |
 | capabilities | 495940/113934 | 407831/85897 |
