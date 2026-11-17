@@ -27,9 +27,11 @@ async function productionRuntime(entry, external) {
 describe('production minification preserves named public runtime contracts', () => {
   it('retains public Motion export names', async () => {
     const runtime = await productionRuntime('src/motion/index.ts', ['../ir/contour-runtime.js']);
-    const names = ['compileSymbolEffect', 'prepareContourStateEffect'];
+    const names = JSON.parse(readFileSync(join(root, 'release/export-surface.json'), 'utf8'))['./motion'];
     expect(Object.keys(runtime).sort()).toEqual(names.sort());
-    for (const name of names) expect(runtime[name].name).toBe(name);
+    // Import names are the public boundary. Function.name registrations keep
+    // unused DOM code in a compiler-only consumer after minification.
+    for (const name of names) expect(typeof runtime[name]).toBe('function');
   });
 
   it('retains the returned capsule glyph contract after consumer minification', async () => {

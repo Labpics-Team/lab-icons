@@ -92,6 +92,11 @@ globalThis.document.body.dataset.ready = String(rendered.length > 0);
     bundle: true, write: false, minify: true, format: 'esm', target: 'es2022' });
   assert.ok(!staticBundle.outputFiles[0].text.includes('coordinates'));
   assert.ok(staticBundle.outputFiles[0].text.length < optics.symbols['plus-circle'].outline.length + 100);
+  const compilerBundle = await build({ absWorkingDir: consumer,
+    stdin: { contents: "export { compileSymbolEffect } from '@labpics/icons/motion';", resolveDir: consumer },
+    bundle: true, write: false, minify: true, format: 'esm', target: 'es2022' });
+  assert.ok(!compilerBundle.outputFiles[0].text.includes('querySelectorAll'),
+    'the pure effect compiler retained the unused DOM executor');
 
   browser = await chromium.launch({ ...(process.argv.includes('--chrome') ? { channel: 'chrome' } : {}), headless: true });
   const page = await browser.newPage({ viewport: { width: 780, height: 700 }, deviceScaleFactor: 1 });
@@ -125,7 +130,9 @@ globalThis.document.body.dataset.ready = String(rendered.length > 0);
   assert.equal(await page.evaluate(() => window.__iconRafCalls), stoppedFrames, 'idle Motion scheduled more frames');
   assert.deepEqual(errors, []);
   const report = { version: pkg.version, preview, ...runtime, browser: browser.version(), observation, motion: motionResult,
-    singleSymbol: { bytes: bundle.outputFiles[0].contents.length, modules: included }, staticBytes: staticBundle.outputFiles[0].contents.length };
+    singleSymbol: { bytes: bundle.outputFiles[0].contents.length, modules: included },
+    compilerBytes: compilerBundle.outputFiles[0].contents.length,
+    staticBytes: staticBundle.outputFiles[0].contents.length };
   writeFileSync(join(output, 'report.json'), JSON.stringify(report, null, 2) + '\n');
   console.log(JSON.stringify(report, null, 2));
 } finally {

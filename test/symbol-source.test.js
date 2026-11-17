@@ -1,4 +1,5 @@
 import { readFileSync, statSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { join } from 'node:path';
 import { build } from 'esbuild';
@@ -43,18 +44,30 @@ describe('SymbolSource corpus', () => {
     expect(statSync(path).mtimeMs).toBe(before);
   });
 
-  it('all 660 root strings match current author masters and the per-family module', async () => {
+  it('all 660 root strings match current author masters and the per-family module', () => {
     const baseline = loadAuthorBaseline(root);
-    const exports = await import(pathToFileURL(join(root, 'dist/index.js')).href);
-    expect(Object.keys(exports)).toHaveLength(660);
-    for (const [id, variants] of Object.entries(baseline.icons)) {
-      const family = await import(pathToFileURL(join(root, `dist/symbols/${id}.js`)).href);
-      expect(family.default.id).toBe(id);
-      for (const variant of ['outline', 'filled']) {
-        expect(exports[symbolExportName(id, variant)], `${id}/${variant}`).toBe(variants[variant].artifactSvg);
-        expect(family[variant], `${id}/${variant}`).toBe(variants[variant].artifactSvg);
+    const expected = Object.entries(baseline.icons).map(([id, variants]) => ({ id,
+      variants: ['outline', 'filled'].map(variant => ({ variant, name: symbolExportName(id, variant), svg: variants[variant].artifactSvg })),
+    }));
+    // Published output is plain ESM. Native Node loads it directly; asking
+    // Vitest to transform the whole optical corpus tests the test bundler instead.
+    const output = execFileSync(process.execPath, ['--input-type=module', '-e', `
+      import { readFileSync } from 'node:fs';
+      import { pathToFileURL } from 'node:url';
+      import { join } from 'node:path';
+      const { root, expected } = JSON.parse(readFileSync(0, 'utf8'));
+      const all = await import(pathToFileURL(join(root, 'dist/index.js')));
+      const errors = Object.keys(all).length === 660 ? [] : ['root export count'];
+      for (const { id, variants } of expected) {
+        const family = await import(pathToFileURL(join(root, 'dist/symbols', id + '.js')));
+        if (family.default.id !== id) errors.push(id + ': identity');
+        for (const { variant, name, svg } of variants) {
+          if (all[name] !== svg || family[variant] !== svg) errors.push(id + '/' + variant);
+        }
       }
-    }
+      console.log(JSON.stringify(errors));
+    `], { input: JSON.stringify({ root, expected }), encoding: 'utf8' });
+    expect(JSON.parse(output)).toEqual([]);
   }, 10000);
 
   it('a static leaf consumer contains just its SVG literal, no runtime or other symbols', async () => {

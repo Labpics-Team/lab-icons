@@ -44,6 +44,7 @@ pnpm add @labpics/icons
 | `@labpics/icons/ir/candidates` | `./dist/ir/candidates.js` | `./dist/ir/candidates.d.ts` |
 | `@labpics/icons/ir/render` | `./dist/ir/render.js` | `./dist/ir/render.d.ts` |
 | `@labpics/icons/authoring` | `./dist/authoring/index.js` | `./dist/authoring/index.d.ts` |
+| `@labpics/icons/render` | `./dist/render/index.js` | `./dist/render/index.d.ts` |
 | `@labpics/icons/motion` | `./dist/motion/index.js` | `./dist/motion/index.d.ts` |
 | `@labpics/icons/symbols/*` | `./dist/symbols/*.js` | `./dist/symbols/*.d.ts` |
 | `@labpics/icons/lottie/*` | `./dist/lottie/*.js` | `./dist/lottie/*.d.ts` |
@@ -813,18 +814,39 @@ pnpm add @labpics/icons
 - `dist/lottie/warning.js`
 - `dist/lottie/waveform.d.ts`
 - `dist/lottie/waveform.js`
+- `dist/motion/execution.d.ts`
 - `dist/motion/index.d.ts`
 - `dist/motion/index.js`
+- `dist/motion/symbol-state.d.ts`
+- `dist/render/index.d.ts`
+- `dist/render/index.js`
+- `dist/render/optical-grid.d.ts`
 - `dist/state-variations/playback-circle.d.ts`
 - `dist/state-variations/playback-circle.js`
 - `dist/state-variations/status-circle.d.ts`
 - `dist/state-variations/status-circle.js`
+- `dist/states/calendar.d.ts`
+- `dist/states/calendar.js`
+- `dist/states/camera.d.ts`
+- `dist/states/camera.js`
+- `dist/states/chevron.d.ts`
+- `dist/states/chevron.js`
+- `dist/states/cloud.d.ts`
+- `dist/states/cloud.js`
+- `dist/states/direction.d.ts`
+- `dist/states/direction.js`
 - `dist/states/ellipsis-orientation-filled.d.ts`
 - `dist/states/ellipsis-orientation-filled.js`
 - `dist/states/ellipsis-orientation-outline.d.ts`
 - `dist/states/ellipsis-orientation-outline.js`
 - `dist/states/expression-face.d.ts`
 - `dist/states/expression-face.js`
+- `dist/states/flash.d.ts`
+- `dist/states/flash.js`
+- `dist/states/heart.d.ts`
+- `dist/states/heart.js`
+- `dist/states/link.d.ts`
+- `dist/states/link.js`
 - `dist/states/microphone-filled.d.ts`
 - `dist/states/microphone-filled.js`
 - `dist/states/microphone-presentation-filled.d.ts`
@@ -833,18 +855,28 @@ pnpm add @labpics/icons
 - `dist/states/microphone-presentation.js`
 - `dist/states/microphone.d.ts`
 - `dist/states/microphone.js`
+- `dist/states/notification.d.ts`
+- `dist/states/notification.js`
+- `dist/states/pin.d.ts`
+- `dist/states/pin.js`
 - `dist/states/playback-circle.d.ts`
 - `dist/states/playback-circle.js`
+- `dist/states/playback.d.ts`
+- `dist/states/playback.js`
 - `dist/states/plus-presentation-filled.d.ts`
 - `dist/states/plus-presentation-filled.js`
 - `dist/states/plus-presentation.d.ts`
 - `dist/states/plus-presentation.js`
 - `dist/states/status-circle.d.ts`
 - `dist/states/status-circle.js`
+- `dist/states/status.d.ts`
+- `dist/states/status.js`
 - `dist/states/visibility-filled.d.ts`
 - `dist/states/visibility-filled.js`
 - `dist/states/visibility.d.ts`
 - `dist/states/visibility.js`
+- `dist/states/volume.d.ts`
+- `dist/states/volume.js`
 - `dist/symbols/accessibility.d.ts`
 - `dist/symbols/accessibility.js`
 - `dist/symbols/actions.d.ts`
@@ -1555,3 +1587,6 @@ pnpm add @labpics/icons
 - `dist/ir/state-annulus-types.d.ts`
 - `dist/ir/state-common-types.d.ts`
 - `dist/ir/state-types.d.ts`
+- `dist/motion/execution.d.ts`
+- `dist/motion/symbol-state.d.ts`
+- `dist/render/optical-grid.d.ts`

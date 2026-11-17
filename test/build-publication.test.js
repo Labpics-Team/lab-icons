@@ -218,6 +218,15 @@ describe('публикация единой эпохи IR/symbols/motion/Lottie'
   it.each(['ir/index.js', 'ir/lottie-runtime.js', 'ir/state-runtime.js'])('при отказе bundle %s ждёт остальных writers до cleanup, не оставляя поздний staging', async rejectedTarget => {
     const { root, output } = fixture();
     write(root, 'scripts/build-anatomy-projection.mjs', 'export {};');
+    const source = JSON.parse(fs.readFileSync(new URL('../symbols/source.json', import.meta.url), 'utf8'));
+    const symbol = source.symbols['plus-circle'];
+    source.symbols = { 'plus-circle': symbol };
+    delete symbol.compatibilityStatic;
+    for (const variant of Object.values(symbol.variants)) {
+      write(root, variant.provenance.master, fs.readFileSync(new URL(`../${variant.provenance.master}`, import.meta.url)));
+    }
+    write(root, symbol.opticalMaster, fs.readFileSync(new URL(`../${symbol.opticalMaster}`, import.meta.url)));
+    write(root, 'symbols/source.json', JSON.stringify(source));
     for (const spec of ['author-anatomy', 'author-state-groups']) {
       write(root, `semantics/${spec}.json`, fs.readFileSync(new URL(`../semantics/${spec}.json`, import.meta.url), 'utf8'));
     }

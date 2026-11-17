@@ -1,0 +1,232 @@
+{
+  "source": "7b6c269",
+  "reason": "Optical axes and opt-in semantic families are delivered. Effect compiler no longer retains DOM execution after tree shaking.",
+  "artifacts": {
+    "dist/symbols/plus-circle.js": {
+      "previous": {
+        "baselineBytes": 635,
+        "baselineGzipBytes": 255,
+        "maxBytes": 12546,
+        "maxGzipBytes": 2542,
+        "allowedModules": [],
+        "forbiddenNeedles": [
+          "sourceMappingURL",
+          "semantics/catalog.json",
+          "anatomy.runtime.json"
+        ]
+      },
+      "measured": {
+        "baselineBytes": 38733,
+        "baselineGzipBytes": 11074,
+        "maxBytes": 38733,
+        "maxGzipBytes": 11074,
+        "allowedModules": [],
+        "forbiddenNeedles": [
+          "sourceMappingURL",
+          "semantics/catalog.json",
+          "anatomy.runtime.json"
+        ]
+      }
+    },
+    "dist/symbols/time.js": {
+      "previous": {
+        "baselineBytes": 8272,
+        "baselineGzipBytes": 2478,
+        "maxBytes": 12099,
+        "maxGzipBytes": 2494,
+        "allowedModules": [],
+        "forbiddenNeedles": [
+          "sourceMappingURL",
+          "semantics/catalog.json",
+          "anatomy.runtime.json"
+        ]
+      },
+      "measured": {
+        "baselineBytes": 35419,
+        "baselineGzipBytes": 10812,
+        "maxBytes": 35419,
+        "maxGzipBytes": 10812,
+        "allowedModules": [],
+        "forbiddenNeedles": [
+          "sourceMappingURL",
+          "semantics/catalog.json",
+          "anatomy.runtime.json"
+        ]
+      }
+    },
+    "dist/symbols/volume.js": {
+      "previous": {
+        "baselineBytes": 11943,
+        "baselineGzipBytes": 3576,
+        "maxBytes": 20142,
+        "maxGzipBytes": 3665,
+        "allowedModules": [],
+        "forbiddenNeedles": [
+          "sourceMappingURL",
+          "semantics/catalog.json",
+          "anatomy.runtime.json"
+        ]
+      },
+      "measured": {
+        "baselineBytes": 73948,
+        "baselineGzipBytes": 24678,
+        "maxBytes": 73948,
+        "maxGzipBytes": 24678,
+        "allowedModules": [],
+        "forbiddenNeedles": [
+          "sourceMappingURL",
+          "semantics/catalog.json",
+          "anatomy.runtime.json"
+        ]
+      }
+    },
+    "dist/motion/index.js": {
+      "previous": {
+        "baselineBytes": 11411,
+        "baselineGzipBytes": 3776,
+        "maxBytes": 14620,
+        "maxGzipBytes": 3817,
+        "allowedModules": [
+          "src/core/motion-sampler.js",
+          "src/motion/effect-projection.ts",
+          "src/motion/index.ts"
+        ],
+        "forbiddenNeedles": [
+          "sourceMappingURL"
+        ]
+      },
+      "measured": {
+        "baselineBytes": 25600,
+        "baselineGzipBytes": 9029,
+        "maxBytes": 25600,
+        "maxGzipBytes": 9029,
+        "allowedModules": [
+          "src/core/motion-sampler.js",
+          "src/motion/effect-projection.ts",
+          "src/motion/execution.js",
+          "src/motion/index.ts",
+          "src/motion/symbol-state.ts",
+          "src/render/optical-grid.ts",
+          "src/render/request.ts"
+        ],
+        "forbiddenNeedles": [
+          "sourceMappingURL"
+        ]
+      }
+    }
+  },
+  "consumerChanges": {
+    "authored-time": {
+      "previous": {
+        "entry": "import { glyph } from '@labpics/icons/symbols/time';\nconsole.log(glyph());\n",
+        "baselineBytes": 8333,
+        "baselineGzipBytes": 3100,
+        "maxBytes": 12652,
+        "maxGzipBytes": 3250
+      },
+      "measured": {
+        "entry": "import { glyph } from '@labpics/icons/symbols/time';\nconsole.log(glyph());\n",
+        "baselineBytes": 8333,
+        "baselineGzipBytes": 3101,
+        "maxBytes": 12652,
+        "maxGzipBytes": 3250
+      }
+    },
+    "recorded-motion": {
+      "previous": {
+        "entry": "import { glyph, glyphCapabilities } from '@labpics/icons/ir';\nimport { compileSymbolEffect } from '@labpics/icons/motion';\nconsole.log(compileSymbolEffect(glyph({ icon: 'time' }), glyphCapabilities('time'), 'time.advance', { duration: 400 }));\n",
+        "baselineBytes": 861362,
+        "baselineGzipBytes": 216164,
+        "maxBytes": 865952,
+        "maxGzipBytes": 217706
+      },
+      "measured": {
+        "entry": "import { glyph, glyphCapabilities } from '@labpics/icons/ir';\nimport { compileSymbolEffect } from '@labpics/icons/motion';\nconsole.log(compileSymbolEffect(glyph({ icon: 'time' }), glyphCapabilities('time'), 'time.advance', { duration: 400 }));\n",
+        "baselineBytes": 856369,
+        "baselineGzipBytes": 214216,
+        "maxBytes": 865952,
+        "maxGzipBytes": 217706
+      }
+    },
+    "source-ellipsis-horizontal": {
+      "previous": {
+        "entry": "import { glyph } from '@labpics/icons/symbols/ellipsis-horizontal';\nconsole.log(glyph());\n",
+        "baselineBytes": 12968,
+        "baselineGzipBytes": 3102,
+        "maxBytes": 13019,
+        "maxGzipBytes": 3109
+      },
+      "measured": {
+        "entry": "import { glyph } from '@labpics/icons/symbols/ellipsis-horizontal';\nconsole.log(glyph());\n",
+        "baselineBytes": 12968,
+        "baselineGzipBytes": 3103,
+        "maxBytes": 13019,
+        "maxGzipBytes": 3109
+      }
+    },
+    "source-ellipsis-vertical": {
+      "previous": {
+        "entry": "import { glyph } from '@labpics/icons/symbols/ellipsis-vertical';\nconsole.log(glyph());\n",
+        "baselineBytes": 12909,
+        "baselineGzipBytes": 3104,
+        "maxBytes": 12960,
+        "maxGzipBytes": 3110
+      },
+      "measured": {
+        "entry": "import { glyph } from '@labpics/icons/symbols/ellipsis-vertical';\nconsole.log(glyph());\n",
+        "baselineBytes": 12909,
+        "baselineGzipBytes": 3105,
+        "maxBytes": 12960,
+        "maxGzipBytes": 3110
+      }
+    },
+    "visibility-state-outline": {
+      "previous": {
+        "entry": "import { renderStateSvg, compileStateEffect } from '@labpics/icons/states/visibility';\nconsole.log(renderStateSvg('hidden'), compileStateEffect('visible', { duration: 180 }));\n",
+        "baselineBytes": 11802,
+        "baselineGzipBytes": 4725,
+        "maxBytes": 11802,
+        "maxGzipBytes": 4725
+      },
+      "measured": {
+        "entry": "import { renderStateSvg, compileStateEffect } from '@labpics/icons/states/visibility';\nconsole.log(renderStateSvg('hidden'), compileStateEffect('visible', { duration: 180 }));\n",
+        "baselineBytes": 11802,
+        "baselineGzipBytes": 4727,
+        "maxBytes": 11802,
+        "maxGzipBytes": 4727
+      }
+    },
+    "gesture-reload-ir-reference": {
+      "previous": {
+        "entry": "import { glyph, glyphCapabilities } from '@labpics/icons/symbols/reload';\nimport { renderGlyphSvg } from '@labpics/icons/ir/render';\nimport { compileSymbolEffect } from '@labpics/icons/motion';\nconst value = glyph();\nconsole.log(renderGlyphSvg(value), compileSymbolEffect(value, glyphCapabilities(), 'reload.cycle', { duration: 400 }));\n",
+        "baselineBytes": 31655,
+        "baselineGzipBytes": 9755,
+        "maxBytes": 31702,
+        "maxGzipBytes": 9756
+      },
+      "measured": {
+        "entry": "import { glyph, glyphCapabilities } from '@labpics/icons/symbols/reload';\nimport { renderGlyphSvg } from '@labpics/icons/ir/render';\nimport { compileSymbolEffect } from '@labpics/icons/motion';\nconst value = glyph();\nconsole.log(renderGlyphSvg(value), compileSymbolEffect(value, glyphCapabilities(), 'reload.cycle', { duration: 400 }));\n",
+        "baselineBytes": 26694,
+        "baselineGzipBytes": 7844,
+        "maxBytes": 31702,
+        "maxGzipBytes": 9756
+      }
+    },
+    "gesture-refresh-ir-reference": {
+      "previous": {
+        "entry": "import { glyph, glyphCapabilities } from '@labpics/icons/symbols/refresh';\nimport { renderGlyphSvg } from '@labpics/icons/ir/render';\nimport { compileSymbolEffect } from '@labpics/icons/motion';\nconst value = glyph();\nconsole.log(renderGlyphSvg(value), compileSymbolEffect(value, glyphCapabilities(), 'refresh.cycle', { duration: 400 }));\n",
+        "baselineBytes": 33266,
+        "baselineGzipBytes": 10574,
+        "maxBytes": 33313,
+        "maxGzipBytes": 10574
+      },
+      "measured": {
+        "entry": "import { glyph, glyphCapabilities } from '@labpics/icons/symbols/refresh';\nimport { renderGlyphSvg } from '@labpics/icons/ir/render';\nimport { compileSymbolEffect } from '@labpics/icons/motion';\nconst value = glyph();\nconsole.log(renderGlyphSvg(value), compileSymbolEffect(value, glyphCapabilities(), 'refresh.cycle', { duration: 400 }));\n",
+        "baselineBytes": 28305,
+        "baselineGzipBytes": 8648,
+        "maxBytes": 33313,
+        "maxGzipBytes": 10574
+      }
+    }
+  }
+}

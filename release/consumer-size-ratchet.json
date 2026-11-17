@@ -68,7 +68,7 @@
   "authored-time": {
    "entry": "import { glyph } from '@labpics/icons/symbols/time';\nconsole.log(glyph());\n",
    "baselineBytes": 8333,
-   "baselineGzipBytes": 3100,
+   "baselineGzipBytes": 3101,
    "maxBytes": 12652,
    "maxGzipBytes": 3250
   },
@@ -116,8 +116,8 @@
   },
   "recorded-motion": {
    "entry": "import { glyph, glyphCapabilities } from '@labpics/icons/ir';\nimport { compileSymbolEffect } from '@labpics/icons/motion';\nconsole.log(compileSymbolEffect(glyph({ icon: 'time' }), glyphCapabilities('time'), 'time.advance', { duration: 400 }));\n",
-   "baselineBytes": 861362,
-   "baselineGzipBytes": 216164,
+   "baselineBytes": 856369,
+   "baselineGzipBytes": 214216,
    "maxBytes": 865952,
    "maxGzipBytes": 217706
   },
@@ -145,7 +145,7 @@
   "source-ellipsis-horizontal": {
    "entry": "import { glyph } from '@labpics/icons/symbols/ellipsis-horizontal';\nconsole.log(glyph());\n",
    "baselineBytes": 12968,
-   "baselineGzipBytes": 3102,
+   "baselineGzipBytes": 3103,
    "maxBytes": 13019,
    "maxGzipBytes": 3109
   },
@@ -159,7 +159,7 @@
   "source-ellipsis-vertical": {
    "entry": "import { glyph } from '@labpics/icons/symbols/ellipsis-vertical';\nconsole.log(glyph());\n",
    "baselineBytes": 12909,
-   "baselineGzipBytes": 3104,
+   "baselineGzipBytes": 3105,
    "maxBytes": 12960,
    "maxGzipBytes": 3110
   },
@@ -201,9 +201,9 @@
   "visibility-state-outline": {
    "entry": "import { renderStateSvg, compileStateEffect } from '@labpics/icons/states/visibility';\nconsole.log(renderStateSvg('hidden'), compileStateEffect('visible', { duration: 180 }));\n",
    "baselineBytes": 11802,
-   "baselineGzipBytes": 4725,
+   "baselineGzipBytes": 4727,
    "maxBytes": 11802,
-   "maxGzipBytes": 4725
+   "maxGzipBytes": 4727
   },
   "visibility-state-filled": {
    "entry": "import { renderStateSvg, compileStateEffect } from '@labpics/icons/states/visibility-filled';\nconsole.log(renderStateSvg('hidden'), compileStateEffect('visible', { duration: 180 }));\n",
@@ -256,15 +256,15 @@
   },
   "gesture-reload-ir-reference": {
    "entry": "import { glyph, glyphCapabilities } from '@labpics/icons/symbols/reload';\nimport { renderGlyphSvg } from '@labpics/icons/ir/render';\nimport { compileSymbolEffect } from '@labpics/icons/motion';\nconst value = glyph();\nconsole.log(renderGlyphSvg(value), compileSymbolEffect(value, glyphCapabilities(), 'reload.cycle', { duration: 400 }));\n",
-   "baselineBytes": 31655,
-   "baselineGzipBytes": 9755,
+   "baselineBytes": 26694,
+   "baselineGzipBytes": 7844,
    "maxBytes": 31702,
    "maxGzipBytes": 9756
   },
   "gesture-refresh-ir-reference": {
    "entry": "import { glyph, glyphCapabilities } from '@labpics/icons/symbols/refresh';\nimport { renderGlyphSvg } from '@labpics/icons/ir/render';\nimport { compileSymbolEffect } from '@labpics/icons/motion';\nconst value = glyph();\nconsole.log(renderGlyphSvg(value), compileSymbolEffect(value, glyphCapabilities(), 'refresh.cycle', { duration: 400 }));\n",
-   "baselineBytes": 33266,
-   "baselineGzipBytes": 10574,
+   "baselineBytes": 28305,
+   "baselineGzipBytes": 8648,
    "maxBytes": 33313,
    "maxGzipBytes": 10574
   },

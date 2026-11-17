@@ -25,6 +25,7 @@ function fixture({ sameVersion = false } = {}) {
   const source = loadSymbolSource(repository);
   source.symbols = { accessibility: source.symbols.accessibility };
   delete source.symbols.accessibility.compatibilityStatic;
+  delete source.symbols.accessibility.opticalMaster;
   source.components = {}; source.compatibility.stateGroups.groups = {};
   source.symbols.accessibility.variants.outline.anatomy.classification = 'semantic';
   source.symbols.accessibility.variants.outline.anatomy.parts[0].id = 'authored-body';

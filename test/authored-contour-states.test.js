@@ -268,6 +268,7 @@ describe('переносимый prepared sampler', () => {
         '--noUncheckedIndexedAccess', '--target', 'ES2022', '--module', 'ESNext', '--moduleResolution', 'bundler', '--skipLibCheck',
         '--rootDir', join(root, 'src'), '--outDir', declarations, join(root, 'src/motion/index.ts'), join(root, 'src/states/types.ts')], { cwd: directory });
       cpSync(declarations, dist, { recursive: true }); mkdirSync(join(dist, 'states'), { recursive: true });
+      cpSync(join(root, 'src/motion/execution.d.ts'), join(dist, 'motion/execution.d.ts'));
       for (const [source, target] of [['types', 'state-types'], ['common-types', 'state-common-types'], ['contour-types', 'contour-state-types']]) {
         writeFileSync(join(dist, 'ir', `${target}.d.ts`), readFileSync(join(declarations, 'states', `${source}.d.ts`), 'utf8')
           .replaceAll('./common-types.js', './state-common-types.js'));

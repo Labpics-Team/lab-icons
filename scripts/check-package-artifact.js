@@ -198,6 +198,7 @@ const CLEAN_PACK_EXCLUDES = new Set([
 ]);
 
 const NATIVE_PATH = { isAbsolute, relative };
+const NATIVE_BUILD_DIRECTORIES = new Set(['.gradle', '.kotlin', '.build', 'build']);
 
 /**
  * Проецирует путь fs.cp filter в source-relative allow/deny решение.
@@ -216,8 +217,10 @@ export function shouldCopyCleanPackPath(copyRoot, source, pathApi = NATIVE_PATH)
   ) {
     throw new Error(`package artifact: путь filter вне clean source root (${projected})`);
   }
-  const [top] = projected.split('/');
-  return !CLEAN_PACK_EXCLUDES.has(top) && !projected.endsWith('.tgz');
+  const [top, ...nested] = projected.split('/');
+  return !CLEAN_PACK_EXCLUDES.has(top)
+    && !(top === 'native' && nested.some((part) => NATIVE_BUILD_DIRECTORIES.has(part)))
+    && !projected.endsWith('.tgz');
 }
 
 /**

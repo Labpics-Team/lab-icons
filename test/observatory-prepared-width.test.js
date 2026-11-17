@@ -1,8 +1,8 @@
 import { readFileSync } from 'node:fs';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { createSymbolMotion } from '../src/motion/execution.js';
 
-const source = readFileSync(new URL('../observatory/motion-execution.js', import.meta.url), 'utf8');
-const functionSource = source.slice(source.indexOf('function executePreparedScalar'), source.indexOf('\nfunction contourEffect')).replace(/^export /gm, '');
+afterEach(() => vi.unstubAllGlobals());
 
 function fixture({ compound = false, reducedMotion = false } = {}) {
   const selector = compound ? '[data-parts="enclosure support body"]' : '[data-part="body"]';
@@ -46,7 +46,8 @@ function fixture({ compound = false, reducedMotion = false } = {}) {
       } };
     clocks.push(clock); return clock;
   };
-  const execute = new Function('value', 'SVGElement', `${functionSource}\nreturn executePreparedWidth;`)(value, Viewport);
+  vi.stubGlobal('SVGElement', Viewport);
+  const execute = createSymbolMotion({ value }).executePreparedWidth;
   const request = { from: 1, to: .8, duration: 900, reducedMotion };
   return { execute, prepared, request, viewports, writes, clocks };
 }

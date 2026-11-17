@@ -158,6 +158,12 @@ export async function checkGlyphTypeBoundary({ baseline = null } = {}) {
         '--target', 'ES2022', '--module', 'ESNext', '--moduleResolution', 'bundler', '--rootDir', join(sourceRoot, 'src'), '--outDir', out,
         join(sourceRoot, 'src/ir/index.ts'), join(sourceRoot, 'src/ir/authored-variation.ts'),
         join(sourceRoot, 'src/motion/index.ts')], { cwd: root, stdio: 'pipe', windowsHide: true });
+      // TypeScript resolves retained declarations but does not copy them to outDir.
+      for (const file of before ? baselineFiles : snapshotFiles) {
+        if (file.startsWith('src/') && /\.d\.[cm]?ts$/.test(file)) {
+          write(join(out, file.slice('src/'.length)), readSnapshot(file, before));
+        }
+      }
       const emitter = before ? oldDeclarations : { symbolModuleDeclaration, variationModuleDeclaration };
       for (const name of names) write(join(out, 'symbols', `${name}.d.ts`), emitter.symbolModuleDeclaration(name));
       write(join(out, 'variations/ellipsis-horizontal.d.ts'), emitter.variationModuleDeclaration('ellipsis-horizontal'));

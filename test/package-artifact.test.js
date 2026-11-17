@@ -189,7 +189,9 @@ function validPackage() {
   write(root, 'dist/authoring/design-spec.d.ts', "import type { GlyphIR } from '../ir/compiler.js';\nexport type { SymbolSource } from './symbol-source.js';\nexport declare function compileDesignSpec(spec: unknown): GlyphIR;\n");
   write(root, 'dist/authoring/symbol-source.d.ts', "export interface SymbolSource { readonly id: string }\n");
   write(root, 'dist/motion/index.js', 'import "../ir/contour-runtime.js"; export const fixture = 1;\n');
-  write(root, 'dist/motion/index.d.ts', "import type { StateRefusal } from '../ir/state-types.js'; import type { PreparedContourStateEffect } from '../ir/contour-state-types.js'; export declare const fixture: StateRefusal | PreparedContourStateEffect;\n");
+  write(root, 'dist/motion/execution.d.ts', 'export interface SymbolPlayback { stop(): void }\n');
+  write(root, 'dist/motion/symbol-state.d.ts', 'export interface SymbolController { dispose(): void }\n');
+  write(root, 'dist/motion/index.d.ts', "export type { SymbolController } from './symbol-state.js'; export type { SymbolPlayback } from './execution.js'; import type { StateRefusal } from '../ir/state-types.js'; import type { PreparedContourStateEffect } from '../ir/contour-state-types.js'; export declare const fixture: StateRefusal | PreparedContourStateEffect;\n");
   write(root, 'dist/ir/lottie-runtime.js', 'import "../motion/index.js"; export const createLottieSymbol = () => ({});\n');
   write(root, 'dist/ir/lottie-types.d.ts', readFileSync(new URL('../src/lottie/types.ts', import.meta.url), 'utf8'));
   write(root, 'dist/symbols/fixture.js', 'import "../ir/symbol-runtime.js"; export const glyph = () => ({}); export const glyphCapabilities = () => ({});\n');
@@ -310,6 +312,16 @@ describe('check-package-artifact', () => {
     write(source, 'node_modules/.pnpm/tooling-sentinel', 'installed tooling\n');
     write(source, 'preview/debug.html', '<p>debug</p>\n');
     write(source, 'stale.tgz', 'not a package\n');
+    const nativeOutputs = [
+      'native/compose/.gradle/9.3.1/executionHistory/executionHistory.lock',
+      'native/compose/.kotlin/sessions/state',
+      'native/compose/build/classes/stale.class',
+      'native/compose/consumer/build/outputs/stale.jar',
+      'native/swift/.build/debug/stale',
+    ];
+    for (const output of nativeOutputs) write(source, output, 'local build output\n');
+    write(source, 'native/compose/build.gradle.kts', '// native build source\n');
+    write(source, 'native/compose/consumer/src/Main.kt', '// native consumer\n');
 
     createCleanPackSource(source, clean);
 
@@ -319,6 +331,9 @@ describe('check-package-artifact', () => {
     expect(existsSync(join(clean, 'dist'))).toBe(false);
     expect(existsSync(join(clean, 'preview'))).toBe(false);
     expect(existsSync(join(clean, 'stale.tgz'))).toBe(false);
+    for (const output of nativeOutputs) expect(existsSync(join(clean, output))).toBe(false);
+    expect(existsSync(join(clean, 'native/compose/build.gradle.kts'))).toBe(true);
+    expect(existsSync(join(clean, 'native/compose/consumer/src/Main.kt'))).toBe(true);
     expect(lstatSync(join(clean, 'node_modules')).isSymbolicLink()).toBe(true);
     expect(readFileSync(join(clean, 'node_modules/.pnpm/tooling-sentinel'), 'utf8')).toBe(
       'installed tooling\n',
@@ -339,6 +354,8 @@ describe('check-package-artifact', () => {
       'node_modules/.pnpm/tool',
       'preview/debug.html',
       'tmp/probe.txt',
+      'native/compose/.gradle/9.3.1/state.lock',
+      'native/compose/consumer/build/classes/Main.class',
     ]) {
       expect(shouldCopyCleanPackPath(copyRoot, inside(excluded), win32)).toBe(false);
     }

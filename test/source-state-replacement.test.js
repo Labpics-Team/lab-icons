@@ -80,7 +80,10 @@ describe('точная замена авторских состояний', () =
   it.each(groupNames)('%s: endpoint, takeover, экспорт и отказ остаются одним installed протоколом', async name => {
     const payload = compile()[name];
     const { api, source } = await importGroup(payload);
-    expect(Object.keys(api).sort()).toEqual(read('release/export-surface.json')[`./states/${name}`]);
+    // This fixture builds the retained source-replacement API. The production
+    // module also exposes the opt-in semantic family, checked by pack consumers.
+    expect(Object.keys(api).sort()).toEqual(read('release/export-surface.json')[`./states/${name}`]
+      .filter(key => key !== 'default' && key !== 'family'));
     const expected = statePackageExpectations(baseline, document)[name];
     expect(() => verifyInstalledStateGroup(api, expected)).not.toThrow();
     const caps = api.stateCapabilities();

@@ -190,7 +190,8 @@ describe('authored shared state enclosure: one geometry law and retained state p
     expect(packet[0].symbol).toContain('../ir/source-packet-runtime.js');
     const captured = read('release/contract.json');
     const motionTargets = authorMotionTargets(originalAnatomy);
-    const projected = symbolReleaseProjection(captured, Object.keys(manifest.icons), Object.keys(capturedStates.groups),
+    const stateGroups = [...new Set([...Object.keys(capturedStates.groups), ...Object.keys(read('symbols/source.json').stateFamilies)])];
+    const projected = symbolReleaseProjection(captured, Object.keys(manifest.icons), stateGroups,
       authorVariationIconNames(originalAnatomy), authorVariationLawNames(originalAnatomy), packet,
       authorStateVariationGroupNames(capturedStates, originalAnatomy), authorContentVariationIconNames(originalAnatomy), authorStateLawNames(capturedStates),
       motionTargets.names, motionTargets.capsules, motionTargets.clocks);
