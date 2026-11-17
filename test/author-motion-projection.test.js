@@ -73,9 +73,16 @@ describe('авторский motion target без стоимости полно�
     const legacyDocument = { ...document, icons: Object.fromEntries(['reload', 'refresh'].map(icon => [icon, document.icons[icon]])) };
     const selected = { ...document, icons: Object.fromEntries(allNames.map(icon => [icon, document.icons[icon]])) };
     expect(compileAuthorAnatomy(author, selected)).toEqual(old.compileAuthorAnatomy(author, legacyDocument));
-    const beforeMotion = structuredClone(source);
-    for (const icon of names) projectAuthorMotionSymbol(rich[icon], compileSymbolEffect);
-    for (const icon of allNames) expect(renderSymbolModules(source[icon])).toEqual(renderSymbolModules(beforeMotion[icon]));
+    const oldEmitter = await importBaseline('scripts/lib/symbol-modules.js');
+    for (const icon of allNames) {
+      const current = renderSymbolModules(source[icon]);
+      // CORPUS adds exactly this public static facade; all other source module
+      // bytes still match the independent frozen emitter at 2bf18f9.
+      const staticFacade = `export const symbol = /* @__PURE__ */ Object.freeze({ id: ${JSON.stringify(icon)}, outline, filled });\nexport default symbol;\n`;
+      expect(current.symbol).toContain(staticFacade);
+      expect({ ...current, symbol: current.symbol.replace(staticFacade, '') })
+        .toEqual(oldEmitter.renderSymbolModules(source[icon]));
+    }
     expect(source.timer.capabilities.outline.motion.state).toBe('source-only');
     expect(source.timer.source.outline.provenance.anatomy).toBeUndefined();
     expect(source.timer.source.filled).toEqual(rich.timer.source.filled);

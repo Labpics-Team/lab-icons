@@ -428,12 +428,14 @@ export async function runExplorerJourney() {
       const rest = JSON.stringify(paths(master)), still = JSON.stringify(unchanged(stage()));
       const capture = pose => clockPoses.push({ name, variant, pose, progress: Number(q('progress').value),
         svg: stage().outerHTML, samples: samples().map(svg => svg.outerHTML) });
-      const poseMatches = () => {
+      const poseMatches = (displayRoundtrip = false) => {
         const hours = caps.gesture.from + (caps.gesture.to - caps.gesture.from) * Number(q('progress').value);
         const pose = prepared.sample(hours);
         const visibleMatches = svg => {
+          const actual = target(svg)?.getAttribute('d');
+          if (!displayRoundtrip) return actual === pose.d;
           const bounds = svg.getBoundingClientRect(), viewBox = svg.viewBox.baseVal;
-          return clockDisplayPathMatches(pose.d, target(svg)?.getAttribute('d'),
+          return clockDisplayPathMatches(pose.d, actual,
             Math.max(bounds.width / viewBox.width, bounds.height / viewBox.height));
         };
         return pose.ok && visibleMatches(stage()) &&
@@ -463,7 +465,7 @@ export async function runExplorerJourney() {
       q('pause').click();
       const paused = JSON.stringify(paths(stage())), pausedProgress = Number(q('progress').value);
       capture('paused');
-      check(`${id}/in-flight-public-pose`, poseMatches() && paused !== rest);
+      check(`${id}/in-flight-public-pose`, poseMatches(true) && paused !== rest);
       for (let index = 0; index < 3; index++) await frame();
       check(`${id}/pause-retains-pose`, JSON.stringify(paths(stage())) === paused && Number(q('progress').value) === pausedProgress);
       const beforeSvg = downloads.length;
