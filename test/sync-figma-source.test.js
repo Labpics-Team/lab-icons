@@ -88,6 +88,7 @@ it('a new full snapshot preserves every unchanged master and builds all producti
   write(captureRoot, 'receipt.json', JSON.stringify(manifest));
   const run = async (file, args, timeout = 30_000) => {
     const result = await runProcessTree(file, args, { cwd: root, signal: AbortSignal.timeout(timeout) });
+    expect(result.error, `${result.stdout}\n${result.stderr}`).toBeUndefined();
     expect(result.status, `${result.error ?? ''}\n${result.stdout}\n${result.stderr}`).toBe(0);
     return result.stdout;
   };
