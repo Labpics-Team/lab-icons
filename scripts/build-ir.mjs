@@ -171,6 +171,10 @@ async function compileIrTargets({ root, staging, preview = false }) {
     // Source state-types публикуется под прежним IR specifier того же владельца.
     writeFileSync(join(staging, 'motion/index.d.ts'), readFileSync(join(declarations, 'motion/index.d.ts'), 'utf8')
       .replaceAll('../states/contour-types.js', '../ir/contour-state-types.js'));
+    writeFileSync(join(staging, 'motion/execution.d.ts'), readFileSync(join(root, 'src/motion/execution.d.ts'), 'utf8')
+      .replaceAll('../states/contour-types.js', '../ir/contour-state-types.js')
+      .replaceAll('../states/types.js', '../ir/state-types.js')
+      .replaceAll('../states/source-types.js', '../ir/source-state-types.js'));
     copyFileSync(join(declarations, 'lottie/types.d.ts'), join(staging, 'ir/lottie-types.d.ts'));
     if (motionNames.length) {
       writeFileSync(join(staging, 'ir/gesture-types.d.ts'), readFileSync(join(declarations, 'motion/gesture-types.d.ts'), 'utf8')

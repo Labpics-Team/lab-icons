@@ -2575,5 +2575,44 @@
       "final_plan_review",
       "icons_completion_review"
     ]
+  },
+  "publicConsumer": {
+    "version": "0.3.0",
+    "preview": false,
+    "families": 330,
+    "renders": 16500,
+    "browser": "157.0.8103.51",
+    "observation": {
+      "ready": "true",
+      "svg": 18,
+      "frames": 0,
+      "overflow": false,
+      "widths": [
+        16,
+        24,
+        48
+      ]
+    },
+    "motion": {
+      "rotation": "paused-and-stopped",
+      "contour": "interrupted-and-reversed",
+      "width": "reduced-final",
+      "clock": "reduced-final",
+      "removal": "no-late-write"
+    },
+    "singleSymbol": {
+      "bytes": 38890,
+      "modules": [
+        "node_modules/.pnpm/@labpics+icons@file+..+labpics-icons-0.3.0.tgz/node_modules/@labpics/icons/dist/symbols/plus-circle.js",
+        "node_modules/.pnpm/@labpics+icons@file+..+labpics-icons-0.3.0.tgz/node_modules/@labpics/icons/dist/render/index.js",
+        "consumer.ts"
+      ]
+    },
+    "staticBytes": 1096,
+    "executorReview": {
+      "verdict": "accepted",
+      "reviewer": "icons_completion_review",
+      "sourceSha256": "2ca0c77948de9d1cb7bd04734b2a37d71e2aa9e1d4424561d80cc609ed7733da"
+    }
   }
 }

@@ -834,6 +834,7 @@
     "dist/lottie/warning.js",
     "dist/lottie/waveform.d.ts",
     "dist/lottie/waveform.js",
+    "dist/motion/execution.d.ts",
     "dist/motion/index.d.ts",
     "dist/motion/index.js",
     "dist/render/index.d.ts",

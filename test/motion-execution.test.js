@@ -4,10 +4,11 @@ import { animate, sequence, value } from '@labpics/motion';
 import { prepareContourStateEffect } from '../src/ir/contour-runtime.js';
 
 vi.mock('@labpics/motion', () => ({ animate: vi.fn(), sequence: vi.fn(), value: vi.fn() }));
-vi.stubGlobal('__MOTION_IDENTITY__', { package: '@labpics/motion', version: '0.5.0' });
-const { executeSymbolEffect, executePreparedWidth, executePreparedClock } = await import('../observatory/motion-execution.js');
+const { createSymbolMotion } = await import('../src/motion/index.ts');
+const { executeSymbolEffect, executePreparedWidth, executePreparedClock } = createSymbolMotion({ animate, sequence, value });
 
 class SvgViewport {
+  tagName = 'svg';
   style = {};
   parts = [{ dataset: { part: 'direction-body' }, style: {}, d: 'authored' }];
   querySelectorAll() { return this.parts; }
@@ -61,6 +62,32 @@ beforeEach(() => {
 });
 afterEach(() => { vi.clearAllMocks(); });
 
+describe('однозначная привязка публичного эффекта', () => {
+  it('связывает части внутри единственного SVG, игнорируя одноимённые части снаружи', () => {
+    const svg = new SvgViewport();
+    const outside = { dataset: { part: 'direction-body' }, style: {} };
+    const wrapper = { querySelectorAll: selector => selector === 'svg' ? [svg] : [outside, ...svg.parts] };
+    executeSymbolEffect(wrapper, effect());
+    expect(sequence.mock.calls[0][0][0][0]).toBe(svg.parts[0]);
+    expect(svg.style.overflow).toBe('visible');
+    expect(outside.style).toEqual({});
+  });
+
+  it.each(['multiple', 'nested', 'duplicate'])('отвергает %s до записи стиля или запуска Motion', boundary => {
+    const svg = new SvgViewport(), other = new SvgViewport();
+    let root = svg;
+    if (boundary === 'multiple') root = { querySelectorAll: () => [svg, other] };
+    if (boundary === 'nested') svg.parts.push(other);
+    if (boundary === 'duplicate') svg.parts.push({ ...svg.parts[0], style: {} });
+    expect(() => executeSymbolEffect(root, effect())).toThrow(/ровно один SVG|уникальные data-part/);
+    expect(svg.style).toEqual({});
+    expect(other.style).toEqual({});
+    expect(animate).not.toHaveBeenCalled();
+    expect(sequence).not.toHaveBeenCalled();
+    expect(value).not.toHaveBeenCalled();
+  });
+});
+
 describe('публичное исполнение подготовленного contour-перехода', () => {
   const transition = () => ({
     contract: 'labpics.symbol-state-effect/1', version: 1, kind: 'contour-interpolation', from: 0.37, to: 1,
@@ -113,6 +140,25 @@ describe('публичное исполнение подготовленного
     clock.publish(1);
     expect(svg.parts[0].d).toBe('first-dot-pose-0.685');
     expect(svg.parts[1].d).toBe('middle-dot-author');
+  });
+
+  it.each(['sampler', 'observer'])('отказ %s после запуска завершает clock и сохраняет последнюю позу', async boundary => {
+    const svg = viewport(), sampler = prepared();
+    const original = sampler.sample;
+    if (boundary === 'sampler') sampler.sample = progress => progress > .5
+      ? { ok: false, reason: { code: 'SAMPLER_FAILURE', message: 'failed frame' } } : original(progress);
+    const [control] = executeSymbolEffect(svg, transition(), { preparedContour: sampler,
+      onProgress: progress => { if (boundary === 'observer' && progress > .5) throw new Error('observer failed frame'); } });
+    const rejected = expect(control.finished).rejects.toThrow('failed frame');
+    const clock = value.mock.results[0].value;
+    expect(() => clock.publish(.7)).not.toThrow();
+    await rejected;
+    expect(control.state).toBe('failed');
+    expect(clock.dispose).toHaveBeenCalledTimes(1);
+    expect(clock.unsubscribe).toHaveBeenCalledTimes(1);
+    const retained = svg.parts.map(part => part.d);
+    clock.publish(.9);
+    expect(svg.parts.map(part => part.d)).toEqual(retained);
   });
 
   it('различает точный admission и более позднюю позу pause публичного Motion 0.5', async () => {
@@ -214,6 +260,7 @@ describe('публичное исполнение подготовленного
       clock.playback.state = 'failed'; clock.playback.finished = Promise.reject(failure);
       const [control] = executeSymbolEffect(viewport(), transition(), { preparedContour: prepared() });
       await expect(control.finished).rejects.toThrow(failure);
+      expect(control.state).toBe('failed');
     }
     expect(clock.unsubscribe).toHaveBeenCalledTimes(1); expect(clock.dispose).toHaveBeenCalledTimes(1);
   });
@@ -278,6 +325,38 @@ describe('публичный Motion сохраняет владение подг
     }
   });
 
+  it.each([undefined, null, false])('отказ observer со значением %s остаётся отказом', async reason => {
+    const svg = new SvgViewport();
+    const body = { tagName: 'path', d: 'width-1', getAttribute(key) { return this[key]; },
+      setAttribute(key, next) { this[key] = next; } };
+    svg.querySelectorAll = () => [body];
+    const prepared = { version: 1, law: 'capsule.width', renderTarget: { attribute: 'd', selector: '[data-part="body"]' },
+      sample: width => ({ ok: true, bodyWidth: width, d: `width-${width}` }) };
+    const [control] = executePreparedWidth(svg, prepared, { from: 1, to: .8, duration: 900, reducedMotion: false },
+      { onProgress: width => { if (width !== 1) throw reason; } });
+    value.mock.results[0].value.publish(.9);
+    await expect(control.finished).rejects.toBe(reason);
+    expect(control.state).toBe('failed');
+  });
+
+  it('ошибка финальной записи отвергает finished и оставляет состояние failed', async () => {
+    const svg = new SvgViewport();
+    const body = { tagName: 'path', d: 'width-1', getAttribute(key) { return this[key]; },
+      setAttribute(key, next) { this[key] = next; } };
+    svg.querySelectorAll = () => [body];
+    const prepared = { version: 1, law: 'capsule.width', renderTarget: { attribute: 'd', selector: '[data-part="body"]' },
+      sample: width => ({ ok: true, bodyWidth: width, d: `width-${width}` }) };
+    const clock = scalarClock(1);
+    clock.playback.finished = Promise.resolve({ status: 'finished' });
+    value.mockReturnValueOnce(clock);
+    const [control] = executePreparedWidth(svg, prepared, { from: 1, to: .8, duration: 900, reducedMotion: false },
+      { onProgress: width => { if (width === .8) throw new Error('final write failed'); } });
+    await expect(control.finished).rejects.toThrow('final write failed');
+    expect(control.state).toBe('failed');
+    expect(clock.dispose).toHaveBeenCalledTimes(1);
+    expect(clock.unsubscribe).toHaveBeenCalledTimes(1);
+  });
+
   it('отказ observer сохраняет последний записанный кадр без дополнительной записи stop', async () => {
     const { value: publicValue } = await vi.importActual('@labpics/motion');
     value.mockImplementation(publicValue);
@@ -294,6 +373,7 @@ describe('публичный Motion сохраняет владение подг
         { onProgress: width => { frames.push(width); if (width !== 1) { now += 50; throw failure; } } });
       now += 100; control.pause();
       await expect(control.finished).rejects.toThrow(failure);
+      expect(control.state).toBe('failed');
       expect(frames).toEqual([1, 1 + (.8 - 1) * 100 / 900]);
       expect(body.d).toBe(`width-${frames.at(-1)}`);
       expect(body.setAttribute).toHaveBeenCalledTimes(1);

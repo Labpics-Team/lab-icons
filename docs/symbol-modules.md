@@ -114,8 +114,36 @@ if (!result.ok) throw new Error(result.reason.message);
 статический viewBox, который сохраняет авторский размер. Приложение учитывает
 эту область при размещении и не обрезает её родительским clip. `targets` содержат
 стабильные `partId`, normalized anchor, градусы и стандартные keyframes.
-Публичный Lab Motion исполняет числовой канал `rotate`; пример связки находится
-в [Observatory consumer](../observatory/motion-execution.js).
+Публичный Lab Motion исполняет числовой канал `rotate`. Исполнитель входит в
+`@labpics/icons/motion`; приложение связывает его с Motion один раз:
+
+```js
+import * as motion from '@labpics/motion';
+import { createSymbolMotion } from '@labpics/icons/motion';
+import { renderMotionSvg, compileMotionEffect } from '@labpics/icons/gestures/reload';
+
+const icons = createSymbolMotion(motion);
+const source = renderMotionSvg('outline');
+const transition = compileMotionEffect('reload.cycle', { duration: 900 });
+if (!source.ok || !transition.ok) throw new Error('Не удалось подготовить символ');
+container.innerHTML = source.svg;
+const controls = icons.executeSymbolEffect(container, transition.effect, { initialize: true });
+// При удалении элемента или перед обратным переходом:
+for (const control of controls) control.stop();
+```
+
+Возвращённые controls поддерживают `pause/play/seek/finish/stop` и `finished`.
+Остановка сохраняет позу; следующий rotate/opacity/translation-эффект без
+`initialize` продолжает видимое состояние. Для contour-перехода сохраняйте
+последний scalar из `onProgress` и передавайте его в `from` следующего
+`compileStateEffect`: автоматического восстановления progress из SVG нет.
+Контейнер эффекта должен содержать ровно один SVG с уникальными `data-part`;
+можно передать непосредственно этот SVG. `executePreparedWidth` и `executePreparedClock` исполняют программы
+ширины и стрелок с тем же управлением. Нулевая длительность сразу показывает
+результат; завершение или остановка освобождает подписки. Создание исполнителя
+не создаёт таймеров и не подключает Motion к статическим SVG.
+
+[Observatory](../observatory/motion-execution.js) использует этот же публичный API.
 
 У эффекта версия 1 содержит вращение; версия 2 содержит скалярные opacity-стадии;
 версия 3 содержит направленный перенос в единицах исходного `viewBox`.

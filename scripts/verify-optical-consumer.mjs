@@ -37,8 +37,9 @@ try {
   assert.equal(tarballs.length, 1);
   writeFileSync(join(consumer, 'package.json'), JSON.stringify({ name: 'lab-icons-optical-consumer', private: true,
     type: 'module', packageManager: pkg.packageManager,
-    dependencies: { '@labpics/icons': localTarballSpecifier(consumer, join(temporary, tarballs[0])) } }));
-  pnpm(['install', '--offline', '--ignore-scripts', '--no-lockfile', '--store-dir', join(temporary, 'store')], consumer);
+    dependencies: { '@labpics/icons': localTarballSpecifier(consumer, join(temporary, tarballs[0])),
+      '@labpics/motion': pkg.devDependencies['@labpics/motion'] } }));
+  pnpm(['install', '--ignore-scripts', '--no-lockfile'], consumer);
 
   writeFileSync(join(consumer, 'expected.json'), JSON.stringify(Object.fromEntries(Object.entries(optics.symbols).map(([id, symbol]) =>
     [id, { outline: symbol.outline, filled: symbol.filled, data: symbol.data }]))));
@@ -109,7 +110,21 @@ globalThis.document.body.dataset.ready = String(rendered.length > 0);
   assert.deepEqual(errors, []); assert.equal(observation.ready, 'true'); assert.equal(observation.svg, 18);
   assert.equal(observation.frames, 0); assert.equal(observation.overflow, false); assert.deepEqual(observation.widths, [16, 24, 48]);
   await page.screenshot({ path: join(output, 'consumer.png'), fullPage: true });
-  const report = { version: pkg.version, preview, ...runtime, browser: browser.version(), observation,
+  const motionEntry = join(consumer, 'motion.ts');
+  copyFileSync(join(root, 'scripts/consumers/motion.ts'), motionEntry);
+  const compilerConfig = JSON.parse(readFileSync(join(consumer, 'tsconfig.json'), 'utf8'));
+  compilerConfig.files.push('motion.ts');
+  writeFileSync(join(consumer, 'tsconfig.json'), JSON.stringify(compilerConfig));
+  run(process.execPath, [join(root, 'node_modules/typescript/bin/tsc'), '-p', join(consumer, 'tsconfig.json')], consumer);
+  const motionBundle = await build({ absWorkingDir: consumer, entryPoints: [motionEntry], bundle: true, write: false,
+    platform: 'browser', format: 'iife', minify: true, target: 'es2022' });
+  await page.addScriptTag({ content: motionBundle.outputFiles[0].text });
+  const motionResult = await page.evaluate(() => globalThis.verifyMotion());
+  const stoppedFrames = await page.evaluate(() => window.__iconRafCalls);
+  await page.waitForTimeout(100);
+  assert.equal(await page.evaluate(() => window.__iconRafCalls), stoppedFrames, 'idle Motion scheduled more frames');
+  assert.deepEqual(errors, []);
+  const report = { version: pkg.version, preview, ...runtime, browser: browser.version(), observation, motion: motionResult,
     singleSymbol: { bytes: bundle.outputFiles[0].contents.length, modules: included }, staticBytes: staticBundle.outputFiles[0].contents.length };
   writeFileSync(join(output, 'report.json'), JSON.stringify(report, null, 2) + '\n');
   console.log(JSON.stringify(report, null, 2));

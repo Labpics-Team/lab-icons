@@ -2107,6 +2107,7 @@
   ],
   "./motion": [
     "compileSymbolEffect",
+    "createSymbolMotion",
     "prepareContourStateEffect"
   ],
   "./render": [

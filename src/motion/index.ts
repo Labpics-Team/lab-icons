@@ -4,6 +4,9 @@ import type { PreparedContourStateEffect, SymbolContourStateEffect } from '../st
 import { prepareContourStateEffect as prepareContourPacket } from '../ir/contour-runtime.js';
 import { parseEffectRequest, projectRotationEffect } from './effect-projection.js';
 
+export { createSymbolMotion } from './execution.js';
+export type { SymbolMotionRuntime, SymbolMotionExecutor, SymbolPlayback, SymbolExecutionOptions, SymbolScalarRequest } from './execution.js';
+
 export type { SymbolContourStateEffect, PreparedContourStateEffect, ContourStatePoseResult } from '../states/contour-types.js';
 /** Подготовка контура без каталога и часов. */
 export function prepareContourStateEffect(effect: SymbolContourStateEffect): PreparedContourStateEffect {

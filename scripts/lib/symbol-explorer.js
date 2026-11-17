@@ -132,6 +132,7 @@ export function writeSymbolExplorer({ repo, outDir, report, visuals, canvas, ico
     absWorkingDir: repo,
     entryPoints: ['observatory/motion-execution.js'],
     outfile: join(outDir, 'motion-execution.js'),
+    external: ['./package/*'],
     bundle: true, format: 'esm', platform: 'browser', target: 'es2022', minify: true,
     define: { __MOTION_IDENTITY__: JSON.stringify(executionIdentity) },
   });
