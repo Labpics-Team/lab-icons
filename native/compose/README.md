@@ -1,0 +1,54 @@
+# Lab Icons для Compose
+
+Kotlin Multiplatform renderer получает тот же SymbolData, что и web: команды
+M/L/C/Z, координаты, sparse-поправки осей, fill-rule и селекторы частей.
+Каждое семейство подключается отдельно. Числовой пакет декодируется один раз;
+SVG parser, браузер и каталог для отдельного Icon не нужны.
+
+```kotlin
+import pics.lab.icons.Icon
+import pics.lab.icons.IconVariant
+import pics.lab.icons.symbols.plusCircle
+
+Icon(plusCircle, tint = labelColor, size = 20.dp, weight = 500f)
+Icon(plusCircle, tint = labelColor, variant = IconVariant.Filled, opsz = 24f)
+```
+
+`size` задаётся после пользовательского масштаба в логических единицах. Плотность
+экрана применяется Compose при рисовании. `opsz = null` следует фактическому
+логическому размеру внутри layout constraints; явный opsz от него независим.
+Диапазоны находятся в `symbol.axes`, выход за них отвергается.
+
+Цвет передаёт вызывающий компонент. Декоративный Icon не добавляет семантику;
+имя действия принадлежит кнопке. Для самостоятельного изображения можно передать
+`contentDescription`. Неподвижный Icon не создаёт coroutine или frame-clock waiter.
+При изменении осей каждый экземпляр переиспользует числовые буферы и Path;
+изменение tint не пересчитывает геометрию.
+
+Float-проекция проверяется против независимых samples web-рендера. Допуск проверки
+координат — 1/2048 единицы viewBox, то есть менее 1/1024 логического пикселя при
+размере 48. Исходный SVG продолжает храниться отдельно без этой проекции.
+
+## Проверка разработки
+
+Обычная генерация требует принятия всех оптических masters. Явный режим preview
+позволяет локально проверять незавершённую работу; он не означает готовность выпуска.
+
+```sh
+./gradlew desktopTest -PpreviewSymbols=true
+./gradlew publishDesktopPublicationToDistributionRepository publishKotlinMultiplatformPublicationToDistributionRepository -PpreviewSymbols=true
+node ../../scripts/export-native-symbols.mjs --preview --symbol plus-circle --package pics.lab.icons.consumer.generated --output consumer/build/exported
+./gradlew -p consumer run --args=--smoke -PiconsVersion=<package-version> -PiconsRepository=<absolute-build-repository> -PexportedIconSource=<absolute-consumer-build-exported>
+```
+
+На Windows используется `gradlew.bat`. Consumer — отдельная Gradle-сборка,
+которая получает Maven-артефакт, открывает настоящее окно, меняет размер/вес/вариант,
+сохраняет `consumer/build/native-icons-consumer.png` и закрывается.
+Plus-circle компилируется из отдельно экспортированного Kotlin-файла в пакете
+consumer. Это проверяет импорт готового семейства и доставку самостоятельного экспорта.
+Native Motion и экспорт семантических эффектов добавляются следующим срезом;
+этот renderer пока исполняет статическую оптику.
+
+Основания: [Compose custom drawing](https://developer.android.com/develop/ui/compose/graphics/draw/overview),
+[Kotlin Base64](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.io.encoding/-base64/),
+[KMP publication](https://kotlinlang.org/docs/multiplatform/multiplatform-publish-lib-setup.html).
