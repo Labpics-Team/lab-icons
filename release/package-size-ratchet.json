@@ -7669,10 +7669,10 @@
    ]
   },
   "dist/motion/index.js": {
-   "baselineBytes": 25654,
-   "baselineGzipBytes": 9081,
-   "maxBytes": 25654,
-   "maxGzipBytes": 9081,
+   "baselineBytes": 26758,
+   "baselineGzipBytes": 9463,
+   "maxBytes": 26758,
+   "maxGzipBytes": 9463,
    "allowedModules": [
     "src/core/motion-sampler.js",
     "src/motion/effect-projection.ts",
@@ -7700,20 +7700,20 @@
    "forbiddenNeedles": [
     "sourceMappingURL"
    ],
-   "baselineBytes": 2233,
-   "baselineGzipBytes": 782,
-   "maxBytes": 2233,
-   "maxGzipBytes": 782,
+   "baselineBytes": 2506,
+   "baselineGzipBytes": 894,
+   "maxBytes": 2506,
+   "maxGzipBytes": 894,
    "allowedModules": []
   },
   "dist/render/index.js": {
    "forbiddenNeedles": [
     "sourceMappingURL"
    ],
-   "baselineBytes": 3637,
-   "baselineGzipBytes": 1396,
-   "maxBytes": 3637,
-   "maxGzipBytes": 1396,
+   "baselineBytes": 3748,
+   "baselineGzipBytes": 1446,
+   "maxBytes": 3748,
+   "maxGzipBytes": 1446,
    "allowedModules": [
     "src/render/index.ts",
     "src/render/optical-grid.ts",
@@ -7724,10 +7724,10 @@
    "forbiddenNeedles": [
     "sourceMappingURL"
    ],
-   "baselineBytes": 1421,
-   "baselineGzipBytes": 627,
-   "maxBytes": 1421,
-   "maxGzipBytes": 627,
+   "baselineBytes": 1451,
+   "baselineGzipBytes": 638,
+   "maxBytes": 1451,
+   "maxGzipBytes": 638,
    "allowedModules": []
   },
   "dist/state-variations/playback-circle.d.ts": {
@@ -8273,10 +8273,10 @@
    ]
   },
   "dist/states/status.js": {
-   "baselineBytes": 208256,
-   "baselineGzipBytes": 60620,
-   "maxBytes": 208256,
-   "maxGzipBytes": 60620,
+   "baselineBytes": 208616,
+   "baselineGzipBytes": 60726,
+   "maxBytes": 208616,
+   "maxGzipBytes": 60726,
    "allowedModules": [],
    "forbiddenNeedles": [
     "sourceMappingURL"
@@ -10403,10 +10403,10 @@
    ]
   },
   "dist/symbols/checkmark-circle.js": {
-   "baselineBytes": 37190,
-   "baselineGzipBytes": 12961,
-   "maxBytes": 37190,
-   "maxGzipBytes": 12961,
+   "baselineBytes": 37550,
+   "baselineGzipBytes": 13051,
+   "maxBytes": 37550,
+   "maxGzipBytes": 13051,
    "allowedModules": [],
    "forbiddenNeedles": [
     "sourceMappingURL",
