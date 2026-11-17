@@ -183,8 +183,34 @@ export function draftOpticalFields(source, { miterLimit = 2.5, maximumOffset = 0
           ...(limited ? { limitedDetailVariation: true } : {}),
           ...(flags.size ? { flags: [...flags].sort() } : {}) };
       });
+      // Contours of one paint operation also share clearance. Constrain the
+      // effective ink field at nearby controls across their boundaries so a
+      // joined source detail does not turn into an overlap or a new counter.
+      const combined = fields.flatMap(field => field.normal.map(value => value * (field.offsetScale ?? 1)));
+      const clearanceLimited = fields.length > 1 && limitFieldVariation(combined, base.coordinates, maximumOffset);
+      if (clearanceLimited) {
+        let index = 0;
+        for (const field of fields) {
+          const scale = field.offsetScale ?? 1;
+          if (scale < 0.1) {
+            // A microscopic exported sliver follows the surrounding field as
+            // a translation. Preserve its already limited internal variation;
+            // forcing each tiny control independently can invert its area.
+            const shift = [0, 0];
+            for (let coordinate = 0; coordinate < field.normal.length; coordinate++) {
+              shift[coordinate % 2] += combined[index + coordinate] - field.normal[coordinate] * scale;
+            }
+            for (let coordinate = 0; coordinate < field.normal.length; coordinate++) {
+              field.normal[coordinate] = round(field.normal[coordinate] + shift[coordinate % 2] * 2 / field.normal.length / scale);
+            }
+            index += field.normal.length;
+          } else for (let coordinate = 0; coordinate < field.normal.length; coordinate++) {
+            field.normal[coordinate] = round(combined[index++] / scale);
+          }
+        }
+      }
       shape.remove();
-      return { pathIndex, contours: fields };
+      return { pathIndex, contours: fields, ...(clearanceLimited ? { limitedContourClearance: true } : {}) };
     });
   } finally { scope.project.remove(); }
 }

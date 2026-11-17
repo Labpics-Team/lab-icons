@@ -54,6 +54,20 @@ it('keeps tiny authored joins from folding through neighboring curves across the
   }
 });
 
+it('preserves joined contours and microscopic source slivers without weakening the whole symbol', () => {
+  const root = fileURLToPath(new URL('..', import.meta.url)), document = loadSymbolSource(root);
+  const baseline = loadAuthorBaseline(root, { manifest: projectAuthorBaseline(document) });
+  for (const [id, variant] of [['download', 'filled'], ['layers', 'outline']]) {
+    const source = authorPathEntries(baseline.icons[id][variant].normalizedSvg), original = inspectOpticalPaths(source);
+    const masters = opticalRecipeMasters({ axes, source, recipes: [], fields: draftOpticalFields(source),
+      fieldProfile: document.opticalProfiles[`draft-${variant}`] });
+    expect(() => compileOpticalGrid({ axes, source, masters })).not.toThrow();
+    for (const master of masters) inspectOpticalPaths(master.paths).forEach((path, index) => {
+      expect(path.crossings).toBeLessThanOrEqual(original[index].crossings);
+    });
+  }
+});
+
 it('compiles optical changes for all 660 variants and refuses unreviewed production', () => {
   const root = fileURLToPath(new URL('..', import.meta.url));
   const corpus = compileOpticalCorpus(root, { preview: true });
