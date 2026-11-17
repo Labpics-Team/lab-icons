@@ -3,8 +3,8 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
-import { spawnSync } from 'node:child_process';
 import { afterEach, expect, it } from 'vitest';
+import { runProcessTree } from './helpers/run-process-tree.js';
 import { createCleanPackSource, pnpmInvocation } from '../scripts/check-package-artifact.js';
 import { authorPathFingerprint, loadAuthorBaseline } from '../scripts/lib/author-baseline.js';
 import { loadSymbolSource, projectAuthorBaseline } from '../scripts/lib/symbol-source.js';
@@ -17,7 +17,7 @@ const sha = value => createHash('sha256').update(value).digest('hex');
 const write = (root, path, bytes) => { mkdirSync(dirname(join(root, path)), { recursive: true }); writeFileSync(join(root, path), bytes); };
 afterEach(() => { for (const path of temporary.splice(0)) {
   if (dirname(path) !== tmpdir() || !path.includes('lab-icons-sync-')) throw new Error('unexpected cleanup path');
-  rmSync(path, { recursive: true, force: true });
+  rmSync(path, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
 } });
 function fixture({ sameVersion = false } = {}) {
   const root = mkdtempSync(join(tmpdir(), 'lab-icons-sync-')); temporary.push(root);
@@ -73,7 +73,7 @@ it('an incoming receipt cannot overwrite the trusted Outline/Filled style', () =
   expect(() => loadAuthorBaseline(input.root)).not.toThrow();
 });
 
-it('a new full snapshot preserves every unchanged master and builds all production state laws', () => {
+it('a new full snapshot preserves every unchanged master and builds all production state laws', async () => {
   const temporaryRoot = mkdtempSync(join(tmpdir(), 'lab-icons-sync-')); temporary.push(temporaryRoot);
   const root = createCleanPackSource(repository, join(temporaryRoot, 'repository'));
   const captureRoot = join(temporaryRoot, 'capture');
@@ -86,12 +86,12 @@ it('a new full snapshot preserves every unchanged master and builds all producti
     write(captureRoot, receipt.master, bytes);
   }
   write(captureRoot, 'receipt.json', JSON.stringify(manifest));
-  const run = (file, args) => {
-    const result = spawnSync(file, args, { cwd: root, encoding: 'utf8', windowsHide: true, timeout: 90_000, maxBuffer: 10 * 1024 * 1024 });
+  const run = async (file, args, timeout = 30_000) => {
+    const result = await runProcessTree(file, args, { cwd: root, signal: AbortSignal.timeout(timeout) });
     expect(result.status, `${result.error ?? ''}\n${result.stdout}\n${result.stderr}`).toBe(0);
     return result.stdout;
   };
-  const synced = JSON.parse(run(process.execPath, ['scripts/sync-figma-source.mjs', '--capture', captureRoot,
+  const synced = JSON.parse(await run(process.execPath, ['scripts/sync-figma-source.mjs', '--capture', captureRoot,
     '--manifest', join(captureRoot, 'receipt.json'), '--write']));
   expect(synced).toMatchObject({ changed: [], unchanged: manifest.counts.variants });
   const next = loadAuthorBaseline(root);
@@ -107,10 +107,12 @@ it('a new full snapshot preserves every unchanged master and builds all producti
   expect([...new Set(Object.values(document.groups).map(group => group.law))].sort())
     .toEqual(['dots.orient', 'enclosure.replace', 'source.replace']);
   const build = pnpmInvocation(['build']);
-  run(build.file, build.args);
+  // The real clean build competes with geometry suites on CI. This is a
+  // liveness limit, not a performance assertion; one CLI call used to get 90s.
+  await run(build.file, build.args, 240_000);
   // The consumer reads actual package exports and checks geometry, provenance and transitions for every group.
   const grid = JSON.parse(readFileSync(join(root, 'semantics/grid.json'), 'utf8'));
   write(root, 'state-expected.json', JSON.stringify(statePackageExpectations(next, document, grid)));
   write(root, 'state-consumer.mjs', "import { readFileSync } from 'node:fs';\n" + stateArtifactConsumerSource());
-  run(process.execPath, ['state-consumer.mjs']);
-});
+  await run(process.execPath, ['state-consumer.mjs']);
+}, 330_000);
