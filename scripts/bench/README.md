@@ -104,6 +104,14 @@ Current source symbols отказывают неподдержанным axes/ca
 контракта — `SEMANTIC_MOTION_UNAVAILABLE`. Принятые recorded axes/gesture
 не выдаются за current Figma parity.
 
+Explorer проверяет native range с `step="any"` на точных двоичных дробях вне
+процентной сетки. Строковая сериализация range в Chromium может округлить
+последние разряды, поэтому восстановленная из неё промежуточная clock pose
+сверяется с пределом 1/1024 CSS px на каждый Bezier control. Выпуклая оболочка
+controls ограничивает всю кривую. Rest, неподвижные части и экспорт видимой
+позы сохраняют точные проверки. Сам sampler не округляется; это граница
+наблюдения [native range](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input/range).
+
 CDP rate 4 — синтетическое замедление CPU, а не измерение на конкретном слабом
 устройстве. Viewport 1280×800: большие сцены содержат offscreen DOM. rAF
 измеряет возможность кадра, а не presentation time GPU. Heap — наблюдение

@@ -38,6 +38,26 @@ function rawCapsuleContours(d) {
   return contours;
 }
 
+/** Native range string serialization is not an exact clock-state transport.
+ * Matching Bezier controls bound the whole curve by their convex hull;
+ * allow at most 1/1024 CSS px for a pose reconstructed from that display. */
+export function clockDisplayPathMatches(expected, actual, pixelsPerUnit) {
+  if (!Number.isFinite(pixelsPerUnit) || pixelsPerUnit <= 0) return false;
+  try {
+    const source = rawCapsuleContours(expected), observed = rawCapsuleContours(actual);
+    return source.length === observed.length && source.every((contour, index) =>
+      contour.length === observed[index].length && contour.every((segment, position) => {
+        const other = observed[index][position];
+        if (segment.cmd !== other.cmd || segment.values.length !== other.values.length) return false;
+        for (let coordinate = 0; coordinate < segment.values.length; coordinate += 2) {
+          if (Math.hypot(segment.values[coordinate] - other.values[coordinate],
+            segment.values[coordinate + 1] - other.values[coordinate + 1]) * pixelsPerUnit > 1 / 1024) return false;
+        }
+        return true;
+      }));
+  } catch { return false; }
+}
+
 /** Width law сверяется с raw authored operands, без coefficient packet/compiler parser. */
 export function matchesAuthoredCapsulePath(before, after, width) {
   try {
@@ -411,18 +431,26 @@ export async function runExplorerJourney() {
       const poseMatches = () => {
         const hours = caps.gesture.from + (caps.gesture.to - caps.gesture.from) * Number(q('progress').value);
         const pose = prepared.sample(hours);
-        return pose.ok && target(stage())?.getAttribute('d') === pose.d &&
+        const visibleMatches = svg => {
+          const bounds = svg.getBoundingClientRect(), viewBox = svg.viewBox.baseVal;
+          return clockDisplayPathMatches(pose.d, target(svg)?.getAttribute('d'),
+            Math.max(bounds.width / viewBox.width, bounds.height / viewBox.height));
+        };
+        return pose.ok && visibleMatches(stage()) &&
           JSON.stringify(unchanged(stage())) === still && samples().length === 3 && samples().every(svg =>
-            target(svg)?.getAttribute('d') === pose.d && JSON.stringify(unchanged(svg)) === still);
+            visibleMatches(svg) && JSON.stringify(unchanged(svg)) === still);
       };
-      // Native range не должен квантовать наблюдаемую непрерывную позу стрелок.
+      // Exact dyadic values distinguish a step mesh without requiring the
+      // native range serializer to preserve every binary64 mantissa bit.
       const progressInput = q('progress'), previousProgress = progressInput.value;
-      const continuousProgress = .12345678912345678;
-      progressInput.value = String(continuousProgress);
-      const observedProgress = Number(progressInput.value);
+      const progressSamples = [1 / 1024, 505 / 4096, 1 - 1 / 4096].map(requested => {
+        progressInput.value = String(requested);
+        return { requested, observed: Number(progressInput.value) };
+      });
       progressInput.value = previousProgress;
-      check(`${id}/continuous-native-progress`, observedProgress === continuousProgress,
-        { requested: continuousProgress, observed: observedProgress, step: progressInput.step });
+      check(`${id}/continuous-native-progress`, progressInput.step === 'any' &&
+        progressSamples.every(sample => sample.requested === sample.observed),
+        { samples: progressSamples, step: progressInput.step });
       check(`${id}/author-identity`, caps.author.masterSha256 === source.provenance.author.masterSha256 &&
         caps.author.nodeSha256 === source.provenance.author.nodeSha256 && /^[a-f0-9]{64}$/.test(caps.geometrySha256));
       check(`${id}/exact-authored-rest`, JSON.stringify(paths(stage())) === rest && samples().every(svg => JSON.stringify(paths(svg)) === rest));
