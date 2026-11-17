@@ -89,7 +89,7 @@ function barCoordinate(value, axis, recipe, w, o) {
 }
 
 /** Recipes retain authored control points and adjust declared anatomical dimensions. */
-export function opticalRecipeMasters({ axes, source, recipes, fields = [], fieldProfile, fieldScale = 1 }) {
+export function opticalRecipeMasters({ axes, source, recipes, fields = [], fieldProfile, fieldScale = 1, negativeStrokes = [] }) {
   const paths = source.map(path => ({ ...path, segments: parsePathData(path.d) }));
   const bound = recipes.map(recipe => bindRecipe(recipe, paths[recipe.pathIndex]));
   if (fields.length) {
@@ -107,6 +107,8 @@ export function opticalRecipeMasters({ axes, source, recipes, fields = [], field
     for (const contour of field.contours) {
       if (contours.has(contour.contourIndex) || !['exterior', 'counter', 'mixed'].includes(contour.role) ||
           !Array.isArray(contour.normal) || contour.normal.some(value => !Number.isFinite(value)) ||
+          contour.weightNormal !== undefined && (!Array.isArray(contour.weightNormal) || contour.weightNormal.length !== contour.normal.length ||
+            contour.weightNormal.some(value => !Number.isFinite(value))) ||
           contour.offsetScale !== undefined && (!Number.isFinite(contour.offsetScale) || contour.offsetScale <= 0 || contour.offsetScale > 1)) {
         throw new TypeError('optical field has invalid contour data');
       }
@@ -128,6 +130,26 @@ export function opticalRecipeMasters({ axes, source, recipes, fields = [], field
     if (matches.length > 1) throw new TypeError('optical recipes overlap the same contour');
     return matches[0];
   }));
+  // Semantic negative strokes include holes, positive islands inside those
+  // holes, and selected points of a notch open to the exterior. Geometric
+  // winding alone cannot distinguish them from structural apertures.
+  const negativePoints = new Map();
+  if (!Array.isArray(negativeStrokes)) throw new TypeError('negative strokes must be an array');
+  for (const selector of negativeStrokes) {
+    const { pathIndex, contourIndex, pointIndices } = selector;
+    const contour = fieldPaths.get(pathIndex)?.get(contourIndex);
+    const key = `${pathIndex}/${contourIndex}`;
+    if (!Number.isInteger(pathIndex) || !Number.isInteger(contourIndex) || !contour || negativePoints.has(key)) {
+      throw new TypeError('negative stroke references a missing or repeated draft contour');
+    }
+    const count = contour.normal.length / 2;
+    const indices = pointIndices ?? Array.from({ length: count }, (_, index) => index);
+    if (!Array.isArray(indices) || !indices.length || new Set(indices).size !== indices.length ||
+        indices.some(index => !Number.isInteger(index) || index < 0 || index >= count)) {
+      throw new TypeError('negative stroke references an invalid or repeated point');
+    }
+    negativePoints.set(key, new Set(indices));
+  }
   return axes.weight.flatMap((weight, w) => axes.opsz.map((opsz, o) => ({ weight, opsz,
     paths: paths.map((path, pathIndex) => {
       let contourIndex = -1, contourCoordinate = 0;
@@ -142,9 +164,21 @@ export function opticalRecipeMasters({ axes, source, recipes, fields = [], field
             const draft = fieldPaths.get(pathIndex)?.get(contourIndex);
             if (!draft || w === 1 && o === 1) return value;
             const scale = 1 + (fieldProfile.spanScale[o] - 1) * fieldScale;
-            const offset = (fieldProfile.weightOffset[w] +
-              (draft.role === 'counter' ? fieldProfile.counterOpszOffset[o] : fieldProfile.opszOffset[o])) * fieldScale * (draft.offsetScale ?? 1);
-            return 12 + (value - 12) * scale + draft.normal[contourCoordinate + coordinate] * offset;
+            const selected = negativePoints.get(`${pathIndex}/${contourIndex}`);
+            const negative = selected?.has((contourCoordinate + coordinate - axis) / 2);
+            const normal = draft.normal[contourCoordinate + coordinate];
+            const weightNormal = draft.weightNormal?.[contourCoordinate + coordinate] ?? normal * (negative ? -1 : 1);
+            // An open negative stroke joins a positive silhouette. Both sides
+            // share its semantic join field; an enclosed mark and its islands
+            // use the independent small-size negative-stroke compensation.
+            const semanticOpsz = draft.weightNormal;
+            const opszNormal = semanticOpsz ? weightNormal : normal;
+            const opszOffset = semanticOpsz
+              ? selected?.size === draft.normal.length / 2 ? -fieldProfile.counterOpszOffset[o]
+                : draft.role === 'counter' ? fieldProfile.counterOpszOffset[o] : fieldProfile.opszOffset[o]
+              : negative || draft.role === 'counter' ? fieldProfile.counterOpszOffset[o] : fieldProfile.opszOffset[o];
+            const offset = (weightNormal * fieldProfile.weightOffset[w] + opszNormal * opszOffset) * fieldScale * (draft.offsetScale ?? 1);
+            return 12 + (value - 12) * scale + offset;
           }
           if (recipe.kind === 'rounded-cross') return crossCoordinate(value, axis, recipe, w, o);
           if (recipe.kind === 'rounded-bar') return barCoordinate(value, axis, recipe, w, o);

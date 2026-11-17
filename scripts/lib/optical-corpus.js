@@ -6,6 +6,7 @@ import { loadAuthorBaseline } from './author-baseline.js';
 import { authorPathEntries } from '../../src/core/icon-geometry.js';
 import { opticalRecipeMasters } from './optical-recipes.js';
 import { applyOpticalCorrections, compileOpticalGrid } from './optical-grid.js';
+import { draftOpticalFields } from './optical-drafts.js';
 
 /** A review accepts concrete compiled geometry, including shared profiles. */
 export const opticalReviewDigest = data => createHash('sha256').update(JSON.stringify(data)).digest('hex');
@@ -27,8 +28,12 @@ export function opticalVariantMasters(document, symbol, variant, author, recipe)
     return component?.opticalRecipe ? [{ ...withProfile(component.opticalRecipe), pathIndex: part.pathIndex,
       center: component.anchors.center.map(value => value * 24) }] : [];
   });
+  const semantic = recipe.negativeStrokes?.length ? draftOpticalFields(source, { negativeStrokes: recipe.negativeStrokes }) : null;
+  const fields = semantic ? recipe.fields.map(path => ({ ...path, contours: path.contours.map(contour => ({ ...contour,
+    weightNormal: semantic[path.pathIndex].contours[contour.contourIndex].normal,
+  })) })) : recipe.fields;
   const recipeMasters = opticalRecipeMasters({ axes: document.axisDesign, source, recipes: [...recipes, ...components],
-    fields: recipe.fields, fieldScale: recipe.fieldScale,
+    fields, fieldScale: recipe.fieldScale, negativeStrokes: recipe.negativeStrokes,
     fieldProfile: recipe.fieldProfile ? withProfile({ profile: recipe.fieldProfile }) : undefined });
   const masters = applyOpticalCorrections({ axes: document.axisDesign, masters: recipeMasters, corrections: recipe.corrections });
   return { axes: document.axisDesign, source, masters };

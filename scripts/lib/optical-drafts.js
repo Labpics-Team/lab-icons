@@ -90,13 +90,13 @@ function contoursOf(path) {
  * Ink-side probes use the complete path's fill rule, not the contour winding.
  * No Paper objects or geometric inference enter the renderer or stored model.
  */
-export function draftOpticalFields(source, { miterLimit = 2.5, maximumOffset = 0.35 } = {}) {
+export function draftOpticalFields(source, { miterLimit = 2.5, maximumOffset = 0.35, negativeStrokes = [] } = {}) {
   if (!Number.isFinite(miterLimit) || miterLimit < 1 || !Number.isFinite(maximumOffset) || maximumOffset <= 0) {
     throw new TypeError('optical draft requires finite positive geometry limits');
   }
   const scope = new paper.PaperScope(); scope.setup(new scope.Size(24, 24));
   try {
-    return source.map((path, pathIndex) => {
+    const output = source.map((path, pathIndex) => {
       const shape = new scope.CompoundPath({ pathData: path.d, fillRule: path.fillRule ?? 'nonzero', insert: false });
       const base = opticalPathSource(path), contours = contoursOf(path);
       const fields = contours.map((contour, contourIndex) => {
@@ -135,6 +135,15 @@ export function draftOpticalFields(source, { miterLimit = 2.5, maximumOffset = 0
         const exterior = edges.filter(edge => edge.sign === outward).length;
         const role = exterior === edges.length ? 'exterior' : exterior === 0 ? 'counter' : 'mixed';
         if (role === 'mixed') flags.add('mixed-ink-side');
+        const negative = negativeStrokes.find(selector => selector.pathIndex === pathIndex && selector.contourIndex === contourIndex);
+        const negativePoints = negative?.pointIndices ? new Set(negative.pointIndices) : null;
+        // Change edge semantics before constructing joins and limiting nearby
+        // fields. Flipping already averaged corner vectors erases a stem where
+        // its negative and positive sections meet.
+        if (negative) for (const edge of edges) {
+          const indices = [edge.startIndex, edge.endIndex, ...(edge.controlIndex === undefined ? [] : [edge.controlIndex, edge.controlIndex + 2])];
+          if (!negativePoints || indices.some(index => negativePoints.has((index - contour.start) / 2))) edge.sign *= -1;
+        }
         const write = (index, vector) => {
           for (let axis = 0; axis < 2; axis++) values[index - contour.start + axis] = round(vector[axis]);
         };
@@ -170,10 +179,10 @@ export function draftOpticalFields(source, { miterLimit = 2.5, maximumOffset = 0
         // An identified axis-aligned ellipse changes its radii through an affine
         // field. This preserves original tangency and tiny exporter segments,
         // which a sampled parallel curve can fold at small inner radii.
-        if (ellipse && role !== 'mixed') {
+        if (ellipse && role !== 'mixed' && !negativePoints) {
           for (let index = 0; index < values.length; index++) {
             const axis = index % 2;
-            values[index] = round((base.coordinates[contour.start + index] - center[axis]) / radius[axis] * (role === 'counter' ? -1 : 1));
+            values[index] = round((base.coordinates[contour.start + index] - center[axis]) / radius[axis] * (role === 'counter' ? -1 : 1) * (negative ? -1 : 1));
           }
           flags.delete('limited-join'); flags.delete('large-control-offset');
         }
@@ -212,6 +221,22 @@ export function draftOpticalFields(source, { miterLimit = 2.5, maximumOffset = 0
       shape.remove();
       return { pathIndex, contours: fields, ...(clearanceLimited ? { limitedContourClearance: true } : {}) };
     });
+    if (negativeStrokes.length && output.length > 1) {
+      // Semantic strokes can continue across separately painted source paths.
+      // Their coincident controls receive one displacement; nearby handles
+      // preserve the same bounded variation as contours of one paint.
+      const fields = output.flatMap(path => path.contours);
+      const values = fields.flatMap(field => field.normal.map(value => value * (field.offsetScale ?? 1)));
+      const coordinates = source.flatMap(path => opticalPathSource(path).coordinates);
+      if (limitFieldVariation(values, coordinates, maximumOffset)) {
+        let index = 0;
+        for (const field of fields) {
+          const scale = field.offsetScale ?? 1;
+          for (let coordinate = 0; coordinate < field.normal.length; coordinate++) field.normal[coordinate] = round(values[index++] / scale);
+        }
+      }
+    }
+    return output;
   } finally { scope.project.remove(); }
 }
 

@@ -96,6 +96,7 @@ it('retains authored support corrections during regeneration and refuses stale b
   expect(regenerated.status, regenerated.stderr).toBe(0);
   const updated = JSON.parse(readFileSync(join(root, file), 'utf8'));
   expect(updated.variants.filled.corrections).toEqual(corrections);
+  expect(updated.variants.filled.negativeStrokes).toEqual(recipe.variants.filled.negativeStrokes);
   const compiled = compileOpticalCorpus(root, { preview: true }).symbols.console.data;
   const position = opticalPosition(compiled.axes, 600, 16);
   const before = sampleOpticalPath(original.variants.filled.paths[0], position);
@@ -114,3 +115,39 @@ it('retains authored support corrections during regeneration and refuses stale b
   expect(readFileSync(join(root, file), 'utf8')).toBe(stale);
   expect(readFileSync(join(root, 'symbols/source.json'), 'utf8')).toBe(sourceBefore);
 }, 40_000);
+
+const contourPath = (symbol, path, contour, weight, opsz = 24) => {
+  const data = symbol.data, optical = data.variants.filled.paths[path];
+  return opticalPathData(optical, sampleOpticalPath(optical, opticalPosition(data.axes, weight, opsz))).match(/M[^M]+/g)[contour];
+};
+const contourSize = (symbol, path, contour, weight) => {
+  const box = pathBBox(contourPath(symbol, path, contour, weight));
+  return [box.maxX - box.minX, box.maxY - box.minY];
+};
+
+it('thickens semantic negative strokes and shrinks their islands without treating structural holes as strokes', () => {
+  const { root } = fixture(['console', 'calendar-today', 'palette']);
+  const { symbols } = compileOpticalCorpus(root, { preview: true });
+  const underscore = [300, 400, 600].map(weight => contourSize(symbols.console, 0, 1, weight)[1]);
+  expect(underscore[0]).toBeLessThan(underscore[1]);
+  expect(underscore[2]).toBeGreaterThan(underscore[1]);
+  expect(underscore[2] - underscore[0]).toBeGreaterThan(0.5);
+  // The day is a positive island in the negative page; the island contracts.
+  expect(contourSize(symbols['calendar-today'], 0, 0, 600)[0]).toBeLessThan(contourSize(symbols['calendar-today'], 0, 0, 300)[0]);
+  // Palette paint dots grow as negative marks, its thumb hole stays an aperture.
+  expect(contourSize(symbols.palette, 0, 2, 600)[0]).toBeGreaterThan(contourSize(symbols.palette, 0, 2, 300)[0]);
+  expect(contourSize(symbols.palette, 0, 1, 600)[0]).toBeLessThan(contourSize(symbols.palette, 0, 1, 300)[0]);
+});
+
+it('keeps the positive and negative stem joined across separate paints at supports and intermediate positions', () => {
+  const { root } = fixture(['share-display']);
+  const symbol = compileOpticalCorpus(root, { preview: true }).symbols['share-display'];
+  const paths = symbol.data.variants.filled.paths;
+  for (const weight of [300, 350, 400, 500, 600]) for (const opsz of [16, 20, 24, 36, 48]) {
+    const position = opticalPosition(symbol.data.axes, weight, opsz);
+    const a = sampleOpticalPath(paths[0], position), b = sampleOpticalPath(paths[1], position);
+    for (const [left, right] of [[9, 17], [19, 14]]) for (const axis of [0, 1]) {
+      expect(a[left * 2 + axis]).toBeCloseTo(b[right * 2 + axis], 10);
+    }
+  }
+});

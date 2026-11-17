@@ -44,7 +44,7 @@ for (const symbol of Object.values(document.symbols)) {
     const fields = draftOpticalFields(source);
     const previous = existing?.variants[variant];
     const { fields: _oldFields, diagnostics: _oldDiagnostics, masterSha256: _oldSha, ...authored } = previous ?? {};
-    const hasAuthoredGeometry = Boolean(authored.paths?.length || authored.corrections?.length);
+    const hasAuthoredGeometry = Boolean(authored.paths?.length || authored.corrections?.length || authored.negativeStrokes?.length);
     if (previous && previous.masterSha256 !== author.sha256 && hasAuthoredGeometry) {
       throw new Error(`Source changed for authored optical corrections: ${symbol.id}/${variant}; migrate the coordinate bindings first`);
     }
