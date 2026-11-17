@@ -44,7 +44,7 @@ import kotlin.system.exitProcess
 
 fun main(args: Array<String>) {
     check(exportedPlusCircle.id == plusCircle.id && exportedPlusCircle.axes == plusCircle.axes)
-    if ("--headless" in args) { headlessSmoke(); headlessCalendarSmoke(); return }
+    if ("--headless" in args) { headlessSmoke(); headlessCalendarSmoke(); headlessOpticalSmoke(); return }
     val smoke = "--smoke" in args
     if (smoke) thread(name = "icons-consumer-deadline", isDaemon = true) {
         Thread.sleep(30_000)

@@ -48,9 +48,10 @@ fun headlessCalendarSmoke() = runBlocking {
                         val tint = Color(0xff215da0).copy(alpha = .55f)
                         Icon(calendarNumber, tint, variant = variant, size = 48.dp, weight = weight, opsz = opsz, date = date, timeZone = "UTC")
                         val seed = if (variant == IconVariant.Outline && weight == 300f && opsz == 16f && day == 1) initialDate.value else date
-                        val motion = rememberIconMotion(calendarNumber, variant, initialDate = seed, initialTimeZone = "UTC")
+                        val motion = rememberIconMotion(calendarNumber, variant, initialDate = seed, initialTimeZone = "UTC",
+                            initialWeight = weight, initialOpsz = opsz)
                         controls["$variant/$weight/$opsz/$day"] = motion
-                        Icon(calendarNumber, tint, size = 48.dp, weight = weight, opsz = opsz, motion = motion)
+                        Icon(calendarNumber, tint, size = 48.dp, motion = motion)
                     }
                 }
             }

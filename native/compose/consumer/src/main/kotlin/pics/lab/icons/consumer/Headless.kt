@@ -43,9 +43,9 @@ fun headlessSmoke() = runBlocking {
                         val tint = Color(0xff215da0).copy(alpha = .55f)
                         Icon(symbol, tint, size = 48.dp, weight = weight, opsz = opsz, variant = variant)
                         for (phase in listOf(0f, .25f, .5f, 1f)) {
-                            val motion = rememberIconMotion(symbol, variant)
+                            val motion = rememberIconMotion(symbol, variant, initialWeight = weight, initialOpsz = opsz)
                             controls["${symbol.id}/$variant/$weight/$opsz/$phase"] = motion to phase
-                            Icon(symbol, tint, size = 48.dp, weight = weight, opsz = opsz, motion = motion)
+                            Icon(symbol, tint, size = 48.dp, motion = motion)
                         }
                     }
                 }

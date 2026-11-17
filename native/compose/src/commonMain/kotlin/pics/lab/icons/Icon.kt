@@ -18,27 +18,31 @@ public fun Icon(
     modifier: Modifier = Modifier,
     variant: IconVariant = IconVariant.Outline,
     size: Dp = symbol.axes.opsz.default.dp,
-    weight: Float = symbol.axes.weight.default,
+    weight: Float? = null,
     opsz: Float? = null,
     contentDescription: String? = null,
     motion: IconMotion? = null,
     date: Instant? = null,
     timeZone: String? = null,
+    state: String? = null,
 ) {
     require(size.value.isFinite() && size.value > 0) { "Icon size must be positive and finite" }
-    symbol.axes.weight.position(weight)
+    weight?.let { symbol.axes.weight.position(it) }
     opsz?.let { symbol.axes.opsz.position(it) }
     if (motion != null) {
         require(date == null && timeZone == null) { "A motion controller owns the calendar date; use IconMotion.setDate" }
-        MotionIcon(motion, tint, modifier, size, weight, opsz, contentDescription)
+        require(weight == null && opsz == null) { "A motion controller owns optical axes; use initialWeight/initialOpsz and IconMotion.setOptics" }
+        require(state == null) { "A motion controller owns the state; use initialState and IconMotion.setState" }
+        MotionIcon(motion, tint, modifier, size, contentDescription)
         return
     }
     val day = remember(symbol, date, timeZone) { resolveCalendarRequest(symbol, date, timeZone) }
-    val selected = remember(symbol, day) { resolveCalendarSymbol(symbol, day) }
-    val prepared = remember(selected, variant) {
-        prepareStaticSymbol(selected, variant)
+    val selection = remember(symbol, variant, state) { resolveIconState(symbol, variant, state) }
+    val selected = remember(selection, day) { resolveCalendarSymbol(selection.symbol, day) }
+    val prepared = remember(selected, selection.variant) {
+        prepareStaticSymbol(selected, selection.variant)
     }
-    PaintedIcon(prepared, tint, modifier, size, weight, opsz, contentDescription)
+    PaintedIcon(prepared, tint, modifier, size, weight ?: symbol.axes.weight.default, opsz, contentDescription)
 }
 
 /** One instance per Icon; changing an axis reuses all paths and coordinate buffers. */
@@ -79,20 +83,36 @@ internal class PreparedPathSource(private val source: SymbolPathData) {
 
 /** Commands already identify whole contours; selection needs no SVG parser or geometry operation. */
 internal class PreparedPath(private val source: SymbolPathData, private val contours: IntArray = IntArray(0),
-    private val sampled: PreparedPathSource = PreparedPathSource(source), private val view: SymbolPathViewData? = null) {
+    sampled: PreparedPathSource? = null, private val view: SymbolPathViewData? = null) {
     val path = Path()
-    private val projected = view?.let { FloatArray(it.points.size * 2) }
+    private var sampled = sampled
+    private var projected: FloatArray? = null
+    val sourcePoints: FloatArray get() = sampled!!.points
     private var revision = -1
+    private var pose: IconPartPose? = null
+    private var poseRevision = -1
     fun update(weightSide: Int, weight: Float, opticalSide: Int, optical: Float) {
+        val sampled = sampled ?: PreparedPathSource(source).also { this.sampled = it }
         sampled.update(weightSide, weight, opticalSide, optical)
         if (revision == sampled.revision) return
         revision = sampled.revision
-        if (projected != null) view!!.sample(sampled.points, projected)
+        if (view != null) {
+            val target = projected ?: FloatArray(view.points.size * 2).also { projected = it }
+            view.sample(sampled.points, target)
+        }
         val points = projected ?: sampled.points
+        rebuild(view?.commands ?: source.commands, points, contours, source.evenOdd)
+    }
+    fun updatePose(next: IconPartPose) {
+        if (pose === next && poseRevision == next.revision) return
+        pose = next; poseRevision = next.revision
+        rebuild(next.commands, next.points, next.contours, next.evenOdd)
+    }
+    private fun rebuild(commands: ByteArray, points: FloatArray, contours: IntArray, evenOdd: Boolean) {
         path.reset()
-        path.fillType = if (source.evenOdd) PathFillType.EvenOdd else PathFillType.NonZero
+        path.fillType = if (evenOdd) PathFillType.EvenOdd else PathFillType.NonZero
         var cursor = 0; var contour = -1
-        for (command in view?.commands ?: source.commands) {
+        for (command in commands) {
             if (command.toInt() == 0) contour++
             val selected = contours.isEmpty() || contour in contours
             when (command.toInt()) {

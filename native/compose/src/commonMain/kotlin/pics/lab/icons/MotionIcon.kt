@@ -33,19 +33,17 @@ import androidx.compose.ui.unit.Dp
 import kotlin.math.min
 
 @Composable
-internal fun MotionIcon(motion: IconMotion, tint: Color, modifier: Modifier, size: Dp, weight: Float,
-    opsz: Float?, description: String?) {
-    val sources = remember(motion) { mutableMapOf<SymbolPathData, PreparedPathSource>() }
+internal fun MotionIcon(motion: IconMotion, tint: Color, modifier: Modifier, size: Dp, description: String?) {
     val prepared = motion.paints.map { paint -> remember(paint) {
-        PreparedPaint(paint, sources.getOrPut(paint.pathData) { PreparedPathSource(paint.pathData) })
+        PreparedPaint(paint)
     } }
-    PaintedIcon(prepared, tint, modifier, size, weight, opsz, description)
+    PaintedIcon(prepared, tint, modifier, size, motion.weight, motion.opsz, description, motion)
 }
 
 /** Both static and animated symbols use the same coverage, stroke and tint pipeline. */
 @Composable
 internal fun PaintedIcon(prepared: List<PreparedPaint>, tint: Color, modifier: Modifier, size: Dp,
-    weight: Float, opsz: Float?, description: String?) {
+    weight: Float, opsz: Float?, description: String?, motion: IconMotion? = null) {
     val layers = remember(prepared) { prepareLayers(prepared) }
     val currentTint by rememberUpdatedState(tint)
     val accessibility = if (description == null) Modifier else Modifier.semantics {
@@ -53,11 +51,15 @@ internal fun PaintedIcon(prepared: List<PreparedPaint>, tint: Color, modifier: M
     }
     Spacer(modifier.size(size).then(accessibility).drawWithCache {
         val logicalSize = min(this.size.width, this.size.height) / density
-        for (paint in prepared) {
+        if (motion == null) for (paint in prepared) {
             val axis = paint.paint.symbol.axes.opsz
             paint.update(weight, opsz ?: logicalSize.coerceIn(axis.minimum, axis.maximum))
         }
         onDrawBehind {
+            if (motion != null) {
+                motion.resolveLayout(logicalSize)
+                for (paint in prepared) paint.updatePose((paint.paint as IconPaint).geometry!!.current())
+            }
             val edge = min(this.size.width, this.size.height)
             translate((this.size.width - edge) / 2, (this.size.height - edge) / 2) {
                 scale(edge / 24f, edge / 24f, pivot = Offset.Zero) {
@@ -148,7 +150,7 @@ internal fun prepareStaticSymbol(symbol: SymbolData, variant: IconVariant): List
     }
 }
 
-internal class PreparedPaint(val paint: IconPaintState, private val source: PreparedPathSource = PreparedPathSource(paint.pathData)) {
+internal class PreparedPaint(val paint: IconPaintState, source: PreparedPathSource? = null) {
     val geometry = PreparedPath(paint.pathData, paint.part.contourIndices, source, paint.part.geometry)
     var anchor = Offset(paint.part.anchorX, paint.part.anchorY)
         private set
@@ -171,8 +173,14 @@ internal class PreparedPaint(val paint: IconPaintState, private val source: Prep
         paint.pathData.strokeWidth?.let {
             pathStroke = Stroke(it.sample(weightSide, weightAt, opticalSide, opticalAt), cap = StrokeCap.Round, join = StrokeJoin.Round)
         }
-        paint.part.pivot?.let { anchor = Offset(it.sample(source.points, 0), it.sample(source.points, 1)) }
+        paint.part.pivot?.let { anchor = Offset(it.sample(geometry.sourcePoints, 0), it.sample(geometry.sourcePoints, 1)) }
         previousWeight = weight; previousOptical = optical
+    }
+    fun updatePose(pose: IconPartPose) {
+        geometry.updatePose(pose)
+        anchor = pose.anchor; offsetX = pose.offsetX
+        val width = pose.strokeWidth
+        if (width != pathStroke?.width) pathStroke = width?.let { Stroke(it, cap = StrokeCap.Round, join = StrokeJoin.Round) }
     }
     val revealed = Path()
     val measure: PathMeasure? = paint.part.draw?.let { guide ->

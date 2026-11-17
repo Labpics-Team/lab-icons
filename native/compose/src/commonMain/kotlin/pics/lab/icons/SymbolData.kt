@@ -17,6 +17,17 @@ public data class IconAxis(public val minimum: Float, public val default: Float,
 public data class IconAxes(public val weight: IconAxis, public val opsz: IconAxis)
 public enum class IconVariant { Outline, Filled }
 
+internal class IconStateSelection(val symbol: SymbolData, val variant: IconVariant)
+internal fun resolveIconState(symbol: SymbolData, variant: IconVariant, state: String?): IconStateSelection = when (state) {
+    null -> IconStateSelection(symbol, variant)
+    "selected" -> IconStateSelection(symbol, IconVariant.Filled)
+    "unselected" -> IconStateSelection(symbol, IconVariant.Outline)
+    else -> {
+        require(symbol.states.containsKey(state)) { "Unknown icon state: $state" }
+        IconStateSelection(symbol.states[state] ?: symbol, variant)
+    }
+}
+
 /** Immutable compiled family. Numeric buffers remain private to the renderer. */
 @Immutable
 public class SymbolData internal constructor(

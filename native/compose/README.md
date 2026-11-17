@@ -19,6 +19,11 @@ Icon(microphoneStates, tint = labelColor, motion = motion)
 motion.setState("off")
 ```
 
+Начальный вариант состояния доступен без эффекта после первого кадра:
+`Icon(microphoneStates, labelColor, state = "off")` для статики либо
+`rememberIconMotion(microphoneStates, initialState = "off")` для движения.
+Начертание по-прежнему задаёт `variant`; `selected`/`unselected` выбирают Filled/Outline.
+
 `rememberIconMotion` освобождает controller при удалении из композиции.
 `effect("cycle")`, `effect("ring")`, `effect("level", to = .5f)` и
 `effect("draw")` используют объявленные части текущего символа. Прерывание
@@ -31,8 +36,9 @@ motion.setState("off")
 Направляющая постепенно вырезает отверстие;
 положительные части, PathMeasure, stroke и границы слоя готовятся вне кадра.
 Части движения выбирают целые контуры исходного числового пути по индексам.
-Один символ разделяет sampled buffer между частями этого пути: координаты и
-коэффициенты не дублируются ни в экспорте, ни в подготовленных буферах.
+В неподвижной позе один символ разделяет sampled buffer между частями этого пути.
+Переход сохраняет координатные snapshots только изменившихся частей; Canvas
+переиспользует эти точки и свой Path, не готовит второй оптический buffer.
 Числовой формат 4 добавляет ссылки на исходные точки для контуров и общей опоры,
 а также параметр эффекта в часах. Decoder читает форматы 1…5, включая ранний
 формат 3 с отдельными motion paths.
@@ -89,6 +95,37 @@ calendar.setDate(nextDate, "Asia/Tokyo", durationMillis = 180)
 Прозрачность общего слоя — максимум видимости его частей; покрытие каждой части
 делится на этот максимум, а tint применяется один раз после объединения/вычитания.
 
+## Оптические переходы
+
+```kotlin
+val icon = rememberIconMotion(time, initialWeight = 300f, initialOpsz = 16f)
+Icon(time, labelColor, size = 48.dp, motion = icon)
+val change = icon.setOptics(weight = 600f, opsz = 48f, durationMillis = 240)
+// Следующее изменение продолжает видимую форму:
+icon.setOptics(weight = 450f, opsz = 32f)
+icon.setOptics(opsz = null) // снова следовать фактическому логическому размеру
+```
+
+`initialState`/`initialWeight`/`initialOpsz` читаются при создании controller. С ним `Icon`
+получает оптику от controller; одновременные `weight`/`opsz` у `Icon` отвергаются.
+У статического `Icon` эти свойства остаются обычными входами. Миграция:
+`Icon(..., weight = w, opsz = o, motion = m)` заменяется начальной настройкой
+`rememberIconMotion(..., initialWeight = w, initialOpsz = o)` и `Icon(..., motion = m)`.
+
+Переход линейно смешивает готовые координаты конечных поз, опору вращения,
+смещение и толщину открытого штриха. Он не пересчитывает геометрию из
+промежуточных значений weight/opsz. Прерывание сохраняет последний видимый
+рисунок; нулевой кадр устанавливается до запуска часов. Старый `finish()`
+не восстанавливает прежний target. `setOptics` сохраняет state/date/variant
+и, как web `set`, возвращает жест к исходной позе. Новый жест продолжает
+оставшуюся оптическую часть перехода.
+
+При `opsz = null` размер берётся из фактических layout constraints и делится
+на плотность ровно один раз. Ограничение Icon до 32 dp даёт opsz 32 и при
+density 1, и при density 2, даже если запрошено 96 dp. Смена layout во время
+перехода продолжает его с видимой формы к новой оптической цели; отдельные
+часы для layout не создаются. Изменение tint не пересчитывает геометрию.
+
 Часы и controls принадлежат публичному
 `pics.lab:motion-compose:0.1.0` из Maven repository
 `https://raw.githubusercontent.com/Labpics-Team/lab-motion/maven-compose-v0.1.0/`.
@@ -137,6 +174,10 @@ node ../../scripts/export-native-symbols.mjs --preview --symbol plus-circle --pa
 Календарная сцена дополнительно проверяет 72 пары static/motion, сохранение
 controller/date/selection при рекомпозиции, прерывание и disposal; изображение
 сохраняется в `consumer/build/native-icons-calendar-headless.png`.
+Оптическая сцена проверяет оба начертания time/calendar-number/checkmark-circle/
+volume-high: первый кадр, середину, прерывание, поздний `finish`, точное совпадение
+конечной позы со статическим Icon и автоматическую оптику под constraints/DPR.
+Изображение сохраняется в `consumer/build/native-icons-optical-headless.png`.
 Он не открывает окно и не читает рабочий стол. Это обычный локальный путь проверки.
 Оконный `--smoke` сохраняет `consumer/build/native-icons-consumer.png` и запускается
 только в изолированной среде. На рабочем компьютере используются `desktopTest`

@@ -15,14 +15,16 @@ import pics.lab.motion.MotionResult
 import pics.lab.motion.MotionTransition
 import pics.lab.motion.MotionValue
 import kotlin.time.Instant
+import kotlin.math.ceil
 
-/** One controller per mounted icon. Initial date is read once; later edits use setDate. */
+/** Initial content and optical settings are read once; later edits use the controller. */
 @Composable
 public fun rememberIconMotion(symbol: SymbolData, variant: IconVariant = IconVariant.Outline,
-    initialDate: Instant? = null, initialTimeZone: String? = null): IconMotion {
+    initialDate: Instant? = null, initialTimeZone: String? = null,
+    initialWeight: Float = symbol.axes.weight.default, initialOpsz: Float? = null, initialState: String? = null): IconMotion {
     val scope = rememberCoroutineScope()
     val motion = remember(symbol, variant) {
-        IconMotion(symbol, variant, scope, resolveCalendarRequest(symbol, initialDate, initialTimeZone))
+        IconMotion(symbol, variant, scope, resolveCalendarRequest(symbol, initialDate, initialTimeZone), initialWeight, initialOpsz, initialState)
     }
     DisposableEffect(motion) { onDispose { motion.dispose() } }
     return motion
@@ -33,24 +35,79 @@ public class IconMotion internal constructor(
     private val initialVariant: IconVariant,
     private val scope: CoroutineScope,
     initialDay: Int? = null,
+    initialWeight: Float = base.axes.weight.default,
+    initialOpsz: Float? = null,
+    initialState: String? = null,
 ) {
     private val controller = MotionController(scope)
     internal val paints = mutableStateListOf<IconPaint>()
     private val stored = mutableMapOf<String, IconPaint>()
-    private var currentSource = base
+    private val initialSelection = resolveIconState(base, initialVariant, initialState)
+    private var currentSource = initialSelection.symbol
     private var day = initialDay
-    private var current = resolveCalendarSymbol(base, initialDay)
-    private var variant = initialVariant
+    private var current = resolveCalendarSymbol(currentSource, initialDay)
+    private var variant = initialSelection.variant
     private var disposed = false
     private var epoch = 0
     private var cleanup: Job? = null
     private var stateRevision = 0
     private val phases = mutableMapOf<SymbolEffectData, IconEffectPhase>()
-    private var desired = current.variants[initialVariant.ordinal].parts.map { it.key }.toSet()
+    private val opticalProgress = controller.value(1f)
+    private var layoutOptical = base.axes.opsz.default
+    private var playback: MotionPlayback? = null
+    private var geometryEndMillis = 0f
+    /** Requested optical settings. Null opsz follows the actual logical layout, without DPR. */
+    public var weight: Float = initialWeight
+        private set
+    public var opsz: Float? = initialOpsz
+        private set
+    private var desired = current.variants[variant.ordinal].parts.map { it.key }.toSet()
     public var reducedMotion: Boolean
         get() = controller.reducedMotion
         set(value) { controller.reducedMotion = value }
-    init { addPaints(current, variant, 1f) }
+    init {
+        base.axes.weight.position(initialWeight); initialOpsz?.let { base.axes.opsz.position(it) }
+        addPaints(current, variant, 1f)
+    }
+
+    /** Interpolates resolved geometry, including a previously interrupted optical pose. */
+    public fun setOptics(weight: Float = this.weight, opsz: Float? = this.opsz, durationMillis: Int = 180): MotionPlayback {
+        check(!disposed) { "Icon is disposed" }; require(durationMillis >= 0)
+        base.axes.weight.position(weight); opsz?.let { base.axes.opsz.position(it) }
+        ensureGeometry()
+        this.weight = weight; this.opsz = opsz
+        return transitionTo(current, variant, durationMillis, resetPose = true)
+    }
+
+    private fun ensureGeometry() {
+        if (paints.none { it.geometry == null }) return
+        val sources = mutableMapOf<Pair<SymbolData, IconVariant>, Map<String, IconPartPose>>()
+        for (paint in paints) if (paint.geometry == null) {
+            val poses = sources.getOrPut(paint.symbol to paint.variant) {
+                sampleIconPose(paint.symbol, paint.variant, weight, opsz ?: layoutOptical)
+            }
+            paint.geometry = IconPaintGeometry(poses.getValue(paint.part.key), opticalProgress)
+        }
+    }
+
+    /** Layout resolves auto opsz; it never creates a clock or a second user setting. */
+    internal fun resolveLayout(logicalSize: Float) {
+        val next = logicalSize.coerceIn(base.axes.opsz.minimum, base.axes.opsz.maximum)
+        if (next != layoutOptical && opsz == null) {
+            layoutOptical = next
+            val sources = mutableMapOf<Pair<SymbolData, IconVariant>, Map<String, IconPartPose>>()
+            for (paint in paints) {
+                val target = sources.getOrPut(paint.symbol to paint.variant) {
+                    sampleIconPose(paint.symbol, paint.variant, weight, next)
+                }.getValue(paint.part.key)
+                val previous = paint.geometry?.current()
+                val transition = if (previous != null && opticalProgress.value < 1f)
+                    interpolateIconGeometry(previous, target, opticalProgress.value) else null
+                paint.geometry = IconPaintGeometry(target, opticalProgress, transition)
+            }
+        } else layoutOptical = next
+        ensureGeometry()
+    }
 
     private fun addPaints(symbol: SymbolData, variant: IconVariant, alpha: Float) {
         for (part in symbol.variants[variant.ordinal].parts) {
@@ -64,14 +121,10 @@ public class IconMotion internal constructor(
     /** Selection switches the authored variant. Named states come from SymbolSource. */
     public fun setState(state: String, durationMillis: Int = 180): MotionPlayback {
         check(!disposed) { "Icon is disposed" }; require(durationMillis >= 0)
-        val selectedVariant = when (state) { "selected" -> IconVariant.Filled; "unselected" -> IconVariant.Outline; else -> initialVariant }
-        val target = when (state) {
-            "selected", "unselected" -> base
-            else -> { require(base.states.containsKey(state)) { "Unknown icon state: $state" }; base.states[state] ?: base }
-        }
-        val resolved = resolveCalendarSymbol(target, day)
-        currentSource = target
-        return transitionTo(resolved, selectedVariant, durationMillis, resetPose = true)
+        val selection = resolveIconState(base, initialVariant, state)
+        val resolved = resolveCalendarSymbol(selection.symbol, day)
+        currentSource = selection.symbol
+        return transitionTo(resolved, selection.variant, durationMillis, resetPose = true)
     }
 
     /** Change only calendar content. Variant/state and the shared shell keep their current pose. */
@@ -86,9 +139,20 @@ public class IconMotion internal constructor(
 
     private fun transitionTo(target: SymbolData, selectedVariant: IconVariant, durationMillis: Int,
         resetPose: Boolean): MotionPlayback {
+        val targetGeometry = sampleIconPose(target, selectedVariant, weight, opsz ?: layoutOptical)
+        ensureGeometry()
         desired = target.variants[selectedVariant.ordinal].parts.map { it.key }.toSet()
         addPaints(target, selectedVariant, 0f)
+        // Capture before resetting the shared progress. Outgoing parts retain their visible shape.
+        for (paint in paints) {
+            val first = paint.geometry?.current()
+            val last = targetGeometry[paint.part.key]
+            paint.geometry = if (last == null) IconPaintGeometry(first!!, opticalProgress)
+                else IconPaintGeometry(last, opticalProgress, first?.let { interpolateIconGeometry(it, last) })
+        }
+        controller.animate { to(opticalProgress, 0f, MotionTransition.Tween(0)) }.finish()
         val playback = controller.animate {
+            to(opticalProgress, 1f, MotionTransition.Tween(durationMillis, MotionEase.Linear))
             for (paint in paints) {
                 val transition = MotionTransition.Tween(durationMillis, MotionEase.Linear)
                 to(paint.alpha, if (paint.part.key in desired) 1f else 0f, transition)
@@ -99,11 +163,13 @@ public class IconMotion internal constructor(
             }
         }
         current = target; variant = selectedVariant; stateRevision++
+        geometryEndMillis = durationMillis.toFloat()
         cleanAfter(playback)
         return playback
     }
 
     private fun cleanAfter(playback: MotionPlayback) {
+        this.playback = playback
         cleanup?.cancel(); val generation = ++epoch
         cleanup = scope.launch {
             if (playback.finished.await() == MotionResult.Finished && generation == epoch) paints.removeAll { it.part.key !in desired }
@@ -116,6 +182,8 @@ public class IconMotion internal constructor(
         val data = current.variants[variant.ordinal]
         val effect = requireNotNull(data.effects[name]) { "Unsupported icon effect: $name" }
         val duration = durationMillis ?: effect.duration; require(duration >= 0)
+        val geometryRemaining = if (opticalProgress.value >= 1f) 0 else
+            ceil((geometryEndMillis - (playback?.timeMillis ?: 0f)).coerceAtLeast(0f)).toInt()
         val phase = phases.getOrPut(effect) { IconEffectPhase(controller.value(effect.rest), -1) }
         // Linear tracks expose their current phase even while a state reset changes the pose.
         val reference = if (effect.elapsedHours) effect.tracks.firstOrNull { it.values.first() != it.values.last() } else null
@@ -150,6 +218,7 @@ public class IconMotion internal constructor(
         }
         phase.revision = stateRevision
         val playback = controller.animate {
+            to(opticalProgress, 1f, MotionTransition.Tween(geometryRemaining, MotionEase.Linear))
             for (paint in paints) to(paint.alpha, if (paint.part.key in desired) 1f else 0f, MotionTransition.Tween(duration, MotionEase.Linear))
             to(phase.value, endpoint, MotionTransition.Tween(duration, MotionEase.Linear))
             for (binding in bindings) {
@@ -157,6 +226,7 @@ public class IconMotion internal constructor(
                 else keyframes(binding.value, binding.targets, duration, binding.times)
             }
         }
+        geometryEndMillis = geometryRemaining.toFloat()
         cleanAfter(playback)
         return playback
     }
@@ -174,6 +244,7 @@ internal class IconPaint(override val symbol: SymbolData, override val variant: 
     val alpha: MotionValue, val opacity: MotionValue, val x: MotionValue, val y: MotionValue,
     val rotation: MotionValue, val draw: MotionValue) : IconPaintState {
     override val pathData: SymbolPathData = symbol.variants[variant.ordinal].let { (it.motionPaths ?: it.paths)[part.pathIndex] }
+    var geometry: IconPaintGeometry? = null
     override val alphaValue: Float get() = alpha.value
     override val opacityValue: Float get() = opacity.value
     override val xValue: Float get() = x.value
