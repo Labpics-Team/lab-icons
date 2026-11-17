@@ -15,13 +15,30 @@ private fun decodeSymbolBytes(id: String, bytes: ByteArray, depth: Int = 0): Sym
     require(reader.byte() == 76 && reader.byte() == 73 && reader.byte() == 67 && reader.byte() == 78) {
         "Unsupported compiled symbol format"
     }
-    val version = reader.byte(); require(version in 1..4)
+    val version = reader.byte(); require(version in 1..5)
     fun axis() = IconAxis(reader.float(), reader.float(), reader.float())
     val axes = IconAxes(axis(), axis())
+    fun readOpticalScalar(positive: Boolean = false): OpticalScalar {
+        val base = reader.float()
+        val count = reader.byte(); require(count <= 8)
+        val seen = BooleanArray(8)
+        val terms = IntArray(count)
+        val deltas = FloatArray(count)
+        for (index in 0 until count) {
+            val term = reader.byte(); require(term in 0..7 && !seen[term])
+            seen[term] = true; terms[index] = term; deltas[index] = reader.float()
+        }
+        val result = OpticalScalar(base, terms, deltas)
+        for (weightSide in 0..1) for (opticalSide in 0..1) for (weight in 0..1) for (optical in 0..1) {
+            val value = result.sample(weightSide, weight.toFloat(), opticalSide, optical.toFloat())
+            require(value.isFinite() && (!positive || value > 0f)) { "Invalid optical scalar support" }
+        }
+        return result
+    }
     fun readPaths(): Array<SymbolPathData> = Array(reader.count()) {
         val commands = reader.bytes(reader.count())
         val coordinateCount = reader.count()
-        val expectedCount = closedPathCoordinateCount(commands)
+        val expectedCount = pathCoordinateCount(commands, allowOpen = version >= 5)
         require(coordinateCount == expectedCount) { "Incompatible symbol path coordinates" }
         val coordinates = FloatArray(coordinateCount) { reader.float() }
         val fillRule = reader.byte(); require(fillRule in 0..1)
@@ -38,18 +55,17 @@ private fun decodeSymbolBytes(id: String, bytes: ByteArray, depth: Int = 0): Sym
             }
             SymbolDelta(term, indices, values)
         }
-        SymbolPathData(commands, coordinates, fillRule == 1, terms)
-    }
-    val variants = Array(2) {
-        val paths = readPaths()
-        val motionPaths = if (version < 3) null else when (reader.byte()) {
+        val stroke = if (version < 5) null else when (reader.byte()) {
             0 -> null
-            1 -> readPaths()
-            else -> error("Invalid motion paths flag")
+            1 -> readOpticalScalar(positive = true)
+            else -> error("Invalid stroke flag")
         }
-        val partPaths = motionPaths ?: paths
+        if (stroke == null && version >= 5) pathCoordinateCount(commands, allowOpen = false)
+        SymbolPathData(commands, coordinates, fillRule == 1, terms, stroke)
+    }
+    fun readParts(partPaths: Array<SymbolPathData>): Array<SymbolPartData> {
         val partIds = mutableSetOf<String>()
-        val parts = Array(reader.count()) {
+        return Array(reader.count()) {
             val partId = reader.bytes(reader.count()).decodeToString(throwOnInvalidSequence = true)
             require(partId.isNotBlank() && partIds.add(partId)) { "Compiled symbol part identity is invalid" }
             val pathIndex = reader.count(); require(pathIndex < partPaths.size)
@@ -86,7 +102,7 @@ private fun decodeSymbolBytes(id: String, bytes: ByteArray, depth: Int = 0): Sym
                     0 -> null
                     1 -> {
                         val commands = reader.bytes(reader.count())
-                        val coordinateCount = closedPathCoordinateCount(commands)
+                        val coordinateCount = pathCoordinateCount(commands, allowOpen = partPaths[pathIndex].strokeWidth != null)
                         val basis = basis()
                         val points = Array(reader.count()) { when (reader.byte()) {
                             0 -> SymbolPointReference(reader.count().also { require(it < pointCount) }, null)
@@ -103,9 +119,23 @@ private fun decodeSymbolBytes(id: String, bytes: ByteArray, depth: Int = 0): Sym
                     1 -> SymbolPointProjection(basis(), weights())
                     else -> error("Invalid pivot flag")
                 }
-                SymbolPartData(partId, pathIndex, contours, key, x, y, draw, layer, negative, geometry, pivot)
+                val offsetX = if (version < 5) null else when (reader.byte()) {
+                    0 -> null
+                    1 -> readOpticalScalar()
+                    else -> error("Invalid optical offset flag")
+                }
+                SymbolPartData(partId, pathIndex, contours, key, x, y, draw, layer, negative, geometry, pivot, offsetX)
             }
         }
+    }
+    val variants = Array(2) {
+        val paths = readPaths()
+        val motionPaths = if (version < 3) null else when (reader.byte()) {
+            0 -> null
+            1 -> readPaths()
+            else -> error("Invalid motion paths flag")
+        }
+        val parts = readParts(motionPaths ?: paths)
         val effects = if (version == 1) emptyMap() else buildMap {
             repeat(reader.count()) {
                 val name = reader.text(); require(name.isNotBlank() && !containsKey(name))
@@ -140,21 +170,36 @@ private fun decodeSymbolBytes(id: String, bytes: ByteArray, depth: Int = 0): Sym
             put(name, state)
         }
     }
+    val calendar = if (version < 5) null else when (reader.byte()) {
+        0 -> null
+        1 -> {
+            val key = reader.text(); require(key.isNotBlank())
+            val digits = readPaths(); require(digits.size == 10) { "A calendar requires ten shared digits" }
+            val spacing = readOpticalScalar(positive = true)
+            val shells = Array(2) { variant ->
+                readParts(variants[variant].paths).also { parts ->
+                    require(parts.isNotEmpty() && parts.first().layer != null) { "Calendar shell requires an isolated layer" }
+                }
+            }
+            CalendarSymbolData(key, digits, spacing, shells)
+        }
+        else -> error("Invalid calendar flag")
+    }
     require(reader.finished) { "Trailing compiled symbol data" }
-    return SymbolData(id, axes, variants, states)
+    return SymbolData(id, axes, variants, states, calendar)
 }
 
-private fun closedPathCoordinateCount(commands: ByteArray): Int {
+private fun pathCoordinateCount(commands: ByteArray, allowOpen: Boolean): Int {
     require(commands.isNotEmpty())
     var open = false
     val count = commands.sumOf { command -> when (command.toInt()) {
-        0 -> { require(!open); open = true; 2 }
+        0 -> { require(allowOpen || !open); open = true; 2 }
         1 -> { require(open); 2 }
         2 -> { require(open); 6 }
         3 -> { require(open); open = false; 0 }
         else -> error("Unknown path opcode")
     } }
-    require(!open) { "Compiled symbol contour is not closed" }
+    require(allowOpen || !open) { "Compiled symbol contour is not closed" }
     return count
 }
 

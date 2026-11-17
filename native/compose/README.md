@@ -34,8 +34,12 @@ motion.setState("off")
 Один символ разделяет sampled buffer между частями этого пути: координаты и
 коэффициенты не дублируются ни в экспорте, ни в подготовленных буферах.
 Числовой формат 4 добавляет ссылки на исходные точки для контуров и общей опоры,
-а также параметр эффекта в часах. Decoder читает форматы 1…4, включая ранний
+а также параметр эффекта в часах. Decoder читает форматы 1…5, включая ранний
 формат 3 с отдельными motion paths.
+Формат 5 добавляет оптический stroke с круглыми концами/соединениями, оптическое
+смещение части и календарный пакет: десять общих цифр, интервал и ссылки оболочки.
+Открытые пути разрешены только для stroke. Старые экспорты сохраняют прежние
+значения по умолчанию; новый отдельный Kotlin-экспорт требует decoder формата 5.
 
 Явный `to` продолжает текущую фазу либо исходный `rest` при первом вызове.
 Без `to` новый или завершённый жест проигрывается с начала, а прерванный
@@ -58,6 +62,32 @@ Icon(time, tint = labelColor, motion = clock)
 clock.effect("advance", to = 2f, durationMillis = 1000)
 clock.effect("advance") // Ещё один час от текущей фазы.
 ```
+
+`symbols.calendarNumber` принимает явный `kotlin.time.Instant` и именованную
+IANA-зону. Дата и зона передаются вместе; часы и обновление даты принадлежат
+приложению. Без даты сохраняется авторский рисунок. Число вычисляется один раз
+через `kotlinx-datetime:0.7.1`; преобразование не зависит от локали и системной зоны.
+Дни используют общие оптические контуры и интервал, без шрифта или SVG parser.
+
+```kotlin
+import kotlin.time.Instant
+import pics.lab.icons.symbols.calendarNumber
+
+val date = Instant.parse("2024-03-01T00:30:00Z")
+Icon(calendarNumber, labelColor, date = date, timeZone = "America/Los_Angeles") // 29
+val calendar = rememberIconMotion(calendarNumber, initialDate = date, initialTimeZone = "UTC")
+Icon(calendarNumber, labelColor, motion = calendar)
+// В обработчике изменения данных:
+calendar.setDate(nextDate, "Asia/Tokyo", durationMillis = 180)
+```
+
+`initialDate`/`initialTimeZone` читаются при создании controller; рекомпозиция
+не заменяет его дату, выбранный вариант или текущую позу. После создания дата
+меняется через `setDate`. Одновременные `motion` и `date`/`timeZone` у `Icon`
+отвергаются как два источника состояния. Смена даты сохраняет текущий state/variant,
+оболочку и видимые значения при прерывании. Static и motion рисует один Canvas-путь.
+Прозрачность общего слоя — максимум видимости его частей; покрытие каждой части
+делится на этот максимум, а tint применяется один раз после объединения/вычитания.
 
 Часы и controls принадлежат публичному
 `pics.lab:motion-compose:0.1.0` из Maven repository
@@ -104,6 +134,9 @@ node ../../scripts/export-native-symbols.mjs --preview --symbol plus-circle --pa
 которая получает Maven-артефакт. `--headless` использует `ImageComposeScene`,
 проверяет 52 контроллера часов, прерывание, обратный ход, продолжение и disposal;
 сохраняет `consumer/build/native-icons-clock-headless.png` и закрывает сцену.
+Календарная сцена дополнительно проверяет 72 пары static/motion, сохранение
+controller/date/selection при рекомпозиции, прерывание и disposal; изображение
+сохраняется в `consumer/build/native-icons-calendar-headless.png`.
 Он не открывает окно и не читает рабочий стол. Это обычный локальный путь проверки.
 Оконный `--smoke` сохраняет `consumer/build/native-icons-consumer.png` и запускается
 только в изолированной среде. На рабочем компьютере используются `desktopTest`
@@ -120,7 +153,14 @@ Consumer также проверяет прерывание Motion, состоя
 с полупрозрачным tint и проверяет единицы времени и промежуточные позы.
 900 положений дополнительно проверяют отсутствие повторного окрашивания
 пересечений стрелок с оболочкой; отдельный сценарий продолжает прерванный reset.
+Календарные проверки покрывают UTC/Los Angeles/Tokyo, midnight/leap/DST,
+отказ неизвестной или безымянной offset-зоне, дни 1/8/10/11/28/31 на девяти опорах,
+однократный tint, сохранение фона, порядок частей и чтение binary 1…4.
+110 независимых web-samples проверяют координаты, толщину и интервал цифр.
+Последний [протокол native calendar с изображением](evidence/calendar-20261117.md)
+содержит команды повторения и границы выполненной проверки.
 
 Основания: [Compose custom drawing](https://developer.android.com/develop/ui/compose/graphics/draw/overview),
 [Kotlin Base64](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.io.encoding/-base64/),
 [KMP publication](https://kotlinlang.org/docs/multiplatform/multiplatform-publish-lib-setup.html).
+Дата: [kotlinx-datetime 0.7.1](https://github.com/Kotlin/kotlinx-datetime/tree/v0.7.1).

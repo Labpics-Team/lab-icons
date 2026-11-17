@@ -7,7 +7,7 @@ const propertyName = id => { const name = typeName(id); return name[0].toLowerCa
 
 /** Numeric transport decoded once into Kotlin arrays; no SVG parser is shipped. */
 export function encodeNativeSymbol(symbol, anatomy) {
-  const chunks = [Buffer.from([76, 73, 67, 78, 4])];
+  const chunks = [Buffer.from([76, 73, 67, 78, 5])];
   const byte = value => chunks.push(Buffer.from([value]));
   const count = value => {
     if (!Number.isInteger(value) || value < 0 || value > 0x7fffffff) throw new RangeError('native symbol count is out of range');
@@ -18,6 +18,10 @@ export function encodeNativeSymbol(symbol, anatomy) {
     const buffer = Buffer.allocUnsafe(4); buffer.writeFloatLE(value); chunks.push(buffer);
   };
   const text = value => { const buffer = Buffer.from(value, 'utf8'); count(buffer.length); chunks.push(buffer); };
+  const opticalScalar = value => {
+    scalar(value.base); byte(value.terms.length);
+    for (const [term, delta] of value.terms) { byte(term); scalar(delta); }
+  };
   const encodePaths = paths => {
     count(paths.length);
     for (const path of paths) {
@@ -33,16 +37,10 @@ export function encodeNativeSymbol(symbol, anatomy) {
         byte(term); count(delta.length / 2);
         for (let index = 0; index < delta.length; index += 2) { count(delta[index]); scalar(delta[index + 1]); }
       }
+      byte(path.stroke ? 1 : 0); if (path.stroke) opticalScalar(path.stroke.width);
     }
   };
-  for (const axis of [symbol.data.axes.weight, symbol.data.axes.opsz]) axis.forEach(scalar);
-  for (const variant of ['outline', 'filled']) {
-    encodePaths(symbol.data.variants[variant].paths);
-    const semantic = symbol.semantics?.variants[variant];
-    // Keep the v3 slot: v4 readers also accept earlier separate motion paths.
-    // New exports reference contours in the sole static numeric path table.
-    byte(0);
-    const parts = semantic?.parts ?? anatomy.variants[variant].anatomy.parts;
+  const encodeParts = (parts, variant) => {
     count(parts.length);
     for (const part of parts) {
       text(part.id); count(part.pathIndex);
@@ -70,7 +68,18 @@ export function encodeNativeSymbol(symbol, anatomy) {
       }
       byte(part.pivot ? 1 : 0);
       if (part.pivot) { part.pivot.basis.forEach(count); part.pivot.weights.forEach(scalar); }
+      byte(part.offsetX ? 1 : 0); if (part.offsetX) opticalScalar(part.offsetX);
     }
+  };
+  for (const axis of [symbol.data.axes.weight, symbol.data.axes.opsz]) axis.forEach(scalar);
+  for (const variant of ['outline', 'filled']) {
+    encodePaths(symbol.data.variants[variant].paths);
+    const semantic = symbol.semantics?.variants[variant];
+    // Keep the v3 slot: v4 readers also accept earlier separate motion paths.
+    // New exports reference contours in the sole static numeric path table.
+    byte(0);
+    const parts = semantic?.parts ?? anatomy.variants[variant].anatomy.parts;
+    encodeParts(parts, variant);
     const effects = Object.entries(semantic?.effects ?? {}); count(effects.length);
     for (const [name, effect] of effects) {
       text(name); scalar(effect.duration); scalar(effect.rest); byte(effect.parameter === 'elapsed-hours' ? 1 : 0); count(effect.tracks.length);
@@ -86,6 +95,12 @@ export function encodeNativeSymbol(symbol, anatomy) {
   for (const [name, state] of states) {
     text(name); text(state.id); byte(state.data ? 1 : 0);
     if (state.data) { const bytes = encodeNativeSymbol(state); count(bytes.length); chunks.push(bytes); }
+  }
+  const calendar = symbol.semantics?.calendar;
+  byte(calendar ? 1 : 0);
+  if (calendar) {
+    text(calendar.key); encodePaths(calendar.digits); opticalScalar(calendar.spacing);
+    for (const variant of ['outline', 'filled']) encodeParts(calendar.shells[variant], variant);
   }
   return Buffer.concat(chunks);
 }
@@ -105,7 +120,7 @@ export function nativeSymbolSource(symbol, anatomy, { packageName = 'pics.lab.ic
 }
 
 /** Cross-language fixtures follow the web sampler, not the native implementation. */
-export function nativeSymbolTests(corpus, { opticalPosition, sampleOpticalPath }) {
+export function nativeSymbolTests(corpus, { opticalPosition, sampleOpticalPath, sampleOpticalScalar }) {
   const calls = [];
   const double = value => Number.isInteger(value) ? `${value}.0` : String(value);
   for (const id of ['plus-circle', 'cog', 'earth', 'star', 'download', 'layers']) {
@@ -119,5 +134,13 @@ export function nativeSymbolTests(corpus, { opticalPosition, sampleOpticalPath }
       }
     }
   }
-  return `// Generated independently from the web optical sampler. Do not edit.\npackage pics.lab.icons\n\nimport pics.lab.icons.symbols.*\nimport kotlin.math.abs\nimport kotlin.test.*\n\nclass NativeCorpusTest {\n    @Test fun wholeCorpusDecodesAndPreservesCenter() {\n        val corpus = listOf(${Object.keys(corpus.symbols).map(id => `\`${propertyName(id)}\``).join(',')})\n        assertEquals(${Object.keys(corpus.symbols).length}, corpus.size)\n        for (symbol in corpus) for (variant in symbol.variants) for (path in variant.paths) {\n            val buffer = FloatArray(path.coordinates.size)\n            path.sample(1, 1f, 0, 1f, buffer)\n            path.sample(1, 0f, 1, 0f, buffer)\n            assertContentEquals(path.coordinates, buffer, symbol.id)\n        }\n        assertSame(cog, cog)\n    }\n\n    @Test fun floatSamplingMatchesWebGeometry() {\n${calls.join('\n')}\n    }\n}\n\nprivate fun assertWebSample(symbol: SymbolData, variant: IconVariant, weight: Float, opsz: Float, pathIndex: Int, indices: IntArray, expected: DoubleArray) {\n    val path = symbol.variants[variant.ordinal].paths[pathIndex]\n    val target = FloatArray(path.coordinates.size)\n    val weightAxis = symbol.axes.weight\n    val opticalAxis = symbol.axes.opsz\n    path.sample(if (weight < weightAxis.default) 0 else 1, weightAxis.position(weight), if (opsz < opticalAxis.default) 0 else 1, opticalAxis.position(opsz), target)\n    for (index in indices.indices) {\n        // At 48 logical units this is less than one 1/1024-pixel coordinate step.\n        assertTrue(abs(target[indices[index]].toDouble() - expected[index]) < 1.0 / 2048.0, "Web/native geometry differs: \${symbol.id}/$variant/$weight/$opsz/$pathIndex/\${indices[index]}")\n    }\n}\n`;
+  const calendarCalls = [];
+  const calendar = corpus.symbols['calendar-number'].semantics.calendar;
+  const calendarPositions = [300, 400, 600].flatMap(weight => [16, 24, 48].map(opsz => [weight, opsz])).concat([[350, 20], [450, 32]]);
+  for (const [weight, opsz] of calendarPositions) for (const [digit, path] of calendar.digits.entries()) {
+    const at = opticalPosition(corpus.axes, weight, opsz), values = sampleOpticalPath(path, at);
+    const indices = Array.from({ length: Math.min(8, values.length) }, (_, i) => Math.floor(i * (values.length - 1) / (Math.min(8, values.length) - 1)));
+    calendarCalls.push(`        assertCalendarSample(calendarNumber, ${weight}f, ${opsz}f, ${digit}, ${double(sampleOpticalScalar(calendar.spacing, at))}, ${double(sampleOpticalScalar(path.stroke.width, at))}, intArrayOf(${indices.join(',')}), doubleArrayOf(${indices.map(i => double(values[i])).join(',')}))`);
+  }
+  return `// Generated independently from the web optical sampler. Do not edit.\npackage pics.lab.icons\n\nimport pics.lab.icons.symbols.*\nimport kotlin.math.abs\nimport kotlin.test.*\n\nclass NativeCorpusTest {\n    @Test fun wholeCorpusDecodesAndPreservesCenter() {\n        val corpus = listOf(${Object.keys(corpus.symbols).map(id => `\`${propertyName(id)}\``).join(',')})\n        assertEquals(${Object.keys(corpus.symbols).length}, corpus.size)\n        for (symbol in corpus) for (variant in symbol.variants) for (path in variant.paths) {\n            val buffer = FloatArray(path.coordinates.size)\n            path.sample(1, 1f, 0, 1f, buffer)\n            path.sample(1, 0f, 1, 0f, buffer)\n            assertContentEquals(path.coordinates, buffer, symbol.id)\n        }\n        assertSame(cog, cog)\n    }\n\n    @Test fun floatSamplingMatchesWebGeometry() {\n${calls.join('\n')}\n    }\n\n    @Test fun calendarCoordinatesStrokeAndSpacingMatchWeb() {\n${calendarCalls.join('\n')}\n    }\n}\n\nprivate fun assertWebSample(symbol: SymbolData, variant: IconVariant, weight: Float, opsz: Float, pathIndex: Int, indices: IntArray, expected: DoubleArray) {\n    val path = symbol.variants[variant.ordinal].paths[pathIndex]\n    val target = FloatArray(path.coordinates.size)\n    val weightAxis = symbol.axes.weight\n    val opticalAxis = symbol.axes.opsz\n    path.sample(if (weight < weightAxis.default) 0 else 1, weightAxis.position(weight), if (opsz < opticalAxis.default) 0 else 1, opticalAxis.position(opsz), target)\n    for (index in indices.indices) {\n        // At 48 logical units this is less than one 1/1024-pixel coordinate step.\n        assertTrue(abs(target[indices[index]].toDouble() - expected[index]) < 1.0 / 2048.0, "Web/native geometry differs: \${symbol.id}/$variant/$weight/$opsz/$pathIndex/\${indices[index]}")\n    }\n}\n\nprivate fun assertCalendarSample(symbol: SymbolData, weight: Float, optical: Float, digit: Int, spacing: Double, width: Double, indices: IntArray, values: DoubleArray) {\n    val calendar = symbol.calendar!!\n    val path = calendar.digits[digit]\n    val ws = if (weight < symbol.axes.weight.default) 0 else 1\n    val os = if (optical < symbol.axes.opsz.default) 0 else 1\n    val wp = symbol.axes.weight.position(weight)\n    val op = symbol.axes.opsz.position(optical)\n    assertEquals(spacing, calendar.spacing.sample(ws, wp, os, op).toDouble(), 0.00001)\n    assertEquals(width, path.strokeWidth!!.sample(ws, wp, os, op).toDouble(), 0.00001)\n    val target = FloatArray(path.coordinates.size)\n    path.sample(ws, wp, os, op, target)\n    for (i in indices.indices) assertEquals(values[i], target[indices[i]].toDouble(), 1.0 / 2048.0)\n}\n`;
 }

@@ -14,12 +14,16 @@ import pics.lab.motion.MotionPlayback
 import pics.lab.motion.MotionResult
 import pics.lab.motion.MotionTransition
 import pics.lab.motion.MotionValue
+import kotlin.time.Instant
 
-/** One controller per mounted icon. It creates no animation job until a state/effect is requested. */
+/** One controller per mounted icon. Initial date is read once; later edits use setDate. */
 @Composable
-public fun rememberIconMotion(symbol: SymbolData, variant: IconVariant = IconVariant.Outline): IconMotion {
+public fun rememberIconMotion(symbol: SymbolData, variant: IconVariant = IconVariant.Outline,
+    initialDate: Instant? = null, initialTimeZone: String? = null): IconMotion {
     val scope = rememberCoroutineScope()
-    val motion = remember(symbol, variant) { IconMotion(symbol, variant, scope) }
+    val motion = remember(symbol, variant) {
+        IconMotion(symbol, variant, scope, resolveCalendarRequest(symbol, initialDate, initialTimeZone))
+    }
     DisposableEffect(motion) { onDispose { motion.dispose() } }
     return motion
 }
@@ -28,22 +32,25 @@ public class IconMotion internal constructor(
     private val base: SymbolData,
     private val initialVariant: IconVariant,
     private val scope: CoroutineScope,
+    initialDay: Int? = null,
 ) {
     private val controller = MotionController(scope)
     internal val paints = mutableStateListOf<IconPaint>()
     private val stored = mutableMapOf<String, IconPaint>()
-    private var current = base
+    private var currentSource = base
+    private var day = initialDay
+    private var current = resolveCalendarSymbol(base, initialDay)
     private var variant = initialVariant
     private var disposed = false
     private var epoch = 0
     private var cleanup: Job? = null
     private var stateRevision = 0
     private val phases = mutableMapOf<SymbolEffectData, IconEffectPhase>()
-    private var desired = base.variants[initialVariant.ordinal].parts.map { it.key }.toSet()
+    private var desired = current.variants[initialVariant.ordinal].parts.map { it.key }.toSet()
     public var reducedMotion: Boolean
         get() = controller.reducedMotion
         set(value) { controller.reducedMotion = value }
-    init { addPaints(base, variant, 1f) }
+    init { addPaints(current, variant, 1f) }
 
     private fun addPaints(symbol: SymbolData, variant: IconVariant, alpha: Float) {
         for (part in symbol.variants[variant.ordinal].parts) {
@@ -62,13 +69,30 @@ public class IconMotion internal constructor(
             "selected", "unselected" -> base
             else -> { require(base.states.containsKey(state)) { "Unknown icon state: $state" }; base.states[state] ?: base }
         }
+        val resolved = resolveCalendarSymbol(target, day)
+        currentSource = target
+        return transitionTo(resolved, selectedVariant, durationMillis, resetPose = true)
+    }
+
+    /** Change only calendar content. Variant/state and the shared shell keep their current pose. */
+    public fun setDate(date: Instant, timeZone: String, durationMillis: Int = 180): MotionPlayback {
+        check(!disposed) { "Icon is disposed" }; require(durationMillis >= 0)
+        val nextDay = resolveCalendarRequest(base, date, timeZone)!!
+        if (nextDay == day) return controller.animate { }
+        val target = resolveCalendarSymbol(currentSource, nextDay)
+        day = nextDay
+        return transitionTo(target, variant, durationMillis, resetPose = false)
+    }
+
+    private fun transitionTo(target: SymbolData, selectedVariant: IconVariant, durationMillis: Int,
+        resetPose: Boolean): MotionPlayback {
         desired = target.variants[selectedVariant.ordinal].parts.map { it.key }.toSet()
         addPaints(target, selectedVariant, 0f)
         val playback = controller.animate {
             for (paint in paints) {
                 val transition = MotionTransition.Tween(durationMillis, MotionEase.Linear)
                 to(paint.alpha, if (paint.part.key in desired) 1f else 0f, transition)
-                if (paint.part.key in desired) {
+                if (resetPose && paint.part.key in desired) {
                     to(paint.opacity, 1f, transition); to(paint.x, 0f, transition); to(paint.y, 0f, transition); to(paint.draw, 1f, transition)
                     to(paint.rotation, 0f, transition)
                 }
@@ -146,10 +170,16 @@ public class IconMotion internal constructor(
 private class IconEffectPhase(val value: MotionValue, var revision: Int)
 private class IconEffectBinding(val value: MotionValue, val start: Float, val targets: List<Float>, val times: List<Float>)
 
-internal class IconPaint(val symbol: SymbolData, val variant: IconVariant, val part: SymbolPartData,
+internal class IconPaint(override val symbol: SymbolData, override val variant: IconVariant, override val part: SymbolPartData,
     val alpha: MotionValue, val opacity: MotionValue, val x: MotionValue, val y: MotionValue,
-    val rotation: MotionValue, val draw: MotionValue) {
-    val pathData: SymbolPathData = symbol.variants[variant.ordinal].let { (it.motionPaths ?: it.paths)[part.pathIndex] }
+    val rotation: MotionValue, val draw: MotionValue) : IconPaintState {
+    override val pathData: SymbolPathData = symbol.variants[variant.ordinal].let { (it.motionPaths ?: it.paths)[part.pathIndex] }
+    override val alphaValue: Float get() = alpha.value
+    override val opacityValue: Float get() = opacity.value
+    override val xValue: Float get() = x.value
+    override val yValue: Float get() = y.value
+    override val rotationValue: Float get() = rotation.value
+    override val drawValue: Float get() = draw.value
     fun channel(property: Int): MotionValue = when (property) { 0 -> opacity; 1 -> x; 2 -> y; 3 -> rotation; 4 -> draw; else -> error("Unknown icon channel") }
 }
 

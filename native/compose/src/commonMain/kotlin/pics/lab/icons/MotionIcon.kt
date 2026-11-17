@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.PathMeasure
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.drawscope.rotate
@@ -38,6 +39,13 @@ internal fun MotionIcon(motion: IconMotion, tint: Color, modifier: Modifier, siz
     val prepared = motion.paints.map { paint -> remember(paint) {
         PreparedPaint(paint, sources.getOrPut(paint.pathData) { PreparedPathSource(paint.pathData) })
     } }
+    PaintedIcon(prepared, tint, modifier, size, weight, opsz, description)
+}
+
+/** Both static and animated symbols use the same coverage, stroke and tint pipeline. */
+@Composable
+internal fun PaintedIcon(prepared: List<PreparedPaint>, tint: Color, modifier: Modifier, size: Dp,
+    weight: Float, opsz: Float?, description: String?) {
     val layers = remember(prepared) { prepareLayers(prepared) }
     val currentTint by rememberUpdatedState(tint)
     val accessibility = if (description == null) Modifier else Modifier.semantics {
@@ -76,22 +84,25 @@ internal fun prepareLayers(prepared: List<PreparedPaint>): List<PreparedIconLaye
 
 internal fun DrawScope.drawIconLayers(layers: List<PreparedIconLayer>, tint: Color) {
     for (layer in layers) {
+        val groupAlpha = if (layer.isolated) layer.paints.maxOf { it.paint.alphaValue }.coerceIn(0f, 1f) else 1f
+        if (groupAlpha <= 0f) continue
         if (layer.isolated) {
-            layer.composite!!.alpha = layer.paints.first().paint.alpha.value.coerceIn(0f, 1f)
+            layer.composite!!.alpha = groupAlpha
             drawContext.canvas.saveLayer(layer.bounds, layer.composite)
         }
         try {
             for (entry in layer.paints) {
                 val paint = entry.paint
-                val alpha = ((if (layer.isolated) 1f else paint.alpha.value) * paint.opacity.value).coerceIn(0f, 1f)
-                val progress = paint.draw.value.coerceIn(0f, 1f)
+                val alpha = (paint.alphaValue / groupAlpha * paint.opacityValue).coerceIn(0f, 1f)
+                val progress = paint.drawValue.coerceIn(0f, 1f)
                 if (alpha <= 0f || progress <= 0f) continue
                 val path = entry.geometry.path
                 val mode = if (paint.part.negative) BlendMode.DstOut else BlendMode.SrcOver
                 val color = if (paint.part.negative) Color.Black else if (layer.isolated) Color.White else tint
-                translate(paint.x.value, paint.y.value) {
-                    rotate(paint.rotation.value, entry.anchor) {
-                        if (progress >= 1f || entry.measure == null) drawPath(path, color, alpha = alpha, blendMode = mode)
+                translate(paint.xValue + entry.offsetX, paint.yValue) {
+                    rotate(paint.rotationValue, entry.anchor) {
+                        if (progress >= 1f || entry.measure == null) drawPath(path, color, alpha = alpha,
+                            style = entry.pathStroke ?: Fill, blendMode = mode)
                         else {
                             entry.revealed.reset()
                             entry.measure.getSegment(0f, entry.measure.length * progress, entry.revealed)
@@ -105,18 +116,61 @@ internal fun DrawScope.drawIconLayers(layers: List<PreparedIconLayer>, tint: Col
     }
 }
 
-internal class PreparedPaint(val paint: IconPaint, private val source: PreparedPathSource = PreparedPathSource(paint.pathData)) {
+internal interface IconPaintState {
+    val symbol: SymbolData
+    val variant: IconVariant
+    val part: SymbolPartData
+    val pathData: SymbolPathData
+    val alphaValue: Float
+    val opacityValue: Float
+    val xValue: Float
+    val yValue: Float
+    val rotationValue: Float
+    val drawValue: Float
+}
+
+internal class StaticIconPaint(override val symbol: SymbolData, override val variant: IconVariant,
+    override val part: SymbolPartData) : IconPaintState {
+    override val pathData = symbol.variants[variant.ordinal].let { (it.motionPaths ?: it.paths)[part.pathIndex] }
+    override val alphaValue = 1f
+    override val opacityValue = 1f
+    override val xValue = 0f
+    override val yValue = 0f
+    override val rotationValue = 0f
+    override val drawValue = 1f
+}
+
+internal fun prepareStaticSymbol(symbol: SymbolData, variant: IconVariant): List<PreparedPaint> {
+    val sources = mutableMapOf<SymbolPathData, PreparedPathSource>()
+    return symbol.variants[variant.ordinal].parts.map { part ->
+        val paint = StaticIconPaint(symbol, variant, part)
+        PreparedPaint(paint, sources.getOrPut(paint.pathData) { PreparedPathSource(paint.pathData) })
+    }
+}
+
+internal class PreparedPaint(val paint: IconPaintState, private val source: PreparedPathSource = PreparedPathSource(paint.pathData)) {
     val geometry = PreparedPath(paint.pathData, paint.part.contourIndices, source, paint.part.geometry)
     var anchor = Offset(paint.part.anchorX, paint.part.anchorY)
         private set
     val stroke = paint.part.draw?.let { Stroke(it.width, cap = StrokeCap.Round, join = StrokeJoin.Round) }
+    var pathStroke: Stroke? = null
+        private set
+    var offsetX = 0f
+        private set
     private var previousWeight = Float.NaN
     private var previousOptical = Float.NaN
     fun update(weight: Float, optical: Float) {
         if (weight == previousWeight && optical == previousOptical) return
         val axes = paint.symbol.axes
-        geometry.update(if (weight < axes.weight.default) 0 else 1, axes.weight.position(weight),
-            if (optical < axes.opsz.default) 0 else 1, axes.opsz.position(optical))
+        val weightSide = if (weight < axes.weight.default) 0 else 1
+        val opticalSide = if (optical < axes.opsz.default) 0 else 1
+        val weightAt = axes.weight.position(weight)
+        val opticalAt = axes.opsz.position(optical)
+        geometry.update(weightSide, weightAt, opticalSide, opticalAt)
+        offsetX = paint.part.offsetX?.sample(weightSide, weightAt, opticalSide, opticalAt) ?: 0f
+        paint.pathData.strokeWidth?.let {
+            pathStroke = Stroke(it.sample(weightSide, weightAt, opticalSide, opticalAt), cap = StrokeCap.Round, join = StrokeJoin.Round)
+        }
         paint.part.pivot?.let { anchor = Offset(it.sample(source.points, 0), it.sample(source.points, 1)) }
         previousWeight = weight; previousOptical = optical
     }

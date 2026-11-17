@@ -1,25 +1,14 @@
 package pics.lab.icons
 
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathFillType
-import androidx.compose.ui.graphics.drawscope.scale
-import androidx.compose.ui.graphics.drawscope.translate
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.role
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import kotlin.math.min
+import kotlin.time.Instant
 
 /** size is already scaled logical size; null opsz follows the rendered logical size. */
 @Composable
@@ -33,34 +22,23 @@ public fun Icon(
     opsz: Float? = null,
     contentDescription: String? = null,
     motion: IconMotion? = null,
+    date: Instant? = null,
+    timeZone: String? = null,
 ) {
     require(size.value.isFinite() && size.value > 0) { "Icon size must be positive and finite" }
     symbol.axes.weight.position(weight)
     opsz?.let { symbol.axes.opsz.position(it) }
     if (motion != null) {
+        require(date == null && timeZone == null) { "A motion controller owns the calendar date; use IconMotion.setDate" }
         MotionIcon(motion, tint, modifier, size, weight, opsz, contentDescription)
         return
     }
-    val prepared = remember(symbol, variant) { PreparedSymbol(symbol, variant) }
-    val currentTint by rememberUpdatedState(tint)
-    val accessibility = if (contentDescription == null) Modifier else Modifier.semantics {
-        this.contentDescription = contentDescription
-        role = Role.Image
+    val day = remember(symbol, date, timeZone) { resolveCalendarRequest(symbol, date, timeZone) }
+    val selected = remember(symbol, day) { resolveCalendarSymbol(symbol, day) }
+    val prepared = remember(selected, variant) {
+        prepareStaticSymbol(selected, variant)
     }
-    Spacer(modifier.size(size).then(accessibility).drawWithCache {
-        val logicalSize = min(this.size.width, this.size.height) / density
-        val optical = opsz ?: logicalSize.coerceIn(symbol.axes.opsz.minimum, symbol.axes.opsz.maximum)
-        prepared.update(weight, optical)
-        onDrawBehind {
-            val edge = min(this.size.width, this.size.height)
-            val factor = edge / 24f
-            translate((this.size.width - edge) / 2, (this.size.height - edge) / 2) {
-                scale(factor, factor, pivot = androidx.compose.ui.geometry.Offset.Zero) {
-                    for (path in prepared.paths) drawPath(path, currentTint)
-                }
-            }
-        }
-    })
+    PaintedIcon(prepared, tint, modifier, size, weight, opsz, contentDescription)
 }
 
 /** One instance per Icon; changing an axis reuses all paths and coordinate buffers. */

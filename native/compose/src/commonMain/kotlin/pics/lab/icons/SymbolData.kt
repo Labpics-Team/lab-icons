@@ -24,14 +24,19 @@ public class SymbolData internal constructor(
     public val axes: IconAxes,
     internal val variants: Array<SymbolVariantData>,
     internal val states: Map<String, SymbolData?> = emptyMap(),
+    internal val calendar: CalendarSymbolData? = null,
 )
+
+internal class CalendarSymbolData(val key: String, val digits: Array<SymbolPathData>,
+    val spacing: OpticalScalar, val shells: Array<Array<SymbolPartData>>)
 
 internal class SymbolVariantData(val paths: Array<SymbolPathData>, val parts: Array<SymbolPartData>,
     val effects: Map<String, SymbolEffectData> = emptyMap(), val motionPaths: Array<SymbolPathData>? = null)
 internal class SymbolPartData(val id: String, val pathIndex: Int, val contourIndices: IntArray,
     val key: String = id, val anchorX: Float = 12f, val anchorY: Float = 12f, val draw: SymbolDrawData? = null,
     val layer: String? = null, val negative: Boolean = false,
-    val geometry: SymbolPathViewData? = null, val pivot: SymbolPointProjection? = null)
+    val geometry: SymbolPathViewData? = null, val pivot: SymbolPointProjection? = null,
+    val offsetX: OpticalScalar? = null)
 internal class SymbolPointReference(val index: Int, val weights: FloatArray?)
 internal class SymbolPointProjection(val basis: IntArray, val weights: FloatArray) {
     fun sample(source: FloatArray, axis: Int): Float = basis.indices.sumOf { (source[basis[it] * 2 + axis] * weights[it]).toDouble() }.toFloat()
@@ -49,18 +54,29 @@ internal class SymbolDrawData(val commands: ByteArray, val coordinates: FloatArr
 internal class SymbolEffectData(val duration: Int, val rest: Float, val tracks: Array<SymbolTrackData>, val elapsedHours: Boolean = false)
 internal class SymbolTrackData(val partIndex: Int, val property: Int, val times: FloatArray, val values: FloatArray)
 internal class SymbolDelta(val term: Int, val indices: IntArray, val values: FloatArray)
-internal class SymbolPathData(val commands: ByteArray, val coordinates: FloatArray, val evenOdd: Boolean, val terms: Array<SymbolDelta>) {
+internal class OpticalScalar(val base: Float, val terms: IntArray, val deltas: FloatArray) {
+    fun sample(weightSide: Int, weight: Float, opticalSide: Int, optical: Float): Float {
+        var value = base
+        for (index in terms.indices) value += deltas[index] * opticalTermFactor(terms[index], weightSide, weight, opticalSide, optical)
+        return value
+    }
+    fun times(factor: Float) = OpticalScalar(base * factor, terms, FloatArray(deltas.size) { deltas[it] * factor })
+}
+
+private fun opticalTermFactor(term: Int, weightSide: Int, weight: Float, opticalSide: Int, optical: Float): Float = when {
+    term < 2 -> if (term == weightSide) weight else 0f
+    term < 4 -> if (term == 2 + opticalSide) optical else 0f
+    term == 4 + weightSide * 2 + opticalSide -> weight * optical
+    else -> 0f
+}
+
+internal class SymbolPathData(val commands: ByteArray, val coordinates: FloatArray, val evenOdd: Boolean,
+    val terms: Array<SymbolDelta>, val strokeWidth: OpticalScalar? = null) {
     fun sample(weightSide: Int, weight: Float, opticalSide: Int, optical: Float, target: FloatArray) {
         require(target.size == coordinates.size)
         coordinates.copyInto(target)
-        val cross = 4 + weightSide * 2 + opticalSide
         for (delta in terms) {
-            val factor = when {
-                delta.term < 2 -> if (delta.term == weightSide) weight else 0f
-                delta.term < 4 -> if (delta.term == 2 + opticalSide) optical else 0f
-                delta.term == cross -> weight * optical
-                else -> 0f
-            }
+            val factor = opticalTermFactor(delta.term, weightSide, weight, opticalSide, optical)
             if (factor == 0f) continue
             for (index in delta.indices.indices) target[delta.indices[index]] += delta.values[index] * factor
         }

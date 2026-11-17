@@ -51,6 +51,7 @@ kotlin {
                 api("org.jetbrains.compose.ui:ui:1.12.2")
                 api("org.jetbrains.compose.runtime:runtime:1.12.2")
                 api("pics.lab:motion-compose:0.1.0")
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.7.1")
             }
         }
         commonTest {
@@ -82,4 +83,8 @@ publishing {
             scm { url = "https://github.com/Labpics-Team/lab-icons" }
         }
     }
+}
+
+tasks.withType<org.gradle.api.tasks.testing.Test>().configureEach {
+    systemProperty("java.awt.headless", "true")
 }
