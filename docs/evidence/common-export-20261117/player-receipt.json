@@ -1,0 +1,2342 @@
+[
+  {
+    "symbol": "calendar-number",
+    "variant": "outline",
+    "weight": 300,
+    "opsz": 16,
+    "drawProgress": 1,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "calendar-number",
+    "variant": "outline",
+    "weight": 300,
+    "opsz": 24,
+    "drawProgress": 1,
+    "mean": 0.0026041666666666665,
+    "max": 12,
+    "alpha": 94
+  },
+  {
+    "symbol": "calendar-number",
+    "variant": "outline",
+    "weight": 300,
+    "opsz": 48,
+    "drawProgress": 1,
+    "mean": 0.001193576388888889,
+    "max": 11,
+    "alpha": 94
+  },
+  {
+    "symbol": "calendar-number",
+    "variant": "outline",
+    "weight": 400,
+    "opsz": 16,
+    "drawProgress": 1,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "calendar-number",
+    "variant": "outline",
+    "weight": 400,
+    "opsz": 24,
+    "drawProgress": 1,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "calendar-number",
+    "variant": "outline",
+    "weight": 400,
+    "opsz": 48,
+    "drawProgress": 1,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "calendar-number",
+    "variant": "outline",
+    "weight": 600,
+    "opsz": 16,
+    "drawProgress": 1,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "calendar-number",
+    "variant": "outline",
+    "weight": 600,
+    "opsz": 24,
+    "drawProgress": 1,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "calendar-number",
+    "variant": "outline",
+    "weight": 600,
+    "opsz": 48,
+    "drawProgress": 1,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "calendar-number",
+    "variant": "filled",
+    "weight": 300,
+    "opsz": 16,
+    "drawProgress": 1,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "calendar-number",
+    "variant": "filled",
+    "weight": 300,
+    "opsz": 24,
+    "drawProgress": 1,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "calendar-number",
+    "variant": "filled",
+    "weight": 300,
+    "opsz": 48,
+    "drawProgress": 1,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "calendar-number",
+    "variant": "filled",
+    "weight": 400,
+    "opsz": 16,
+    "drawProgress": 1,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "calendar-number",
+    "variant": "filled",
+    "weight": 400,
+    "opsz": 24,
+    "drawProgress": 1,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "calendar-number",
+    "variant": "filled",
+    "weight": 400,
+    "opsz": 48,
+    "drawProgress": 1,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "calendar-number",
+    "variant": "filled",
+    "weight": 600,
+    "opsz": 16,
+    "drawProgress": 1,
+    "mean": 0.001193576388888889,
+    "max": 11,
+    "alpha": 94
+  },
+  {
+    "symbol": "calendar-number",
+    "variant": "filled",
+    "weight": 600,
+    "opsz": 24,
+    "drawProgress": 1,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "calendar-number",
+    "variant": "filled",
+    "weight": 600,
+    "opsz": 48,
+    "drawProgress": 1,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "weight": 300,
+    "opsz": 16,
+    "drawProgress": 0,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "weight": 300,
+    "opsz": 16,
+    "drawProgress": 0.125,
+    "mean": 0.001193576388888889,
+    "max": 11,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "weight": 300,
+    "opsz": 16,
+    "drawProgress": 0.25,
+    "mean": 0.0013020833333333333,
+    "max": 12,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "weight": 300,
+    "opsz": 16,
+    "drawProgress": 0.5,
+    "mean": 0.0003255208333333333,
+    "max": 3,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "weight": 300,
+    "opsz": 16,
+    "drawProgress": 0.75,
+    "mean": 0.0013020833333333333,
+    "max": 12,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "weight": 300,
+    "opsz": 16,
+    "drawProgress": 1,
+    "mean": 0.0013020833333333333,
+    "max": 12,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "weight": 300,
+    "opsz": 24,
+    "drawProgress": 0,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "weight": 300,
+    "opsz": 24,
+    "drawProgress": 0.125,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "weight": 300,
+    "opsz": 24,
+    "drawProgress": 0.25,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "weight": 300,
+    "opsz": 24,
+    "drawProgress": 0.5,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "weight": 300,
+    "opsz": 24,
+    "drawProgress": 0.75,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "weight": 300,
+    "opsz": 24,
+    "drawProgress": 1,
+    "mean": 0.001193576388888889,
+    "max": 11,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "weight": 300,
+    "opsz": 48,
+    "drawProgress": 0,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "weight": 300,
+    "opsz": 48,
+    "drawProgress": 0.125,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "weight": 300,
+    "opsz": 48,
+    "drawProgress": 0.25,
+    "mean": 0.001193576388888889,
+    "max": 11,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "weight": 300,
+    "opsz": 48,
+    "drawProgress": 0.5,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "weight": 300,
+    "opsz": 48,
+    "drawProgress": 0.75,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "weight": 300,
+    "opsz": 48,
+    "drawProgress": 1,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "weight": 400,
+    "opsz": 16,
+    "drawProgress": 0,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "weight": 400,
+    "opsz": 16,
+    "drawProgress": 0.125,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "weight": 400,
+    "opsz": 16,
+    "drawProgress": 0.25,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "weight": 400,
+    "opsz": 16,
+    "drawProgress": 0.5,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "weight": 400,
+    "opsz": 16,
+    "drawProgress": 0.75,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "weight": 400,
+    "opsz": 16,
+    "drawProgress": 1,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "weight": 400,
+    "opsz": 24,
+    "drawProgress": 0,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "weight": 400,
+    "opsz": 24,
+    "drawProgress": 0.125,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "weight": 400,
+    "opsz": 24,
+    "drawProgress": 0.25,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "weight": 400,
+    "opsz": 24,
+    "drawProgress": 0.5,
+    "mean": 0.0026041666666666665,
+    "max": 12,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "weight": 400,
+    "opsz": 24,
+    "drawProgress": 0.75,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "weight": 400,
+    "opsz": 24,
+    "drawProgress": 1,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "weight": 400,
+    "opsz": 48,
+    "drawProgress": 0,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "weight": 400,
+    "opsz": 48,
+    "drawProgress": 0.125,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "weight": 400,
+    "opsz": 48,
+    "drawProgress": 0.25,
+    "mean": 0.0013020833333333333,
+    "max": 12,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "weight": 400,
+    "opsz": 48,
+    "drawProgress": 0.5,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "weight": 400,
+    "opsz": 48,
+    "drawProgress": 0.75,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "weight": 400,
+    "opsz": 48,
+    "drawProgress": 1,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "weight": 600,
+    "opsz": 16,
+    "drawProgress": 0,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "weight": 600,
+    "opsz": 16,
+    "drawProgress": 0.125,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "weight": 600,
+    "opsz": 16,
+    "drawProgress": 0.25,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "weight": 600,
+    "opsz": 16,
+    "drawProgress": 0.5,
+    "mean": 0.0006510416666666666,
+    "max": 6,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "weight": 600,
+    "opsz": 16,
+    "drawProgress": 0.75,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "weight": 600,
+    "opsz": 16,
+    "drawProgress": 1,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "weight": 600,
+    "opsz": 24,
+    "drawProgress": 0,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "weight": 600,
+    "opsz": 24,
+    "drawProgress": 0.125,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "weight": 600,
+    "opsz": 24,
+    "drawProgress": 0.25,
+    "mean": 0.0010850694444444445,
+    "max": 10,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "weight": 600,
+    "opsz": 24,
+    "drawProgress": 0.5,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "weight": 600,
+    "opsz": 24,
+    "drawProgress": 0.75,
+    "mean": 0.005859375,
+    "max": 12,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "weight": 600,
+    "opsz": 24,
+    "drawProgress": 1,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "weight": 600,
+    "opsz": 48,
+    "drawProgress": 0,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "weight": 600,
+    "opsz": 48,
+    "drawProgress": 0.125,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "weight": 600,
+    "opsz": 48,
+    "drawProgress": 0.25,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "weight": 600,
+    "opsz": 48,
+    "drawProgress": 0.5,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "weight": 600,
+    "opsz": 48,
+    "drawProgress": 0.75,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "weight": 600,
+    "opsz": 48,
+    "drawProgress": 1,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "weight": 300,
+    "opsz": 16,
+    "drawProgress": 0,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "weight": 300,
+    "opsz": 16,
+    "drawProgress": 0.125,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "weight": 300,
+    "opsz": 16,
+    "drawProgress": 0.25,
+    "mean": 0.0013020833333333333,
+    "max": 12,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "weight": 300,
+    "opsz": 16,
+    "drawProgress": 0.5,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "weight": 300,
+    "opsz": 16,
+    "drawProgress": 0.75,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "weight": 300,
+    "opsz": 16,
+    "drawProgress": 1,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "weight": 300,
+    "opsz": 24,
+    "drawProgress": 0,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "weight": 300,
+    "opsz": 24,
+    "drawProgress": 0.125,
+    "mean": 0.0008680555555555555,
+    "max": 8,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "weight": 300,
+    "opsz": 24,
+    "drawProgress": 0.25,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "weight": 300,
+    "opsz": 24,
+    "drawProgress": 0.5,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "weight": 300,
+    "opsz": 24,
+    "drawProgress": 0.75,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "weight": 300,
+    "opsz": 24,
+    "drawProgress": 1,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "weight": 300,
+    "opsz": 48,
+    "drawProgress": 0,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "weight": 300,
+    "opsz": 48,
+    "drawProgress": 0.125,
+    "mean": 0.0005425347222222222,
+    "max": 5,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "weight": 300,
+    "opsz": 48,
+    "drawProgress": 0.25,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "weight": 300,
+    "opsz": 48,
+    "drawProgress": 0.5,
+    "mean": 0.0013020833333333333,
+    "max": 12,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "weight": 300,
+    "opsz": 48,
+    "drawProgress": 0.75,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "weight": 300,
+    "opsz": 48,
+    "drawProgress": 1,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "weight": 400,
+    "opsz": 16,
+    "drawProgress": 0,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "weight": 400,
+    "opsz": 16,
+    "drawProgress": 0.125,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "weight": 400,
+    "opsz": 16,
+    "drawProgress": 0.25,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "weight": 400,
+    "opsz": 16,
+    "drawProgress": 0.5,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "weight": 400,
+    "opsz": 16,
+    "drawProgress": 0.75,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "weight": 400,
+    "opsz": 16,
+    "drawProgress": 1,
+    "mean": 0.001193576388888889,
+    "max": 11,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "weight": 400,
+    "opsz": 24,
+    "drawProgress": 0,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "weight": 400,
+    "opsz": 24,
+    "drawProgress": 0.125,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "weight": 400,
+    "opsz": 24,
+    "drawProgress": 0.25,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "weight": 400,
+    "opsz": 24,
+    "drawProgress": 0.5,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "weight": 400,
+    "opsz": 24,
+    "drawProgress": 0.75,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "weight": 400,
+    "opsz": 24,
+    "drawProgress": 1,
+    "mean": 0.0013020833333333333,
+    "max": 12,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "weight": 400,
+    "opsz": 48,
+    "drawProgress": 0,
+    "mean": 0.0009765625,
+    "max": 2,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "weight": 400,
+    "opsz": 48,
+    "drawProgress": 0.125,
+    "mean": 0.0009765625,
+    "max": 2,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "weight": 400,
+    "opsz": 48,
+    "drawProgress": 0.25,
+    "mean": 0.0009765625,
+    "max": 2,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "weight": 400,
+    "opsz": 48,
+    "drawProgress": 0.5,
+    "mean": 0.002170138888888889,
+    "max": 11,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "weight": 400,
+    "opsz": 48,
+    "drawProgress": 0.75,
+    "mean": 0.0009765625,
+    "max": 2,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "weight": 400,
+    "opsz": 48,
+    "drawProgress": 1,
+    "mean": 0.0009765625,
+    "max": 2,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "weight": 600,
+    "opsz": 16,
+    "drawProgress": 0,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "weight": 600,
+    "opsz": 16,
+    "drawProgress": 0.125,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "weight": 600,
+    "opsz": 16,
+    "drawProgress": 0.25,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "weight": 600,
+    "opsz": 16,
+    "drawProgress": 0.5,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "weight": 600,
+    "opsz": 16,
+    "drawProgress": 0.75,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "weight": 600,
+    "opsz": 16,
+    "drawProgress": 1,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "weight": 600,
+    "opsz": 24,
+    "drawProgress": 0,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "weight": 600,
+    "opsz": 24,
+    "drawProgress": 0.125,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "weight": 600,
+    "opsz": 24,
+    "drawProgress": 0.25,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "weight": 600,
+    "opsz": 24,
+    "drawProgress": 0.5,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "weight": 600,
+    "opsz": 24,
+    "drawProgress": 0.75,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "weight": 600,
+    "opsz": 24,
+    "drawProgress": 1,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "weight": 600,
+    "opsz": 48,
+    "drawProgress": 0,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "weight": 600,
+    "opsz": 48,
+    "drawProgress": 0.125,
+    "mean": 0.001193576388888889,
+    "max": 11,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "weight": 600,
+    "opsz": 48,
+    "drawProgress": 0.25,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "weight": 600,
+    "opsz": 48,
+    "drawProgress": 0.5,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "weight": 600,
+    "opsz": 48,
+    "drawProgress": 0.75,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "weight": 600,
+    "opsz": 48,
+    "drawProgress": 1,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "weight": 300,
+    "opsz": 16,
+    "drawProgress": 0,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "weight": 300,
+    "opsz": 16,
+    "drawProgress": 0.125,
+    "mean": 0.0026041666666666665,
+    "max": 12,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "weight": 300,
+    "opsz": 16,
+    "drawProgress": 0.25,
+    "mean": 0.0026041666666666665,
+    "max": 12,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "weight": 300,
+    "opsz": 16,
+    "drawProgress": 0.5,
+    "mean": 0.0026041666666666665,
+    "max": 12,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "weight": 300,
+    "opsz": 16,
+    "drawProgress": 0.75,
+    "mean": 0.0028211805555555555,
+    "max": 12,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "weight": 300,
+    "opsz": 16,
+    "drawProgress": 1,
+    "mean": 0.0026041666666666665,
+    "max": 12,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "weight": 300,
+    "opsz": 24,
+    "drawProgress": 0,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "weight": 300,
+    "opsz": 24,
+    "drawProgress": 0.125,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "weight": 300,
+    "opsz": 24,
+    "drawProgress": 0.25,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "weight": 300,
+    "opsz": 24,
+    "drawProgress": 0.5,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "weight": 300,
+    "opsz": 24,
+    "drawProgress": 0.75,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "weight": 300,
+    "opsz": 24,
+    "drawProgress": 1,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "weight": 300,
+    "opsz": 48,
+    "drawProgress": 0,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "weight": 300,
+    "opsz": 48,
+    "drawProgress": 0.125,
+    "mean": 0.0014105902777777778,
+    "max": 12,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "weight": 300,
+    "opsz": 48,
+    "drawProgress": 0.25,
+    "mean": 0.0013020833333333333,
+    "max": 12,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "weight": 300,
+    "opsz": 48,
+    "drawProgress": 0.5,
+    "mean": 0.0013020833333333333,
+    "max": 12,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "weight": 300,
+    "opsz": 48,
+    "drawProgress": 0.75,
+    "mean": 0.0013020833333333333,
+    "max": 12,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "weight": 300,
+    "opsz": 48,
+    "drawProgress": 1,
+    "mean": 0.0013020833333333333,
+    "max": 12,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "weight": 400,
+    "opsz": 16,
+    "drawProgress": 0,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "weight": 400,
+    "opsz": 16,
+    "drawProgress": 0.125,
+    "mean": 0.0013020833333333333,
+    "max": 12,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "weight": 400,
+    "opsz": 16,
+    "drawProgress": 0.25,
+    "mean": 0.0013020833333333333,
+    "max": 12,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "weight": 400,
+    "opsz": 16,
+    "drawProgress": 0.5,
+    "mean": 0.0026041666666666665,
+    "max": 12,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "weight": 400,
+    "opsz": 16,
+    "drawProgress": 0.75,
+    "mean": 0.002712673611111111,
+    "max": 12,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "weight": 400,
+    "opsz": 16,
+    "drawProgress": 1,
+    "mean": 0.0037977430555555555,
+    "max": 12,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "weight": 400,
+    "opsz": 24,
+    "drawProgress": 0,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "weight": 400,
+    "opsz": 24,
+    "drawProgress": 0.125,
+    "mean": 0.00010850694444444444,
+    "max": 1,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "weight": 400,
+    "opsz": 24,
+    "drawProgress": 0.25,
+    "mean": 0.00021701388888888888,
+    "max": 1,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "weight": 400,
+    "opsz": 24,
+    "drawProgress": 0.5,
+    "mean": 0.00010850694444444444,
+    "max": 1,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "weight": 400,
+    "opsz": 24,
+    "drawProgress": 0.75,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "weight": 400,
+    "opsz": 24,
+    "drawProgress": 1,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "weight": 400,
+    "opsz": 48,
+    "drawProgress": 0,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "weight": 400,
+    "opsz": 48,
+    "drawProgress": 0.125,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "weight": 400,
+    "opsz": 48,
+    "drawProgress": 0.25,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "weight": 400,
+    "opsz": 48,
+    "drawProgress": 0.5,
+    "mean": 0.0013020833333333333,
+    "max": 11,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "weight": 400,
+    "opsz": 48,
+    "drawProgress": 0.75,
+    "mean": 0.001193576388888889,
+    "max": 11,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "weight": 400,
+    "opsz": 48,
+    "drawProgress": 1,
+    "mean": 0.001193576388888889,
+    "max": 11,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "weight": 600,
+    "opsz": 16,
+    "drawProgress": 0,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "weight": 600,
+    "opsz": 16,
+    "drawProgress": 0.125,
+    "mean": 0.00010850694444444444,
+    "max": 1,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "weight": 600,
+    "opsz": 16,
+    "drawProgress": 0.25,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "weight": 600,
+    "opsz": 16,
+    "drawProgress": 0.5,
+    "mean": 0.0013020833333333333,
+    "max": 12,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "weight": 600,
+    "opsz": 16,
+    "drawProgress": 0.75,
+    "mean": 0.0013020833333333333,
+    "max": 12,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "weight": 600,
+    "opsz": 16,
+    "drawProgress": 1,
+    "mean": 0.0013020833333333333,
+    "max": 12,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "weight": 600,
+    "opsz": 24,
+    "drawProgress": 0,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "weight": 600,
+    "opsz": 24,
+    "drawProgress": 0.125,
+    "mean": 0.00010850694444444444,
+    "max": 1,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "weight": 600,
+    "opsz": 24,
+    "drawProgress": 0.25,
+    "mean": 0.00010850694444444444,
+    "max": 1,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "weight": 600,
+    "opsz": 24,
+    "drawProgress": 0.5,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "weight": 600,
+    "opsz": 24,
+    "drawProgress": 0.75,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "weight": 600,
+    "opsz": 24,
+    "drawProgress": 1,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "weight": 600,
+    "opsz": 48,
+    "drawProgress": 0,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "weight": 600,
+    "opsz": 48,
+    "drawProgress": 0.125,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "weight": 600,
+    "opsz": 48,
+    "drawProgress": 0.25,
+    "mean": 0.0014105902777777778,
+    "max": 12,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "weight": 600,
+    "opsz": 48,
+    "drawProgress": 0.5,
+    "mean": 0.0013020833333333333,
+    "max": 12,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "weight": 600,
+    "opsz": 48,
+    "drawProgress": 0.75,
+    "mean": 0.0014105902777777778,
+    "max": 12,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "weight": 600,
+    "opsz": 48,
+    "drawProgress": 1,
+    "mean": 0.0013020833333333333,
+    "max": 12,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "weight": 300,
+    "opsz": 16,
+    "drawProgress": 0,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "weight": 300,
+    "opsz": 16,
+    "drawProgress": 0.125,
+    "mean": 0.0013020833333333333,
+    "max": 12,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "weight": 300,
+    "opsz": 16,
+    "drawProgress": 0.25,
+    "mean": 0.0013020833333333333,
+    "max": 12,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "weight": 300,
+    "opsz": 16,
+    "drawProgress": 0.5,
+    "mean": 0.002170138888888889,
+    "max": 12,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "weight": 300,
+    "opsz": 16,
+    "drawProgress": 0.75,
+    "mean": 0.0026041666666666665,
+    "max": 12,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "weight": 300,
+    "opsz": 16,
+    "drawProgress": 1,
+    "mean": 0.0026041666666666665,
+    "max": 12,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "weight": 300,
+    "opsz": 24,
+    "drawProgress": 0,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "weight": 300,
+    "opsz": 24,
+    "drawProgress": 0.125,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "weight": 300,
+    "opsz": 24,
+    "drawProgress": 0.25,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "weight": 300,
+    "opsz": 24,
+    "drawProgress": 0.5,
+    "mean": 0.0013020833333333333,
+    "max": 12,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "weight": 300,
+    "opsz": 24,
+    "drawProgress": 0.75,
+    "mean": 0.0013020833333333333,
+    "max": 12,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "weight": 300,
+    "opsz": 24,
+    "drawProgress": 1,
+    "mean": 0.0013020833333333333,
+    "max": 12,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "weight": 300,
+    "opsz": 48,
+    "drawProgress": 0,
+    "mean": 0.00010850694444444444,
+    "max": 1,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "weight": 300,
+    "opsz": 48,
+    "drawProgress": 0.125,
+    "mean": 0.0014105902777777778,
+    "max": 12,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "weight": 300,
+    "opsz": 48,
+    "drawProgress": 0.25,
+    "mean": 0.0014105902777777778,
+    "max": 12,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "weight": 300,
+    "opsz": 48,
+    "drawProgress": 0.5,
+    "mean": 0.0014105902777777778,
+    "max": 12,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "weight": 300,
+    "opsz": 48,
+    "drawProgress": 0.75,
+    "mean": 0.0014105902777777778,
+    "max": 12,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "weight": 300,
+    "opsz": 48,
+    "drawProgress": 1,
+    "mean": 0.0014105902777777778,
+    "max": 12,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "weight": 400,
+    "opsz": 16,
+    "drawProgress": 0,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "weight": 400,
+    "opsz": 16,
+    "drawProgress": 0.125,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "weight": 400,
+    "opsz": 16,
+    "drawProgress": 0.25,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "weight": 400,
+    "opsz": 16,
+    "drawProgress": 0.5,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "weight": 400,
+    "opsz": 16,
+    "drawProgress": 0.75,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "weight": 400,
+    "opsz": 16,
+    "drawProgress": 1,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "weight": 400,
+    "opsz": 24,
+    "drawProgress": 0,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "weight": 400,
+    "opsz": 24,
+    "drawProgress": 0.125,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "weight": 400,
+    "opsz": 24,
+    "drawProgress": 0.25,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "weight": 400,
+    "opsz": 24,
+    "drawProgress": 0.5,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "weight": 400,
+    "opsz": 24,
+    "drawProgress": 0.75,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "weight": 400,
+    "opsz": 24,
+    "drawProgress": 1,
+    "mean": 0.0013020833333333333,
+    "max": 12,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "weight": 400,
+    "opsz": 48,
+    "drawProgress": 0,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "weight": 400,
+    "opsz": 48,
+    "drawProgress": 0.125,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "weight": 400,
+    "opsz": 48,
+    "drawProgress": 0.25,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "weight": 400,
+    "opsz": 48,
+    "drawProgress": 0.5,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "weight": 400,
+    "opsz": 48,
+    "drawProgress": 0.75,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "weight": 400,
+    "opsz": 48,
+    "drawProgress": 1,
+    "mean": 0.0013020833333333333,
+    "max": 12,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "weight": 600,
+    "opsz": 16,
+    "drawProgress": 0,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "weight": 600,
+    "opsz": 16,
+    "drawProgress": 0.125,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "weight": 600,
+    "opsz": 16,
+    "drawProgress": 0.25,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "weight": 600,
+    "opsz": 16,
+    "drawProgress": 0.5,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "weight": 600,
+    "opsz": 16,
+    "drawProgress": 0.75,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "weight": 600,
+    "opsz": 16,
+    "drawProgress": 1,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "weight": 600,
+    "opsz": 24,
+    "drawProgress": 0,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "weight": 600,
+    "opsz": 24,
+    "drawProgress": 0.125,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "weight": 600,
+    "opsz": 24,
+    "drawProgress": 0.25,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "weight": 600,
+    "opsz": 24,
+    "drawProgress": 0.5,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "weight": 600,
+    "opsz": 24,
+    "drawProgress": 0.75,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "weight": 600,
+    "opsz": 24,
+    "drawProgress": 1,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "weight": 600,
+    "opsz": 48,
+    "drawProgress": 0,
+    "mean": 0,
+    "max": 0,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "weight": 600,
+    "opsz": 48,
+    "drawProgress": 0.125,
+    "mean": 0.0013020833333333333,
+    "max": 12,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "weight": 600,
+    "opsz": 48,
+    "drawProgress": 0.25,
+    "mean": 0.0013020833333333333,
+    "max": 12,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "weight": 600,
+    "opsz": 48,
+    "drawProgress": 0.5,
+    "mean": 0.0013020833333333333,
+    "max": 12,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "weight": 600,
+    "opsz": 48,
+    "drawProgress": 0.75,
+    "mean": 0.0013020833333333333,
+    "max": 12,
+    "alpha": 94
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "weight": 600,
+    "opsz": 48,
+    "drawProgress": 1,
+    "mean": 0.0013020833333333333,
+    "max": 12,
+    "alpha": 94
+  }
+]
