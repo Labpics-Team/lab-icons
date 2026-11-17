@@ -30,12 +30,14 @@ layer/negative. Регрессия читает реальные fixtures, пр�
   Outline/Filled и dispose.
 - `node scripts/verify-semantic-motion.mjs`: все ранее принятые midframes PASS,
   **live = 0** после stop/finish/dispose.
-- `./gradlew.bat desktopTest`: реальные Canvas raster comparisons, старые
+- `./gradlew.bat desktopTest`: **11 tests PASS**, реальные Canvas raster comparisons, старые
   binary fixtures, фазы и disposal. Skia runtime включён только в desktop tests.
 - Отдельный Compose consumer установлен из локального Maven-артефакта
   **Icons 0.4.0-semantic.4**, с публичным **Motion 0.1.0** и отдельно
   экспортированным PlusCircle. Окно отрисовано, controls прерваны и завершены,
   сделан снимок, приложение закрыто. Это локальная проверка, не публичный выпуск.
+  Она предшествовала уточнению пользователя о запрете видимых окон и звуков на
+  рабочем компьютере; дальнейшая проверка выполняется headless либо в изоляции.
 
 Снимки: [браузер](negative-draw.png), [native consumer](negative-native.png).
 Receipt браузера: [negative-receipt.json](negative-receipt.json).

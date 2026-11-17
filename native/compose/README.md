@@ -81,6 +81,8 @@ node ../../scripts/export-native-symbols.mjs --preview --symbol plus-circle --pa
 На Windows используется `gradlew.bat`. Consumer — отдельная Gradle-сборка,
 которая получает Maven-артефакт, открывает настоящее окно, меняет размер/вес/вариант,
 сохраняет `consumer/build/native-icons-consumer.png` и закрывается.
+Оконный smoke запускается только в изолированной среде. На рабочем компьютере
+используются `desktopTest` и headless-проверки: без видимых окон и звуков.
 Plus-circle компилируется из отдельно экспортированного Kotlin-файла в пакете
 consumer. Это проверяет импорт готового семейства и доставку самостоятельного экспорта.
 Consumer также проверяет прерывание Motion, состояния, draw, reduced motion и
