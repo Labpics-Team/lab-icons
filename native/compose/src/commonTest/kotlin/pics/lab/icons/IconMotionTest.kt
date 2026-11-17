@@ -9,6 +9,7 @@ import kotlinx.coroutines.test.runTest
 import pics.lab.icons.symbols.checkmark
 import pics.lab.icons.states.statusStates
 import pics.lab.icons.states.microphoneStates
+import pics.lab.icons.states.directionStates
 import pics.lab.icons.symbols.reload
 import pics.lab.icons.symbols.volumeHigh
 import pics.lab.motion.MotionResult
@@ -19,6 +20,54 @@ import kotlin.test.assertTrue
 
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class IconMotionTest {
+    @Test fun explicitLevelUsesRestAndCurrentPhaseAtEveryIntermediateFrame() = runTest {
+        val scope = CoroutineScope(coroutineContext + Job(coroutineContext[Job]) + BroadcastFrameClock())
+        val icon = IconMotion(volumeHigh, IconVariant.Outline, scope)
+        val far = icon.paints.first { it.part.id == "wave-far" }
+        val middle = icon.paints.first { it.part.id == "wave-middle" }
+        val first = icon.effect("level", to = .8f, durationMillis = 1000)
+        assertEquals(1f, far.opacity.value)
+        first.pause()
+        for (time in listOf(0f, 250f, 500f, 750f)) {
+            first.seek(time)
+            assertEquals(1f - .6f * time / 1000, far.opacity.value, .00001f)
+            assertEquals(1f, middle.opacity.value, .00001f)
+        }
+        first.seek(500f)
+        val next = icon.effect("level", to = .7f, durationMillis = 1000); next.pause(); next.seek(500f)
+        assertEquals(.4f, far.opacity.value, .00001f)
+        icon.dispose(); scope.cancel()
+    }
+
+    @Test fun explicitDrawContinuesFromRestAndOmittedEndpointReplaysRepeatedly() = runTest {
+        val scope = CoroutineScope(coroutineContext + Job(coroutineContext[Job]) + BroadcastFrameClock())
+        val icon = IconMotion(checkmark, IconVariant.Outline, scope)
+        val first = icon.effect("draw", to = .5f, durationMillis = 1000)
+        assertEquals(1f, icon.paints.single().draw.value)
+        first.pause(); first.seek(500f)
+        assertEquals(.75f, icon.paints.single().draw.value)
+        first.finish()
+        icon.effect("draw", to = 1f, durationMillis = 0).finish()
+        repeat(2) {
+            val replay = icon.effect("draw", durationMillis = 1000); replay.pause(); replay.seek(500f)
+            assertEquals(.5f, icon.paints.single().draw.value)
+            replay.finish()
+        }
+        icon.dispose(); scope.cancel()
+    }
+
+    @Test fun directionGestureTargetsIncomingPartDuringStateReplacement() = runTest {
+        val scope = CoroutineScope(coroutineContext + Job(coroutineContext[Job]) + BroadcastFrameClock())
+        val icon = IconMotion(directionStates, IconVariant.Outline, scope)
+        val outgoing = icon.paints.single()
+        val change = icon.setState("right", 1000); change.pause(); change.seek(500f)
+        val incoming = icon.paints.first { it !== outgoing }
+        val nudge = icon.effect("nudge", durationMillis = 1000); nudge.pause(); nudge.seek(500f)
+        assertEquals(0f, outgoing.x.value)
+        assertEquals(3f, incoming.x.value)
+        icon.dispose(); scope.cancel()
+    }
+
     @Test fun publicMotionRetargetsFromVisiblePoseAndDisposesItsClock() = runTest {
         val clock = BroadcastFrameClock()
         val scope = CoroutineScope(coroutineContext + Job(coroutineContext[Job]) + clock)

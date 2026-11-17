@@ -38,7 +38,7 @@ internal fun MotionIcon(motion: IconMotion, tint: Color, modifier: Modifier, siz
         val logicalSize = min(this.size.width, this.size.height) / density
         for (paint in prepared) {
             val axis = paint.paint.symbol.axes.opsz
-            paint.symbol.update(weight, opsz ?: logicalSize.coerceIn(axis.minimum, axis.maximum))
+            paint.update(weight, opsz ?: logicalSize.coerceIn(axis.minimum, axis.maximum))
         }
         onDrawBehind {
             val edge = min(this.size.width, this.size.height)
@@ -49,7 +49,7 @@ internal fun MotionIcon(motion: IconMotion, tint: Color, modifier: Modifier, siz
                         val alpha = (paint.alpha.value * paint.opacity.value).coerceIn(0f, 1f)
                         val progress = paint.draw.value.coerceIn(0f, 1f)
                         if (alpha <= 0f || progress <= 0f) continue
-                        val path = entry.symbol.paths[paint.part.pathIndex]
+                        val path = entry.geometry.path
                         translate(paint.x.value, paint.y.value) {
                             rotate(paint.rotation.value, Offset(paint.part.anchorX, paint.part.anchorY)) {
                                 if (progress >= 1f || entry.measure == null) drawPath(path, currentTint, alpha = alpha)
@@ -71,7 +71,16 @@ internal fun MotionIcon(motion: IconMotion, tint: Color, modifier: Modifier, siz
 }
 
 private class PreparedPaint(val paint: IconPaint) {
-    val symbol = PreparedSymbol(paint.symbol, paint.variant)
+    val geometry = PreparedPath(paint.symbol.variants[paint.variant.ordinal].paths[paint.part.pathIndex])
+    private var previousWeight = Float.NaN
+    private var previousOptical = Float.NaN
+    fun update(weight: Float, optical: Float) {
+        if (weight == previousWeight && optical == previousOptical) return
+        val axes = paint.symbol.axes
+        geometry.update(if (weight < axes.weight.default) 0 else 1, axes.weight.position(weight),
+            if (optical < axes.opsz.default) 0 else 1, axes.opsz.position(optical))
+        previousWeight = weight; previousOptical = optical
+    }
     val revealed = Path()
     val measure: PathMeasure? = paint.part.draw?.let { guide ->
         val path = Path(); var cursor = 0; val points = guide.coordinates

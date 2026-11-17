@@ -66,8 +66,8 @@ public fun Icon(
 /** One instance per Icon; changing an axis reuses all paths and coordinate buffers. */
 internal class PreparedSymbol(private val symbol: SymbolData, variant: IconVariant) {
     private val data = symbol.variants[variant.ordinal]
-    val paths = Array(data.paths.size) { Path() }
-    private val coordinates = Array(data.paths.size) { FloatArray(data.paths[it].coordinates.size) }
+    private val prepared = Array(data.paths.size) { PreparedPath(data.paths[it]) }
+    val paths = Array(data.paths.size) { prepared[it].path }
     private var previousWeight = Float.NaN
     private var previousOptical = Float.NaN
 
@@ -77,23 +77,27 @@ internal class PreparedSymbol(private val symbol: SymbolData, variant: IconVaria
         val opticalPosition = symbol.axes.opsz.position(optical)
         val weightSide = if (weight < symbol.axes.weight.default) 0 else 1
         val opticalSide = if (optical < symbol.axes.opsz.default) 0 else 1
-        for (index in data.paths.indices) {
-            val source = data.paths[index]
-            val points = coordinates[index]
-            source.sample(weightSide, weightPosition, opticalSide, opticalPosition, points)
-            val target = paths[index]
-            target.reset()
-            target.fillType = if (source.evenOdd) PathFillType.EvenOdd else PathFillType.NonZero
-            var cursor = 0
-            for (command in source.commands) when (command.toInt()) {
-                0 -> { target.moveTo(points[cursor], points[cursor + 1]); cursor += 2 }
-                1 -> { target.lineTo(points[cursor], points[cursor + 1]); cursor += 2 }
-                2 -> { target.cubicTo(points[cursor], points[cursor + 1], points[cursor + 2], points[cursor + 3], points[cursor + 4], points[cursor + 5]); cursor += 6 }
-                3 -> target.close()
-                else -> error("Unknown compiled icon opcode")
-            }
-        }
+        for (path in prepared) path.update(weightSide, weightPosition, opticalSide, opticalPosition)
         previousWeight = weight
         previousOptical = optical
+    }
+}
+
+/** Exactly one path and numeric buffer; motion never prepares unrelated parts of a symbol. */
+internal class PreparedPath(private val source: SymbolPathData) {
+    val path = Path()
+    private val points = FloatArray(source.coordinates.size)
+    fun update(weightSide: Int, weight: Float, opticalSide: Int, optical: Float) {
+        source.sample(weightSide, weight, opticalSide, optical, points)
+        path.reset()
+        path.fillType = if (source.evenOdd) PathFillType.EvenOdd else PathFillType.NonZero
+        var cursor = 0
+        for (command in source.commands) when (command.toInt()) {
+            0 -> { path.moveTo(points[cursor], points[cursor + 1]); cursor += 2 }
+            1 -> { path.lineTo(points[cursor], points[cursor + 1]); cursor += 2 }
+            2 -> { path.cubicTo(points[cursor], points[cursor + 1], points[cursor + 2], points[cursor + 3], points[cursor + 4], points[cursor + 5]); cursor += 6 }
+            3 -> path.close()
+            else -> error("Unknown compiled icon opcode")
+        }
     }
 }

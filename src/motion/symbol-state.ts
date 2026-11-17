@@ -8,7 +8,7 @@ export interface IconTransitionOptions {
   readonly reducedMotion?: boolean;
 }
 export interface IconEffectOptions extends IconTransitionOptions {
-  /** Normalized endpoint; omitting it plays the complete declared gesture. */
+  /** Explicit endpoints continue from current phase (initially rest); omission plays/replays the gesture. */
   readonly to?: number;
 }
 export interface MountedIcon {
@@ -153,23 +153,29 @@ export function mountSymbol(runtime: SymbolMotionRuntime, root: Element, symbol:
     if (!gesture) throw new RangeError(`Symbol ${symbol.id} does not support effect ${name} in this state`);
     const duration = timing(request, gesture.duration), to = request.to ?? 1;
     if (!Number.isFinite(to) || to < 0 || to > 1) throw new RangeError('Icon effect endpoint must be between 0 and 1');
-    stop('effect');
-    const old = phases.get(name), from = old === undefined || old === 1 && request.to === undefined ? 0 : old;
+    const current = phases.get(name);
+    const replay = request.to === undefined && (current === undefined || current === 1);
+    const from = replay ? 0 : current ?? gesture.rest;
     const bindings = gesture.tracks.map(track => {
-      const paint = [...paints.values()].find(paint => paint.part.id === track.partId);
+      const part = semantics.parts.find(part => part.id === track.partId);
+      const paint = part && paints.get(part.key);
       if (!paint) throw new Error(`Missing semantic paint: ${track.partId}`);
-      return { track, paint, start: paint[track.property], base: sample(track, from) };
+      const base = sample(track, from);
+      const turn = track.property === 'rotate' && Math.abs(track.stops.at(-1)![1] - track.stops[0]![1]) === 360;
+      return { track, paint, start: replay && !turn ? base : paint[track.property], base, turn };
     });
-    if (name === 'draw' && old === undefined && request.to === undefined) {
-      for (const binding of bindings) { binding.start = 0; binding.paint.draw = 0; writePaint(binding.paint); }
+    stop('effect');
+    if (replay) {
+      for (const { paint, track, start } of bindings) { paint[track.property] = start; writePaint(paint); }
     }
+    phases.set(name, from);
     return play('effect', duration, progress => {
       const phase = from + (to - from) * progress;
       phases.set(name, phase);
-      for (const { track, paint, start, base } of bindings) {
+      for (const { track, paint, start, base, turn } of bindings) {
         // Correct from the last written visible value; the correction vanishes at the endpoint.
-        const fullTurn = track.property === 'rotate' && old === 1 && request.to === undefined;
-        paint[track.property] = sample(track, phase) + (start - base) * (fullTurn ? 1 : 1 - progress);
+        // A full turn retains its accumulated angle while keeping the same normalized phase.
+        paint[track.property] = sample(track, phase) + (start - base) * (turn ? 1 : 1 - progress);
         writePaint(paint);
       }
     });

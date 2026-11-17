@@ -18,6 +18,7 @@ import volume from '@labpics/icons/symbols/volume-high';
 import mic from '@labpics/icons/states/microphone';
 import direction from '@labpics/icons/states/direction';
 const assert = (value, message) => { if (!value) throw new Error(message); };
+const near = (value, expected, message) => assert(Math.abs(value-expected)<1e-6,message+': '+value+' != '+expected);
 let values = 0, live = 0;
 const runtime = createSymbolMotion({ ...motion, value(initial) {
   values++; live++; const result = motion.value(initial); let disposed = false;
@@ -51,11 +52,44 @@ const drawn = add(check); const draw = drawn.effect('draw',{duration:1000}); dra
 assert(drawn.element.querySelector('mask path').getAttribute('stroke-dashoffset')==='0.5','draw does not use guide mask');
 assert(drawn.element.querySelector(':scope > path').getAttribute('mask').startsWith('url('),'draw shape is not masked');
 const ring = add(notifications); ring.effect('ring',{reducedMotion:true});
-const levels = add(volume); levels.effect('level',{to:0.5,reducedMotion:true});
+const levels = add(volume);
+const level = levels.effect('level',{to:0.8,duration:1000});
+near(Number(levels.element.querySelector('[data-part="wave-far"]').getAttribute('opacity')),1,'explicit level changed immediately');
+level.pause();
+for (const time of [0,250,500,750]) {
+  level.seek(time);
+  near(Number(levels.element.querySelector('[data-part="wave-far"]').getAttribute('opacity')),1-.6*time/1000,'level must decrease from rest');
+  near(Number(levels.element.querySelector('[data-part="wave-middle"]').getAttribute('opacity')),1,'middle wave must remain visible');
+}
+level.seek(500);
+const lower = levels.effect('level',{to:0.7,duration:1000}); lower.pause(); lower.seek(500);
+near(Number(levels.element.querySelector('[data-part="wave-far"]').getAttribute('opacity')),.4,'retarget must retain current phase');
+lower.finish(); await lower.finished;
+levels.effect('level',{to:0.5,reducedMotion:true});
 assert(levels.element.querySelector('[data-part="speaker"]').getAttribute('opacity')==='1','level changed speaker');
 const disabled = add(mic); disabled.setState('off',{reducedMotion:true});
 const slash = disabled.effect('draw',{duration:1000}); slash.pause(); slash.seek(500);
-const arrow = add(direction); arrow.setState('down',{reducedMotion:true});
+const arrow = add(direction);
+const outgoing = arrow.element.querySelector(':scope > path');
+const directionChange = arrow.setState('right',{duration:1000}); directionChange.pause(); directionChange.seek(500);
+const incoming = [...arrow.element.querySelectorAll(':scope > path')].find(path=>path!==outgoing);
+const nudge = arrow.effect('nudge',{duration:1000}); nudge.pause(); nudge.seek(500);
+assert(outgoing.getAttribute('transform').startsWith('translate(0 0)'),'nudge moved outgoing direction');
+assert(incoming.getAttribute('transform').startsWith('translate(3 0)'),'nudge did not move current direction');
+nudge.stop(); directionChange.finish(); await directionChange.finished;
+const redraw = add(check);
+const explicitDraw = redraw.effect('draw',{to:.5,duration:1000});
+assert(redraw.element.querySelector(':scope > path').getAttribute('mask')==='','explicit draw rewound immediately');
+explicitDraw.pause(); explicitDraw.seek(500);
+near(Number(redraw.element.querySelector('mask path').getAttribute('stroke-dashoffset')),.25,'explicit draw should continue from rest');
+explicitDraw.finish(); await explicitDraw.finished;
+redraw.effect('draw',{to:1,reducedMotion:true});
+for(let replay=0;replay<2;replay++) {
+  const run=redraw.effect('draw',{duration:1000}); run.pause(); run.seek(500);
+  near(Number(redraw.element.querySelector('mask path').getAttribute('stroke-dashoffset')),.5,'draw replay must reveal half the guide');
+  assert(redraw.element.querySelector(':scope > path').getAttribute('mask').startsWith('url('),'draw replay lost its mask');
+  run.finish(); await run.finished;
+}
 const reducedBefore = values; rotate.effect('cycle',{reducedMotion:true});
 assert(values===reducedBefore,'reduced motion created a clock');
 const repeat = rotate.effect('cycle',{duration:1000}); repeat.pause(); repeat.seek(500);
@@ -66,7 +100,7 @@ assert((await running.finished).status==='stopped' && !removed.element.isConnect
 draw.stop(); slash.stop();
 await Promise.resolve();
 assert(live===0,'completed or stopped icon retained clocks: '+live);
-window.result={ok:true,values,live,groups:['selection/check','direction','loading/reload','notification','volume/progress','slash/off'],draw:'authored guide mask',interruption:'visible pose',reducedMotion:'synchronous endpoint'};
+window.result={ok:true,values,live,groups:['selection/check','direction','loading/reload','notification','volume/progress','slash/off'],draw:'authored guide mask',interruption:'visible pose',reducedMotion:'synchronous endpoint',midframes:['current part key','rest and interrupted level phase','explicit draw endpoint','repeated draw']};
 `;
 const bundle = await build({ stdin: { contents: source, resolveDir: root, sourcefile: 'consumer.mjs' }, bundle: true, format: 'esm', write: false, target: 'es2022' });
 const html = `<!doctype html><html><head><meta charset="utf-8"><style>body{margin:32px;background:#fafafa;color:#161619;font:14px system-ui;display:flex;gap:16px;flex-wrap:wrap}.cell{width:150px;height:130px;border:1px solid #ddd;border-radius:12px;padding:16px;display:flex;align-items:center;flex-direction:column;gap:24px}</style></head><body><script>${bundle.outputFiles[0].text.replaceAll('</script','<\\/script')}</script></body></html>`;

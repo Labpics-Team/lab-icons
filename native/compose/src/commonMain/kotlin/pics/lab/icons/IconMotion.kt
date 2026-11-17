@@ -37,6 +37,8 @@ public class IconMotion internal constructor(
     private var disposed = false
     private var epoch = 0
     private var cleanup: Job? = null
+    private var stateRevision = 0
+    private val phases = mutableMapOf<SymbolEffectData, IconEffectPhase>()
     private var desired = base.variants[initialVariant.ordinal].parts.map { it.key }.toSet()
     public var reducedMotion: Boolean
         get() = controller.reducedMotion
@@ -71,7 +73,7 @@ public class IconMotion internal constructor(
                 }
             }
         }
-        current = target; variant = selectedVariant
+        current = target; variant = selectedVariant; stateRevision++
         cleanAfter(playback)
         return playback
     }
@@ -83,31 +85,44 @@ public class IconMotion internal constructor(
         }
     }
 
-    /** Plays the declared gesture from visible values; a new effect replaces the previous control. */
-    public fun effect(name: String, to: Float = 1f, durationMillis: Int? = null): MotionPlayback {
-        check(!disposed) { "Icon is disposed" }; require(to.isFinite() && to in 0f..1f)
+    /** Explicit endpoints continue from current/rest phase; omission plays or replays the whole gesture. */
+    public fun effect(name: String, to: Float? = null, durationMillis: Int? = null): MotionPlayback {
+        val endpoint = to ?: 1f
+        check(!disposed) { "Icon is disposed" }; require(endpoint.isFinite() && endpoint in 0f..1f)
         val data = current.variants[variant.ordinal]
         val effect = requireNotNull(data.effects[name]) { "Unsupported icon effect: $name" }
         val duration = durationMillis ?: effect.duration; require(duration >= 0)
+        val phase = phases.getOrPut(effect) { IconEffectPhase(controller.value(effect.rest), -1) }
+        val currentPhase = if (phase.revision == stateRevision) phase.value.value else null
+        val replay = to == null && (currentPhase == null || currentPhase == 1f)
+        val from = if (replay) 0f else currentPhase ?: effect.rest
         val bindings = effect.tracks.map { track ->
             val key = data.parts[track.partIndex].key
-            track to paints.first { it.part.key == key }
+            val paint = paints.first { it.part.key == key }
+            val value = paint.channel(track.property)
+            val turn = track.property == 3 && kotlin.math.abs(track.values.last() - track.values.first()) == 360f
+            val base = sampleTrack(track, from)
+            val start = if (replay && !turn) base else value.value
+            val interior = track.times.indices.filter { if (endpoint > from) track.times[it] > from && track.times[it] < endpoint
+                else track.times[it] < from && track.times[it] > endpoint }.let { if (endpoint < from) it.reversed() else it }
+            val points = interior.map { track.times[it] } + endpoint
+            val times = points.map { if (endpoint == from) 1f else (it - from) / (endpoint - from) }
+            val targets = points.mapIndexed { index, point -> sampleTrack(track, point) + (start - base) * (if (turn) 1f else 1f - times[index]) }
+            IconEffectBinding(value, start, targets, listOf(0f) + times)
         }
-        if (name == "draw" && to > 0f && bindings.all { it.second.draw.value >= 1f }) {
-            controller.animate { for ((_, paint) in bindings) to(paint.draw, 0f, MotionTransition.Tween(0)) }.finish()
+        if (phase.value.value != from || replay) {
+            controller.animate {
+                to(phase.value, from, MotionTransition.Tween(0))
+                if (replay) for (binding in bindings) to(binding.value, binding.start, MotionTransition.Tween(0))
+            }.finish()
         }
+        phase.revision = stateRevision
         val playback = controller.animate {
             for (paint in paints) to(paint.alpha, if (paint.part.key in desired) 1f else 0f, MotionTransition.Tween(duration, MotionEase.Linear))
-            for ((track, paint) in bindings) {
-                val value = paint.channel(track.property)
-                val offset = if (track.property == 3 && value.value >= 360f && to == 1f) value.value else 0f
-                val end = sampleTrack(track, to) + offset
-                val interior = track.times.indices.filter { track.times[it] > 0f && track.times[it] < to }
-                if (interior.isEmpty() || to == 0f) to(value, end, MotionTransition.Tween(duration, MotionEase.Linear))
-                else {
-                    keyframes(value, interior.map { track.values[it] + offset } + end, duration,
-                        listOf(0f) + interior.map { track.times[it] / to } + 1f)
-                }
+            to(phase.value, endpoint, MotionTransition.Tween(duration, MotionEase.Linear))
+            for (binding in bindings) {
+                if (binding.targets.size == 1) to(binding.value, binding.targets.single(), MotionTransition.Tween(duration, MotionEase.Linear))
+                else keyframes(binding.value, binding.targets, duration, binding.times)
             }
         }
         cleanAfter(playback)
@@ -116,9 +131,12 @@ public class IconMotion internal constructor(
 
     public fun dispose() {
         if (disposed) return
-        disposed = true; epoch++; cleanup?.cancel(); controller.dispose(); paints.clear(); stored.clear()
+        disposed = true; epoch++; cleanup?.cancel(); controller.dispose(); paints.clear(); stored.clear(); phases.clear()
     }
 }
+
+private class IconEffectPhase(val value: MotionValue, var revision: Int)
+private class IconEffectBinding(val value: MotionValue, val start: Float, val targets: List<Float>, val times: List<Float>)
 
 internal class IconPaint(val symbol: SymbolData, val variant: IconVariant, val part: SymbolPartData,
     val alpha: MotionValue, val opacity: MotionValue, val x: MotionValue, val y: MotionValue,

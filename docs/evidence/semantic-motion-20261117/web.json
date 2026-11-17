@@ -1,6 +1,6 @@
 {
   "ok": true,
-  "values": 8,
+  "values": 15,
   "live": 0,
   "groups": [
     "selection/check",
@@ -12,5 +12,11 @@
   ],
   "draw": "authored guide mask",
   "interruption": "visible pose",
-  "reducedMotion": "synchronous endpoint"
+  "reducedMotion": "synchronous endpoint",
+  "midframes": [
+    "current part key",
+    "rest and interrupted level phase",
+    "explicit draw endpoint",
+    "repeated draw"
+  ]
 }

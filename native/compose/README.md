@@ -26,6 +26,11 @@ motion.setState("off")
 эффект. Draw обрезает штрих направляющей исходной залитой формой; PathMeasure
 создаётся один раз. Кадр не ищет части по строкам и не разбирает SVG.
 
+Явный `to` продолжает текущую фазу либо исходный `rest` при первом вызове.
+Без `to` новый или завершённый жест проигрывается с начала, а прерванный
+продолжается. Поэтому `effect("draw", to = .5f)` плавно скрывает половину
+полного знака; `effect("draw")` рисует его заново при каждом полном повторе.
+
 Часы и controls принадлежат публичному
 `pics.lab:motion-compose:0.1.0` из Maven repository
 `https://raw.githubusercontent.com/Labpics-Team/lab-motion/maven-compose-v0.1.0/`.
@@ -72,8 +77,9 @@ node ../../scripts/export-native-symbols.mjs --preview --symbol plus-circle --pa
 сохраняет `consumer/build/native-icons-consumer.png` и закрывается.
 Plus-circle компилируется из отдельно экспортированного Kotlin-файла в пакете
 consumer. Это проверяет импорт готового семейства и доставку самостоятельного экспорта.
-Native Motion и экспорт семантических эффектов добавляются следующим срезом;
-этот renderer пока исполняет статическую оптику.
+Consumer также проверяет прерывание Motion, состояния, draw, reduced motion и
+освобождение активных controls. Семантические части и эффекты входят в тот же
+числовой экспорт; каждая активная часть готовит только собственный Path.
 
 Основания: [Compose custom drawing](https://developer.android.com/develop/ui/compose/graphics/draw/overview),
 [Kotlin Base64](https://kotlinlang.org/api/core/kotlin-stdlib/kotlin.io.encoding/-base64/),
