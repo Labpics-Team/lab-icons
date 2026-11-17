@@ -101,6 +101,15 @@ export function symbolExplorerGestureProjection(contract, iconIds, surface = {})
 /** Runtime presence задаёт package contract; semantic spec задаёт точное членство. */
 export function symbolExplorerBrowserFiles(contract, iconIds, stateGroups, surface = {}) {
   const stateFiles = stateGroups.map(({ group }) => `dist/states/${group}.js`);
+  // Numeric families are public data consumed by the new renderer. They do not
+  // imply an old GlyphIR transition API or a legacy explorer control.
+  for (const [entry, names] of Object.entries(surface)) {
+    if (/^\.\/states\/[^/]+$/.test(entry) && names.includes('default') && names.includes('family')) {
+      const file = `dist/${entry.slice(2)}.js`;
+      if (!contract.files.includes(file.replace(/\.js$/, '.d.ts'))) throw new Error(`symbol explorer: ${entry} не имеет declaration`);
+      if (!stateFiles.includes(file)) stateFiles.push(file);
+    }
+  }
   const variationFiles = symbolExplorerVariationIds(contract, iconIds).map(id => `dist/variations/${id}.js`);
   const stateVariationFiles = symbolExplorerStateVariationIds(contract, stateGroups)
     .map(id => `dist/state-variations/${id}.js`);

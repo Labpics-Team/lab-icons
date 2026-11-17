@@ -226,7 +226,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
       - name: Android SDK
-        run: sdkmanager 'platforms;android-37'
+        uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407 # v3
+        with:
+          packages: 'platforms;android-37'
       - name: Проверка и сборка Maven для Desktop, Android и iOS
         working-directory: native/compose
         run: ./gradlew desktopTest publishAllPublicationsToDistributionRepository

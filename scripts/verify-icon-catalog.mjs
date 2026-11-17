@@ -107,6 +107,11 @@ try {
   await page.locator('#date').fill('2026-11-18');
   await page.locator('#date').dispatchEvent('change');
   assert.match(await page.locator('#import-code').textContent(), /2026-11-18/);
+  await page.locator('#date').fill(''); await page.locator('#date').dispatchEvent('change');
+  await page.locator('[data-id="calendar-clear"]').click(); await ready();
+  assert.equal(await page.locator('#symbol-name').textContent(), 'calendar-clear');
+  assert.equal(await page.locator('#stage svg').count(), 1);
+  await page.locator('[data-id="calendar-number"]').click(); await ready();
   await page.setViewportSize({ width: 390, height: 844 });
   await page.locator('#close-detail').click();
   await page.locator('#clear-search').evaluate(button => { document.querySelector('#search').value = ''; document.querySelector('#search').dispatchEvent(new Event('input')); });
@@ -122,7 +127,12 @@ try {
   assert.equal(await page.locator('#search').evaluate(node => !!node.closest('[inert]')), false);
   await page.locator('#search').fill('volume-high');
   await page.locator('[data-id="volume-high"]').click(); await ready();
+  const volumeHigh = await geometry();
   await page.locator('[data-state="mute"]').click();
+  await page.locator('#reduce-motion').check();
+  await page.locator('#reverse').click();
+  assert.equal(await page.locator('#progress').inputValue(), '0');
+  assert.equal(await geometry(), volumeHigh, 'Reduced reverse must show the actual initial state');
   await page.keyboard.press('Escape');
   assert.equal(await page.evaluate(() => document.activeElement.dataset.id), 'volume-high', 'Close should restore the actual opener after changing state');
   await page.goto(`${base}/?icon=time`); await ready();

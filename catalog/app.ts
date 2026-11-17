@@ -137,7 +137,7 @@ async function choose(id: string, requestedFamily?: string, present = true) {
     options = { size: Number(input('size').value), weight: Number(input('weight').value),
       opsz: input('auto-optics').checked ? 'auto' : Number(input('opsz').value), variant,
       ...(membership ? { state: membership.state } : {}),
-      ...(next.semantics?.calendar ? { date: new Date(`${input('date').value}T12:00:00Z`), timeZone: 'UTC' } : {}) };
+      ...(next.semantics?.calendar && input('date').value ? { date: new Date(`${input('date').value}T12:00:00Z`), timeZone: 'UTC' } : {}) };
     mounted = icons.mount($('stage'), next, options);
     input('weight').min = String(next.data.axes.weight[0]); input('weight').max = String(next.data.axes.weight[2]);
     input('opsz').min = String(next.data.axes.opsz[0]); input('opsz').max = String(next.data.axes.opsz[2]);
@@ -173,7 +173,13 @@ function play(reverse = false) {
   let start = Number(input('progress').value), end = reverse ? 0 : 1;
   if (!clip || start === end) { clip?.stop(); prepareClip(); start = reverse ? 1 : 0; }
   if (!clip) return;
-  if (clip.duration === 0) { progress(end); return; }
+  if (clip.duration === 0) {
+    if (reverse) {
+      mounted.set(select('animation').value === 'transition' && previous ? previous : options, { duration: 0 });
+      if (select('animation').value !== 'transition') mounted.effect(select('animation').value, { to: 0, duration: 0, reducedMotion: true });
+    }
+    clip = undefined; progress(end); return;
+  }
   clip.seek(start * duration); progress(start);
   const clock = motion.value(start);
   const unsubscribe = clock.subscribe(value => { clip?.seek(value * duration); progress(value); });
@@ -234,7 +240,11 @@ input('auto-optics').onchange = () => { $('optics-control').hidden = input('auto
 input('color').oninput = () => { colorChanged = true; updateDetail(); };
 $('states').onclick = event => { const state = (event.target as HTMLElement).closest<HTMLElement>('[data-state]')?.dataset.state; if (state) { selectedId = families[familyId][state]; apply({ ...options, state }); } };
 select('family').onchange = () => void choose(selectedId, select('family').value);
-input('date').onchange = () => { if (input('date').value && input('date').validity.valid) apply({ ...options, date: new Date(`${input('date').value}T12:00:00Z`), timeZone: 'UTC' }); };
+input('date').onchange = () => {
+  if (!input('date').validity.valid) return;
+  const { date, timeZone, ...rest } = options;
+  apply(input('date').value ? { ...rest, date: new Date(`${input('date').value}T12:00:00Z`), timeZone: 'UTC' } : rest);
+};
 select('animation').onchange = () => { clearClip(); if (mounted) mounted.set(options, { duration: 0 }); updateAnimationChoices(); updateDetail(); };
 input('reduce-motion').onchange = () => { if (input('reduce-motion').checked) { stop(); clip?.finish(); progress(1); } };
 $('play').onclick = () => play(); $('reverse').onclick = () => play(true);

@@ -1,0 +1,18 @@
+vulnerabilities:
+  - id: CVE-2026-112366
+    purls:
+      - pkg:npm/picomatch@4.0.5
+    expired_at: 2026-12-18
+    statement: >-
+      На 18.11.2026 https://github.com/advisories/GHSA-fc5q-39xc-vjpf не содержит
+      исправленной версии; registry latest 4.0.7 затронута, 4.0.8 отсутствует.
+      ReDoS требует атакующий glob-шаблон. Все установленные пути здесь ведут
+      только через devDependencies Vite/Vitest и их tinyglobby/fdir/mocker.
+      Шаблоны берутся из версионируемых конфигураций и package exports, а не из
+      поиска, URL, даты или SVG пользователя. Каталог собирает esbuild в статические
+      файлы; пакет Icons не имеет runtime dependencies. PR-код проверяется на
+      изолированных hosted runners с timeout и без checkout credentials.
+      scripts/check-security.mjs проверяет точный advisory, версию, dev-признак,
+      каждый путь и отсутствие опубликованного исправления; другая граница
+      не принимается. Второй Trivy-проход без ignorefile отклоняет исправленные
+      уязвимости. Повторный разбор не позднее 18.12.2026.

@@ -105,6 +105,16 @@ describe('browser-проекция принятых symbol capabilities', () => 
       .toThrow(/dist\/states\/status-circle\.js не имеет semantic group/);
   });
 
+  it('числовое семейство поставляется без выдуманного legacy transition API', () => {
+    const contract = symbolReleaseProjection(base, ['fixture'], ['calendar']);
+    const surface = { './states/calendar': ['default', 'family'] };
+    expect(symbolExplorerBrowserFiles(contract, ['fixture'], [], surface)).toContain('dist/states/calendar.js');
+    expect(() => symbolExplorerBrowserFiles(contract, ['fixture'], [], { './states/calendar': ['default'] }))
+      .toThrow(/не имеет semantic group/);
+    contract.files = contract.files.filter(file => file !== 'dist/states/calendar.d.ts');
+    expect(() => symbolExplorerBrowserFiles(contract, ['fixture'], [], surface)).toThrow(/declaration/);
+  });
+
   it('variation и будущий private runtime приходят из владельца package contract', () => {
     const contract = symbolReleaseProjection(base, ['fixture'], [], ['fixture']);
     const futureRuntime = 'dist/ir/fixture-source-runtime.js';
