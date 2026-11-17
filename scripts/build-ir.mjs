@@ -226,7 +226,7 @@ async function compileIrTargets({ root, staging, preview = false }) {
     const sourceDocument = loadSymbolSource(root);
     const payloads = Object.fromEntries(names.map(icon => [icon, compiledAuthorSymbolPayload(icon, authorSources[icon], compiler)]));
     const semantics = Object.fromEntries(names.map(icon => [icon,
-      compileSymbolMotion(icon, optics.symbols[icon].data, payloads[icon].capabilities, sourceDocument.symbols[icon])]));
+      compileSymbolMotion(icon, optics.symbols[icon].data, payloads[icon].capabilities, sourceDocument.symbols[icon], annotations.jointEvidence)]));
     const families = compileSymbolFamilies(semantics, sourceDocument, optics);
     for (const icon of names) {
       const payload = payloads[icon];

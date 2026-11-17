@@ -7,7 +7,7 @@ const propertyName = id => { const name = typeName(id); return name[0].toLowerCa
 
 /** Numeric transport decoded once into Kotlin arrays; no SVG parser is shipped. */
 export function encodeNativeSymbol(symbol, anatomy) {
-  const chunks = [Buffer.from([76, 73, 67, 78, 3])];
+  const chunks = [Buffer.from([76, 73, 67, 78, 4])];
   const byte = value => chunks.push(Buffer.from([value]));
   const count = value => {
     if (!Number.isInteger(value) || value < 0 || value > 0x7fffffff) throw new RangeError('native symbol count is out of range');
@@ -39,7 +39,7 @@ export function encodeNativeSymbol(symbol, anatomy) {
   for (const variant of ['outline', 'filled']) {
     encodePaths(symbol.data.variants[variant].paths);
     const semantic = symbol.semantics?.variants[variant];
-    // Version 3 readers also accept earlier exports with separate motion paths.
+    // Keep the v3 slot: v4 readers also accept earlier separate motion paths.
     // New exports reference contours in the sole static numeric path table.
     byte(0);
     const parts = semantic?.parts ?? anatomy.variants[variant].anatomy.parts;
@@ -59,10 +59,21 @@ export function encodeNativeSymbol(symbol, anatomy) {
         count(coordinates.length); coordinates.forEach(scalar); scalar(part.draw.width);
       }
       text(part.layer ?? ''); byte(part.negative ? 1 : 0);
+      byte(part.geometry ? 1 : 0);
+      if (part.geometry) {
+        count(part.geometry.commands.length); for (const command of part.geometry.commands) byte(opcodes[command]);
+        part.geometry.basis.forEach(count); count(part.geometry.points.length);
+        for (const point of part.geometry.points) {
+          byte(typeof point === 'number' ? 0 : 1);
+          if (typeof point === 'number') count(point); else point.forEach(scalar);
+        }
+      }
+      byte(part.pivot ? 1 : 0);
+      if (part.pivot) { part.pivot.basis.forEach(count); part.pivot.weights.forEach(scalar); }
     }
     const effects = Object.entries(semantic?.effects ?? {}); count(effects.length);
     for (const [name, effect] of effects) {
-      text(name); scalar(effect.duration); scalar(effect.rest); count(effect.tracks.length);
+      text(name); scalar(effect.duration); scalar(effect.rest); byte(effect.parameter === 'elapsed-hours' ? 1 : 0); count(effect.tracks.length);
       for (const track of effect.tracks) {
         const partIndex = parts.findIndex(part => part.id === track.partId);
         if (partIndex < 0) throw new TypeError(`Native effect references missing part: ${track.partId}`);

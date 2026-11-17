@@ -24,11 +24,23 @@ export interface SymbolPart {
   readonly pathIndex: number;
   /** Whole contours of the shared numeric path; omitted means the complete path. */
   readonly contourIndices?: readonly number[];
+  readonly geometry?: SymbolPathView;
+  readonly pivot?: SymbolPointProjection;
   readonly anchor: readonly [number, number];
   readonly draw?: Readonly<{ path: string; width: number }>;
   /** Parts of an authored subtraction share an isolated paint layer. */
   readonly layer?: string;
   readonly negative?: boolean;
+}
+export interface SymbolPointProjection {
+  readonly basis: readonly [number, number, number];
+  readonly weights: readonly [number, number, number];
+}
+/** Direct source-point indices or convex combinations; no second optical coordinate table. */
+export interface SymbolPathView {
+  readonly commands: string;
+  readonly basis: readonly [number, number, number];
+  readonly points: readonly (number | readonly [number, number, number])[];
 }
 export interface SymbolTrack {
   readonly partId: string;
@@ -38,6 +50,7 @@ export interface SymbolTrack {
 export interface SymbolGesture {
   readonly duration: number;
   readonly rest: number;
+  readonly parameter?: 'elapsed-hours';
   readonly tracks: readonly SymbolTrack[];
 }
 export interface SymbolVariantSemantics {

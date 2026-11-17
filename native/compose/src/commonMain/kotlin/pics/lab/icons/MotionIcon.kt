@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Paint
@@ -62,6 +63,8 @@ internal fun MotionIcon(motion: IconMotion, tint: Color, modifier: Modifier, siz
 /** One offscreen surface per declared subtractive composition, never the consumer's background. */
 internal class PreparedIconLayer(val paints: List<PreparedPaint>, val isolated: Boolean) {
     val bounds = Rect(-24f, -24f, 48f, 48f)
+    val origin = Offset(-24f, -24f)
+    val size = Size(72f, 72f)
     val composite = if (isolated) Paint() else null
 }
 
@@ -73,16 +76,19 @@ internal fun prepareLayers(prepared: List<PreparedPaint>): List<PreparedIconLaye
 
 internal fun DrawScope.drawIconLayers(layers: List<PreparedIconLayer>, tint: Color) {
     for (layer in layers) {
-        if (layer.isolated) drawContext.canvas.saveLayer(layer.bounds, layer.composite!!)
+        if (layer.isolated) {
+            layer.composite!!.alpha = layer.paints.first().paint.alpha.value.coerceIn(0f, 1f)
+            drawContext.canvas.saveLayer(layer.bounds, layer.composite)
+        }
         try {
             for (entry in layer.paints) {
                 val paint = entry.paint
-                val alpha = ((if (paint.part.negative) 1f else paint.alpha.value) * paint.opacity.value).coerceIn(0f, 1f)
+                val alpha = ((if (layer.isolated) 1f else paint.alpha.value) * paint.opacity.value).coerceIn(0f, 1f)
                 val progress = paint.draw.value.coerceIn(0f, 1f)
                 if (alpha <= 0f || progress <= 0f) continue
                 val path = entry.geometry.path
                 val mode = if (paint.part.negative) BlendMode.DstOut else BlendMode.SrcOver
-                val color = if (paint.part.negative) Color.Black else tint
+                val color = if (paint.part.negative) Color.Black else if (layer.isolated) Color.White else tint
                 translate(paint.x.value, paint.y.value) {
                     rotate(paint.rotation.value, entry.anchor) {
                         if (progress >= 1f || entry.measure == null) drawPath(path, color, alpha = alpha, blendMode = mode)
@@ -94,13 +100,15 @@ internal fun DrawScope.drawIconLayers(layers: List<PreparedIconLayer>, tint: Col
                     }
                 }
             }
+            if (layer.isolated) drawRect(tint, topLeft = layer.origin, size = layer.size, blendMode = BlendMode.SrcIn)
         } finally { if (layer.isolated) drawContext.canvas.restore() }
     }
 }
 
-internal class PreparedPaint(val paint: IconPaint, source: PreparedPathSource = PreparedPathSource(paint.pathData)) {
-    val geometry = PreparedPath(paint.pathData, paint.part.contourIndices, source)
-    val anchor = Offset(paint.part.anchorX, paint.part.anchorY)
+internal class PreparedPaint(val paint: IconPaint, private val source: PreparedPathSource = PreparedPathSource(paint.pathData)) {
+    val geometry = PreparedPath(paint.pathData, paint.part.contourIndices, source, paint.part.geometry)
+    var anchor = Offset(paint.part.anchorX, paint.part.anchorY)
+        private set
     val stroke = paint.part.draw?.let { Stroke(it.width, cap = StrokeCap.Round, join = StrokeJoin.Round) }
     private var previousWeight = Float.NaN
     private var previousOptical = Float.NaN
@@ -109,6 +117,7 @@ internal class PreparedPaint(val paint: IconPaint, source: PreparedPathSource = 
         val axes = paint.symbol.axes
         geometry.update(if (weight < axes.weight.default) 0 else 1, axes.weight.position(weight),
             if (optical < axes.opsz.default) 0 else 1, axes.opsz.position(optical))
+        paint.part.pivot?.let { anchor = Offset(it.sample(source.points, 0), it.sample(source.points, 1)) }
         previousWeight = weight; previousOptical = optical
     }
     val revealed = Path()

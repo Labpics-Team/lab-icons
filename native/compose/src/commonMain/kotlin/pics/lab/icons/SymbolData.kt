@@ -30,9 +30,23 @@ internal class SymbolVariantData(val paths: Array<SymbolPathData>, val parts: Ar
     val effects: Map<String, SymbolEffectData> = emptyMap(), val motionPaths: Array<SymbolPathData>? = null)
 internal class SymbolPartData(val id: String, val pathIndex: Int, val contourIndices: IntArray,
     val key: String = id, val anchorX: Float = 12f, val anchorY: Float = 12f, val draw: SymbolDrawData? = null,
-    val layer: String? = null, val negative: Boolean = false)
+    val layer: String? = null, val negative: Boolean = false,
+    val geometry: SymbolPathViewData? = null, val pivot: SymbolPointProjection? = null)
+internal class SymbolPointReference(val index: Int, val weights: FloatArray?)
+internal class SymbolPointProjection(val basis: IntArray, val weights: FloatArray) {
+    fun sample(source: FloatArray, axis: Int): Float = basis.indices.sumOf { (source[basis[it] * 2 + axis] * weights[it]).toDouble() }.toFloat()
+}
+internal class SymbolPathViewData(val commands: ByteArray, val basis: IntArray, val points: Array<SymbolPointReference>) {
+    fun sample(source: FloatArray, target: FloatArray) {
+        for (i in points.indices) for (axis in 0..1) {
+            val point = points[i]
+            target[i * 2 + axis] = if (point.weights == null) source[point.index * 2 + axis]
+                else basis.indices.sumOf { (source[basis[it] * 2 + axis] * point.weights[it]).toDouble() }.toFloat()
+        }
+    }
+}
 internal class SymbolDrawData(val commands: ByteArray, val coordinates: FloatArray, val width: Float)
-internal class SymbolEffectData(val duration: Int, val rest: Float, val tracks: Array<SymbolTrackData>)
+internal class SymbolEffectData(val duration: Int, val rest: Float, val tracks: Array<SymbolTrackData>, val elapsedHours: Boolean = false)
 internal class SymbolTrackData(val partIndex: Int, val property: Int, val times: FloatArray, val values: FloatArray)
 internal class SymbolDelta(val term: Int, val indices: IntArray, val values: FloatArray)
 internal class SymbolPathData(val commands: ByteArray, val coordinates: FloatArray, val evenOdd: Boolean, val terms: Array<SymbolDelta>) {

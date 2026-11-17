@@ -3,6 +3,7 @@ import { loadSymbolSource, projectAuthorAnatomy, projectAuthorBaseline } from '.
 import { loadAuthorBaseline } from './author-baseline.js';
 import { compileAuthorAnatomyWithEvidence } from './author-anatomy.js';
 import { compactDataLiteral } from './generated-module.js';
+import { compileOpticalClock } from './optical-clock.js';
 
 const hash = value => createHash('sha256').update(JSON.stringify(value)).digest('hex').slice(0, 24);
 const variants = ['outline', 'filled'];
@@ -11,15 +12,15 @@ const variants = ['outline', 'filled'];
 export function compileSemanticCorpus(root, corpus) {
   const document = loadSymbolSource(root);
   const author = loadAuthorBaseline(root, { manifest: projectAuthorBaseline(document) });
-  const { contracts } = compileAuthorAnatomyWithEvidence(author, projectAuthorAnatomy(document), undefined, { scope: 'source' });
+  const { contracts, jointEvidence } = compileAuthorAnatomyWithEvidence(author, projectAuthorAnatomy(document), undefined, { scope: 'source' });
   const semantics = Object.fromEntries(Object.keys(corpus.symbols).map(id => [id,
     compileSymbolMotion(id, corpus.symbols[id].data, Object.fromEntries(variants.map(variant => [variant,
-      { motion: { gestures: contracts[`${id}/${variant}`]?.gestures ?? [] } }])), document.symbols[id])]));
+      { motion: { gestures: contracts[`${id}/${variant}`]?.gestures ?? [] } }])), document.symbols[id], jointEvidence)]));
   return { semantics, families: compileSymbolFamilies(semantics, document, corpus) };
 }
 
 /** Semantic lowering consumes validated author gesture tracks, never infers intent from names. */
-export function compileSymbolMotion(symbol, data, capabilities, declaration) {
+export function compileSymbolMotion(symbol, data, capabilities, declaration, joints = {}) {
   return { variants: Object.fromEntries(variants.map(variant => {
     const anatomy = declaration.variants[variant].anatomy;
     const sourcePaths = data.variants[variant].paths;
@@ -61,6 +62,23 @@ export function compileSymbolMotion(symbol, data, capabilities, declaration) {
     const drawn = parts.filter(part => part.draw);
     if (drawn.length) effects.draw = { duration: 360, rest: 1,
       tracks: drawn.map(part => ({ partId: part.id, property: 'draw', stops: [[0, 0], [1, 1]] })) };
+    if (anatomy.joint) {
+      const joint = joints[`${symbol}/${variant}`];
+      if (!joint) throw new TypeError(`Clock requires its proven source joint: ${symbol}/${variant}`);
+      const pathIndex = anatomy.joint.pathIndex, path = sourcePaths[pathIndex], clock = compileOpticalClock(path, joint);
+      const clockLayer = hash({ path, joint: anatomy.joint });
+      const index = parts.findIndex(part => part.pathIndex === pathIndex);
+      const body = parts[index];
+      if (joint.polarity === 'negative') {
+        body.contourIndices = Array.from({ length: [...path.commands].filter(command => command === 'M').length }, (_, i) => i)
+          .filter(i => i !== anatomy.joint.contourIndex);
+        body.layer = clockLayer; body.key = hash({ clockLayer, body: body.contourIndices });
+      } else parts.splice(index, 1);
+      parts.push(...clock.limbs.map(limb => ({ ...limb, pathIndex, anchor: joint.bearing, pivot: clock.pivot,
+        layer: clockLayer, ...(joint.polarity === 'negative' && { negative: true }), key: hash({ clockLayer, id: limb.id }) })));
+      effects.advance = { duration: 900, rest: 0, parameter: 'elapsed-hours', tracks: clock.limbs.map((limb, index) =>
+        ({ partId: limb.id, property: 'rotate', stops: [[0, 0], [1, index === 0 ? 360 : 30]] })) };
+    }
     return [variant, { parts, effects }];
   })) };
 }

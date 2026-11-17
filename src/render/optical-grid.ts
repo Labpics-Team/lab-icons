@@ -58,7 +58,8 @@ export function sampleOpticalPath(path: OpticalPath, at: OpticalPosition,
 }
 
 /** Emits precompiled M/L/C/Z opcodes, with no tokenization or geometric inference. */
-export function opticalPathData(path: OpticalPath, coordinates: ArrayLike<number>, contours?: readonly number[]): string {
+export function opticalPathData(path: { readonly commands: string; readonly coordinates: ArrayLike<number> },
+  coordinates: ArrayLike<number>, contours?: readonly number[]): string {
   if (coordinates.length !== path.coordinates.length) throw new RangeError('optical path has a different coordinate count');
   let result = '', index = 0, contour = -1;
   for (const command of path.commands) {

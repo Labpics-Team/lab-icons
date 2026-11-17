@@ -1,0 +1,23 @@
+{
+  "ok": true,
+  "comparisons": 216,
+  "maximumMeanChannelDifference": 0.304918130446623,
+  "live": 0,
+  "groups": [
+    "time/outline",
+    "time/filled",
+    "history/outline",
+    "history/filled"
+  ],
+  "cases": [
+    "9 optical supports",
+    "rest and 12 hours",
+    "transparent/translucent color",
+    "common-pivot limb union",
+    "elapsed-hour units",
+    "reverse and interruption",
+    "next-hour continuation",
+    "selection returns source pose",
+    "dispose"
+  ]
+}

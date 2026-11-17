@@ -101,18 +101,20 @@ internal class PreparedPathSource(private val source: SymbolPathData) {
 
 /** Commands already identify whole contours; selection needs no SVG parser or geometry operation. */
 internal class PreparedPath(private val source: SymbolPathData, private val contours: IntArray = IntArray(0),
-    private val sampled: PreparedPathSource = PreparedPathSource(source)) {
+    private val sampled: PreparedPathSource = PreparedPathSource(source), private val view: SymbolPathViewData? = null) {
     val path = Path()
+    private val projected = view?.let { FloatArray(it.points.size * 2) }
     private var revision = -1
     fun update(weightSide: Int, weight: Float, opticalSide: Int, optical: Float) {
         sampled.update(weightSide, weight, opticalSide, optical)
         if (revision == sampled.revision) return
         revision = sampled.revision
-        val points = sampled.points
+        if (projected != null) view!!.sample(sampled.points, projected)
+        val points = projected ?: sampled.points
         path.reset()
         path.fillType = if (source.evenOdd) PathFillType.EvenOdd else PathFillType.NonZero
         var cursor = 0; var contour = -1
-        for (command in source.commands) {
+        for (command in view?.commands ?: source.commands) {
             if (command.toInt() == 0) contour++
             val selected = contours.isEmpty() || contour in contours
             when (command.toInt()) {

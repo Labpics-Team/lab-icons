@@ -15,22 +15,13 @@ private fun decodeSymbolBytes(id: String, bytes: ByteArray, depth: Int = 0): Sym
     require(reader.byte() == 76 && reader.byte() == 73 && reader.byte() == 67 && reader.byte() == 78) {
         "Unsupported compiled symbol format"
     }
-    val version = reader.byte(); require(version in 1..3)
+    val version = reader.byte(); require(version in 1..4)
     fun axis() = IconAxis(reader.float(), reader.float(), reader.float())
     val axes = IconAxes(axis(), axis())
     fun readPaths(): Array<SymbolPathData> = Array(reader.count()) {
         val commands = reader.bytes(reader.count())
-        require(commands.isNotEmpty())
         val coordinateCount = reader.count()
-        var open = false
-        val expectedCount = commands.sumOf { command -> when (command.toInt()) {
-            0 -> { require(!open); open = true; 2 }
-            1 -> { require(open); 2 }
-            2 -> { require(open); 6 }
-            3 -> { require(open); open = false; 0 }
-            else -> error("Unknown path opcode")
-        } }
-        require(!open) { "Compiled symbol contour is not closed" }
+        val expectedCount = closedPathCoordinateCount(commands)
         require(coordinateCount == expectedCount) { "Incompatible symbol path coordinates" }
         val coordinates = FloatArray(coordinateCount) { reader.float() }
         val fillRule = reader.byte(); require(fillRule in 0..1)
@@ -86,7 +77,33 @@ private fun decodeSymbolBytes(id: String, bytes: ByteArray, depth: Int = 0): Sym
                     else -> error("Invalid subtractive part flag")
                 }
                 require(!negative || layer != null) { "Subtractive parts require an isolated layer" }
-                SymbolPartData(partId, pathIndex, contours, key, x, y, draw, layer, negative)
+                val pointCount = partPaths[pathIndex].coordinates.size / 2
+                fun basis() = IntArray(3) { reader.count().also { require(it < pointCount) } }
+                fun weights() = FloatArray(3) { reader.float().also { require(it in 0f..1f) } }.also {
+                    require(kotlin.math.abs(it.sum() - 1f) <= .000001f)
+                }
+                val geometry = if (version < 4) null else when (reader.byte()) {
+                    0 -> null
+                    1 -> {
+                        val commands = reader.bytes(reader.count())
+                        val coordinateCount = closedPathCoordinateCount(commands)
+                        val basis = basis()
+                        val points = Array(reader.count()) { when (reader.byte()) {
+                            0 -> SymbolPointReference(reader.count().also { require(it < pointCount) }, null)
+                            1 -> SymbolPointReference(-1, weights())
+                            else -> error("Invalid source point reference")
+                        } }
+                        require(coordinateCount == points.size * 2) { "Incompatible symbol path references" }
+                        SymbolPathViewData(commands, basis, points)
+                    }
+                    else -> error("Invalid path view flag")
+                }
+                val pivot = if (version < 4) null else when (reader.byte()) {
+                    0 -> null
+                    1 -> SymbolPointProjection(basis(), weights())
+                    else -> error("Invalid pivot flag")
+                }
+                SymbolPartData(partId, pathIndex, contours, key, x, y, draw, layer, negative, geometry, pivot)
             }
         }
         val effects = if (version == 1) emptyMap() else buildMap {
@@ -94,6 +111,7 @@ private fun decodeSymbolBytes(id: String, bytes: ByteArray, depth: Int = 0): Sym
                 val name = reader.text(); require(name.isNotBlank() && !containsKey(name))
                 val durationValue = reader.float(); require(durationValue >= 0 && durationValue < Int.MAX_VALUE && durationValue % 1f == 0f)
                 val duration = durationValue.toInt(); val rest = reader.float(); require(rest in 0f..1f)
+                val elapsedHours = if (version < 4) false else when (reader.byte()) { 0 -> false; 1 -> true; else -> error("Invalid effect parameter") }
                 val tracks = Array(reader.count()) {
                     val part = reader.count(); require(part < parts.size)
                     val property = reader.byte(); require(property in 0..4)
@@ -106,7 +124,7 @@ private fun decodeSymbolBytes(id: String, bytes: ByteArray, depth: Int = 0): Sym
                     require(times.first() == 0f && times.last() == 1f)
                     SymbolTrackData(part, property, times, values)
                 }
-                put(name, SymbolEffectData(duration, rest, tracks))
+                put(name, SymbolEffectData(duration, rest, tracks, elapsedHours))
             }
         }
         SymbolVariantData(paths, parts, effects, motionPaths)
@@ -124,6 +142,20 @@ private fun decodeSymbolBytes(id: String, bytes: ByteArray, depth: Int = 0): Sym
     }
     require(reader.finished) { "Trailing compiled symbol data" }
     return SymbolData(id, axes, variants, states)
+}
+
+private fun closedPathCoordinateCount(commands: ByteArray): Int {
+    require(commands.isNotEmpty())
+    var open = false
+    val count = commands.sumOf { command -> when (command.toInt()) {
+        0 -> { require(!open); open = true; 2 }
+        1 -> { require(open); 2 }
+        2 -> { require(open); 6 }
+        3 -> { require(open); open = false; 0 }
+        else -> error("Unknown path opcode")
+    } }
+    require(!open) { "Compiled symbol contour is not closed" }
+    return count
 }
 
 private class SymbolReader(private val source: ByteArray) {

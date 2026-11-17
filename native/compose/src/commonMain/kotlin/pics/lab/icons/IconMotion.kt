@@ -88,27 +88,29 @@ public class IconMotion internal constructor(
 
     /** Explicit endpoints continue from current/rest phase; omission plays or replays the whole gesture. */
     public fun effect(name: String, to: Float? = null, durationMillis: Int? = null): MotionPlayback {
-        val endpoint = to ?: 1f
-        check(!disposed) { "Icon is disposed" }; require(endpoint.isFinite() && endpoint in 0f..1f)
+        check(!disposed) { "Icon is disposed" }; require(to == null || to.isFinite())
         val data = current.variants[variant.ordinal]
         val effect = requireNotNull(data.effects[name]) { "Unsupported icon effect: $name" }
         val duration = durationMillis ?: effect.duration; require(duration >= 0)
         val phase = phases.getOrPut(effect) { IconEffectPhase(controller.value(effect.rest), -1) }
         val currentPhase = if (phase.revision == stateRevision) phase.value.value else null
-        val replay = to == null && (currentPhase == null || currentPhase == 1f)
+        val endpoint = to ?: if (effect.elapsedHours) (currentPhase ?: effect.rest) + 1f else 1f
+        require(endpoint.isFinite() && (effect.elapsedHours || endpoint in 0f..1f))
+        val replay = !effect.elapsedHours && to == null && (currentPhase == null || currentPhase == 1f)
         val from = if (replay) 0f else currentPhase ?: effect.rest
         val bindings = effect.tracks.map { track ->
             val key = data.parts[track.partIndex].key
             val paint = paints.first { it.part.key == key }
             val value = paint.channel(track.property)
-            val turn = track.property == 3 && kotlin.math.abs(track.values.last() - track.values.first()) == 360f
-            val base = sampleTrack(track, from)
+            val turn = !effect.elapsedHours && track.property == 3 && kotlin.math.abs(track.values.last() - track.values.first()) == 360f
+            val base = sampleTrack(track, from, effect.elapsedHours)
             val start = if (replay && !turn) base else value.value
-            val interior = track.times.indices.filter { if (endpoint > from) track.times[it] > from && track.times[it] < endpoint
-                else track.times[it] < from && track.times[it] > endpoint }.let { if (endpoint < from) it.reversed() else it }
+            val interior = track.times.indices.filter { !effect.elapsedHours && (if (endpoint > from) track.times[it] > from && track.times[it] < endpoint
+                else track.times[it] < from && track.times[it] > endpoint) }.let { if (endpoint < from) it.reversed() else it }
             val points = interior.map { track.times[it] } + endpoint
             val times = points.map { if (endpoint == from) 1f else (it - from) / (endpoint - from) }
-            val targets = points.mapIndexed { index, point -> sampleTrack(track, point) + (start - base) * (if (turn) 1f else 1f - times[index]) }
+            val targets = points.mapIndexed { index, point -> sampleTrack(track, point, effect.elapsedHours) + (start - base) * (if (turn) 1f else 1f - times[index]) }
+            require(targets.all { it.isFinite() })
             IconEffectBinding(value, start, targets, listOf(0f) + times)
         }
         if (phase.value.value != from || replay) {
@@ -146,7 +148,8 @@ internal class IconPaint(val symbol: SymbolData, val variant: IconVariant, val p
     fun channel(property: Int): MotionValue = when (property) { 0 -> opacity; 1 -> x; 2 -> y; 3 -> rotation; 4 -> draw; else -> error("Unknown icon channel") }
 }
 
-internal fun sampleTrack(track: SymbolTrackData, progress: Float): Float {
+internal fun sampleTrack(track: SymbolTrackData, progress: Float, linear: Boolean = false): Float {
+    if (linear) return track.values.first() + progress * (track.values.last() - track.values.first())
     if (progress <= 0) return track.values.first()
     for (index in 1 until track.times.size) if (progress <= track.times[index]) {
         val fraction = (progress - track.times[index - 1]) / (track.times[index] - track.times[index - 1])
