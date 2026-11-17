@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "review": "in-progress",
+  "variants": {
+    "outline": {
+      "masterSha256": "07be6c7e5b87e9f4ba0facd8fb3b31dbfaba03cb9a3bb9b0f6f552d16b4aaf85",
+      "paths": [
+        { "pathIndex": 0, "kind": "rounded-bar", "profile": "positive-mark", "center": [{"midpoint":[{"segment":5,"field":"x"},{"segment":6,"field":"x"}]},{"segment":2,"field":"y"}], "capCenter": {"segment":5,"field":"x"} }
+      ]
+    },
+    "filled": {
+      "masterSha256": "219b9c8b2c5f0c268f16f66a795c3a707e2ec9a23f91cad845cd284ed910d276",
+      "paths": [
+        { "pathIndex": 0, "contourIndex": 0, "kind": "disc", "center": [{"segment":0,"field":"x"},{"segment":1,"field":"y"}], "radiusMeasure": "start-y", "radiusDelta": [0.15, 0, 0] },
+        { "pathIndex": 0, "contourIndex": 1, "kind": "rounded-bar", "profile": "counter-mark", "center": [{"midpoint":[{"segment":0,"field":"x"},{"segment":3,"field":"x"}]},{"segment":1,"field":"y"}], "capCenter": {"segment":3,"field":"x"} }
+      ]
+    }
+  }
+}

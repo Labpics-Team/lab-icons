@@ -11,7 +11,13 @@ export function compileOpticalCorpus(root, { preview = false } = {}) {
   const document = loadSymbolSource(root);
   const baseline = loadAuthorBaseline(root, { manifest: projectAuthorBaseline(document) });
   verifySymbolComponents(document, root);
-  const axes = document.axisDesign, symbols = {};
+  const axes = document.axisDesign, symbols = {}, profiles = document.opticalProfiles ?? {};
+  const withProfile = recipe => {
+    if (recipe.profile !== undefined && !Object.hasOwn(profiles, recipe.profile)) {
+      throw new TypeError(`optical master has an unknown profile: ${recipe.profile}`);
+    }
+    return { ...profiles[recipe.profile], ...recipe };
+  };
   for (const symbol of Object.values(document.symbols)) {
     if (!symbol.opticalMaster) {
       if (preview) continue;
@@ -27,13 +33,15 @@ export function compileOpticalCorpus(root, { preview = false } = {}) {
       const author = baseline.icons[symbol.id][variant], recipe = specification.variants[variant];
       if (recipe.masterSha256 !== author.sha256) throw new Error(`optical master source changed: ${symbol.id}/${variant}`);
       const source = authorPathEntries(author.normalizedSvg);
+      const recipes = recipe.paths.map(withProfile);
       const components = symbol.variants[variant].anatomy.parts.flatMap(part => {
         const component = document.components[part.component];
-        return component?.opticalRecipe ? [{ ...component.opticalRecipe, pathIndex: part.pathIndex,
+        return component?.opticalRecipe ? [{ ...withProfile(component.opticalRecipe), pathIndex: part.pathIndex,
           center: component.anchors.center.map(value => value * 24) }] : [];
       });
-      variants[variant] = compileOpticalGrid({ axes, source,
-        masters: opticalRecipeMasters({ axes, source, recipes: [...recipe.paths, ...components] }) });
+      const compiled = compileOpticalGrid({ axes, source,
+        masters: opticalRecipeMasters({ axes, source, recipes: [...recipes, ...components] }) });
+      variants[variant] = { paths: compiled.paths };
     }
     symbols[symbol.id] = { id: symbol.id, outline: baseline.icons[symbol.id].outline.artifactSvg,
       filled: baseline.icons[symbol.id].filled.artifactSvg, data: { version: 1, axes, variants } };

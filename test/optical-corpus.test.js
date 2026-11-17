@@ -5,6 +5,8 @@ import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { loadSymbolSource } from '../scripts/lib/symbol-source.js';
 import { compileOpticalCorpus } from '../scripts/lib/optical-corpus.js';
+import { pathBBox } from '../src/core/path-data.js';
+import { opticalPathData, opticalPosition, sampleOpticalPath } from '../src/render/optical-grid.ts';
 
 const repository = fileURLToPath(new URL('..', import.meta.url));
 const temporary = [];
@@ -14,13 +16,16 @@ const write = (root, file, bytes) => {
 afterEach(() => {
   for (const path of temporary.splice(0)) rmSync(path, { recursive: true, force: true, maxRetries: 3, retryDelay: 100 });
 });
-function fixture() {
+function fixture(ids = ['plus-circle']) {
   const root = mkdtempSync(join(tmpdir(), 'lab-icons-optics-')); temporary.push(root);
   const source = loadSymbolSource(repository);
-  source.symbols = { 'plus-circle': source.symbols['plus-circle'] };
-  delete source.symbols['plus-circle'].compatibilityStatic;
-  for (const variant of Object.values(source.symbols['plus-circle'].variants)) {
-    write(root, variant.provenance.master, readFileSync(join(repository, variant.provenance.master)));
+  source.symbols = Object.fromEntries(ids.map(id => [id, source.symbols[id]]));
+  for (const symbol of Object.values(source.symbols)) {
+    delete symbol.compatibilityStatic;
+    for (const variant of Object.values(symbol.variants)) {
+      write(root, variant.provenance.master, readFileSync(join(repository, variant.provenance.master)));
+    }
+    write(root, symbol.opticalMaster, readFileSync(join(repository, symbol.opticalMaster)));
   }
   const file = source.symbols['plus-circle'].opticalMaster;
   const recipe = JSON.parse(readFileSync(join(repository, file), 'utf8'));
@@ -38,6 +43,20 @@ it('projects real source-bound recipes and shared circle optics into both varian
   expect(variants.filled.paths).toHaveLength(1);
   expect(variants.outline.paths[1].terms.length).toBeGreaterThan(0);
   expect(variants.filled.paths[0].fillRule).toBe('evenodd');
+});
+
+it('shares the complete circle grid and changes the minus stroke independently of its length', () => {
+  const { root, source: document } = fixture(['plus-circle', 'minus-circle']);
+  const { symbols, axes } = compileOpticalCorpus(root, { preview: true });
+  const plus = symbols['plus-circle'].data.variants.outline.paths;
+  const minus = symbols['minus-circle'].data.variants.outline.paths;
+  expect(minus[1]).toEqual(plus[1]);
+  const source = pathBBox(opticalPathData(minus[0], minus[0].coordinates));
+  const heavy = pathBBox(opticalPathData(minus[0], sampleOpticalPath(minus[0], opticalPosition(axes, 600, 16))));
+  const profile = document.opticalProfiles['positive-mark'];
+  const thickness = profile.weightScale[2] * profile.opszScale[0];
+  expect(heavy.maxY - heavy.minY).toBeCloseTo((source.maxY - source.minY) * thickness, 10);
+  expect((heavy.maxX - heavy.minX) / (source.maxX - source.minX)).toBeLessThan(thickness);
 });
 
 it('refuses shipping missing or unreviewed masters and stale source-coordinate bindings', () => {

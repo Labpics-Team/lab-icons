@@ -136,6 +136,18 @@
     "weight": [300, 400, 600],
     "opsz": [16, 24, 48]
   },
+  "opticalProfiles": {
+    "positive-mark": {
+      "weightScale": [0.75, 1, 1.3],
+      "opszScale": [1.1, 1, 0.95],
+      "spanScale": [1.025, 1, 0.985]
+    },
+    "counter-mark": {
+      "weightScale": [1.15, 1, 0.85],
+      "opszScale": [1.1, 1, 0.96],
+      "spanScale": [1.025, 1, 0.985]
+    }
+  },
   "components": {
     "circle-outline": {
       "role": "container",
@@ -23182,6 +23194,7 @@
     },
     "minus-circle": {
       "id": "minus-circle",
+      "opticalMaster": "symbols/optics/minus-circle.json",
       "variants": {
         "outline": {
           "provenance": {

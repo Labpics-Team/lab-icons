@@ -5,14 +5,14 @@
     "outline": {
       "masterSha256": "1187b32d965b0d97f97dae969f8d62c9e573757b9588341d41368657bd6dde54",
       "paths": [
-        { "pathIndex": 0, "kind": "rounded-cross", "center": [{"segment":0,"field":"x"},{"segment":6,"field":"y"}], "halfWidth": [{"segment":1,"field":"x"},{"segment":2,"field":"y"}], "capCenter": [{"segment":3,"field":"x"},{"segment":1,"field":"y"}], "weightScale": [0.75, 1, 1.3], "opszScale": [1.1, 1, 0.95], "spanScale": [1.025, 1, 0.985] }
+        { "pathIndex": 0, "kind": "rounded-cross", "profile": "positive-mark", "center": [{"segment":0,"field":"x"},{"segment":6,"field":"y"}], "halfWidth": [{"segment":1,"field":"x"},{"segment":2,"field":"y"}], "capCenter": [{"segment":3,"field":"x"},{"segment":1,"field":"y"}] }
       ]
     },
     "filled": {
       "masterSha256": "f5d09b415f4d61fe92077f6fd73b3809323e1dd326a66351fc4ba8f4a881f565",
       "paths": [
         { "pathIndex": 0, "contourIndex": 0, "kind": "disc", "center": [{"segment":0,"field":"x"},{"segment":1,"field":"y"}], "radiusMeasure": "start-y", "radiusDelta": [0.15, 0, 0] },
-        { "pathIndex": 0, "contourIndex": 1, "kind": "rounded-cross", "center": [{"segment":0,"field":"x"},{"segment":4,"field":"y"}], "halfWidth": [{"segment":1,"field":"x"},{"segment":2,"field":"y"}], "capCenter": [{"segment":3,"field":"x"},{"segment":1,"field":"y"}], "weightScale": [1.15, 1, 0.85], "opszScale": [1.1, 1, 0.96], "spanScale": [1.025, 1, 0.985] }
+        { "pathIndex": 0, "contourIndex": 1, "kind": "rounded-cross", "profile": "counter-mark", "center": [{"segment":0,"field":"x"},{"segment":4,"field":"y"}], "halfWidth": [{"segment":1,"field":"x"},{"segment":2,"field":"y"}], "capCenter": [{"segment":3,"field":"x"},{"segment":1,"field":"y"}] }
       ]
     }
   }
