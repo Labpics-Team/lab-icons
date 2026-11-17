@@ -62,6 +62,8 @@ it('shares the complete circle grid and changes the minus stroke independently o
 
 it('refuses shipping missing or unreviewed masters and stale source-coordinate bindings', () => {
   const { root, source, recipe, file } = fixture();
+  recipe.review = 'unreviewed';
+  write(root, file, JSON.stringify(recipe));
   expect(() => compileOpticalCorpus(root)).toThrow('still need visual review');
   recipe.variants.outline.masterSha256 = '0'.repeat(64);
   write(root, file, JSON.stringify(recipe));
@@ -86,6 +88,7 @@ it('retains authored support corrections during regeneration and refuses stale b
   const { root, recipe, file } = fixture(['console']);
   const original = compileOpticalCorpus(root, { preview: true }).symbols.console.data;
   const corrections = [{ weight: 600, opsz: 16, paths: [{ pathIndex: 0, delta: [2, 0.01] }] }];
+  recipe.review = 'unreviewed';
   recipe.variants.filled.corrections = corrections;
   write(root, file, JSON.stringify(recipe));
   const run = () => runProcessTree(process.execPath, [join(repository, 'scripts/draft-optical-corpus.mjs'), '--root', root, '--regenerate'], {

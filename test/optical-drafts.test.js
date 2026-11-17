@@ -68,12 +68,12 @@ it('preserves joined contours and microscopic source slivers without weakening t
   }
 });
 
-it('compiles optical changes for all 660 variants and refuses unreviewed production', () => {
+it('compiles the accepted production axes for all 660 variants', () => {
   const root = fileURLToPath(new URL('..', import.meta.url));
-  const corpus = compileOpticalCorpus(root, { preview: true });
+  const corpus = compileOpticalCorpus(root);
   expect(Object.keys(corpus.symbols)).toHaveLength(330);
+  expect(corpus.axes).toEqual(axes);
   for (const symbol of Object.values(corpus.symbols)) for (const variant of Object.values(symbol.data.variants)) {
     expect(variant.paths.some(path => path.terms.length > 0)).toBe(true);
   }
-  expect(() => compileOpticalCorpus(root)).toThrow('still need visual review');
 });

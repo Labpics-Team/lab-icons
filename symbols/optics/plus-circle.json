@@ -1,6 +1,7 @@
 {
   "version": 1,
-  "review": "in-progress",
+  "review": "accepted",
+  "reviewedSha256":"3a1b9ada975ab581bb8d2e5023e39c374066d33027f5326b5384d8f63333f496",
   "variants": {
     "outline": {
       "masterSha256": "1187b32d965b0d97f97dae969f8d62c9e573757b9588341d41368657bd6dde54",

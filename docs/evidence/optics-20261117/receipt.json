@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "verdict": "pending-independent-visual-review",
+  "verdict": "accepted-independent-visual-review",
   "axes": {
     "weight": [
       300,
@@ -2567,5 +2567,13 @@
       ]
     },
     "staticBytes": 1096
+  },
+  "review": {
+    "sourceRevision": "f6d2777101d60125a392edc7d9630becf6d44006",
+    "report": "independent-review.md",
+    "reviewers": [
+      "final_plan_review",
+      "icons_completion_review"
+    ]
   }
 }
