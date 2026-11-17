@@ -7669,15 +7669,16 @@
    ]
   },
   "dist/motion/index.js": {
-   "baselineBytes": 26758,
-   "baselineGzipBytes": 9463,
-   "maxBytes": 26758,
-   "maxGzipBytes": 9463,
+   "baselineBytes": 27734,
+   "baselineGzipBytes": 9858,
+   "maxBytes": 27734,
+   "maxGzipBytes": 9858,
    "allowedModules": [
     "src/core/motion-sampler.js",
     "src/motion/effect-projection.ts",
     "src/motion/execution.js",
     "src/motion/index.ts",
+    "src/motion/path-view.ts",
     "src/motion/symbol-state.ts",
     "src/render/optical-grid.ts",
     "src/render/request.ts"
@@ -7687,10 +7688,10 @@
    ]
   },
   "dist/motion/symbol-state.d.ts": {
-   "baselineBytes": 1139,
-   "baselineGzipBytes": 517,
+   "baselineBytes": 1132,
+   "baselineGzipBytes": 520,
    "maxBytes": 1139,
-   "maxGzipBytes": 517,
+   "maxGzipBytes": 520,
    "allowedModules": [],
    "forbiddenNeedles": [
     "sourceMappingURL"
@@ -7700,10 +7701,10 @@
    "forbiddenNeedles": [
     "sourceMappingURL"
    ],
-   "baselineBytes": 2506,
-   "baselineGzipBytes": 894,
-   "maxBytes": 2506,
-   "maxGzipBytes": 894,
+   "baselineBytes": 3109,
+   "baselineGzipBytes": 1066,
+   "maxBytes": 3109,
+   "maxGzipBytes": 1066,
    "allowedModules": []
   },
   "dist/render/index.js": {
@@ -7724,10 +7725,10 @@
    "forbiddenNeedles": [
     "sourceMappingURL"
    ],
-   "baselineBytes": 1451,
-   "baselineGzipBytes": 638,
-   "maxBytes": 1451,
-   "maxGzipBytes": 638,
+   "baselineBytes": 1519,
+   "baselineGzipBytes": 646,
+   "maxBytes": 1519,
+   "maxGzipBytes": 646,
    "allowedModules": []
   },
   "dist/state-variations/playback-circle.d.ts": {
@@ -12779,10 +12780,10 @@
    ]
   },
   "dist/symbols/history.js": {
-   "baselineBytes": 72933,
-   "baselineGzipBytes": 23391,
-   "maxBytes": 72933,
-   "maxGzipBytes": 23391,
+   "baselineBytes": 80028,
+   "baselineGzipBytes": 26581,
+   "maxBytes": 80028,
+   "maxGzipBytes": 26581,
    "allowedModules": [],
    "forbiddenNeedles": [
     "sourceMappingURL",
@@ -15803,10 +15804,10 @@
    ]
   },
   "dist/symbols/time.js": {
-   "baselineBytes": 35419,
-   "baselineGzipBytes": 10812,
-   "maxBytes": 35419,
-   "maxGzipBytes": 10812,
+   "baselineBytes": 41145,
+   "baselineGzipBytes": 13527,
+   "maxBytes": 41145,
+   "maxGzipBytes": 13527,
    "allowedModules": [],
    "forbiddenNeedles": [
     "sourceMappingURL",

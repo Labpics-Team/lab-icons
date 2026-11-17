@@ -68,7 +68,7 @@
   "authored-time": {
    "entry": "import { glyph } from '@labpics/icons/symbols/time';\nconsole.log(glyph());\n",
    "baselineBytes": 8333,
-   "baselineGzipBytes": 3101,
+   "baselineGzipBytes": 3100,
    "maxBytes": 12652,
    "maxGzipBytes": 3250
   },
@@ -257,14 +257,14 @@
   "gesture-reload-ir-reference": {
    "entry": "import { glyph, glyphCapabilities } from '@labpics/icons/symbols/reload';\nimport { renderGlyphSvg } from '@labpics/icons/ir/render';\nimport { compileSymbolEffect } from '@labpics/icons/motion';\nconst value = glyph();\nconsole.log(renderGlyphSvg(value), compileSymbolEffect(value, glyphCapabilities(), 'reload.cycle', { duration: 400 }));\n",
    "baselineBytes": 26756,
-   "baselineGzipBytes": 7879,
+   "baselineGzipBytes": 7880,
    "maxBytes": 31702,
    "maxGzipBytes": 9756
   },
   "gesture-refresh-ir-reference": {
    "entry": "import { glyph, glyphCapabilities } from '@labpics/icons/symbols/refresh';\nimport { renderGlyphSvg } from '@labpics/icons/ir/render';\nimport { compileSymbolEffect } from '@labpics/icons/motion';\nconst value = glyph();\nconsole.log(renderGlyphSvg(value), compileSymbolEffect(value, glyphCapabilities(), 'refresh.cycle', { duration: 400 }));\n",
    "baselineBytes": 28367,
-   "baselineGzipBytes": 8686,
+   "baselineGzipBytes": 8688,
    "maxBytes": 33313,
    "maxGzipBytes": 10574
   },
