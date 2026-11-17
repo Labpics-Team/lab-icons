@@ -26,7 +26,7 @@ import java.io.File
 @OptIn(ExperimentalComposeUiApi::class)
 fun headlessSmoke() = runBlocking {
     val controls = linkedMapOf<String, Pair<IconMotion, Float>>()
-    val scene = ImageComposeScene(width = 640, height = 1100) {
+    val scene = ImageComposeScene(width = 640, height = 1180) {
         Column(Modifier.fillMaxSize().background(Color(0xfff4f4f6)).padding(24.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             BasicText("Lab Icons · time / history", style = TextStyle(Color(0xff17171b), 22.sp))
             Row(horizontalArrangement = Arrangement.spacedBy(24.dp)) {
@@ -35,14 +35,16 @@ fun headlessSmoke() = runBlocking {
             }
             for (symbol in listOf(time, history)) for (variant in IconVariant.entries) {
                 BasicText("${symbol.id} · $variant", style = TextStyle(Color(0xff17171b), 16.sp))
-                for ((weight, opsz) in listOf(300f to 16f, 400f to 24f, 600f to 48f)) {
+                val supports = listOf(300f to 16f, 400f to 24f, 600f to 48f) +
+                    if (symbol === history && variant == IconVariant.Outline) listOf(600f to 16f) else emptyList()
+                for ((weight, opsz) in supports) {
                     Row(Modifier.height(52.dp), horizontalArrangement = Arrangement.spacedBy(24.dp), verticalAlignment = Alignment.CenterVertically) {
                         BasicText("${weight.toInt()} / ${opsz.toInt()}", Modifier.width(110.dp), TextStyle(Color(0xff626270), 14.sp))
                         val tint = Color(0xff215da0).copy(alpha = .55f)
                         Icon(symbol, tint, size = 48.dp, weight = weight, opsz = opsz, variant = variant)
                         for (phase in listOf(0f, .25f, .5f, 1f)) {
                             val motion = rememberIconMotion(symbol, variant)
-                            controls["${symbol.id}/$variant/$weight/$phase"] = motion to phase
+                            controls["${symbol.id}/$variant/$weight/$opsz/$phase"] = motion to phase
                             Icon(symbol, tint, size = 48.dp, weight = weight, opsz = opsz, motion = motion)
                         }
                     }
@@ -52,7 +54,7 @@ fun headlessSmoke() = runBlocking {
     }
     try {
         scene.render(0L).close()
-        check(controls.size == 48)
+        check(controls.size == 52)
         for ((motion, phase) in controls.values) motion.effect("advance", to = phase, durationMillis = 0).finish()
         val motion = controls.values.first().first
         val first = motion.effect("advance", to = 2f, durationMillis = 1000); first.pause(); first.seek(250f)
@@ -60,6 +62,11 @@ fun headlessSmoke() = runBlocking {
         check(first.finished.await() == MotionResult.Stopped)
         reverse.pause(); reverse.seek(500f); reverse.finish()
         motion.effect("advance", durationMillis = 0).finish()
+        motion.effect("advance", to = 2f, durationMillis = 0).finish()
+        val reset = motion.setState("unselected", 1000); reset.pause(); reset.seek(500f)
+        val resumed = motion.effect("advance", durationMillis = 1000); resumed.pause(); resumed.seek(500f)
+        reset.finish(); resumed.finish()
+        motion.effect("advance", to = 0f, durationMillis = 0).finish()
         val file = File("build/native-icons-clock-headless.png").apply { parentFile.mkdirs() }
         scene.render(16_000_000L).use { image -> image.encodeToData(EncodedImageFormat.PNG)!!.use { file.writeBytes(it.bytes) } }
         val removed = motion.effect("advance"); motion.dispose()

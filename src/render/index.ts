@@ -28,7 +28,7 @@ export interface SymbolPart {
   readonly pivot?: SymbolPointProjection;
   readonly anchor: readonly [number, number];
   readonly draw?: Readonly<{ path: string; width: number }>;
-  /** Parts of an authored subtraction share an isolated paint layer. */
+  /** Parts whose coverage is painted once share an isolated layer, optionally with subtraction. */
   readonly layer?: string;
   readonly negative?: boolean;
 }

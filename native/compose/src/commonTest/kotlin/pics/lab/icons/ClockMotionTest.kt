@@ -24,10 +24,10 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class ClockMotionTest {
-    private fun raster(draw: DrawScope.() -> Unit): IntArray {
+    private fun raster(background: Color? = Color(0xffeeeeee), draw: DrawScope.() -> Unit): IntArray {
         val bitmap = ImageBitmap(96, 96)
         CanvasDrawScope().draw(Density(1f), LayoutDirection.Ltr, Canvas(bitmap), Size(96f, 96f)) {
-            drawRect(Color(0xffeeeeee)); scale(4f, 4f, pivot = Offset.Zero, block = draw)
+            background?.let { drawRect(it) }; scale(4f, 4f, pivot = Offset.Zero, block = draw)
         }
         return IntArray(96 * 96).also { bitmap.readPixels(it) }
     }
@@ -76,6 +76,52 @@ class ClockMotionTest {
             motion.effect("advance", durationMillis = 0).finish()
             assertEquals(360f, minute.value); assertEquals(30f, hour.value)
             motion.setState("unselected", 0).finish()
+            motion.dispose()
+        }
+        scope.cancel()
+    }
+
+    @Test fun nextHourStartsFromAnInterruptedReturnToTheSourcePose() = runTest {
+        val scope = CoroutineScope(coroutineContext + Job(coroutineContext[Job]) + BroadcastFrameClock())
+        for (symbol in listOf(time, history)) for (variant in IconVariant.entries) {
+            val motion = IconMotion(symbol, variant, scope)
+            val minute = motion.paints.first { it.part.id == "clock-minute" }.rotation
+            val hour = motion.paints.first { it.part.id == "clock-hour" }.rotation
+            motion.effect("advance", to = 2f, durationMillis = 0).finish()
+            val reset = motion.setState(if (variant == IconVariant.Filled) "selected" else "unselected", 1000)
+            reset.pause(); reset.seek(500f)
+            assertEquals(360f, minute.value); assertEquals(30f, hour.value)
+            val next = motion.effect("advance", durationMillis = 1000); next.pause()
+            assertEquals(360f, minute.value); assertEquals(30f, hour.value)
+            next.seek(500f)
+            assertEquals(540f, minute.value); assertEquals(45f, hour.value)
+            reset.finish()
+            assertEquals(540f, minute.value); assertEquals(45f, hour.value)
+            next.finish()
+            assertEquals(720f, minute.value); assertEquals(60f, hour.value)
+            motion.dispose()
+        }
+        scope.cancel()
+    }
+
+    @Test fun translucentClockIsPaintedOnceEvenWhenAHandCrossesTheEnclosure() = runTest {
+        val scope = CoroutineScope(coroutineContext + Job(coroutineContext[Job]) + BroadcastFrameClock())
+        for (symbol in listOf(time, history)) for (variant in IconVariant.entries) {
+            val motion = IconMotion(symbol, variant, scope)
+            val sources = mutableMapOf<SymbolPathData, PreparedPathSource>()
+            val paints = motion.paints.map { PreparedPaint(it, sources.getOrPut(it.pathData) { PreparedPathSource(it.pathData) }) }
+            val layers = prepareLayers(paints)
+            for (weight in listOf(300f, 400f, 600f)) for (opsz in listOf(16f, 24f, 48f)) {
+                paints.forEach { it.update(weight, opsz) }
+                for (step in 0..24) {
+                    motion.effect("advance", to = step / 2f, durationMillis = 0).finish()
+                    val pixels = raster(null) { drawIconLayers(layers, Color.Black.copy(alpha = .37f)) }
+                    assertTrue(pixels.all { it ushr 24 <= 95 }, "${symbol.id}/$variant/$weight/$opsz/${step / 2f} overpainted translucent ink")
+                    if (symbol === history && variant == IconVariant.Outline && weight == 600f && opsz == 16f && step == 1) {
+                        assertEquals(94, pixels[81 * 96 + 47] ushr 24)
+                    }
+                }
+            }
             motion.dispose()
         }
         scope.cancel()

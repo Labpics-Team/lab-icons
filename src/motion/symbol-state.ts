@@ -9,7 +9,7 @@ export interface IconTransitionOptions {
   readonly reducedMotion?: boolean;
 }
 export interface IconEffectOptions extends IconTransitionOptions {
-  /** Explicit endpoints continue from current phase (initially rest); omission plays/replays the gesture. */
+  /** Explicit endpoints continue; omission replays a gesture or advances elapsed time by one hour. */
   readonly to?: number;
 }
 export interface MountedIcon {
@@ -182,8 +182,14 @@ export function mountSymbol(runtime: SymbolMotionRuntime, root: Element, symbol:
     alive();
     const gesture: SymbolGesture | undefined = Object.hasOwn(semantics.effects, name) ? semantics.effects[name] : undefined;
     if (!gesture) throw new RangeError(`Symbol ${symbol.id} does not support effect ${name} in this state`);
-    const current = phases.get(name);
     const linear = gesture.parameter === 'elapsed-hours';
+    // A linear parameter has an unambiguous visible phase, including during a state reset.
+    const reference = linear ? gesture.tracks.find(track => track.stops[0]![1] !== track.stops.at(-1)![1]) : undefined;
+    const referencePart = reference && semantics.parts.find(part => part.id === reference.partId);
+    const referencePaint = referencePart && paints.get(referencePart.key);
+    const current = reference && referencePaint
+      ? (referencePaint[reference.property] - reference.stops[0]![1]) / (reference.stops.at(-1)![1] - reference.stops[0]![1])
+      : phases.get(name);
     const duration = timing(request, gesture.duration), to = request.to ?? (linear ? (current ?? gesture.rest) + 1 : 1);
     if (!Number.isFinite(to) || !linear && (to < 0 || to > 1)) throw new RangeError(linear ? 'Elapsed hours must be finite' : 'Icon effect endpoint must be between 0 and 1');
     const replay = !linear && request.to === undefined && (current === undefined || current === 1);

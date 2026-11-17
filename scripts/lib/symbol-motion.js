@@ -66,14 +66,18 @@ export function compileSymbolMotion(symbol, data, capabilities, declaration, joi
       const joint = joints[`${symbol}/${variant}`];
       if (!joint) throw new TypeError(`Clock requires its proven source joint: ${symbol}/${variant}`);
       const pathIndex = anatomy.joint.pathIndex, path = sourcePaths[pathIndex], clock = compileOpticalClock(path, joint);
-      const clockLayer = hash({ path, joint: anatomy.joint });
+      const clockLayer = hash({ paths: sourcePaths, joint: anatomy.joint });
       const index = parts.findIndex(part => part.pathIndex === pathIndex);
       const body = parts[index];
       if (joint.polarity === 'negative') {
         body.contourIndices = Array.from({ length: [...path.commands].filter(command => command === 'M').length }, (_, i) => i)
           .filter(i => i !== anatomy.joint.contourIndex);
-        body.layer = clockLayer; body.key = hash({ clockLayer, body: body.contourIndices });
       } else parts.splice(index, 1);
+      // Moving hands can cross the enclosure. Apply tint once to their complete coverage.
+      for (const part of parts) {
+        part.layer = clockLayer;
+        part.key = hash({ clockLayer, pathIndex: part.pathIndex, contourIndices: part.contourIndices });
+      }
       parts.push(...clock.limbs.map(limb => ({ ...limb, pathIndex, anchor: joint.bearing, pivot: clock.pivot,
         layer: clockLayer, ...(joint.polarity === 'negative' && { negative: true }), key: hash({ clockLayer, id: limb.id }) })));
       effects.advance = { duration: 900, rest: 0, parameter: 'elapsed-hours', tracks: clock.limbs.map((limb, index) =>

@@ -60,7 +60,7 @@ internal fun MotionIcon(motion: IconMotion, tint: Color, modifier: Modifier, siz
     })
 }
 
-/** One offscreen surface per declared subtractive composition, never the consumer's background. */
+/** One offscreen surface per declared coverage layer, never the consumer's background. */
 internal class PreparedIconLayer(val paints: List<PreparedPaint>, val isolated: Boolean) {
     val bounds = Rect(-24f, -24f, 48f, 48f)
     val origin = Offset(-24f, -24f)

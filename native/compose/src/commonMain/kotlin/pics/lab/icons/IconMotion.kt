@@ -86,14 +86,19 @@ public class IconMotion internal constructor(
         }
     }
 
-    /** Explicit endpoints continue from current/rest phase; omission plays or replays the whole gesture. */
+    /** Explicit endpoints continue; omission replays a gesture or advances elapsed time by one hour. */
     public fun effect(name: String, to: Float? = null, durationMillis: Int? = null): MotionPlayback {
         check(!disposed) { "Icon is disposed" }; require(to == null || to.isFinite())
         val data = current.variants[variant.ordinal]
         val effect = requireNotNull(data.effects[name]) { "Unsupported icon effect: $name" }
         val duration = durationMillis ?: effect.duration; require(duration >= 0)
         val phase = phases.getOrPut(effect) { IconEffectPhase(controller.value(effect.rest), -1) }
-        val currentPhase = if (phase.revision == stateRevision) phase.value.value else null
+        // Linear tracks expose their current phase even while a state reset changes the pose.
+        val reference = if (effect.elapsedHours) effect.tracks.firstOrNull { it.values.first() != it.values.last() } else null
+        val currentPhase = if (reference != null) {
+            val visible = paints.first { it.part.key == data.parts[reference.partIndex].key }.channel(reference.property).value
+            (visible - reference.values.first()) / (reference.values.last() - reference.values.first())
+        } else if (phase.revision == stateRevision) phase.value.value else null
         val endpoint = to ?: if (effect.elapsedHours) (currentPhase ?: effect.rest) + 1f else 1f
         require(endpoint.isFinite() && (effect.elapsedHours || endpoint in 0f..1f))
         val replay = !effect.elapsedHours && to == null && (currentPhase == null || currentPhase == 1f)

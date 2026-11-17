@@ -5,6 +5,8 @@ import checkmark from '../dist/symbols/checkmark.js';
 import checkmarkCircle from '../dist/symbols/checkmark-circle.js';
 import reload from '../dist/symbols/reload.js';
 import direction from '../dist/states/direction.js';
+import time from '../dist/symbols/time.js';
+import history from '../dist/symbols/history.js';
 
 class Element {
   constructor(tagName, document) { this.tagName = tagName; this.ownerDocument = document; this.attributes = new Map(); this.children = []; this.style = {}; }
@@ -43,6 +45,26 @@ const opacity = (icon, part) => Number(paths(icon).find(path => path.getAttribut
 const drawOffset = icon => Number(icon.element.children[0].children[0].children[0].getAttribute('stroke-dashoffset'));
 
 describe('semantic phase and visible intermediate poses', () => {
+  it.each([time, history])('$id advances one hour from an interrupted return to the source pose', async symbol => {
+    for (const variant of ['outline', 'filled']) {
+      const icon = scene(symbol, { variant });
+      const angle = part => Number(descendants(icon.element).find(node => node.getAttribute('data-part') === part)
+        .getAttribute('transform').match(/rotate\(([^ ]+)/)[1]);
+      icon.effect('advance', { to: 2, reducedMotion: true });
+      const reset = icon.set({ variant }, { duration: 1000 }); reset.pause(); reset.seek(500);
+      expect(angle('clock-minute')).toBe(360); expect(angle('clock-hour')).toBe(30);
+      const next = icon.effect('advance', { duration: 1000 }); next.pause();
+      expect(angle('clock-minute')).toBe(360); expect(angle('clock-hour')).toBe(30);
+      next.seek(500);
+      expect(angle('clock-minute')).toBe(540); expect(angle('clock-hour')).toBe(45);
+      reset.finish(); await reset.finished;
+      expect(angle('clock-minute')).toBe(540); expect(angle('clock-hour')).toBe(45);
+      next.finish(); await next.finished;
+      expect(angle('clock-minute')).toBe(720); expect(angle('clock-hour')).toBe(60);
+      icon.dispose();
+    }
+  });
+
   it('restores the complete negative draw pose after an interrupted selected round trip without a jump', async () => {
     const icon = scene(checkmarkCircle, { state: 'selected' });
     const guide = descendants(icon.element).find(node => node.getAttribute('stroke-dashoffset') !== null);
