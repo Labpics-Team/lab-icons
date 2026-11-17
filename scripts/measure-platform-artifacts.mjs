@@ -103,7 +103,10 @@ for (const icon of motionTargets.rotations) {
   rotationEntries[`gesture-${icon}-combined`] = `import { renderMotionSvg, compileMotionEffect } from '${entry}';\nconsole.log(renderMotionSvg(${renderArgument}), compileMotionEffect('${gestures[0].id}', ${request}));\n`;
 }
 const entries = {
+  ...Object.fromEntries(Object.entries(oldConsumers.scenarios).map(([name, scenario]) => [name, scenario.entry])),
   ...clockEntries,
+  'one-family-lottie': "import time from '@labpics/icons/symbols/time';\nimport { exportLottie } from '@labpics/icons/lottie';\nconsole.log(exportLottie(time, { gesture: 'advance' }));\n",
+  'one-family-dotlottie': "import time from '@labpics/icons/symbols/time';\nimport { exportLottie, packDotLottie } from '@labpics/icons/lottie';\nconst result = exportLottie(time, { gesture: 'advance' });\nconsole.log(result.ok && packDotLottie(result.animation));\n",
   'one-static': oldConsumers.scenarios['one-static'].entry,
   'authored-static': "import { outline } from '@labpics/icons/symbols/time';\nconsole.log(outline);\n",
   'glyph-one': "import { glyph } from '@labpics/icons/symbols/alert';\nconsole.log(glyph());\n",

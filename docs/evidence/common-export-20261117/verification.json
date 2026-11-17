@@ -1,0 +1,39 @@
+{
+  "capturedAt": "2026-11-17T20:02:41.421Z",
+  "baseSha": "0e551d218faa4d336eaaf088264cb161508d0285",
+  "workingTree": true,
+  "fullSuite": {
+    "command": "pnpm exec vitest run --reporter=default --reporter=json --outputFile=preview/symbol-lottie/full-suite.json",
+    "files": 193,
+    "passed": 2735,
+    "skipped": 27,
+    "failed": 0,
+    "success": true
+  },
+  "checks": [
+    "pnpm build:ir",
+    "pnpm exec tsc --noEmit",
+    "node scripts/check-package-size.js",
+    "node scripts/check-consumer-size.js",
+    "node scripts/check-export-surface.js",
+    "pnpm exec publint --strict",
+    "node scripts/check-treeshake.js",
+    "node scripts/check-docs-drift.js --write",
+    "node scripts/check-package-artifact.js --browser"
+  ],
+  "installedConsumer": {
+    "esm": true,
+    "types": true,
+    "attw": true,
+    "staticLottieComparisons": 660,
+    "motionLottieComparisons": 1170,
+    "dotLottieComparisons": 70,
+    "dotLottieMaxDelta": 0
+  },
+  "remaining": [
+    "Independent review",
+    "Native optical interpolation parity",
+    "Catalog integration",
+    "Release 0.4.0"
+  ]
+}

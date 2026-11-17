@@ -1,6 +1,4 @@
 import { parsePathData } from '../../src/core/path-data.js';
-import { compactDataLiteral, compactGeneratedModule, jsonDataLiteral } from './generated-module.js';
-import { transformSync } from 'esbuild';
 
 export class LottieGeometryError extends Error {
   constructor(code, message) { super(message); this.name = 'LottieGeometryError'; this.code = code; }
@@ -101,36 +99,22 @@ export function compileLottieGeometry(glyph) {
   }
 }
 
-export function renderLottieSymbolModule(icon, variants) {
-  if (!/^[a-z][a-z0-9-]*$/.test(icon)) throw new TypeError('lottie module: невалидное имя');
-  const lines = [
-    '/** GENERATED: target-contours одного авторского символа; path parser остаётся в сборке. */',
-    `import { glyph, glyphCapabilities } from '../symbols/${icon}.js';`,
-    "import { createLottieSymbol } from '../ir/lottie-runtime.js';",
-    `const symbol = /* @__PURE__ */ createLottieSymbol({ glyph, glyphCapabilities }, ${jsonDataLiteral(variants)});`,
-    'export function exportLottie(request) { return symbol.exportLottie(request); }',
-    'export function lottieCapabilities(variant) { return symbol.lottieCapabilities(variant); }', '',
-  ];
-  const compact = [...lines];
-  compact[3] = `const symbol = /* @__PURE__ */ createLottieSymbol({ glyph, glyphCapabilities }, ${compactDataLiteral(variants)});`;
-  const module = compactGeneratedModule([lines.join('\n'), compact.join('\n')]);
-  if (!Object.values(variants).some(target => target.ok && target.geometry.composition?.kind === 'compound')) return module;
-  // Сжатие пробелов удаляет PURE. Сжимается только data declaration;
-  // imports, аннотированный factory root и публичные wrappers сохраняются.
-  const data = transformSync(`const targets=${compactDataLiteral(variants)};`,
-    { target: 'es2022', treeShaking: false, minifySyntax: true, minifyWhitespace: true, legalComments: 'none' }).code;
-  const minified = [...lines.slice(1, 3), data,
-    'const symbol=/* @__PURE__ */createLottieSymbol({glyph,glyphCapabilities},targets);',
-    ...lines.slice(4),
+/** Compatibility import path delegates to the common numeric-symbol exporter. */
+export function renderLottieSymbolModule(icon) {
+  if (!/^[a-z][a-z0-9-]*$/.test(icon)) throw new TypeError('lottie module: invalid symbol name');
+  return [
+    `import symbol from '../symbols/${icon}.js';`,
+    "import { exportLottie as exportSymbol, lottieCapabilities as capabilities } from '../export/lottie.js';",
+    'export function exportLottie(request) { return exportSymbol(symbol, request); }',
+    'export function lottieCapabilities(options) { return capabilities(symbol, options); }', '',
   ].join('\n');
-  return compactGeneratedModule([module, minified]);
 }
 
 export function lottieSymbolDeclaration() {
   return [
-    "import type { LottieExportRequest, LottieExportResult, LottieCapabilities } from '../ir/lottie-types.js';",
-    "import type { IconVariant } from '../ir/compiler.js';",
+    "import type { LottieExportRequest, LottieExportResult, LottieCapabilities } from '../export/types.js';",
+    "import type { IconVariant, RenderIconOptions } from '../render/index.js';",
     'export declare function exportLottie(request?: LottieExportRequest): LottieExportResult;',
-    'export declare function lottieCapabilities(variant?: IconVariant): LottieCapabilities;', '',
+    'export declare function lottieCapabilities(options?: IconVariant | RenderIconOptions): LottieCapabilities;', '',
   ].join('\n');
 }

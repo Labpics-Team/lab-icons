@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { afterEach, expect, it } from 'vitest';
 import { runProcessTree } from './helpers/run-process-tree.js';
-import { createCleanPackSource, pnpmInvocation } from '../scripts/check-package-artifact.js';
+import { createCleanPackSource, cleanPackEnvironment, pnpmInvocation } from '../scripts/check-package-artifact.js';
 import { authorPathFingerprint, loadAuthorBaseline } from '../scripts/lib/author-baseline.js';
 import { loadSymbolSource, projectAuthorBaseline } from '../scripts/lib/symbol-source.js';
 import { stateArtifactConsumerSource, statePackageExpectations } from '../scripts/lib/state-artifact-consumer.js';
@@ -98,7 +98,7 @@ it('a new full snapshot preserves every unchanged master and builds all producti
   }
   write(captureRoot, 'receipt.json', JSON.stringify(manifest));
   const run = async (file, args, timeout = 30_000) => {
-    const result = await runProcessTree(file, args, { cwd: root, signal: AbortSignal.timeout(timeout) });
+    const result = await runProcessTree(file, args, { cwd: root, env: cleanPackEnvironment(), signal: AbortSignal.timeout(timeout) });
     expect(result.error, `${result.stdout}\n${result.stderr}`).toBeUndefined();
     expect(result.status, `${result.error ?? ''}\n${result.stdout}\n${result.stderr}`).toBe(0);
     return result.stdout;

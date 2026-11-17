@@ -33,7 +33,7 @@ import { loadSymbolSource } from './lib/symbol-source.js';
 import { compileSymbolMotion, compileSymbolFamilies, renderSymbolFamilyModule, symbolFamilyDeclaration } from './lib/symbol-motion.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const TARGETS = ['ir', 'symbols', 'variations', 'content-variations', 'motion', 'lottie', 'authoring', 'states', 'state-variations', 'gestures', 'render'];
+const TARGETS = ['ir', 'symbols', 'variations', 'content-variations', 'motion', 'lottie', 'export', 'authoring', 'states', 'state-variations', 'gestures', 'render'];
 // Motion сохраняет имена публичных exports; capsule задаёт имя glyph на своей границе.
 const MINIFIED_ENTRIES = new Set(['src/motion/index.ts', 'src/ir/author-capsule-runtime.ts']);
 const REQUIRED_DECLARATIONS = ['author-capsule-motion-types.d.ts', 'author-annulus-types.d.ts', 'author-content-types.d.ts', 'author-capsule-types.d.ts', 'author-catalog.generated.d.ts', 'author-provenance.d.ts', 'author-source.d.ts', 'authored-variation.d.ts', 'candidates.d.ts', 'catalog.generated.d.ts', 'compiler.d.ts', 'glyph-types.d.ts', 'index.d.ts', 'paint-types.d.ts', 'recipes.d.ts', 'render.d.ts', 'request.d.ts'];
@@ -157,7 +157,7 @@ async function compileIrTargets({ root, staging, preview = false }) {
       ...(motionNames.length ? [bundle(root, staging, 'src/motion/gesture-runtime.ts', 'ir/gesture-runtime.js')] : []),
       ...(capsuleMotionNames.length ? [bundle(root, staging, 'src/ir/author-capsule-motion-runtime.ts', 'ir/capsule-motion-runtime.js')] : []),
       ...(clockMotionNames.length ? [bundle(root, staging, 'src/ir/author-clock-motion-runtime.ts', 'ir/clock-motion-runtime.js')] : []),
-      bundle(root, staging, 'src/lottie/runtime.ts', 'ir/lottie-runtime.js', ['../motion/index.js']),
+      bundle(root, staging, 'src/lottie/index.ts', 'export/lottie.js'),
       ...stateRuntimeTargets(stateLaws).map(target => bundle(root, staging, target.entry, `ir/${target.runtime}`)),
       // Serializer остаётся build-only: runtime групп потребляет проверенные строки.
       bundle(root, declarations, 'src/ir/svg-assembly.ts', 'svg-assembly.mjs'),
@@ -181,7 +181,9 @@ async function compileIrTargets({ root, staging, preview = false }) {
       .replaceAll('../states/contour-types.js', '../ir/contour-state-types.js')
       .replaceAll('../states/types.js', '../ir/state-types.js')
       .replaceAll('../states/source-types.js', '../ir/source-state-types.js'));
-    copyFileSync(join(declarations, 'lottie/types.d.ts'), join(staging, 'ir/lottie-types.d.ts'));
+    for (const file of ['index.d.ts', 'symbol-export.d.ts', 'dotlottie.d.ts', 'types.d.ts']) {
+      copyFileSync(join(declarations, 'lottie', file), join(staging, 'export', file === 'index.d.ts' ? 'lottie.d.ts' : file));
+    }
     if (motionNames.length) {
       writeFileSync(join(staging, 'ir/gesture-types.d.ts'), readFileSync(join(declarations, 'motion/gesture-types.d.ts'), 'utf8')
         .replaceAll('./index.js', '../motion/index.js').replaceAll('../ir/author-provenance.js', './author-provenance.js'));
@@ -233,7 +235,7 @@ async function compileIrTargets({ root, staging, preview = false }) {
     const families = compileSymbolFamilies(semantics, sourceDocument, optics);
     for (const icon of names) {
       const payload = payloads[icon];
-      const { variation, targets } = payload;
+      const { variation } = payload;
       if (variationNames.has(icon) !== !!variation) throw new Error(`build-ir: ${icon}: compiled variation не совпадает с author spec`);
       if (contentVariationNames.includes(icon) !== !!payload.contentVariation) throw new Error(`build-ir: ${icon}: compiled content variation не совпадает с author spec`);
       if (!optics.symbols[icon]) throw new Error(`build-ir: optical masters are missing for ${icon}`);
@@ -256,7 +258,7 @@ async function compileIrTargets({ root, staging, preview = false }) {
         writeFileSync(join(staging, 'content-variations', `${icon}.js`), modules.contentVariation);
         writeFileSync(join(staging, 'content-variations', `${icon}.d.ts`), contentVariationModuleDeclaration(icon));
       }
-      writeFileSync(join(staging, 'lottie', `${icon}.js`), renderLottieSymbolModule(icon, targets));
+      writeFileSync(join(staging, 'lottie', `${icon}.js`), renderLottieSymbolModule(icon));
       writeFileSync(join(staging, 'lottie', `${icon}.d.ts`), lottieSymbolDeclaration());
     }
     for (const target of sourcePacketRuntimeTargets(compiledModules)) await bundle(root, staging, target.entry, `ir/${target.runtime}`);

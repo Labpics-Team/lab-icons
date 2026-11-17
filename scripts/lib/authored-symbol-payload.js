@@ -4,7 +4,6 @@ import { build } from 'esbuild';
 import { loadAuthorBaseline, authorSymbolPayload } from './author-baseline.js';
 import { compileAuthorAnatomy } from './author-anatomy.js';
 import { authorVariationCapability } from './author-variation.js';
-import { compileLottieGeometry } from './lottie-geometry.js';
 import { symbolExportName } from './symbol-modules.js';
 
 /** Один владелец target capabilities для build и release projection. */
@@ -14,14 +13,13 @@ export function compiledAuthorSymbolPayload(icon, sources, compiler) {
   const variation = projected.outline || projected.filled ? projected : undefined;
   const content = sources.outline.sourceContract.contentVariation;
   const contentVariation = content ? { outline: content } : undefined;
-  const targets = Object.fromEntries(['outline', 'filled'].map(variant => [variant, compileLottieGeometry(payload.source[variant])]));
   const capabilities = Object.fromEntries(['outline', 'filled'].map(variant => {
     const capability = payload.capabilities[variant], law = variation?.[variant];
     return [variant, { ...capability, ...(law && { variation: authorVariationCapability(law) }),
       motion: { ...capability.motion, adapters: { ...capability.motion.adapters,
-        lottie: targets[variant].ok && capability.motion.state === 'gesture-ready' ? 'lottie-web-svg-5.13' : 'not-exported' } } }];
+        lottie: capability.motion.state === 'gesture-ready' ? 'lottie-web-svg-5.13' : 'not-exported' } } }];
   }));
-  return { ...payload, capabilities, variation, targets, ...(contentVariation && { contentVariation }) };
+  return { ...payload, capabilities, variation, ...(contentVariation && { contentVariation }) };
 }
 
 /** Production projection выбирает имена; никакой ручной census возможностей. */

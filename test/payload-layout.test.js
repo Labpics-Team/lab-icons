@@ -159,13 +159,14 @@ describe('build-only проекция без повторов авторских
     expect(healthy).not.toContain('AUTHOR_PARITY_REQUIRED');
   });
 
-  it('Lottie не теряет PURE и сокращает actual unread module без изменения lowering', () => {
+  it('Lottie wrapper carries only the symbol import and delegates to the common exporter', () => {
     const payload = payloads['notifications-unread'];
     const module = renderLottieSymbolModule(payload.icon, payload.targets);
     const size = measure(module);
     expect(size.bytes).toBeLessThanOrEqual(13309);
     expect(size.gzipBytes).toBeLessThanOrEqual(4701);
-    expect(module).toContain('/* @__PURE__ */ createLottieSymbol');
+    expect(module).toContain("import symbol from '../symbols/notifications-unread.js'");
+    expect(size.bytes).toBeLessThan(400);
     expect(module).not.toContain('parsePathData');
   });
 });

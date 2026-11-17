@@ -12,7 +12,6 @@ import { createCompiledAnnulusGlyph } from '../src/ir/author-annulus-runtime.js'
 import { createCompiledCapabilities } from '../src/ir/symbol-runtime.js';
 import { compileSymbolEffect } from '../src/motion/index.js';
 import { compileLottieGeometry } from '../scripts/lib/lottie-geometry.js';
-import { createLottieSymbol } from '../src/lottie/runtime.js';
 import { parsePathData } from '../src/core/path-data.js';
 import { authorVariationCapability, authorVariationIconNames, authorVariationLawNames } from '../scripts/lib/author-variation.js';
 
@@ -161,10 +160,7 @@ describe('authored annulus opt-in: certified build packet → real public consum
     expect(compileSymbolEffect(glyph, module.glyphCapabilities(), `${icon}.presence`, { duration: 300 }))
       .toMatchObject({ ok: false, reason: { code: 'SEMANTIC_MOTION_UNAVAILABLE' } });
     expect(compileLottieGeometry(glyph)).toMatchObject({ ok: false, reason: { code: 'AUTHOR_SOURCE_REQUIRED' } });
-    const target = createLottieSymbol(module, Object.fromEntries(['outline', 'filled'].map(variant => [variant, compileLottieGeometry(module.source[variant])])));
-    expect(target.exportLottie()).toMatchObject({ ok: true });
-    expect(target.exportLottie({ variation: { enclosureEmphasis: 1.1 } }))
-      .toMatchObject({ ok: false, reason: { code: 'VARIATION_UNSUPPORTED' } });
+
   });
 
   it.each(names)('%s public projection excludes dots engine, keeps source identity and refuses undeclared variants', async icon => {

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { sampleMotionGesture, validateMotionGesture } from '../src/core/motion-sampler.js';
 import { compileSymbolEffect } from '../src/motion/index.js';
-import { lottieSymbols } from './helpers/lottie-symbols.js';
+import { authorMotionSymbols } from './helpers/author-motion-symbols.js';
 import { motionEntriesAt, proveMotionTrajectory } from '../scripts/lib/motion-trajectory.js';
 import { createGlyphCompiler } from '../src/ir/compiler.js';
 import grid from '../semantics/grid.json';
@@ -60,7 +60,7 @@ describe('направленное движение в единицах viewBox'
   });
 
   it('компилирует разные продолжения одинаковой позы по принятой фазе, сохраняя авторский path', () => {
-    const symbols = lottieSymbols();
+    const symbols = authorMotionSymbols();
     for (const name of ['chevron-forward', 'arrow-forward']) for (const variant of ['outline', 'filled']) {
       const symbol = symbols[name].symbol, glyph = symbol.glyph({ variant }), caps = symbol.glyphCapabilities(variant);
       const d = glyph.parts.map(part => part.d);

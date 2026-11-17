@@ -785,6 +785,11 @@
   "./ir/render": [
     "renderGlyphSvg"
   ],
+  "./lottie": [
+    "exportLottie",
+    "lottieCapabilities",
+    "packDotLottie"
+  ],
   "./lottie/accessibility": [
     "exportLottie",
     "lottieCapabilities"

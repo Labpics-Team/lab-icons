@@ -2,16 +2,14 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { loadAuthorBaseline, authorSymbolPayload } from '../../scripts/lib/author-baseline.js';
 import { compileAuthorAnatomy } from '../../scripts/lib/author-anatomy.js';
-import { compileLottieGeometry } from '../../scripts/lib/lottie-geometry.js';
 import { symbolExportName } from '../../scripts/lib/symbol-modules.js';
 import { createGlyphCompiler } from '../../src/ir/compiler.js';
 import { createCompiledGlyph, createCompiledCapabilities } from '../../src/ir/symbol-runtime.js';
-import { createLottieSymbol } from '../../src/lottie/runtime.js';
 
 export const nudgeNames = ['chevron-back', 'chevron-forward', 'chevron-up', 'chevron-down',
   'arrow-back', 'arrow-forward', 'arrow-up', 'arrow-down'];
 export const names = ['reload', 'refresh', 'ellipsis-horizontal', 'chatbubble-ellipses', 'volume-high', 'volume-middle', ...nudgeNames];
-export function lottieSymbols() {
+export function authorMotionSymbols() {
   const fixtureNames = [...names, 'mic-circle'];
   const root = fileURLToPath(new URL('../..', import.meta.url));
   const read = path => JSON.parse(readFileSync(new URL(path, new URL('../..', import.meta.url)), 'utf8'));
@@ -33,7 +31,6 @@ export function lottieSymbols() {
     const payload = authorSymbolPayload(icon, sources[icon], compiler);
     const symbol = { glyph: createCompiledGlyph(payload.icon, payload.source),
       glyphCapabilities: createCompiledCapabilities(payload.capabilities) };
-    const targets = Object.fromEntries(['outline', 'filled'].map(variant => [variant, compileLottieGeometry(payload.source[variant])]));
-    return [icon, { symbol, payload, targets, lottie: createLottieSymbol(symbol, targets), masters: baseline.icons[icon] }];
+    return [icon, { symbol, payload, masters: baseline.icons[icon] }];
   }));
 }

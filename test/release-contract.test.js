@@ -58,8 +58,11 @@ const DECLARATIONS = Object.freeze({
   'dist/ir/state-common-types.d.ts': "export interface StateRefusal { readonly ok: false }\n",
   'dist/ir/contour-state-types.d.ts': "import type { StateRefusal } from './state-common-types.js';\nexport type PreparedContourStateEffect = StateRefusal | { readonly ok: true };\n",
   'dist/symbols/fixture.d.ts': "import type { AuthorSourceGlyph } from '../ir/author-source.js';\nexport declare function glyph(): AuthorSourceGlyph;\n",
-  'dist/lottie/fixture.d.ts': "import type { LottieExportResult } from '../ir/lottie-types.js';\nexport declare function exportLottie(): LottieExportResult;\n",
-  'dist/ir/lottie-types.d.ts': "import type { GlyphIR } from './glyph-types.js';\nexport interface LottieExportResult { readonly glyph: GlyphIR }\n",
+  'dist/lottie/fixture.d.ts': "import type { LottieExportResult } from '../export/types.js';\nexport declare function exportLottie(): LottieExportResult;\n",
+  'dist/export/lottie.d.ts': "export { exportLottie } from './symbol-export.js'; export { packDotLottie } from './dotlottie.js';\n",
+  'dist/export/symbol-export.d.ts': "import type { LottieExportResult } from './types.js'; export declare function exportLottie(): LottieExportResult;\n",
+  'dist/export/dotlottie.d.ts': "import type { LottieExportResult } from './types.js'; export declare function packDotLottie(value: LottieExportResult): Uint8Array;\n",
+  'dist/export/types.d.ts': "export interface LottieExportResult { readonly ok: boolean }\n",
   'dist/ir/recipes.d.ts': "export type { RecipeFillPaint } from './paint-types.js';\nexport interface RecipeResult { readonly kind: string }\n",
   'dist/ir/candidates.d.ts': 'export declare function registerCandidates(): void;\n',
 });

@@ -1,8 +1,9 @@
 import type { IconSymbol, RenderIconOptions, SymbolGesture, SymbolPart, SymbolTrack, SymbolVariantSemantics } from '../render/index.js';
-import { resolveIconRequest } from '../render/request.js';
-import { opticalPathData, sampleOpticalPath, sampleOpticalScalar } from '../render/optical-grid.js';
+import { resolveSymbolPose, symbolGeometryTransition, type PreparedSymbolPart } from '../render/pose.js';
+import { opticalPathData } from '../render/optical-grid.js';
 import type { SymbolMotionRuntime, SymbolPlayback } from './execution.js';
-import { projectPathView, projectPoint } from './path-view.js';
+import { sampleSymbolTrack as sample, sampleSymbolTransition, sampleSymbolEffectValue,
+  symbolCoverageAlpha, symbolRest as rest, symbolPoseChannels as poseChannels } from './symbol-sampler.js';
 
 export interface IconTransitionOptions {
   readonly duration?: number;
@@ -22,22 +23,9 @@ export interface MountedIcon {
   /** Stops all controls and removes the mounted SVG. Idempotent. */
   dispose(): void;
 }
-type Paint = { element: SVGPathElement; part: SymbolPart; anchor: readonly [number, number]; offsetX: number; alpha: number; opacity: number; x: number; y: number; rotate: number; draw: number; guide?: SVGPathElement; mask?: SVGMaskElement };
+type Paint = { element: SVGPathElement; geometry: PreparedSymbolPart; part: SymbolPart; anchor: readonly [number, number]; offsetX: number; alpha: number; opacity: number; x: number; y: number; rotate: number; draw: number; guide?: SVGPathElement; mask?: SVGMaskElement };
 const ns = 'http://www.w3.org/2000/svg';
-const rest = { opacity: 1, x: 0, y: 0, rotate: 0, draw: 1 };
-const poseChannels = Object.keys(rest) as (keyof typeof rest)[];
 let nextMask = 0;
-
-function sample(track: SymbolTrack, progress: number, linear = false): number {
-  const stops = track.stops;
-  if (linear) return stops[0]![1] + progress * (stops.at(-1)![1] - stops[0]![1]);
-  if (progress <= stops[0]![0]) return stops[0]![1];
-  for (let index = 1; index < stops.length; index++) {
-    const left = stops[index - 1]!, right = stops[index]!;
-    if (progress <= right[0]) return left[1] + (right[1] - left[1]) * (progress - left[0]) / (right[0] - left[0]);
-  }
-  return stops[stops.length - 1]![1];
-}
 
 /** No SVG parser, geometry inference, clock or subscriptions on a static mount. */
 export function mountSymbol(runtime: SymbolMotionRuntime, root: Element, symbol: IconSymbol,
@@ -98,7 +86,7 @@ export function mountSymbol(runtime: SymbolMotionRuntime, root: Element, symbol:
   }
   function writePaint(paint: Paint) {
     const layer = paint.part.layer ? layers.get(paint.part.layer)! : undefined;
-    const coverage = layer ? layer.alpha > 0 ? paint.alpha / layer.alpha : 0 : paint.alpha;
+    const coverage = layer ? symbolCoverageAlpha(paint.alpha, layer.alpha) : paint.alpha;
     paint.element.setAttribute('opacity', String(coverage * paint.opacity));
     paint.element.setAttribute('transform', `translate(${paint.x + paint.offsetX} ${paint.y}) rotate(${paint.rotate} ${paint.anchor.join(' ')})`);
     if (paint.guide) {
@@ -108,16 +96,17 @@ export function mountSymbol(runtime: SymbolMotionRuntime, root: Element, symbol:
       paint.guide.setAttribute('visibility', paint.draw <= 0 ? 'hidden' : 'visible');
     }
   }
-  function addPaint(part: SymbolPart, d: string, fillRule: string): Paint {
+  function addPaint(geometry: PreparedSymbolPart, d: string, fillRule: string): Paint {
+    const part = geometry.part;
     const path = document.createElementNS(ns, 'path'); path.setAttribute('d', d); path.setAttribute('fill-rule', fillRule);
     path.setAttribute('data-part', part.id);
-    const paint: Paint = { element: path, part, anchor: part.anchor, offsetX: 0, alpha: 0, opacity: 1, x: 0, y: 0, rotate: 0, draw: 1 };
+    const paint: Paint = { element: path, geometry, part, anchor: part.anchor, offsetX: 0, alpha: 0, opacity: 1, x: 0, y: 0, rotate: 0, draw: 1 };
     if (part.draw) {
       const mask = document.createElementNS(ns, 'mask'); mask.id = `lab-icon-draw-${++nextMask}`;
       mask.setAttribute('maskUnits', 'userSpaceOnUse'); mask.setAttribute('x', '-24'); mask.setAttribute('y', '-24');
       mask.setAttribute('width', '72'); mask.setAttribute('height', '72');
       const guide = document.createElementNS(ns, 'path');
-      guide.setAttribute('d', part.draw.path); guide.setAttribute('fill', 'none'); guide.setAttribute('stroke', 'white');
+      guide.setAttribute('d', opticalPathData(part.draw.path, part.draw.path.coordinates)); guide.setAttribute('fill', 'none'); guide.setAttribute('stroke', 'white');
       guide.setAttribute('stroke-width', String(part.draw.width)); guide.setAttribute('stroke-linecap', 'round');
       guide.setAttribute('stroke-linejoin', 'round'); guide.setAttribute('pathLength', '1'); guide.setAttribute('stroke-dasharray', '1 1');
       mask.append(guide); definitions.append(mask); paint.guide = guide; paint.mask = mask;
@@ -136,16 +125,9 @@ export function mountSymbol(runtime: SymbolMotionRuntime, root: Element, symbol:
     } else element.append(path);
     return paint;
   }
-  function resolve(next: RenderIconOptions) {
-    const { data, variant, size, position: at, selected } = resolveIconRequest(symbol, next);
-    const declaration = selected.semantics;
-    const semantic = declaration?.variants[variant] ?? { effects: {}, parts: data.variants[variant].paths.map((_, index) =>
-      ({ id: `paint-${index}`, pathIndex: index, key: `${symbol.id}/${variant}/${index}`, anchor: [12, 12] as const })) };
-    return { data, variant, size, at, semantic };
-  }
   function set(next: RenderIconOptions, transition: IconTransitionOptions = {}) {
     alive();
-    const duration = timing(transition, 180), resolved = resolve(next);
+    const duration = timing(transition, 180), resolved = resolveSymbolPose(symbol, next);
     // All dependent motion releases before any next-state DOM mutation.
     for (const channel of [...active.keys()]) stop(channel);
     const generation = ++epoch;
@@ -154,24 +136,24 @@ export function mountSymbol(runtime: SymbolMotionRuntime, root: Element, symbol:
     semantics = resolved.semantic;
     element.setAttribute('width', String(resolved.size)); element.setAttribute('height', String(resolved.size));
     const desired = new Set<string>(), starts = new Map<Paint, typeof rest & { alpha: number }>();
-    const coordinates = new Map<number, Float64Array>();
-    for (const part of semantics.parts) {
-      const path = resolved.data.variants[resolved.variant].paths[part.pathIndex]!;
-      let sampled = coordinates.get(part.pathIndex);
-      if (!sampled) { sampled = sampleOpticalPath(path, resolved.at); coordinates.set(part.pathIndex, sampled); }
-      const projected = part.geometry ? projectPathView(part.geometry, sampled) : sampled;
-      const drawing = part.geometry ? { ...path, commands: part.geometry.commands, coordinates: projected } : path;
-      const d = opticalPathData(drawing, projected, part.geometry ? undefined : part.contourIndices);
+    const geometryTransitions = new Map<Paint, NonNullable<ReturnType<typeof symbolGeometryTransition>>>();
+    for (const prepared of resolved.paints) {
+      const { part, path, commands, coordinates, contours, strokeWidth } = prepared;
+      const d = opticalPathData({ commands, coordinates }, coordinates, contours);
       const key = part.key; desired.add(key);
       let paint = paints.get(key);
-      if (!paint) { paint = addPaint(part, d, path.fillRule); paints.set(key, paint); }
-      else { paint.part = part; paint.element.setAttribute('d', d); paint.element.setAttribute('data-part', part.id); }
-      paint.anchor = part.pivot ? projectPoint(sampled, part.pivot) : part.anchor;
-      paint.offsetX = part.offsetX ? sampleOpticalScalar(part.offsetX, resolved.at) : 0;
-      if (path.stroke) {
+      if (!paint) { paint = addPaint(prepared, d, path.fillRule); paints.set(key, paint); }
+      else {
+        const geometry = symbolGeometryTransition(paint.geometry, prepared);
+        if (geometry) geometryTransitions.set(paint, geometry);
+        paint.part = part; paint.geometry = prepared; paint.element.setAttribute('data-part', part.id);
+      }
+      paint.anchor = prepared.anchor;
+      paint.offsetX = prepared.offsetX;
+      if (strokeWidth !== undefined) {
         paint.element.setAttribute('fill', 'none');
         paint.element.setAttribute('stroke', part.layer ? part.negative ? 'black' : 'white' : 'currentColor');
-        paint.element.setAttribute('stroke-width', String(sampleOpticalScalar(path.stroke.width, resolved.at)));
+        paint.element.setAttribute('stroke-width', String(strokeWidth));
         paint.element.setAttribute('stroke-linecap', 'round'); paint.element.setAttribute('stroke-linejoin', 'round');
       }
       stateChannels.set(paint, new Set(poseChannels));
@@ -180,9 +162,13 @@ export function mountSymbol(runtime: SymbolMotionRuntime, root: Element, symbol:
       x: paint.x, y: paint.y, rotate: paint.rotate, draw: paint.draw });
     const write = (progress: number) => {
       for (const [paint, start] of starts) {
-        paint.alpha = start.alpha + ((desired.has(paint.part.key) ? 1 : 0) - start.alpha) * progress;
-        const channels = stateChannels.get(paint);
-        if (channels) for (const channel of channels) paint[channel] = start[channel] + (rest[channel] - start[channel]) * progress;
+        sampleSymbolTransition(paint, start, desired.has(paint.part.key), progress, stateChannels.get(paint));
+      }
+      for (const [paint, geometry] of geometryTransitions) {
+        const value = geometry.sample(progress); paint.geometry = value;
+        paint.element.setAttribute('d', opticalPathData(value, value.coordinates, value.contours));
+        paint.anchor = value.anchor; paint.offsetX = value.offsetX;
+        if (value.strokeWidth !== undefined) paint.element.setAttribute('stroke-width', String(value.strokeWidth));
       }
       // A shared shell stays opaque while old/new contents fade within its coverage.
       // When every part fades together, the full layer (including holes) fades once.
@@ -241,7 +227,7 @@ export function mountSymbol(runtime: SymbolMotionRuntime, root: Element, symbol:
       for (const { track, paint, start, base, turn } of bindings) {
         // Correct from the last written visible value; the correction vanishes at the endpoint.
         // A full turn retains its accumulated angle while keeping the same normalized phase.
-        paint[track.property] = sample(track, phase, linear) + (start - base) * (turn ? 1 : 1 - progress);
+        paint[track.property] = sampleSymbolEffectValue(track, phase, progress, start, base, linear, turn);
         writePaint(paint);
       }
     });

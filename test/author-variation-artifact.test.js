@@ -71,7 +71,7 @@ beforeAll(async () => {
     ['src/ir/author-capsule-runtime.ts', 'ir/capsule-runtime.js'],
     ['src/ir/authored-variation.ts', 'ir/variation-runtime.js'],
     ['src/motion/index.ts', 'motion/index.js'],
-    ['src/lottie/runtime.ts', 'ir/lottie-runtime.js'],
+    ['src/lottie/index.ts', 'export/lottie.js'],
   ]) await build({ entryPoints: [join(root, input)], outfile: join(dist, output), bundle: true,
     platform: 'node', format: 'esm', target: 'es2022', logLevel: 'silent' });
   for (const icon of names) {

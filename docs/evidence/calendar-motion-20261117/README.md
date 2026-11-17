@@ -74,6 +74,6 @@ transform задан; старый control остановлен, disposal осв
 отвергается вся эта форма, включая Unicode minus; имена `Etc/GMT+1` и
 `Etc/GMT-3` сохранены. Браузер проверяет короткие, слитные и разделённые offsets.
 
-После исправлений: `build:ir`, TypeScript, 74 теста/7 файлов, calendar 558+50,
+После исправлений на 2026-11-17: `build:ir`, TypeScript, 74 теста/7 файлов, calendar 558+50,
 clock 216+900, negative draw 54 и semantic motion — PASS. Эти результаты
 передаются на повторное независимое ревью.

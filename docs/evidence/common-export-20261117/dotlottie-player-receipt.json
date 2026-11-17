@@ -1,0 +1,632 @@
+[
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "motion": "advance",
+    "progress": 0,
+    "maximum": 0,
+    "ink": 189989,
+    "archiveBytes": 2170
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "motion": "advance",
+    "progress": 0.125,
+    "maximum": 0,
+    "ink": 190103,
+    "archiveBytes": 2170
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "motion": "advance",
+    "progress": 0.25,
+    "maximum": 0,
+    "ink": 181465,
+    "archiveBytes": 2170
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "motion": "advance",
+    "progress": 0.437,
+    "maximum": 0,
+    "ink": 190102,
+    "archiveBytes": 2170
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "motion": "advance",
+    "progress": 0.5,
+    "maximum": 0,
+    "ink": 190065,
+    "archiveBytes": 2170
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "motion": "advance",
+    "progress": 0.75,
+    "maximum": 0,
+    "ink": 190076,
+    "archiveBytes": 2170
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "motion": "advance",
+    "progress": 1,
+    "maximum": 0,
+    "ink": 183704,
+    "archiveBytes": 2170
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "motion": "transition",
+    "progress": 0,
+    "maximum": 0,
+    "ink": 146227,
+    "archiveBytes": 4888
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "motion": "transition",
+    "progress": 0.125,
+    "maximum": 0,
+    "ink": 158515,
+    "archiveBytes": 4888
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "motion": "transition",
+    "progress": 0.25,
+    "maximum": 0,
+    "ink": 171251,
+    "archiveBytes": 4888
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "motion": "transition",
+    "progress": 0.437,
+    "maximum": 0,
+    "ink": 190251,
+    "archiveBytes": 4888
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "motion": "transition",
+    "progress": 0.5,
+    "maximum": 0,
+    "ink": 196668,
+    "archiveBytes": 4888
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "motion": "transition",
+    "progress": 0.75,
+    "maximum": 0,
+    "ink": 222380,
+    "archiveBytes": 4888
+  },
+  {
+    "symbol": "time",
+    "variant": "outline",
+    "motion": "transition",
+    "progress": 1,
+    "maximum": 0,
+    "ink": 249113,
+    "archiveBytes": 4888
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "motion": "draw",
+    "progress": 0,
+    "maximum": 0,
+    "ink": 161212,
+    "archiveBytes": 1581
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "motion": "draw",
+    "progress": 0.125,
+    "maximum": 0,
+    "ink": 176133,
+    "archiveBytes": 1581
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "motion": "draw",
+    "progress": 0.25,
+    "maximum": 0,
+    "ink": 179441,
+    "archiveBytes": 1581
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "motion": "draw",
+    "progress": 0.437,
+    "maximum": 0,
+    "ink": 183853,
+    "archiveBytes": 1581
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "motion": "draw",
+    "progress": 0.5,
+    "maximum": 0,
+    "ink": 185843,
+    "archiveBytes": 1581
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "motion": "draw",
+    "progress": 0.75,
+    "maximum": 0,
+    "ink": 193752,
+    "archiveBytes": 1581
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "outline",
+    "motion": "draw",
+    "progress": 1,
+    "maximum": 0,
+    "ink": 197088,
+    "archiveBytes": 1581
+  },
+  {
+    "symbol": "calendar-number",
+    "variant": "outline",
+    "motion": "transition",
+    "progress": 0,
+    "maximum": 0,
+    "ink": 247996,
+    "archiveBytes": 1965
+  },
+  {
+    "symbol": "calendar-number",
+    "variant": "outline",
+    "motion": "transition",
+    "progress": 0.125,
+    "maximum": 0,
+    "ink": 250619,
+    "archiveBytes": 1965
+  },
+  {
+    "symbol": "calendar-number",
+    "variant": "outline",
+    "motion": "transition",
+    "progress": 0.25,
+    "maximum": 0,
+    "ink": 253308,
+    "archiveBytes": 1965
+  },
+  {
+    "symbol": "calendar-number",
+    "variant": "outline",
+    "motion": "transition",
+    "progress": 0.437,
+    "maximum": 0,
+    "ink": 257807,
+    "archiveBytes": 1965
+  },
+  {
+    "symbol": "calendar-number",
+    "variant": "outline",
+    "motion": "transition",
+    "progress": 0.5,
+    "maximum": 0,
+    "ink": 260280,
+    "archiveBytes": 1965
+  },
+  {
+    "symbol": "calendar-number",
+    "variant": "outline",
+    "motion": "transition",
+    "progress": 0.75,
+    "maximum": 0,
+    "ink": 267047,
+    "archiveBytes": 1965
+  },
+  {
+    "symbol": "calendar-number",
+    "variant": "outline",
+    "motion": "transition",
+    "progress": 1,
+    "maximum": 0,
+    "ink": 274886,
+    "archiveBytes": 1965
+  },
+  {
+    "symbol": "volume-high",
+    "variant": "outline",
+    "motion": "transition",
+    "progress": 0,
+    "maximum": 0,
+    "ink": 192618,
+    "archiveBytes": 6705
+  },
+  {
+    "symbol": "volume-high",
+    "variant": "outline",
+    "motion": "transition",
+    "progress": 0.125,
+    "maximum": 0,
+    "ink": 189917,
+    "archiveBytes": 6705
+  },
+  {
+    "symbol": "volume-high",
+    "variant": "outline",
+    "motion": "transition",
+    "progress": 0.25,
+    "maximum": 0,
+    "ink": 185224,
+    "archiveBytes": 6705
+  },
+  {
+    "symbol": "volume-high",
+    "variant": "outline",
+    "motion": "transition",
+    "progress": 0.437,
+    "maximum": 0,
+    "ink": 183458,
+    "archiveBytes": 6705
+  },
+  {
+    "symbol": "volume-high",
+    "variant": "outline",
+    "motion": "transition",
+    "progress": 0.5,
+    "maximum": 0,
+    "ink": 188982,
+    "archiveBytes": 6705
+  },
+  {
+    "symbol": "volume-high",
+    "variant": "outline",
+    "motion": "transition",
+    "progress": 0.75,
+    "maximum": 0,
+    "ink": 195255,
+    "archiveBytes": 6705
+  },
+  {
+    "symbol": "volume-high",
+    "variant": "outline",
+    "motion": "transition",
+    "progress": 1,
+    "maximum": 0,
+    "ink": 212483,
+    "archiveBytes": 6705
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "motion": "advance",
+    "progress": 0,
+    "maximum": 0,
+    "ink": 476389,
+    "archiveBytes": 1473
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "motion": "advance",
+    "progress": 0.125,
+    "maximum": 0,
+    "ink": 476254,
+    "archiveBytes": 1473
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "motion": "advance",
+    "progress": 0.25,
+    "maximum": 0,
+    "ink": 485642,
+    "archiveBytes": 1473
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "motion": "advance",
+    "progress": 0.437,
+    "maximum": 0,
+    "ink": 476214,
+    "archiveBytes": 1473
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "motion": "advance",
+    "progress": 0.5,
+    "maximum": 0,
+    "ink": 476276,
+    "archiveBytes": 1473
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "motion": "advance",
+    "progress": 0.75,
+    "maximum": 0,
+    "ink": 476277,
+    "archiveBytes": 1473
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "motion": "advance",
+    "progress": 1,
+    "maximum": 0,
+    "ink": 483488,
+    "archiveBytes": 1473
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "motion": "transition",
+    "progress": 0,
+    "maximum": 0,
+    "ink": 461971,
+    "archiveBytes": 2818
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "motion": "transition",
+    "progress": 0.125,
+    "maximum": 0,
+    "ink": 466278,
+    "archiveBytes": 2818
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "motion": "transition",
+    "progress": 0.25,
+    "maximum": 0,
+    "ink": 470623,
+    "archiveBytes": 2818
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "motion": "transition",
+    "progress": 0.437,
+    "maximum": 0,
+    "ink": 477391,
+    "archiveBytes": 2818
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "motion": "transition",
+    "progress": 0.5,
+    "maximum": 0,
+    "ink": 479681,
+    "archiveBytes": 2818
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "motion": "transition",
+    "progress": 0.75,
+    "maximum": 0,
+    "ink": 488512,
+    "archiveBytes": 2818
+  },
+  {
+    "symbol": "time",
+    "variant": "filled",
+    "motion": "transition",
+    "progress": 1,
+    "maximum": 0,
+    "ink": 497392,
+    "archiveBytes": 2818
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "motion": "draw",
+    "progress": 0,
+    "maximum": 0,
+    "ink": 509207,
+    "archiveBytes": 1669
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "motion": "draw",
+    "progress": 0.125,
+    "maximum": 0,
+    "ink": 494341,
+    "archiveBytes": 1669
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "motion": "draw",
+    "progress": 0.25,
+    "maximum": 0,
+    "ink": 490984,
+    "archiveBytes": 1669
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "motion": "draw",
+    "progress": 0.437,
+    "maximum": 0,
+    "ink": 486608,
+    "archiveBytes": 1669
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "motion": "draw",
+    "progress": 0.5,
+    "maximum": 0,
+    "ink": 484637,
+    "archiveBytes": 1669
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "motion": "draw",
+    "progress": 0.75,
+    "maximum": 0,
+    "ink": 476797,
+    "archiveBytes": 1669
+  },
+  {
+    "symbol": "checkmark-circle",
+    "variant": "filled",
+    "motion": "draw",
+    "progress": 1,
+    "maximum": 0,
+    "ink": 473413,
+    "archiveBytes": 1669
+  },
+  {
+    "symbol": "calendar-number",
+    "variant": "filled",
+    "motion": "transition",
+    "progress": 0,
+    "maximum": 0,
+    "ink": 420120,
+    "archiveBytes": 1894
+  },
+  {
+    "symbol": "calendar-number",
+    "variant": "filled",
+    "motion": "transition",
+    "progress": 0.125,
+    "maximum": 0,
+    "ink": 417406,
+    "archiveBytes": 1894
+  },
+  {
+    "symbol": "calendar-number",
+    "variant": "filled",
+    "motion": "transition",
+    "progress": 0.25,
+    "maximum": 0,
+    "ink": 414223,
+    "archiveBytes": 1894
+  },
+  {
+    "symbol": "calendar-number",
+    "variant": "filled",
+    "motion": "transition",
+    "progress": 0.437,
+    "maximum": 0,
+    "ink": 409500,
+    "archiveBytes": 1894
+  },
+  {
+    "symbol": "calendar-number",
+    "variant": "filled",
+    "motion": "transition",
+    "progress": 0.5,
+    "maximum": 0,
+    "ink": 407738,
+    "archiveBytes": 1894
+  },
+  {
+    "symbol": "calendar-number",
+    "variant": "filled",
+    "motion": "transition",
+    "progress": 0.75,
+    "maximum": 0,
+    "ink": 400727,
+    "archiveBytes": 1894
+  },
+  {
+    "symbol": "calendar-number",
+    "variant": "filled",
+    "motion": "transition",
+    "progress": 1,
+    "maximum": 0,
+    "ink": 393194,
+    "archiveBytes": 1894
+  },
+  {
+    "symbol": "volume-high",
+    "variant": "filled",
+    "motion": "transition",
+    "progress": 0,
+    "maximum": 0,
+    "ink": 238971,
+    "archiveBytes": 6104
+  },
+  {
+    "symbol": "volume-high",
+    "variant": "filled",
+    "motion": "transition",
+    "progress": 0.125,
+    "maximum": 0,
+    "ink": 233770,
+    "archiveBytes": 6104
+  },
+  {
+    "symbol": "volume-high",
+    "variant": "filled",
+    "motion": "transition",
+    "progress": 0.25,
+    "maximum": 0,
+    "ink": 226176,
+    "archiveBytes": 6104
+  },
+  {
+    "symbol": "volume-high",
+    "variant": "filled",
+    "motion": "transition",
+    "progress": 0.437,
+    "maximum": 0,
+    "ink": 221291,
+    "archiveBytes": 6104
+  },
+  {
+    "symbol": "volume-high",
+    "variant": "filled",
+    "motion": "transition",
+    "progress": 0.5,
+    "maximum": 0,
+    "ink": 227026,
+    "archiveBytes": 6104
+  },
+  {
+    "symbol": "volume-high",
+    "variant": "filled",
+    "motion": "transition",
+    "progress": 0.75,
+    "maximum": 0,
+    "ink": 231380,
+    "archiveBytes": 6104
+  },
+  {
+    "symbol": "volume-high",
+    "variant": "filled",
+    "motion": "transition",
+    "progress": 1,
+    "maximum": 0,
+    "ink": 249310,
+    "archiveBytes": 6104
+  }
+]

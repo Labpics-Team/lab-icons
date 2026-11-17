@@ -52,6 +52,10 @@
       "types": "./dist/symbols/*.d.ts",
       "import": "./dist/symbols/*.js"
     },
+    "./lottie": {
+      "types": "./dist/export/lottie.d.ts",
+      "import": "./dist/export/lottie.js"
+    },
     "./lottie/*": {
       "types": "./dist/lottie/*.d.ts",
       "import": "./dist/lottie/*.js"
@@ -99,6 +103,11 @@
     "dist/content-variations/plus-circle.js",
     "dist/content-variations/question-circle.d.ts",
     "dist/content-variations/question-circle.js",
+    "dist/export/dotlottie.d.ts",
+    "dist/export/lottie.d.ts",
+    "dist/export/lottie.js",
+    "dist/export/symbol-export.d.ts",
+    "dist/export/types.d.ts",
     "dist/gestures/history.d.ts",
     "dist/gestures/history.js",
     "dist/gestures/mic-circle.d.ts",
@@ -142,8 +151,6 @@
     "dist/ir/glyph-types.d.ts",
     "dist/ir/index.d.ts",
     "dist/ir/index.js",
-    "dist/ir/lottie-runtime.js",
-    "dist/ir/lottie-types.d.ts",
     "dist/ir/paint-types.d.ts",
     "dist/ir/recipes.d.ts",
     "dist/ir/recipes.js",
@@ -1637,6 +1644,7 @@
   "devDependencies": {
     "@arethetypeswrong/cli": "0.18.5",
     "@labpics/motion": "0.5.0",
+    "@lottiefiles/dotlottie-web": "0.83.2",
     "esbuild": "0.28.1",
     "fflate": "0.8.3",
     "lottie-web": "5.13.0",

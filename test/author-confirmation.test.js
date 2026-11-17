@@ -3,12 +3,10 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { loadAuthorBaseline, authorSymbolPayload } from '../scripts/lib/author-baseline.js';
 import { compileAuthorAnatomy } from '../scripts/lib/author-anatomy.js';
-import { compileLottieGeometry } from '../scripts/lib/lottie-geometry.js';
 import { symbolExportName } from '../scripts/lib/symbol-modules.js';
 import { createGlyphCompiler } from '../src/ir/compiler.js';
 import { createCompiledGlyph, createCompiledCapabilities } from '../src/ir/symbol-runtime.js';
 import { compileSymbolEffect } from '../src/motion/index.js';
-import { createLottieSymbol } from '../src/lottie/runtime.js';
 import { sampleMotionGesture } from '../src/core/motion-sampler.js';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
@@ -44,9 +42,7 @@ const consumers = Object.fromEntries(names.map(icon => {
   const payload = authorSymbolPayload(icon, sources[icon], compiler);
   const symbol = { glyph: createCompiledGlyph(payload.icon, payload.source),
     glyphCapabilities: createCompiledCapabilities(payload.capabilities) };
-  const lottie = createLottieSymbol(symbol, Object.fromEntries(['outline', 'filled'].map(variant =>
-    [variant, compileLottieGeometry(payload.source[variant])])));
-  return [icon, { symbol, lottie }];
+  return [icon, { symbol }];
 }));
 
 // Oracle читает raw master непосредственно, минуя production parser/assembler.
@@ -104,31 +100,8 @@ describe('confirmation.presence: внутренние состояния авт�
     });
   });
 
-  it.each(accepted)('%s/%s экспортирует тот же presence law в Lottie, не создавая TrimPath', (icon, variant) => {
-    const { lottie, symbol } = consumers[icon];
-    const source = symbol.glyph({ variant });
-    for (const [from, to] of [[0, 1], [1, 0], [0.37, 0.8]]) {
-      const result = lottie.exportLottie({ variant, gesture: `${icon}.presence`, duration: 1000, from, to });
-      expect(result.ok).toBe(true);
-      const animation = result.animation;
-      const mark = animation.layers.find(layer => layer.nm === 'confirmation-mark');
-      expect(mark.ks.o.a).toBe(1);
-      expect(mark.ks.o.k[0].s).toEqual([from * 100]);
-      expect(mark.ks.o.k.at(-1).s).toEqual([to * 100]);
-      expect(mark.ks.o.k.at(-1).t).toBe(60);
-      expect(animation.layers.flatMap(layer => layer.shapes).some(shape => shape.ty === 'tm')).toBe(false);
-      expect(animation.meta.labIcons.masterSha256).toBe(source.provenance.author.masterSha256);
-      if (icon !== 'checkmark') {
-        const enclosure = animation.layers.find(layer => layer.nm === 'confirmation-enclosure');
-        expect(enclosure.ks.o).toEqual({ a: 0, k: 100 });
-        expect(enclosure.shapes.filter(shape => shape.ty === 'sh')).toHaveLength(2);
-        expect(enclosure.shapes.at(-1).r).toBe(2);
-      }
-    }
-  });
-
   it.each(enclosed)('%s Filled: body и negative mark-hole сохраняются, presence не приписывается', icon => {
-    const { symbol, lottie } = consumers[icon];
+    const { symbol } = consumers[icon];
     const glyph = symbol.glyph({ variant: 'filled' }), caps = symbol.glyphCapabilities('filled');
     expect(rawPaths(baseline.icons[icon].filled.rawSvg)).toHaveLength(1);
     expect(glyph.parts[0].fillRule).toBe('evenodd');
@@ -136,9 +109,6 @@ describe('confirmation.presence: внутренние состояния авт�
     expect(caps.motion.state).toBe('source-only');
     expect(compileSymbolEffect(glyph, caps, `${icon}.presence`, { duration: 600 })).toMatchObject({
       ok: false, reason: { code: 'SEMANTIC_MOTION_UNAVAILABLE' },
-    });
-    expect(lottie.exportLottie({ variant: 'filled', gesture: `${icon}.presence`, duration: 1000 })).toMatchObject({
-      ok: false, reason: { code: 'MOTION_UNAVAILABLE' },
     });
     const invalid = structuredClone(document), master = baseline.icons[icon].filled;
     invalid.icons[icon].filled = { masterSha256: master.author.masterSha256,

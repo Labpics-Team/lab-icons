@@ -1,5 +1,4 @@
 import { createHash } from 'node:crypto';
-import { parsePathData } from '../../src/core/path-data.js';
 
 const opcodes = { M: 0, L: 1, C: 2, Z: 3 };
 const typeName = id => id.replace(/(^|-)([a-z])/g, (_, __, letter) => letter.toUpperCase());
@@ -50,10 +49,8 @@ export function encodeNativeSymbol(symbol, anatomy) {
       (part.anchor ?? [12, 12]).forEach(scalar);
       byte(part.draw ? 1 : 0);
       if (part.draw) {
-        const segments = parsePathData(part.draw.path);
-        count(segments.length); segments.forEach(segment => byte(opcodes[segment.cmd]));
-        const fields = { M: ['x','y'], L: ['x','y'], C: ['x1','y1','x2','y2','x','y'], Z: [] };
-        const coordinates = segments.flatMap(segment => fields[segment.cmd].map(key => segment[key]));
+        const { commands, coordinates } = part.draw.path;
+        count(commands.length); for (const command of commands) byte(opcodes[command]);
         count(coordinates.length); coordinates.forEach(scalar); scalar(part.draw.width);
       }
       text(part.layer ?? ''); byte(part.negative ? 1 : 0);

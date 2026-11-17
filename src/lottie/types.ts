@@ -1,12 +1,12 @@
-import type { IconVariant } from '../ir/glyph-types.js';
+import type { IconVariant, RenderIconOptions } from '../render/index.js';
 
-export type LottieRefusalCode = 'INVALID_REQUEST' | 'AUTHOR_SOURCE_REQUIRED' | 'COMPOSITION_UNSUPPORTED' |
-  'PAINT_UNSUPPORTED' | 'PATH_INVALID' | 'ARC_UNSUPPORTED' | 'OPEN_CONTOUR_UNSUPPORTED' |
-  'GEOMETRY_MISMATCH' | 'MOTION_UNAVAILABLE' | 'DURATION_NOT_FRAME_ALIGNED' | 'CANVAS_UNSUPPORTED' | 'VARIATION_UNSUPPORTED';
+export type LottieRefusalCode = 'INVALID_REQUEST' | 'COMPOSITION_UNSUPPORTED' |
+  'PAINT_UNSUPPORTED' | 'PATH_INVALID' | 'OPEN_CONTOUR_UNSUPPORTED' |
+  'MOTION_UNAVAILABLE' | 'CANVAS_UNSUPPORTED' | 'VARIATION_UNSUPPORTED' |
+  'SYMBOL_DATA_REQUIRED' | 'MOTION_UNSUPPORTED' | 'TOPOLOGY_UNSUPPORTED';
 
-export interface LottieExportRequest {
-  readonly variant?: IconVariant;
-  /** Без жеста — точный master. */
+export interface LottieExportRequest extends RenderIconOptions {
+  /** Without a gesture or transition, exports the requested static optical pose. */
   readonly gesture?: string;
   readonly duration?: number;
   readonly from?: number;
@@ -15,6 +15,7 @@ export interface LottieExportRequest {
   /** Lottie не имеет currentColor: цвет материализуется явно. */
   readonly color?: `#${string}`;
   readonly frameRate?: number;
+  readonly transition?: Readonly<{ from: RenderIconOptions; to: RenderIconOptions }>;
 }
 
 export interface LottieCapabilities {
@@ -31,7 +32,7 @@ export interface LottieAnimation {
   meta: { labIcons: {
     profile: 'lottie-web-svg-5.13'; icon: string; variant: IconVariant;
     logicalViewBox: number[]; offset: number[]; durationMs: number;
-    terminalFrame: number; terminalHoldFrames: 1; masterSha256: string;
+    terminalFrame: number; terminalHoldFrames: number; masterSha256?: string;
     gesture: string | null; from: number; to: number;
   } };
 }

@@ -260,6 +260,14 @@ export function createCleanPackSource(root, destination) {
   return resolvedDestination;
 }
 
+/** The isolated source borrows installed tools, not their original project path. */
+export function cleanPackEnvironment() {
+  // pnpm's workspace-state receipt belongs to the tooling checkout. Checking
+  // it against the intentionally copied source fails before prepack starts.
+  // Keep the original workspace policy and shared installation unchanged.
+  return { ...process.env, pnpm_config_verify_deps_before_run: 'false' };
+}
+
 function listFiles(root, current = root) {
   const files = [];
   for (const name of readdirSync(current).sort()) {
@@ -516,6 +524,7 @@ export function refusalModuleRunnerSource() {
 /** Полный pack/install/import/typecheck smoke. */
 export function checkPackageArtifact({
   root = ROOT,
+  verifyBrowser = false,
   platform = process.platform,
   pnpmCommand = platform === 'win32' ? 'pnpm.cmd' : 'pnpm',
   comspec = process.env.ComSpec || 'cmd.exe',
@@ -544,6 +553,7 @@ export function checkPackageArtifact({
         // pnpm pack запускает prepack. В source-копии dist отсутствует, так
         // что smoke доказывает именно clean lifecycle, а не локальный кэш.
         cwd: cleanSource,
+        env: cleanPackEnvironment(),
         encoding: 'utf8',
         stdio: ['ignore', 'pipe', 'pipe'],
       },
@@ -619,6 +629,9 @@ export function checkPackageArtifact({
         `import { compileSymbolEffect } from '@labpics/icons/motion';\n` +
         `import { renderGlyphSvg } from '@labpics/icons/ir/render';\n` +
         `import { renderIcon } from '@labpics/icons/render';\n` +
+        `import { exportLottie, packDotLottie } from '@labpics/icons/lottie';\n` +
+        `const exportedClock = exportLottie(timeSymbol.default, { weight: 500, gesture: 'advance', to: 2, duration: 317 });\n` +
+        `if (!exportedClock.ok || exportedClock.animation.meta.labIcons.terminalFrame !== 19.02 || packDotLottie(exportedClock.animation)[0] !== 80) throw new Error('common Lottie/dotLottie export broken');\n` +
         authorVariationArtifactConsumerSource() +
         `if (typeof accessibilityOutline !== 'string' || !accessibilityOutline.includes('<svg')) throw new Error('root ESM export broken');\n` +
         `if ('buildDirectionalArrow' in fullIr) throw new Error('full IR leaks lightweight recipe surface');\n` +
@@ -683,6 +696,13 @@ export function checkPackageArtifact({
       encoding: 'utf8',
       stdio: ['ignore', 'pipe', 'pipe'],
     });
+    if (verifyBrowser) for (const args of [['verify-symbol-lottie.mjs', 'corpus'], ['verify-symbol-lottie.mjs'], ['verify-symbol-dotlottie.mjs']]) {
+      const output = execFileSync(process.execPath, [join(root, 'scripts', args[0]), ...args.slice(1)], {
+        cwd: root, encoding: 'utf8', windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'],
+        env: { ...process.env, LAB_ICONS_CONSUMER_DIR: consumer },
+      });
+      process.stdout.write(output);
+    }
 
     writeFileSync(
       join(consumer, 'smoke.ts'),
@@ -696,11 +716,14 @@ export function checkPackageArtifact({
         `import { glyph as sourceActivityGlyph } from '@labpics/icons/symbols/ellipsis-horizontal';\n` +
         `import { glyph as ellipseGlyph } from '@labpics/icons/symbols/ellipse';\n` +
         `import { exportLottie as exportActivityLottie } from '@labpics/icons/lottie/ellipsis-horizontal';\n` +
+        `import { exportLottie, packDotLottie, type LottieExportResult } from '@labpics/icons/lottie';\n` +
         `import { compileSymbolEffect, type SymbolEffectResult, type SymbolOpacityStage } from '@labpics/icons/motion';\n` +
         `import { renderGlyphSvg } from '@labpics/icons/ir/render';\n` +
         `import { renderIcon, type IconSymbol } from '@labpics/icons/render';\n` +
         `import time from '@labpics/icons/symbols/time';\n` +
         `const opticalSymbol: IconSymbol = time;\n` +
+        `const exported: LottieExportResult = exportLottie(time, { transition: { from: { weight: 300 }, to: { weight: 600 } } });\n` +
+        `const archive: Uint8Array | false = exported.ok && packDotLottie(exported.animation);\n` +
         `const opticalSvg: string = renderIcon(opticalSymbol, { size: 20, weight: 500, opsz: 'auto' });\n` +
         `const varied: GlyphIR = activityGlyph({ variation: { dotScale: 1.1, spacingScale: 0.9 } });\n` +
         `const verticalVaried: GlyphIR = verticalGlyph({ variant: 'filled', variation: { spacingScale: 1.1 } });\n` +
@@ -998,7 +1021,7 @@ export function checkPackageArtifact({
 
 const isMain = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
 if (isMain) {
-  const { errors, files } = checkPackageArtifact();
+  const { errors, files } = checkPackageArtifact({ verifyBrowser: process.argv.includes('--browser') });
   if (errors.length > 0) {
     console.error(`check-package-artifact: HARD — ${errors.length} нарушений:`);
     for (const error of errors) console.error(`  - ${error}`);

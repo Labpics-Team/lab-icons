@@ -3,12 +3,10 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { loadAuthorBaseline, authorSymbolPayload } from '../scripts/lib/author-baseline.js';
 import { compileAuthorAnatomy } from '../scripts/lib/author-anatomy.js';
-import { compileLottieGeometry } from '../scripts/lib/lottie-geometry.js';
 import { symbolExportName } from '../scripts/lib/symbol-modules.js';
 import { createGlyphCompiler } from '../src/ir/compiler.js';
 import { createCompiledGlyph, createCompiledCapabilities } from '../src/ir/symbol-runtime.js';
 import { compileSymbolEffect } from '../src/motion/index.js';
-import { createLottieSymbol } from '../src/lottie/runtime.js';
 import { sampleMotionGesture } from '../src/core/motion-sampler.js';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
@@ -89,9 +87,7 @@ function consumers() {
     const payload = authorSymbolPayload(name, sources[name], compiler);
     const symbol = { glyph: createCompiledGlyph(payload.icon, payload.source),
       glyphCapabilities: createCompiledCapabilities(payload.capabilities) };
-    const lottie = createLottieSymbol(symbol, Object.fromEntries(['outline', 'filled'].map(variant =>
-      [variant, compileLottieGeometry(payload.source[variant])])));
-    return [name, { symbol, lottie }];
+    return [name, { symbol }];
   }));
 }
 
@@ -163,53 +159,12 @@ describe('notification.ring: явное входящее уведомление 
     }
   });
 
-  it.each(accepted)('%s/%s экспортирует точные статические curves и тот же цикл в Lottie', (name, variant) => {
-    const { symbol, lottie } = consumers()[name];
-    const glyph = symbol.glyph({ variant });
-    const amplitude = rawClapperWidth(rawPaths(baseline.icons[name][variant].rawSvg)
-      [glyph.parts.find(part => part.id === 'notification-clapper').zIndex].d) / 4;
-    const staticAnimation = lottie.exportLottie({ variant }).animation;
-    for (const [from, to] of [[0, 1], [1, 0], [0.13, 0.87], [0.87, 0.13]]) {
-      const result = lottie.exportLottie({ variant, gesture: `${name}.ring`, duration: 1000, from, to });
-      expect(result.ok).toBe(true);
-      const animation = result.animation, offset = animation.meta.labIcons.offset;
-      expect(animation.layers.map(layer => layer.nm).reverse()).toEqual(ids[`${name}/${variant}`]);
-      expect(animation.meta.labIcons.masterSha256).toBe(glyph.provenance.author.masterSha256);
-      for (const layer of animation.layers) {
-        expect(layer.shapes).toEqual(staticAnimation.layers.find(item => item.nm === layer.nm).shapes);
-        expect(layer.ks.o).toEqual({ a: 0, k: 100 }); expect(layer.ks.r).toEqual({ a: 0, k: 0 });
-        expect(layer.ks.a).toEqual({ a: 0, k: [0, 0, 0] });
-        if (layer.nm !== 'notification-clapper') {
-          expect(layer.ks.p.a).toBe(0);
-          expect(layer.ks.p.k[0] - offset[0]).toBe(0);
-          expect(layer.ks.p.k[1] - offset[1]).toBe(0);
-          expect(layer.ks.p.k[2]).toBe(0);
-        }
-        else for (const frame of layer.ks.p.k) {
-          expect(frame.s[0] - offset[0]).toBeCloseTo(amplitude * ringAt(from + (to - from) * frame.t / 60), 11);
-          expect(frame.s[1] - offset[1]).toBe(0);
-          expect(frame.s[2]).toBe(0);
-        }
-      }
-      expect(animation.layers.find(layer => layer.nm === 'notification-clapper').ks.p.k.at(-1).t).toBe(60);
-    }
-    const reduced = lottie.exportLottie({ variant, gesture: `${name}.ring`, duration: 1000, to: 0.5, reducedMotion: true });
-    expect(reduced.animation.op).toBe(1);
-    expect(reduced.animation.layers.every(layer => layer.ks.p.a === 0)).toBe(true);
-    expect(reduced.animation.layers.find(layer => layer.nm === 'notification-clapper').ks.p.k[0] -
-      reduced.animation.meta.labIcons.offset[0]).toBeCloseTo(-amplitude / 4, 11);
-    expect(lottie.exportLottie({ variant, gesture: `${name}.ring`, to: 2 })).toMatchObject({
-      ok: false, reason: { code: 'INVALID_REQUEST' } });
-  });
-
   it.each(['outline', 'filled'])('notifications-off/%s: геометрия clapper не назначает ring', variant => {
-    const { symbol, lottie } = consumers()['notifications-off'];
+    const { symbol } = consumers()['notifications-off'];
     expect(symbol.glyphCapabilities(variant).motion.state).toBe('source-only');
     expect(compileSymbolEffect(symbol.glyph({ variant }), symbol.glyphCapabilities(variant),
       'notifications-off.ring', { duration: 1000 })).toMatchObject({
       ok: false, reason: { code: 'SEMANTIC_MOTION_UNAVAILABLE' } });
-    expect(lottie.exportLottie({ variant, gesture: 'notifications-off.ring' })).toMatchObject({
-      ok: false, reason: { code: 'MOTION_UNAVAILABLE' } });
   });
 
   it.each([

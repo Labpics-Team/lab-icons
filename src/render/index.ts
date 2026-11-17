@@ -29,7 +29,7 @@ export interface SymbolPart {
   readonly pivot?: SymbolPointProjection;
   readonly offsetX?: OpticalScalar;
   readonly anchor: readonly [number, number];
-  readonly draw?: Readonly<{ path: string; width: number }>;
+  readonly draw?: Readonly<{ path: SymbolNumericPath; width: number }>;
   /** Parts whose coverage is painted once share an isolated layer, optionally with subtraction. */
   readonly layer?: string;
   readonly negative?: boolean;
@@ -37,6 +37,10 @@ export interface SymbolPart {
 export interface SymbolPointProjection {
   readonly basis: readonly [number, number, number];
   readonly weights: readonly [number, number, number];
+}
+export interface SymbolNumericPath {
+  readonly commands: string;
+  readonly coordinates: readonly number[];
 }
 /** Direct source-point indices or convex combinations; no second optical coordinate table. */
 export interface SymbolPathView {

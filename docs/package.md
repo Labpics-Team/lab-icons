@@ -47,6 +47,7 @@ pnpm add @labpics/icons
 | `@labpics/icons/render` | `./dist/render/index.js` | `./dist/render/index.d.ts` |
 | `@labpics/icons/motion` | `./dist/motion/index.js` | `./dist/motion/index.d.ts` |
 | `@labpics/icons/symbols/*` | `./dist/symbols/*.js` | `./dist/symbols/*.d.ts` |
+| `@labpics/icons/lottie` | `./dist/export/lottie.js` | `./dist/export/lottie.d.ts` |
 | `@labpics/icons/lottie/*` | `./dist/lottie/*.js` | `./dist/lottie/*.d.ts` |
 | `@labpics/icons/states/*` | `./dist/states/*.js` | `./dist/states/*.d.ts` |
 | `@labpics/icons/variations/*` | `./dist/variations/*.js` | `./dist/variations/*.d.ts` |
@@ -79,6 +80,11 @@ pnpm add @labpics/icons
 - `dist/content-variations/plus-circle.js`
 - `dist/content-variations/question-circle.d.ts`
 - `dist/content-variations/question-circle.js`
+- `dist/export/dotlottie.d.ts`
+- `dist/export/lottie.d.ts`
+- `dist/export/lottie.js`
+- `dist/export/symbol-export.d.ts`
+- `dist/export/types.d.ts`
 - `dist/gestures/history.d.ts`
 - `dist/gestures/history.js`
 - `dist/gestures/mic-circle.d.ts`
@@ -122,8 +128,6 @@ pnpm add @labpics/icons
 - `dist/ir/glyph-types.d.ts`
 - `dist/ir/index.d.ts`
 - `dist/ir/index.js`
-- `dist/ir/lottie-runtime.js`
-- `dist/ir/lottie-types.d.ts`
 - `dist/ir/paint-types.d.ts`
 - `dist/ir/recipes.d.ts`
 - `dist/ir/recipes.js`
@@ -1566,6 +1570,9 @@ pnpm add @labpics/icons
 
 - `dist/authoring/design-spec.d.ts`
 - `dist/authoring/symbol-source.d.ts`
+- `dist/export/dotlottie.d.ts`
+- `dist/export/symbol-export.d.ts`
+- `dist/export/types.d.ts`
 - `dist/ir/author-annulus-types.d.ts`
 - `dist/ir/author-capsule-motion-types.d.ts`
 - `dist/ir/author-capsule-types.d.ts`
@@ -1580,7 +1587,6 @@ pnpm add @labpics/icons
 - `dist/ir/contour-state-types.d.ts`
 - `dist/ir/gesture-types.d.ts`
 - `dist/ir/glyph-types.d.ts`
-- `dist/ir/lottie-types.d.ts`
 - `dist/ir/paint-types.d.ts`
 - `dist/ir/request.d.ts`
 - `dist/ir/source-state-types.d.ts`

@@ -4,11 +4,11 @@ import { spawn, spawnSync } from 'node:child_process';
 // parent alive until taskkill can find the complete tree, then await closed IO.
 // This covers foreground build commands, whose parent awaits its children.
 // Detached descendants are not supported; failed termination is an error.
-export function runProcessTree(file, args, { cwd, signal, maxBuffer = 10 * 1024 * 1024 } = {}) {
+export function runProcessTree(file, args, { cwd, env, signal, maxBuffer = 10 * 1024 * 1024 } = {}) {
   signal?.throwIfAborted();
   return new Promise(resolve => {
     const child = spawn(file, args, {
-      cwd, windowsHide: true, detached: process.platform !== 'win32', stdio: ['ignore', 'pipe', 'pipe'],
+      cwd, env, windowsHide: true, detached: process.platform !== 'win32', stdio: ['ignore', 'pipe', 'pipe'],
     });
     let error, stdout = '', stderr = '', bytes = 0, stopped = false, finished = false, closeDeadline;
     const finish = (status, killedBy) => {

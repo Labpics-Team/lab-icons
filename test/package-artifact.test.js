@@ -192,8 +192,10 @@ function validPackage() {
   write(root, 'dist/motion/execution.d.ts', 'export interface SymbolPlayback { stop(): void }\n');
   write(root, 'dist/motion/symbol-state.d.ts', 'export interface SymbolController { dispose(): void }\n');
   write(root, 'dist/motion/index.d.ts', "export type { SymbolController } from './symbol-state.js'; export type { SymbolPlayback } from './execution.js'; import type { StateRefusal } from '../ir/state-types.js'; import type { PreparedContourStateEffect } from '../ir/contour-state-types.js'; export declare const fixture: StateRefusal | PreparedContourStateEffect;\n");
-  write(root, 'dist/ir/lottie-runtime.js', 'import "../motion/index.js"; export const createLottieSymbol = () => ({});\n');
-  write(root, 'dist/ir/lottie-types.d.ts', readFileSync(new URL('../src/lottie/types.ts', import.meta.url), 'utf8'));
+  write(root, 'dist/export/lottie.js', 'export const exportLottie = () => ({}); export const lottieCapabilities = () => ({});\n');
+  for (const file of ['index.d.ts', 'types.d.ts', 'symbol-export.d.ts', 'dotlottie.d.ts']) {
+    write(root, `dist/export/${file === 'index.d.ts' ? 'lottie.d.ts' : file}`, readFileSync(new URL(`../dist/export/${file === 'index.d.ts' ? 'lottie.d.ts' : file}`, import.meta.url), 'utf8'));
+  }
   write(root, 'dist/symbols/fixture.js', 'import "../ir/symbol-runtime.js"; export const glyph = () => ({}); export const glyphCapabilities = () => ({});\n');
   write(root, 'dist/symbols/fixture.d.ts', "import type { AuthorSourceGlyph } from '../ir/author-source.js';\nexport declare function glyph(): AuthorSourceGlyph;\n");
   const unavailableTarget = { ok: false, reason: { code: 'PATH_INVALID', message: 'fixture' } };

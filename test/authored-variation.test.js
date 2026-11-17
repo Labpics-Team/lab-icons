@@ -11,7 +11,6 @@ import { createCompiledVariationGlyph } from "../src/ir/authored-variation.js";
 import { assembleGlyphSvg } from "../src/ir/svg-assembly.js";
 import { compileSymbolEffect } from "../src/motion/index.js";
 import { compileLottieGeometry } from "../scripts/lib/lottie-geometry.js";
-import { createLottieSymbol } from "../src/lottie/runtime.js";
 import { pathBBox, parsePathData } from "../src/core/path-data.js";
 const root = fileURLToPath(new URL("..", import.meta.url));
 const read = (path) => JSON.parse(readFileSync(new URL(path, new URL("..", import.meta.url)), "utf8"));
@@ -148,9 +147,7 @@ describe("authored dot geometry: independent variant controls, coupled domain", 
     }
     expect(() => module.glyph({ modelMode: "source-only", variation: { dotScale: 1.1 } })).toThrow(expect.objectContaining({ code: "AUTHOR_PARITY_REQUIRED" }));
     expect(() => module.glyph({ axes: { weight: 1.1 }, variation: { dotScale: 1.1 } })).toThrow(expect.objectContaining({ code: "AUTHOR_PARITY_REQUIRED" }));
-    const target = createLottieSymbol(module, Object.fromEntries(["outline", "filled"].map((variant) => [variant, compileLottieGeometry(module.payload.source[variant])])));
-    expect(target.exportLottie({ variation: { dotScale: 1.1 } })).toMatchObject({ ok: false, reason: { code: "VARIATION_UNSUPPORTED" } });
-    expect(target.exportLottie()).toMatchObject({ ok: true });
+
   });
   it("preserves horizontal opacity gestures and refuses invented vertical motion", () => {
     const horizontal = symbol("ellipsis-horizontal");

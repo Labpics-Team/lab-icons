@@ -362,7 +362,7 @@ describe('замкнутые symbol modules', () => {
     files['dist/ir/symbol-runtime.js'] = 'import "./request.js";import "./author-request-runtime.js";export const value=1;';
     files['dist/ir/author-request-runtime.js'] = 'import "./request.js";export const value=1;';
     files['dist/symbols/alert.js'] = 'import "../ir/symbol-runtime.js";export const value=1;';
-    files['dist/lottie/alert.js'] = 'import "../ir/lottie-runtime.js";export const value=1;';
+    files['dist/lottie/alert.js'] = 'import "../export/lottie.js";export const value=1;';
     files['dist/motion/index.js'] = 'import "../ir/contour-runtime.js";export const value=1;';
     const readText = file => files[file];
     expect(validateReleaseRuntimeDependencyGraph({ contract, readText })).toEqual([]);

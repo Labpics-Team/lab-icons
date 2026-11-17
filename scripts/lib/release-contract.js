@@ -15,7 +15,7 @@ const ROOT_KEYS = [
 ];
 const PRIMARY_KEYS = ['access', 'install', 'kind'];
 const FALLBACK_KEYS = ['immutable', 'kind', 'specifier'];
-const EXPORT_KEYS = ['.', './ir', './ir/candidates', './ir/recipes', './ir/render', './authoring', './motion', './render', './symbols/*', './lottie/*'];
+const EXPORT_KEYS = ['.', './ir', './ir/candidates', './ir/recipes', './ir/render', './authoring', './motion', './render', './symbols/*', './lottie', './lottie/*'];
 const EXPORT_CONDITIONS = Object.freeze({
   '.': ['types', 'import'],
   './ir': ['types', 'import'],
@@ -27,6 +27,7 @@ const EXPORT_CONDITIONS = Object.freeze({
   './motion': ['types', 'import'],
   './render': ['types', 'import'],
   './symbols/*': ['types', 'import'],
+  './lottie': ['types', 'import'],
   './lottie/*': ['types', 'import'],
   './states/*': ['types', 'import'],
   './variations/*': ['types', 'import'],

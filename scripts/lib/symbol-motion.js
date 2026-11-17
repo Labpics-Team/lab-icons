@@ -5,6 +5,7 @@ import { compileAuthorAnatomyWithEvidence } from './author-anatomy.js';
 import { compactDataLiteral } from './generated-module.js';
 import { compileOpticalClock } from './optical-clock.js';
 import { compileCalendarSymbol } from './calendar-symbol.js';
+import { opticalPathSource } from './optical-grid.js';
 
 const hash = value => createHash('sha256').update(JSON.stringify(value)).digest('hex').slice(0, 24);
 const variants = ['outline', 'filled'];
@@ -46,10 +47,12 @@ export function compileSymbolMotion(symbol, data, capabilities, declaration, joi
       if (draw && (!/^M[\d .,LC-]+$/.test(draw.path) || !Number.isFinite(draw.width) || draw.width <= 0)) {
         throw new TypeError(`Invalid authored draw guide: ${symbol}/${variant}/${id}`);
       }
+      const guide = draw && opticalPathSource({ d: draw.path, strokeWidth: draw.width });
       const contourIndices = subtract ? own.contourIndices : undefined;
       return { id, key: hash(layer ? { layer, pathIndex, contourIndices } : path), pathIndex,
         ...(contourIndices && { contourIndices }), anchor: own?.anchor?.map(value => value * 24) ?? [12, 12],
-        ...(draw && { draw }), ...(layer && { layer, ...(own.role === 'counter' && { negative: true }) }) };
+        ...(guide && { draw: { path: { commands: guide.commands, coordinates: guide.coordinates }, width: draw.width } }),
+        ...(layer && { layer, ...(own.role === 'counter' && { negative: true }) }) };
     });
     const effects = {};
     for (const gesture of capabilities?.[variant]?.motion?.gestures ?? []) {

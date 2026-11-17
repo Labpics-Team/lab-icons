@@ -3,9 +3,8 @@ import { chromium } from 'playwright';
 import { writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import checkmark from '../../../dist/symbols/checkmark-circle.js';
-import { opticalPathSource } from '../../../scripts/lib/optical-grid.js';
 process.chdir(fileURLToPath(new URL('../../../', import.meta.url)));
-const preparedGuides=Object.fromEntries(['outline','filled'].map(variant=>[variant,Object.fromEntries(checkmark.semantics.variants[variant].parts.filter(p=>p.draw).map(p=>[p.id,opticalPathSource({d:p.draw.path,strokeWidth:p.draw.width})]))]));
+const preparedGuides=Object.fromEntries(['outline','filled'].map(variant=>[variant,Object.fromEntries(checkmark.semantics.variants[variant].parts.filter(p=>p.draw).map(p=>[p.id,{...p.draw.path,strokeWidth:p.draw.width}]))]));
 const source = `
 import lottie from 'lottie-web';
 import * as motion from '@labpics/motion';

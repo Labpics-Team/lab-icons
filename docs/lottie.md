@@ -1,84 +1,94 @@
-# Экспортировать авторский символ в Lottie
+# Экспорт символа в Lottie и dotLottie
 
-**Diátaxis:** how-to.
-
-Субпуть `@labpics/icons/lottie/<name>` содержит заранее скомпилированные контуры
-выбранного символа. Статические SVG-импорты остаются самостоятельными.
-Экспорт использует semantic effects Lab Icons; player выбирает потребитель.
+`exportLottie` принимает тот же `IconSymbol` и свойства, что и `renderIcon`.
+В файл попадают выбранная оптика, дата, состояние или объявленный жест.
 
 ```ts
-import { exportLottie, lottieCapabilities } from '@labpics/icons/lottie/reload';
+import time from '@labpics/icons/symbols/time';
+import { exportLottie, lottieCapabilities, packDotLottie } from '@labpics/icons/lottie';
 
-const result = exportLottie({
-  variant: 'outline',
-  gesture: 'reload.cycle',
-  duration: 1000,
-  color: '#123456',
-  frameRate: 60,
+const result = exportLottie(time, {
+  variant: 'outline', weight: 500, opsz: 20,
+  gesture: 'advance', from: 0, to: 2, duration: 1000,
+  color: '#123456', frameRate: 60,
 });
 if (!result.ok) throw new Error(`${result.reason.code}: ${result.reason.message}`);
 const animationData = result.animation;
+const archive = packDotLottie(animationData); // Uint8Array для файла .lottie
 ```
 
-Для неподвижного мастера передайте только `variant` и `color`. Поддержанные
-жесты выбранного варианта возвращает `lottieCapabilities(variant).gestures`.
-`from` и `to` задают сегмент нормализованного прогресса; обратный сегмент
-экспортируется тем же способом. `reducedMotion: true` материализует конечную
-неподвижную позу. Параметры движения требуют явного `gesture`.
-Значения по умолчанию действуют только для пропущенного поля или `undefined`;
-явный `null` получает `INVALID_REQUEST`.
+Без `gesture` и `transition` экспортируется неподвижная поза. Доступные жесты
+возвращает `lottieCapabilities(symbol, options).gestures`; вместо options можно
+передать `'outline'` или `'filled'`. Пути `/lottie/<имя>` сохраняются как короткие
+обёртки общего exporter: у них первым аргументом остаются options.
 
-`<name>.nudge` у `chevron-{back,forward,up,down}` и
-`arrow-{back,forward,up,down}` переносит исходную цельную часть в объявленном
-физическом направлении и возвращает её обратно. Пик на середине прогресса
-равен 1/8 соответствующего размера исходного viewBox. Lottie получает
-position keyframes в этих же единицах; авторские контуры остаются прежними.
-Варианты с кругом требуют отдельной анатомии и этот жест не объявляют.
+`from` и `to` задают сегмент жеста, включая обратное направление. Обычно это
+диапазон 0…1; у `time.advance` и `history.advance` — прошедшие часы, включая
+отрицательные и несколько оборотов. `duration` задаётся в миллисекундах.
+`reducedMotion: true` сразу материализует конечную позу.
 
-`notifications.ring` и `notifications-unread.ring` доступны в Outline и
-Filled для входящего уведомления. Position keyframes двигают только
-`notification-clapper` по шкале `0 → +A → −A → +A/2 → −A/2 → 0`
-с равными пятыми прогресса; `A` — четверть ширины язычка в исходном viewBox.
-Корпус и badge остаются статическими layers; контуры и порядок сохранены.
-Обратный и частичный interval используют эту же шкалу, reduced motion
-сохраняет конечную позу. У `notifications-off` этот жест не объявлен.
-Для ring проверены source JSON и effect; player-приёмка остаётся открытой
-в [evidence среза](evidence/author-motion-20261101.md#входящее-уведомление).
+## Дата, состояние и оптика
 
-Target profile — `lottie-web-svg-5.13`: квалификация относится к SVG renderer
-`lottie-web` 5.13.0. Canvas, native players и dotLottie ещё требуют собственных
-проверок. `color` — RGB `#rrggbb`; Lottie JSON не наследует CSS `currentColor`.
+```ts
+import calendar from '@labpics/icons/states/calendar';
 
-При `layers` JSON содержит отдельную layer для каждой исходной части и общий
-fill scope для её контуров. Объявленный авторский `compound` с `evenodd`
-экспортируется статически одной layer и одной общей заливкой: отрицательные
-контуры сохраняют отверстия. Имена shapes сохраняют semantic part IDs и
-исходный порядок; build сохраняет cubic geometry, winding, anchors и авторский
-receipt. Например, Filled `mic-circle` сохраняет отрицательные корпус и опору.
-Независимое движение этих контуров получает отказ существующего motion owner;
-`lottieCapabilities('filled').gestures` у этого символа остаётся пустым.
-Невырожденные SVG arcs, открытые fill contours, неподдержанная композиция,
-маски и stroke получают точный отказ. Оси текущего author master не добавляются.
+const result = exportLottie(calendar, {
+  date: new Date('2026-11-17T12:00:00Z'), timeZone: 'Europe/Moscow',
+  transition: {
+    from: { state: 'date', weight: 300, opsz: 48 },
+    to: { state: 'grid', weight: 600, opsz: 16 },
+  },
+  duration: 300,
+});
+```
 
-Длительность задаётся как `N * 1000 / frameRate`, где `N` — целое число кадров.
-Строгая обратная проверка принимает это представление в JavaScript Number;
-произвольная длительность не округляется. Конечная поза стоит на
-`terminalFrame`; `op` включает дополнительный терминальный кадр. Например,
-при 1000 ms и 60 fps pose достигается на кадре 60, а длительность player
-составляет 61/60 секунды. Параметры и эта конвенция записаны в
-`animation.meta.labIcons`. Экспорт с невыразимой длительностью отвергается.
+Свойства `from`/`to` внутри `transition` дополняют общие свойства запроса.
+Совместимые части меняют координаты, pivot, толщину штриха и размещение;
+разные части заменяются crossfade. Ключ части задаёт correspondence.
+`gesture` и `transition` выбираются раздельно. Интерактивное прерывание
+принадлежит живому [Motion API](symbol-motion.md), а не записанному файлу.
 
-Вращение получает консервативный canvas по convex hull control points.
-Перенос учитывает внутренние вершины шкалы, даже когда начальная и конечная
-позы совпадают; reduced motion оставляет только конечную позу.
-`logicalViewBox` сохраняет размер исходного символа, `offset` — размещение
-этого размера внутри target canvas. При вёрстке по исходным 24 единицам
-масштабируйте внешние `w/h` тем же коэффициентом, чтобы padding не уменьшал glyph.
+Дата требует явного `Date` и именованной IANA zone. Часы и календарь не
+обращаются к текущему времени. `size` разрешает `opsz: 'auto'`, как у SVG;
+логические координаты анимации сохраняют исходный viewBox.
 
-Каждый export возвращает свежий изменяемый JSON: `lottie-web` нормализует
-tangents in-place. Повторный export сохраняет исходный template. После
-использования освобождайте player его штатным `destroy()`.
+## Геометрия и воспроизведение
 
-Состояние source и открытые delivery gates закреплены в
-[проверке target](evidence/lottie-20261101.md). Установка опубликованной версии
-с этим субпутём будет подтверждена отдельным release readback.
+Exporter читает числовые M/L/C/Z и семантические tracks символа напрямую.
+Пути SVG не разбираются во время исполнения. Только явно объявленный
+`part.layer` объединяет покрытие и вычитание через luminance matte;
+остальные части сохраняют самостоятельные paints и порядок. Цвет применяется
+после маски покрытия, opacity слоя — после окрашивания. `draw` использует
+числовой guide, stroke и trim-path matte, включая отрицательные штрихи Filled.
+
+`color` — `#rrggbb` или `#rrggbbaa`; JSON не наследует CSS `currentColor`.
+Профиль `lottie-web-svg-5.13` проверяется настоящим SVG renderer `lottie-web`
+5.13.0. Прямая в Lottie записывается кубической кривой с тем же геометрическим
+следом; сглаживание отдельных граничных пикселей может отличаться от SVG `L`.
+Геометрия, отверстия, порядок paints и конечные позы сохраняются.
+
+`terminalFrame = duration * frameRate / 1000` может быть дробным.
+`op = ceil(terminalFrame) + 1` оставляет конечную позу доступной player.
+Например, 317 ms при 60 fps дают terminalFrame 19.02 и op 21.
+Эта конвенция записана в `animation.meta.labIcons`.
+Canvas охватывает контрольные точки и траекторию движения;
+`logicalViewBox` и `offset` позволяют разместить анимацию относительно
+исходных 24 единиц без уменьшения значка из-за добавленных полей.
+
+Каждый вызов возвращает свежий изменяемый JSON, включая независимые объекты
+keyframes: `lottie-web` нормализует tangents на месте. Упакуйте JSON до передачи
+в player; после использования освободите player через `destroy()`.
+Архив dotLottie содержит [тот же JSON](dotlottie.md). Отдельная проверка
+dotLottie Web сравнивает загрузку архива и JSON в его WASM renderer;
+она не обещает пиксельного равенства между разными движками.
+
+Неверный запрос возвращает `INVALID_REQUEST`; отсутствующий жест —
+`MOTION_UNAVAILABLE`, неподдержанный track — `MOTION_UNSUPPORTED`.
+Некомпилированный символ даёт `SYMBOL_DATA_REQUIRED`, несовместимые пути —
+`TOPOLOGY_UNSUPPORTED`, непредставимая область — `CANVAS_UNSUPPORTED`.
+Открытая заливка, неизвестный paint и неверный числовой путь имеют отдельные
+коды отказа. Прежние operands `variation` получают `VARIATION_UNSUPPORTED`.
+
+Основание: [Lottie layers](https://lottie.github.io/lottie-spec/1.0/specs/layers/),
+[Lottie shapes](https://lottie.github.io/lottie-spec/1.0/specs/shapes/),
+[dotLottie v2](https://dotlottie.io/spec/2.0/).

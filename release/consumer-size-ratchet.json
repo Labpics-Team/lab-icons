@@ -109,22 +109,22 @@
   },
   "recorded-model-axis": {
    "entry": "import { glyph } from '@labpics/icons/ir';\nconsole.log(glyph({ icon: 'chevron-forward', axes: { weight: 1.1, opsz: 32 } }));\n",
-   "baselineBytes": 839226,
-   "baselineGzipBytes": 210290,
+   "baselineBytes": 839230,
+   "baselineGzipBytes": 210291,
    "maxBytes": 853339,
    "maxGzipBytes": 214703
   },
   "recorded-motion": {
    "entry": "import { glyph, glyphCapabilities } from '@labpics/icons/ir';\nimport { compileSymbolEffect } from '@labpics/icons/motion';\nconsole.log(compileSymbolEffect(glyph({ icon: 'time' }), glyphCapabilities('time'), 'time.advance', { duration: 400 }));\n",
-   "baselineBytes": 856431,
+   "baselineBytes": 856452,
    "baselineGzipBytes": 214254,
    "maxBytes": 865952,
    "maxGzipBytes": 217706
   },
   "full-ir-opt-in": {
    "entry": "import { glyph } from '@labpics/icons/ir';\nconsole.log(glyph({ icon: 'alert' }));\n",
-   "baselineBytes": 839190,
-   "baselineGzipBytes": 210274,
+   "baselineBytes": 839194,
+   "baselineGzipBytes": 210276,
    "maxBytes": 921319,
    "maxGzipBytes": 231011
   },
@@ -137,8 +137,8 @@
   },
   "recipes-only": {
    "entry": "import { buildCalendarNumberGeometry } from '@labpics/icons/ir/recipes';\nconsole.log(buildCalendarNumberGeometry);\n",
-   "baselineBytes": 11537,
-   "baselineGzipBytes": 4590,
+   "baselineBytes": 11955,
+   "baselineGzipBytes": 4706,
    "maxBytes": 12690,
    "maxGzipBytes": 5049
   },
@@ -256,15 +256,15 @@
   },
   "gesture-reload-ir-reference": {
    "entry": "import { glyph, glyphCapabilities } from '@labpics/icons/symbols/reload';\nimport { renderGlyphSvg } from '@labpics/icons/ir/render';\nimport { compileSymbolEffect } from '@labpics/icons/motion';\nconst value = glyph();\nconsole.log(renderGlyphSvg(value), compileSymbolEffect(value, glyphCapabilities(), 'reload.cycle', { duration: 400 }));\n",
-   "baselineBytes": 26756,
-   "baselineGzipBytes": 7880,
+   "baselineBytes": 26771,
+   "baselineGzipBytes": 7887,
    "maxBytes": 31702,
    "maxGzipBytes": 9756
   },
   "gesture-refresh-ir-reference": {
    "entry": "import { glyph, glyphCapabilities } from '@labpics/icons/symbols/refresh';\nimport { renderGlyphSvg } from '@labpics/icons/ir/render';\nimport { compileSymbolEffect } from '@labpics/icons/motion';\nconst value = glyph();\nconsole.log(renderGlyphSvg(value), compileSymbolEffect(value, glyphCapabilities(), 'refresh.cycle', { duration: 400 }));\n",
-   "baselineBytes": 28367,
-   "baselineGzipBytes": 8688,
+   "baselineBytes": 28382,
+   "baselineGzipBytes": 8690,
    "maxBytes": 33313,
    "maxGzipBytes": 10574
   },
@@ -298,10 +298,24 @@
   },
   "one-family-static": {
    "entry": "import { outline } from \"@labpics/icons/symbols/plus-circle\"; console.log(outline);\n",
-   "maxBytes": 1090,
-   "maxGzipBytes": 553,
    "baselineBytes": 1090,
-   "baselineGzipBytes": 553
+   "baselineGzipBytes": 553,
+   "maxBytes": 1090,
+   "maxGzipBytes": 553
+  },
+  "one-family-lottie": {
+   "entry": "import time from '@labpics/icons/symbols/time';\nimport { exportLottie } from '@labpics/icons/lottie';\nconsole.log(exportLottie(time, { gesture: 'advance' }));\n",
+   "baselineBytes": 52785,
+   "baselineGzipBytes": 20118,
+   "maxBytes": 52785,
+   "maxGzipBytes": 20118
+  },
+  "one-family-dotlottie": {
+   "entry": "import time from '@labpics/icons/symbols/time';\nimport { exportLottie, packDotLottie } from '@labpics/icons/lottie';\nconst result = exportLottie(time, { gesture: 'advance' });\nconsole.log(result.ok && packDotLottie(result.animation));\n",
+   "baselineBytes": 60870,
+   "baselineGzipBytes": 24037,
+   "maxBytes": 60870,
+   "maxGzipBytes": 24037
   }
  }
 }

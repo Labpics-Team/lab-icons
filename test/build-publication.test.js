@@ -215,7 +215,7 @@ describe('публикация единой эпохи IR/symbols/motion/Lottie'
     expectNoTransactionFiles(root);
   });
 
-  it.each(['ir/index.js', 'ir/lottie-runtime.js', 'ir/state-runtime.js'])('при отказе bundle %s ждёт остальных writers до cleanup, не оставляя поздний staging', async rejectedTarget => {
+  it.each(['ir/index.js', 'export/lottie.js', 'ir/state-runtime.js'])('при отказе bundle %s ждёт остальных writers до cleanup, не оставляя поздний staging', async rejectedTarget => {
     const { root, output } = fixture();
     write(root, 'scripts/build-anatomy-projection.mjs', 'export {};');
     const source = JSON.parse(fs.readFileSync(new URL('../symbols/source.json', import.meta.url), 'utf8'));
@@ -245,7 +245,7 @@ describe('публикация единой эпохи IR/symbols/motion/Lottie'
           // Как esbuild с write:false: финальную запись выполняет настоящий bundle.
           resolveWrite({ outputFiles: [{ path: outfile, text: 'export {};' }],
             metafile: { outputs: { [outfile]: { inputs: {} } } } });
-        }, target === 'ir/lottie-runtime.js' ? 50 : 25));
+        }, target === 'export/lottie.js' ? 50 : 25));
       pending.push(operation);
       return operation;
     });
@@ -255,7 +255,7 @@ describe('публикация единой эпохи IR/symbols/motion/Lottie'
       expect(finished).toBe(started);
       expect(completed).toContain(rejectedTarget);
       expect(completed).toContain('authoring/index.js');
-      expect(completed).toContain('ir/lottie-runtime.js');
+      expect(completed).toContain('export/lottie.js');
       expect(completed).toContain('ir/state-runtime.js');
       expect(completed.some(target => target.endsWith('/svg-assembly.mjs'))).toBe(true);
       expect(epochs(output)).toEqual(Object.keys(TARGET_FILES).map(() => 'old'));

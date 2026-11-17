@@ -77,6 +77,7 @@ export function symbolReleaseProjection(base, iconIds, stateGroupIds = [], varia
     './render': { types: './dist/render/index.d.ts', import: './dist/render/index.js' },
     './motion': { types: './dist/motion/index.d.ts', import: './dist/motion/index.js' },
     './symbols/*': { types: './dist/symbols/*.d.ts', import: './dist/symbols/*.js' },
+    './lottie': { types: './dist/export/lottie.d.ts', import: './dist/export/lottie.js' },
     './lottie/*': { types: './dist/lottie/*.d.ts', import: './dist/lottie/*.js' },
     ...(groups.length ? { './states/*': { types: './dist/states/*.d.ts', import: './dist/states/*.js' } } : {}),
     ...(variationIconIds.length ? { './variations/*': { types: './dist/variations/*.d.ts', import: './dist/variations/*.js' } } : {}),
@@ -88,9 +89,10 @@ export function symbolReleaseProjection(base, iconIds, stateGroupIds = [], varia
     key.includes('*')
       ? (key === './states/*' ? groups : key === './state-variations/*' ? stateVariations : key === './content-variations/*' ? contentVariations : key === './gestures/*' ? motions : key === './variations/*' ? [...variationIconIds].sort() : ids).flatMap(id => Object.values(conditions).map(target => target.replace('*', id).slice(2)))
       : Object.values(conditions).map(target => target.slice(2)));
-  const typeDependencies = ['dist/authoring/symbol-source.d.ts', 'dist/authoring/design-spec.d.ts', 'dist/ir/author-annulus-types.d.ts', 'dist/ir/author-content-types.d.ts', 'dist/ir/author-capsule-types.d.ts', 'dist/ir/author-catalog.generated.d.ts', 'dist/ir/author-provenance.d.ts', 'dist/ir/author-source.d.ts', 'dist/ir/authored-variation.d.ts', 'dist/ir/catalog.generated.d.ts', 'dist/ir/compiler.d.ts', 'dist/ir/glyph-types.d.ts', 'dist/ir/paint-types.d.ts', 'dist/ir/request.d.ts', 'dist/ir/lottie-types.d.ts', 'dist/ir/state-types.d.ts', 'dist/ir/state-common-types.d.ts', 'dist/ir/contour-state-types.d.ts'].sort();
-  typeDependencies.push('dist/render/optical-grid.d.ts', 'dist/motion/execution.d.ts', 'dist/motion/symbol-state.d.ts'); typeDependencies.sort();
-  const runtimeDependencies = ['dist/legacy-static.js', 'dist/ir/author-request-runtime.js', 'dist/ir/compiler.js', 'dist/ir/contour-runtime.js', 'dist/ir/request.js', 'dist/ir/symbol-runtime.js', 'dist/ir/lottie-runtime.js'].sort();
+  const typeDependencies = ['dist/authoring/symbol-source.d.ts', 'dist/authoring/design-spec.d.ts', 'dist/ir/author-annulus-types.d.ts', 'dist/ir/author-content-types.d.ts', 'dist/ir/author-capsule-types.d.ts', 'dist/ir/author-catalog.generated.d.ts', 'dist/ir/author-provenance.d.ts', 'dist/ir/author-source.d.ts', 'dist/ir/authored-variation.d.ts', 'dist/ir/catalog.generated.d.ts', 'dist/ir/compiler.d.ts', 'dist/ir/glyph-types.d.ts', 'dist/ir/paint-types.d.ts', 'dist/ir/request.d.ts', 'dist/ir/state-types.d.ts', 'dist/ir/state-common-types.d.ts', 'dist/ir/contour-state-types.d.ts'].sort();
+  typeDependencies.push('dist/render/optical-grid.d.ts', 'dist/motion/execution.d.ts', 'dist/motion/symbol-state.d.ts',
+    'dist/export/symbol-export.d.ts', 'dist/export/dotlottie.d.ts', 'dist/export/types.d.ts'); typeDependencies.sort();
+  const runtimeDependencies = ['dist/legacy-static.js', 'dist/ir/author-request-runtime.js', 'dist/ir/compiler.js', 'dist/ir/contour-runtime.js', 'dist/ir/request.js', 'dist/ir/symbol-runtime.js'].sort();
   if (motions.some(id => !capsuleMotions.includes(id) && !clockMotions.includes(id))) {
     typeDependencies.push('dist/ir/gesture-types.d.ts'); typeDependencies.sort();
     runtimeDependencies.push('dist/ir/gesture-runtime.js');

@@ -509,12 +509,23 @@ describe('platform measurement admission policy', () => {
     const { root } = fixture();
     const policyPath = join(root, 'release/consumer-size-ratchet.json');
     const consumers = JSON.parse(readFileSync(policyPath));
-    consumers.scenarios['previous-extra'] = consumers.scenarios['one-static'];
+    const entry = "import { outline } from '@labpics/icons/symbols/plus-circle';\nconsole.log(outline);\n";
+    const previous = {
+      ...consumers.scenarios['one-static'], entry, maxBytes: 15, maxGzipBytes: 16,
+    };
+    consumers.scenarios['previous-extra'] = previous;
     writeFileSync(policyPath, JSON.stringify(consumers));
-    const before = readFileSync(policyPath);
     const result = run(root, ['--update']);
-    expect(result.status).not.toBe(0);
-    expect(result.stderr).toMatch(/previous-extra.*previous consumer scenario/);
+    expect(result.status, result.stderr).toBe(0);
+    const next = JSON.parse(readFileSync(policyPath)).scenarios;
+    expect(next['previous-extra']).toEqual(previous);
+    expect(next['one-family-lottie']).toBeDefined();
+    expect(next['one-family-dotlottie']).toBeDefined();
+    const before = readFileSync(policyPath);
+    measureConsumer(root, entry, 16, 17);
+    const grown = run(root, ['--update']);
+    expect(grown.status).not.toBe(0);
+    expect(grown.stderr).toMatch(/previous-extra.*consumer budget/);
     expect(readFileSync(policyPath).equals(before)).toBe(true);
   });
   it.each([20, 5])('собственный full-ir потолок %s имеет приоритет после первой миграции', ceiling => {

@@ -45,6 +45,25 @@ const opacity = (icon, part) => Number(paths(icon).find(path => path.getAttribut
 const drawOffset = icon => Number(icon.element.children[0].children[0].children[0].getAttribute('stroke-dashoffset'));
 
 describe('semantic phase and visible intermediate poses', () => {
+  it('continues optical geometry from its visible coordinates when interrupted', async () => {
+    for (const variant of ['outline', 'filled']) {
+      const icon = scene(time, { variant, weight: 300, opsz: 48 });
+      const geometry = icon => descendants(icon.element).filter(node => node.getAttribute('data-part') !== null)
+        .map(node => [node.getAttribute('data-part'), node.getAttribute('d'), node.getAttribute('transform')]);
+      const initial = geometry(icon);
+      const first = icon.set({ variant, weight: 600, opsz: 16 }, { duration: 1000 }); first.pause();
+      expect(geometry(icon)).toEqual(initial);
+      first.seek(370); const visible = geometry(icon); expect(visible).not.toEqual(initial);
+      const next = icon.set({ variant, weight: 400, opsz: 24 }, { duration: 1000 }); next.pause();
+      expect(geometry(icon)).toEqual(visible);
+      first.finish(); await first.finished; expect(geometry(icon)).toEqual(visible);
+      next.seek(500); expect(geometry(icon)).not.toEqual(visible);
+      next.finish(); await next.finished;
+      const target = scene(time, { variant, weight: 400, opsz: 24 });
+      expect(geometry(icon)).toEqual(geometry(target));
+      target.dispose(); icon.dispose();
+    }
+  });
   it.each([time, history])('$id advances one hour from an interrupted return to the source pose', async symbol => {
     for (const variant of ['outline', 'filled']) {
       const icon = scene(symbol, { variant });
