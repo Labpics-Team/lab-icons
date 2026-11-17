@@ -1,6 +1,7 @@
 {
   "ok": true,
   "comparisons": 558,
+  "zeroFrameComparisons": 50,
   "maximumMeanAlphaDifference": 0,
   "live": 0,
   "cases": [
@@ -8,8 +9,11 @@
     "accepted source enclosure",
     "translucent tint",
     "explicit Date/IANA",
+    "all numeric offsets rejected",
+    "Etc/GMT zones retained",
     "shared shell",
     "interrupted date change",
+    "unchanged-progress zero frame",
     "selection",
     "Date mutation snapshot",
     "invalid date is atomic",

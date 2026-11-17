@@ -14,12 +14,12 @@ function dayFormatter(timeZone) {
   if (typeof timeZone !== 'string' || timeZone.length === 0 || timeZone.trim() !== timeZone) {
     throw new TypeError('timeZone: IANA identifier');
   }
-  // ECMA-402 implementations may accept raw offset identifiers (например,
-  // +01:00), но public contract требует именованную IANA zone. При этом
+  // ECMA-402 accepts several signed offset forms (+01, +0100, +01:00).
+  // A named IANA identifier never begins with a sign. При этом
   // Intl.supportedValuesOf('timeZone') не является полным allowlist: он не
   // перечисляет валидные tzdb IDs семейства Etc/GMT±N, которые formatter
   // корректно принимает и канонизирует.
-  if (/^[+-]\d{2}:\d{2}(?::\d{2})?$/.test(timeZone)) {
+  if (/^[+\-\u2212]/.test(timeZone)) {
     throw new RangeError(`timeZone: unsupported "${timeZone}"`);
   }
   try {

@@ -45,3 +45,16 @@ path-keyframes, canvas padding, installed exporter, dotLottie или други�
 Источники: [слои и matte](https://lottie.github.io/lottie-spec/1.0/specs/layers/),
 [режимы matte/trim](https://lottie.github.io/lottie-spec/1.0/specs/constants/),
 [штрихи и группы](https://lottie.github.io/lottie-spec/1.0/specs/shapes/).
+
+## Уточнение независимого ревью
+
+Ревью подтвердило 234 позы, но расширение опыта на database-search/Outline
+показало неверное допущение прототипа: глобальная маска объединяет независимые
+paints. Максимальный alpha прототипа 94 вместо 153 в web; средняя alpha-разница
+1.10449. При реализации покрытие объединяется **только по явному `part.layer`**;
+части без него сохраняют отдельные paints и исходный порядок. Текущий probe
+сохраняет ограниченный опыт, его общий слой нельзя переносить на весь корпус.
+
+Принятое направление EXPORT-01: прямое lowering IconSymbol, числовых частей и
+semantic tracks; общие pose/transition samplers с runtime. Отдельное развитие
+GlyphIR не требуется. dotLottie упаковывает тот же полученный Lottie JSON.

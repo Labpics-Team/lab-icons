@@ -46,6 +46,34 @@ const alphaDelta = (a, b) => {
 
 async function verify() {
   let comparisons = 0, maximumMeanAlphaDifference = 0;
+  let zeroFrameComparisons = 0;
+  for (const variant of ['outline', 'filled']) for (const weight of [300, 350, 400, 500, 600]) for (const opsz of [16, 20, 24, 36, 48]) {
+    const icon = icons.mount(document.body, calendar, options(8, variant, weight, opsz));
+    icon.element.style.color = 'rgba(0,0,0,.37)';
+    const first = icon.setDate(date(28), 'UTC', { duration: 1000 }); first.pause(); first.seek(437);
+    const before = serialize(icon.element);
+    const next = icon.setDate(date(29), 'UTC', { duration: 1000 }); next.pause(); next.seek(0);
+    // A real Motion value already at 0 need not emit another 0. The controller
+    // must establish its starting pose before asking the clock to advance.
+    const after = serialize(icon.element);
+    const delta = alphaDelta(await image(before), await image(after));
+    assert(delta === 0, 'Zero-frame date interruption changed visible pixels: ' + variant + '/' + weight + '/' + opsz + ': ' + delta);
+    assert([...icon.element.querySelectorAll('[data-part="calendar-date-ones"]')].at(-1).getAttribute('opacity') === '0', 'New digit is visible at unchanged progress 0');
+    assert([...icon.element.querySelectorAll('[data-part]')].every(part => part.hasAttribute('opacity') && part.hasAttribute('transform')), 'A new date part has no initial pose');
+    assert((await first.finished).status === 'stopped', 'Zero-frame interruption retained the old control');
+    icon.dispose(); assert((await next.finished).status === 'stopped', 'Zero-frame disposal retained the new control');
+    zeroFrameComparisons++;
+  }
+  for (const timeZone of ['+01', '+0100', '+01:00', '-02', '-0230', '-02:30', '+01:00:00', '\u221202:30']) {
+    let rejected = false;
+    try { renderIcon(calendar, { date: date(1), timeZone }); }
+    catch (error) { rejected = error instanceof RangeError; }
+    assert(rejected, 'Numeric offset was accepted as a named IANA zone: ' + timeZone);
+  }
+  const boundary = new Date('2026-01-01T00:30:00Z');
+  for (const [timeZone, day] of [['Etc/GMT+1', 31], ['Etc/GMT-3', 1]]) {
+    assert(renderIcon(calendar, { date: boundary, timeZone }) === renderIcon(calendar, { date: date(day), timeZone: 'UTC' }), 'Named IANA fixed-offset zone was lost: ' + timeZone);
+  }
   for (const variant of ['outline', 'filled']) {
     const icon = icons.mount(document.body, calendar, options(1, variant));
     icon.element.style.color = 'rgba(0,0,0,.37)';
@@ -122,8 +150,8 @@ async function verify() {
       }
     }
   }
-  window.result = { ok: true, comparisons, maximumMeanAlphaDifference, live,
-    cases: ['31 days × 9 optical supports × 2 variants', 'accepted source enclosure', 'translucent tint', 'explicit Date/IANA', 'shared shell', 'interrupted date change', 'selection', 'Date mutation snapshot', 'invalid date is atomic', 'dispose'] };
+  window.result = { ok: true, comparisons, zeroFrameComparisons, maximumMeanAlphaDifference, live,
+    cases: ['31 days × 9 optical supports × 2 variants', 'accepted source enclosure', 'translucent tint', 'explicit Date/IANA', 'all numeric offsets rejected', 'Etc/GMT zones retained', 'shared shell', 'interrupted date change', 'unchanged-progress zero frame', 'selection', 'Date mutation snapshot', 'invalid date is atomic', 'dispose'] };
 }
 verify().catch(error => { window.failure = error.stack; });
 `;
@@ -132,7 +160,7 @@ const html = `<!doctype html><html><head><meta charset="utf-8"><style>body{margi
 writeFileSync(join(output, 'index.html'), html);
 let browser;
 try {
-  browser = await chromium.launch({ channel: 'chrome', headless: true });
+  browser = await chromium.launch({ channel: 'chrome', headless: true, args: ['--mute-audio'] });
   const page = await browser.newPage({ viewport: { width: 1340, height: 1300 }, deviceScaleFactor: 2 });
   await page.setContent(html);
   await page.waitForFunction(() => window.result || window.failure, undefined, { timeout: 30000 });

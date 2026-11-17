@@ -32,6 +32,8 @@ function contours(path, coordinates, included) {
  }
  finish(); return result;
 }
+// Exploratory single coverage scope. A general exporter must group only by
+// explicit part.layer; see the database-search counterexample in README.md.
 function exportPose(symbol,options,drawProgress=1) {
  const r=resolveIconRequest(symbol,options), parts=r.selected.semantics.variants[r.variant].parts;
  const op=symbol===calendar?1:61;

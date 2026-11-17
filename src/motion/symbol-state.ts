@@ -70,6 +70,9 @@ export function mountSymbol(runtime: SymbolMotionRuntime, root: Element, symbol:
       return { state: 'finished' as const, duration: 0, finished: Promise.resolve({ status: 'finished' as const }),
         pause() {}, play() {}, seek() {}, finish() {}, stop() {} };
     }
+    // A value already at 0 does not have to emit on subscribe or seek(0).
+    // Establish new parts' opacity/transforms before the first clock update.
+    write(0);
     const clock = runtime.value(0);
     let released = false;
     let unsubscribe = () => {};

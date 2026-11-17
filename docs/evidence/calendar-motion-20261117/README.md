@@ -56,3 +56,24 @@ Lottie/dotLottie экспорты, каталог и выпуск 0.4.0.
 
 Источники: [Kotlin instant → local date](https://kotlinlang.org/api/kotlinx-datetime/kotlinx-datetime/kotlinx.datetime/to-local-date-time.html),
 [Lottie stroke и grouping](https://lottie.github.io/lottie-spec/1.0/specs/shapes/).
+
+## Исправления независимого ревью
+
+Ревью web `899118c` подтвердило 558 конечных поз и просмотр 16/24/48, но нашло
+два нарушения контракта. После `8 → 28`, остановленного на 437 ms, немедленный
+`setDate(29)` создавал новую цифру без opacity/transform до первого изменения
+часов. `seek(0)` при уже нулевом Motion value не обязан посылать обновление.
+Собственный regression до исправления получил alpha-расхождение 1.5626085
+на Outline/300/24. `play` теперь синхронно записывает начальную позу до создания
+часов. Проверены 50 комбинаций обоих начертаний и промежуточных weight/opsz:
+после `pause(); seek(0)` пиксели не меняются, opacity новой цифры равна 0,
+transform задан; старый control остановлен, disposal освобождает новый.
+
+Проверка IANA zone запрещала только форму `+01:00`, хотя Chrome также принимает
+`+01`, `+0100`, `-02`, `-0230`. Именованная IANA zone не начинается со знака:
+отвергается вся эта форма, включая Unicode minus; имена `Etc/GMT+1` и
+`Etc/GMT-3` сохранены. Браузер проверяет короткие, слитные и разделённые offsets.
+
+После исправлений: `build:ir`, TypeScript, 74 теста/7 файлов, calendar 558+50,
+clock 216+900, negative draw 54 и semantic motion — PASS. Эти результаты
+передаются на повторное независимое ревью.

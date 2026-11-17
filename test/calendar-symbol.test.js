@@ -62,6 +62,7 @@ describe('calendar content on the shared symbol API', () => {
     { date: new Date(0) }, { timeZone: 'UTC' }, { ...input(1), date: new Date(NaN) },
     { ...input(1), timeZone: '+01:00' }, { ...input(1), timeZone: 'Mars/Crater' },
     { ...input(1), timeZone: ' UTC ' },
+    ...['+01', '+0100', '-02', '-0230', '-02:30', '+01:00:00', '\u221202:30'].map(timeZone => ({ ...input(1), timeZone })),
   ])('rejects incomplete or invalid explicit date input %#', options => {
     expect(() => renderIcon(calendar, options)).toThrow();
     expect(() => renderIcon(family, { ...options, state: 'clear' })).toThrow();
