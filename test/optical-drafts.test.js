@@ -4,6 +4,9 @@ import { opticalRecipeMasters } from '../scripts/lib/optical-recipes.js';
 import { compileOpticalGrid } from '../scripts/lib/optical-grid.js';
 import { compileOpticalCorpus } from '../scripts/lib/optical-corpus.js';
 import { fileURLToPath } from 'node:url';
+import { loadSymbolSource, projectAuthorBaseline } from '../scripts/lib/symbol-source.js';
+import { loadAuthorBaseline } from '../scripts/lib/author-baseline.js';
+import { authorPathEntries } from '../src/core/icon-geometry.js';
 
 const axes = { weight: [300, 400, 600], opsz: [16, 24, 48] };
 const profile = { weightOffset: [-0.2, 0, 0.2], opszOffset: [0.05, 0, -0.02],
@@ -39,6 +42,16 @@ it('limits thin details locally and rejects corrupted field correspondence', () 
   expect(() => compileOpticalGrid({ axes, source, masters: project(source) })).not.toThrow();
   fields[0].contours[0].normal.pop();
   expect(() => opticalRecipeMasters({ axes, source, recipes: [], fields, fieldProfile: profile })).toThrow('correspondence');
+});
+
+it('keeps tiny authored joins from folding through neighboring curves across the draft grid', () => {
+  const root = fileURLToPath(new URL('..', import.meta.url)), document = loadSymbolSource(root);
+  const author = loadAuthorBaseline(root, { manifest: projectAuthorBaseline(document) }).icons.paw.outline;
+  const source = authorPathEntries(author.normalizedSvg), baseline = inspectOpticalPaths(source);
+  for (const master of project(source)) {
+    const diagnostics = inspectOpticalPaths(master.paths);
+    diagnostics.forEach((path, index) => expect(path.crossings).toBeLessThanOrEqual(baseline[index].crossings));
+  }
 });
 
 it('compiles optical changes for all 660 variants and refuses unreviewed production', () => {

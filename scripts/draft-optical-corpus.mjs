@@ -7,9 +7,12 @@ import { authorPathEntries } from '../src/core/icon-geometry.js';
 import { draftOpticalFields, inspectOpticalPaths } from './lib/optical-drafts.js';
 import { opticalVariantMasters } from './lib/optical-corpus.js';
 import { compileOpticalGrid } from './lib/optical-grid.js';
+import { build } from 'esbuild';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const document = loadSymbolSource(root), baseline = loadAuthorBaseline(root, { manifest: projectAuthorBaseline(document) });
+const runtime = await build({ entryPoints: [join(root, 'src/render/optical-grid.ts')], bundle: true, write: false, format: 'esm' });
+const { opticalPosition, sampleOpticalPath, opticalPathData } = await import(`data:text/javascript;base64,${Buffer.from(runtime.outputFiles[0].text).toString('base64')}`);
 const regenerate = process.argv.includes('--regenerate');
 // Small-size detail and counter changes have independent signs. These are
 // conservative draft profiles, not substitutes for visual optical correction.
@@ -47,23 +50,33 @@ for (const symbol of Object.values(document.symbols)) {
     if (recipe.fieldScale === 1) delete recipe.fieldScale;
     else summary.attenuated.push(`${symbol.id}/${variant}`);
     if (!compiled.paths.some(path => path.terms.length)) throw new Error(`${symbol.id}/${variant}: empty optical draft`);
-    const original = inspectOpticalPaths(source), risks = [];
-    for (const master of projected.masters) {
+    const original = inspectOpticalPaths(source), risks = [], interiorRisks = [];
+    const midpointSupports = axis => [axis[0], (axis[0] + axis[1]) / 2, axis[1], (axis[1] + axis[2]) / 2, axis[2]];
+    const interiors = midpointSupports(document.axisDesign.weight).flatMap(weight => midpointSupports(document.axisDesign.opsz).flatMap(opsz => {
+      if (document.axisDesign.weight.includes(weight) && document.axisDesign.opsz.includes(opsz)) return [];
+      const position = opticalPosition(document.axisDesign, weight, opsz);
+      return [{ weight, opsz, interior: true, paths: compiled.paths.map(path => ({
+        d: opticalPathData(path, sampleOpticalPath(path, position)), fillRule: path.fillRule,
+      })) }];
+    }));
+    for (const master of [...projected.masters, ...interiors]) {
       if (master.weight === 400 && master.opsz === 24) continue;
+      const findings = master.interior ? interiorRisks : risks;
       const diagnostics = inspectOpticalPaths(master.paths);
       diagnostics.forEach((path, index) => {
         const base = original[index], support = `${master.weight}/${master.opsz}`;
-        if (path.crossings > base.crossings) risks.push({ support, path: index, issue: 'additional-crossings', baseline: base.crossings, observed: path.crossings });
+        if (path.crossings > base.crossings) findings.push({ support, path: index, issue: 'additional-crossings', baseline: base.crossings, observed: path.crossings });
         if (path.bounds.some((value, axis) => axis < 2 ? value < Math.min(0, base.bounds[axis]) - 0.01 : value > Math.max(24, base.bounds[axis]) + 0.01)) {
-          risks.push({ support, path: index, issue: 'canvas-overflow', bounds: path.bounds });
+          findings.push({ support, path: index, issue: 'canvas-overflow', bounds: path.bounds });
         }
         path.areas.forEach((area, contour) => {
-          if (Math.abs(area) < Math.abs(base.areas[contour]) * 0.2) risks.push({ support, path: index, contour, issue: 'near-collapse' });
+          if (Math.abs(area) < Math.abs(base.areas[contour]) * 0.2) findings.push({ support, path: index, contour, issue: 'near-collapse' });
+          if (Math.sign(area) !== Math.sign(base.areas[contour])) findings.push({ support, path: index, contour, issue: 'winding-change' });
         });
       });
     }
-    recipe.diagnostics = { source: original, risks };
-    if (risks.length || fields.some(field => field.contours.some(contour => contour.flags?.length))) summary.flagged.push(`${symbol.id}/${variant}`);
+    recipe.diagnostics = { source: original, risks, interiorRisks };
+    if (risks.length || interiorRisks.length || fields.some(field => field.contours.some(contour => contour.flags?.length))) summary.flagged.push(`${symbol.id}/${variant}`);
     specification.variants[variant] = recipe; summary.variants++;
   }
   symbol.opticalMaster = relative; outputs.set(file, JSON.stringify(specification) + '\n'); summary.families++;

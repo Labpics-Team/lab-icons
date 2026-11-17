@@ -8,6 +8,35 @@ const subtract = (a, b) => a.map((value, axis) => value - b[axis]);
 const unit = vector => length(vector) > 1e-10 ? vector.map(value => value / length(vector)) : null;
 const round = value => Math.round(value * 1e6) / 1e6;
 
+function limitFieldVariation(values, coordinates, maximumOffset) {
+  // A tiny source control edge cannot support an arbitrarily large change of
+  // displacement. Pairwise projection retains its correspondence and reduces
+  // the differential at the largest draft offset, including zero handles.
+  // The finite iteration is a draft correction, not a topology proof.
+  const pairs = [];
+  const maximumNormal = Math.max(...Array.from({ length: values.length / 2 }, (_, index) => Math.hypot(values[index * 2], values[index * 2 + 1])));
+  const radiusSquared = (maximumOffset * maximumNormal * 4) ** 2;
+  for (let index = 0; index < values.length; index += 2) for (let next = index + 2; next < values.length; next += 2) {
+    const distanceSquared = (coordinates[next] - coordinates[index]) ** 2 + (coordinates[next + 1] - coordinates[index + 1]) ** 2;
+    if (distanceSquared <= radiusSquared) pairs.push([index, next, Math.sqrt(distanceSquared) / (maximumOffset * 2)]);
+  }
+  let limited = false;
+  for (let iteration = 0; iteration < 32; iteration++) {
+    let maximumExcess = 0;
+    for (const [index, next, bound] of pairs) {
+      const dx = values[next] - values[index], dy = values[next + 1] - values[index + 1], distance = Math.hypot(dx, dy);
+      if (distance <= bound) continue;
+      maximumExcess = Math.max(maximumExcess, distance - bound); limited = true;
+      const correction = (distance - bound) / distance / 2;
+      values[index] += dx * correction; values[index + 1] += dy * correction;
+      values[next] -= dx * correction; values[next + 1] -= dy * correction;
+    }
+    if (maximumExcess < 1e-9) break;
+  }
+  for (let index = 0; index < values.length; index++) values[index] = round(values[index]);
+  return limited;
+}
+
 function point(edge, t) {
   if (edge.points.length === 2) return edge.points[0].map((value, axis) => value * (1 - t) + edge.points[1][axis] * t);
   const [a, b, c, d] = edge.points, s = 1 - t;
@@ -61,7 +90,10 @@ function contoursOf(path) {
  * Ink-side probes use the complete path's fill rule, not the contour winding.
  * No Paper objects or geometric inference enter the renderer or stored model.
  */
-export function draftOpticalFields(source, { miterLimit = 2.5 } = {}) {
+export function draftOpticalFields(source, { miterLimit = 2.5, maximumOffset = 0.35 } = {}) {
+  if (!Number.isFinite(miterLimit) || miterLimit < 1 || !Number.isFinite(maximumOffset) || maximumOffset <= 0) {
+    throw new TypeError('optical draft requires finite positive geometry limits');
+  }
   const scope = new paper.PaperScope(); scope.setup(new scope.Size(24, 24));
   try {
     return source.map((path, pathIndex) => {
@@ -77,6 +109,11 @@ export function draftOpticalFields(source, { miterLimit = 2.5 } = {}) {
         }
         outline.closePath();
         const outward = Math.sign(outline.area);
+        const box = outline.bounds, radius = [box.width / 2, box.height / 2], center = [box.center.x, box.center.y];
+        const ellipse = radius.every(value => value > 0) && edges.every(edge => [0, 0.25, 0.5, 0.75, 1].every(t => {
+          const p = point(edge, t);
+          return Math.abs(Math.hypot(...p.map((value, axis) => (value - center[axis]) / radius[axis])) - 1) < 0.01;
+        }));
         const offsetScale = Math.min(1, Math.abs(outline.area) / outline.length / 0.375);
         if (offsetScale < 1) flags.add('thin-detail');
         outline.remove();
@@ -130,7 +167,20 @@ export function draftOpticalFields(source, { miterLimit = 2.5 } = {}) {
         const first = base.coordinates.slice(contour.start, contour.start + 2);
         const final = contour.start + contour.count - 2;
         if (length(subtract(first, base.coordinates.slice(final, final + 2))) < 1e-10) write(final, joins[0]);
+        // An identified axis-aligned ellipse changes its radii through an affine
+        // field. This preserves original tangency and tiny exporter segments,
+        // which a sampled parallel curve can fold at small inner radii.
+        if (ellipse && role !== 'mixed') {
+          for (let index = 0; index < values.length; index++) {
+            const axis = index % 2;
+            values[index] = round((base.coordinates[contour.start + index] - center[axis]) / radius[axis] * (role === 'counter' ? -1 : 1));
+          }
+          flags.delete('limited-join'); flags.delete('large-control-offset');
+        }
+        const limited = limitFieldVariation(values, base.coordinates.slice(contour.start, contour.start + contour.count), maximumOffset);
         return { contourIndex, role, normal: values, ...(offsetScale < 1 ? { offsetScale } : {}),
+          ...(ellipse && role !== 'mixed' ? { shape: 'axis-aligned-ellipse' } : {}),
+          ...(limited ? { limitedDetailVariation: true } : {}),
           ...(flags.size ? { flags: [...flags].sort() } : {}) };
       });
       shape.remove();
