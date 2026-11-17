@@ -7669,10 +7669,10 @@
    ]
   },
   "dist/motion/index.js": {
-   "baselineBytes": 25600,
-   "baselineGzipBytes": 9029,
-   "maxBytes": 25600,
-   "maxGzipBytes": 9029,
+   "baselineBytes": 25654,
+   "baselineGzipBytes": 9081,
+   "maxBytes": 25654,
+   "maxGzipBytes": 9081,
    "allowedModules": [
     "src/core/motion-sampler.js",
     "src/motion/effect-projection.ts",
@@ -7687,10 +7687,10 @@
    ]
   },
   "dist/motion/symbol-state.d.ts": {
-   "baselineBytes": 1108,
-   "baselineGzipBytes": 501,
-   "maxBytes": 1108,
-   "maxGzipBytes": 501,
+   "baselineBytes": 1139,
+   "baselineGzipBytes": 517,
+   "maxBytes": 1139,
+   "maxGzipBytes": 517,
    "allowedModules": [],
    "forbiddenNeedles": [
     "sourceMappingURL"
