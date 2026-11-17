@@ -7,7 +7,7 @@ const propertyName = id => { const name = typeName(id); return name[0].toLowerCa
 
 /** Numeric transport decoded once into Kotlin arrays; no SVG parser is shipped. */
 export function encodeNativeSymbol(symbol, anatomy) {
-  const chunks = [Buffer.from([76, 73, 67, 78, 2])];
+  const chunks = [Buffer.from([76, 73, 67, 78, 3])];
   const byte = value => chunks.push(Buffer.from([value]));
   const count = value => {
     if (!Number.isInteger(value) || value < 0 || value > 0x7fffffff) throw new RangeError('native symbol count is out of range');
@@ -18,9 +18,7 @@ export function encodeNativeSymbol(symbol, anatomy) {
     const buffer = Buffer.allocUnsafe(4); buffer.writeFloatLE(value); chunks.push(buffer);
   };
   const text = value => { const buffer = Buffer.from(value, 'utf8'); count(buffer.length); chunks.push(buffer); };
-  for (const axis of [symbol.data.axes.weight, symbol.data.axes.opsz]) axis.forEach(scalar);
-  for (const variant of ['outline', 'filled']) {
-    const paths = symbol.data.variants[variant].paths;
+  const encodePaths = paths => {
     count(paths.length);
     for (const path of paths) {
       count(path.commands.length);
@@ -36,7 +34,13 @@ export function encodeNativeSymbol(symbol, anatomy) {
         for (let index = 0; index < delta.length; index += 2) { count(delta[index]); scalar(delta[index + 1]); }
       }
     }
+  };
+  for (const axis of [symbol.data.axes.weight, symbol.data.axes.opsz]) axis.forEach(scalar);
+  for (const variant of ['outline', 'filled']) {
+    encodePaths(symbol.data.variants[variant].paths);
     const semantic = symbol.semantics?.variants[variant];
+    byte(semantic?.paths ? 1 : 0);
+    if (semantic?.paths) encodePaths(semantic.paths);
     const parts = semantic?.parts ?? anatomy.variants[variant].anatomy.parts;
     count(parts.length);
     for (const part of parts) {
@@ -53,6 +57,7 @@ export function encodeNativeSymbol(symbol, anatomy) {
         const coordinates = segments.flatMap(segment => fields[segment.cmd].map(key => segment[key]));
         count(coordinates.length); coordinates.forEach(scalar); scalar(part.draw.width);
       }
+      text(part.layer ?? ''); byte(part.negative ? 1 : 0);
     }
     const effects = Object.entries(semantic?.effects ?? {}); count(effects.length);
     for (const [name, effect] of effects) {

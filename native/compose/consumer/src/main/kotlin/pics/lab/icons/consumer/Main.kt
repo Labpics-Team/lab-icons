@@ -65,6 +65,13 @@ fun main(args: Array<String>) {
             val drawn = rememberIconMotion(checkmark)
             val volume = rememberIconMotion(volumeHigh)
             val microphone = rememberIconMotion(microphoneStates)
+            val negativeStart = rememberIconMotion(checkmarkCircle, IconVariant.Filled)
+            val negativeMiddle = rememberIconMotion(checkmarkCircle, IconVariant.Filled)
+            val negativeEnd = rememberIconMotion(checkmarkCircle, IconVariant.Filled)
+            LaunchedEffect(Unit) {
+                negativeStart.effect("draw", to = 0f, durationMillis = 0)
+                negativeMiddle.effect("draw", to = .5f, durationMillis = 0)
+            }
             Column(Modifier.fillMaxSize().background(background).padding(32.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
                 BasicText("Lab Icons", style = TextStyle(ink, 28.sp, FontWeight.SemiBold))
                 BasicText("Один рисунок · вес и оптика · Outline и Filled", style = TextStyle(muted, 15.sp))
@@ -112,6 +119,17 @@ fun main(args: Array<String>) {
                     Icon(microphoneStates, ink, Modifier.clickable { microphone.setState("off") }, size = 48.dp, motion = microphone)
                     BasicText("Состояния · общие части · Motion · draw", style = TextStyle(muted, 13.sp))
                 }
+                Row(horizontalArrangement = Arrangement.spacedBy(24.dp), verticalAlignment = Alignment.CenterVertically) {
+                    BasicText("Filled draw", Modifier.width(156.dp), TextStyle(ink, 15.sp))
+                    for ((label, iconMotion) in listOf("0" to negativeStart, "½" to negativeMiddle, "1" to negativeEnd)) {
+                        Row(Modifier.background(Color(0xff658dc4), RoundedCornerShape(10.dp)).padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            Icon(checkmarkCircle, Color.White.copy(alpha = .7f), size = 48.dp, variant = IconVariant.Filled, motion = iconMotion)
+                            BasicText(label, style = TextStyle(Color.White, 13.sp))
+                        }
+                    }
+                    BasicText("Прозрачное вычитание", style = TextStyle(muted, 13.sp))
+                }
             }
             if (smoke) LaunchedEffect(Unit) {
                 window.isAlwaysOnTop = true
@@ -131,6 +149,11 @@ fun main(args: Array<String>) {
                 val change = confirmation.setState("increase", 1000); change.pause(); change.seek(350f)
                 val restore = confirmation.setState("confirmed", 500); restore.finish()
                 val draw = drawn.effect("draw", durationMillis = 1000); draw.pause(); draw.seek(500f)
+                val negative = negativeMiddle.effect("draw", to = 1f, durationMillis = 1000); negative.pause(); negative.seek(500f)
+                val negativeReverse = negativeMiddle.effect("draw", to = 0f, durationMillis = 1000)
+                check(negative.finished.await() == MotionResult.Stopped)
+                negativeReverse.finish()
+                negativeMiddle.effect("draw", to = .5f, durationMillis = 0).finish()
                 volume.reducedMotion = true; volume.effect("level", to = .5f)
                 microphone.reducedMotion = true; microphone.setState("off")
                 delay(180)

@@ -3,6 +3,7 @@ import groovy.json.JsonSlurper
 plugins {
     kotlin("multiplatform") version "2.3.21"
     id("org.jetbrains.kotlin.plugin.compose") version "2.3.21"
+    id("org.jetbrains.compose") version "1.12.2"
     id("com.android.kotlin.multiplatform.library") version "9.1.1"
     `maven-publish`
 }
@@ -58,6 +59,9 @@ kotlin {
                 implementation(kotlin("test"))
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
             }
+        }
+        named("desktopTest") {
+            dependencies { implementation(compose.desktop.currentOs) }
         }
     }
 }

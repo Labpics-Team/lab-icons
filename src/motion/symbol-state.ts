@@ -44,6 +44,7 @@ export function mountSymbol(runtime: SymbolMotionRuntime, root: Element, symbol:
   element.style.overflow = 'visible';
   const definitions = document.createElementNS(ns, 'defs'); element.append(definitions);
   const paints = new Map<string, Paint>();
+  const layers = new Map<string, { positive: SVGGElement; negative: SVGMaskElement }>();
   const active = new Map<string, { playback: SymbolPlayback; release: () => void }>();
   const phases = new Map<string, number>();
   let options = initial, disposed = false, epoch = 0;
@@ -87,7 +88,7 @@ export function mountSymbol(runtime: SymbolMotionRuntime, root: Element, symbol:
       finish: () => playback.finish(), stop: release };
   }
   function writePaint(paint: Paint) {
-    paint.element.setAttribute('opacity', String(paint.alpha * paint.opacity));
+    paint.element.setAttribute('opacity', String((paint.part.negative ? 1 : paint.alpha) * paint.opacity));
     paint.element.setAttribute('transform', `translate(${paint.x} ${paint.y}) rotate(${paint.rotate} ${paint.part.anchor.join(' ')})`);
     if (paint.guide) {
       // Exactly empty/full endpoints avoid round-cap residue and clipping at any weight.
@@ -110,7 +111,20 @@ export function mountSymbol(runtime: SymbolMotionRuntime, root: Element, symbol:
       guide.setAttribute('stroke-linejoin', 'round'); guide.setAttribute('pathLength', '1'); guide.setAttribute('stroke-dasharray', '1 1');
       mask.append(guide); definitions.append(mask); paint.guide = guide; paint.mask = mask;
     }
-    element.append(path); return paint;
+    if (part.layer) {
+      let layer = layers.get(part.layer);
+      if (!layer) {
+        const mask = document.createElementNS(ns, 'mask'); mask.id = `lab-icon-subtract-${++nextMask}`;
+        mask.setAttribute('maskUnits', 'userSpaceOnUse'); mask.setAttribute('x', '-24'); mask.setAttribute('y', '-24');
+        mask.setAttribute('width', '72'); mask.setAttribute('height', '72');
+        const white = document.createElementNS(ns, 'rect'); white.setAttribute('x', '-24'); white.setAttribute('y', '-24');
+        white.setAttribute('width', '72'); white.setAttribute('height', '72'); white.setAttribute('fill', 'white'); mask.append(white);
+        const group = document.createElementNS(ns, 'g'); group.setAttribute('mask', `url(#${mask.id})`);
+        definitions.append(mask); element.append(group); layer = { positive: group, negative: mask }; layers.set(part.layer, layer);
+      }
+      if (part.negative) { path.setAttribute('fill', 'black'); layer.negative.append(path); } else layer.positive.append(path);
+    } else element.append(path);
+    return paint;
   }
   function resolve(next: RenderIconOptions) {
     const { data, variant, size, position: at, selected } = resolveIconRequest(symbol, next);
@@ -129,7 +143,7 @@ export function mountSymbol(runtime: SymbolMotionRuntime, root: Element, symbol:
     element.setAttribute('width', String(resolved.size)); element.setAttribute('height', String(resolved.size));
     const desired = new Set<string>(), starts = new Map<Paint, number>();
     for (const part of semantics.parts) {
-      const path = resolved.data.variants[resolved.variant].paths[part.pathIndex]!;
+      const path = (semantics.paths ?? resolved.data.variants[resolved.variant].paths)[part.pathIndex]!;
       const d = opticalPathData(path, sampleOpticalPath(path, resolved.at));
       const key = part.key; desired.add(key);
       let paint = paints.get(key);

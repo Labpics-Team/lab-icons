@@ -9417,6 +9417,12 @@
             "path": "M8.5 13L10.45 15.4L14.6 9",
             "width": 4.5
           }
+        },
+        "filled": {
+          "confirmation-mark": {
+            "path": "M8.5 13L10.45 15.4L14.6 9",
+            "width": 4.5
+          }
         }
       }
     },

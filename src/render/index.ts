@@ -24,6 +24,9 @@ export interface SymbolPart {
   readonly pathIndex: number;
   readonly anchor: readonly [number, number];
   readonly draw?: Readonly<{ path: string; width: number }>;
+  /** Parts of an authored subtraction share an isolated paint layer. */
+  readonly layer?: string;
+  readonly negative?: boolean;
 }
 export interface SymbolTrack {
   readonly partId: string;
@@ -38,6 +41,8 @@ export interface SymbolGesture {
 export interface SymbolVariantSemantics {
   readonly parts: readonly SymbolPart[];
   readonly effects: Readonly<Record<string, SymbolGesture>>;
+  /** Compiled motion anatomy may split a compound path without changing the static master. */
+  readonly paths?: readonly OpticalPath[];
 }
 export interface SymbolSemantics {
   readonly variants: Readonly<Record<IconVariant, SymbolVariantSemantics>>;

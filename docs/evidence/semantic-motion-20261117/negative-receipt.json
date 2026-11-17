@@ -1,0 +1,19 @@
+{
+  "ok": true,
+  "comparisons": 54,
+  "maximumMeanChannelDifference": 0.43583984375,
+  "alphaTotals": [
+    1413832,
+    1345833,
+    1314834
+  ],
+  "cases": [
+    "9 optical supports",
+    "transparent and opaque backgrounds",
+    "partial tint alpha",
+    "draw 0/.5/1",
+    "replay and reversal",
+    "interrupted selection",
+    "dispose"
+  ]
+}

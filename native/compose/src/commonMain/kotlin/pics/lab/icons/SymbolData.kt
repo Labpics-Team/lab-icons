@@ -26,9 +26,11 @@ public class SymbolData internal constructor(
     internal val states: Map<String, SymbolData?> = emptyMap(),
 )
 
-internal class SymbolVariantData(val paths: Array<SymbolPathData>, val parts: Array<SymbolPartData>, val effects: Map<String, SymbolEffectData> = emptyMap())
+internal class SymbolVariantData(val paths: Array<SymbolPathData>, val parts: Array<SymbolPartData>,
+    val effects: Map<String, SymbolEffectData> = emptyMap(), val motionPaths: Array<SymbolPathData>? = null)
 internal class SymbolPartData(val id: String, val pathIndex: Int, val contourIndices: IntArray,
-    val key: String = id, val anchorX: Float = 12f, val anchorY: Float = 12f, val draw: SymbolDrawData? = null)
+    val key: String = id, val anchorX: Float = 12f, val anchorY: Float = 12f, val draw: SymbolDrawData? = null,
+    val layer: String? = null, val negative: Boolean = false)
 internal class SymbolDrawData(val commands: ByteArray, val coordinates: FloatArray, val width: Float)
 internal class SymbolEffectData(val duration: Int, val rest: Float, val tracks: Array<SymbolTrackData>)
 internal class SymbolTrackData(val partIndex: Int, val property: Int, val times: FloatArray, val values: FloatArray)
