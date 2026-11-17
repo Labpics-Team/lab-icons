@@ -73,6 +73,16 @@ it('an incoming receipt cannot overwrite the trusted Outline/Filled style', () =
   expect(() => loadAuthorBaseline(input.root)).not.toThrow();
 });
 
+it('does not silently reuse optical coordinate bindings after an author master changes', () => {
+  const input = fixture();
+  input.source.symbols.accessibility.opticalMaster = 'symbols/optics/accessibility.json';
+  const original = JSON.stringify(input.source);
+  write(input.root, 'symbols/source.json', original);
+  expect(() => syncFigmaSource({ ...input, write: true })).toThrow('requires review of its optical masters');
+  expect(readFileSync(join(input.root, 'symbols/source.json'), 'utf8')).toBe(original);
+  expect(existsSync(join(input.root, input.manifest.icons.accessibility.outline.master))).toBe(false);
+});
+
 it('a new full snapshot preserves every unchanged master and builds all production state laws', async () => {
   const temporaryRoot = mkdtempSync(join(tmpdir(), 'lab-icons-sync-')); temporary.push(temporaryRoot);
   const root = createCleanPackSource(repository, join(temporaryRoot, 'repository'));

@@ -9,7 +9,8 @@
 
 Проверьте выбранное семейство в `symbols/source.json`: пару `outline`/`filled`,
 `provenance`, `anatomy` и ссылки на `components`. Канва записана в `canvas`;
-`axisDesign` содержит планируемые оси и не обещает их поддержку.
+`axisDesign` содержит опоры осей. Поддержку определяют проверенные оптические
+masters всего корпуса; незавершённые рецепты можно смотреть в optical atlas.
 Возможности текущего варианта сообщает `glyphCapabilities(variant)` из его
 модуля `@labpics/icons/symbols/<id>`; примеры есть в
 [подключении символов](symbol-modules.md).

@@ -25,6 +25,9 @@ export function syncFigmaSource({ root, captureRoot, manifest, write = false }) 
       next.symbols[id].variants[variant].provenance.version = authorMasterVersion(previous.provenance, source.capture.source);
       continue;
     }
+    if (source.symbols[id].opticalMaster) {
+      throw new Error(`Figma sync: changed ${id}/${variant} requires review of its optical masters before import`);
+    }
     const destination = resolve(root, incoming.master);
     if (!destination.startsWith(`${resolve(root)}${sep}`)) throw new Error('Figma sync: master path escapes repository');
     const bytes = Buffer.from(captured.icons[id][variant].rawSvg);

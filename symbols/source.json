@@ -133,27 +133,8 @@
     ]
   },
   "axisDesign": {
-    "weight": {
-      "min": 300,
-      "default": 400,
-      "max": 600,
-      "masters": [
-        300,
-        400,
-        600
-      ]
-    },
-    "opsz": {
-      "min": 16,
-      "default": 24,
-      "max": 48,
-      "masters": [
-        16,
-        24,
-        48
-      ]
-    },
-    "status": "planned"
+    "weight": [300, 400, 600],
+    "opsz": [16, 24, 48]
   },
   "components": {
     "circle-outline": {
@@ -171,6 +152,13 @@
       },
       "placement": {
         "kind": "preserve-authored-content"
+      },
+      "opticalRecipe": {
+        "kind": "annulus",
+        "radiusMeasure": "start-y",
+        "weightScale": [0.8333333333333334, 1, 1.3333333333333333],
+        "opszScale": [1.0833333333333333, 1, 0.9444444444444444],
+        "radiusDelta": [0.15, 0, 0]
       }
     }
   },
@@ -29062,6 +29050,7 @@
     },
     "plus-circle": {
       "id": "plus-circle",
+      "opticalMaster": "symbols/optics/plus-circle.json",
       "variants": {
         "outline": {
           "provenance": {
