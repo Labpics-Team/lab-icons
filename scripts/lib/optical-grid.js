@@ -32,6 +32,49 @@ export function opticalPathSource({ d, fillRule = 'nonzero' }) {
   return { commands, coordinates, fillRule };
 }
 
+/** Source-bound edits of individual supports. The source center is immutable. */
+export function applyOpticalCorrections({ axes, masters, corrections = [] }) {
+  if (!Array.isArray(corrections)) throw new TypeError('optical corrections must be an array');
+  if (corrections.length === 0) return masters;
+  const result = masters.map(master => ({ ...master, paths: master.paths.map(path => ({ ...path })) }));
+  const supports = new Set();
+  for (const correction of corrections) {
+    const { weight, opsz, paths } = correction;
+    const key = `${weight}/${opsz}`;
+    if (!axes.weight.includes(weight) || !axes.opsz.includes(opsz) || supports.has(key) || !Array.isArray(paths) || !paths.length) {
+      throw new TypeError('optical correction has a missing, duplicate or foreign support');
+    }
+    if (weight === axes.weight[1] && opsz === axes.opsz[1]) throw new TypeError('optical corrections cannot change the source center');
+    supports.add(key);
+    const master = result.find(item => item.weight === weight && item.opsz === opsz);
+    if (!master) throw new TypeError('optical correction references a missing master');
+    const seenPaths = new Set();
+    for (const { pathIndex, delta } of paths) {
+      if (!Number.isInteger(pathIndex) || !master.paths[pathIndex] || seenPaths.has(pathIndex) ||
+          !Array.isArray(delta) || !delta.length || delta.length % 2 !== 0) {
+        throw new TypeError('optical correction has invalid path coordinates');
+      }
+      seenPaths.add(pathIndex);
+      const path = opticalPathSource(master.paths[pathIndex]), seenCoordinates = new Set();
+      for (let index = 0; index < delta.length; index += 2) {
+        const coordinate = delta[index], change = delta[index + 1];
+        if (!Number.isInteger(coordinate) || coordinate < 0 || coordinate >= path.coordinates.length ||
+            seenCoordinates.has(coordinate) || !Number.isFinite(change) || !Number.isFinite(path.coordinates[coordinate] + change)) {
+          throw new TypeError('optical correction has an invalid or repeated coordinate');
+        }
+        seenCoordinates.add(coordinate); path.coordinates[coordinate] += change;
+      }
+      let cursor = 0;
+      master.paths[pathIndex].d = Array.from(path.commands, command => {
+        const values = path.coordinates.slice(cursor, cursor + fields[command].length);
+        cursor += values.length;
+        return command + values.join(' ');
+      }).join('');
+    }
+  }
+  return result;
+}
+
 function validateAxis(axis, name) {
   if (!Array.isArray(axis) || axis.length !== 3 || axis.some(value => !Number.isFinite(value)) ||
       !(axis[0] < axis[1] && axis[1] < axis[2])) throw new TypeError(`${name} requires three ordered finite supports`);

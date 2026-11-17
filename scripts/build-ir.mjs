@@ -28,9 +28,10 @@ import { authorMotionSymbolNames, compileAuthorMotionSymbols, renderAuthorMotion
 import { authorMotionTargets } from './lib/author-motion-targets.js';
 import { projectAuthorCapsuleMotion, renderAuthorCapsuleMotionModule, authorCapsuleMotionModuleDeclaration } from './lib/author-capsule-motion.js';
 import { compileAuthorClockMotionSymbols, renderAuthorClockMotionModule, authorClockMotionModuleDeclaration } from './lib/author-clock-motion.js';
+import { compileOpticalCorpus } from './lib/optical-corpus.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const TARGETS = ['ir', 'symbols', 'variations', 'content-variations', 'motion', 'lottie', 'authoring', 'states', 'state-variations', 'gestures'];
+const TARGETS = ['ir', 'symbols', 'variations', 'content-variations', 'motion', 'lottie', 'authoring', 'states', 'state-variations', 'gestures', 'render'];
 // Motion сохраняет имена публичных exports; capsule задаёт имя glyph на своей границе.
 const MINIFIED_ENTRIES = new Set(['src/motion/index.ts', 'src/ir/author-capsule-runtime.ts']);
 const REQUIRED_DECLARATIONS = ['author-capsule-motion-types.d.ts', 'author-annulus-types.d.ts', 'author-content-types.d.ts', 'author-capsule-types.d.ts', 'author-catalog.generated.d.ts', 'author-provenance.d.ts', 'author-source.d.ts', 'authored-variation.d.ts', 'candidates.d.ts', 'catalog.generated.d.ts', 'compiler.d.ts', 'glyph-types.d.ts', 'index.d.ts', 'paint-types.d.ts', 'recipes.d.ts', 'render.d.ts', 'request.d.ts'];
@@ -114,7 +115,8 @@ export async function bundle(root, staging, entry, target, external = []) {
   writeFileSync(output.path, headers + output.text);
 }
 
-async function compileIrTargets({ root, staging }) {
+async function compileIrTargets({ root, staging, preview = false }) {
+  const optics = compileOpticalCorpus(root, { preview });
   execFileSync(process.execPath, [join(root, 'scripts/build-anatomy-projection.mjs')], { cwd: root, stdio: 'inherit' });
   const declarations = mkdtempSync(join(tmpdir(), 'lab-icons-ir-dts-'));
   try {
@@ -146,6 +148,7 @@ async function compileIrTargets({ root, staging }) {
       bundle(root, staging, 'src/ir/contour-runtime.ts', 'ir/contour-runtime.js'),
       bundle(root, staging, 'src/ir/recipes.ts', 'ir/recipes.js'),
       bundle(root, staging, 'src/ir/render.ts', 'ir/render.js'),
+      bundle(root, staging, 'src/render/index.ts', 'render/index.js'),
       bundle(root, staging, 'src/authoring/index.ts', 'authoring/index.js'),
       bundle(root, staging, 'src/ir/candidates.ts', 'ir/candidates.js', ['./index.js']),
       bundle(root, staging, 'src/motion/index.ts', 'motion/index.js', ['../ir/contour-runtime.js']),
@@ -163,6 +166,7 @@ async function compileIrTargets({ root, staging }) {
     if (failedBundle) throw failedBundle.reason;
     execFileSync(process.execPath, [join(root, 'node_modules/typescript/bin/tsc'), '-p', join(root, 'tsconfig.build.json'), '--outDir', declarations], { cwd: root, stdio: 'inherit' });
     for (const file of REQUIRED_DECLARATIONS) copyFileSync(join(declarations, 'ir', file), join(staging, 'ir', file));
+    for (const file of ['index.d.ts', 'optical-grid.d.ts']) copyFileSync(join(declarations, 'render', file), join(staging, 'render', file));
     if (clockMotionNames.length) copyFileSync(join(declarations, 'ir/author-clock-motion-types.d.ts'), join(staging, 'ir/author-clock-motion-types.d.ts'));
     // Source state-types публикуется под прежним IR specifier того же владельца.
     writeFileSync(join(staging, 'motion/index.d.ts'), readFileSync(join(declarations, 'motion/index.d.ts'), 'utf8')
@@ -217,7 +221,8 @@ async function compileIrTargets({ root, staging }) {
       const { variation, targets } = payload;
       if (variationNames.has(icon) !== !!variation) throw new Error(`build-ir: ${icon}: compiled variation не совпадает с author spec`);
       if (contentVariationNames.includes(icon) !== !!payload.contentVariation) throw new Error(`build-ir: ${icon}: compiled content variation не совпадает с author spec`);
-      const modules = renderSymbolModules(payload);
+      if (!optics.symbols[icon]) throw new Error(`build-ir: optical masters are missing for ${icon}`);
+      const modules = renderSymbolModules({ ...payload, opticalData: optics.symbols[icon].data });
       if (capsuleMotionNames.includes(icon)) {
         const motion = projectAuthorCapsuleMotion(payload);
         writeFileSync(join(staging, 'gestures', `${icon}.js`), renderAuthorCapsuleMotionModule(motion));
@@ -225,7 +230,7 @@ async function compileIrTargets({ root, staging }) {
       }
       compiledModules.push(modules);
       writeFileSync(join(staging, 'symbols', `${icon}.js`), modules.symbol);
-      writeFileSync(join(staging, 'symbols', `${icon}.d.ts`), symbolModuleDeclaration(icon));
+      writeFileSync(join(staging, 'symbols', `${icon}.d.ts`), symbolModuleDeclaration(icon, { optical: true }));
       if (modules.variation) {
         writeFileSync(join(staging, 'ir/symbol-data', `${icon}.js`), modules.data);
         writeFileSync(join(staging, 'variations', `${icon}.js`), modules.variation);
@@ -290,7 +295,7 @@ function validateStagedSurface(staging, contract) {
 }
 
 /** Команда сборки и проверки отказов проходят одну границу публикации всей эпохи. */
-export async function buildIr({ root = ROOT, compileTargets = compileIrTargets, transactionFs } = {}) {
+export async function buildIr({ root = ROOT, compileTargets = compileIrTargets, transactionFs, preview = false } = {}) {
   const output = join(root, 'dist');
   const backup = join(root, '.dist-ir-previous');
   recoverAbandonedStaging(root);
@@ -299,7 +304,7 @@ export async function buildIr({ root = ROOT, compileTargets = compileIrTargets, 
   const staging = mkdtempSync(join(root, `.dist-ir-build-${process.pid}-`));
   try {
     retainStaticArtifacts(output, staging);
-    const symbolCount = await compileTargets({ root, staging });
+    const symbolCount = await compileTargets({ root, staging, preview });
     validateStagedSurface(staging, read(root, 'release/contract.json'));
     // Соседний staging остаётся на той же файловой системе. Две rename могут дать
     // временно отсутствующий dist, но не смешанный набор IR/symbols/motion.
@@ -311,6 +316,6 @@ export async function buildIr({ root = ROOT, compileTargets = compileIrTargets, 
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  const symbolCount = await buildIr();
+  const symbolCount = await buildIr({ preview: process.argv.includes('--preview') });
   console.log(`build-ir: ${symbolCount} current author symbol modules + recorded IR + isolated motion`);
 }

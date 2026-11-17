@@ -1,6 +1,6 @@
 import { mkdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import { loadSymbolSource, projectAuthorBaseline } from './lib/symbol-source.js';
 import { loadAuthorBaseline } from './lib/author-baseline.js';
 import { authorPathEntries } from '../src/core/icon-geometry.js';
@@ -9,9 +9,14 @@ import { opticalVariantMasters } from './lib/optical-corpus.js';
 import { compileOpticalGrid } from './lib/optical-grid.js';
 import { build } from 'esbuild';
 
-const root = fileURLToPath(new URL('..', import.meta.url));
+const repository = fileURLToPath(new URL('..', import.meta.url));
+const rootArgument = process.argv.indexOf('--root');
+if (rootArgument >= 0 && (!process.argv[rootArgument + 1] || process.argv[rootArgument + 1].startsWith('--'))) {
+  throw new TypeError('--root requires a source directory');
+}
+const root = rootArgument < 0 ? repository : resolve(process.argv[rootArgument + 1]);
 const document = loadSymbolSource(root), baseline = loadAuthorBaseline(root, { manifest: projectAuthorBaseline(document) });
-const runtime = await build({ entryPoints: [join(root, 'src/render/optical-grid.ts')], bundle: true, write: false, format: 'esm' });
+const runtime = await build({ entryPoints: [join(repository, 'src/render/optical-grid.ts')], bundle: true, write: false, format: 'esm' });
 const { opticalPosition, sampleOpticalPath, opticalPathData } = await import(`data:text/javascript;base64,${Buffer.from(runtime.outputFiles[0].text).toString('base64')}`);
 const regenerate = process.argv.includes('--regenerate');
 // Small-size detail and counter changes have independent signs. These are
@@ -33,18 +38,25 @@ for (const symbol of Object.values(document.symbols)) {
   if (existing && (!regenerate || existing.generator !== 'normal-field-v1' || existing.review !== 'unreviewed')) {
     summary.retained.push(symbol.id); continue;
   }
-  const specification = { version: 1, review: 'unreviewed', generator: 'normal-field-v1', variants: {} };
+  const specification = { ...existing, version: 1, review: 'unreviewed', generator: 'normal-field-v1', variants: {} };
   for (const variant of ['outline', 'filled']) {
     const author = baseline.icons[symbol.id][variant], source = authorPathEntries(author.normalizedSvg);
     const fields = draftOpticalFields(source);
-    const recipe = { masterSha256: author.sha256, fieldProfile: `draft-${variant}`, fields };
+    const previous = existing?.variants[variant];
+    const { fields: _oldFields, diagnostics: _oldDiagnostics, masterSha256: _oldSha, ...authored } = previous ?? {};
+    const hasAuthoredGeometry = Boolean(authored.paths?.length || authored.corrections?.length);
+    if (previous && previous.masterSha256 !== author.sha256 && hasAuthoredGeometry) {
+      throw new Error(`Source changed for authored optical corrections: ${symbol.id}/${variant}; migrate the coordinate bindings first`);
+    }
+    const recipe = { masterSha256: author.sha256, fieldProfile: `draft-${variant}`, ...authored, fields };
     let projected, compiled;
-    for (const scale of [1, 0.75, 0.5, 0.25, 0.125, 0.0625, 0.03125]) {
+    const scales = recipe.fieldScale !== undefined ? [recipe.fieldScale] : hasAuthoredGeometry ? [1] : [1, 0.75, 0.5, 0.25, 0.125, 0.0625, 0.03125];
+    for (const scale of scales) {
       recipe.fieldScale = scale;
       projected = opticalVariantMasters(document, symbol, variant, author, recipe);
       try { compiled = compileOpticalGrid(projected); break; }
       catch (error) {
-        if (!String(error.message).includes('winding') || scale === 0.03125) throw new Error(`${symbol.id}/${variant}: ${error.message}`, { cause: error });
+        if (!String(error.message).includes('winding') || scale === scales.at(-1)) throw new Error(`${symbol.id}/${variant}: ${error.message}`, { cause: error });
       }
     }
     if (recipe.fieldScale === 1) delete recipe.fieldScale;

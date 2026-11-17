@@ -28,6 +28,8 @@ const DIST_COMMIT = 'b'.repeat(40);
 
 const DECLARATIONS = Object.freeze({
   'dist/index.d.ts': 'export declare const accessibilityOutline: string;\n',
+  'dist/render/index.d.ts': "import type { OpticalPath } from './optical-grid.js';\nexport declare function renderIcon(path: OpticalPath): string;\n",
+  'dist/render/optical-grid.d.ts': 'export interface OpticalPath { readonly commands: string }\n',
   'dist/ir/catalog.generated.d.ts': "export type CatalogIconId = 'fixture';\n",
   'dist/ir/author-catalog.generated.d.ts': "export type AuthorIconId = 'fixture';\n",
   'dist/ir/author-provenance.d.ts': "export interface AuthorSourceProvenance { readonly kind: 'figma' }\n",

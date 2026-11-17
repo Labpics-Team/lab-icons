@@ -74,6 +74,7 @@ export function symbolReleaseProjection(base, iconIds, stateGroupIds = [], varia
     './ir/candidates': base.exports['./ir/candidates'],
     './ir/render': { types: './dist/ir/render.d.ts', import: './dist/ir/render.js' },
     './authoring': { types: './dist/authoring/index.d.ts', import: './dist/authoring/index.js' },
+    './render': { types: './dist/render/index.d.ts', import: './dist/render/index.js' },
     './motion': { types: './dist/motion/index.d.ts', import: './dist/motion/index.js' },
     './symbols/*': { types: './dist/symbols/*.d.ts', import: './dist/symbols/*.js' },
     './lottie/*': { types: './dist/lottie/*.d.ts', import: './dist/lottie/*.js' },
@@ -88,6 +89,7 @@ export function symbolReleaseProjection(base, iconIds, stateGroupIds = [], varia
       ? (key === './states/*' ? groups : key === './state-variations/*' ? stateVariations : key === './content-variations/*' ? contentVariations : key === './gestures/*' ? motions : key === './variations/*' ? [...variationIconIds].sort() : ids).flatMap(id => Object.values(conditions).map(target => target.replace('*', id).slice(2)))
       : Object.values(conditions).map(target => target.slice(2)));
   const typeDependencies = ['dist/authoring/symbol-source.d.ts', 'dist/authoring/design-spec.d.ts', 'dist/ir/author-annulus-types.d.ts', 'dist/ir/author-content-types.d.ts', 'dist/ir/author-capsule-types.d.ts', 'dist/ir/author-catalog.generated.d.ts', 'dist/ir/author-provenance.d.ts', 'dist/ir/author-source.d.ts', 'dist/ir/authored-variation.d.ts', 'dist/ir/catalog.generated.d.ts', 'dist/ir/compiler.d.ts', 'dist/ir/glyph-types.d.ts', 'dist/ir/paint-types.d.ts', 'dist/ir/request.d.ts', 'dist/ir/lottie-types.d.ts', 'dist/ir/state-types.d.ts', 'dist/ir/state-common-types.d.ts', 'dist/ir/contour-state-types.d.ts'].sort();
+  typeDependencies.push('dist/render/optical-grid.d.ts'); typeDependencies.sort();
   const runtimeDependencies = ['dist/legacy-static.js', 'dist/ir/author-request-runtime.js', 'dist/ir/compiler.js', 'dist/ir/contour-runtime.js', 'dist/ir/request.js', 'dist/ir/symbol-runtime.js', 'dist/ir/lottie-runtime.js'].sort();
   if (motions.some(id => !capsuleMotions.includes(id) && !clockMotions.includes(id))) {
     typeDependencies.push('dist/ir/gesture-types.d.ts'); typeDependencies.sort();
@@ -232,7 +234,7 @@ export function renderSymbolModule(input) {
     "import { createCompiledGlyph, createCompiledCapabilities } from '../ir/symbol-runtime.js';",
     ...(packet ? ["import { materializeSourceV1, materializeTranslationCycleV1 } from '../ir/source-packet-runtime.js';"] : []),
     ...records.paths, ...records.static, ...records.shared,
-    `export const symbol = /* @__PURE__ */ Object.freeze({ id: ${jsonDataLiteral(input.icon)}, outline, filled });`,
+    `export const symbol = /* @__PURE__ */ Object.freeze({ id: ${jsonDataLiteral(input.icon)}, outline, filled${input.opticalData ? `, data: ${compactDataLiteral(input.opticalData)}` : ''} });`,
     'export default symbol;',
     `const outlineSource = ${records.sources.outline};`,
     `const filledSource = ${records.sources.filled};`,
@@ -246,13 +248,14 @@ export function renderSymbolModule(input) {
   return compactGeneratedModule([emit(false), emit(true), emit(false, true), emit(true, true), ...(packet ? [emit(true, true, true)] : [])]);
 }
 
-export function symbolModuleDeclaration(icon) {
+export function symbolModuleDeclaration(icon, { optical = false } = {}) {
   if (!SYMBOL_NAME.test(icon)) throw new TypeError('symbol declaration: невалидное имя');
   return [
     "import type { AuthorSourceGlyph, AuthorSourceCapabilities, AuthorSymbolGlyphRequest } from '../ir/author-source.js';",
+    ...(optical ? ["import type { IconSymbol } from '../render/index.js';"] : []),
     'export declare const outline: string;',
     'export declare const filled: string;',
-    `export declare const symbol: Readonly<{ id: '${icon}'; outline: string; filled: string }>;`,
+    `export declare const symbol: ${optical ? `IconSymbol & Readonly<{ id: '${icon}' }>` : `Readonly<{ id: '${icon}'; outline: string; filled: string }>`};`,
     'export default symbol;',
     `export declare function glyph(request?: AuthorSymbolGlyphRequest): AuthorSourceGlyph<'${icon}'>;`,
     `export declare function glyphCapabilities(variant?: AuthorSourceCapabilities['variant']): AuthorSourceCapabilities<'${icon}'>;`,
@@ -265,7 +268,7 @@ export function renderSymbolModules(input) {
   const { icon, source, staticSvg, variation } = input;
   const capabilities = sourceCapabilities(input.capabilities);
   if (input.contentVariation && !variation) throw new TypeError('content variation: отсутствует авторский annulus variation допуск');
-  if (!variation) return { symbol: renderSymbolModule({ icon, source, staticSvg, capabilities }) };
+  if (!variation) return { symbol: renderSymbolModule({ icon, source, staticSvg, capabilities, opticalData: input.opticalData }) };
   const law = variation.outline?.law;
   const target = variationRuntimeTargets([law])[0];
   if (!SYMBOL_NAME.test(icon) || Object.keys(variation).some(variant => !['outline', 'filled'].includes(variant)) ||
@@ -293,8 +296,12 @@ export function renderSymbolModules(input) {
   const dataPath = `../ir/symbol-data/${icon}.js`;
   const imports = `import { outline, filled, outlineSource, filledSource, outlineCapabilities, filledCapabilities } from '${dataPath}';`;
   const exports = 'export { outline, filled };';
-  const base = [imports, "import { createCompiledGlyph, createCompiledCapabilities } from '../ir/symbol-runtime.js';", exports,
-    `export const symbol = /* @__PURE__ */ Object.freeze({ id: ${jsonDataLiteral(icon)}, outline, filled });`,
+  const baseImports = input.opticalData
+    ? `import { outlineSource, filledSource, outlineCapabilities, filledCapabilities } from '${dataPath}';` : imports;
+  const baseStatic = input.opticalData
+    ? ['outline', 'filled'].map(variant => `export const ${variant} = ${jsonDataLiteral(staticSvg[variant])};`) : [exports];
+  const base = [baseImports, "import { createCompiledGlyph, createCompiledCapabilities } from '../ir/symbol-runtime.js';", ...baseStatic,
+    `export const symbol = /* @__PURE__ */ Object.freeze({ id: ${jsonDataLiteral(icon)}, outline, filled${input.opticalData ? `, data: ${compactDataLiteral(input.opticalData)}` : ''} });`,
     'export default symbol;',
     `export const glyph = /* @__PURE__ */ createCompiledGlyph(${jsonDataLiteral(icon)}, { outline: outlineSource, filled: filledSource });`,
     'export const glyphCapabilities = /* @__PURE__ */ createCompiledCapabilities({ outline: outlineCapabilities, filled: filledCapabilities });', ''].join('\n');

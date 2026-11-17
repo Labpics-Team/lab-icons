@@ -2109,6 +2109,9 @@
     "compileSymbolEffect",
     "prepareContourStateEffect"
   ],
+  "./render": [
+    "renderIcon"
+  ],
   "./state-variations/playback-circle": [
     "compileStateEffect",
     "enclosureVariationCapabilities",

@@ -146,6 +146,9 @@ function validPackage() {
   write(root, 'LICENSE', 'MIT\n');
   write(root, 'dist/index.js', 'export const accessibilityOutline = `<svg/>`;\n');
   write(root, 'dist/index.d.ts', 'export declare const accessibilityOutline: string;\n');
+  write(root, 'dist/render/index.js', 'export const renderIcon = () => "<svg/>";\n');
+  write(root, 'dist/render/index.d.ts', "import type { OpticalPath } from './optical-grid.js';\nexport declare function renderIcon(path: OpticalPath): string;\n");
+  write(root, 'dist/render/optical-grid.d.ts', 'export interface OpticalPath { readonly commands: string }\n');
   write(root, 'dist/legacy-static.js', 'export default {};\n');
   write(root, 'dist/ir/index.js', 'import "./compiler.js"; import "../legacy-static.js"; export const iconIds = []; export const glyph = () => ({});\n');
   write(

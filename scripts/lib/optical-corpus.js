@@ -5,7 +5,7 @@ import { loadSymbolSource, projectAuthorBaseline, verifySymbolComponents } from 
 import { loadAuthorBaseline } from './author-baseline.js';
 import { authorPathEntries } from '../../src/core/icon-geometry.js';
 import { opticalRecipeMasters } from './optical-recipes.js';
-import { compileOpticalGrid } from './optical-grid.js';
+import { applyOpticalCorrections, compileOpticalGrid } from './optical-grid.js';
 
 /** A review accepts concrete compiled geometry, including shared profiles. */
 export const opticalReviewDigest = data => createHash('sha256').update(JSON.stringify(data)).digest('hex');
@@ -27,9 +27,10 @@ export function opticalVariantMasters(document, symbol, variant, author, recipe)
     return component?.opticalRecipe ? [{ ...withProfile(component.opticalRecipe), pathIndex: part.pathIndex,
       center: component.anchors.center.map(value => value * 24) }] : [];
   });
-  const masters = opticalRecipeMasters({ axes: document.axisDesign, source, recipes: [...recipes, ...components],
+  const recipeMasters = opticalRecipeMasters({ axes: document.axisDesign, source, recipes: [...recipes, ...components],
     fields: recipe.fields, fieldScale: recipe.fieldScale,
     fieldProfile: recipe.fieldProfile ? withProfile({ profile: recipe.fieldProfile }) : undefined });
+  const masters = applyOpticalCorrections({ axes: document.axisDesign, masters: recipeMasters, corrections: recipe.corrections });
   return { axes: document.axisDesign, source, masters };
 }
 

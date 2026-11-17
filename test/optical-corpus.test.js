@@ -7,6 +7,7 @@ import { loadSymbolSource } from '../scripts/lib/symbol-source.js';
 import { compileOpticalCorpus, opticalReviewDigest } from '../scripts/lib/optical-corpus.js';
 import { pathBBox } from '../src/core/path-data.js';
 import { opticalPathData, opticalPosition, sampleOpticalPath } from '../src/render/optical-grid.ts';
+import { runProcessTree } from './helpers/run-process-tree.js';
 
 const repository = fileURLToPath(new URL('..', import.meta.url));
 const temporary = [];
@@ -27,7 +28,7 @@ function fixture(ids = ['plus-circle']) {
     }
     write(root, symbol.opticalMaster, readFileSync(join(repository, symbol.opticalMaster)));
   }
-  const file = source.symbols['plus-circle'].opticalMaster;
+  const file = source.symbols[ids[0]].opticalMaster;
   const recipe = JSON.parse(readFileSync(join(repository, file), 'utf8'));
   write(root, file, JSON.stringify(recipe)); write(root, 'symbols/source.json', JSON.stringify(source));
   return { root, source, recipe, file };
@@ -80,3 +81,36 @@ it('binds visual acceptance to the compiled geometry, including shared profiles'
   write(root, 'symbols/source.json', JSON.stringify(source));
   expect(() => compileOpticalCorpus(root)).toThrow('geometry changed since visual review');
 });
+
+it('retains authored support corrections during regeneration and refuses stale bindings before any write', async () => {
+  const { root, recipe, file } = fixture(['console']);
+  const original = compileOpticalCorpus(root, { preview: true }).symbols.console.data;
+  const corrections = [{ weight: 600, opsz: 16, paths: [{ pathIndex: 0, delta: [2, 0.01] }] }];
+  recipe.variants.filled.corrections = corrections;
+  write(root, file, JSON.stringify(recipe));
+  const run = () => runProcessTree(process.execPath, [join(repository, 'scripts/draft-optical-corpus.mjs'), '--root', root, '--regenerate'], {
+    cwd: repository, signal: AbortSignal.timeout(30_000),
+  });
+  const regenerated = await run();
+  expect(regenerated.error, regenerated.stderr).toBeUndefined();
+  expect(regenerated.status, regenerated.stderr).toBe(0);
+  const updated = JSON.parse(readFileSync(join(root, file), 'utf8'));
+  expect(updated.variants.filled.corrections).toEqual(corrections);
+  const compiled = compileOpticalCorpus(root, { preview: true }).symbols.console.data;
+  const position = opticalPosition(compiled.axes, 600, 16);
+  const before = sampleOpticalPath(original.variants.filled.paths[0], position);
+  const after = sampleOpticalPath(compiled.variants.filled.paths[0], position);
+  expect(after[2] - before[2]).toBeCloseTo(0.01, 12);
+  expect(compiled.variants.filled.paths[0].coordinates).toEqual(original.variants.filled.paths[0].coordinates);
+
+  updated.variants.filled.masterSha256 = '0'.repeat(64);
+  const stale = JSON.stringify(updated);
+  write(root, file, stale);
+  const sourceBefore = readFileSync(join(root, 'symbols/source.json'), 'utf8');
+  const refused = await run();
+  expect(refused.error).toBeUndefined();
+  expect(refused.status).not.toBe(0);
+  expect(refused.stderr).toContain('migrate the coordinate bindings first');
+  expect(readFileSync(join(root, file), 'utf8')).toBe(stale);
+  expect(readFileSync(join(root, 'symbols/source.json'), 'utf8')).toBe(sourceBefore);
+}, 40_000);

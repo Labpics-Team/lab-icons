@@ -40,6 +40,10 @@
       "types": "./dist/authoring/index.d.ts",
       "import": "./dist/authoring/index.js"
     },
+    "./render": {
+      "types": "./dist/render/index.d.ts",
+      "import": "./dist/render/index.js"
+    },
     "./motion": {
       "types": "./dist/motion/index.d.ts",
       "import": "./dist/motion/index.js"
@@ -832,6 +836,9 @@
     "dist/lottie/waveform.js",
     "dist/motion/index.d.ts",
     "dist/motion/index.js",
+    "dist/render/index.d.ts",
+    "dist/render/index.js",
+    "dist/render/optical-grid.d.ts",
     "dist/state-variations/playback-circle.d.ts",
     "dist/state-variations/playback-circle.js",
     "dist/state-variations/status-circle.d.ts",

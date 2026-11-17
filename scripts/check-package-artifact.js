@@ -615,6 +615,7 @@ export function checkPackageArtifact({
         `import * as timeSymbol from '@labpics/icons/symbols/time';\n` +
         `import { compileSymbolEffect } from '@labpics/icons/motion';\n` +
         `import { renderGlyphSvg } from '@labpics/icons/ir/render';\n` +
+        `import { renderIcon } from '@labpics/icons/render';\n` +
         authorVariationArtifactConsumerSource() +
         `if (typeof accessibilityOutline !== 'string' || !accessibilityOutline.includes('<svg')) throw new Error('root ESM export broken');\n` +
         `if ('buildDirectionalArrow' in fullIr) throw new Error('full IR leaks lightweight recipe surface');\n` +
@@ -635,6 +636,9 @@ export function checkPackageArtifact({
         `    const expected = variants[variant];\n` +
         `    const current = symbol.glyph({ variant });\n` +
         `    if (symbol[variant] !== expected.svg) throw new Error('current static master differs: ' + icon + '/' + variant);\n` +
+        `    if (renderIcon(symbol.default, { variant }) !== expected.svg) throw new Error('public renderer source differs: ' + icon + '/' + variant);\n` +
+        `    const optical = renderIcon(symbol.default, { variant, size: 20, weight: 500, opsz: 'auto' });\n` +
+        `    if (!optical.includes('width="20" height="20"') || optical.includes('NaN')) throw new Error('public renderer optical path broken: ' + icon + '/' + variant);\n` +
         `    if (symbol.glyph({ variant, modelMode: 'source-only' }) !== current || current.icon !== icon || current.variant !== variant || !isDeepStrictEqual(current.composition, expected.composition)) throw new Error('current source/default differs: ' + icon + '/' + variant);\n` +
         `    if (JSON.stringify(current.viewBox) !== '[0,0,24,24]' || !/<svg\\b[^>]*\\bfill="currentColor"/.test(current.svg) || current.parts.some(part => part.paint.kind !== 'fill' || part.paint.fill !== 'currentColor')) throw new Error('current viewport/paint differs: ' + icon + '/' + variant);\n` +
         `    if (current.provenance.kind !== 'source' || current.provenance.file !== expected.master || JSON.stringify(current.provenance.author) !== JSON.stringify(expected.author) || JSON.stringify(current.provenance.anatomy ?? null) !== JSON.stringify(expected.anatomy)) throw new Error('current author provenance differs: ' + icon + '/' + variant);\n` +
@@ -691,6 +695,10 @@ export function checkPackageArtifact({
         `import { exportLottie as exportActivityLottie } from '@labpics/icons/lottie/ellipsis-horizontal';\n` +
         `import { compileSymbolEffect, type SymbolEffectResult, type SymbolOpacityStage } from '@labpics/icons/motion';\n` +
         `import { renderGlyphSvg } from '@labpics/icons/ir/render';\n` +
+        `import { renderIcon, type IconSymbol } from '@labpics/icons/render';\n` +
+        `import time from '@labpics/icons/symbols/time';\n` +
+        `const opticalSymbol: IconSymbol = time;\n` +
+        `const opticalSvg: string = renderIcon(opticalSymbol, { size: 20, weight: 500, opsz: 'auto' });\n` +
         `const varied: GlyphIR = activityGlyph({ variation: { dotScale: 1.1, spacingScale: 0.9 } });\n` +
         `const verticalVaried: GlyphIR = verticalGlyph({ variant: 'filled', variation: { spacingScale: 1.1 } });\n` +
         `const authoredDomain: 'convex-linear' = activityCapabilities().variation.domain.kind;\n` +
