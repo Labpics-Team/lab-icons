@@ -6782,22 +6782,22 @@
             }
           },
           "anatomy": {
-            "classification": "unclassified",
+            "classification": "semantic",
             "parts": [
               {
+                "id": "calendar-date-tens",
                 "pathIndex": 0,
-                "id": "path-1",
-                "role": "unclassified"
+                "role": "content"
               },
               {
+                "id": "calendar-date-ones",
                 "pathIndex": 1,
-                "id": "path-2",
-                "role": "unclassified"
+                "role": "content"
               },
               {
+                "id": "calendar-shell",
                 "pathIndex": 2,
-                "id": "path-3",
-                "role": "unclassified"
+                "role": "enclosure"
               }
             ]
           }
@@ -6818,17 +6818,36 @@
             }
           },
           "anatomy": {
-            "classification": "unclassified",
+            "classification": "semantic",
             "parts": [
               {
+                "id": "calendar-body",
                 "pathIndex": 0,
-                "id": "path-1",
-                "role": "unclassified"
+                "contourIndices": [
+                  0
+                ],
+                "role": "enclosure"
               },
               {
+                "id": "calendar-date-tens",
+                "pathIndex": 0,
+                "contourIndices": [
+                  1
+                ],
+                "role": "counter"
+              },
+              {
+                "id": "calendar-date-ones",
+                "pathIndex": 0,
+                "contourIndices": [
+                  2
+                ],
+                "role": "counter"
+              },
+              {
+                "id": "calendar-header",
                 "pathIndex": 1,
-                "id": "path-2",
-                "role": "unclassified"
+                "role": "enclosure"
               }
             ]
           }
@@ -6844,7 +6863,16 @@
           "sha256": "2d3ca4f0d6fc43d3d82ba0f9f1044395b0237c207dece2c73884d0a854648eaa"
         }
       },
-      "opticalMaster": "symbols/optics/calendar-number.json"
+      "opticalMaster": "symbols/optics/calendar-number.json",
+      "calendar": {
+        "profile": "positive-mark",
+        "viewport": {
+          "variant": "outline",
+          "partId": "calendar-shell",
+          "contourIndex": 1
+        },
+        "contentScale": 0.75
+      }
     },
     "calendar-today": {
       "id": "calendar-today",

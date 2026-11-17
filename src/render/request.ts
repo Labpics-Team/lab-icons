@@ -1,5 +1,7 @@
 import type { IconSymbol, IconVariant, RenderIconOptions } from './index.js';
 import { opticalPosition } from './optical-grid.js';
+import { resolveCalendarSymbol } from './calendar.js';
+import { resolveCalendarDay } from '../core/calendar-date.js';
 
 /** Shared admission for pure rendering and mounted motion; no discarded SVG serialization. */
 export function resolveIconRequest(symbol: IconSymbol, options: RenderIconOptions) {
@@ -13,6 +15,13 @@ export function resolveIconRequest(symbol: IconSymbol, options: RenderIconOption
     else if (state) selected = state.data ? { id: state.id, data: state.data, semantics: state.semantics, outline: '', filled: '' } : symbol;
     else throw new RangeError(`symbol ${symbol.id} does not define state ${String(options.state)}`);
   }
+  const dynamic = options.date !== undefined || options.timeZone !== undefined;
+  if (dynamic) {
+    if (!symbol.semantics?.calendar && !selected.semantics?.calendar) throw new RangeError(`Symbol ${symbol.id} does not support a calendar date`);
+    if (options.date === undefined || options.timeZone === undefined) throw new TypeError('Calendar date and timeZone must be provided together');
+    const { day } = resolveCalendarDay({ date: options.date, timeZone: options.timeZone });
+    if (selected.semantics?.calendar) selected = resolveCalendarSymbol(selected, day);
+  }
   const data = selected.data;
   if (data?.version !== 1) throw new TypeError(`symbol ${selected.id} has no compiled optical masters`);
   if (variant === undefined) variant = 'outline';
@@ -22,5 +31,7 @@ export function resolveIconRequest(symbol: IconSymbol, options: RenderIconOption
   const weight = options.weight === undefined ? data.axes.weight[1] : options.weight;
   const requestedOpsz = options.opsz === undefined ? 'auto' : options.opsz;
   const opsz = requestedOpsz === 'auto' ? Math.min(data.axes.opsz[2], Math.max(data.axes.opsz[0], size)) : requestedOpsz;
-  return { selected, data, variant: variant as IconVariant, size, weight, opsz, position: opticalPosition(data.axes, weight, opsz) };
+  return { selected, data, variant: variant as IconVariant, size, weight, opsz,
+    parts: dynamic && selected.semantics?.calendar ? selected.semantics.variants[variant].parts : undefined,
+    position: opticalPosition(data.axes, weight, opsz) };
 }

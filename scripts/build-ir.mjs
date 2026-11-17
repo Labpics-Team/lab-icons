@@ -168,7 +168,10 @@ async function compileIrTargets({ root, staging, preview = false }) {
     if (failedBundle) throw failedBundle.reason;
     execFileSync(process.execPath, [join(root, 'node_modules/typescript/bin/tsc'), '-p', join(root, 'tsconfig.build.json'), '--outDir', declarations], { cwd: root, stdio: 'inherit' });
     for (const file of REQUIRED_DECLARATIONS) copyFileSync(join(declarations, 'ir', file), join(staging, 'ir', file));
-    for (const file of ['index.d.ts', 'optical-grid.d.ts']) copyFileSync(join(declarations, 'render', file), join(staging, 'render', file));
+    copyFileSync(join(declarations, 'render/index.d.ts'), join(staging, 'render/index.d.ts'));
+    // The build/runtime sampler is maintained in core; its public declaration
+    // stays at the render boundary without exposing a second package path.
+    copyFileSync(join(root, 'src/core/optical-sampling.d.ts'), join(staging, 'render/optical-grid.d.ts'));
     copyFileSync(join(declarations, 'motion/symbol-state.d.ts'), join(staging, 'motion/symbol-state.d.ts'));
     if (clockMotionNames.length) copyFileSync(join(declarations, 'ir/author-clock-motion-types.d.ts'), join(staging, 'ir/author-clock-motion-types.d.ts'));
     // Source state-types публикуется под прежним IR specifier того же владельца.
@@ -226,7 +229,7 @@ async function compileIrTargets({ root, staging, preview = false }) {
     const sourceDocument = loadSymbolSource(root);
     const payloads = Object.fromEntries(names.map(icon => [icon, compiledAuthorSymbolPayload(icon, authorSources[icon], compiler)]));
     const semantics = Object.fromEntries(names.map(icon => [icon,
-      compileSymbolMotion(icon, optics.symbols[icon].data, payloads[icon].capabilities, sourceDocument.symbols[icon], annotations.jointEvidence)]));
+      compileSymbolMotion(icon, optics.symbols[icon].data, payloads[icon].capabilities, sourceDocument.symbols[icon], annotations.jointEvidence, sourceDocument.opticalProfiles)]));
     const families = compileSymbolFamilies(semantics, sourceDocument, optics);
     for (const icon of names) {
       const payload = payloads[icon];

@@ -13,7 +13,7 @@ const winding = path => {
 };
 
 /** Offline normalization keeps source curve correspondence; no point fitting. */
-export function opticalPathSource({ d, fillRule = 'nonzero' }) {
+export function opticalPathSource({ d, fillRule = 'nonzero', strokeWidth }) {
   if (!['nonzero', 'evenodd'].includes(fillRule)) throw new TypeError('optical path has an unsupported fill rule');
   const segments = parsePathData(d), coordinates = [];
   let commands = '';
@@ -25,11 +25,12 @@ export function opticalPathSource({ d, fillRule = 'nonzero' }) {
       coordinates.push(segment[name]);
     }
   }
-  if (!commands.startsWith('M') || !commands.endsWith('Z') || /Z[^M]/.test(commands) ||
-      (commands.match(/M/g)?.length ?? 0) !== (commands.match(/Z/g)?.length ?? 0)) {
+  if (strokeWidth !== undefined && (!Number.isFinite(strokeWidth) || strokeWidth <= 0)) throw new TypeError('optical stroke width must be positive');
+  if (!commands.startsWith('M') || /Z[^M]/.test(commands) || strokeWidth === undefined &&
+      (!commands.endsWith('Z') || (commands.match(/M/g)?.length ?? 0) !== (commands.match(/Z/g)?.length ?? 0))) {
     throw new TypeError('optical path requires closed corresponding contours');
   }
-  return { commands, coordinates, fillRule };
+  return { commands, coordinates, fillRule, ...(strokeWidth !== undefined && { strokeWidth }) };
 }
 
 /** Source-bound edits of individual supports. The source center is immutable. */
@@ -91,7 +92,7 @@ export function compileOpticalGrid({ axes, source, masters }) {
   if (!Array.isArray(source) || !source.length || !Array.isArray(masters) || masters.length !== 9) {
     throw new TypeError('optical grid requires source paths and all nine masters');
   }
-  const base = source.map(opticalPathSource), windings = base.map(winding), grid = new Map();
+  const base = source.map(opticalPathSource), windings = base.map(path => path.strokeWidth === undefined ? winding(path) : null), grid = new Map();
   for (const master of masters) {
     const w = axes.weight.indexOf(master.weight), o = axes.opsz.indexOf(master.opsz);
     const key = `${w}/${o}`;
@@ -100,37 +101,46 @@ export function compileOpticalGrid({ axes, source, masters }) {
     }
     const paths = master.paths.map(opticalPathSource);
     for (let index = 0; index < base.length; index++) {
-      if (paths[index].commands !== base[index].commands || paths[index].fillRule !== base[index].fillRule) {
+      if (paths[index].commands !== base[index].commands || paths[index].fillRule !== base[index].fillRule ||
+          (paths[index].strokeWidth === undefined) !== (base[index].strokeWidth === undefined)) {
         throw new TypeError(`optical grid changed path correspondence or paint at ${key}/${index}`);
       }
-      if (winding(paths[index]).some((sign, contour) => sign !== windings[index][contour])) {
+      if (windings[index] && winding(paths[index]).some((sign, contour) => sign !== windings[index][contour])) {
         throw new TypeError(`optical grid changed contour winding at ${key}/${index}`);
       }
     }
     grid.set(key, paths);
   }
   const center = grid.get('1/1');
-  if (base.some((path, index) => path.coordinates.some((value, coordinate) => value !== center[index].coordinates[coordinate]))) {
+  if (base.some((path, index) => path.strokeWidth !== center[index].strokeWidth ||
+      path.coordinates.some((value, coordinate) => value !== center[index].coordinates[coordinate]))) {
     throw new TypeError('optical center must preserve the source master exactly');
   }
   const paths = base.map((path, pathIndex) => {
-    const at = (w, o) => grid.get(`${w}/${o}`)[pathIndex].coordinates;
-    const terms = [at(0, 1), at(2, 1), at(1, 0), at(1, 2)]
-      .map(master => master.map((value, index) => value - path.coordinates[index]));
-    for (const w of [0, 2]) for (const o of [0, 2]) {
-      terms.push(at(w, o).map((value, index) => value - path.coordinates[index]
-        - terms[w === 0 ? 0 : 1][index] - terms[o === 0 ? 2 : 3][index]));
-    }
-    // Every factor is in [0,1]. This conservative envelope also prevents an
-    // overflowing intermediate sum even when the final mathematical value fits.
-    if (path.coordinates.some((value, index) => !Number.isFinite(
-      terms.reduce((bound, term) => bound + Math.abs(term[index]), Math.abs(value))))) {
-      throw new RangeError('optical coefficients exceed the finite coordinate envelope');
-    }
-    return { ...path, terms: terms.flatMap((term, index) => {
-      const delta = sparse(term);
-      return delta.length ? [[index, delta]] : [];
-    }) };
+    const at = (w, o) => grid.get(`${w}/${o}`)[pathIndex];
+    const { strokeWidth, ...shape } = path;
+    return { ...shape, terms: opticalCoefficients(path.coordinates, (w, o) => at(w, o).coordinates),
+      ...(strokeWidth !== undefined && { stroke: { width: opticalScalar(strokeWidth, (w, o) => at(w, o).strokeWidth) } }) };
   });
   return { axes: { weight: [...axes.weight], opsz: [...axes.opsz] }, paths };
+}
+
+/** The same bilinear law lowers coordinate vectors, stroke widths and placement. */
+function opticalCoefficients(base, at) {
+  const terms = [at(0, 1), at(2, 1), at(1, 0), at(1, 2)]
+    .map(master => master.map((value, index) => value - base[index]));
+  for (const w of [0, 2]) for (const o of [0, 2]) {
+    terms.push(at(w, o).map((value, index) => value - base[index]
+      - terms[w === 0 ? 0 : 1][index] - terms[o === 0 ? 2 : 3][index]));
+  }
+  if (base.some((value, index) => !Number.isFinite(
+    terms.reduce((bound, term) => bound + Math.abs(term[index]), Math.abs(value))))) {
+    throw new RangeError('optical coefficients exceed the finite coordinate envelope');
+  }
+  return terms.flatMap((term, index) => { const delta = sparse(term); return delta.length ? [[index, delta]] : []; });
+}
+
+export function opticalScalar(base, at) {
+  if (!Number.isFinite(base) || at(1, 1) !== base) throw new TypeError('optical scalar requires its exact source support');
+  return { base, terms: opticalCoefficients([base], (w, o) => [at(w, o)]).map(([term, delta]) => [term, delta[1]]) };
 }

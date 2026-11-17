@@ -1,0 +1,18 @@
+{
+  "ok": true,
+  "comparisons": 558,
+  "maximumMeanAlphaDifference": 0,
+  "live": 0,
+  "cases": [
+    "31 days × 9 optical supports × 2 variants",
+    "accepted source enclosure",
+    "translucent tint",
+    "explicit Date/IANA",
+    "shared shell",
+    "interrupted date change",
+    "selection",
+    "Date mutation snapshot",
+    "invalid date is atomic",
+    "dispose"
+  ]
+}

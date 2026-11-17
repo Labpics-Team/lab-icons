@@ -1,3 +1,5 @@
+import { resolveCalendarDay } from './calendar-date.js';
+export { resolveCalendarDay } from './calendar-date.js';
 import {
   _closedRecord as closedRecord,
   _deepFreeze as deepFreeze,
@@ -283,16 +285,21 @@ function layoutTokens(aperture, profile, requiredGap = 0) {
 }
 
 function defaultCell(opsz) {
-  const profile = opszProfile(opsz);
-  const aperture = parseAperture(DEFAULT_CALENDAR_APERTURE);
-  const requiredGap = opticalLimits({ opsz }).minClearance * CALENDAR_CANVAS_SIZE;
-  const layout = layoutTokens(aperture, profile, requiredGap);
+  const layout = calendarNumberLayout({ opsz });
   return {
     centerX: layout.centerX,
     centerY: layout.centerY,
     width: layout.cellWidth,
-    height: aperture.height,
+    height: layout.aperture.height,
   };
+}
+
+/** The enclosure supplies its viewport; this one layout law determines cells and spacing. */
+export function calendarNumberLayout(input = {}) {
+  const options = closedRecord(input, 'layout', ['opsz', 'aperture']);
+  const opsz = parseOpsz(options.opsz === undefined ? CALENDAR_OPSZ_RANGE.default : options.opsz);
+  const aperture = parseAperture(options.aperture === undefined ? DEFAULT_CALENDAR_APERTURE : options.aperture);
+  return deepFreeze({ aperture, ...layoutTokens(aperture, opszProfile(opsz), opticalLimits({ opsz }).minClearance * CALENDAR_CANVAS_SIZE) });
 }
 
 function cleanNumber(value) {
@@ -363,7 +370,7 @@ export function roundedDigitGeometry(digit, options = {}) {
   if (!Number.isInteger(digit) || digit < 0 || digit > 9) {
     throw new RangeError(`digit: integer 0..9; got ${String(digit)}`);
   }
-  const parsedOptions = closedRecord(options, 'options', ['opsz', 'cell']);
+  const parsedOptions = closedRecord(options, 'options', ['opsz', 'cell', 'strokeScale']);
   const opsz = parseOpsz(parsedOptions.opsz === undefined ? CALENDAR_OPSZ_RANGE.default : parsedOptions.opsz);
   const profile = opszProfile(opsz);
   const cell = parsedOptions.cell === undefined ? defaultCell(opsz) : parseCell(parsedOptions.cell);
@@ -373,7 +380,8 @@ export function roundedDigitGeometry(digit, options = {}) {
   ) {
     throw new RangeError(`cell: меньше ${MIN_CELL_PIXELS}px на заявленном opsz`);
   }
-  const strokeWidth = cell.height * profile.strokeRatio;
+  const strokeScale = parsedOptions.strokeScale === undefined ? 1 : positiveNumber(parsedOptions.strokeScale, 'strokeScale');
+  const strokeWidth = cell.height * profile.strokeRatio * strokeScale;
   const availableWidth = cell.width - strokeWidth;
   const availableHeight = cell.height - strokeWidth;
   if (availableWidth <= 0 || availableHeight <= 0) {
@@ -414,66 +422,6 @@ export function roundedDigitGeometry(digit, options = {}) {
   });
 }
 
-function parseInstant(date) {
-  let epochMilliseconds;
-  try {
-    // Прямой вызов builtin не позволяет Date-subclass подменить getTime().
-    epochMilliseconds = Date.prototype.getTime.call(date);
-  } catch {
-    throw new TypeError('date: Date required');
-  }
-  if (!Number.isFinite(epochMilliseconds)) throw new RangeError('date: invalid');
-  return epochMilliseconds;
-}
-
-function dayFormatter(timeZone) {
-  if (typeof timeZone !== 'string' || timeZone.length === 0 || timeZone.trim() !== timeZone) {
-    throw new TypeError('timeZone: IANA identifier');
-  }
-  // ECMA-402 implementations may accept raw offset identifiers (например,
-  // +01:00), но public contract требует именованную IANA zone. При этом
-  // Intl.supportedValuesOf('timeZone') не является полным allowlist: он не
-  // перечисляет валидные tzdb IDs семейства Etc/GMT±N, которые formatter
-  // корректно принимает и канонизирует.
-  if (/^[+-]\d{2}:\d{2}(?::\d{2})?$/.test(timeZone)) {
-    throw new RangeError(`timeZone: unsupported "${timeZone}"`);
-  }
-  try {
-    const formatter = new Intl.DateTimeFormat('en-US-u-ca-gregory-nu-latn', {
-      timeZone,
-      day: 'numeric',
-    });
-    const resolved = formatter.resolvedOptions();
-    if (resolved.calendar !== 'gregory' || resolved.numberingSystem !== 'latn') {
-      throw new Error('Intl: gregory/latn ignored');
-    }
-    if (typeof resolved.timeZone !== 'string' || resolved.timeZone.length === 0) {
-      throw new Error('Intl: canonical time zone absent');
-    }
-    return { formatter, canonicalTimeZone: resolved.timeZone };
-  } catch (error) {
-    throw new RangeError(`timeZone: unsupported "${timeZone}"`, { cause: error });
-  }
-}
-
-/** Разрешает day-of-month из явно переданных instant + time zone. */
-export function resolveCalendarDay(input) {
-  const parsedInput = closedRecord(input, 'input', ['date', 'timeZone']);
-  const epochMilliseconds = parseInstant(parsedInput.date);
-  const { formatter, canonicalTimeZone } = dayFormatter(parsedInput.timeZone);
-  const dayParts = formatter
-    .formatToParts(new Date(epochMilliseconds))
-    .filter(({ type }) => type === 'day');
-  if (dayParts.length !== 1 || !/^\d{1,2}$/.test(dayParts[0].value)) {
-    throw new Error('calendar day: ambiguous Intl value');
-  }
-  const day = Number(dayParts[0].value);
-  if (!Number.isInteger(day) || day < 1 || day > 31) {
-    throw new Error(`calendar day: outside 1..31 (${String(day)})`);
-  }
-  return deepFreeze({ day, epochMilliseconds, timeZone: canonicalTimeZone });
-}
-
 function unionBounds(parts) {
   return {
     minX: Math.min(...parts.map(({ inkBounds }) => inkBounds.minX)),
@@ -497,11 +445,7 @@ export function buildCalendarNumberGeometry(input) {
   const aperture = parseAperture(parsedInput.aperture === undefined ? DEFAULT_CALENDAR_APERTURE : parsedInput.aperture);
   const profile = opszProfile(opsz);
   const limits = opticalLimits({ opsz });
-  const layout = layoutTokens(
-    aperture,
-    profile,
-    limits.minClearance * CALENDAR_CANVAS_SIZE,
-  );
+  const layout = calendarNumberLayout({ aperture, opsz });
   const digits = String(resolved.day).split('').map(Number);
   const slots = digits.length === 1 ? ['ones'] : ['tens', 'ones'];
   const displayWidth = digits.length === 1 ? layout.cellWidth : aperture.width;

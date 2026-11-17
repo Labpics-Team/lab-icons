@@ -1,6 +1,6 @@
 import type { IconSymbol, RenderIconOptions, SymbolGesture, SymbolPart, SymbolTrack, SymbolVariantSemantics } from '../render/index.js';
 import { resolveIconRequest } from '../render/request.js';
-import { opticalPathData, sampleOpticalPath } from '../render/optical-grid.js';
+import { opticalPathData, sampleOpticalPath, sampleOpticalScalar } from '../render/optical-grid.js';
 import type { SymbolMotionRuntime, SymbolPlayback } from './execution.js';
 import { projectPathView, projectPoint } from './path-view.js';
 
@@ -17,11 +17,12 @@ export interface MountedIcon {
   readonly state: string | undefined;
   set(options: RenderIconOptions, transition?: IconTransitionOptions): SymbolPlayback;
   setState(state: string, transition?: IconTransitionOptions): SymbolPlayback;
+  setDate(date: Date, timeZone: string, transition?: IconTransitionOptions): SymbolPlayback;
   effect(name: string, options?: IconEffectOptions): SymbolPlayback;
   /** Stops all controls and removes the mounted SVG. Idempotent. */
   dispose(): void;
 }
-type Paint = { element: SVGPathElement; part: SymbolPart; anchor: readonly [number, number]; alpha: number; opacity: number; x: number; y: number; rotate: number; draw: number; guide?: SVGPathElement; mask?: SVGMaskElement };
+type Paint = { element: SVGPathElement; part: SymbolPart; anchor: readonly [number, number]; offsetX: number; alpha: number; opacity: number; x: number; y: number; rotate: number; draw: number; guide?: SVGPathElement; mask?: SVGMaskElement };
 const ns = 'http://www.w3.org/2000/svg';
 const rest = { opacity: 1, x: 0, y: 0, rotate: 0, draw: 1 };
 const poseChannels = Object.keys(rest) as (keyof typeof rest)[];
@@ -48,7 +49,7 @@ export function mountSymbol(runtime: SymbolMotionRuntime, root: Element, symbol:
   element.style.overflow = 'visible';
   const definitions = document.createElementNS(ns, 'defs'); element.append(definitions);
   const paints = new Map<string, Paint>();
-  const layers = new Map<string, { paint: SVGRectElement; mask: SVGMaskElement }>();
+  const layers = new Map<string, { paint: SVGRectElement; mask: SVGMaskElement; parts: Set<Paint>; alpha: number }>();
   const active = new Map<string, { playback: SymbolPlayback; release: () => void }>();
   const phases = new Map<string, number>();
   const stateChannels = new Map<Paint, Set<keyof typeof rest>>();
@@ -93,9 +94,10 @@ export function mountSymbol(runtime: SymbolMotionRuntime, root: Element, symbol:
       finish: () => playback.finish(), stop: release };
   }
   function writePaint(paint: Paint) {
-    paint.element.setAttribute('opacity', String((paint.part.layer ? 1 : paint.alpha) * paint.opacity));
-    if (paint.part.layer) layers.get(paint.part.layer)!.paint.setAttribute('opacity', String(paint.alpha));
-    paint.element.setAttribute('transform', `translate(${paint.x} ${paint.y}) rotate(${paint.rotate} ${paint.anchor.join(' ')})`);
+    const layer = paint.part.layer ? layers.get(paint.part.layer)! : undefined;
+    const coverage = layer ? layer.alpha > 0 ? paint.alpha / layer.alpha : 0 : paint.alpha;
+    paint.element.setAttribute('opacity', String(coverage * paint.opacity));
+    paint.element.setAttribute('transform', `translate(${paint.x + paint.offsetX} ${paint.y}) rotate(${paint.rotate} ${paint.anchor.join(' ')})`);
     if (paint.guide) {
       // Exactly empty/full endpoints avoid round-cap residue and clipping at any weight.
       paint.element.setAttribute('mask', paint.draw >= 1 ? '' : `url(#${paint.mask!.id})`);
@@ -106,7 +108,7 @@ export function mountSymbol(runtime: SymbolMotionRuntime, root: Element, symbol:
   function addPaint(part: SymbolPart, d: string, fillRule: string): Paint {
     const path = document.createElementNS(ns, 'path'); path.setAttribute('d', d); path.setAttribute('fill-rule', fillRule);
     path.setAttribute('data-part', part.id);
-    const paint: Paint = { element: path, part, anchor: part.anchor, alpha: 0, opacity: 1, x: 0, y: 0, rotate: 0, draw: 1 };
+    const paint: Paint = { element: path, part, anchor: part.anchor, offsetX: 0, alpha: 0, opacity: 1, x: 0, y: 0, rotate: 0, draw: 1 };
     if (part.draw) {
       const mask = document.createElementNS(ns, 'mask'); mask.id = `lab-icon-draw-${++nextMask}`;
       mask.setAttribute('maskUnits', 'userSpaceOnUse'); mask.setAttribute('x', '-24'); mask.setAttribute('y', '-24');
@@ -125,9 +127,9 @@ export function mountSymbol(runtime: SymbolMotionRuntime, root: Element, symbol:
         mask.setAttribute('width', '72'); mask.setAttribute('height', '72');
         const fill = document.createElementNS(ns, 'rect'); fill.setAttribute('x', '-24'); fill.setAttribute('y', '-24');
         fill.setAttribute('width', '72'); fill.setAttribute('height', '72'); fill.setAttribute('mask', `url(#${mask.id})`);
-        definitions.append(mask); element.append(fill); layer = { paint: fill, mask }; layers.set(part.layer, layer);
+        definitions.append(mask); element.append(fill); layer = { paint: fill, mask, parts: new Set(), alpha: 0 }; layers.set(part.layer, layer);
       }
-      path.setAttribute('fill', part.negative ? 'black' : 'white'); layer.mask.append(path);
+      path.setAttribute('fill', part.negative ? 'black' : 'white'); layer.mask.append(path); layer.parts.add(paint);
     } else element.append(path);
     return paint;
   }
@@ -144,7 +146,9 @@ export function mountSymbol(runtime: SymbolMotionRuntime, root: Element, symbol:
     // All dependent motion releases before any next-state DOM mutation.
     for (const channel of [...active.keys()]) stop(channel);
     const generation = ++epoch;
-    phases.clear(); stateChannels.clear(); options = { ...next }; semantics = resolved.semantic;
+    phases.clear(); stateChannels.clear();
+    options = { ...next, ...(next.date !== undefined && { date: new Date(Date.prototype.getTime.call(next.date)) }) };
+    semantics = resolved.semantic;
     element.setAttribute('width', String(resolved.size)); element.setAttribute('height', String(resolved.size));
     const desired = new Set<string>(), starts = new Map<Paint, typeof rest & { alpha: number }>();
     const coordinates = new Map<number, Float64Array>();
@@ -160,6 +164,13 @@ export function mountSymbol(runtime: SymbolMotionRuntime, root: Element, symbol:
       if (!paint) { paint = addPaint(part, d, path.fillRule); paints.set(key, paint); }
       else { paint.part = part; paint.element.setAttribute('d', d); paint.element.setAttribute('data-part', part.id); }
       paint.anchor = part.pivot ? projectPoint(sampled, part.pivot) : part.anchor;
+      paint.offsetX = part.offsetX ? sampleOpticalScalar(part.offsetX, resolved.at) : 0;
+      if (path.stroke) {
+        paint.element.setAttribute('fill', 'none');
+        paint.element.setAttribute('stroke', part.layer ? part.negative ? 'black' : 'white' : 'currentColor');
+        paint.element.setAttribute('stroke-width', String(sampleOpticalScalar(path.stroke.width, resolved.at)));
+        paint.element.setAttribute('stroke-linecap', 'round'); paint.element.setAttribute('stroke-linejoin', 'round');
+      }
       stateChannels.set(paint, new Set(poseChannels));
     }
     for (const paint of paints.values()) starts.set(paint, { alpha: paint.alpha, opacity: paint.opacity,
@@ -169,12 +180,23 @@ export function mountSymbol(runtime: SymbolMotionRuntime, root: Element, symbol:
         paint.alpha = start.alpha + ((desired.has(paint.part.key) ? 1 : 0) - start.alpha) * progress;
         const channels = stateChannels.get(paint);
         if (channels) for (const channel of channels) paint[channel] = start[channel] + (rest[channel] - start[channel]) * progress;
-        writePaint(paint);
       }
+      // A shared shell stays opaque while old/new contents fade within its coverage.
+      // When every part fades together, the full layer (including holes) fades once.
+      for (const layer of layers.values()) {
+        layer.alpha = 0;
+        for (const paint of layer.parts) layer.alpha = Math.max(layer.alpha, paint.alpha);
+        layer.paint.setAttribute('opacity', String(layer.alpha));
+      }
+      for (const paint of starts.keys()) writePaint(paint);
     };
     const done = () => {
       if (generation !== epoch) return;
-      for (const [key, paint] of paints) if (!desired.has(key)) { paint.element.remove(); paint.mask?.remove(); paints.delete(key); }
+      for (const [key, paint] of paints) if (!desired.has(key)) {
+        paint.element.remove(); paint.mask?.remove(); paints.delete(key);
+        if (paint.part.layer) layers.get(paint.part.layer)!.parts.delete(paint);
+      }
+      for (const [key, layer] of layers) if (!layer.parts.size) { layer.mask.remove(); layer.paint.remove(); layers.delete(key); }
     };
     return play('state', duration, write, done);
   }
@@ -224,5 +246,6 @@ export function mountSymbol(runtime: SymbolMotionRuntime, root: Element, symbol:
   set(initial, { duration: 0 }); root.append(element);
   return { element, get state() { return options.state; }, set,
     setState: (state, transition) => set({ ...options, state }, transition), effect,
+    setDate: (date, timeZone, transition) => set({ ...options, date, timeZone }, transition),
     dispose() { if (disposed) return; disposed = true; epoch++; for (const channel of [...active.keys()]) stop(channel); element.remove(); paints.clear(); stateChannels.clear(); } };
 }

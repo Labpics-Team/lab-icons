@@ -1,6 +1,7 @@
 import { opticalPathData, sampleOpticalPath,
-  type OpticalAxes, type OpticalPath } from './optical-grid.js';
+  type OpticalAxes, type OpticalPath, type OpticalScalar } from './optical-grid.js';
 import { resolveIconRequest } from './request.js';
+import { renderSymbolParts } from './parts.js';
 
 export type IconVariant = 'outline' | 'filled';
 export interface SymbolData {
@@ -26,6 +27,7 @@ export interface SymbolPart {
   readonly contourIndices?: readonly number[];
   readonly geometry?: SymbolPathView;
   readonly pivot?: SymbolPointProjection;
+  readonly offsetX?: OpticalScalar;
   readonly anchor: readonly [number, number];
   readonly draw?: Readonly<{ path: string; width: number }>;
   /** Parts whose coverage is painted once share an isolated layer, optionally with subtraction. */
@@ -59,8 +61,15 @@ export interface SymbolVariantSemantics {
 }
 export interface SymbolSemantics {
   readonly variants: Readonly<Record<IconVariant, SymbolVariantSemantics>>;
+  readonly calendar?: CalendarSymbolData;
   /** A state without data refers to the family's own artwork. */
   readonly states?: Readonly<Record<string, Readonly<{ id: string; data?: SymbolData; semantics?: SymbolSemantics }>>>;
+}
+export interface CalendarSymbolData {
+  readonly key: string;
+  readonly digits: readonly OpticalPath[];
+  readonly spacing: OpticalScalar;
+  readonly shells: Readonly<Record<IconVariant, readonly SymbolPart[]>>;
 }
 export interface RenderIconOptions {
   readonly variant?: IconVariant;
@@ -69,14 +78,18 @@ export interface RenderIconOptions {
   readonly weight?: number;
   readonly opsz?: number | 'auto';
   readonly state?: string;
+  /** Explicit instant and named IANA zone. Both are required for a dynamic calendar day. */
+  readonly date?: Date;
+  readonly timeZone?: string;
 }
 
 /** Pure SVG rendering: no DOM, clocks, observers or runtime SVG parser. */
 export function renderIcon(symbol: IconSymbol, options: RenderIconOptions = {}): string {
-  const { selected, data, variant, size, weight, opsz, position } = resolveIconRequest(symbol, options);
+  const { selected, data, variant, size, weight, opsz, position, parts } = resolveIconRequest(symbol, options);
   // The source support at its source size returns the existing SVG literal.
   if (selected[variant] && weight === data.axes.weight[1] && opsz === data.axes.opsz[1] && size === 24) return selected[variant];
   let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="currentColor">`;
+  if (parts) return `${svg}${renderSymbolParts(data, variant, parts, position)}</svg>`;
   for (const path of data.variants[variant].paths) {
     svg += `<path d="${opticalPathData(path, sampleOpticalPath(path, position))}" fill-rule="${path.fillRule}"/>`;
   }

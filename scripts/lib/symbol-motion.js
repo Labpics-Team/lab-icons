@@ -4,6 +4,7 @@ import { loadAuthorBaseline } from './author-baseline.js';
 import { compileAuthorAnatomyWithEvidence } from './author-anatomy.js';
 import { compactDataLiteral } from './generated-module.js';
 import { compileOpticalClock } from './optical-clock.js';
+import { compileCalendarSymbol } from './calendar-symbol.js';
 
 const hash = value => createHash('sha256').update(JSON.stringify(value)).digest('hex').slice(0, 24);
 const variants = ['outline', 'filled'];
@@ -15,17 +16,18 @@ export function compileSemanticCorpus(root, corpus) {
   const { contracts, jointEvidence } = compileAuthorAnatomyWithEvidence(author, projectAuthorAnatomy(document), undefined, { scope: 'source' });
   const semantics = Object.fromEntries(Object.keys(corpus.symbols).map(id => [id,
     compileSymbolMotion(id, corpus.symbols[id].data, Object.fromEntries(variants.map(variant => [variant,
-      { motion: { gestures: contracts[`${id}/${variant}`]?.gestures ?? [] } }])), document.symbols[id], jointEvidence)]));
+      { motion: { gestures: contracts[`${id}/${variant}`]?.gestures ?? [] } }])), document.symbols[id], jointEvidence, document.opticalProfiles)]));
   return { semantics, families: compileSymbolFamilies(semantics, document, corpus) };
 }
 
 /** Semantic lowering consumes validated author gesture tracks, never infers intent from names. */
-export function compileSymbolMotion(symbol, data, capabilities, declaration, joints = {}) {
-  return { variants: Object.fromEntries(variants.map(variant => {
+export function compileSymbolMotion(symbol, data, capabilities, declaration, joints = {}, profiles = {}) {
+  const calendar = compileCalendarSymbol(data, declaration, profiles);
+  return { ...(calendar && { calendar }), variants: Object.fromEntries(variants.map(variant => {
     const anatomy = declaration.variants[variant].anatomy;
     const sourcePaths = data.variants[variant].paths;
-    const subtract = anatomy.parts.some(part => part.role === 'counter' && declaration.draw?.[variant]?.[part.id]);
-    const layer = subtract ? hash(sourcePaths) : undefined;
+    const subtract = anatomy.parts.some(part => part.role === 'counter' && (calendar || declaration.draw?.[variant]?.[part.id]));
+    const layer = subtract || calendar ? hash(sourcePaths) : undefined;
     if (subtract) for (const [pathIndex, path] of sourcePaths.entries()) {
       const parts = anatomy.parts.filter(part => part.pathIndex === pathIndex);
       const count = [...path.commands].filter(command => command === 'M').length;
@@ -97,7 +99,7 @@ export function compileSymbolFamilies(semantics, document, corpus) {
         if (!/^[a-z][a-z0-9-]*$/.test(name) || !corpus.symbols[target]) throw new TypeError(`Unknown semantic state: ${id}/${name}/${target}`);
         if (Object.hasOwn(states, name) && states[name].id !== target) throw new TypeError(`Ambiguous semantic state: ${id}/${name}`);
         states[name] = target === id ? { id } : { id: target, data: corpus.symbols[target].data,
-          semantics: { variants: semantics[target].variants } };
+          semantics: semantics[target] };
       }
     return [family, { ...corpus.symbols[id], semantics: { ...semantics[id], states } }];
   }));
