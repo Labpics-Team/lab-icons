@@ -89,9 +89,39 @@ function barCoordinate(value, axis, recipe, w, o) {
 }
 
 /** Recipes retain authored control points and adjust declared anatomical dimensions. */
-export function opticalRecipeMasters({ axes, source, recipes }) {
+export function opticalRecipeMasters({ axes, source, recipes, fields = [], fieldProfile, fieldScale = 1 }) {
   const paths = source.map(path => ({ ...path, segments: parsePathData(path.d) }));
   const bound = recipes.map(recipe => bindRecipe(recipe, paths[recipe.pathIndex]));
+  if (fields.length) {
+    for (const key of ['weightOffset', 'opszOffset', 'counterOpszOffset', 'spanScale']) {
+      if (fieldProfile?.[key]?.length !== 3 || fieldProfile[key].some(value => !Number.isFinite(value)) ||
+          fieldProfile[key][1] !== (key === 'spanScale' ? 1 : 0) ||
+          key === 'spanScale' && fieldProfile[key].some(value => value <= 0)) throw new TypeError(`optical field requires a valid ${key}`);
+    }
+    if (!Number.isFinite(fieldScale) || fieldScale <= 0 || fieldScale > 1) throw new TypeError('optical field scale must be in (0,1]');
+  }
+  const fieldPaths = new Map();
+  for (const field of fields) {
+    if (!paths[field.pathIndex] || fieldPaths.has(field.pathIndex)) throw new TypeError('optical field has a duplicate or missing path');
+    const contours = new Map();
+    for (const contour of field.contours) {
+      if (contours.has(contour.contourIndex) || !['exterior', 'counter', 'mixed'].includes(contour.role) ||
+          !Array.isArray(contour.normal) || contour.normal.some(value => !Number.isFinite(value)) ||
+          contour.offsetScale !== undefined && (!Number.isFinite(contour.offsetScale) || contour.offsetScale <= 0 || contour.offsetScale > 1)) {
+        throw new TypeError('optical field has invalid contour data');
+      }
+      contours.set(contour.contourIndex, contour);
+    }
+    const counts = [];
+    for (const segment of paths[field.pathIndex].segments) {
+      if (segment.cmd === 'M') counts.push(0);
+      counts[counts.length - 1] += coordinates[segment.cmd].length;
+    }
+    if (contours.size !== counts.length || counts.some((count, index) => contours.get(index)?.normal.length !== count)) {
+      throw new TypeError('optical field changed contour correspondence');
+    }
+    fieldPaths.set(field.pathIndex, contours);
+  }
   const byPath = paths.map((path, pathIndex) => path.segments.filter(segment => segment.cmd === 'M').map((_, contourIndex) => {
     const matches = bound.filter(recipe => recipe.pathIndex === pathIndex &&
       (recipe.contourIndex === undefined || recipe.contourIndex === contourIndex));
@@ -100,15 +130,22 @@ export function opticalRecipeMasters({ axes, source, recipes }) {
   }));
   return axes.weight.flatMap((weight, w) => axes.opsz.map((opsz, o) => ({ weight, opsz,
     paths: paths.map((path, pathIndex) => {
-      let contourIndex = -1;
+      let contourIndex = -1, contourCoordinate = 0;
       const d = path.segments.map(segment => {
-        if (segment.cmd === 'M') contourIndex++;
+        if (segment.cmd === 'M') { contourIndex++; contourCoordinate = 0; }
         const recipe = byPath[pathIndex][contourIndex];
         const fields = coordinates[segment.cmd];
         if (!fields) throw new TypeError('optical recipe requires M/L/C/Z');
         const values = fields.map((field, coordinate) => {
           const value = segment[field], axis = coordinate % 2;
-          if (!recipe) return value;
+          if (!recipe) {
+            const draft = fieldPaths.get(pathIndex)?.get(contourIndex);
+            if (!draft || w === 1 && o === 1) return value;
+            const scale = 1 + (fieldProfile.spanScale[o] - 1) * fieldScale;
+            const offset = (fieldProfile.weightOffset[w] +
+              (draft.role === 'counter' ? fieldProfile.counterOpszOffset[o] : fieldProfile.opszOffset[o])) * fieldScale * (draft.offsetScale ?? 1);
+            return 12 + (value - 12) * scale + draft.normal[contourCoordinate + coordinate] * offset;
+          }
           if (recipe.kind === 'rounded-cross') return crossCoordinate(value, axis, recipe, w, o);
           if (recipe.kind === 'rounded-bar') return barCoordinate(value, axis, recipe, w, o);
           if (recipe.kind === 'disc' || recipe.kind === 'annulus') {
@@ -121,6 +158,7 @@ export function opticalRecipeMasters({ axes, source, recipes }) {
           }
           throw new TypeError(`unknown optical recipe ${recipe.kind}`);
         });
+        contourCoordinate += fields.length;
         return segment.cmd + values.join(' ');
       }).join('');
       return { d, fillRule: path.fillRule };

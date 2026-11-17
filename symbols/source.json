@@ -133,19 +133,95 @@
     ]
   },
   "axisDesign": {
-    "weight": [300, 400, 600],
-    "opsz": [16, 24, 48]
+    "weight": [
+      300,
+      400,
+      600
+    ],
+    "opsz": [
+      16,
+      24,
+      48
+    ]
   },
   "opticalProfiles": {
     "positive-mark": {
-      "weightScale": [0.75, 1, 1.3],
-      "opszScale": [1.1, 1, 0.95],
-      "spanScale": [1.025, 1, 0.985]
+      "weightScale": [
+        0.75,
+        1,
+        1.3
+      ],
+      "opszScale": [
+        1.1,
+        1,
+        0.95
+      ],
+      "spanScale": [
+        1.025,
+        1,
+        0.985
+      ]
     },
     "counter-mark": {
-      "weightScale": [1.15, 1, 0.85],
-      "opszScale": [1.1, 1, 0.96],
-      "spanScale": [1.025, 1, 0.985]
+      "weightScale": [
+        1.15,
+        1,
+        0.85
+      ],
+      "opszScale": [
+        1.1,
+        1,
+        0.96
+      ],
+      "spanScale": [
+        1.025,
+        1,
+        0.985
+      ]
+    },
+    "draft-outline": {
+      "weightOffset": [
+        -0.1875,
+        0,
+        0.225
+      ],
+      "opszOffset": [
+        0.06,
+        0,
+        -0.025
+      ],
+      "counterOpszOffset": [
+        -0.04,
+        0,
+        0.015
+      ],
+      "spanScale": [
+        1.012,
+        1,
+        0.995
+      ]
+    },
+    "draft-filled": {
+      "weightOffset": [
+        -0.16,
+        0,
+        0.19
+      ],
+      "opszOffset": [
+        0.045,
+        0,
+        -0.02
+      ],
+      "counterOpszOffset": [
+        -0.07,
+        0,
+        0.02
+      ],
+      "spanScale": [
+        1.008,
+        1,
+        0.996
+      ]
     }
   },
   "components": {
@@ -168,9 +244,21 @@
       "opticalRecipe": {
         "kind": "annulus",
         "radiusMeasure": "start-y",
-        "weightScale": [0.8333333333333334, 1, 1.3333333333333333],
-        "opszScale": [1.0833333333333333, 1, 0.9444444444444444],
-        "radiusDelta": [0.15, 0, 0]
+        "weightScale": [
+          0.8333333333333334,
+          1,
+          1.3333333333333333
+        ],
+        "opszScale": [
+          1.0833333333333333,
+          1,
+          0.9444444444444444
+        ],
+        "radiusDelta": [
+          0.15,
+          0,
+          0
+        ]
       }
     }
   },
@@ -250,7 +338,8 @@
           "file": "svg/Filled/accessibility_filled.svg",
           "sha256": "b98568d43a39aab40f41cfedfbc601cfb1b51aeeec6f1f6250217855a480e1bb"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/accessibility.json"
     },
     "actions": {
       "id": "actions",
@@ -332,7 +421,8 @@
           "file": "svg/Filled/actions_filled.svg",
           "sha256": "391ed8a7318addb5bac528b3536b06cc130692c475ac6c279d956fa7f7ef8cb4"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/actions.json"
     },
     "alert": {
       "id": "alert",
@@ -409,7 +499,8 @@
           "file": "svg/Filled/alert_filled.svg",
           "sha256": "32295dbdb57d2a94119bc6965227c4cfb396d6e5847dbe425a36e549fe2abd96"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/alert.json"
     },
     "alert-circle": {
       "id": "alert-circle",
@@ -573,7 +664,8 @@
           "file": "svg/Filled/alert-circle_filled.svg",
           "sha256": "a6639eae9cec2af58700236041de3747bf605bd350c099723e1bc28a1bd6b98e"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/alert-circle.json"
     },
     "align-bottom": {
       "id": "align-bottom",
@@ -638,7 +730,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/align-bottom.json"
     },
     "align-horizontal-center": {
       "id": "align-horizontal-center",
@@ -693,7 +786,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/align-horizontal-center.json"
     },
     "align-items-bottom": {
       "id": "align-items-bottom",
@@ -768,7 +862,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/align-items-bottom.json"
     },
     "align-items-horizontal-center": {
       "id": "align-items-horizontal-center",
@@ -823,7 +918,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/align-items-horizontal-center.json"
     },
     "align-items-left": {
       "id": "align-items-left",
@@ -898,7 +994,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/align-items-left.json"
     },
     "align-items-right": {
       "id": "align-items-right",
@@ -973,7 +1070,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/align-items-right.json"
     },
     "align-items-top": {
       "id": "align-items-top",
@@ -1048,7 +1146,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/align-items-top.json"
     },
     "align-items-vertical-center": {
       "id": "align-items-vertical-center",
@@ -1103,7 +1202,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/align-items-vertical-center.json"
     },
     "align-left": {
       "id": "align-left",
@@ -1168,7 +1268,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/align-left.json"
     },
     "align-right": {
       "id": "align-right",
@@ -1233,7 +1334,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/align-right.json"
     },
     "align-top": {
       "id": "align-top",
@@ -1298,7 +1400,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/align-top.json"
     },
     "align-vertical-center": {
       "id": "align-vertical-center",
@@ -1353,7 +1456,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/align-vertical-center.json"
     },
     "aloof": {
       "id": "aloof",
@@ -1509,7 +1613,8 @@
           "file": "svg/Filled/aloof_filled.svg",
           "sha256": "f0b20aea897ea1fabacdbe07a2a3271a39b5f627ff3789afc7b2873e2781762e"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/aloof.json"
     },
     "apps": {
       "id": "apps",
@@ -1867,7 +1972,8 @@
           "file": "svg/Filled/apps_filled.svg",
           "sha256": "e2f97550c138fd0cc6ab3333b75b0ee128316f7013553517b427888b4ff79e87"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/apps.json"
     },
     "archive": {
       "id": "archive",
@@ -1939,7 +2045,8 @@
           "file": "svg/Filled/archive_filled.svg",
           "sha256": "7382e3694290280ce4101b48c63d9de30bb2f51f4a7a0d926e754229b699025f"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/archive.json"
     },
     "archive-close": {
       "id": "archive-close",
@@ -2011,7 +2118,8 @@
           "file": "svg/Filled/archive-close_filled.svg",
           "sha256": "4ead3c1cb7c6d812111f1184f82519ccb3586ba19d69dfb9e2ce8c3ab9db8f9a"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/archive-close.json"
     },
     "arrow-back": {
       "id": "arrow-back",
@@ -2201,7 +2309,8 @@
           "file": "svg/Filled/arrow-back_filled.svg",
           "sha256": "e54907ec9118c632c43fbf5f13f01b1d702516df39bc90718c2fc8194aab02a7"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/arrow-back.json"
     },
     "arrow-back-circle": {
       "id": "arrow-back-circle",
@@ -2359,7 +2468,8 @@
           "file": "svg/Filled/arrow-back-circle_filled.svg",
           "sha256": "1b78457b0b4a030364be1a3d583dc6b236448306d856a37323762ca49c93bbb4"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/arrow-back-circle.json"
     },
     "arrow-down": {
       "id": "arrow-down",
@@ -2549,7 +2659,8 @@
           "file": "svg/Filled/arrow-down_filled.svg",
           "sha256": "f576d543084710ac69680828bfe4f547b712d61045d2da51abb74dc9872ea1f5"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/arrow-down.json"
     },
     "arrow-down-circle": {
       "id": "arrow-down-circle",
@@ -2707,7 +2818,8 @@
           "file": "svg/Filled/arrow-down-circle_filled.svg",
           "sha256": "896b9a4f954146ca1af7f6cafc576e2b50ec125264d0c02949e905cb1720af59"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/arrow-down-circle.json"
     },
     "arrow-forward": {
       "id": "arrow-forward",
@@ -2900,7 +3012,8 @@
           "file": "svg/Filled/arrow-forward_filled.svg",
           "sha256": "36556af093e69c3ebb594202def59a523dd52ebedfda08a43230b0443116ca0b"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/arrow-forward.json"
     },
     "arrow-forward-circle": {
       "id": "arrow-forward-circle",
@@ -3058,7 +3171,8 @@
           "file": "svg/Filled/arrow-forward-circle_filled.svg",
           "sha256": "bd4841facdf006861573703f0fccd037ef29b188d6c6112818b287105eeb86d4"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/arrow-forward-circle.json"
     },
     "arrow-redo": {
       "id": "arrow-redo",
@@ -3596,7 +3710,8 @@
           "file": "svg/Filled/arrow-redo_filled.svg",
           "sha256": "b6f93c0f5df0c9f1fd985bcb87c07fdabfc20426d0f92c41dba5600c7d5faba5"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/arrow-redo.json"
     },
     "arrow-redo-circle": {
       "id": "arrow-redo-circle",
@@ -3668,7 +3783,8 @@
           "file": "svg/Filled/arrow-redo-circle_filled.svg",
           "sha256": "c90b97eb69f151cee9426c482b37a87c2e93bef913a89b6bbe9451280da4cf56"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/arrow-redo-circle.json"
     },
     "arrow-redo-curve": {
       "id": "arrow-redo-curve",
@@ -3723,7 +3839,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/arrow-redo-curve.json"
     },
     "arrow-undo": {
       "id": "arrow-undo",
@@ -3799,7 +3916,8 @@
           "file": "svg/Filled/arrow-undo_filled.svg",
           "sha256": "28bbaaaab62c4412ae0f877604a69d8b3d36ecf6cfd768bf8874f6ae9b61af68"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/arrow-undo.json"
     },
     "arrow-undo-circle": {
       "id": "arrow-undo-circle",
@@ -3871,7 +3989,8 @@
           "file": "svg/Filled/arrow-undo-circle_filled.svg",
           "sha256": "d15a77d1b8488ff9586045558df737041d5819505c78b23b0c1f4da22118015b"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/arrow-undo-circle.json"
     },
     "arrow-undo-curve": {
       "id": "arrow-undo-curve",
@@ -3926,7 +4045,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/arrow-undo-curve.json"
     },
     "arrow-up": {
       "id": "arrow-up",
@@ -4116,7 +4236,8 @@
           "file": "svg/Filled/arrow-up_filled.svg",
           "sha256": "623070226f1f1ed5f9a4f36a1f3a7007636e6cc8629168b204590601721b3694"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/arrow-up.json"
     },
     "arrow-up-circle": {
       "id": "arrow-up-circle",
@@ -4273,7 +4394,8 @@
           "file": "svg/Filled/arrow-up-circle_filled.svg",
           "sha256": "ef2a65eaf680d890bc4050af59e6fb3c1a80e625e43eaf27ebfa63a1a51dfd63"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/arrow-up-circle.json"
     },
     "at": {
       "id": "at",
@@ -4338,7 +4460,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/at.json"
     },
     "attach": {
       "id": "attach",
@@ -4405,7 +4528,8 @@
           "file": "svg/Filled/attach_filled.svg",
           "sha256": "e796a3683606d5a32ad490f72b5f777fe41c29e617870595b72c5d2b4e33cfa5"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/attach.json"
     },
     "bag": {
       "id": "bag",
@@ -4472,7 +4596,8 @@
           "file": "svg/Filled/bag_filled.svg",
           "sha256": "f75644d91bcef11068925a240bc5d17d0e74ae368455454fd5c342b14f21ae75"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/bag.json"
     },
     "bag-checkmark": {
       "id": "bag-checkmark",
@@ -4544,7 +4669,8 @@
           "file": "svg/Filled/bag-checkmark_filled.svg",
           "sha256": "036baf60bb753e881a330289550613414320b8b98e4ab097f205b2cf53540514"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/bag-checkmark.json"
     },
     "bag-close": {
       "id": "bag-close",
@@ -4616,7 +4742,8 @@
           "file": "svg/Filled/bag-close_filled.svg",
           "sha256": "83cbd220004c1de540ee8eafcc4b3ad25808df069a6e4d68756ffc49eabb94b5"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/bag-close.json"
     },
     "bag-minus": {
       "id": "bag-minus",
@@ -4688,7 +4815,8 @@
           "file": "svg/Filled/bag-minus_filled.svg",
           "sha256": "b779ca78d9f9a6b397ee8c951a38d773f66e2320370d5efed9e1a37bb0b419a5"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/bag-minus.json"
     },
     "bag-plus": {
       "id": "bag-plus",
@@ -4760,7 +4888,8 @@
           "file": "svg/Filled/bag-plus_filled.svg",
           "sha256": "6fd698677bae6c2eb02e91d9e11ca84bc16f554fc3ffff717e02e17cc3e96c38"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/bag-plus.json"
     },
     "ban": {
       "id": "ban",
@@ -4886,7 +5015,8 @@
           "file": "svg/Filled/ban_filled.svg",
           "sha256": "77766eddb042acc518228a8be0e72b1fc819f115011bbfdafa4f05d403cea100"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/ban.json"
     },
     "basket": {
       "id": "basket",
@@ -4956,7 +5086,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/basket.json"
     },
     "bill": {
       "id": "bill",
@@ -5038,7 +5169,8 @@
           "file": "svg/Filled/bill_filled.svg",
           "sha256": "b29b92141acb26e3a6d0f70fe8c349e35fd9e9d26c1ee3e9aa74ef00d6745249"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/bill.json"
     },
     "bin": {
       "id": "bin",
@@ -5115,7 +5247,8 @@
           "file": "svg/Filled/bin_filled.svg",
           "sha256": "5392698d694bb8927e6ee92de6b2823c66b2cb1f2b00c6062957157871592895"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/bin.json"
     },
     "book": {
       "id": "book",
@@ -5187,7 +5320,8 @@
           "file": "svg/Filled/book_filled.svg",
           "sha256": "a894dc001f1f83486d24c3944e498bc91cfc338970b0ddffbe05b6bf6e91cf8e"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/book.json"
     },
     "bookmark": {
       "id": "bookmark",
@@ -5559,7 +5693,8 @@
           "file": "svg/Filled/bookmark_filled.svg",
           "sha256": "984ddef0087291d0aff07dfcd326912514f93d225fb848a1d8335e1ad6187dbc"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/bookmark.json"
     },
     "bookmarks": {
       "id": "bookmarks",
@@ -5626,7 +5761,8 @@
           "file": "svg/Filled/bookmarks_filled.svg",
           "sha256": "f7113b121078aa06cee8ddfb044c07b5c06a742062bee81d54e339c0b017bcd9"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/bookmarks.json"
     },
     "boolean": {
       "id": "boolean",
@@ -5698,7 +5834,8 @@
           "file": "svg/Filled/boolean_filled.svg",
           "sha256": "1cbf0934428730cb9f47ed0a813621b640fb6b077409f31f12cfc043b41cfe5d"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/boolean.json"
     },
     "brain": {
       "id": "brain",
@@ -5770,7 +5907,8 @@
           "file": "svg/Filled/brain_filled.svg",
           "sha256": "239abe104ef4a88f75210709f4ac40131c781dba416075633277c8a11c79889d"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/brain.json"
     },
     "branch": {
       "id": "branch",
@@ -5847,7 +5985,8 @@
           "file": "svg/Filled/branch_filled.svg",
           "sha256": "30354023ece39f0936f243ff75808d41041ff131f724b5d1f156edbd84a8df86"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/branch.json"
     },
     "branches": {
       "id": "branches",
@@ -5929,7 +6068,8 @@
           "file": "svg/Filled/branches_filled.svg",
           "sha256": "0170dd0742192b4ab51e59ca84f22cae2f02d4c8a66d32b2cb0c3e0cb8127b06"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/branches.json"
     },
     "brush": {
       "id": "brush",
@@ -6001,7 +6141,8 @@
           "file": "svg/Filled/brush_filled.svg",
           "sha256": "8700ac3aff4d9b730737579e0747959bc8fbc7b35b24a4c02d246046f30668dd"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/brush.json"
     },
     "bulb": {
       "id": "bulb",
@@ -6428,7 +6569,8 @@
           "file": "svg/Filled/bulb_filled.svg",
           "sha256": "5ce91dafa36d9e7dd950cb44944560040c06011e8540649889c69903ba3c7257"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/bulb.json"
     },
     "calendar": {
       "id": "calendar",
@@ -6545,7 +6687,8 @@
           "file": "svg/Filled/calendar_filled.svg",
           "sha256": "caf83e5c655abcfd22e9ea304650b3f204ed7a4abf5a644af257b217e23d6466"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/calendar.json"
     },
     "calendar-clear": {
       "id": "calendar-clear",
@@ -6617,7 +6760,8 @@
           "file": "svg/Filled/calendar-clear_filled.svg",
           "sha256": "afc1c80d0157f5cd6de4945a705105f259c4f154298045c665be7d4ab94c3723"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/calendar-clear.json"
     },
     "calendar-number": {
       "id": "calendar-number",
@@ -6699,7 +6843,8 @@
           "file": "svg/Filled/calendar-number_filled.svg",
           "sha256": "2d3ca4f0d6fc43d3d82ba0f9f1044395b0237c207dece2c73884d0a854648eaa"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/calendar-number.json"
     },
     "calendar-today": {
       "id": "calendar-today",
@@ -6781,7 +6926,8 @@
           "file": "svg/Filled/calendar-today_filled.svg",
           "sha256": "4b572f89b40075b14b778005bc12c8c5ca85c0b44e2595369cc0d531bbcc53ee"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/calendar-today.json"
     },
     "camera": {
       "id": "camera",
@@ -6858,7 +7004,8 @@
           "file": "svg/Filled/camera_filled.svg",
           "sha256": "f271bc08c76415cbdb9153527154d20e6557d8ee81cd9b191f3d38e54f531980"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/camera.json"
     },
     "camera-reverse": {
       "id": "camera-reverse",
@@ -6935,7 +7082,8 @@
           "file": "svg/Filled/camera-reverse_filled.svg",
           "sha256": "c602cefb366c4aba399e9943f02f5ca50ab3635a4c617c112547d51fee45cd5d"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/camera-reverse.json"
     },
     "cards": {
       "id": "cards",
@@ -7010,7 +7158,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/cards.json"
     },
     "caret-back": {
       "id": "caret-back",
@@ -7065,7 +7214,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/caret-back.json"
     },
     "caret-down": {
       "id": "caret-down",
@@ -7120,7 +7270,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/caret-down.json"
     },
     "caret-forward": {
       "id": "caret-forward",
@@ -7175,7 +7326,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/caret-forward.json"
     },
     "caret-up": {
       "id": "caret-up",
@@ -7230,7 +7382,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/caret-up.json"
     },
     "caret-vertical": {
       "id": "caret-vertical",
@@ -7285,7 +7438,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/caret-vertical.json"
     },
     "cart": {
       "id": "cart",
@@ -7372,7 +7526,8 @@
           "file": "svg/Filled/cart_filled.svg",
           "sha256": "d3b266af70b4ca04b42d69ee13ec9ccbe0477486016195428f97fadfb8ac3bf9"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/cart.json"
     },
     "chart": {
       "id": "chart",
@@ -7449,7 +7604,8 @@
           "file": "svg/Filled/chart_filled.svg",
           "sha256": "b02d6b6997f289195366ddb41dd59b69b34c52c4812f9005d28a11fef19f2ffd"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/chart.json"
     },
     "chart-area": {
       "id": "chart-area",
@@ -7504,7 +7660,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/chart-area.json"
     },
     "chart-area-panel": {
       "id": "chart-area-panel",
@@ -7564,7 +7721,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/chart-area-panel.json"
     },
     "chart-bars-horizontal": {
       "id": "chart-bars-horizontal",
@@ -7639,7 +7797,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/chart-bars-horizontal.json"
     },
     "chart-columns": {
       "id": "chart-columns",
@@ -7714,7 +7873,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/chart-columns.json"
     },
     "chart-combo": {
       "id": "chart-combo",
@@ -7799,7 +7959,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/chart-combo.json"
     },
     "chart-donut": {
       "id": "chart-donut",
@@ -7859,7 +8020,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/chart-donut.json"
     },
     "chart-flow": {
       "id": "chart-flow",
@@ -7914,7 +8076,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/chart-flow.json"
     },
     "chart-lines": {
       "id": "chart-lines",
@@ -7989,7 +8152,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/chart-lines.json"
     },
     "chart-metric": {
       "id": "chart-metric",
@@ -8064,7 +8228,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/chart-metric.json"
     },
     "chart-nodes": {
       "id": "chart-nodes",
@@ -8129,7 +8294,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/chart-nodes.json"
     },
     "chart-pie": {
       "id": "chart-pie",
@@ -8194,7 +8360,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/chart-pie.json"
     },
     "chart-treemap-horizontal": {
       "id": "chart-treemap-horizontal",
@@ -8289,7 +8456,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/chart-treemap-horizontal.json"
     },
     "chart-treemap-vertical": {
       "id": "chart-treemap-vertical",
@@ -8384,7 +8552,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/chart-treemap-vertical.json"
     },
     "chart-trend-up": {
       "id": "chart-trend-up",
@@ -8449,7 +8618,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/chart-trend-up.json"
     },
     "chatbubble": {
       "id": "chatbubble",
@@ -8762,7 +8932,8 @@
           "file": "svg/Filled/chatbubble_filled.svg",
           "sha256": "aa887761074f82748c960690ae37bbaddd96d347d94594196b4484dd0648e5e7"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/chatbubble.json"
     },
     "chatbubble-ellipses": {
       "id": "chatbubble-ellipses",
@@ -8855,7 +9026,8 @@
           "file": "svg/Filled/chatbubble-ellipses_filled.svg",
           "sha256": "13c524b814632b7a869d2e459f5ccfae6893fbb930057d25424e653e501a4546"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/chatbubble-ellipses.json"
     },
     "chatbubbles": {
       "id": "chatbubbles",
@@ -8932,7 +9104,8 @@
           "file": "svg/Filled/chatbubbles_filled.svg",
           "sha256": "e6536e56be03e8d6599a2cadbdd070874878173340cc46a6256695dcdee96ce7"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/chatbubbles.json"
     },
     "checkmark": {
       "id": "checkmark",
@@ -9053,7 +9226,8 @@
           "file": "svg/Filled/checkmark_filled.svg",
           "sha256": "358debea809aa8606c15f9d32709ed1570e4b1c723f56e20ccaf57b14d080b86"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/checkmark.json"
     },
     "checkmark-circle": {
       "id": "checkmark-circle",
@@ -9221,7 +9395,8 @@
           "file": "svg/Filled/checkmark-circle_filled.svg",
           "sha256": "dde0b596ecb6a3a1c1be3289035f6031edb2d760a940b031a2def39cd994920d"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/checkmark-circle.json"
     },
     "checkmarks": {
       "id": "checkmarks",
@@ -9362,7 +9537,8 @@
           "file": "svg/Filled/checkmarks_filled.svg",
           "sha256": "e98e734641589ebbb64ea13e4428f4f68773121a337b80799430dd4cebe8edf0"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/checkmarks.json"
     },
     "checkmarks-circle": {
       "id": "checkmarks-circle",
@@ -9524,7 +9700,8 @@
           "file": "svg/Filled/checkmarks-circle_filled.svg",
           "sha256": "8ad1bacbd38b1183a2f0667b6787cd439ccffc9fd076d667631fbec94756ff5d"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/checkmarks-circle.json"
     },
     "cherries": {
       "id": "cherries",
@@ -9579,7 +9756,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/cherries.json"
     },
     "chevron-back": {
       "id": "chevron-back",
@@ -9727,7 +9905,8 @@
           "file": "svg/Filled/chevron-back_filled.svg",
           "sha256": "e3ef9cd0528a3c6a43a524ac0feec3157f1b3fbe3dfe826e40780c0a0a950428"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/chevron-back.json"
     },
     "chevron-back-circle": {
       "id": "chevron-back-circle",
@@ -9837,7 +10016,8 @@
           "file": "svg/Filled/chevron-back-circle_filled.svg",
           "sha256": "e9165f827f31e518a6f69fc2682ca8039b73db70e718ec2bad2625f4e01322e0"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/chevron-back-circle.json"
     },
     "chevron-down": {
       "id": "chevron-down",
@@ -9986,7 +10166,8 @@
           "file": "svg/Filled/chevron-down_filled.svg",
           "sha256": "f62db320cb1da7437fb1b1824523fd53c46744c2a099ba608f432e71e337e5f4"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/chevron-down.json"
     },
     "chevron-down-circle": {
       "id": "chevron-down-circle",
@@ -10091,7 +10272,8 @@
           "file": "svg/Filled/chevron-down-circle_filled.svg",
           "sha256": "e0fd985d47696b09e6a129d6ca3040f652af09044816de13b13bb5b080c4f3d1"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/chevron-down-circle.json"
     },
     "chevron-forward": {
       "id": "chevron-forward",
@@ -10239,7 +10421,8 @@
           "file": "svg/Filled/chevron-forward_filled.svg",
           "sha256": "abbfeba0af449e19e10111bb32c59129837561b30e1957cc78b851a61e4a62f9"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/chevron-forward.json"
     },
     "chevron-forward-circle": {
       "id": "chevron-forward-circle",
@@ -10349,7 +10532,8 @@
           "file": "svg/Filled/chevron-forward-circle_filled.svg",
           "sha256": "9e9e681753964eedbc89ba693a4fc52b56643c18cedaa971d1cf4b444e25fb70"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/chevron-forward-circle.json"
     },
     "chevron-up": {
       "id": "chevron-up",
@@ -10498,7 +10682,8 @@
           "file": "svg/Filled/chevron-up_filled.svg",
           "sha256": "37af914391a2731932d24b866328fe8c03166029ac1b6b9358797378e6b81344"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/chevron-up.json"
     },
     "chevron-up-circle": {
       "id": "chevron-up-circle",
@@ -10609,7 +10794,8 @@
           "file": "svg/Filled/chevron-up-circle_filled.svg",
           "sha256": "91b58f269b2ff09c0cb3a485c9026fbb29efdddd6ad6c98c9b6e4da0d4847958"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/chevron-up-circle.json"
     },
     "chevrons-down": {
       "id": "chevrons-down",
@@ -10674,7 +10860,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/chevrons-down.json"
     },
     "close": {
       "id": "close",
@@ -10826,7 +11013,8 @@
           "file": "svg/Filled/close_filled.svg",
           "sha256": "830ab3cea1ac63c96751141a45c1c5b1055cfbe5f0c73563e87f7271817e15ad"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/close.json"
     },
     "close-circle": {
       "id": "close-circle",
@@ -11019,7 +11207,8 @@
           "file": "svg/Filled/close-circle_filled.svg",
           "sha256": "6733f5a4bc9b45320047475e95155c6fc8671ea141bb0210e3e3e94497463c7e"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/close-circle.json"
     },
     "close-octagon": {
       "id": "close-octagon",
@@ -11079,7 +11268,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/close-octagon.json"
     },
     "cloud": {
       "id": "cloud",
@@ -11215,7 +11405,8 @@
           "file": "svg/Filled/cloud_filled.svg",
           "sha256": "8322ea200c42951e0223c47b908cb66e084ec0741fffa7045caf6ad2d5e58f81"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/cloud.json"
     },
     "cloud-checkmark": {
       "id": "cloud-checkmark",
@@ -11294,7 +11485,8 @@
           "file": "svg/Filled/cloud-checkmark_filled.svg",
           "sha256": "3283ea06cd15e1d734f6163be29b35aded07367a0ed64c654b3a97f5ff68aba9"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/cloud-checkmark.json"
     },
     "cloud-download": {
       "id": "cloud-download",
@@ -11371,7 +11563,8 @@
           "file": "svg/Filled/cloud-download_filled.svg",
           "sha256": "7d5ba62288e9b6b79d911c737956ab08bb58bb788b2ee0ce27682218e6d9197b"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/cloud-download.json"
     },
     "cloud-off": {
       "id": "cloud-off",
@@ -11888,7 +12081,8 @@
           "file": "svg/Filled/cloud-off_filled.svg",
           "sha256": "37beb3cb1add90f00af4c4d15d0d897a4113844fa75f45aa6f714b953110f373"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/cloud-off.json"
     },
     "cloud-upload": {
       "id": "cloud-upload",
@@ -11965,7 +12159,8 @@
           "file": "svg/Filled/cloud-upload_filled.svg",
           "sha256": "6f3bb4e5148b634a03088f9698cca03d836179eaf92872969b6c303bdc7110f3"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/cloud-upload.json"
     },
     "code": {
       "id": "code",
@@ -12030,7 +12225,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/code.json"
     },
     "code-frame": {
       "id": "code-frame",
@@ -12085,7 +12281,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/code-frame.json"
     },
     "cog": {
       "id": "cog",
@@ -12182,7 +12379,8 @@
           "file": "svg/Filled/cog_filled.svg",
           "sha256": "3b93927fc63cccf30859a5c891e659c640f796eb5c404ad078cdbc489c34815e"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/cog.json"
     },
     "coin-dollar": {
       "id": "coin-dollar",
@@ -12252,7 +12450,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/coin-dollar.json"
     },
     "coin-ruble": {
       "id": "coin-ruble",
@@ -12317,7 +12516,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/coin-ruble.json"
     },
     "collapse-horizontal": {
       "id": "collapse-horizontal",
@@ -12382,7 +12582,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/collapse-horizontal.json"
     },
     "collapse-horizontal-line": {
       "id": "collapse-horizontal-line",
@@ -12457,7 +12658,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/collapse-horizontal-line.json"
     },
     "collapse-vertical": {
       "id": "collapse-vertical",
@@ -12522,7 +12724,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/collapse-vertical.json"
     },
     "collapse-vertical-line": {
       "id": "collapse-vertical-line",
@@ -12597,7 +12800,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/collapse-vertical-line.json"
     },
     "color-filter": {
       "id": "color-filter",
@@ -12664,7 +12868,8 @@
           "file": "svg/Filled/color-filter_filled.svg",
           "sha256": "f4a693fe27d051ce0088cf860a062ce0f3f2ed32c447c91de436ad8a4e0e64e7"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/color-filter.json"
     },
     "color-wand": {
       "id": "color-wand",
@@ -12786,7 +12991,8 @@
           "file": "svg/Filled/color-wand_filled.svg",
           "sha256": "d77eb9b436313109f2fb503f78d0c7c7604889c93d596075977a4f7ac2ec9f35"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/color-wand.json"
     },
     "commit": {
       "id": "commit",
@@ -12863,7 +13069,8 @@
           "file": "svg/Filled/commit_filled.svg",
           "sha256": "950c1049b8049b50870d5f5df6830abc84fa416353da8eb58523c370ee67628c"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/commit.json"
     },
     "commits": {
       "id": "commits",
@@ -12930,7 +13137,8 @@
           "file": "svg/Filled/commits_filled.svg",
           "sha256": "2092bac59aa8941efd1114300200b3f9575e2dd1e22e5e80dce698de0d2c35d2"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/commits.json"
     },
     "compas": {
       "id": "compas",
@@ -13007,7 +13215,8 @@
           "file": "svg/Filled/compas_filled.svg",
           "sha256": "1a235af68cccc5c05746b61c000855221abd42b895ed330cedc58d45fe8f7248"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/compas.json"
     },
     "component": {
       "id": "component",
@@ -13223,7 +13432,8 @@
           "file": "svg/Filled/component_filled.svg",
           "sha256": "87c19073a33cf863aa7c2b3406c488477ecbca31956ca2a16ba4882d4f19d3b2"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/component.json"
     },
     "computer": {
       "id": "computer",
@@ -13278,7 +13488,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/computer.json"
     },
     "connect": {
       "id": "connect",
@@ -13385,7 +13596,8 @@
           "file": "svg/Filled/connect_filled.svg",
           "sha256": "c617ae0b560c299c174269fcc5024aa57e2468cc0c208b2486cae660d5dc58d8"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/connect.json"
     },
     "connectors": {
       "id": "connectors",
@@ -13440,7 +13652,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/connectors.json"
     },
     "console": {
       "id": "console",
@@ -13517,7 +13730,8 @@
           "file": "svg/Filled/console_filled.svg",
           "sha256": "3d223fa8fe80b771a14bb601d58afe4c9323109c618d97c7fb79730c0a18518c"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/console.json"
     },
     "contrast": {
       "id": "contrast",
@@ -13755,7 +13969,8 @@
           "file": "svg/Filled/contrast_filled.svg",
           "sha256": "a34eb06ee91582414f019eb2147a66ff175fe055882b48400cf9f3a5a427aa7b"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/contrast.json"
     },
     "copy": {
       "id": "copy",
@@ -13832,7 +14047,8 @@
           "file": "svg/Filled/copy_filled.svg",
           "sha256": "39453d35cadd430bcb67cfff2a23b1d8344ffdc5924fd7daf739b90fd47a6302"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/copy.json"
     },
     "corners-in": {
       "id": "corners-in",
@@ -13887,7 +14103,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/corners-in.json"
     },
     "corners-out": {
       "id": "corners-out",
@@ -13942,7 +14159,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/corners-out.json"
     },
     "cursor": {
       "id": "cursor",
@@ -13997,7 +14215,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/cursor.json"
     },
     "cursor-click": {
       "id": "cursor-click",
@@ -14082,7 +14301,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/cursor-click.json"
     },
     "dashboard": {
       "id": "dashboard",
@@ -14167,7 +14387,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/dashboard.json"
     },
     "database": {
       "id": "database",
@@ -14244,7 +14465,8 @@
           "file": "svg/Filled/database_filled.svg",
           "sha256": "850cea122e0f465377c6fc2ba36ab2b5677993e842ecd4496364a884480abe2f"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/database.json"
     },
     "database-export": {
       "id": "database-export",
@@ -14319,7 +14541,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/database-export.json"
     },
     "database-plus": {
       "id": "database-plus",
@@ -14394,7 +14617,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/database-plus.json"
     },
     "database-search": {
       "id": "database-search",
@@ -14479,7 +14703,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/database-search.json"
     },
     "database-settings": {
       "id": "database-settings",
@@ -14554,7 +14779,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/database-settings.json"
     },
     "dice": {
       "id": "dice",
@@ -14666,7 +14892,8 @@
           "file": "svg/Filled/dice_filled.svg",
           "sha256": "96ef95f3fc76885e1fddc5b2fac3dcf2ee6663b07d19f8e2a64694d56681b89a"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/dice.json"
     },
     "download": {
       "id": "download",
@@ -14917,7 +15144,8 @@
           "file": "svg/Filled/download_filled.svg",
           "sha256": "4dc9abd6c1bbbd2729820a96ed89920a443453f2729f0cea687ba6934d812463"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/download.json"
     },
     "duplicate": {
       "id": "duplicate",
@@ -14994,7 +15222,8 @@
           "file": "svg/Filled/duplicate_filled.svg",
           "sha256": "ed209a9e80a0888d19ea6f618b6a53af15d5e2828ef616131b8658005d79092a"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/duplicate.json"
     },
     "ear": {
       "id": "ear",
@@ -15066,7 +15295,8 @@
           "file": "svg/Filled/ear_filled.svg",
           "sha256": "eb80b9cb041e9da1b47e709f5ef55481dd701716bbde165acf5968987139db62"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/ear.json"
     },
     "earth": {
       "id": "earth",
@@ -15148,7 +15378,8 @@
           "file": "svg/Filled/earth_filled.svg",
           "sha256": "a80985c9933491f8c3ce188cd682bd67a915f737fefe26a72f0f509eeb8b5df5"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/earth.json"
     },
     "ellipse": {
       "id": "ellipse",
@@ -15250,7 +15481,8 @@
           "file": "svg/Filled/ellipse_filled.svg",
           "sha256": "8eb104e4c7248177e5549afed03c6bfd42a6d3bdfb69f0ecffc90298b92fbcbd"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/ellipse.json"
     },
     "ellipsis-horizontal": {
       "id": "ellipsis-horizontal",
@@ -15434,7 +15666,8 @@
           "file": "svg/Filled/ellipsis-horizontal_filled.svg",
           "sha256": "cdf43407e65af4767bba404a243d04acc38dcee8ec81bcb972fc9fe5b8e5cdaa"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/ellipsis-horizontal.json"
     },
     "ellipsis-vertical": {
       "id": "ellipsis-vertical",
@@ -15602,7 +15835,8 @@
           "file": "svg/Filled/ellipsis-vertical_filled.svg",
           "sha256": "a12b60fdcef0a8a4b7bc95f62a19303b5259a5db74851618524cb50af3de28f6"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/ellipsis-vertical.json"
     },
     "enter": {
       "id": "enter",
@@ -15674,7 +15908,8 @@
           "file": "svg/Filled/enter_filled.svg",
           "sha256": "2ee60fcd3f24273a679faade2aaf4fa5178cbc6f355b46e40a2fbbe89b90d475"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/enter.json"
     },
     "exit": {
       "id": "exit",
@@ -15746,7 +15981,8 @@
           "file": "svg/Filled/exit_filled.svg",
           "sha256": "83bb9600ddc4f9abd062d240964cc7d2708793312e79e3dd30e7f72758a01f44"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/exit.json"
     },
     "expand-horizontal-line": {
       "id": "expand-horizontal-line",
@@ -15821,7 +16057,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/expand-horizontal-line.json"
     },
     "expand-vertical": {
       "id": "expand-vertical",
@@ -15886,7 +16123,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/expand-vertical.json"
     },
     "extension-puzzle": {
       "id": "extension-puzzle",
@@ -15953,7 +16191,8 @@
           "file": "svg/Filled/extension-puzzle_filled.svg",
           "sha256": "cdcd27ed6b41da0b62850ad2944378a232592b48d0a446db26642413ecbde3a7"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/extension-puzzle.json"
     },
     "eye": {
       "id": "eye",
@@ -16156,7 +16395,8 @@
           "file": "svg/Filled/eye_filled.svg",
           "sha256": "16c8122094f6803d71df2cb8f80814848a38af49fc439dfefe5eeb6079516dee"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/eye.json"
     },
     "eye-off": {
       "id": "eye-off",
@@ -16253,7 +16493,8 @@
           "file": "svg/Filled/eye-off_filled.svg",
           "sha256": "d53003a552160d0338f8cd8b6cc3a8071300eed7159f265079c0677b08bb439a"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/eye-off.json"
     },
     "eyedrop": {
       "id": "eyedrop",
@@ -16320,7 +16561,8 @@
           "file": "svg/Filled/eyedrop_filled.svg",
           "sha256": "4d470fd9c4c274cd5ad5148cfde1ecdf34ac28e0da68b6204598926c1b96779d"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/eyedrop.json"
     },
     "field-text": {
       "id": "field-text",
@@ -16385,7 +16627,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/field-text.json"
     },
     "file": {
       "id": "file",
@@ -16462,7 +16705,8 @@
           "file": "svg/Filled/file_filled.svg",
           "sha256": "4faf92d1c14c2a59f4cdb4a05e3e16b89f69635848dbf79b55787c884f17a130"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/file.json"
     },
     "file-clear": {
       "id": "file-clear",
@@ -16529,7 +16773,8 @@
           "file": "svg/Filled/file-clear_filled.svg",
           "sha256": "da22f87d06171367bf7baa7773222371188b7b39b4bdd6c1c4defdc5cd9bba61"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/file-clear.json"
     },
     "files": {
       "id": "files",
@@ -16596,7 +16841,8 @@
           "file": "svg/Filled/files_filled.svg",
           "sha256": "d3ba4301f529cd863a778394aa0ef9042d28364dfc3489f087fc325359475b6c"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/files.json"
     },
     "filter": {
       "id": "filter",
@@ -16763,7 +17009,8 @@
           "file": "svg/Filled/filter_filled.svg",
           "sha256": "5a918a64c76ebed298a8a730af34436634dd5542e2e652d152ae45e2b2e68da1"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/filter.json"
     },
     "fingerprint": {
       "id": "fingerprint",
@@ -16848,7 +17095,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/fingerprint.json"
     },
     "fire": {
       "id": "fire",
@@ -16915,7 +17163,8 @@
           "file": "svg/Filled/fire_filled.svg",
           "sha256": "a6bbdadb7bfc05f38b67efa7e007bb13b08675470a7088b6e4dc89269bb3106d"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/fire.json"
     },
     "flash": {
       "id": "flash",
@@ -16982,7 +17231,8 @@
           "file": "svg/Filled/flash_filled.svg",
           "sha256": "040b2c8425d6c5e7c5d6c9b19d0a59d84d02f648aff71e0df8b4db382ffebb2d"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/flash.json"
     },
     "flash-off": {
       "id": "flash-off",
@@ -17069,7 +17319,8 @@
           "file": "svg/Filled/flash-off_filled.svg",
           "sha256": "cb4d2fb27fda116f1f909a97d738f753ae36d1676851762f2d88f15a60f1a47c"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/flash-off.json"
     },
     "folder": {
       "id": "folder",
@@ -17136,7 +17387,8 @@
           "file": "svg/Filled/folder_filled.svg",
           "sha256": "c0fcd4674dee2ba6755d425c1e8810368b53e53fb3fa7e5c21e8e7768b1d40b4"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/folder.json"
     },
     "folder-open": {
       "id": "folder-open",
@@ -17191,7 +17443,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/folder-open.json"
     },
     "fork": {
       "id": "fork",
@@ -17268,7 +17521,8 @@
           "file": "svg/Filled/fork_filled.svg",
           "sha256": "5fae66793dffbe5c3d895e88d1b82d094b5dde6475a426ad8904511d17d5cc5a"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/fork.json"
     },
     "fullscreen-enter": {
       "id": "fullscreen-enter",
@@ -17323,7 +17577,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/fullscreen-enter.json"
     },
     "fullscreen-exit": {
       "id": "fullscreen-exit",
@@ -17378,7 +17633,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/fullscreen-exit.json"
     },
     "glasses": {
       "id": "glasses",
@@ -17445,7 +17701,8 @@
           "file": "svg/Filled/glasses_filled.svg",
           "sha256": "6ca97e849c3f5c4c70b20f0da56a7f7090d89e745cde7d337dbe27f9522f118a"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/glasses.json"
     },
     "globe": {
       "id": "globe",
@@ -17512,7 +17769,8 @@
           "file": "svg/Filled/globe_filled.svg",
           "sha256": "256a2f5856d6bf95b976ea4ea0d9da64442341a79d9456771edaa22bd497bdda"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/globe.json"
     },
     "golf": {
       "id": "golf",
@@ -17589,7 +17847,8 @@
           "file": "svg/Filled/golf_filled.svg",
           "sha256": "4f56a90aa7f65190da62851c1ab8c2056c85be7c752d0ce3b9824d6666b4209d"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/golf.json"
     },
     "group": {
       "id": "group",
@@ -17686,7 +17945,8 @@
           "file": "svg/Filled/group_filled.svg",
           "sha256": "7da40dfd46fbc709096fb67b2ef9b823c938ce5529b5c019f1d440046108558c"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/group.json"
     },
     "group-circle": {
       "id": "group-circle",
@@ -17763,7 +18023,8 @@
           "file": "svg/Filled/group-circle_filled.svg",
           "sha256": "03a0d7f9bba26571aeaa646446c6b56665b1f466abb4d006bebfd5aca2168646"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/group-circle.json"
     },
     "hand-point-down": {
       "id": "hand-point-down",
@@ -17818,7 +18079,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/hand-point-down.json"
     },
     "hand-point-left": {
       "id": "hand-point-left",
@@ -17873,7 +18135,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/hand-point-left.json"
     },
     "hand-point-right": {
       "id": "hand-point-right",
@@ -17928,7 +18191,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/hand-point-right.json"
     },
     "hand-point-up": {
       "id": "hand-point-up",
@@ -17983,7 +18247,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/hand-point-up.json"
     },
     "hand-two-fingers": {
       "id": "hand-two-fingers",
@@ -18038,7 +18303,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/hand-two-fingers.json"
     },
     "hard-drive": {
       "id": "hard-drive",
@@ -18103,7 +18369,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/hard-drive.json"
     },
     "hash": {
       "id": "hash",
@@ -18170,7 +18437,8 @@
           "file": "svg/Filled/hash_filled.svg",
           "sha256": "74a0cc2a66a26556d021daf7c2a30f94339f1e67600901a3a1ddddf795a14568"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/hash.json"
     },
     "headphone": {
       "id": "headphone",
@@ -18237,7 +18505,8 @@
           "file": "svg/Filled/headphone_filled.svg",
           "sha256": "db5a67960329654929fa4b4f51ebddf40c3184571bbd944948341684b3e5fdfb"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/headphone.json"
     },
     "heart": {
       "id": "heart",
@@ -18603,7 +18872,8 @@
           "file": "svg/Filled/heart_filled.svg",
           "sha256": "01c48d97e714efa023c968935d922ec79b9ae9c0bc512ee59482c62948745a2e"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/heart.json"
     },
     "heart-off": {
       "id": "heart-off",
@@ -19197,7 +19467,8 @@
           "file": "svg/Filled/heart-off_filled.svg",
           "sha256": "d816835f70045f4a8cea51c6c9775e0cdd8ceabc0d96e4049776420363174402"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/heart-off.json"
     },
     "heart-pulse": {
       "id": "heart-pulse",
@@ -19257,7 +19528,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/heart-pulse.json"
     },
     "history": {
       "id": "history",
@@ -19364,7 +19636,8 @@
           "file": "svg/Filled/history_filled.svg",
           "sha256": "35ab1fadec02fe448f3ba8759734bcfc67e253343ecfbf12a986428334813184"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/history.json"
     },
     "home": {
       "id": "home",
@@ -19431,7 +19704,8 @@
           "file": "svg/Filled/home_filled.svg",
           "sha256": "39bc17232ffec724e725f5dc6e8cfd6358467de8bc6693799572f91f4118aae1"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/home.json"
     },
     "hourglass": {
       "id": "hourglass",
@@ -19503,7 +19777,8 @@
           "file": "svg/Filled/hourglass_filled.svg",
           "sha256": "07fb2734078c61b730bed94923e84488cf4f9a45910853bde68af15a19b47406"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/hourglass.json"
     },
     "image": {
       "id": "image",
@@ -19575,7 +19850,8 @@
           "file": "svg/Filled/image_filled.svg",
           "sha256": "f27b27b18847c9cf7f6de3bf41666d7765327f04516c8ff55c6bf6fcc2479be6"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/image.json"
     },
     "images": {
       "id": "images",
@@ -19652,7 +19928,8 @@
           "file": "svg/Filled/images_filled.svg",
           "sha256": "f2f3838df96753de88f935e9a6612edcbde1c4623ad5b952acf01695f99b17ce"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/images.json"
     },
     "info": {
       "id": "info",
@@ -19805,7 +20082,8 @@
           "file": "svg/Filled/info_filled.svg",
           "sha256": "8de2614d72f536eb2b9d33082bf19c4099a9ac4557c5231d812458321c6ce38a"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/info.json"
     },
     "info-circle": {
       "id": "info-circle",
@@ -19980,7 +20258,8 @@
           "file": "svg/Filled/info-circle_filled.svg",
           "sha256": "c01dfb0cca9119fc6e71e10271a0d7df192c9fe54fc2f515da402cbd253eade7"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/info-circle.json"
     },
     "invert": {
       "id": "invert",
@@ -20047,7 +20326,8 @@
           "file": "svg/Filled/invert_filled.svg",
           "sha256": "9385f02dc6f1fe5d3a3bacab3d642019912c27f85bab2cb831e7be6b4cfad57f"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/invert.json"
     },
     "justify-horizontal": {
       "id": "justify-horizontal",
@@ -20122,7 +20402,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/justify-horizontal.json"
     },
     "justify-items-horizontal": {
       "id": "justify-items-horizontal",
@@ -20207,7 +20488,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/justify-items-horizontal.json"
     },
     "justify-items-vertical": {
       "id": "justify-items-vertical",
@@ -20292,7 +20574,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/justify-items-vertical.json"
     },
     "justify-vertical": {
       "id": "justify-vertical",
@@ -20367,7 +20650,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/justify-vertical.json"
     },
     "key": {
       "id": "key",
@@ -20439,7 +20723,8 @@
           "file": "svg/Filled/key_filled.svg",
           "sha256": "dd37be1f8526154abf14c810158aa6b646fce7dea470e2813925b6f46602ee22"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/key.json"
     },
     "keyboard": {
       "id": "keyboard",
@@ -20499,7 +20784,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/keyboard.json"
     },
     "keys": {
       "id": "keys",
@@ -20569,7 +20855,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/keys.json"
     },
     "layers": {
       "id": "layers",
@@ -20646,7 +20933,8 @@
           "file": "svg/Filled/layers_filled.svg",
           "sha256": "99d5cf54e85bb1a77aedf00f329a102cd301a4ba8727217676814b1d2d51247c"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/layers.json"
     },
     "link": {
       "id": "link",
@@ -20733,7 +21021,8 @@
           "file": "svg/Filled/link_filled.svg",
           "sha256": "ab0cd4640d8715e964520c590ca753da28422c6014a0d3882cc2cd3c0e4ea955"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/link.json"
     },
     "link-horizontal": {
       "id": "link-horizontal",
@@ -20820,7 +21109,8 @@
           "file": "svg/Filled/link-horizontal_filled.svg",
           "sha256": "1716657835b229d2258423678818b7eb5dc944ce1f521fc972a9664d603c2220"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/link-horizontal.json"
     },
     "link-horizontal-off": {
       "id": "link-horizontal-off",
@@ -21290,7 +21580,8 @@
           "file": "svg/Filled/link-horizontal-off_filled.svg",
           "sha256": "cb752e2bc2d206a1a58588ceedc8c9f33ec97f2a28e8cb3bfb733258e31ba867"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/link-horizontal-off.json"
     },
     "list": {
       "id": "list",
@@ -21550,7 +21841,8 @@
           "file": "svg/Filled/list_filled.svg",
           "sha256": "dea28f0246d39ca7e98616816d9f641368cfb7017034244af0dd0e7360c5b3d6"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/list.json"
     },
     "lock": {
       "id": "lock",
@@ -21622,7 +21914,8 @@
           "file": "svg/Filled/lock_filled.svg",
           "sha256": "97c80ae716c628f0d2d2fdc869c5e9907b145de5fc297bd00179e28fffb12ac9"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/lock.json"
     },
     "mail": {
       "id": "mail",
@@ -21689,7 +21982,8 @@
           "file": "svg/Filled/mail_filled.svg",
           "sha256": "7473924801884851e3d9986f7daa2c74daafe3f816bb3110b9be07471b434af2"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/mail.json"
     },
     "mail-open": {
       "id": "mail-open",
@@ -21756,7 +22050,8 @@
           "file": "svg/Filled/mail-open_filled.svg",
           "sha256": "d4966b1bae2e95774dbdddcba5b78b3beb88b8d9b12273b8e144ad0e58f32d69"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/mail-open.json"
     },
     "mail-unread": {
       "id": "mail-unread",
@@ -21833,7 +22128,8 @@
           "file": "svg/Filled/mail-unread_filled.svg",
           "sha256": "999d068cfcf8e1ad13ed6a9b08fd7725d1398f6ff961567c0e0aec2d6925a359"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/mail-unread.json"
     },
     "mcp": {
       "id": "mcp",
@@ -21910,7 +22206,8 @@
           "file": "svg/Filled/mcp_filled.svg",
           "sha256": "4b4e6a4330220d9ce16aa86c132dd335691e820e53b55bf20c570c2827a15bbb"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/mcp.json"
     },
     "megaphone": {
       "id": "megaphone",
@@ -21982,7 +22279,8 @@
           "file": "svg/Filled/megaphone_filled.svg",
           "sha256": "55cb7f983706b1c69afa7edc58036ea0a8f9700c9fa76d5ed4b6ffc41246163f"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/megaphone.json"
     },
     "menu": {
       "id": "menu",
@@ -22116,7 +22414,8 @@
           "file": "svg/Filled/menu_filled.svg",
           "sha256": "aaeae18e313eadf353af4fb8f40552d5e12f8b6eb9f1ac8a7b130d12000472a9"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/menu.json"
     },
     "merge": {
       "id": "merge",
@@ -22193,7 +22492,8 @@
           "file": "svg/Filled/merge_filled.svg",
           "sha256": "94b4af29aa512a362c9f48748ad8d03e64e6e20012d627813529b779ded29d10"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/merge.json"
     },
     "mic": {
       "id": "mic",
@@ -22286,7 +22586,8 @@
           "file": "svg/Filled/mic_filled.svg",
           "sha256": "be34e1ce98ceb86197be3b71758577400decc67049fb93c5f644359cce221618"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/mic.json"
     },
     "mic-circle": {
       "id": "mic-circle",
@@ -22402,7 +22703,8 @@
           "file": "svg/Filled/mic-circle_filled.svg",
           "sha256": "bd1b63f8ff472aacc11b715a28cd386ff76aec89ffe26848fcaac29f45345b11"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/mic-circle.json"
     },
     "mic-off": {
       "id": "mic-off",
@@ -23088,7 +23390,8 @@
           "file": "svg/Filled/mic-off_filled.svg",
           "sha256": "c9d1b5b684133bd36b980c56b603d53802174ff2b25d297fb31128b778552df3"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/mic-off.json"
     },
     "minus": {
       "id": "minus",
@@ -23190,7 +23493,8 @@
           "file": "svg/Filled/minus_filled.svg",
           "sha256": "d12c71e725c0c56a268eb8a7dea3c2a49799e2384d5ddeba55b69531d295ee83"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/minus.json"
     },
     "minus-circle": {
       "id": "minus-circle",
@@ -23413,7 +23717,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/monitor-pulse.json"
     },
     "moon": {
       "id": "moon",
@@ -23719,7 +24024,8 @@
           "file": "svg/Filled/moon_filled.svg",
           "sha256": "f0efa93a3286c18e0a3107c4916eed3bc1386c89c29498128920c1f62330963d"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/moon.json"
     },
     "moon-sparkles": {
       "id": "moon-sparkles",
@@ -23806,7 +24112,8 @@
           "file": "svg/Filled/moon-sparkles_filled.svg",
           "sha256": "7593e2984663d70530b66a625527458520260bb45fbf8f8ec3e2a25ac6ab4d20"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/moon-sparkles.json"
     },
     "move": {
       "id": "move",
@@ -24195,7 +24502,8 @@
           "file": "svg/Filled/move_filled.svg",
           "sha256": "c1252398cb4f14e218009d8cb5be1db8e283a937966ceda1ae2167b1570cda97"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/move.json"
     },
     "musical-note": {
       "id": "musical-note",
@@ -24262,7 +24570,8 @@
           "file": "svg/Filled/musical-note_filled.svg",
           "sha256": "faee0dbfa447903fbb448f32a1fe386fe6d9a6857a235d4fb9c530fa87db8a20"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/musical-note.json"
     },
     "musical-notes": {
       "id": "musical-notes",
@@ -24329,7 +24638,8 @@
           "file": "svg/Filled/musical-notes_filled.svg",
           "sha256": "d3ad7ff3838ed6b2cbe26243176a65815f886e2700d78af0140c31d9d238549b"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/musical-notes.json"
     },
     "navigate": {
       "id": "navigate",
@@ -24396,7 +24706,8 @@
           "file": "svg/Filled/navigate_filled.svg",
           "sha256": "4a0f097cf5c1fa40fddfbe1ce843d974034b3f09692485f3441c2884bfa644ac"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/navigate.json"
     },
     "notifications": {
       "id": "notifications",
@@ -24487,7 +24798,8 @@
           "file": "svg/Filled/notifications_filled.svg",
           "sha256": "2d2f5a9a31802fcb269bde5cdd1e25abc66ba7427a849e5549bb93a62c11728f"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/notifications.json"
     },
     "notifications-off": {
       "id": "notifications-off",
@@ -24584,7 +24896,8 @@
           "file": "svg/Filled/notifications-off_filled.svg",
           "sha256": "2cf44460dde09e020ae3ad9dcb9a66be23cb683ac242a9748d8af6521140a460"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/notifications-off.json"
     },
     "notifications-unread": {
       "id": "notifications-unread",
@@ -24695,7 +25008,8 @@
           "file": "svg/Filled/notifications-unread_filled.svg",
           "sha256": "deab8a506a675a86107d6ef007ec8033720587f6760667d35537827403517bba"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/notifications-unread.json"
     },
     "options": {
       "id": "options",
@@ -24782,7 +25096,8 @@
           "file": "svg/Filled/options_filled.svg",
           "sha256": "9a3d9688294e2283298d92396623b3ea400e59c19dfaf98e7f9a6c7901aaa99f"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/options.json"
     },
     "palette": {
       "id": "palette",
@@ -24874,7 +25189,8 @@
           "file": "svg/Filled/palette_filled.svg",
           "sha256": "41303f7b007123fe5917b65fde0f9bc5d2af417d74e6b44dc6a27f75d11cd634"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/palette.json"
     },
     "pause": {
       "id": "pause",
@@ -25016,7 +25332,8 @@
           "file": "svg/Filled/pause_filled.svg",
           "sha256": "7ea28299eb1f68060d5d5cb6868b5c83b513148240e5ded81af30d076120c7ed"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/pause.json"
     },
     "pause-circle": {
       "id": "pause-circle",
@@ -25189,7 +25506,8 @@
           "file": "svg/Filled/pause-circle_filled.svg",
           "sha256": "54d1c14350d01a6e54c4c882371591f260e225f716fbd9bef9960e88fa6ffb80"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/pause-circle.json"
     },
     "paw": {
       "id": "paw",
@@ -25296,7 +25614,8 @@
           "file": "svg/Filled/paw_filled.svg",
           "sha256": "9e274900684663b0e9feb648f7c610605132254a2904be63bca6a9d87b6f9ded"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/paw.json"
     },
     "pencil": {
       "id": "pencil",
@@ -25363,7 +25682,8 @@
           "file": "svg/Filled/pencil_filled.svg",
           "sha256": "cbb6044a94f450fe3789b222728c625626370648be3040bab9f213b2e26e0299"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/pencil.json"
     },
     "person": {
       "id": "person",
@@ -25440,7 +25760,8 @@
           "file": "svg/Filled/person_filled.svg",
           "sha256": "c22f620547f7ae7f73ab4d98f257990674fc5e9e6f64f79ceab8880865eb9375"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/person.json"
     },
     "person-circle": {
       "id": "person-circle",
@@ -25512,7 +25833,8 @@
           "file": "svg/Filled/person-circle_filled.svg",
           "sha256": "bf31d7cbbbb34535a159f82696eb2f1957a53351d48b0d7182e3ab4057535035"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/person-circle.json"
     },
     "person-minus": {
       "id": "person-minus",
@@ -25599,7 +25921,8 @@
           "file": "svg/Filled/person-minus_filled.svg",
           "sha256": "28434f5fd339aa0ea6d685db2476b20f8f1ba729a5032400dfc92a4fc9145998"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/person-minus.json"
     },
     "person-plus": {
       "id": "person-plus",
@@ -25686,7 +26009,8 @@
           "file": "svg/Filled/person-plus_filled.svg",
           "sha256": "df51d9eed2e1397b636975ae8f1405f7176ebf7ab718ca1ce65b480a663dea63"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/person-plus.json"
     },
     "phone": {
       "id": "phone",
@@ -25753,7 +26077,8 @@
           "file": "svg/Filled/phone_filled.svg",
           "sha256": "3ce1f067eca6aa2b4ed6484d0e5615bb13772eb8333743c054ba5eb4fa96443d"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/phone.json"
     },
     "pin": {
       "id": "pin",
@@ -25825,7 +26150,8 @@
           "file": "svg/Filled/pin_filled.svg",
           "sha256": "eed28be8a82ea5f43a45fb965d37f7dfee9d7c0c06e0debc290da92e6fe1e61a"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/pin.json"
     },
     "pin-vertical": {
       "id": "pin-vertical",
@@ -25885,7 +26211,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/pin-vertical.json"
     },
     "pin-vertical-off": {
       "id": "pin-vertical-off",
@@ -25965,7 +26292,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/pin-vertical-off.json"
     },
     "place": {
       "id": "place",
@@ -26037,7 +26365,8 @@
           "file": "svg/Filled/place_filled.svg",
           "sha256": "8af4a1adffe5ba0866d32d3d40fd330c9013d1980c456dbd20ceda49d4b63ba5"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/place.json"
     },
     "plane": {
       "id": "plane",
@@ -26104,7 +26433,8 @@
           "file": "svg/Filled/plane_filled.svg",
           "sha256": "195fa6c43ec158005d08afb1c580ff981a9d1b1a675adb4c71fb97a38c3879d8"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/plane.json"
     },
     "play": {
       "id": "play",
@@ -26407,7 +26737,8 @@
           "file": "svg/Filled/play_filled.svg",
           "sha256": "f5469b747ed09ad42079cb85205dcc02a45fedd8c3f1da4e930e85e8e238e955"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/play.json"
     },
     "play-back": {
       "id": "play-back",
@@ -26483,7 +26814,8 @@
           "file": "svg/Filled/play-back_filled.svg",
           "sha256": "76c2ff762414e4f0dc67b65b6908688bb3e0241a617900fd7923791fadb87fbe"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/play-back.json"
     },
     "play-back-circle": {
       "id": "play-back-circle",
@@ -26636,7 +26968,8 @@
           "file": "svg/Filled/play-back-circle_filled.svg",
           "sha256": "134fd351dc9d06e9a6a51535c11ed3c74e3a49ed559379288bb1c6cb117c52be"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/play-back-circle.json"
     },
     "play-circle": {
       "id": "play-circle",
@@ -26787,7 +27120,8 @@
           "file": "svg/Filled/play-circle_filled.svg",
           "sha256": "35259eb7aca35a0dad971fe9ce2209643504cab311302962af778200cc35ea06"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/play-circle.json"
     },
     "play-forward": {
       "id": "play-forward",
@@ -27777,7 +28111,8 @@
           "file": "svg/Filled/play-forward_filled.svg",
           "sha256": "524aac0526fcd7a83e08509e80c9232acec7cb0f03eaf3b55303afc33ce6c468"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/play-forward.json"
     },
     "play-forward-circle": {
       "id": "play-forward-circle",
@@ -27930,7 +28265,8 @@
           "file": "svg/Filled/play-forward-circle_filled.svg",
           "sha256": "3f50877e9430fe611a3fdf36077f1e27184ba8508f7450245b5fbeb0b9a2d1a6"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/play-forward-circle.json"
     },
     "play-skip-back": {
       "id": "play-skip-back",
@@ -28006,7 +28342,8 @@
           "file": "svg/Filled/play-skip-back_filled.svg",
           "sha256": "7e49050faae48ee3ffe786ce1e5c2d3f0337a6c11e1d307567193e049ea213f3"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/play-skip-back.json"
     },
     "play-skip-back-circle": {
       "id": "play-skip-back-circle",
@@ -28161,7 +28498,8 @@
           "file": "svg/Filled/play-skip-back-circle_filled.svg",
           "sha256": "07b1a225623d76e1612b340458652c0e9437cc4ea06d5fae5dece4a19cbde92f"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/play-skip-back-circle.json"
     },
     "play-skip-forward": {
       "id": "play-skip-forward",
@@ -28780,7 +29118,8 @@
           "file": "svg/Filled/play-skip-forward_filled.svg",
           "sha256": "600ca1688cfbfd21c3aeaed3c8c6b9189265465127754e7196cd30edeae81856"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/play-skip-forward.json"
     },
     "play-skip-forward-circle": {
       "id": "play-skip-forward-circle",
@@ -28935,7 +29274,8 @@
           "file": "svg/Filled/play-skip-forward-circle_filled.svg",
           "sha256": "9ac058d4801b23328d72a60afaef65cbcfdbd34fbbf999be0072886b315530cf"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/play-skip-forward-circle.json"
     },
     "plus": {
       "id": "plus",
@@ -29059,7 +29399,8 @@
           "file": "svg/Filled/plus_filled.svg",
           "sha256": "454266ab35559b8f1a76b84daf8da3c898af3f1b428d5bb068ea9bc72230aa74"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/plus.json"
     },
     "plus-circle": {
       "id": "plus-circle",
@@ -29318,7 +29659,8 @@
           "file": "svg/Filled/print_filled.svg",
           "sha256": "bd959975878d7ca4e6bbbad1d2be7d48c3ac447011ba56e670bd631ca995bdcb"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/print.json"
     },
     "priority": {
       "id": "priority",
@@ -29415,7 +29757,8 @@
           "file": "svg/Filled/priority_filled.svg",
           "sha256": "bd86e95c0d0d54c03bf9f99609f956ce6bf85a317d5f2d1915983aee3b084b81"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/priority.json"
     },
     "pull-request": {
       "id": "pull-request",
@@ -29502,7 +29845,8 @@
           "file": "svg/Filled/pull-request_filled.svg",
           "sha256": "9685bee217f4a14158028ad03e57a0ac1a493ec8cfefd1b8ee2f480a97df487a"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/pull-request.json"
     },
     "push": {
       "id": "push",
@@ -29579,7 +29923,8 @@
           "file": "svg/Filled/push_filled.svg",
           "sha256": "52ad214216a43ffab938b03a5b3cfb765f12290a3300e334eefe4da174c04a45"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/push.json"
     },
     "qr": {
       "id": "qr",
@@ -29716,7 +30061,8 @@
           "file": "svg/Filled/qr_filled.svg",
           "sha256": "92724bed24995aa097d5fd7eb01e01b24de7e194cffdcf7dfdd1ac5f78cdbf62"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/qr.json"
     },
     "question": {
       "id": "question",
@@ -30165,7 +30511,8 @@
           "file": "svg/Filled/question_filled.svg",
           "sha256": "1b0179f9e43ac375f8183ac8564861f66b5e771a4259eb758b40ee17dcbf6afa"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/question.json"
     },
     "question-circle": {
       "id": "question-circle",
@@ -30258,7 +30605,8 @@
           "file": "svg/Filled/question-circle_filled.svg",
           "sha256": "98e4933e197ae25fa5e402671020353b2c6a4caec09effe535a1251458718cdc"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/question-circle.json"
     },
     "radio": {
       "id": "radio",
@@ -30562,7 +30910,8 @@
           "file": "svg/Filled/radio_filled.svg",
           "sha256": "32f19241cdd555f74cb0314b769bc83ada1dc42c45b85f7b5f842a7eacfaa311"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/radio.json"
     },
     "refresh": {
       "id": "refresh",
@@ -30982,7 +31331,8 @@
           "file": "svg/Filled/refresh_filled.svg",
           "sha256": "c21ca910deb7b6bc38ab142ec42eeb8b829cb549c5184b305090704a16d37a26"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/refresh.json"
     },
     "reload": {
       "id": "reload",
@@ -31097,7 +31447,8 @@
           "file": "svg/Filled/reload_filled.svg",
           "sha256": "c78ada02c0bc47eae2f0cf58e09184c5e367e88c96af4146c18567fc9fe1d280"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/reload.json"
     },
     "repeat": {
       "id": "repeat",
@@ -31174,7 +31525,8 @@
           "file": "svg/Filled/repeat_filled.svg",
           "sha256": "aa06cf1f7720691d22ab5572c5bf4ebbd52011277d480a29dccf3818904b5c0e"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/repeat.json"
     },
     "resize": {
       "id": "resize",
@@ -31387,7 +31739,8 @@
           "file": "svg/Filled/resize_filled.svg",
           "sha256": "26c7b7e579ce3214bf0741f79c0f9c412b84f79e141aa6d552f05735e9306fd0"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/resize.json"
     },
     "revert": {
       "id": "revert",
@@ -31469,7 +31822,8 @@
           "file": "svg/Filled/revert_filled.svg",
           "sha256": "9e39c0011cd8ce13b3e12648e32573fbf43cee2b5b78fa49fdaadb26805764ab"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/revert.json"
     },
     "rhomb": {
       "id": "rhomb",
@@ -31536,7 +31890,8 @@
           "file": "svg/Filled/rhomb_filled.svg",
           "sha256": "79a06359597756d7f2c1ce91ebf387d81287c696e0794a40b65b083a5d565263"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/rhomb.json"
     },
     "rocket": {
       "id": "rocket",
@@ -31623,7 +31978,8 @@
           "file": "svg/Filled/rocket_filled.svg",
           "sha256": "60a5b7393363461e198683f7e4fe7b5feba1f995668c81ebffe2bd23d3ae2e24"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/rocket.json"
     },
     "sad": {
       "id": "sad",
@@ -31705,7 +32061,8 @@
           "file": "svg/Filled/sad_filled.svg",
           "sha256": "d28d03400a900ae62aaed50eaf90bee0b603a9b810faa7a6e184676c8c68b7a1"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/sad.json"
     },
     "scan": {
       "id": "scan",
@@ -31787,7 +32144,8 @@
           "file": "svg/Filled/scan_filled.svg",
           "sha256": "e42d17539ed799000632f7091dde6b3851c68d5356b78b7c821aa04c5c5747d5"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/scan.json"
     },
     "school": {
       "id": "school",
@@ -31859,7 +32217,8 @@
           "file": "svg/Filled/school_filled.svg",
           "sha256": "d93e0a4b34567471f72c2a60a313bd0d2e703bee99efa7920835b877db07bd5c"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/school.json"
     },
     "search": {
       "id": "search",
@@ -32178,7 +32537,8 @@
           "file": "svg/Filled/search_filled.svg",
           "sha256": "b0a334c6766bffbd98017f123599627d4aad6de523f9002282d4fd108c85071e"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/search.json"
     },
     "send": {
       "id": "send",
@@ -32245,7 +32605,8 @@
           "file": "svg/Filled/send_filled.svg",
           "sha256": "f1c79d309ec04b647b4bed716e9b07bda315f1d79912be4e986c9e57b33f9f70"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/send.json"
     },
     "server": {
       "id": "server",
@@ -32330,7 +32691,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/server.json"
     },
     "settings": {
       "id": "settings",
@@ -32402,7 +32764,8 @@
           "file": "svg/Filled/settings_filled.svg",
           "sha256": "a22f6d4811ca4fa72248a6f5b9a07c3e328ba34dd85a3d5a958c36cb57079560"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/settings.json"
     },
     "share": {
       "id": "share",
@@ -32474,7 +32837,8 @@
           "file": "svg/Filled/share_filled.svg",
           "sha256": "ae125b368ce72cafa2cfb0feac17b5e8d8f40a4f2fa5236a69865bdc86e5bbe5"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/share.json"
     },
     "share-display": {
       "id": "share-display",
@@ -32551,7 +32915,8 @@
           "file": "svg/Filled/share-display_filled.svg",
           "sha256": "c8a8a5ed58d09e700a3953324c9b08e034306dc92b91f7d037212fa352146249"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/share-display.json"
     },
     "share-social": {
       "id": "share-social",
@@ -32618,7 +32983,8 @@
           "file": "svg/Filled/share-social_filled.svg",
           "sha256": "b15ec3443b1d5470061528056109424ed3ce64a348c1712cdde6e1cc045bc8be"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/share-social.json"
     },
     "shield": {
       "id": "shield",
@@ -32975,7 +33341,8 @@
           "file": "svg/Filled/shield_filled.svg",
           "sha256": "633e2d8864c0d67a38865b2ced92571d5fc34ce2e670aeb9b07f6ef9f3879272"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/shield.json"
     },
     "shield-checkmark": {
       "id": "shield-checkmark",
@@ -33054,7 +33421,8 @@
           "file": "svg/Filled/shield-checkmark_filled.svg",
           "sha256": "dc285562d194d6ee6709fe00a23770f020d86e86caf3ee0b6a33cfd59a480f20"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/shield-checkmark.json"
     },
     "sidebar-collapsed": {
       "id": "sidebar-collapsed",
@@ -33119,7 +33487,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/sidebar-collapsed.json"
     },
     "sidebar-expanded": {
       "id": "sidebar-expanded",
@@ -33174,7 +33543,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/sidebar-expanded.json"
     },
     "signature": {
       "id": "signature",
@@ -33276,7 +33646,8 @@
           "file": "svg/Filled/signature_filled.svg",
           "sha256": "79b747c3e944189494f1a579503a5e6d74bf17629a84e027592afb1f6891f0f1"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/signature.json"
     },
     "smile": {
       "id": "smile",
@@ -33358,7 +33729,8 @@
           "file": "svg/Filled/smile_filled.svg",
           "sha256": "307e6c48127c57f2b8ac825335e4480a45f88fa6202020a98e8bcc7a525b0e30"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/smile.json"
     },
     "sparkle": {
       "id": "sparkle",
@@ -33425,7 +33797,8 @@
           "file": "svg/Filled/sparkle_filled.svg",
           "sha256": "8d5cc1ebba274d6b805d8541edd611620712501a70d291174041b74bf255e97d"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/sparkle.json"
     },
     "sparkles": {
       "id": "sparkles",
@@ -33512,7 +33885,8 @@
           "file": "svg/Filled/sparkles_filled.svg",
           "sha256": "577b40abf3d767d39de850adce00a165f6ca16164a0423d17ffe2692890d5e9a"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/sparkles.json"
     },
     "speed": {
       "id": "speed",
@@ -33609,7 +33983,8 @@
           "file": "svg/Filled/speed_filled.svg",
           "sha256": "a1a54bf578f3f00fce6a2f2ecccbf8071a6417ba2ff88a58217232f0fa8c8199"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/speed.json"
     },
     "square": {
       "id": "square",
@@ -33707,7 +34082,8 @@
           "file": "svg/Filled/square_filled.svg",
           "sha256": "6775a4d5408505e5fbb2ed1acf8ef7029fae8fee3dc93a328d1a3b28297f5697"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/square.json"
     },
     "star": {
       "id": "star",
@@ -33774,7 +34150,8 @@
           "file": "svg/Filled/star_filled.svg",
           "sha256": "0a90e5744aff95a0c7d5f82a62d7da83fabcda99340e76d45fc1852f04849beb"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/star.json"
     },
     "stats": {
       "id": "stats",
@@ -33861,7 +34238,8 @@
           "file": "svg/Filled/stats_filled.svg",
           "sha256": "ef2ff6e0c41888c6b9d3a0ca2a5ca4a3c76edf0ef83b07e3dc7a948638ed6d4e"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/stats.json"
     },
     "steps": {
       "id": "steps",
@@ -33958,7 +34336,8 @@
           "file": "svg/Filled/steps_filled.svg",
           "sha256": "ff4b7b7259844e0ad4869514622ba1d67ff8ed56b6a513781574551756be953c"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/steps.json"
     },
     "stop": {
       "id": "stop",
@@ -34013,7 +34392,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/stop.json"
     },
     "stop-circle": {
       "id": "stop-circle",
@@ -34073,7 +34453,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/stop-circle.json"
     },
     "storefront": {
       "id": "storefront",
@@ -34128,7 +34509,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/storefront.json"
     },
     "sun": {
       "id": "sun",
@@ -34275,7 +34657,8 @@
           "file": "svg/Filled/sun_filled.svg",
           "sha256": "ed8429bd2fd8f13df2b0750c922ee25e81ff8759f24ba32e495c5ef1195bbf09"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/sun.json"
     },
     "sun-low": {
       "id": "sun-low",
@@ -34626,7 +35009,8 @@
           "file": "svg/Filled/sun-low_filled.svg",
           "sha256": "7747b37b14ed15a9cc91e127f07d9746bd87cc5ffdb1b4c2d37f4f84143d2e1e"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/sun-low.json"
     },
     "swap-horizontal": {
       "id": "swap-horizontal",
@@ -34896,7 +35280,8 @@
           "file": "svg/Filled/swap-horizontal_filled.svg",
           "sha256": "597964aeb5e6bc91f507f3231fe6e1c4109aa0101514e637984782ce70ae30dc"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/swap-horizontal.json"
     },
     "swap-vertical": {
       "id": "swap-vertical",
@@ -35158,7 +35543,8 @@
           "file": "svg/Filled/swap-vertical_filled.svg",
           "sha256": "b082e97e6ad561e56a1c91d4beb7a5db6f10001d389791dc63a18d7a9099b1f1"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/swap-vertical.json"
     },
     "sync": {
       "id": "sync",
@@ -35235,7 +35621,8 @@
           "file": "svg/Filled/sync_filled.svg",
           "sha256": "3872d2c287837f8a66f46336a0f7d6f3cc1fecad4609afc184d4de6ed983ebe6"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/sync.json"
     },
     "tablet-landscape": {
       "id": "tablet-landscape",
@@ -35332,7 +35719,8 @@
           "file": "svg/Filled/tablet-landscape_filled.svg",
           "sha256": "58228faf94ce9fa68f3a9c941b6e1720aeaa913dd5a7f8e82d9891aa0f8e7b33"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/tablet-landscape.json"
     },
     "tablet-portrait": {
       "id": "tablet-portrait",
@@ -35429,7 +35817,8 @@
           "file": "svg/Filled/tablet-portrait_filled.svg",
           "sha256": "bd2c614c55659de61cc2c9e96099f8c11309fa110c458321943c6135f9209786"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/tablet-portrait.json"
     },
     "tag": {
       "id": "tag",
@@ -35501,7 +35890,8 @@
           "file": "svg/Filled/tag_filled.svg",
           "sha256": "9892fcc01dbf6b03585f24b66cd7cbfd2e08bae2c97d0c8f65faa47b8aeffc6c"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/tag.json"
     },
     "tag-dollar": {
       "id": "tag-dollar",
@@ -35561,7 +35951,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/tag-dollar.json"
     },
     "tag-ruble": {
       "id": "tag-ruble",
@@ -35621,7 +36012,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/tag-ruble.json"
     },
     "tags": {
       "id": "tags",
@@ -35691,7 +36083,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/tags.json"
     },
     "target": {
       "id": "target",
@@ -35766,7 +36159,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/target.json"
     },
     "text": {
       "id": "text",
@@ -35848,7 +36242,8 @@
           "file": "svg/Filled/text_filled.svg",
           "sha256": "49a972bca0eac623a60c1537ab1062bd74f998049a8b4058a57c62f7f06d799e"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/text.json"
     },
     "ticket": {
       "id": "ticket",
@@ -35920,7 +36315,8 @@
           "file": "svg/Filled/ticket_filled.svg",
           "sha256": "a51ba75b0206e9b69163fe913a411bc2eea55e58aa87b6b612daf6cc8e7f780f"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/ticket.json"
     },
     "time": {
       "id": "time",
@@ -36165,7 +36561,8 @@
           "file": "svg/Filled/time_filled.svg",
           "sha256": "1268196304944d913b713c3be7a01cdd49264e0844e9aa657ff745748cc5d178"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/time.json"
     },
     "timer": {
       "id": "timer",
@@ -36246,7 +36643,8 @@
           "file": "svg/Filled/timer_filled.svg",
           "sha256": "96c0f37e50cb37151049ce66f0e6e31dbf18b6f22de84ef2f3365a7e38229b0d"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/timer.json"
     },
     "translate": {
       "id": "translate",
@@ -36333,7 +36731,8 @@
           "file": "svg/Filled/translate_filled.svg",
           "sha256": "706f1893c5aaa76adaaca4fa0711f8a0122e5f666aebb48b176980cc97dac42b"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/translate.json"
     },
     "triangle": {
       "id": "triangle",
@@ -36717,7 +37116,8 @@
           "file": "svg/Filled/triangle_filled.svg",
           "sha256": "7c6b2bc3ea0763bea626184aaac8eec6afa66d4285231c5116f233b956958c10"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/triangle.json"
     },
     "trophy": {
       "id": "trophy",
@@ -36784,7 +37184,8 @@
           "file": "svg/Filled/trophy_filled.svg",
           "sha256": "6ce534691db3960abae8417614c5e4ce0e6889a03a99986f762529b48687561d"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/trophy.json"
     },
     "turn-off": {
       "id": "turn-off",
@@ -36861,7 +37262,8 @@
           "file": "svg/Filled/turn-off_filled.svg",
           "sha256": "9d017999be651e1653c8affdf979f41eeb67f604c7e67ae05a4cc51f3348ed61"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/turn-off.json"
     },
     "unlock": {
       "id": "unlock",
@@ -36933,7 +37335,8 @@
           "file": "svg/Filled/unlock_filled.svg",
           "sha256": "c8c04c42e3a6e7be5fe3122dae72077e0e51be0f7cfbda09f304ef52ae0f91b1"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/unlock.json"
     },
     "upload": {
       "id": "upload",
@@ -37187,7 +37590,8 @@
           "file": "svg/Filled/upload_filled.svg",
           "sha256": "87d6c654c73bb9ac9942f4884b49388355ec39a414948d0d4a487208c7839bb3"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/upload.json"
     },
     "video": {
       "id": "video",
@@ -37254,7 +37658,8 @@
           "file": "svg/Filled/video_filled.svg",
           "sha256": "1b231bff2525b491f44e9829f0444fec8ef18e2f54ae12c1827a212c499e7aa8"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/video.json"
     },
     "video-camera": {
       "id": "video-camera",
@@ -37331,7 +37736,8 @@
           "file": "svg/Filled/video-camera_filled.svg",
           "sha256": "468c9445162917135517fc8351d82db41ed1ed545554ec46ba41e3497a1fd4b8"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/video-camera.json"
     },
     "video-camera-off": {
       "id": "video-camera-off",
@@ -37964,7 +38370,8 @@
           "file": "svg/Filled/video-camera-off_filled.svg",
           "sha256": "83a94381d3757c682c1d3b07db51e57df1dece734c08f61e4243eb3f1f2156ec"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/video-camera-off.json"
     },
     "volume": {
       "id": "volume",
@@ -38031,7 +38438,8 @@
           "file": "svg/Filled/volume_filled.svg",
           "sha256": "ec21f8c4c9aec938c91730017de55f307957509a0bfbf0c72a1730b76dbf65f8"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/volume.json"
     },
     "volume-high": {
       "id": "volume-high",
@@ -38152,7 +38560,8 @@
           "file": "svg/Filled/volume-high_filled.svg",
           "sha256": "2fd1bcd6ae683704eaf4b5023f8bd12f494e436fcfcb6c58e8e69ca2cdb53a62"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/volume-high.json"
     },
     "volume-low": {
       "id": "volume-low",
@@ -38229,7 +38638,8 @@
           "file": "svg/Filled/volume-low_filled.svg",
           "sha256": "01f23e7ea8c2d0f388e60c3c9a58b7ebdd6ae9ca8d18fd41804f58528ad5827d"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/volume-low.json"
     },
     "volume-middle": {
       "id": "volume-middle",
@@ -38332,7 +38742,8 @@
           "file": "svg/Filled/volume-middle_filled.svg",
           "sha256": "4939b9f972e3ac079057302458650d106b1f7d161f023ff92d5a4a1c4d82b301"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/volume-middle.json"
     },
     "volume-mute": {
       "id": "volume-mute",
@@ -38449,7 +38860,8 @@
           "file": "svg/Filled/volume-mute_filled.svg",
           "sha256": "2cd69fdfb81207eba2cfc7988c6d4eaf4080912c45cedec784bd0a0b9a6f4f69"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/volume-mute.json"
     },
     "volume-muted": {
       "id": "volume-muted",
@@ -38526,7 +38938,8 @@
           "file": "svg/Filled/volume-muted_filled.svg",
           "sha256": "2baea934133040c01d646bef7c4ff323043b339ea4f0088d23db1cc384cb91f6"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/volume-muted.json"
     },
     "wallet": {
       "id": "wallet",
@@ -38598,7 +39011,8 @@
           "file": "svg/Filled/wallet_filled.svg",
           "sha256": "70deaea743cb1f0eca2dd840d5b2b709f547b8b16caf344d443df414351cae15"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/wallet.json"
     },
     "warning": {
       "id": "warning",
@@ -38675,7 +39089,8 @@
           "file": "svg/Filled/warning_filled.svg",
           "sha256": "453faa0d78acdc80ce61b2589704ba3e78096a1039a9f5ff9114f802c7ea9364"
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/warning.json"
     },
     "waveform": {
       "id": "waveform",
@@ -38760,7 +39175,8 @@
             ]
           }
         }
-      }
+      },
+      "opticalMaster": "symbols/optics/waveform.json"
     }
   },
   "compatibility": {

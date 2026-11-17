@@ -4,7 +4,7 @@ import { dirname, join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { loadSymbolSource } from '../scripts/lib/symbol-source.js';
-import { compileOpticalCorpus } from '../scripts/lib/optical-corpus.js';
+import { compileOpticalCorpus, opticalReviewDigest } from '../scripts/lib/optical-corpus.js';
 import { pathBBox } from '../src/core/path-data.js';
 import { opticalPathData, opticalPosition, sampleOpticalPath } from '../src/render/optical-grid.ts';
 
@@ -68,4 +68,15 @@ it('refuses shipping missing or unreviewed masters and stale source-coordinate b
   delete source.symbols['plus-circle'].opticalMaster;
   write(root, 'symbols/source.json', JSON.stringify(source));
   expect(() => compileOpticalCorpus(root)).toThrow('no authored masters');
+});
+
+it('binds visual acceptance to the compiled geometry, including shared profiles', () => {
+  const { root, source, recipe, file } = fixture();
+  recipe.review = 'accepted';
+  recipe.reviewedSha256 = opticalReviewDigest(compileOpticalCorpus(root, { preview: true }).symbols['plus-circle'].data);
+  write(root, file, JSON.stringify(recipe));
+  expect(() => compileOpticalCorpus(root)).not.toThrow();
+  source.opticalProfiles['positive-mark'].weightScale[2] += 0.05;
+  write(root, 'symbols/source.json', JSON.stringify(source));
+  expect(() => compileOpticalCorpus(root)).toThrow('geometry changed since visual review');
 });
