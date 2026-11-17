@@ -161,9 +161,9 @@ Float-проекция проверяется против независимы�
 позволяет локально проверять незавершённую работу; он не означает готовность выпуска.
 
 ```sh
-./gradlew desktopTest -PpreviewSymbols=true
-./gradlew publishDesktopPublicationToDistributionRepository publishKotlinMultiplatformPublicationToDistributionRepository -PpreviewSymbols=true
-node ../../scripts/export-native-symbols.mjs --preview --symbol plus-circle --package pics.lab.icons.consumer.generated --output consumer/build/exported
+./gradlew desktopTest
+./gradlew publishDesktopPublicationToDistributionRepository publishKotlinMultiplatformPublicationToDistributionRepository
+node ../../scripts/export-native-symbols.mjs --symbol plus-circle --package pics.lab.icons.consumer.generated --output consumer/build/exported
 ./gradlew -p consumer run --args=--headless -PiconsVersion=<package-version> -PiconsRepository=<absolute-build-repository> -PexportedIconSource=<absolute-consumer-build-exported>
 ```
 

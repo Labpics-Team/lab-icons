@@ -250,8 +250,8 @@ function pnpmJobErrors({ relativePath, job, expectedPnpmVersion }) {
   }
 
   // Измерение внешнего consumer не определяет список verify и обязано войти в CI.
-  const measuredConsumer = relativePath === '.github/workflows/ci.yml' && job.id === 'benchmark';
-  if (!measuredConsumer && !hasCanonicalVerify(job.text)) {
+  const additionalConsumer = relativePath === '.github/workflows/ci.yml' && ['benchmark', 'native'].includes(job.id);
+  if (!additionalConsumer && !hasCanonicalVerify(job.text)) {
     errors.push(`${prefix}: полный гейт должен запускаться канонической командой «pnpm verify»`);
   }
 
@@ -287,10 +287,17 @@ export function benchmarkWorkflowErrors(text) {
   if (!benchmark) return [];
   const errors = [];
   const required = jobs.find(job => job.id === 'required');
-  if (!/^\s*needs:\s*\[verify, security, benchmark\]\s*$/m.test(required?.text ?? '') ||
+  const dependencies = required?.text.match(/^\s*needs:\s*\[([^\]]+)\]/m)?.[1].split(',').map(value => value.trim()) ?? [];
+  if (!['verify', 'security', 'benchmark'].every(id => dependencies.includes(id)) ||
       !required?.text.includes("BENCHMARK_RESULT: ${{ needs.benchmark.result }}") ||
       !required?.text.includes("\"$BENCHMARK_RESULT\" == 'success'")) {
     errors.push('.github/workflows/ci.yml: consumer benchmark обязан блокировать стабильный CI context');
+  }
+  const native = jobs.find(job => job.id === 'native');
+  if (native && (!dependencies.includes('native') ||
+      !required?.text.includes("NATIVE_RESULT: ${{ needs.native.result }}") ||
+      !required?.text.includes("\"$NATIVE_RESULT\" == 'success'"))) {
+    errors.push('.github/workflows/ci.yml: native consumer обязан входить в стабильный CI context');
   }
   if (!/^\s*(?:-\s+)?run: node scripts\/bench\/compare-consumers\.mjs benchmark-results\s*$/m.test(benchmark.text) ||
       !/^\s*(?:-\s+)?run: pnpm exec playwright install --with-deps chromium\s*$/m.test(benchmark.text) ||

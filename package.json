@@ -1,8 +1,8 @@
 {
   "name": "@labpics/icons",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "private": false,
-  "description": "Статические SVG и геометрические модели иконок Labpics",
+  "description": "Авторские оптические символы Labpics: SVG, состояния, движение и экспорт",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Labpics-Team/lab-icons.git"
@@ -1598,6 +1598,8 @@
     "build:ir": "node scripts/build-ir.mjs",
     "build:anatomy": "node scripts/build-anatomy.js",
     "build:catalog": "node scripts/build-catalog.mjs",
+    "catalog:build": "node scripts/build-icon-catalog.mjs",
+    "catalog:check": "tsc --noEmit -p catalog/tsconfig.json && node scripts/verify-icon-catalog.mjs",
     "observatory": "pnpm build && node scripts/build-observatory.mjs",
     "typecheck": "tsc --noEmit",
     "check:security": "pnpm audit --audit-level=low",

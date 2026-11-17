@@ -376,7 +376,9 @@ jobs:
   });
 
   it.each([
-    ['benchmark не входит в CI', source => source.replace('needs: [verify, security, benchmark]', 'needs: [verify, security]')],
+    ['benchmark не входит в CI', source => source.replace('needs: [verify, security, benchmark, native]', 'needs: [verify, security, native]')],
+    ['native не входит в CI', source => source.replace('needs: [verify, security, benchmark, native]', 'needs: [verify, security, benchmark]')],
+    ['удалён native outcome', source => source.replace(' && "$NATIVE_RESULT" == \'success\'', '')],
     ['удалён success outcome', source => source.replace(' && "$BENCHMARK_RESULT" == \'success\'', '')],
     ['ошибка замаскирована', source => source.replace('    name: Чистый consumer и browser benchmark', '    continue-on-error: true\n    name: Чистый consumer и browser benchmark')],
     ['baseline меняется автоматически', source => source.replace('node scripts/bench/compare-consumers.mjs benchmark-results', 'node scripts/bench/compare-consumers.mjs benchmark-results --update')],

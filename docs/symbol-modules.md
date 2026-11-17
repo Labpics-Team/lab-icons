@@ -1,4 +1,9 @@
-# Подключить отдельный символ
+# Ранний GlyphIR API отдельного символа
+
+Эта страница описывает сохранённый `glyph`/`glyphCapabilities` API.
+Для оптических символов используйте [renderIcon](render-symbols.md),
+для состояний и движения — [createSymbolMotion](symbol-motion.md).
+Их вход — `IconSymbol`, доступный как default export того же модуля.
 
 `@labpics/icons/symbols/<имя>` содержит Outline, Filled и предварительно собранные
 части одного текущего авторского символа. Исходники закреплены в

@@ -7,7 +7,7 @@
 
 ## Установка
 
-Пакет: `@labpics/icons`. Версия checkout: `0.3.0`.
+Пакет: `@labpics/icons`. Версия checkout: `0.4.0`.
 
 Основной канал — публичный npm:
 
@@ -20,7 +20,7 @@ pnpm add @labpics/icons
 ```json
 {
   "dependencies": {
-    "@labpics/icons": "github:Labpics-Team/lab-icons#v0.3.0-dist"
+    "@labpics/icons": "github:Labpics-Team/lab-icons#v0.4.0-dist"
   }
 }
 ```

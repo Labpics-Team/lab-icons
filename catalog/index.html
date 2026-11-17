@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ru" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Символы Lab Icons: два начертания, оптические размеры, состояния и движение. Найдите знак и сохраните его для своего интерфейса.">
+  <title>Lab Icons — символы для интерфейса</title>
+  <link rel="icon" href="icons/apps-outline.svg" type="image/svg+xml">
+  <link rel="preload" href="fonts/Geist-Variable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <a class="skip" href="#library">К символам</a>
+  <header class="topbar">
+    <a class="brand" href="./" aria-label="Lab Icons, начало">Lab Icons</a>
+    <nav aria-label="Основная навигация"><a href="./" aria-current="page">Символы</a><a href="https://github.com/Labpics-Team/lab-icons#readme">Документация</a></nav>
+    <div class="header-end"><span id="version" class="version"></span><button id="theme" class="icon-button" aria-label="Тёмная тема" title="Тёмная тема"><span data-icon="moon" aria-hidden="true"></span></button><a class="github-link" href="https://github.com/Labpics-Team/lab-icons">GitHub <span aria-hidden="true">↗</span></a></div>
+  </header>
+  <main class="workspace">
+    <section id="library" class="library" aria-labelledby="library-title" tabindex="-1">
+      <div class="library-heading"><div><h1 id="library-title">Символы</h1><p id="corpus-count"></p></div><div class="variant-control segmented" role="group" aria-label="Начертание"><button data-variant="outline" aria-pressed="true">Контур</button><button data-variant="filled" aria-pressed="false">Заливка</button></div></div>
+      <div class="search-row"><label class="search"><span data-icon="search" aria-hidden="true"></span><span class="sr-only">Найти символ</span><input id="search" type="search" placeholder="Найти символ" autocomplete="off"><kbd aria-hidden="true">/</kbd></label><select id="filter" aria-label="Показать символы"><option value="all">Все символы</option><option value="motion">С движением</option><option value="states">С состояниями</option></select></div>
+      <div class="results-heading"><span id="visible-count" aria-live="polite"></span><span>Выберите знак, чтобы настроить его</span></div>
+      <div id="grid" class="symbol-grid" aria-label="Символы"></div>
+      <div id="empty" class="empty" hidden><span data-icon="search" aria-hidden="true"></span><h2>Ничего не нашлось</h2><p>Попробуйте другое название.</p><button id="clear-search" class="secondary">Сбросить поиск</button></div>
+      <footer class="library-footer"><span>Сделано в Labpics</span><span>Открытая библиотека · MIT</span></footer>
+    </section>
+    <aside id="inspector" class="inspector" aria-labelledby="symbol-name" aria-busy="true">
+      <div class="selection-heading"><div><span class="caption">Символ</span><h2 id="symbol-name">time</h2></div><button id="close-detail" class="icon-button" aria-label="Закрыть настройку"><span data-icon="close" aria-hidden="true"></span></button></div>
+      <p id="load-status" class="message" role="status" hidden></p><button id="retry" class="secondary" hidden>Попробовать снова</button>
+      <div id="stage" class="symbol-stage" role="img" aria-label="Предпросмотр символа"></div>
+      <div id="samples" class="size-samples" aria-label="Символ в интерфейсе"></div>
+      <fieldset id="settings" disabled>
+        <div class="settings-section optics">
+          <label class="range-row" for="size"><span>Размер</span><output id="size-value" for="size">24 px</output></label><input id="size" type="range" min="16" max="64" step="1" value="24">
+          <label class="range-row" for="weight"><span>Вес</span><output id="weight-value" for="weight">400</output></label><input id="weight" type="range" min="300" max="600" step="1" value="400">
+          <label class="check"><input id="auto-optics" type="checkbox" checked><span>Оптика по размеру</span></label>
+          <div id="optics-control" hidden><label class="range-row" for="opsz"><span>Оптический размер</span><output id="opsz-value" for="opsz">24</output></label><input id="opsz" type="range" min="16" max="48" step="1" value="24"></div>
+          <div class="color-row"><span>Цвет</span><label class="color-value"><input id="color" type="color" value="#101012" aria-label="Цвет символа"><span id="color-value">#101012</span></label><button id="reset" class="text-button">Сбросить</button></div>
+        </div>
+        <section id="states-section" class="settings-section" hidden><h3>Состояние</h3><label id="family-control" hidden><span class="sr-only">Группа состояний</span><select id="family"></select></label><div id="states" class="state-choices" role="group" aria-label="Состояние символа"></div></section>
+        <section id="date-section" class="settings-section" hidden><label class="range-row" for="date"><span>Дата</span></label><input id="date" type="date"></section>
+        <section class="settings-section motion-section"><div class="section-heading"><h3>Движение</h3><label class="check compact"><input id="reduce-motion" type="checkbox"><span>Уменьшить</span></label></div><select id="animation" aria-label="Анимация"><option value="">Без движения</option></select><div class="playback"><button id="play" class="primary"><span data-icon="play" aria-hidden="true"></span><span id="play-label">Воспроизвести</span></button><button id="reverse" class="secondary icon-button" title="В обратную сторону" aria-label="В обратную сторону"><span data-icon="arrow-back" aria-hidden="true"></span></button></div><label class="scrub"><span class="sr-only">Позиция анимации</span><input id="progress" type="range" min="0" max="1" step="0.001" value="0"><output id="progress-value">0%</output></label></section>
+        <section class="settings-section use-section"><div class="section-heading"><h3>Использовать</h3><span id="copy-status" class="copy-status" role="status"></span></div><div class="code-preview"><pre><code id="import-code"></code></pre><button id="copy" class="icon-button" aria-label="Скопировать код" title="Скопировать код"><span data-icon="copy" aria-hidden="true"></span></button></div><div class="download-row"><select id="format" aria-label="Формат файла"><option value="svg">SVG</option><option value="lottie">Lottie</option><option value="dotlottie">dotLottie</option><option value="kotlin">Kotlin</option></select><button id="download" class="secondary"><span data-icon="download" aria-hidden="true"></span>Скачать</button></div><p id="export-status" class="message" role="status" hidden></p></section>
+      </fieldset>
+    </aside>
+  </main>
+  <script type="module" src="assets/catalog.js"></script>
+</body>
+</html>

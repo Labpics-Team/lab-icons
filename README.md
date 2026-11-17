@@ -1,45 +1,77 @@
 # Lab Icons
 
-Авторские SVG и геометрическое представление символов Labpics.
-Модули отдельных символов используют закреплённые masters Lab UI v2.1 и
-наследуют `currentColor`. Возможности модели, осей и жестов читаются из контракта варианта.
+330 авторских символов Lab UI, два независимых начертания, оптический вес и размер,
+состояния и прерываемое движение. Один числовой источник служит SVG, Compose,
+Lottie и dotLottie. Исходный макет Figma сохраняется без изменений.
 
 ## Начало работы
 
 [Установка, требования к среде и точки входа](docs/package.md) формируются из
 контракта поставки. Основной канал установки: публичный npm.
 
-Примеры описывают собранный checkout; публикация выпуска проверяется отдельно.
-Текущий авторский символ подключается одной SVG-строкой:
-
-```js
-import { outline } from '@labpics/icons/symbols/accessibility';
-
-console.log(outline);
+```sh
+pnpm add @labpics/icons
 ```
 
-Части и возможности символа подключают через его собственный модуль:
+Для исходного рисунка достаточно одной строки:
 
 ```js
-import { glyph, glyphCapabilities } from '@labpics/icons/symbols/time';
+import { outline } from '@labpics/icons/symbols/plus-circle';
 
-const source = glyph({
-  variant: 'outline',
-  modelMode: 'source-only',
+document.querySelector('#icon').innerHTML = outline;
+```
+
+Для оптики используйте тот же символ с renderer:
+
+```js
+import plus from '@labpics/icons/symbols/plus-circle';
+import { renderIcon } from '@labpics/icons/render';
+
+document.querySelector('#icon').innerHTML = renderIcon(plus, {
+  size: 20, weight: 500, opsz: 'auto', variant: 'outline',
 });
-const capabilities = glyphCapabilities('outline');
-console.log(source, capabilities);
 ```
 
-Default и `source-only` возвращают один неизменяемый авторский результат.
-`source.provenance.author` связывает его с Figma file/node/version и хешами master.
-До доказательства паритета текущей авторской формы запрос оси или candidate-модели
-получает `AUTHOR_PARITY_REQUIRED`.
+`currentColor` наследует цвет элемента. `weight` — 300…600, `opsz` — 16…48;
+`auto` следует логическому размеру и ограничивается оптическим диапазоном.
+Исходная форма находится на 400/24. Импорт одного символа не подключает каталог;
+сборщик удаляет числовую модель при использовании только `outline` или `filled`.
+Декоративный SVG не заменяет доступное название кнопки.
 
-[Отдельные символы, части, оси и эффекты](docs/symbol-modules.md) показывают полный
-путь подключения. Корневой `@labpics/icons` и отдельные `/symbols/<id>` используют
-актуальный авторский корпус. Полный `@labpics/icons/ir` сохраняет записанную ранее
-геометрию в отдельном compatibility-снимке; его модели и жесты относятся к тому baseline.
+## Состояния и движение
+
+```sh
+pnpm add @labpics/motion
+```
+
+```js
+import * as motion from '@labpics/motion';
+import microphone from '@labpics/icons/states/microphone';
+import { createSymbolMotion } from '@labpics/icons/motion';
+
+const view = createSymbolMotion(motion).mount(
+  document.querySelector('#microphone'), microphone,
+  { size: 24, weight: 400, state: 'on' },
+);
+view.setState('off');
+view.set({ state: 'off', weight: 600, opsz: 32 });
+// При удалении элемента:
+view.dispose();
+```
+
+`symbols/<id>` содержит рисунок и жесты выбранного символа; `states/<family>`
+добавляет связанные состояния. Совместимые части переходят из текущей видимой
+геометрии; разные контуры заменяются с сохранением общей оболочки. В покое
+нет таймера или покадровой работы. Публичный Lab Motion управляет часами.
+
+[Показать и настроить символ](docs/render-symbols.md) ·
+[Состояния, жесты, дата и прерывание](docs/symbol-motion.md) ·
+[Lottie и dotLottie](docs/lottie.md) ·
+[Compose](native/compose/README.md) ·
+[Каталог](docs/catalog.md)
+
+Ранний [glyph/GlyphIR API](docs/symbol-modules.md) сохранён для совместимости.
+Его ограничения относятся к этой поверхности; новый renderer использует `IconSymbol`.
 
 [SymbolSource](docs/symbol-source.md) связывает пару начертаний, masters, части и
 общие компоненты. Каталоги и compatibility-аннотации генерируются из этого источника.
@@ -52,11 +84,16 @@ Default и `source-only` возвращают один неизменяемый 
 ```sh
 pnpm install --frozen-lockfile
 pnpm verify
+pnpm catalog:build
+pnpm catalog:check
 ```
 
-`pnpm verify` включает сборку. `node scripts/build-source-atlas.mjs` создаёт
-`preview/source-atlas.html` с авторскими формами при размерах 16/24/48 px.
-`pnpm observatory` сравнивает записанную ранее геометрию со старыми моделями.
+`pnpm verify` включает сборку. Каталог создаётся в `preview/catalog/`: поиск,
+начертания, вес, оптика, состояния, дата, движение и четыре формата скачивания.
+Он использует публичные entrypoints пакета; числовые модели загружаются по выбору.
+`node scripts/build-source-atlas.mjs` создаёт `preview/source-atlas.html`
+с авторскими формами при размерах 16/24/48 px. `pnpm observatory` сохраняется
+для сравнения ранних compatibility-моделей.
 
 [Документация](docs/README.md) разделяет рабочие процедуры, точную справку и
 объяснения. [Обновление авторского корпуса](docs/agent-workflow.md) описывает
@@ -67,4 +104,4 @@ read-only импорт полного снимка Figma через `pnpm sync:f
 
 ## Лицензия
 
-[MIT](LICENSE).
+[MIT](LICENSE). Встроенный Geist распространяется по SIL OFL.
