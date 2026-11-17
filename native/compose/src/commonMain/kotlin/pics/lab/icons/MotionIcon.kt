@@ -33,7 +33,10 @@ import kotlin.math.min
 @Composable
 internal fun MotionIcon(motion: IconMotion, tint: Color, modifier: Modifier, size: Dp, weight: Float,
     opsz: Float?, description: String?) {
-    val prepared = motion.paints.map { paint -> remember(paint) { PreparedPaint(paint) } }
+    val sources = remember(motion) { mutableMapOf<SymbolPathData, PreparedPathSource>() }
+    val prepared = motion.paints.map { paint -> remember(paint) {
+        PreparedPaint(paint, sources.getOrPut(paint.pathData) { PreparedPathSource(paint.pathData) })
+    } }
     val layers = remember(prepared) { prepareLayers(prepared) }
     val currentTint by rememberUpdatedState(tint)
     val accessibility = if (description == null) Modifier else Modifier.semantics {
@@ -95,9 +98,8 @@ internal fun DrawScope.drawIconLayers(layers: List<PreparedIconLayer>, tint: Col
     }
 }
 
-internal class PreparedPaint(val paint: IconPaint) {
-    private val variant = paint.symbol.variants[paint.variant.ordinal]
-    val geometry = PreparedPath((variant.motionPaths ?: variant.paths)[paint.part.pathIndex])
+internal class PreparedPaint(val paint: IconPaint, source: PreparedPathSource = PreparedPathSource(paint.pathData)) {
+    val geometry = PreparedPath(paint.pathData, paint.part.contourIndices, source)
     val anchor = Offset(paint.part.anchorX, paint.part.anchorY)
     val stroke = paint.part.draw?.let { Stroke(it.width, cap = StrokeCap.Round, join = StrokeJoin.Round) }
     private var previousWeight = Float.NaN

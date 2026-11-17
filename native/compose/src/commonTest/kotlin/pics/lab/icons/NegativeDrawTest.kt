@@ -15,11 +15,13 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.runCurrent
 import pics.lab.icons.symbols.checkmarkCircle
 import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import kotlin.test.assertContentEquals
 
 class NegativeDrawTest {
     private fun raster(background: Color = Color.Transparent, draw: DrawScope.() -> Unit): IntArray {
@@ -80,6 +82,33 @@ class NegativeDrawTest {
         assertEquals(.5f, counter.draw.value)
         val reverse = motion.effect("draw", to = 0f, durationMillis = 1000); reverse.pause(); reverse.seek(500f)
         assertEquals(.25f, counter.draw.value)
+        motion.dispose(); scope.cancel()
+    }
+
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    @Test fun interruptedSelectionRestoresTheCompletePictureWithoutJumping() = runTest {
+        val scope = CoroutineScope(coroutineContext + Job(coroutineContext[Job]) + BroadcastFrameClock())
+        val motion = IconMotion(checkmarkCircle, IconVariant.Filled, scope)
+        val counter = motion.paints.single { it.part.negative }
+        fun picture(): IntArray {
+            val sources = mutableMapOf<SymbolPathData, PreparedPathSource>()
+            val paints = motion.paints.map { PreparedPaint(it, sources.getOrPut(it.pathData) { PreparedPathSource(it.pathData) }).apply { update(400f, 24f) } }
+            return raster { drawIconLayers(prepareLayers(paints), Color.Black) }
+        }
+        val complete = picture()
+        val draw = motion.effect("draw", durationMillis = 1000); draw.pause(); draw.seek(250f)
+        val away = motion.setState("unselected", 1000)
+        assertEquals(.25f, counter.draw.value)
+        away.pause(); away.seek(500f)
+        val back = motion.setState("selected", 1000)
+        assertEquals(.25f, counter.draw.value)
+        back.pause(); back.seek(500f)
+        assertEquals(.625f, counter.draw.value)
+        back.finish(); runCurrent()
+        assertEquals(1f, counter.draw.value)
+        assertContentEquals(complete, picture())
+        assertTrue(motion.paints.all { it.symbol.variants[it.variant.ordinal].motionPaths == null })
+        assertTrue(motion.paints.all { it.part.pathIndex == 0 })
         motion.dispose(); scope.cancel()
     }
 }

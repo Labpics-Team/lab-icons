@@ -8,18 +8,35 @@ Web использует SVG luminance mask, Compose — DstOut внутри sav
 принадлежит композиции конкретного исходного пути: несовпадающие вычитающие
 рисунки не делят общий слой. Opacity при crossfade применяется к положительному
 рисунку; отрицательная часть сохраняет геометрию отверстия. Static data остаются
-исходными, motion override содержит все исходные координаты и sparse terms.
+исходными; части выбирают целые контуры по `pathIndex`/`contourIndices`.
+Координаты и sparse terms представлены один раз.
 Пакет одной иконки не получает семейства состояний.
 
-Native binary v3 сохраняет static paths отдельно от motion paths и добавляет
-layer/negative. Регрессия читает реальные fixtures, произведённые encoder v1
+Native binary v3 добавляет layer/negative. Новые экспорты ссылаются на общие
+static paths; decoder также сохраняет чтение ранних v3 motion paths.
+Регрессия читает реальные fixtures, произведённые encoder v1
 (`4dee2c0`) и v2 (`c91dc75`). Path, PathMeasure, Stroke, Rect и слой готовятся
 до кадровых обновлений. Geometry вне движения не разбирается заново.
 
-Проверено:
+После независимого ревью исправлены две причины:
+
+- `selected → draw(.25) → unselected(.5) → selected.finish()` сохранял
+  частичную маску. Web сбрасывал фазу, но возвращал только alpha. Теперь
+  возвращаются все каналы исходной позы, без скачка; новый эффект забирает
+  только свои каналы у продолжающейся смены состояния. Native также
+  возвращает rotation. Браузер и native проверяют полный конечный рисунок.
+- `semantics.paths` дублировал compound geometry. После замены индексами
+  checkmark-circle уменьшился **54 509 → 37 550 B**, status —
+  **225 575 → 208 616 B**. Оба на **360 B** больше базового c91dc75:
+  направляющая и ссылки частей. Motion: **26 758 B**; render: **3 748 B**;
+  render declarations: **2 506 B**. Это сырые размеры production dist;
+  baselines на этом этапе не обновлялись. Внутри одного native Icon части
+  пути также используют общий sampled buffer.
+
+Проверено после исправлений:
 
 - `pnpm exec tsc --noEmit` и production `pnpm build:ir`.
-- 78 адресных JS/TS tests: оптические коэффициенты на 25 комбинациях axes,
+- 81 адресный JS/TS test: оптические коэффициенты на 25 комбинациях axes,
   семантические фазы, импорт, controls, render и public types.
 - `node scripts/verify-negative-draw.mjs`: 54 растровых сравнения — девять опор,
   прозрачный/белый/тёмный фон, tint alpha .55, progress .99999/1. Ни одного
@@ -28,11 +45,13 @@ layer/negative. Регрессия читает реальные fixtures, пр�
   сглаживание для выпуклого пути и compound fill; тест не объявляет их
   побитово равными. Проверены draw 0/.5/1, повтор, реверс, прерванная смена
   Outline/Filled и dispose.
+  Сценарий ревью проверяет отсутствие скачка при обеих сменах, остаток маски
+  .75 → .375 → 0 и побитовое равенство исходной полной позе после возврата.
 - `node scripts/verify-semantic-motion.mjs`: все ранее принятые midframes PASS,
   **live = 0** после stop/finish/dispose.
-- `./gradlew.bat desktopTest`: **11 tests PASS**, реальные Canvas raster comparisons, старые
+- `./gradlew.bat desktopTest`: **13 tests PASS**, реальные Canvas raster comparisons, старые
   binary fixtures, фазы и disposal. Skia runtime включён только в desktop tests.
-- Отдельный Compose consumer установлен из локального Maven-артефакта
+- До этих исправлений отдельный Compose consumer установлен из локального Maven-артефакта
   **Icons 0.4.0-semantic.4**, с публичным **Motion 0.1.0** и отдельно
   экспортированным PlusCircle. Окно отрисовано, controls прерваны и завершены,
   сделан снимок, приложение закрыто. Это локальная проверка, не публичный выпуск.
@@ -53,4 +72,5 @@ Calendar kernel уже имеет rounded digits и явные Date/IANA zone; �
 
 Источники: [Apple Draw](https://developer.apple.com/videos/play/wwdc2025/337/),
 [Compose BlendMode](https://developer.android.com/reference/kotlin/androidx/compose/ui/graphics/BlendMode),
-[Compose graphics isolation](https://developer.android.com/develop/ui/compose/graphics/draw/modifiers).
+[Compose graphics isolation](https://developer.android.com/develop/ui/compose/graphics/draw/modifiers),
+[SVG 2 compound paths](https://www.w3.org/TR/SVG/paths.html).

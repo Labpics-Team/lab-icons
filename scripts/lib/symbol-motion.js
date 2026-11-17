@@ -7,25 +7,6 @@ import { compactDataLiteral } from './generated-module.js';
 const hash = value => createHash('sha256').update(JSON.stringify(value)).digest('hex').slice(0, 24);
 const variants = ['outline', 'filled'];
 
-/** Select whole source contours, retaining every sparse coefficient and winding. */
-function selectContours(path, selected) {
-  let contour = -1, cursor = 0, commands = ''; const indices = [];
-  for (const command of path.commands) {
-    if (command === 'M') contour++;
-    const count = command === 'C' ? 6 : command === 'Z' ? 0 : 2;
-    if (selected.includes(contour)) { commands += command; for (let i = 0; i < count; i++) indices.push(cursor + i); }
-    cursor += count;
-  }
-  if (!commands || selected.some(index => index > contour || index < 0)) throw new TypeError('Motion anatomy references a missing contour');
-  const remap = new Map(indices.map((index, output) => [index, output]));
-  return { commands, coordinates: indices.map(index => path.coordinates[index]), fillRule: 'nonzero',
-    terms: path.terms.flatMap(([term, delta]) => {
-      const result = [];
-      for (let i = 0; i < delta.length; i += 2) if (remap.has(delta[i])) result.push(remap.get(delta[i]), delta[i + 1]);
-      return result.length ? [[term, result]] : [];
-    }) };
-}
-
 /** Standalone exporters use the same validated author tracks as the web build. */
 export function compileSemanticCorpus(root, corpus) {
   const document = loadSymbolSource(root);
@@ -44,25 +25,27 @@ export function compileSymbolMotion(symbol, data, capabilities, declaration) {
     const sourcePaths = data.variants[variant].paths;
     const subtract = anatomy.parts.some(part => part.role === 'counter' && declaration.draw?.[variant]?.[part.id]);
     const layer = subtract ? hash(sourcePaths) : undefined;
-    const projected = subtract ? anatomy.parts.map(part => ({ part,
-      path: part.contourIndices ? selectContours(sourcePaths[part.pathIndex], part.contourIndices) : sourcePaths[part.pathIndex] })) : null;
-    if (projected) for (const [pathIndex, path] of sourcePaths.entries()) {
+    if (subtract) for (const [pathIndex, path] of sourcePaths.entries()) {
       const parts = anatomy.parts.filter(part => part.pathIndex === pathIndex);
-      const contours = parts.flatMap(part => part.contourIndices ?? Array.from({ length: [...path.commands].filter(command => command === 'M').length }, (_, i) => i));
-      if (new Set(contours).size !== contours.length || contours.length !== [...path.commands].filter(command => command === 'M').length) {
+      const count = [...path.commands].filter(command => command === 'M').length;
+      const contours = parts.flatMap(part => part.contourIndices ?? Array.from({ length: count }, (_, i) => i));
+      if (new Set(contours).size !== count || contours.length !== count || contours.some(index => !Number.isInteger(index) || index < 0 || index >= count)) {
         throw new TypeError(`Subtractive motion must preserve every contour exactly once: ${symbol}/${variant}`);
       }
     }
-    const paths = projected?.map(entry => entry.path) ?? sourcePaths;
-    const parts = paths.map((path, pathIndex) => {
+    const entries = subtract ? anatomy.parts.map(part => ({ path: sourcePaths[part.pathIndex], pathIndex: part.pathIndex, part }))
+      : sourcePaths.map((path, pathIndex) => ({ path, pathIndex }));
+    const parts = entries.map(({ path, pathIndex, part }) => {
       const declarations = anatomy.parts.filter(part => part.pathIndex === pathIndex);
-      const own = projected?.[pathIndex]?.part ?? (declarations.length === 1 && !declarations[0].contourIndices ? declarations[0] : undefined);
+      const own = part ?? (declarations.length === 1 && !declarations[0].contourIndices ? declarations[0] : undefined);
       const id = own?.id ?? `paint-${pathIndex}`;
       const draw = declaration.draw?.[variant]?.[id];
       if (draw && (!/^M[\d .,LC-]+$/.test(draw.path) || !Number.isFinite(draw.width) || draw.width <= 0)) {
         throw new TypeError(`Invalid authored draw guide: ${symbol}/${variant}/${id}`);
       }
-      return { id, key: hash(layer ? { layer, path } : path), pathIndex, anchor: own?.anchor?.map(value => value * 24) ?? [12, 12],
+      const contourIndices = subtract ? own.contourIndices : undefined;
+      return { id, key: hash(layer ? { layer, pathIndex, contourIndices } : path), pathIndex,
+        ...(contourIndices && { contourIndices }), anchor: own?.anchor?.map(value => value * 24) ?? [12, 12],
         ...(draw && { draw }), ...(layer && { layer, ...(own.role === 'counter' && { negative: true }) }) };
     });
     const effects = {};
@@ -78,7 +61,7 @@ export function compileSymbolMotion(symbol, data, capabilities, declaration) {
     const drawn = parts.filter(part => part.draw);
     if (drawn.length) effects.draw = { duration: 360, rest: 1,
       tracks: drawn.map(part => ({ partId: part.id, property: 'draw', stops: [[0, 0], [1, 1]] })) };
-    return [variant, { parts, effects, ...(projected && { paths }) }];
+    return [variant, { parts, effects }];
   })) };
 }
 

@@ -39,8 +39,9 @@ export function encodeNativeSymbol(symbol, anatomy) {
   for (const variant of ['outline', 'filled']) {
     encodePaths(symbol.data.variants[variant].paths);
     const semantic = symbol.semantics?.variants[variant];
-    byte(semantic?.paths ? 1 : 0);
-    if (semantic?.paths) encodePaths(semantic.paths);
+    // Version 3 readers also accept earlier exports with separate motion paths.
+    // New exports reference contours in the sole static numeric path table.
+    byte(0);
     const parts = semantic?.parts ?? anatomy.variants[variant].anatomy.parts;
     count(parts.length);
     for (const part of parts) {

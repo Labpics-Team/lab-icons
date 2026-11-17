@@ -68,6 +68,18 @@ class IconMotionTest {
         icon.dispose(); scope.cancel()
     }
 
+    @Test fun selectionReturnsRotationToTheSourcePoseContinuously() = runTest {
+        val scope = CoroutineScope(coroutineContext + Job(coroutineContext[Job]) + BroadcastFrameClock())
+        val icon = IconMotion(reload, IconVariant.Outline, scope)
+        val rotation = icon.paints.single().rotation
+        val cycle = icon.effect("cycle", durationMillis = 1000); cycle.pause(); cycle.seek(500f)
+        val restore = icon.setState("unselected", 1000)
+        assertEquals(180f, rotation.value)
+        restore.pause(); restore.seek(500f); assertEquals(90f, rotation.value)
+        restore.finish(); assertEquals(0f, rotation.value)
+        icon.dispose(); scope.cancel()
+    }
+
     @Test fun publicMotionRetargetsFromVisiblePoseAndDisposesItsClock() = runTest {
         val clock = BroadcastFrameClock()
         val scope = CoroutineScope(coroutineContext + Job(coroutineContext[Job]) + clock)

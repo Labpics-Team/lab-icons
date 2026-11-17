@@ -83,21 +83,45 @@ internal class PreparedSymbol(private val symbol: SymbolData, variant: IconVaria
     }
 }
 
-/** Exactly one path and numeric buffer; motion never prepares unrelated parts of a symbol. */
-internal class PreparedPath(private val source: SymbolPathData) {
-    val path = Path()
-    private val points = FloatArray(source.coordinates.size)
+/** One sampled buffer per source path in this icon, also when several parts select its contours. */
+internal class PreparedPathSource(private val source: SymbolPathData) {
+    val points = FloatArray(source.coordinates.size)
+    var revision = 0
+        private set
+    private var lastWeightSide = -1
+    private var lastOpticalSide = -1
+    private var lastWeight = Float.NaN
+    private var lastOptical = Float.NaN
     fun update(weightSide: Int, weight: Float, opticalSide: Int, optical: Float) {
+        if (weightSide == lastWeightSide && opticalSide == lastOpticalSide && weight == lastWeight && optical == lastOptical) return
         source.sample(weightSide, weight, opticalSide, optical, points)
+        lastWeightSide = weightSide; lastOpticalSide = opticalSide; lastWeight = weight; lastOptical = optical; revision++
+    }
+}
+
+/** Commands already identify whole contours; selection needs no SVG parser or geometry operation. */
+internal class PreparedPath(private val source: SymbolPathData, private val contours: IntArray = IntArray(0),
+    private val sampled: PreparedPathSource = PreparedPathSource(source)) {
+    val path = Path()
+    private var revision = -1
+    fun update(weightSide: Int, weight: Float, opticalSide: Int, optical: Float) {
+        sampled.update(weightSide, weight, opticalSide, optical)
+        if (revision == sampled.revision) return
+        revision = sampled.revision
+        val points = sampled.points
         path.reset()
         path.fillType = if (source.evenOdd) PathFillType.EvenOdd else PathFillType.NonZero
-        var cursor = 0
-        for (command in source.commands) when (command.toInt()) {
-            0 -> { path.moveTo(points[cursor], points[cursor + 1]); cursor += 2 }
-            1 -> { path.lineTo(points[cursor], points[cursor + 1]); cursor += 2 }
-            2 -> { path.cubicTo(points[cursor], points[cursor + 1], points[cursor + 2], points[cursor + 3], points[cursor + 4], points[cursor + 5]); cursor += 6 }
-            3 -> path.close()
-            else -> error("Unknown compiled icon opcode")
+        var cursor = 0; var contour = -1
+        for (command in source.commands) {
+            if (command.toInt() == 0) contour++
+            val selected = contours.isEmpty() || contour in contours
+            when (command.toInt()) {
+                0 -> { if (selected) path.moveTo(points[cursor], points[cursor + 1]); cursor += 2 }
+                1 -> { if (selected) path.lineTo(points[cursor], points[cursor + 1]); cursor += 2 }
+                2 -> { if (selected) path.cubicTo(points[cursor], points[cursor + 1], points[cursor + 2], points[cursor + 3], points[cursor + 4], points[cursor + 5]); cursor += 6 }
+                3 -> if (selected) path.close()
+                else -> error("Unknown compiled icon opcode")
+            }
         }
     }
 }

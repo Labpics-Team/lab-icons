@@ -77,6 +77,21 @@ assert(guide.getAttribute('stroke-dashoffset')==='0.75','negative draw reverse j
 const switchVariant=fixture.set({size:96,state:'unselected'},{duration:1000}); switchVariant.pause(); switchVariant.seek(500);
 assert(counter.getAttribute('opacity')==='1','state fade changed counter opacity');
 const restore=fixture.setState('selected',{duration:1000}); restore.pause(); restore.seek(500); restore.finish(); await restore.finished;
+fixture.set({state:'selected',size:96,weight:400,opsz:24},{reducedMotion:true});
+const completePose=await pixels(serialize(fixture.element));
+const interrupted=fixture.effect('draw',{duration:1000}); interrupted.pause(); interrupted.seek(250);
+assert(guide.getAttribute('stroke-dashoffset')==='0.75','round-trip fixture has wrong starting pose');
+const away=fixture.setState('unselected',{duration:1000});
+assert(guide.getAttribute('stroke-dashoffset')==='0.75','leaving selected jumped');
+away.pause(); away.seek(500);
+const returnToSelected=fixture.setState('selected',{duration:1000});
+assert(guide.getAttribute('stroke-dashoffset')==='0.75','returning selected jumped');
+returnToSelected.pause(); returnToSelected.seek(500);
+assert(guide.getAttribute('stroke-dashoffset')==='0.375','selected did not restore the draw pose continuously');
+returnToSelected.finish(); await returnToSelected.finished;
+assert(guide.getAttribute('stroke-dashoffset')==='0' && counter.getAttribute('mask')==='','selected retained a partial draw');
+const returnedPose=await pixels(serialize(fixture.element));
+assert(returnedPose.every((value,index)=>value===completePose[index]),'selected endpoint did not restore the complete picture');
 fixture.dispose();
 for(const dark of [false,true]) {
   const section=document.createElement('section'); section.className=dark?'dark':'';
@@ -93,7 +108,7 @@ for(const dark of [false,true]) {
   }
 }
 window.result={ok:true,comparisons:comparisons.length,maximumMeanChannelDifference:Math.max(...comparisons.map(item=>item.difference)),alphaTotals:totals,
-  cases:['9 optical supports','transparent and opaque backgrounds','partial tint alpha','draw 0/.5/1','replay and reversal','interrupted selection','dispose']};
+  cases:['9 optical supports','transparent and opaque backgrounds','partial tint alpha','draw 0/.5/1','replay and reversal','interrupted selection','selected round-trip exact endpoint and no jump','dispose']};
 `;
 const bundle = await build({ stdin: { contents: source, resolveDir: root, sourcefile: 'negative-consumer.mjs' }, bundle: true, format: 'esm', write: false, target: 'es2022' });
 const html = `<!doctype html><html><head><meta charset="utf-8"><style>body{margin:0;background:#e6e6eb;font:14px system-ui;display:flex;gap:16px;padding:24px}section{padding:24px;color:#17171b;background:#fafafb;border-radius:16px}.dark{color:#f4f4f6;background:#17171b}h2{margin:0 0 24px;font-size:18px}.row{display:flex;align-items:center;gap:24px;margin:24px 0}.row>span{width:64px}.cell{display:flex;align-items:center;flex-direction:column;gap:12px}</style></head><body><script type="module">${bundle.outputFiles[0].text.replaceAll('</script', '<\\/script')}</script></body></html>`;

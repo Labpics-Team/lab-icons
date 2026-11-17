@@ -22,6 +22,8 @@ export interface MountedIcon {
 }
 type Paint = { element: SVGPathElement; part: SymbolPart; alpha: number; opacity: number; x: number; y: number; rotate: number; draw: number; guide?: SVGPathElement; mask?: SVGMaskElement };
 const ns = 'http://www.w3.org/2000/svg';
+const rest = { opacity: 1, x: 0, y: 0, rotate: 0, draw: 1 };
+const poseChannels = Object.keys(rest) as (keyof typeof rest)[];
 let nextMask = 0;
 
 function sample(track: SymbolTrack, progress: number): number {
@@ -47,6 +49,7 @@ export function mountSymbol(runtime: SymbolMotionRuntime, root: Element, symbol:
   const layers = new Map<string, { positive: SVGGElement; negative: SVGMaskElement }>();
   const active = new Map<string, { playback: SymbolPlayback; release: () => void }>();
   const phases = new Map<string, number>();
+  const stateChannels = new Map<Paint, Set<keyof typeof rest>>();
   let options = initial, disposed = false, epoch = 0;
   let semantics: SymbolVariantSemantics;
 
@@ -139,21 +142,30 @@ export function mountSymbol(runtime: SymbolMotionRuntime, root: Element, symbol:
     // All dependent motion releases before any next-state DOM mutation.
     for (const channel of [...active.keys()]) stop(channel);
     const generation = ++epoch;
-    phases.clear(); options = { ...next }; semantics = resolved.semantic;
+    phases.clear(); stateChannels.clear(); options = { ...next }; semantics = resolved.semantic;
     element.setAttribute('width', String(resolved.size)); element.setAttribute('height', String(resolved.size));
-    const desired = new Set<string>(), starts = new Map<Paint, number>();
+    const desired = new Set<string>(), starts = new Map<Paint, typeof rest & { alpha: number }>();
+    const coordinates = new Map<number, Float64Array>();
     for (const part of semantics.parts) {
-      const path = (semantics.paths ?? resolved.data.variants[resolved.variant].paths)[part.pathIndex]!;
-      const d = opticalPathData(path, sampleOpticalPath(path, resolved.at));
+      const path = resolved.data.variants[resolved.variant].paths[part.pathIndex]!;
+      let sampled = coordinates.get(part.pathIndex);
+      if (!sampled) { sampled = sampleOpticalPath(path, resolved.at); coordinates.set(part.pathIndex, sampled); }
+      const d = opticalPathData(path, sampled, part.contourIndices);
       const key = part.key; desired.add(key);
       let paint = paints.get(key);
       if (!paint) { paint = addPaint(part, d, path.fillRule); paints.set(key, paint); }
       else { paint.part = part; paint.element.setAttribute('d', d); paint.element.setAttribute('data-part', part.id); }
-      starts.set(paint, paint.alpha);
+      stateChannels.set(paint, new Set(poseChannels));
     }
-    for (const paint of paints.values()) if (!starts.has(paint)) starts.set(paint, paint.alpha);
+    for (const paint of paints.values()) starts.set(paint, { alpha: paint.alpha, opacity: paint.opacity,
+      x: paint.x, y: paint.y, rotate: paint.rotate, draw: paint.draw });
     const write = (progress: number) => {
-      for (const [paint, start] of starts) { paint.alpha = start + ((desired.has(paint.part.key) ? 1 : 0) - start) * progress; writePaint(paint); }
+      for (const [paint, start] of starts) {
+        paint.alpha = start.alpha + ((desired.has(paint.part.key) ? 1 : 0) - start.alpha) * progress;
+        const channels = stateChannels.get(paint);
+        if (channels) for (const channel of channels) paint[channel] = start[channel] + (rest[channel] - start[channel]) * progress;
+        writePaint(paint);
+      }
     };
     const done = () => {
       if (generation !== epoch) return;
@@ -174,6 +186,8 @@ export function mountSymbol(runtime: SymbolMotionRuntime, root: Element, symbol:
       const part = semantics.parts.find(part => part.id === track.partId);
       const paint = part && paints.get(part.key);
       if (!paint) throw new Error(`Missing semantic paint: ${track.partId}`);
+      // An effect takes over only its own channels; the state may still finish fading.
+      stateChannels.get(paint)?.delete(track.property);
       const base = sample(track, from);
       const turn = track.property === 'rotate' && Math.abs(track.stops.at(-1)![1] - track.stops[0]![1]) === 360;
       return { track, paint, start: replay && !turn ? base : paint[track.property], base, turn };
@@ -197,5 +211,5 @@ export function mountSymbol(runtime: SymbolMotionRuntime, root: Element, symbol:
   set(initial, { duration: 0 }); root.append(element);
   return { element, get state() { return options.state; }, set,
     setState: (state, transition) => set({ ...options, state }, transition), effect,
-    dispose() { if (disposed) return; disposed = true; epoch++; for (const channel of [...active.keys()]) stop(channel); element.remove(); paints.clear(); } };
+    dispose() { if (disposed) return; disposed = true; epoch++; for (const channel of [...active.keys()]) stop(channel); element.remove(); paints.clear(); stateChannels.clear(); } };
 }

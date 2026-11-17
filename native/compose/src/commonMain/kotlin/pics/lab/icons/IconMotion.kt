@@ -70,6 +70,7 @@ public class IconMotion internal constructor(
                 to(paint.alpha, if (paint.part.key in desired) 1f else 0f, transition)
                 if (paint.part.key in desired) {
                     to(paint.opacity, 1f, transition); to(paint.x, 0f, transition); to(paint.y, 0f, transition); to(paint.draw, 1f, transition)
+                    to(paint.rotation, 0f, transition)
                 }
             }
         }
@@ -141,6 +142,7 @@ private class IconEffectBinding(val value: MotionValue, val start: Float, val ta
 internal class IconPaint(val symbol: SymbolData, val variant: IconVariant, val part: SymbolPartData,
     val alpha: MotionValue, val opacity: MotionValue, val x: MotionValue, val y: MotionValue,
     val rotation: MotionValue, val draw: MotionValue) {
+    val pathData: SymbolPathData = symbol.variants[variant.ordinal].let { (it.motionPaths ?: it.paths)[part.pathIndex] }
     fun channel(property: Int): MotionValue = when (property) { 0 -> opacity; 1 -> x; 2 -> y; 3 -> rotation; 4 -> draw; else -> error("Unknown icon channel") }
 }
 

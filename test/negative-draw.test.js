@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import check from '../dist/symbols/checkmark-circle.js';
-import { opticalPosition, sampleOpticalPath } from '../src/render/optical-grid.ts';
+import { opticalPathData, opticalPosition, sampleOpticalPath } from '../src/render/optical-grid.ts';
 
 describe('subtractive motion preserves the optical source', () => {
   it('retains every original coordinate and coefficient when splitting the authored contours', () => {
@@ -10,10 +10,14 @@ describe('subtractive motion preserves the optical source', () => {
     expect(motion.parts.map(part => part.negative ?? false)).toEqual([false, true]);
     expect(new Set(motion.parts.map(part => part.layer)).size).toBe(1);
     expect(motion.parts[1].draw).toBeDefined();
-    expect(motion.paths.map(path => path.commands).join('')).toBe(original.commands);
+    expect(motion.paths).toBeUndefined();
+    expect(motion.parts.map(part => part.pathIndex)).toEqual([0, 0]);
+    expect(motion.parts.map(part => part.contourIndices)).toEqual([[0], [1]]);
     for (const weight of [300, 350, 400, 500, 600]) for (const opsz of [16, 20, 24, 36, 48]) {
       const at = opticalPosition(check.data.axes, weight, opsz);
-      expect(motion.paths.flatMap(path => [...sampleOpticalPath(path, at)])).toEqual([...sampleOpticalPath(original, at)]);
+      const coordinates = sampleOpticalPath(original, at);
+      expect(motion.parts.map(part => opticalPathData(original, coordinates, part.contourIndices)).join(''))
+        .toBe(opticalPathData(original, coordinates));
     }
     expect(check.semantics.variants.outline.paths).toBeUndefined();
   });

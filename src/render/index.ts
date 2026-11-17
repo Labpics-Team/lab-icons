@@ -22,6 +22,8 @@ export interface SymbolPart {
   /** Equal keys prove equal geometry at every optical support. */
   readonly key: string;
   readonly pathIndex: number;
+  /** Whole contours of the shared numeric path; omitted means the complete path. */
+  readonly contourIndices?: readonly number[];
   readonly anchor: readonly [number, number];
   readonly draw?: Readonly<{ path: string; width: number }>;
   /** Parts of an authored subtraction share an isolated paint layer. */
@@ -41,8 +43,6 @@ export interface SymbolGesture {
 export interface SymbolVariantSemantics {
   readonly parts: readonly SymbolPart[];
   readonly effects: Readonly<Record<string, SymbolGesture>>;
-  /** Compiled motion anatomy may split a compound path without changing the static master. */
-  readonly paths?: readonly OpticalPath[];
 }
 export interface SymbolSemantics {
   readonly variants: Readonly<Record<IconVariant, SymbolVariantSemantics>>;
