@@ -26,10 +26,12 @@ it.each([{ size: 0 }, { size: NaN }, { size: Infinity }, { weight: 601 }, { opsz
   'rejects invalid requests without silently rendering the source: %o', options => {
     expect(() => renderIcon(symbol, options)).toThrow(RangeError);
   });
-it('uses only explicitly declared semantic states and rejects unknown styles', () => {
+it('supports selection, preserves custom states and rejects unknown states and styles', () => {
   const selected: IconSymbol = { ...symbol, id: 'selected', outline: '<svg>selected outline</svg>' };
   expect(renderIcon({ ...symbol, states: { selected } }, { state: 'selected' })).toBe(selected.outline);
-  expect(() => renderIcon(symbol, { state: 'selected' })).toThrow('does not define state');
+  expect(renderIcon(symbol, { state: 'selected' })).toBe(symbol.filled);
+  expect(renderIcon(symbol, { state: 'unselected' })).toBe(symbol.outline);
+  expect(() => renderIcon(symbol, { state: 'unknown' })).toThrow('does not define state');
   expect(() => renderIcon(symbol, { variant: 'bold' } as unknown as RenderIconOptions)).toThrow('variant');
   for (const field of ['variant', 'size', 'weight', 'opsz']) {
     expect(() => renderIcon(symbol, { [field]: null } as unknown as RenderIconOptions)).toThrow(RangeError);

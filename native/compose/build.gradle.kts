@@ -49,11 +49,15 @@ kotlin {
                 api("org.jetbrains.compose.foundation:foundation:1.12.2")
                 api("org.jetbrains.compose.ui:ui:1.12.2")
                 api("org.jetbrains.compose.runtime:runtime:1.12.2")
+                api("pics.lab:motion-compose:0.1.0")
             }
         }
         commonTest {
             kotlin.srcDir(files(generatedTests).builtBy(generateSymbols))
-            dependencies { implementation(kotlin("test")) }
+            dependencies {
+                implementation(kotlin("test"))
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
+            }
         }
     }
 }

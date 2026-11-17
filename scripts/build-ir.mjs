@@ -29,6 +29,8 @@ import { authorMotionTargets } from './lib/author-motion-targets.js';
 import { projectAuthorCapsuleMotion, renderAuthorCapsuleMotionModule, authorCapsuleMotionModuleDeclaration } from './lib/author-capsule-motion.js';
 import { compileAuthorClockMotionSymbols, renderAuthorClockMotionModule, authorClockMotionModuleDeclaration } from './lib/author-clock-motion.js';
 import { compileOpticalCorpus } from './lib/optical-corpus.js';
+import { loadSymbolSource } from './lib/symbol-source.js';
+import { compileSymbolMotion, compileSymbolFamilies, renderSymbolFamilyModule, symbolFamilyDeclaration } from './lib/symbol-motion.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const TARGETS = ['ir', 'symbols', 'variations', 'content-variations', 'motion', 'lottie', 'authoring', 'states', 'state-variations', 'gestures', 'render'];
@@ -96,7 +98,7 @@ function retainStaticArtifacts(output, staging) {
 
 export async function bundle(root, staging, entry, target, external = []) {
   const minification = MINIFIED_ENTRIES.has(entry)
-    ? { minify: true, keepNames: entry === 'src/motion/index.ts' } : { minify: false, minifyWhitespace: true };
+    ? { minify: true } : { minify: false, minifyWhitespace: true };
   const compiled = await build({
     absWorkingDir: root,
     entryPoints: [join(root, entry)], outfile: join(staging, target),
@@ -167,6 +169,7 @@ async function compileIrTargets({ root, staging, preview = false }) {
     execFileSync(process.execPath, [join(root, 'node_modules/typescript/bin/tsc'), '-p', join(root, 'tsconfig.build.json'), '--outDir', declarations], { cwd: root, stdio: 'inherit' });
     for (const file of REQUIRED_DECLARATIONS) copyFileSync(join(declarations, 'ir', file), join(staging, 'ir', file));
     for (const file of ['index.d.ts', 'optical-grid.d.ts']) copyFileSync(join(declarations, 'render', file), join(staging, 'render', file));
+    copyFileSync(join(declarations, 'motion/symbol-state.d.ts'), join(staging, 'motion/symbol-state.d.ts'));
     if (clockMotionNames.length) copyFileSync(join(declarations, 'ir/author-clock-motion-types.d.ts'), join(staging, 'ir/author-clock-motion-types.d.ts'));
     // Source state-types публикуется под прежним IR specifier того же владельца.
     writeFileSync(join(staging, 'motion/index.d.ts'), readFileSync(join(declarations, 'motion/index.d.ts'), 'utf8')
@@ -220,13 +223,18 @@ async function compileIrTargets({ root, staging, preview = false }) {
       catalog: sourceCatalog, anatomy: { version: 1, glyphs: {} }, grid, staticIcons,
     });
     const compiledModules = [];
+    const sourceDocument = loadSymbolSource(root);
+    const payloads = Object.fromEntries(names.map(icon => [icon, compiledAuthorSymbolPayload(icon, authorSources[icon], compiler)]));
+    const semantics = Object.fromEntries(names.map(icon => [icon,
+      compileSymbolMotion(icon, optics.symbols[icon].data, payloads[icon].capabilities, sourceDocument.symbols[icon])]));
+    const families = compileSymbolFamilies(semantics, sourceDocument, optics);
     for (const icon of names) {
-      const payload = compiledAuthorSymbolPayload(icon, authorSources[icon], compiler);
+      const payload = payloads[icon];
       const { variation, targets } = payload;
       if (variationNames.has(icon) !== !!variation) throw new Error(`build-ir: ${icon}: compiled variation не совпадает с author spec`);
       if (contentVariationNames.includes(icon) !== !!payload.contentVariation) throw new Error(`build-ir: ${icon}: compiled content variation не совпадает с author spec`);
       if (!optics.symbols[icon]) throw new Error(`build-ir: optical masters are missing for ${icon}`);
-      const modules = renderSymbolModules({ ...payload, opticalData: optics.symbols[icon].data });
+      const modules = renderSymbolModules({ ...payload, opticalData: optics.symbols[icon].data, semantics: semantics[icon] });
       if (capsuleMotionNames.includes(icon)) {
         const motion = projectAuthorCapsuleMotion(payload);
         writeFileSync(join(staging, 'gestures', `${icon}.js`), renderAuthorCapsuleMotionModule(motion));
@@ -265,6 +273,11 @@ async function compileIrTargets({ root, staging, preview = false }) {
     for (const [name, payload] of Object.entries(stateGroups)) {
       writeFileSync(join(staging, 'states', `${name}.js`), renderStateGroupModule(payload));
       writeFileSync(join(staging, 'states', `${name}.d.ts`), stateGroupDeclaration(stateSpec, name));
+    }
+    for (const [name, family] of Object.entries(families)) {
+      const legacy = stateGroups[name];
+      writeFileSync(join(staging, 'states', `${name}.js`), (legacy ? renderStateGroupModule(legacy) : '') + renderSymbolFamilyModule(family));
+      writeFileSync(join(staging, 'states', `${name}.d.ts`), (legacy ? stateGroupDeclaration(stateSpec, name) : '') + symbolFamilyDeclaration());
     }
     const stateVariations = compileAuthorStateVariations(stateGroups, author, stateSpec, authorSpec, annotations, grid);
     if (JSON.stringify(Object.keys(stateVariations).sort()) !== JSON.stringify(stateVariationNames)) {

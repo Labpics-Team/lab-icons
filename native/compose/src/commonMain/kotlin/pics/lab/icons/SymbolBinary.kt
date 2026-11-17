@@ -6,10 +6,16 @@ import kotlin.io.encoding.ExperimentalEncodingApi
 /** Compiler entry point for generated Kotlin exports; normal callers import a symbol family. */
 @OptIn(ExperimentalEncodingApi::class)
 public fun decodeSymbolData(id: String, chunks: Array<String>): SymbolData {
-    val reader = SymbolReader(Base64.Default.decode(chunks.joinToString("")))
-    require(reader.byte() == 76 && reader.byte() == 73 && reader.byte() == 67 && reader.byte() == 78 && reader.byte() == 1) {
+    return decodeSymbolBytes(id, Base64.Default.decode(chunks.joinToString("")))
+}
+
+private fun decodeSymbolBytes(id: String, bytes: ByteArray, depth: Int = 0): SymbolData {
+    require(depth <= 1) { "Nested symbol state groups are not supported" }
+    val reader = SymbolReader(bytes)
+    require(reader.byte() == 76 && reader.byte() == 73 && reader.byte() == 67 && reader.byte() == 78) {
         "Unsupported compiled symbol format"
     }
+    val version = reader.byte(); require(version in 1..2)
     fun axis() = IconAxis(reader.float(), reader.float(), reader.float())
     val axes = IconAxes(axis(), axis())
     val variants = Array(2) {
@@ -52,12 +58,58 @@ public fun decodeSymbolData(id: String, chunks: Array<String>): SymbolData {
             val contours = IntArray(reader.count()) { reader.count() }
             val contourCount = paths[pathIndex].commands.count { it == 0.toByte() }
             require(contours.all { it < contourCount } && contours.toSet().size == contours.size)
-            SymbolPartData(partId, pathIndex, contours)
+            if (version == 1) SymbolPartData(partId, pathIndex, contours) else {
+                val key = reader.text(); val x = reader.float(); val y = reader.float()
+                val draw = when (reader.byte()) {
+                    0 -> null
+                    1 -> {
+                        val commands = reader.bytes(reader.count())
+                        val coordinates = FloatArray(reader.count()) { reader.float() }
+                        require(commands.isNotEmpty() && commands[0] == 0.toByte())
+                        require(commands.sumOf { when (it.toInt()) { 0, 1 -> 2; 2 -> 6; else -> error("Invalid draw guide opcode") } } == coordinates.size)
+                        val width = reader.float(); require(width > 0)
+                        SymbolDrawData(commands, coordinates, width)
+                    }
+                    else -> error("Invalid draw guide flag")
+                }
+                SymbolPartData(partId, pathIndex, contours, key, x, y, draw)
+            }
         }
-        SymbolVariantData(paths, parts)
+        val effects = if (version == 1) emptyMap() else buildMap {
+            repeat(reader.count()) {
+                val name = reader.text(); require(name.isNotBlank() && !containsKey(name))
+                val durationValue = reader.float(); require(durationValue >= 0 && durationValue < Int.MAX_VALUE && durationValue % 1f == 0f)
+                val duration = durationValue.toInt(); val rest = reader.float(); require(rest in 0f..1f)
+                val tracks = Array(reader.count()) {
+                    val part = reader.count(); require(part < parts.size)
+                    val property = reader.byte(); require(property in 0..4)
+                    val count = reader.count(); require(count >= 2)
+                    val times = FloatArray(count); val values = FloatArray(count)
+                    for (index in 0 until count) {
+                        times[index] = reader.float(); values[index] = reader.float()
+                        require(times[index] in 0f..1f && (index == 0 || times[index] > times[index - 1]))
+                    }
+                    require(times.first() == 0f && times.last() == 1f)
+                    SymbolTrackData(part, property, times, values)
+                }
+                put(name, SymbolEffectData(duration, rest, tracks))
+            }
+        }
+        SymbolVariantData(paths, parts, effects)
+    }
+    val states = if (version == 1) emptyMap() else buildMap {
+        repeat(reader.count()) {
+            val name = reader.text(); val target = reader.text(); require(name.isNotBlank() && !containsKey(name))
+            val state = when (reader.byte()) {
+                0 -> { require(target == id); null }
+                1 -> decodeSymbolBytes(target, reader.bytes(reader.count()), depth + 1)
+                else -> error("Invalid symbol state flag")
+            }
+            put(name, state)
+        }
     }
     require(reader.finished) { "Trailing compiled symbol data" }
-    return SymbolData(id, axes, variants)
+    return SymbolData(id, axes, variants, states)
 }
 
 private class SymbolReader(private val source: ByteArray) {
@@ -67,6 +119,7 @@ private class SymbolReader(private val source: ByteArray) {
     private fun bits(): Int = byte() or (byte() shl 8) or (byte() shl 16) or (byte() shl 24)
     fun count(): Int = bits().also { require(it >= 0 && it <= source.size) { "Invalid compiled symbol count" } }
     fun float(): Float = Float.fromBits(bits()).also { require(it.isFinite()) { "Nonfinite symbol coordinate" } }
+    fun text(): String = bytes(count()).decodeToString(throwOnInvalidSequence = true)
     fun bytes(count: Int): ByteArray {
         require(count <= source.size - offset) { "Truncated compiled symbol" }
         return source.copyOfRange(offset, offset + count).also { offset += count }

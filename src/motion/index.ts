@@ -5,6 +5,7 @@ import { prepareContourStateEffect as prepareContourPacket } from '../ir/contour
 import { parseEffectRequest, projectRotationEffect } from './effect-projection.js';
 
 export { createSymbolMotion } from './execution.js';
+export type { MountedIcon, IconEffectOptions, IconTransitionOptions } from './symbol-state.js';
 export type { SymbolMotionRuntime, SymbolMotionExecutor, SymbolPlayback, SymbolExecutionOptions, SymbolScalarRequest } from './execution.js';
 
 export type { SymbolContourStateEffect, PreparedContourStateEffect, ContourStatePoseResult } from '../states/contour-types.js';

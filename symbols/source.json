@@ -9227,7 +9227,21 @@
           "sha256": "358debea809aa8606c15f9d32709ed1570e4b1c723f56e20ccaf57b14d080b86"
         }
       },
-      "opticalMaster": "symbols/optics/checkmark.json"
+      "opticalMaster": "symbols/optics/checkmark.json",
+      "draw": {
+        "outline": {
+          "confirmation-mark": {
+            "path": "M7.1 12.65L10.8 16.25L16.7 7.25",
+            "width": 4.5
+          }
+        },
+        "filled": {
+          "confirmation-mark": {
+            "path": "M7.1 12.65L10.8 16.25L16.7 7.25",
+            "width": 4.5
+          }
+        }
+      }
     },
     "checkmark-circle": {
       "id": "checkmark-circle",
@@ -9396,7 +9410,15 @@
           "sha256": "dde0b596ecb6a3a1c1be3289035f6031edb2d760a940b031a2def39cd994920d"
         }
       },
-      "opticalMaster": "symbols/optics/checkmark-circle.json"
+      "opticalMaster": "symbols/optics/checkmark-circle.json",
+      "draw": {
+        "outline": {
+          "confirmation-mark": {
+            "path": "M8.5 13L10.45 15.4L14.6 9",
+            "width": 4.5
+          }
+        }
+      }
     },
     "checkmarks": {
       "id": "checkmarks",
@@ -22725,32 +22747,32 @@
             }
           },
           "anatomy": {
-            "classification": "unclassified",
+            "classification": "semantic",
             "parts": [
               {
                 "pathIndex": 0,
-                "id": "path-1",
-                "role": "unclassified"
+                "id": "muted-slash",
+                "role": "slash"
               },
               {
                 "pathIndex": 1,
-                "id": "path-2",
-                "role": "unclassified"
+                "id": "muted-support-right",
+                "role": "content"
               },
               {
                 "pathIndex": 2,
-                "id": "path-3",
-                "role": "unclassified"
+                "id": "muted-body-right",
+                "role": "content"
               },
               {
                 "pathIndex": 3,
-                "id": "path-4",
-                "role": "unclassified"
+                "id": "muted-support-left",
+                "role": "content"
               },
               {
                 "pathIndex": 4,
-                "id": "path-5",
-                "role": "unclassified"
+                "id": "muted-body-left",
+                "role": "content"
               }
             ]
           }
@@ -22771,32 +22793,32 @@
             }
           },
           "anatomy": {
-            "classification": "unclassified",
+            "classification": "semantic",
             "parts": [
               {
                 "pathIndex": 0,
-                "id": "path-1",
-                "role": "unclassified"
+                "id": "muted-slash",
+                "role": "slash"
               },
               {
                 "pathIndex": 1,
-                "id": "path-2",
-                "role": "unclassified"
+                "id": "muted-support-right",
+                "role": "content"
               },
               {
                 "pathIndex": 2,
-                "id": "path-3",
-                "role": "unclassified"
+                "id": "muted-body-right",
+                "role": "content"
               },
               {
                 "pathIndex": 3,
-                "id": "path-4",
-                "role": "unclassified"
+                "id": "muted-support-left",
+                "role": "content"
               },
               {
                 "pathIndex": 4,
-                "id": "path-5",
-                "role": "unclassified"
+                "id": "muted-body-left",
+                "role": "content"
               }
             ]
           }
@@ -23391,7 +23413,21 @@
           "sha256": "c9d1b5b684133bd36b980c56b603d53802174ff2b25d297fb31128b778552df3"
         }
       },
-      "opticalMaster": "symbols/optics/mic-off.json"
+      "opticalMaster": "symbols/optics/mic-off.json",
+      "draw": {
+        "outline": {
+          "muted-slash": {
+            "path": "M21.6 2.4L2.4 21.6",
+            "width": 4
+          }
+        },
+        "filled": {
+          "muted-slash": {
+            "path": "M21.6 2.4L2.4 21.6",
+            "width": 4
+          }
+        }
+      }
     },
     "minus": {
       "id": "minus",
@@ -39616,6 +39652,84 @@
           }
         }
       }
+    }
+  },
+  "stateFamilies": {
+    "direction": {
+      "left": "arrow-back",
+      "right": "arrow-forward",
+      "up": "arrow-up",
+      "down": "arrow-down"
+    },
+    "chevron": {
+      "left": "chevron-back",
+      "right": "chevron-forward",
+      "up": "chevron-up",
+      "down": "chevron-down"
+    },
+    "notification": {
+      "normal": "notifications",
+      "unread": "notifications-unread",
+      "off": "notifications-off"
+    },
+    "volume": {
+      "high": "volume-high",
+      "middle": "volume-middle",
+      "low": "volume-low",
+      "quiet": "volume",
+      "mute": "volume-mute",
+      "off": "volume-muted"
+    },
+    "microphone": {
+      "on": "mic",
+      "off": "mic-off"
+    },
+    "visibility": {
+      "on": "eye",
+      "off": "eye-off"
+    },
+    "cloud": {
+      "on": "cloud",
+      "off": "cloud-off"
+    },
+    "flash": {
+      "on": "flash",
+      "off": "flash-off"
+    },
+    "heart": {
+      "on": "heart",
+      "off": "heart-off"
+    },
+    "link": {
+      "on": "link-horizontal",
+      "off": "link-horizontal-off"
+    },
+    "pin": {
+      "on": "pin-vertical",
+      "off": "pin-vertical-off"
+    },
+    "camera": {
+      "on": "video-camera",
+      "off": "video-camera-off"
+    },
+    "calendar": {
+      "date": "calendar-number",
+      "today": "calendar-today",
+      "clear": "calendar-clear",
+      "grid": "calendar"
+    },
+    "status": {
+      "confirmed": "checkmark-circle",
+      "dismissed": "close-circle",
+      "question": "question-circle",
+      "attention": "alert-circle",
+      "increase": "plus-circle",
+      "decrease": "minus-circle"
+    },
+    "playback": {
+      "play": "play-circle",
+      "pause": "pause-circle",
+      "stop": "stop-circle"
     }
   }
 }

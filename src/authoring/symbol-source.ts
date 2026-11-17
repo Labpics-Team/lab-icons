@@ -2,6 +2,7 @@
 export interface SymbolSource {
   readonly id: string;
   readonly variants: Readonly<Record<'outline' | 'filled', SymbolVariantSource>>;
+  readonly draw?: Partial<Readonly<Record<'outline' | 'filled', Readonly<Record<string, Readonly<{ path: string; width: number }>>>>>>;
 }
 export interface SymbolVariantSource {
   readonly provenance: {

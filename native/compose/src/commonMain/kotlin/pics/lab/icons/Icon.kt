@@ -32,10 +32,15 @@ public fun Icon(
     weight: Float = symbol.axes.weight.default,
     opsz: Float? = null,
     contentDescription: String? = null,
+    motion: IconMotion? = null,
 ) {
     require(size.value.isFinite() && size.value > 0) { "Icon size must be positive and finite" }
     symbol.axes.weight.position(weight)
     opsz?.let { symbol.axes.opsz.position(it) }
+    if (motion != null) {
+        MotionIcon(motion, tint, modifier, size, weight, opsz, contentDescription)
+        return
+    }
     val prepared = remember(symbol, variant) { PreparedSymbol(symbol, variant) }
     val currentTint by rememberUpdatedState(tint)
     val accessibility = if (contentDescription == null) Modifier else Modifier.semantics {

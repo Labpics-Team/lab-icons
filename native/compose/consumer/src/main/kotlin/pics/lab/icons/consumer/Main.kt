@@ -19,6 +19,15 @@ import androidx.compose.ui.window.rememberWindowState
 import kotlinx.coroutines.delay
 import pics.lab.icons.Icon
 import pics.lab.icons.IconVariant
+import pics.lab.icons.rememberIconMotion
+import pics.lab.icons.symbols.reload
+import pics.lab.icons.symbols.checkmark
+import pics.lab.icons.symbols.checkmarkCircle
+import pics.lab.icons.symbols.volumeHigh
+import pics.lab.icons.symbols.mic
+import pics.lab.icons.states.microphoneStates
+import pics.lab.icons.states.statusStates
+import pics.lab.motion.MotionResult
 import pics.lab.icons.symbols.cog
 import pics.lab.icons.symbols.earth
 import pics.lab.icons.symbols.layers
@@ -42,7 +51,7 @@ fun main(args: Array<String>) {
         exitProcess(1)
     }
     application {
-        Window(onCloseRequest = ::exitApplication, title = "Lab Icons · Native", state = rememberWindowState(width = 1140.dp, height = 800.dp)) {
+        Window(onCloseRequest = ::exitApplication, title = "Lab Icons · Native", state = rememberWindowState(width = 1140.dp, height = 940.dp)) {
             var dark by remember { mutableStateOf(false) }
             var selected by remember { mutableStateOf(false) }
             var size by remember { mutableFloatStateOf(24f) }
@@ -51,6 +60,11 @@ fun main(args: Array<String>) {
             val muted = if (dark) Color(0xffa2a2ab) else Color(0xff70707a)
             val background = if (dark) Color(0xff17171b) else Color(0xfffafafb)
             val surface = if (dark) Color(0xff292930) else Color(0xffededf1)
+            val reloader = rememberIconMotion(reload)
+            val confirmation = rememberIconMotion(statusStates)
+            val drawn = rememberIconMotion(checkmark)
+            val volume = rememberIconMotion(volumeHigh)
+            val microphone = rememberIconMotion(microphoneStates)
             Column(Modifier.fillMaxSize().background(background).padding(32.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
                 BasicText("Lab Icons", style = TextStyle(ink, 28.sp, FontWeight.SemiBold))
                 BasicText("Один рисунок · вес и оптика · Outline и Filled", style = TextStyle(muted, 15.sp))
@@ -90,6 +104,14 @@ fun main(args: Array<String>) {
                     BasicText("Сменить тему", Modifier.clickable { dark = !dark }.padding(12.dp), TextStyle(ink, 15.sp))
                     BasicText("Размер и вес обновляют подготовленные контуры", style = TextStyle(muted, 13.sp))
                 }
+                Row(horizontalArrangement = Arrangement.spacedBy(42.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Icon(reload, ink, Modifier.clickable { reloader.effect("cycle") }, size = 48.dp, motion = reloader)
+                    Icon(statusStates, ink, Modifier.clickable { confirmation.setState("increase") }, size = 48.dp, motion = confirmation)
+                    Icon(checkmark, ink, Modifier.clickable { drawn.effect("draw") }, size = 48.dp, motion = drawn)
+                    Icon(volumeHigh, ink, Modifier.clickable { volume.effect("level", to = .5f) }, size = 48.dp, motion = volume)
+                    Icon(microphoneStates, ink, Modifier.clickable { microphone.setState("off") }, size = 48.dp, motion = microphone)
+                    BasicText("Состояния · общие части · Motion · draw", style = TextStyle(muted, 13.sp))
+                }
             }
             if (smoke) LaunchedEffect(Unit) {
                 window.isAlwaysOnTop = true
@@ -101,11 +123,25 @@ fun main(args: Array<String>) {
                 delay(120)
                 selected = true; size = 24f; weight = 400f
                 delay(180)
+                val first = reloader.effect("cycle", durationMillis = 1000)
+                first.pause(); first.seek(420f)
+                val reverse = reloader.effect("cycle", to = 0f, durationMillis = 400)
+                check(first.finished.await() == MotionResult.Stopped)
+                reverse.finish(); check(reverse.finished.await() == MotionResult.Finished)
+                val change = confirmation.setState("increase", 1000); change.pause(); change.seek(350f)
+                val restore = confirmation.setState("confirmed", 500); restore.finish()
+                val draw = drawn.effect("draw", durationMillis = 1000); draw.pause(); draw.seek(500f)
+                volume.reducedMotion = true; volume.effect("level", to = .5f)
+                microphone.reducedMotion = true; microphone.setState("off")
+                delay(180)
                 val content = window.contentPane
                 val at = content.locationOnScreen
                 val file = File("build/native-icons-consumer.png").apply { parentFile.mkdirs() }
                 ImageIO.write(Robot().createScreenCapture(Rectangle(at.x, at.y, content.width, content.height)), "png", file)
-                println("Installed native Icons artifact: rendered both variants and axes, resized and returned to the source support. Screenshot: ${file.absolutePath}")
+                draw.stop()
+                val removed = reloader.effect("cycle"); reloader.dispose()
+                check(removed.finished.await() == MotionResult.Stopped)
+                println("Installed native Icons + public Motion artifacts: rendered optical axes, reversed interrupted controls, retained shared state parts, drew guide mask, applied reduced motion and disposed active work. Screenshot: ${file.absolutePath}")
                 exitApplication()
             }
         }

@@ -1,3 +1,5 @@
+import { mountSymbol } from './symbol-state.js';
+
 /** Bind the public Lab Motion runtime once; Icons owns no animation clock. */
 export function createSymbolMotion({ animate, sequence, value }) {
 /** Последний записанный scalar — начало successor; clock принадлежит Lab Motion. */
@@ -212,5 +214,6 @@ function executeSymbolEffect(root, effect, { initialize = false, preparedContour
   }
   return controls;
 }
-return Object.freeze({ executeSymbolEffect, executePreparedWidth, executePreparedClock });
+return Object.freeze({ executeSymbolEffect, executePreparedWidth, executePreparedClock,
+  mount: (root, symbol, options) => mountSymbol({ animate, sequence, value }, root, symbol, options) });
 }

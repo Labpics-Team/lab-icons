@@ -4,6 +4,7 @@ import { join, resolve } from 'node:path';
 import { compileOpticalCorpus } from './lib/optical-corpus.js';
 import { loadSymbolSource } from './lib/symbol-source.js';
 import { nativeSymbolSource, nativeSymbolTests } from './lib/native-symbol.js';
+import { compileSemanticCorpus } from './lib/symbol-motion.js';
 import { build } from 'esbuild';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
@@ -17,9 +18,16 @@ for (let index = 0; index < args.length; index++) {
 const { preview } = options;
 const output = options.output ? resolve(options.output) : join(root, 'native/compose/build/generated/symbols');
 const corpus = compileOpticalCorpus(root, { preview }), document = loadSymbolSource(root);
+const { semantics, families } = compileSemanticCorpus(root, corpus);
+for (const symbol of Object.values(corpus.symbols)) symbol.semantics = semantics[symbol.id];
 if (options.symbol && !Object.hasOwn(corpus.symbols, options.symbol)) throw new RangeError(`Unknown symbol: ${options.symbol}`);
 const selected = options.symbol ? [corpus.symbols[options.symbol]] : Object.values(corpus.symbols);
 const files = selected.map(symbol => ({ id: symbol.id, ...nativeSymbolSource(symbol, document.symbols[symbol.id], { packageName: options.package }) }));
+if (!options.symbol) for (const [id, family] of Object.entries(families)) {
+  const { file, ...result } = nativeSymbolSource(family, document.symbols[family.id],
+    { packageName: 'pics.lab.icons.states', exportId: `${id}-states` });
+  files.push({ id: `${id}-states`, file, ...result });
+}
 mkdirSync(output, { recursive: true });
 for (const file of files) writeFileSync(join(output, file.file), file.source);
 writeFileSync(join(output, 'symbols.json'), JSON.stringify({ version: 1, reviewed: !preview, axes: corpus.axes,

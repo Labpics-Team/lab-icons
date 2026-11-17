@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { parsePathData } from '../../src/core/path-data.js';
 
 const opcodes = { M: 0, L: 1, C: 2, Z: 3 };
 const typeName = id => id.replace(/(^|-)([a-z])/g, (_, __, letter) => letter.toUpperCase());
@@ -6,7 +7,7 @@ const propertyName = id => { const name = typeName(id); return name[0].toLowerCa
 
 /** Numeric transport decoded once into Kotlin arrays; no SVG parser is shipped. */
 export function encodeNativeSymbol(symbol, anatomy) {
-  const chunks = [Buffer.from([76, 73, 67, 78, 1])];
+  const chunks = [Buffer.from([76, 73, 67, 78, 2])];
   const byte = value => chunks.push(Buffer.from([value]));
   const count = value => {
     if (!Number.isInteger(value) || value < 0 || value > 0x7fffffff) throw new RangeError('native symbol count is out of range');
@@ -35,22 +36,49 @@ export function encodeNativeSymbol(symbol, anatomy) {
         for (let index = 0; index < delta.length; index += 2) { count(delta[index]); scalar(delta[index + 1]); }
       }
     }
-    const parts = anatomy.variants[variant].anatomy.parts;
+    const semantic = symbol.semantics?.variants[variant];
+    const parts = semantic?.parts ?? anatomy.variants[variant].anatomy.parts;
     count(parts.length);
     for (const part of parts) {
       text(part.id); count(part.pathIndex);
       const contours = part.contourIndices ?? [];
       count(contours.length); contours.forEach(count);
+      text(part.key ?? `${symbol.id}/${variant}/${part.pathIndex}`);
+      (part.anchor ?? [12, 12]).forEach(scalar);
+      byte(part.draw ? 1 : 0);
+      if (part.draw) {
+        const segments = parsePathData(part.draw.path);
+        count(segments.length); segments.forEach(segment => byte(opcodes[segment.cmd]));
+        const fields = { M: ['x','y'], L: ['x','y'], C: ['x1','y1','x2','y2','x','y'], Z: [] };
+        const coordinates = segments.flatMap(segment => fields[segment.cmd].map(key => segment[key]));
+        count(coordinates.length); coordinates.forEach(scalar); scalar(part.draw.width);
+      }
     }
+    const effects = Object.entries(semantic?.effects ?? {}); count(effects.length);
+    for (const [name, effect] of effects) {
+      text(name); scalar(effect.duration); scalar(effect.rest); count(effect.tracks.length);
+      for (const track of effect.tracks) {
+        const partIndex = parts.findIndex(part => part.id === track.partId);
+        if (partIndex < 0) throw new TypeError(`Native effect references missing part: ${track.partId}`);
+        count(partIndex); byte(['opacity','x','y','rotate','draw'].indexOf(track.property)); count(track.stops.length);
+        track.stops.forEach(stop => stop.forEach(scalar));
+      }
+    }
+  }
+  const states = Object.entries(symbol.semantics?.states ?? {}); count(states.length);
+  for (const [name, state] of states) {
+    text(name); text(state.id); byte(state.data ? 1 : 0);
+    if (state.data) { const bytes = encodeNativeSymbol(state); count(bytes.length); chunks.push(bytes); }
   }
   return Buffer.concat(chunks);
 }
 
-export function nativeSymbolSource(symbol, anatomy, { packageName = 'pics.lab.icons.symbols' } = {}) {
+export function nativeSymbolSource(symbol, anatomy, { packageName = 'pics.lab.icons.symbols', exportId = symbol.id } = {}) {
   if (!/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(symbol.id)) throw new TypeError('native symbol requires a safe family identifier');
   if (!/^[a-z][a-z0-9_]*(?:\.[a-z][a-z0-9_]*)*$/.test(packageName)) throw new TypeError('native export requires a Kotlin package name');
-  const bytes = encodeNativeSymbol(symbol, anatomy), name = typeName(symbol.id);
-  const property = propertyName(symbol.id), base64 = bytes.toString('base64');
+  if (!/^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(exportId)) throw new TypeError('native export requires a safe export identifier');
+  const bytes = encodeNativeSymbol(symbol, anatomy), name = typeName(exportId);
+  const property = propertyName(exportId), base64 = bytes.toString('base64');
   // Keep JVM UTF-8 constants and initializer methods well below their 64 KiB
   // limits, including complex paths such as cog and earth.
   const chunks = base64.match(/.{1,16384}/g);

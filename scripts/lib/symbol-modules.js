@@ -89,7 +89,7 @@ export function symbolReleaseProjection(base, iconIds, stateGroupIds = [], varia
       ? (key === './states/*' ? groups : key === './state-variations/*' ? stateVariations : key === './content-variations/*' ? contentVariations : key === './gestures/*' ? motions : key === './variations/*' ? [...variationIconIds].sort() : ids).flatMap(id => Object.values(conditions).map(target => target.replace('*', id).slice(2)))
       : Object.values(conditions).map(target => target.slice(2)));
   const typeDependencies = ['dist/authoring/symbol-source.d.ts', 'dist/authoring/design-spec.d.ts', 'dist/ir/author-annulus-types.d.ts', 'dist/ir/author-content-types.d.ts', 'dist/ir/author-capsule-types.d.ts', 'dist/ir/author-catalog.generated.d.ts', 'dist/ir/author-provenance.d.ts', 'dist/ir/author-source.d.ts', 'dist/ir/authored-variation.d.ts', 'dist/ir/catalog.generated.d.ts', 'dist/ir/compiler.d.ts', 'dist/ir/glyph-types.d.ts', 'dist/ir/paint-types.d.ts', 'dist/ir/request.d.ts', 'dist/ir/lottie-types.d.ts', 'dist/ir/state-types.d.ts', 'dist/ir/state-common-types.d.ts', 'dist/ir/contour-state-types.d.ts'].sort();
-  typeDependencies.push('dist/render/optical-grid.d.ts', 'dist/motion/execution.d.ts'); typeDependencies.sort();
+  typeDependencies.push('dist/render/optical-grid.d.ts', 'dist/motion/execution.d.ts', 'dist/motion/symbol-state.d.ts'); typeDependencies.sort();
   const runtimeDependencies = ['dist/legacy-static.js', 'dist/ir/author-request-runtime.js', 'dist/ir/compiler.js', 'dist/ir/contour-runtime.js', 'dist/ir/request.js', 'dist/ir/symbol-runtime.js', 'dist/ir/lottie-runtime.js'].sort();
   if (motions.some(id => !capsuleMotions.includes(id) && !clockMotions.includes(id))) {
     typeDependencies.push('dist/ir/gesture-types.d.ts'); typeDependencies.sort();
@@ -234,7 +234,7 @@ export function renderSymbolModule(input) {
     "import { createCompiledGlyph, createCompiledCapabilities } from '../ir/symbol-runtime.js';",
     ...(packet ? ["import { materializeSourceV1, materializeTranslationCycleV1 } from '../ir/source-packet-runtime.js';"] : []),
     ...records.paths, ...records.static, ...records.shared,
-    `export const symbol = /* @__PURE__ */ Object.freeze({ id: ${jsonDataLiteral(input.icon)}, outline, filled${input.opticalData ? `, data: ${compactDataLiteral(input.opticalData)}` : ''} });`,
+    `export const symbol = /* @__PURE__ */ Object.freeze({ id: ${jsonDataLiteral(input.icon)}, outline, filled${input.opticalData ? `, data: ${compactDataLiteral(input.opticalData)}` : ''}${input.semantics ? `, semantics: ${compactDataLiteral(input.semantics)}` : ''} });`,
     'export default symbol;',
     `const outlineSource = ${records.sources.outline};`,
     `const filledSource = ${records.sources.filled};`,
@@ -268,7 +268,7 @@ export function renderSymbolModules(input) {
   const { icon, source, staticSvg, variation } = input;
   const capabilities = sourceCapabilities(input.capabilities);
   if (input.contentVariation && !variation) throw new TypeError('content variation: отсутствует авторский annulus variation допуск');
-  if (!variation) return { symbol: renderSymbolModule({ icon, source, staticSvg, capabilities, opticalData: input.opticalData }) };
+  if (!variation) return { symbol: renderSymbolModule({ icon, source, staticSvg, capabilities, opticalData: input.opticalData, semantics: input.semantics }) };
   const law = variation.outline?.law;
   const target = variationRuntimeTargets([law])[0];
   if (!SYMBOL_NAME.test(icon) || Object.keys(variation).some(variant => !['outline', 'filled'].includes(variant)) ||
@@ -301,7 +301,7 @@ export function renderSymbolModules(input) {
   const baseStatic = input.opticalData
     ? ['outline', 'filled'].map(variant => `export const ${variant} = ${jsonDataLiteral(staticSvg[variant])};`) : [exports];
   const base = [baseImports, "import { createCompiledGlyph, createCompiledCapabilities } from '../ir/symbol-runtime.js';", ...baseStatic,
-    `export const symbol = /* @__PURE__ */ Object.freeze({ id: ${jsonDataLiteral(icon)}, outline, filled${input.opticalData ? `, data: ${compactDataLiteral(input.opticalData)}` : ''} });`,
+    `export const symbol = /* @__PURE__ */ Object.freeze({ id: ${jsonDataLiteral(icon)}, outline, filled${input.opticalData ? `, data: ${compactDataLiteral(input.opticalData)}` : ''}${input.semantics ? `, semantics: ${compactDataLiteral(input.semantics)}` : ''} });`,
     'export default symbol;',
     `export const glyph = /* @__PURE__ */ createCompiledGlyph(${jsonDataLiteral(icon)}, { outline: outlineSource, filled: filledSource });`,
     'export const glyphCapabilities = /* @__PURE__ */ createCompiledCapabilities({ outline: outlineCapabilities, filled: filledCapabilities });', ''].join('\n');

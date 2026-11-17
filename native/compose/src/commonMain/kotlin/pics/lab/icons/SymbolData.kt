@@ -23,10 +23,15 @@ public class SymbolData internal constructor(
     public val id: String,
     public val axes: IconAxes,
     internal val variants: Array<SymbolVariantData>,
+    internal val states: Map<String, SymbolData?> = emptyMap(),
 )
 
-internal class SymbolVariantData(val paths: Array<SymbolPathData>, val parts: Array<SymbolPartData>)
-internal class SymbolPartData(val id: String, val pathIndex: Int, val contourIndices: IntArray)
+internal class SymbolVariantData(val paths: Array<SymbolPathData>, val parts: Array<SymbolPartData>, val effects: Map<String, SymbolEffectData> = emptyMap())
+internal class SymbolPartData(val id: String, val pathIndex: Int, val contourIndices: IntArray,
+    val key: String = id, val anchorX: Float = 12f, val anchorY: Float = 12f, val draw: SymbolDrawData? = null)
+internal class SymbolDrawData(val commands: ByteArray, val coordinates: FloatArray, val width: Float)
+internal class SymbolEffectData(val duration: Int, val rest: Float, val tracks: Array<SymbolTrackData>)
+internal class SymbolTrackData(val partIndex: Int, val property: Int, val times: FloatArray, val values: FloatArray)
 internal class SymbolDelta(val term: Int, val indices: IntArray, val values: FloatArray)
 internal class SymbolPathData(val commands: ByteArray, val coordinates: FloatArray, val evenOdd: Boolean, val terms: Array<SymbolDelta>) {
     fun sample(weightSide: Int, weight: Float, opticalSide: Int, optical: Float, target: FloatArray) {

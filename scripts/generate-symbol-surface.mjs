@@ -14,7 +14,7 @@ const read = path => JSON.parse(readFileSync(join(root, path), 'utf8'));
 const author = read('semantics/figma-baseline.json');
 const names = authorIconNames(author);
 const stateSpec = read('semantics/author-state-groups.json');
-const groups = authorStateGroupNames(stateSpec);
+const groups = [...new Set([...authorStateGroupNames(stateSpec), ...Object.keys(read('symbols/source.json').stateFamilies ?? {})])].sort();
 const authorSpec = read('semantics/author-anatomy.json');
 const variationNames = authorVariationIconNames(authorSpec);
 const payloads = await authoredSymbolPayloads(names);

@@ -5,6 +5,32 @@ M/L/C/Z, координаты, sparse-поправки осей, fill-rule и с
 Каждое семейство подключается отдельно. Числовой пакет декодируется один раз;
 SVG parser, браузер и каталог для отдельного Icon не нужны.
 
+Состояния подключаются отдельно через `pics.lab.icons.states.*States`.
+Поэтому `symbols.volumeHigh` содержит только свой рисунок и жесты, а
+`states.volumeStates` явно добавляет все состояния громкости.
+
+```kotlin
+import pics.lab.icons.rememberIconMotion
+import pics.lab.icons.states.microphoneStates
+
+val motion = rememberIconMotion(microphoneStates)
+Icon(microphoneStates, tint = labelColor, motion = motion)
+// В обработчике кнопки:
+motion.setState("off")
+```
+
+`rememberIconMotion` освобождает controller при удалении из композиции.
+`effect("cycle")`, `effect("ring")`, `effect("level", to = .5f)` и
+`effect("draw")` используют объявленные части текущего символа. Прерывание
+подхватывает видимые значения. `reducedMotion = true` немедленно завершает
+эффект. Draw обрезает штрих направляющей исходной залитой формой; PathMeasure
+создаётся один раз. Кадр не ищет части по строкам и не разбирает SVG.
+
+Часы и controls принадлежат публичному
+`pics.lab:motion-compose:0.1.0` из Maven repository
+`https://raw.githubusercontent.com/Labpics-Team/lab-motion/maven-compose-v0.1.0/`.
+В покое controller не запрашивает кадры; буферы и handles повторно используются.
+
 ```kotlin
 import pics.lab.icons.Icon
 import pics.lab.icons.IconVariant

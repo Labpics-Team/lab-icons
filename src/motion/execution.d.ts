@@ -2,6 +2,8 @@ import type { SymbolEffect, SymbolSequenceEffect, SymbolTranslationEffect } from
 import type { PreparedContourStateEffect, SymbolContourStateEffect } from '../states/contour-types.js';
 import type { SymbolStateEffect } from '../states/types.js';
 import type { SourceSymbolStateEffect } from '../states/source-types.js';
+import type { IconSymbol, RenderIconOptions } from '../render/index.js';
+import type { MountedIcon } from './symbol-state.js';
 
 /** The common controls exposed by the public Lab Motion runtime. */
 export interface SymbolPlayback {
@@ -51,6 +53,7 @@ interface ScalarPreparation<T> {
     Readonly<{ ok: false; reason: Readonly<{ code: string; message: string }> }>;
 }
 export interface SymbolMotionExecutor {
+  mount(root: Element, symbol: IconSymbol, options?: RenderIconOptions): MountedIcon;
   executeSymbolEffect(root: Element,
     effect: SymbolEffect | SymbolSequenceEffect | SymbolTranslationEffect | SymbolStateEffect |
       SourceSymbolStateEffect | SymbolContourStateEffect,

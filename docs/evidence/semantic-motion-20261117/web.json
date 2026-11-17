@@ -1,0 +1,16 @@
+{
+  "ok": true,
+  "values": 8,
+  "live": 0,
+  "groups": [
+    "selection/check",
+    "direction",
+    "loading/reload",
+    "notification",
+    "volume/progress",
+    "slash/off"
+  ],
+  "draw": "authored guide mask",
+  "interruption": "visible pose",
+  "reducedMotion": "synchronous endpoint"
+}
