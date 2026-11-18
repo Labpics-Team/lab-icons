@@ -11,15 +11,12 @@ permissions:
   contents: read
 
 concurrency:
-  # PR ставит проверки в очередь, пока завершается итог предыдущей ревизии.
-  group: ci-${{ github.workflow }}-${{ github.event_name == 'pull_request' && format('pr-run-{0}', github.run_id) || github.ref }}
+  # У каждой попытки PR своя группа, включая повтор старого запуска.
+  group: ci-${{ github.workflow }}-${{ github.event_name == 'pull_request' && format('pr-run-{0}-{1}', github.run_id, github.run_attempt) || github.ref }}
   cancel-in-progress: true
 
 jobs:
   verify:
-    concurrency:
-      group: ci-${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.run_id }}-verify-${{ strategy['job-index'] }}
-      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
     name: Verify ${{ matrix.os }} / Node ${{ matrix.node }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
@@ -111,9 +108,6 @@ jobs:
   # Уязвимости зависимостей, ошибки конфигурации и секреты в дереве кандидата.
   # Исключение — только запись в .trivyignore.yaml; уязвимость с исправлением блокирует всегда.
   security:
-    concurrency:
-      group: ci-${{ github.workflow }}-${{ github.event_name }}-${{ github.event.pull_request.number || github.run_id }}-security
-      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
     name: Безопасность
     runs-on: ubuntu-latest
     timeout-minutes: 15
