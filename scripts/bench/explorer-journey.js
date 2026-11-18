@@ -366,7 +366,8 @@ export async function runExplorerJourney() {
       check(`${name}/${variant}/effect-export`, effectDownload.filename === `${name}-${variant}.effect.json` && exportedEffect.icon === name && exportedEffect.variant === variant && exportedEffect.targets[0].partId === 'cycle-body');
       const beforeLottie = downloads.length;
       q('export-format').value = 'lottie'; q('export').click();
-      await wait(() => downloads.length > beforeLottie || q('export-status').textContent.startsWith('Lottie не подготовлен:'), 'Lottie export');
+      await wait(() => downloads.length > beforeLottie || q('export-status').textContent.startsWith('Lottie'), 'Lottie export');
+      if (downloads.length === beforeLottie) throw new Error(`explorer journey: ${name}/${variant}: ${q('export-status').textContent}`);
       const lottieDownload = downloads.at(-1);
       const animation = JSON.parse(await lottieDownload.blob.text());
       check(`${name}/${variant}/lottie-export`, lottieDownload.filename === `${name}-${variant}.lottie.json` &&

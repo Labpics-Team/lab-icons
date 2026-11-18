@@ -78,6 +78,8 @@ describe('browser-проекция принятых symbol capabilities', () => 
     expect(symbolExplorerVariationIds(contract, ['fixture'])).toEqual([]);
     expect(files).toContain('dist/symbols/fixture.js');
     expect(files).toContain('dist/lottie/fixture.js');
+    expect(files).toContain('dist/export/lottie.js');
+    expect(files).toContain('dist/render/index.js');
     expect(files).not.toContain('dist/ir/state-runtime.js');
     expect(files.filter(file => file.startsWith('dist/states/'))).toEqual([]);
   });

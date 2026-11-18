@@ -115,7 +115,9 @@ export function symbolExplorerBrowserFiles(contract, iconIds, stateGroups, surfa
     .map(id => `dist/state-variations/${id}.js`);
   const gestureFiles = symbolExplorerGestureProjection(contract, iconIds, surface).iconIds
     .map(id => `dist/gestures/${id}.js`);
-  const files = [...new Set([...contract.runtimeDependencies, 'dist/ir/render.js', 'dist/motion/index.js', 'dist/authoring/index.js',
+  const publicRuntimeFiles = ['./render', './motion', './authoring', './lottie'].flatMap(entry =>
+    contract.exports[entry]?.import ? [contract.exports[entry].import.slice(2)] : []);
+  const files = [...new Set([...contract.runtimeDependencies, 'dist/ir/render.js', ...publicRuntimeFiles,
     ...iconIds.flatMap(name => [`dist/symbols/${name}.js`, `dist/lottie/${name}.js`]),
     ...stateFiles, ...variationFiles, ...stateVariationFiles, ...gestureFiles])];
   for (const file of files) {
