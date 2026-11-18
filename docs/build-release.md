@@ -89,10 +89,11 @@ node scripts/check-docs-drift.js --check
 Версию определите по [политике совместимости](semver-policy.md).
 Тег исходников должен совпадать с `v<package.json#version>`.
 
-После merge дождитесь успешного CI текущего `main` и передайте его run ID:
+После merge дождитесь успешного CI текущего `main` и задайте его run ID
+в переменной окружения `CI_RUN_ID`. Запустите из Bash:
 
 ```sh
-gh workflow run release-packages.yml --ref main -f ci_run_id=<successful-main-run>
+gh workflow run release-packages.yml --ref main -f "ci_run_id=${CI_RUN_ID:?Укажите ID успешного CI текущего main}"
 ```
 
 Workflow продвигает уже проверенные npm, Maven и catalog artifacts этого коммита.
