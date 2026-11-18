@@ -113,4 +113,25 @@ describe('Ручные счётчики в документации', () => {
     ].join('\n'));
     expect(auditRepo(root).errors).toEqual([]);
   });
+
+  it('принимает измеренные операции и продолжает проверять соседний размер корпуса', ({ root }) => {
+    mkdirSync(join(root, 'docs/evidence'), { recursive: true });
+    const measurements = [
+      'Во всех интервалах idle, stop и dispose получены **0 rAF requests,\n0 executed callbacks, 0 SVG writes, 0 notifications**.',
+      'За кадр выполнены **24 SVG writes** и **12 icon updates**.',
+      '| Сцена | Результат |\n| --- | --- |\n| idle | 0 SVG writes |\n| active | 24 SVG updates |',
+    ];
+    for (const file of ['README.md', 'docs/evidence/runtime.md']) {
+      for (const measurement of measurements) {
+        writeFileSync(join(root, file), measurement);
+        expect(auditRepo(root).errors, `${file}: ${measurement}`).toEqual([]);
+        writeFileSync(join(root, file), `${measurement}\n\nВ пакете 999 SVG, измерены 0 SVG writes; files: 999.`);
+        const errors = auditRepo(root).errors.filter(error => error.includes('ручной счётчик'));
+        expect(errors, `${file}: ${measurement}`).toHaveLength(2);
+        expect(errors.some(error => error.includes('«999 SVG»'))).toBe(true);
+        expect(errors.some(error => error.includes('«files: 999»'))).toBe(true);
+      }
+      writeFileSync(join(root, file), '# Измерения\n');
+    }
+  });
 });

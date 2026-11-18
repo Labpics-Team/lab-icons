@@ -51,6 +51,35 @@ describe('Согласованность документации', () => {
     expect(manualCorpusCountErrors('В библиотеке 660 SVG-файлов.')).toHaveLength(1);
   });
 
+  it('отличает число операций от размера корпуса по полной единице измерения', () => {
+    for (const source of [
+      'В idle получены **0 rAF requests, 0 executed callbacks, 0 SVG writes, 0 notifications**.',
+      'За кадр выполнены 24 SVG writes.',
+      'One SVG write completed.',
+      'Measured twelve SVG updates and two SVG mutations.',
+      'Measured 12 file reads and zero file writes.',
+      'Measured 12 icon updates, 10 glyph operations and 2 export operations.',
+      'Измерены две SVG-записи и пять SVG-обновлений.',
+      'Измерены 12 SVG-чтений, одна SVG-мутация и две SVG-операции.',
+      'Сохранены **24**\n**SVG** **writes**.',
+      'Сохранены `24` `SVG` `writes`.',
+      'Measured 12 SVG-write operations.',
+      'Measured 12 SVG‑updates.',
+      'SVG writes: 24.',
+    ]) expect(manualCorpusCountErrors(source), source).toEqual([]);
+
+    for (const source of [
+      'The package contains 0 SVG.',
+      'The package contains zero SVG.',
+      'The package contains 999 SVG files.',
+      'The package contains 999 SVG writeable assets.',
+      'The package contains 999 SVG, writes are measured separately.',
+      'The package contains 999 SVG; writes: 0.',
+      'The package contains 999 SVG. Writes: 0.',
+      'The package contains 999 SVG\n\nwrites: 0.',
+    ]) expect(manualCorpusCountErrors(source), source).toHaveLength(1);
+  });
+
   it('отделяет помеченную числовую версию от соседнего счётчика файлов', () => {
     expect(manualCorpusCountErrors('Figma-версия `2416636003859748575` файла `LuaiBd4anRi4DMZayKAnY2`.')).toEqual([]);
     expect(manualCorpusCountErrors('Version: `2416636003859748575` files source.')).toEqual([]);
