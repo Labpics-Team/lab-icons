@@ -2,6 +2,7 @@ import { spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
+import { buildSync } from 'esbuild';
 import { parseDocumentation } from '../scripts/lib/docs-markdown.js';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
@@ -22,14 +23,14 @@ function runExample(source) {
 }
 
 describe('Примеры README', () => {
-  it('исполняет каждый опубликованный JS-блок через публичный пакет после сборки', () => {
+  it('собирает каждый браузерный JS-блок через публичный пакет после сборки', () => {
     const examples = javascriptExamples(readFileSync(new URL('../README.md', import.meta.url), 'utf8'));
     for (const example of examples) {
-      const result = runExample(example);
-      expect(result.error, result.stderr).toBeUndefined();
-      expect(result.status, result.stderr).toBe(0);
-      expect(result.stdout.trim().length).toBeGreaterThan(0);
+      const result = buildSync({ stdin: { contents: example, resolveDir: root },
+        bundle: true, platform: 'browser', format: 'esm', write: false });
+      expect(result.outputFiles[0].text.length).toBeGreaterThan(0);
     }
+    // Исполнение этих же блоков в настоящем DOM входит в catalog:check.
   });
 
   it('сообщает об отсутствующем экспорте при исполнении примера', () => {

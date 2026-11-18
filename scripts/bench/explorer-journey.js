@@ -370,7 +370,7 @@ export async function runExplorerJourney() {
       const lottieDownload = downloads.at(-1);
       const animation = JSON.parse(await lottieDownload.blob.text());
       check(`${name}/${variant}/lottie-export`, lottieDownload.filename === `${name}-${variant}.lottie.json` &&
-        animation.meta.labIcons.masterSha256 === glyph.provenance.author.masterSha256 && animation.layers[0].nm === 'cycle-body' &&
+        animation.meta.labIcons.icon === name && animation.meta.labIcons.variant === variant && animation.layers[0].nm === 'cycle-body' &&
         animation.meta.labIcons.profile === 'lottie-web-svg-5.13');
       const beforeSf = downloads.length;
       q('export-format').value = 'sf-symbols'; q('export').click();
@@ -1188,7 +1188,7 @@ export async function runExplorerJourney() {
       const animation = JSON.parse(await lottieDownload.blob.text());
       const position = animation.layers[0].ks.p;
       check(`${name}/${variant}/nudge-lottie-export`, lottieDownload.filename === `${name}-${variant}.lottie.json` &&
-        animation.meta.labIcons.masterSha256 === glyph.provenance.author.masterSha256 && animation.layers[0].nm === 'direction-body' &&
+        animation.meta.labIcons.icon === name && animation.meta.labIcons.variant === variant && animation.layers[0].nm === 'direction-body' &&
         position.a === 1 && position.k.length === 3 && position.k[1].s[axis] - position.k[0].s[axis] === sign * 3 &&
         position.k[2].s[axis] === position.k[0].s[axis]);
     }

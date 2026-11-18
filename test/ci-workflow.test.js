@@ -18,7 +18,7 @@ const candidateEvents = new Set(['pull_request', 'pull_request_target', 'merge_g
 const matrix = parse(sources().get('ci.yml')).jobs.verify.strategy.matrix.include;
 // Одно условие: bash 3.2 на macOS не прерывает скрипт по set -e на упавшем [[ ]] в середине.
 const gateCommand = `set -euo pipefail
-[[ "$MATRIX_RESULT" == 'success' && "$SECURITY_RESULT" == 'success' && "$BENCHMARK_RESULT" == 'success' ]]`;
+[[ "$MATRIX_RESULT" == 'success' && "$SECURITY_RESULT" == 'success' && "$BENCHMARK_RESULT" == 'success' && "$NATIVE_RESULT" == 'success' ]]`;
 // Шаг сканирования одинаков во всех репозиториях; меняются только runner, имя job и место в итоге.
 const securityCommand = [
   'set -euo pipefail',
@@ -198,7 +198,7 @@ function assertNativeGraph(files) {
   expect(workflow.on).toEqual({ push: { branches: ['main'] }, pull_request: null, merge_group: null });
   expect(workflow.permissions).toEqual({ contents: 'read' });
   expect(workflow.defaults).toBeUndefined();
-  expect(Object.keys(workflow.jobs).sort()).toEqual(['benchmark', 'required', 'security', 'verify']);
+  expect(Object.keys(workflow.jobs).sort()).toEqual(['benchmark', 'native', 'required', 'security', 'verify']);
   const verify = workflow.jobs.verify;
   expect(verify['runs-on']).toBe('${{ matrix.os }}');
   expect(verify.if).toBeUndefined();
@@ -242,9 +242,12 @@ function assertNativeGraph(files) {
   expect(workflow.jobs.benchmark['runs-on']).toBe('ubuntu-latest');
   expect(workflow.jobs.benchmark.if).toBeUndefined();
   expect(workflow.jobs.benchmark['continue-on-error']).toBeUndefined();
+  expect(workflow.jobs.native['runs-on']).toBe('macos-latest');
+  expect(workflow.jobs.native.if).toBeUndefined();
+  expect(workflow.jobs.native['continue-on-error']).toBeUndefined();
   const gate = workflow.jobs.required;
   expect(gate.name).toBe('CI');
-  expect(gate.needs).toEqual(['verify', 'security', 'benchmark']);
+  expect([...gate.needs].sort()).toEqual(Object.keys(workflow.jobs).filter(id => id !== 'required').sort());
   expect(gate.if).toBe('${{ always() }}');
   expect(gate['runs-on']).toBe('ubuntu-latest');
   expect(gate.permissions).toEqual({});
@@ -257,6 +260,7 @@ function assertNativeGraph(files) {
       MATRIX_RESULT: '${{ needs.verify.result }}',
       SECURITY_RESULT: '${{ needs.security.result }}',
       BENCHMARK_RESULT: '${{ needs.benchmark.result }}',
+      NATIVE_RESULT: '${{ needs.native.result }}',
     },
     shell: 'bash',
     run: `${gateCommand}\n`,
@@ -282,6 +286,8 @@ describe('нативный итог CI', () => {
     ['не required имя', (w) => { w.jobs.required.name = 'Required CI'; }],
     ['неизвестная job вне итога', (w) => { w.jobs.extra = { 'runs-on': 'ubuntu-latest' }; }],
     ['пропуск verify job', (w) => { w.jobs.verify.if = false; }],
+    ['пропуск native job', (w) => { w.jobs.native.if = false; }],
+    ['игнорирование native job', (w) => { w.jobs.native['continue-on-error'] = true; }],
     ['игнорирование verify job', (w) => { w.jobs.verify['continue-on-error'] = true; }],
     ['игнорирование итога', (w) => { w.jobs.required['continue-on-error'] = true; }],
     ['пропуск pnpm verify', (w) => { w.jobs.verify.steps.find((s) => s.run === 'pnpm verify').if = false; }],
@@ -378,13 +384,14 @@ describe('нативный итог CI', () => {
       MATRIX_RESULT: '${{ needs.verify.result }}',
       SECURITY_RESULT: '${{ needs.security.result }}',
       BENCHMARK_RESULT: '${{ needs.benchmark.result }}',
+      NATIVE_RESULT: '${{ needs.native.result }}',
     });
     expect(gate.shell).toBe('bash');
     const bash = process.platform === 'win32'
       ? join(process.env.ProgramFiles ?? 'C:\\Program Files', 'Git/bin/bash.exe') : 'bash';
-    for (const key of ['MATRIX_RESULT', 'SECURITY_RESULT', 'BENCHMARK_RESULT']) {
+    for (const key of Object.keys(gate.env)) {
       for (const result of ['success', 'failure', 'cancelled', 'skipped', 'neutral', 'pending', '', undefined]) {
-        const env = { ...process.env, MATRIX_RESULT: 'success', SECURITY_RESULT: 'success', BENCHMARK_RESULT: 'success' };
+        const env = { ...process.env, ...Object.fromEntries(Object.keys(gate.env).map(key => [key, 'success'])) };
         delete env[key];
         if (result !== undefined) env[key] = result;
         const actual = spawnSync(bash, ['--noprofile', '--norc', '-e', '-o', 'pipefail', '-c', gate.run], {

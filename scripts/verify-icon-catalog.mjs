@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
 import { build } from 'esbuild';
 import { unzipSync } from 'fflate';
+import { parseDocumentation } from './lib/docs-markdown.js';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const site = resolve(root, 'preview/catalog');
@@ -148,6 +149,19 @@ try {
   releaseModule(); await ready(); await page.unroute('**/assets/*');
   assert.equal(await page.locator('#inspector').isVisible(), false);
   assert.equal(await page.evaluate(() => document.activeElement.dataset.id), 'paw');
+  // README demonstrates DOM consumers; compile and execute the exact published
+  // blocks in a browser instead of pretending Node provides document.
+  await page.evaluate(() => {
+    for (const id of ['icon', 'microphone']) { const element = document.createElement('span'); element.id = id; document.body.append(element); }
+  });
+  const examples = parseDocumentation(await readFile(join(root, 'README.md'), 'utf8')).examples;
+  assert.equal(examples.length, 3);
+  for (const [index, source] of examples.entries()) {
+    const result = await build({ stdin: { contents: source, resolveDir: root }, bundle: true, format: 'esm', write: false, platform: 'browser' });
+    await page.addScriptTag({ type: 'module', content: result.outputFiles[0].text });
+    if (index < 2) assert.equal(await page.locator('#icon svg').count(), 1);
+    else assert.equal(await page.locator('#microphone svg').count(), 0, 'README must dispose its controller');
+  }
   assert.deepEqual(errors, []); assert.deepEqual(failed, []);
   await writeFile(join(output, 'receipt.json'), JSON.stringify({ errors, failed, symbols: 330, fonts, checks: ['light/dark/mobile', 'rendered Cyrillic font', 'working copied code and color', 'play/pause/scrub/reverse/reduced motion', 'SVG/Lottie/dotLottie/Kotlin downloads', 'date', 'mobile focus and async close'] }, null, 2) + '\n');
   console.log('Catalog: 330 symbols, rendered Geist, working copy, playback, four downloads, mobile focus and async close');
