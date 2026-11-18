@@ -1,5 +1,36 @@
 # Измерение внешнего consumer
 
+## Публичные renderIcon и createSymbolMotion
+
+`node scripts/bench/measure-public-symbols.mjs --chrome` выполняет ограниченный
+headless-замер текущего API для 1/100/1000 `reload`. Команда делает production
+`pnpm pack`, устанавливает tarball в отдельный consumer и собирает два ESM bundle:
+`renderIcon` с одним symbol и `createSymbolMotion` с публичным namespace Lab Motion.
+Harness и счётчики не входят в измеряемые bytes. `--chrome` выбирает установленный
+Chrome; без него требуется уже установленный Chromium соответствующей Playwright.
+Скрипт сам не устанавливает браузеры и не открывает окна.
+
+По умолчанию сохраняются три повтора каждого размера в
+`preview/public-symbols/report.json`; `--output <path>` меняет путь.
+`--tarball <path>` измеряет готовый архив без повторной сборки: его SHA сохраняется,
+а неизвестный source SHA явно остаётся `null`. SHA верхнего уровня относится
+к checkout метода. `--repetitions 1` пригоден для проверки самого стенда;
+малое число повторов не даёт статистической квалификации скорости.
+
+Каждое наблюдение запускает отдельный browser process/profile. HTTP cache
+отключён, OS cache общий. Начальный документ пустой; import→paint заканчивается
+нативным FCP. Все 1000 символов помещаются в viewport 1280×800. Записаны размер
+bundle/retained inputs, создание/DOM, GC heap и стоимость реального активного
+callback для поворота и оптического перехода. Idle, stop и dispose проверяют ноль
+rAF, SVG-записей, уведомлений и оставшихся controls/subscriptions; статический
+mount не создаёт MotionValue или ResizeObserver. Это локальные наблюдения нового
+API, без сравнения со старым IR или заявления о максимальной производительности.
+
+[Результат 18 ноября 2026](../../docs/evidence/public-symbols-20261118/README.md)
+сохраняет числа, исходные повторы и ограничения метода.
+
+## Историческое сравнение consumer
+
 `compare-consumers.mjs` запускается в штатном удалённом GitHub job. Guard
 отвергает локальный запуск. Браузер и нагрузка не устанавливаются и не запускаются
 на рабочей станции.
