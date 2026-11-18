@@ -1,11 +1,12 @@
 import assert from 'node:assert/strict';
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { join } from 'node:path';
 import { build } from 'esbuild';
 import { chromium } from 'playwright';
+import { installedBrowserInputs } from './lib/installed-browser-inputs.mjs';
 
-const root = fileURLToPath(new URL('..', import.meta.url)), output = join(root, 'preview/symbol-dotlottie');
+const root = fileURLToPath(new URL('..', import.meta.url)), output = process.env.LAB_ICONS_EVIDENCE_DIR ?? join(root, 'preview/symbol-dotlottie');
 mkdirSync(output, { recursive: true });
 const wasm = readFileSync(join(root, 'node_modules/@lottiefiles/dotlottie-web/dist/dotlottie-player.wasm')).toString('base64');
 const source = `
@@ -62,15 +63,18 @@ async function run() {
 run().catch(error => { window.failure = error?.stack ?? JSON.stringify(error); });
 `;
 const bundle = await build({ stdin: { contents: source, resolveDir: process.env.LAB_ICONS_CONSUMER_DIR ?? root, sourcefile: 'dotlottie-consumer.ts' },
-  nodePaths: [join(root, 'node_modules')], bundle: true, format: 'esm', write: false, target: 'es2022' });
+  absWorkingDir: root, nodePaths: [join(root, 'node_modules')], bundle: true, format: 'esm', write: false, metafile: true, target: 'es2022' });
+writeFileSync(join(output, 'inputs.json'), JSON.stringify(installedBrowserInputs(bundle.metafile, root, process.env.LAB_ICONS_CONSUMER_DIR), null, 2) + '\n');
 let browser;
 try {
-  browser = await chromium.launch({ channel: 'chrome', headless: true, args: ['--mute-audio'] });
+  browser = await chromium.launch({ ...(existsSync(chromium.executablePath()) ? {} : { channel: 'chrome' }), headless: true, args: ['--mute-audio'] });
   const page = await browser.newPage();
   await page.setContent(`<!doctype html><html><body><script type="module">${bundle.outputFiles[0].text.replaceAll('</script', '<\\/script')}</script></body></html>`);
   await page.waitForFunction(() => window.result || window.failure, undefined, { timeout: 60000 });
   const result = await page.evaluate(() => window.result ?? { error: window.failure });
-  assert(Array.isArray(result), JSON.stringify(result));
+  assert(Array.isArray(result), JSON.stringify(result)); assert.equal(result.length, 70);
   writeFileSync(join(output, 'receipt.json'), JSON.stringify(result, null, 2) + '\n');
-  console.log(JSON.stringify({ player: '@lottiefiles/dotlottie-web@0.83.2', comparisons: result.length, maxDelta: Math.max(...result.map(item => item.maximum)) }));
+  const summary = { player: '@lottiefiles/dotlottie-web@0.83.2', browser: browser.version(), comparisons: result.length, maxDelta: Math.max(...result.map(item => item.maximum)) };
+  writeFileSync(join(output, 'summary.json'), JSON.stringify(summary, null, 2) + '\n');
+  console.log(JSON.stringify(summary));
 } finally { await browser?.close(); }
