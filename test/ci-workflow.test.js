@@ -3,6 +3,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, 
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { runInNewContext } from 'node:vm';
 import { describe, expect, it } from 'vitest';
 import { parse, stringify } from 'yaml';
 
@@ -226,7 +227,9 @@ function assertNativeGraph(files) {
     assertBiteStep(verify.steps.find((step) => step.name === spec.name), spec);
   }
   // Свежий checkout без установки зависимостей и без сохранённого токена.
-  expect(workflow.jobs.security).toEqual({
+  const { concurrency: securityConcurrency, ...security } = workflow.jobs.security;
+  expect(securityConcurrency).toBeDefined();
+  expect(security).toEqual({
     name: 'Безопасность',
     'runs-on': 'ubuntu-latest',
     'timeout-minutes': 15,
@@ -260,6 +263,33 @@ function assertNativeGraph(files) {
 }
 
 describe('нативный итог CI', () => {
+  it('ставит матрицу нового PR в очередь, пока предыдущий CI сообщает итог', () => {
+    const { concurrency, jobs } = parse(sources().get('ci.yml'));
+    const event = (event_name, run_id, ref, number = '') => ({
+      workflow: 'CI', event_name, run_id, ref, event: { pull_request: { number } },
+    });
+    const render = (value, github, index = 0) => String(value).replace(/\$\{\{(.*?)\}\}/g, (_, expression) =>
+      runInNewContext(expression, {
+        github, strategy: { 'job-index': index }, format: (text, arg) => text.replace('{0}', arg),
+      }, { timeout: 100 })).toLowerCase();
+    const pr = run => event('pull_request', run, 'refs/pull/7/merge', 7);
+    expect(render(concurrency.group, pr(1))).not.toBe(render(concurrency.group, pr(2)));
+    for (const [name, ref] of [['push', 'refs/heads/main'], ['merge_group', 'refs/heads/gh-readonly-queue/main/pr-7']]) {
+      expect(render(concurrency.group, event(name, 1, ref))).toBe(render(concurrency.group, event(name, 2, ref)));
+      expect(render(concurrency['cancel-in-progress'], event(name, 1, ref))).toBe('true');
+    }
+    expect(jobs.required.concurrency).toBeUndefined();
+    const workers = [[jobs.security.concurrency, 0], ...matrix.map((_, row) => [jobs.verify.concurrency, row])];
+    const keys = workers.map(([worker, row]) => {
+      const key = render(worker.group, pr(1), row);
+      expect(render(worker.group, pr(2), row)).toBe(key);
+      expect(render(worker.group, event('pull_request', 3, 'refs/pull/8/merge', 8), row)).not.toBe(key);
+      expect(render(worker['cancel-in-progress'], pr(2), row)).toBe('true');
+      return key;
+    });
+    expect(new Set(keys).size).toBe(matrix.length + 1);
+  });
+
   it('покрывает каждую платформу единственным required check', () => {
     assertNativeGraph(sources());
   });
