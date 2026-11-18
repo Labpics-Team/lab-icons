@@ -1,0 +1,13 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+reviews:
+  path_filters:
+    # Figma snapshots and generated optical arrays are qualified by source
+    # digests, optical review and the compiler tests. Review their generators.
+    - '!masters/**'
+    - '!symbols/optics/*.json'
+    # Machine observations are evidence, not another implementation. Their
+    # producing scripts, assertions and written conclusions remain in scope.
+    - '!docs/evidence/**/*.json'
+    - '!docs/evidence/**/*.jsonl'
+    - '!docs/research/**/*.json'
+    - '!docs/package.md'

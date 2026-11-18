@@ -60,6 +60,19 @@ function authoredSvg(raw, color) {
   assert(svg.childElementCount > 0, 'Author SVG is empty'); return svg;
 }
 
+function canonicalSvg(source) {
+  const svg = source.cloneNode(true);
+  // Lottie materializes binary32 cubic vertices. Compare the same line locus
+  // in that representation: native SVG L versus degenerate C can rasterize
+  // differently across Skia platforms even when the author comparison is exact.
+  // A live stroke guide keeps its original length parametrization: converting
+  // it changes the browser's dash-length approximation during draw.
+  for (const path of svg.querySelectorAll('path')) if (path.hasAttribute('d') && (!path.hasAttribute('stroke') || path.getAttribute('stroke') === 'none')) {
+    path.setAttribute('d', canonicalCubicPath(path.getAttribute('d')));
+  }
+  return svg;
+}
+
 function waitFor(player, event, action) {
   return new Promise((resolve, reject) => {
     const timer = setTimeout(() => reject(new Error('Lottie ' + event + ' timeout')), 3000);
@@ -110,7 +123,7 @@ export async function runSymbolLottieCases({ lottie, icons, exportLottie, cases,
       async function compare(progress, natural = false) {
         control?.seek(duration * progress);
         const frame = observationFrame(icon.element), svg = container.querySelector('svg'); assert(svg, item.name + ': player is empty');
-        const actual = await raster(observedPlayer(svg, animation), frame), expected = await raster(icon.element.cloneNode(true), frame);
+        const actual = await raster(observedPlayer(svg, animation), frame), expected = await raster(canonicalSvg(icon.element), frame);
         const row = { name: item.name, variant, weight, opsz, progress, natural, ...compareSymbolPixels(actual, expected) };
         if (corpus) {
           const authored = await raster(authoredSvg(item.raw[variant], request.color), frame);
