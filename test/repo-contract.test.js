@@ -116,7 +116,7 @@ on:
 ${workflow({ jobs: [job({ id: 'release-dist', tail: provenance })] })}`.replace(
     '          fetch-depth: 0',
     `          fetch-depth: 0
-          ref: \${{ github.event_name == 'workflow_dispatch' && format('refs/tags/{0}', inputs.tag) || github.ref }}`,
+          ref: \${{ inputs.tag && format('refs/tags/{0}', inputs.tag) || github.ref }}`,
   );
 }
 

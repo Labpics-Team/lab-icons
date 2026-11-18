@@ -171,6 +171,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Повтор выпуска и целостность проверенного npm tarball
+        run: node --test scripts/upload-release-assets.test.mjs scripts/publish-npm.test.mjs
+
       - name: Chromium для удалённого browser consumer
         run: pnpm exec playwright install --with-deps chromium
 
@@ -190,12 +193,22 @@ jobs:
           retention-days: 7
           if-no-files-found: error
 
+      - name: Проверенный npm tarball для публикации
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: lab-icons-npm-${{ github.sha }}
+          path: benchmark-results/package/
+          retention-days: 7
+          if-no-files-found: error
+
       - name: Сырые наблюдения и состав artifacts
         if: ${{ always() }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: lab-icons-consumer-${{ github.sha }}
-          path: benchmark-results/
+          path: |
+            benchmark-results/
+            !benchmark-results/package/**
           retention-days: 1
           if-no-files-found: error
 
@@ -233,7 +246,9 @@ jobs:
           log-accepted-android-sdk-licenses: false
       - name: Проверка и сборка Maven для Desktop, Android и iOS
         working-directory: native/compose
-        run: ./gradlew desktopTest publishAllPublicationsToDistributionRepository
+        run: |
+          node --test scripts/seal-repository.test.mjs
+          ./gradlew desktopTest publishAllPublicationsToDistributionRepository
       - name: Отдельный Kotlin export
         run: node scripts/export-native-symbols.mjs --symbol plus-circle --package pics.lab.icons.consumer.generated --output native/compose/consumer/build/exported
       - name: Установленный Maven consumer без окна

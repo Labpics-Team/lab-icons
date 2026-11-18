@@ -2,7 +2,7 @@
 /** Чистые packed consumers; тяжёлая работа допускается только удалённым CI job. */
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { mkdirSync, mkdtempSync, readFileSync, readdirSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
+import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
 import { cpus, freemem, hostname, platform, release, tmpdir, totalmem } from 'node:os';
 import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -67,7 +67,7 @@ function prepare(temp, label, revision) {
   const packageRoot = realpathSync(join(consumer, 'node_modules/@labpics/icons'));
   const installed = JSON.parse(readFileSync(join(packageRoot, 'package.json'), 'utf8'));
   if (installed.version !== pkg.version) throw new Error(`${label}: installed package identity не совпадает`);
-  return { label, source, consumer, packageRoot, revision, packageVersion: pkg.version, packageManager: pkg.packageManager, lockSha256: sha256(readFileSync(join(source, 'pnpm-lock.yaml'))), tarballSha256: sha256(readFileSync(tarball)), tarballBytes: readFileSync(tarball).length, packMs, installMs };
+  return { label, source, consumer, packageRoot, tarball, revision, packageVersion: pkg.version, packageManager: pkg.packageManager, lockSha256: sha256(readFileSync(join(source, 'pnpm-lock.yaml'))), tarballSha256: sha256(readFileSync(tarball)), tarballBytes: readFileSync(tarball).length, packMs, installMs };
 }
 function caseImport(testCase, label) {
   return testCase.kind === 'static' ? '@labpics/icons' : testCase.lane === 'current-author' && label === 'candidate' ? `@labpics/icons/symbols/${testCase.icon}` : '@labpics/icons/ir';
@@ -229,7 +229,7 @@ try {
   report = { version: 2, baseline: BASELINE, candidate: revision, timestamp: new Date().toISOString(), environment: { node: process.version, v8: process.versions.v8, platform: platform(), osRelease: release(), hostname: hostname(), cpus: cpus().map(cpu => ({ model: cpu.model, speed: cpu.speed })), totalmem: totalmem(), freemem: freemem(), runnerEnvironment: process.env.BENCHMARK_RUNNER_ENVIRONMENT, githubRunId: process.env.GITHUB_RUN_ID, githubRunAttempt: process.env.GITHUB_RUN_ATTEMPT }, protocol: { serverRepetitions: 7, browserRepetitions: 3, counts: COUNTS, cpuSlowdowns: [1, 4], comparison: 'baseline/candidate чередуются; каждый server sample — новый Node process; каждый browser sample — новый context', lanes: { 'retained-identical-output': 'full IR: тот же SVG, без снятия equality oracle', 'current-author': 'root static и sliced current master против recorded baseline: geometry/representation confound; не same-geometry speedup' }, caveats: ['4× CDP slowdown — синтетическое замедление, не физическое constrained hardware', '10000 mounted symbols включают offscreen DOM; viewport 1280×800', 'rAF интервал — frame opportunity, не GPU presentation time', 'peak heap не заявляется: CDP и Node сохраняют точечные наблюдения', '7/3 повторов характеризуют среднее и разброс, не редкие хвосты', 'pack/install и bundler compile — одиночные наблюдения, не latency distribution', 'server измеряет создание SVG, browser измеряет DOM/layout', 'motion принадлежит recorded full IR, не текущим source-only Figma masters', 'current-author lane меняет author geometry и representation: причинный same-geometry speedup не заявляется'] }, packages: [], cases: [], motion: [] };
   writeFileSync(join(output, 'consumer-comparison.json'), JSON.stringify(report, null, 2));
   const prepared = [prepare(temp, 'baseline', BASELINE), prepare(temp, 'candidate', revision)];
-  report.packages = prepared.map(({ source, consumer, packageRoot, ...facts }) => facts);
+  report.packages = prepared.map(({ source, consumer, packageRoot, tarball, ...facts }) => facts);
   const authorRequest = join(temp, 'author-request.json');
   writeFileSync(authorRequest, JSON.stringify({ sourceRoot: prepared[1].source, packageRoot: prepared[1].packageRoot, output: join(output, 'author-consumer.json') }));
   command(process.execPath, [join(ROOT, 'scripts/bench/verify-author-consumer.mjs'), authorRequest], prepared[1].consumer);
@@ -386,6 +386,14 @@ try {
   if (report.benchmarkStatus === 'FAIL') throw new Error('benchmark: measured artifact budget failed; see analysis');
   // Instrumentation читает уже собранные candidate artifacts; не меняет ratchet в CI.
   command(process.execPath, [join(prepared[1].source, 'scripts/measure-platform-artifacts.mjs'), '--output', join(output, 'platform-artifacts.json')], prepared[1].source);
+  const tested = prepared[1], packageDirectory = join(output, 'package');
+  const packageBytes = readFileSync(tested.tarball);
+  if (sha256(packageBytes) !== tested.tarballSha256) throw new Error('Verified tarball changed during qualification');
+  mkdirSync(packageDirectory);
+  copyFileSync(tested.tarball, join(packageDirectory, 'package.tgz'));
+  writeFileSync(join(packageDirectory, 'source.json'), JSON.stringify({ name: '@labpics/icons', version: tested.packageVersion,
+    sourceSha: tested.revision, sha256: tested.tarballSha256,
+    integrity: 'sha512-' + createHash('sha512').update(packageBytes).digest('base64') }, null, 2) + '\n');
   process.stdout.write(`benchmark: полный отчёт ${join(output, 'consumer-comparison.json')}\n`);
 } catch (error) {
   if (report) {

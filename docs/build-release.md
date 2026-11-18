@@ -89,26 +89,40 @@ node scripts/check-docs-drift.js --check
 Версию определите по [политике совместимости](semver-policy.md).
 Тег исходников должен совпадать с `v<package.json#version>`.
 
-В Bash из корня проверенной рабочей копии:
+После merge дождитесь успешного CI текущего `main` и передайте его run ID:
 
 ```sh
-set -euo pipefail
-source_commit=$(git rev-parse --verify 'HEAD^{commit}')
-version=$(git show "$source_commit:package.json" | node --input-type=module -e 'import { readFileSync } from "node:fs"; console.log(JSON.parse(readFileSync(0, "utf8")).version)')
-git tag "v$version" "$source_commit"
-git push origin "refs/tags/v$version"
+gh workflow run release-packages.yml --ref main -f ci_run_id=<successful-main-run>
 ```
 
-Версия читается из выбранного коммита; незакоммиченные изменения остаются
-в рабочей копии. При ошибке команда останавливается. Если push завершился
-неудачно, проверьте состояние удалённого тега перед повтором.
+Workflow продвигает уже проверенные npm, Maven и catalog artifacts этого коммита.
+Он проверяет все ссылки `.module`, SHA-256 и принадлежность файлов репозиторию;
+публикует source tag `v<version>` и отдельный parentless Maven tag
+`maven-compose-v<version>`. Бинарные файлы не добавляются в source-ветку.
+Версия берётся из выбранного коммита; чужой, незавершённый, PR-run или CI
+другого коммита не подходит. SHA запуска выпуска совпадает с проверенным SHA,
+чтобы npm provenance указывала на правильные исходники.
 
-[Workflow релиза](../.github/workflows/release-dist.yml) проверяет исходный тег
-и создаёт тег собранного пакета. Повтор допускается после сверки происхождения
-и байтов с чистой сборкой. Опубликованные теги сохраняют положение и содержимое;
-принудительное обновление запрещено.
+После публикации отдельный headless consumer устанавливает
+`pics.lab:icons-compose:<version>` по публичному адресу, с пустым Gradle cache.
+Существующий [workflow dist](../.github/workflows/release-dist.yml) выпускает
+JavaScript tag `v<version>-dist`.
+Npm Trusted Publishing публикует тот же tarball, который прошёл установленный
+browser consumer в CI. Отдельный consumer с пустым cache устанавливает публичную
+npm-версию; её integrity должна совпасть с проверенными байтами. Затем GitHub
+release получает Maven ZIP, самостоятельный каталог и `SHA256SUMS.txt`.
+Повтор сохраняет существующие теги и проверяет байты уже загруженных assets;
+несовпадающий выпуск требует новой версии.
 
-Наличие конкретной версии в npm проверьте в реестре отдельно.
+В настройках npm-пакета `@labpics/icons` Trusted Publisher должен разрешать
+`npm publish` для GitHub organization `Labpics-Team`, repository `lab-icons`,
+workflow filename `release-packages.yml`. Долгоживущий токен не требуется.
+Первую такую привязку добавляет пользователь с правами на npm-пакет;
+[инструкция npm](https://docs.npmjs.com/trusted-publishers/).
+
+Каталог распаковывается непосредственно в `/icons/`: `index.html` лежит в корне
+архива. Для native используйте Maven URL из [справки Compose](../native/compose/README.md).
+Это тот же способ доставки, что уже применяется в Motion Compose 0.1.0.
 
 ## Исправление ошибки
 

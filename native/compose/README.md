@@ -5,6 +5,27 @@ M/L/C/Z, координаты, sparse-поправки осей, fill-rule и с
 Каждое семейство подключается отдельно. Числовой пакет декодируется один раз;
 SVG parser, браузер и каталог для отдельного Icon не нужны.
 
+## Подключение
+
+Публичный Maven repository использует тот же канал, что Motion Compose:
+отдельный неизменяемый distribution tag, без credentials у потребителя.
+
+```kotlin
+repositories {
+    maven("https://raw.githubusercontent.com/Labpics-Team/lab-icons/maven-compose-v0.4.0/")
+    maven("https://raw.githubusercontent.com/Labpics-Team/lab-motion/maven-compose-v0.1.0/")
+    google()
+    mavenCentral()
+}
+commonMain.dependencies { implementation("pics.lab:icons-compose:0.4.0") }
+```
+
+Gradle выбирает Desktop, Android или iOS из общей metadata. Архив Maven и его
+SHA-256 дополнительно доступны в GitHub release. Порядок выпуска описан в
+[процедуре поставки](../../docs/build-release.md#релиз).
+
+## Символ и движение
+
 Состояния подключаются отдельно через `pics.lab.icons.states.*States`.
 Поэтому `symbols.volumeHigh` содержит только свой рисунок и жесты, а
 `states.volumeStates` явно добавляет все состояния громкости.

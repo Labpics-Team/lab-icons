@@ -14,6 +14,11 @@ on:
       tag:
         description: 'Существующий source tag v<package.json#version>; branch/SHA запрещены'
         required: true
+  workflow_call:
+    inputs:
+      tag:
+        type: string
+        required: true
 
 # Единственное необходимое расширенное право — push братского тега.
 permissions:
@@ -37,7 +42,7 @@ jobs:
         with:
           # Verify включает historical-hand provenance и не работает shallow.
           fetch-depth: 0
-          ref: ${{ github.event_name == 'workflow_dispatch' && format('refs/tags/{0}', inputs.tag) || github.ref }}
+          ref: ${{ inputs.tag && format('refs/tags/{0}', inputs.tag) || github.ref }}
 
       - name: Setup pnpm
         uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9

@@ -363,7 +363,7 @@ export function releaseWorkflowErrors(text) {
     );
   }
   const exactCheckout =
-    "ref: ${{ github.event_name == 'workflow_dispatch' && format('refs/tags/{0}', inputs.tag) || github.ref }}";
+    "ref: ${{ inputs.tag && format('refs/tags/{0}', inputs.tag) || github.ref }}";
   if (!owner.includes(exactCheckout)) {
     errors.push('.github/workflows/release-dist.yml: checkout обязан разрешать manual input только как refs/tags/<tag>');
   }
