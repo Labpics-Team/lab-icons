@@ -1602,7 +1602,7 @@
     "catalog:check": "tsc --noEmit -p catalog/tsconfig.json && node scripts/verify-icon-catalog.mjs",
     "observatory": "pnpm build && node scripts/build-observatory.mjs",
     "typecheck": "tsc --noEmit",
-    "check:security": "node scripts/check-security.mjs",
+    "check:security": "pnpm audit",
     "check:publint": "publint --strict",
     "check:attw": "attw --pack . --profile esm-only --format table --no-emoji --no-color",
     "check:repo-contract": "node scripts/check-repo-contract.js",
