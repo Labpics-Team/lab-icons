@@ -82,9 +82,13 @@ function waitFor(player, event, action) {
   });
 }
 
-export async function runSymbolLottieCases({ lottie, icons, exportLottie, cases, corpus, mutation }) {
+export async function runSymbolLottieCases({ lottie, icons, exportLottie, cases, corpus, mutation, effectMembership = [] }) {
   assert(lottie.version === '5.13.0', 'Unexpected Lottie player version');
   assert(cases.length > 0, 'No selected Lottie cases');
+  for (const { symbol, expected } of effectMembership) for (const variant of ['outline', 'filled']) {
+    const actual = Object.keys(symbol.semantics?.variants?.[variant]?.effects ?? {}).sort();
+    assert(JSON.stringify(actual) === JSON.stringify(expected[variant]), `${symbol.id}/${variant}: installed effect membership differs from source`);
+  }
   const receipts = [];
   for (const item of cases) for (const variant of item.variant ? [item.variant] : ['outline', 'filled'])
     for (const weight of corpus || item.semantic ? [400] : [300, 400, 600]) for (const opsz of corpus || item.semantic ? [24] : [16, 24, 48]) {

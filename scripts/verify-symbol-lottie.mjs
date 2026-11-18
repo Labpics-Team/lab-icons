@@ -11,7 +11,7 @@ const root = fileURLToPath(new URL('..', import.meta.url)), output = process.env
 mkdirSync(output, { recursive: true });
 const corpus = process.argv[2]?.startsWith('corpus') ?? false;
 const manifest = JSON.parse(readFileSync(join(root, 'semantics/figma-baseline.json')));
-const names = [], raw = {};
+const names = [], raw = {}, expectedEffects = {};
 for (const name of Object.keys(manifest.icons)) {
   if (corpus) {
     if (process.argv[2].includes(':') && name !== process.argv[2].split(':')[1]) continue;
@@ -22,7 +22,9 @@ for (const name of Object.keys(manifest.icons)) {
     }));
   } else {
     const symbol = (await import(pathToFileURL(join(root, 'dist/symbols', name + '.js')).href)).default;
-    if (!['outline', 'filled'].some(variant => Object.keys(symbol.semantics?.variants?.[variant]?.effects ?? {}).length)) continue;
+    const effects = Object.fromEntries(['outline', 'filled'].map(variant => [variant, Object.keys(symbol.semantics?.variants?.[variant]?.effects ?? {}).sort()]));
+    if (!Object.values(effects).some(names => names.length)) continue;
+    expectedEffects[name] = effects;
   }
   names.push(name);
 }
@@ -41,6 +43,14 @@ import database from '@labpics/icons/symbols/database-search';
 import calendarFamily from '@labpics/icons/states/calendar';
 import volumeFamily from '@labpics/icons/states/volume';
 const corpus = ${corpus}, symbols = [${names.map((_, i) => `corpus${i}`).join(',')}], raw = ${JSON.stringify(raw)};
+const expectedEffects = ${JSON.stringify(expectedEffects)};
+const effectMembership = corpus ? [] : symbols.map(symbol => ({ symbol, expected: expectedEffects[symbol.id] }));
+if (${JSON.stringify(process.env.LAB_ICONS_LOTTIE_CONTROL)} === 'missing-effect') {
+  const row = effectMembership.find(row => row.expected.outline.length);
+  const symbol = row.symbol, variant = symbol.semantics.variants.outline, effects = { ...variant.effects };
+  delete effects[row.expected.outline[0]];
+  row.symbol = { ...symbol, semantics: { ...symbol.semantics, variants: { ...symbol.semantics.variants, outline: { ...variant, effects } } } };
+}
 const date = day => new Date(Date.UTC(2026, 0, day, 12));
 const semantic = symbols.flatMap(symbol => ['outline', 'filled'].flatMap(variant => Object.keys(symbol.semantics?.variants?.[variant]?.effects ?? {}).flatMap(gesture => [
   { name: symbol.id + '/' + gesture + '/forward', symbol, variant, semantic: true, complete: true, options: { gesture, duration: 317 } },
@@ -62,7 +72,7 @@ const cases = corpus ? symbols.map(symbol => ({ name: symbol.id, symbol, options
   { name: 'date-optical-transition', symbol: calendar, options: { date: date(8), timeZone: 'UTC', transition: { from: { weight: 300, opsz: 48 }, to: { date: date(28), weight: 600, opsz: 16 } }, duration: 300 } },
 ];
 const selected = ${JSON.stringify(corpus ? null : process.argv[2] ?? null)};
-runSymbolLottieCases({ lottie, icons: createSymbolMotion(motion), exportLottie: ${JSON.stringify(process.env.LAB_ICONS_LOTTIE_CONTROL)} === 'symbol' ? (_symbol, request) => exportLottie(time, request) : exportLottie, cases: cases.filter(item => !selected || item.name === selected), corpus,
+runSymbolLottieCases({ lottie, icons: createSymbolMotion(motion), exportLottie: ${JSON.stringify(process.env.LAB_ICONS_LOTTIE_CONTROL)} === 'symbol' ? (_symbol, request) => exportLottie(time, request) : exportLottie, cases: cases.filter(item => !selected || item.name === selected), corpus, effectMembership,
   mutation: ${JSON.stringify(process.env.LAB_ICONS_LOTTIE_CONTROL ?? null)} }).then(result => { window.result = result; }).catch(error => { window.failure = error.stack; });
 `;
 const bundle = await build({ stdin: { contents: source, resolveDir: process.env.LAB_ICONS_CONSUMER_DIR ?? root, sourcefile: 'symbol-lottie-consumer.ts' },

@@ -9,6 +9,7 @@ for (const [control, selected, expected] of [
   ['color', 'independent-paints', /raster mismatch/],
   ['symbol', 'independent-paints', /raster mismatch/],
   ['terminal', 'reload/cycle/forward', /raster mismatch/],
+  ['missing-effect', 'reload/cycle/forward', /installed effect membership differs from source/],
   ['', 'unknown-case', /No selected Lottie cases/],
 ]) {
   let failure = '';
@@ -21,4 +22,4 @@ for (const [control, selected, expected] of [
   } catch (error) { failure = error.stderr?.toString() ?? error.message; }
   assert(expected.test(failure), `${control || 'empty'} control did not detect its defect: ${failure || 'PASS'}`);
 }
-console.log('Lottie controls: cropped canvas, wrong color/symbol, lost terminal pose, empty selection detected');
+console.log('Lottie controls: cropped canvas, wrong color/symbol, lost terminal pose/effect, empty selection detected');

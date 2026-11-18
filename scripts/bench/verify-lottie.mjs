@@ -29,7 +29,7 @@ export async function verifyLottieConsumer({ prepared, output }) {
       cwd: prepared.source, encoding: 'utf8', windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'],
       env: { ...process.env, LAB_ICONS_CONSUMER_DIR: prepared.consumer, LAB_ICONS_EVIDENCE_DIR: join(output, 'lottie-controls') },
     }));
-    report.negativeControls = ['crop', 'color', 'symbol', 'terminal', 'empty'];
+    report.negativeControls = ['crop', 'color', 'symbol', 'terminal', 'missing-effect', 'empty'];
     report.complete = true;
     return report;
   } catch (error) {
