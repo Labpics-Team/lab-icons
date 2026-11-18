@@ -21,7 +21,7 @@ function execute(runId, gh = 'printf "%s\\n" "$@"') {
     ? join(process.env.ProgramFiles ?? 'C:\\Program Files', 'Git/bin/bash.exe') : 'bash';
   // Execute the published command; the gh function records the requested operation.
   return spawnSync(bash, ['--noprofile', '--norc', '-c', `gh() { ${gh}; }\n${releaseCommands()}`], {
-    cwd: tmpdir(), env: { ...process.env, CI_RUN_ID: runId ?? '' }, encoding: 'utf8', timeout: 10_000,
+    cwd: tmpdir(), env: { ...process.env, CI_RUN_ID: runId ?? '' }, encoding: 'utf8', timeout: 10_000, windowsHide: true,
   });
 }
 

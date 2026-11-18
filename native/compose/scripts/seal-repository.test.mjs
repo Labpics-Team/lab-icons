@@ -27,7 +27,7 @@ function fixture(t) {
     const update = () => write(modulePath, JSON.stringify(module));
     update();
     return { directory, root, modulePath, artifact, module, bytes, update,
-        run: () => spawnSync(process.execPath, [script, root, '0.4.0', 'a'.repeat(40)], { encoding: 'utf8' }) };
+        run: () => spawnSync(process.execPath, [script, root, '0.4.0', 'a'.repeat(40)], { encoding: 'utf8', windowsHide: true }) };
 }
 test('complete repository seals and can be verified again', t => {
     const f = fixture(t);
