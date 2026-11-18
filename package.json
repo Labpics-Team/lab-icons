@@ -96,16 +96,16 @@
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "0.18.5",
-    "esbuild": "0.28.1",
+    "esbuild": "0.28.2",
     "fflate": "0.8.3",
     "marked": "9.1.6",
-    "publint": "0.3.21",
-    "rollup": "4.62.2",
+    "publint": "0.3.25",
+    "rollup": "4.68.3",
     "svgo": "4.1.0",
     "typescript": "7.0.2",
-    "vite": "8.1.6",
+    "vite": "8.3.8",
     "vitest": "4.1.12",
-    "yaml": "2.9.0"
+    "yaml": "2.9.1"
   },
   "license": "MIT",
   "keywords": [
