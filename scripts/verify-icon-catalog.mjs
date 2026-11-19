@@ -9,6 +9,124 @@ import { build } from 'esbuild';
 import { unzipSync } from 'fflate';
 import { parseDocumentation } from './lib/docs-markdown.js';
 
+function playbackFinished(end) {
+  return document.querySelector('#progress').value === String(end)
+    && document.querySelector('#play-label').textContent === 'Воспроизвести';
+}
+
+async function verifyPlaybackBoundaries(browser, base) {
+  const context = await browser.newContext({ reducedMotion: 'no-preference' });
+  try {
+    const page = await context.newPage();
+    const errors = [];
+    page.on('pageerror', error => errors.push(error.message));
+    await page.clock.install({ time: new Date('2026-11-19T00:00:00Z') });
+    await page.goto(`${base}/?icon=time`);
+    await page.waitForFunction(() => document.querySelector('#settings')?.disabled === false);
+    await page.clock.pauseAt(new Date('2026-11-19T00:01:00Z'));
+    await page.locator('#animation').selectOption('advance');
+    const geometry = () => page.locator('#stage svg').innerHTML();
+    const scrub = value => page.locator('#progress').evaluate((node, value) => {
+      node.value = String(value); node.dispatchEvent(new Event('input', { bubbles: true }));
+    }, value);
+    const click = id => page.locator(`#${id}`).evaluate(node => node.click());
+    const start = await geometry();
+    await scrub(0.5);
+    const middle = await geometry();
+
+    async function roundedEndpoint(id, end) {
+      await scrub(0.5);
+      // Clock schedules integer-ms frames. Start 0.1 ms after the integer tick
+      // so the last pre-completion frame is inside the range's rounding window.
+      const alignment = await page.evaluate(() => (16 - (performance.now() + 500) % 16) % 16);
+      await page.clock.runFor(alignment);
+      await page.locator(`#${id}`).evaluate(node => {
+        const now = performance.now.bind(performance);
+        Object.defineProperty(performance, 'now', { configurable: true, value: () => now() + 0.1 });
+        try { node.click(); }
+        finally { Object.defineProperty(performance, 'now', { configurable: true, value: now }); }
+      });
+      await page.clock.runFor(500);
+      assert.equal(await page.locator('#progress').inputValue(), String(end));
+      assert.equal(await page.evaluate(playbackFinished, end), false, 'A rounded range endpoint is not playback completion');
+    }
+
+    await roundedEndpoint('reverse', 0);
+    const almostStart = await geometry();
+    assert.notEqual(almostStart, start, 'The fractional frame must precede the exact starting pose');
+    const roundedReverse = await page.evaluate(() => ({
+      range: document.querySelector('#progress').value,
+      label: document.querySelector('#play-label').textContent,
+      minute: document.querySelector('[data-part="clock-minute"]').getAttribute('transform'),
+    }));
+    await click('play'); // Pause with a nonzero position that the range displays as 0.
+    await click('reverse');
+    assert.equal(await geometry(), almostStart, 'Reverse after pausing near zero must preserve the exact position');
+    await page.clock.runFor(16);
+    assert.equal(await page.evaluate(playbackFinished, 0), true);
+    assert.equal(await geometry(), start, 'Reverse must finish at the exact starting pose');
+
+    await scrub(1);
+    const end = await geometry();
+    await scrub(0.5);
+    assert.equal(await geometry(), middle, 'Scrubbing back from a completed clip must restore the midpoint');
+    await scrub(1);
+    await click('reverse');
+    await page.clock.runFor(1016);
+    assert.equal(await page.evaluate(playbackFinished, 0), true);
+    assert.equal(await geometry(), start, 'Reverse from the completed endpoint must restore the starting pose');
+
+    await roundedEndpoint('play', 1);
+    const almostEnd = await geometry();
+    assert.notEqual(almostEnd, end, 'The rounded final range value must precede the exact final pose');
+    await click('play');
+    await click('play');
+    assert.equal(await geometry(), almostEnd, 'Play after pausing near one must preserve the exact position');
+    await page.clock.runFor(16);
+    assert.equal(await page.evaluate(playbackFinished, 1), true);
+    assert.equal(await geometry(), end, 'Forward playback must finish at the exact final pose');
+
+    await scrub(0.5);
+    await click('reduce-motion');
+    assert.equal(await geometry(), end, 'Enabling reduced motion must finish a paused clip');
+    await click('reverse');
+    assert.equal(await page.evaluate(playbackFinished, 0), true, 'Reduced reverse must use the freshly prepared clip duration');
+    assert.equal(await geometry(), start, 'Reduced reverse of a paused clip must restore the starting pose');
+    await click('reduce-motion');
+
+    await scrub(0);
+    await click('play');
+    await page.clock.runFor(400);
+    assert.notEqual(await geometry(), start, 'Reduced-motion toggle must interrupt an existing moving clip');
+    assert.notEqual(await geometry(), end, 'Reduced-motion toggle must happen before normal completion');
+    await click('reduce-motion');
+    assert.equal(await page.evaluate(playbackFinished, 1), true);
+    assert.equal(await geometry(), end, 'Enabling reduced motion must finish the existing clip');
+    await click('reverse');
+    assert.equal(await page.evaluate(playbackFinished, 0), true, 'Reduced reverse after a toggle must finish immediately');
+    assert.equal(await geometry(), start, 'Reduced reverse after a toggle must restore the starting pose');
+    await page.clock.runFor(1100);
+    assert.equal(await geometry(), start, 'The previous driver must not overwrite the reduced reverse pose');
+    await click('play');
+    assert.equal(await page.evaluate(playbackFinished, 1), true);
+    assert.equal(await geometry(), end, 'Reduced forward after a toggle must show the final pose');
+    await click('reduce-motion');
+    await click('reverse');
+    await page.clock.runFor(400);
+    assert.equal(await page.locator('#play-label').textContent(), 'Пауза');
+    assert.notEqual(await geometry(), start, 'Disabling reduced motion must restore animated reverse');
+    assert.notEqual(await geometry(), end, 'Animated reverse must leave its final pose');
+    await click('reduce-motion');
+    assert.equal(await page.evaluate(playbackFinished, 0), true, 'Enabling reduced motion during reverse must finish in reverse');
+    assert.equal(await geometry(), start, 'Reducing reverse motion must preserve its requested endpoint');
+    await page.clock.runFor(1100);
+    assert.equal(await page.evaluate(playbackFinished, 0), true);
+    assert.equal(await geometry(), start);
+    assert.deepEqual(errors, []);
+    return { roundedReverse, checks: ['fractional endpoints', 'pause near both endpoints', 'scrub from completed clip', 'reverse from completed clip', 'toggle reduced motion on paused and playing clips'] };
+  } finally { await context.close(); }
+}
+
 const root = fileURLToPath(new URL('..', import.meta.url));
 const site = resolve(root, 'preview/catalog');
 const output = join(root, 'preview/catalog-check');
@@ -31,6 +149,7 @@ try {
   page.on('pageerror', error => errors.push(error.message));
   page.on('response', response => { if (response.status() >= 400) failed.push([response.status(), response.url()]); });
   const base = `http://127.0.0.1:${server.address().port}`;
+  const playbackBoundaries = await verifyPlaybackBoundaries(browser, base);
   await context.grantPermissions(['clipboard-read', 'clipboard-write'], { origin: base });
   const ready = () => page.waitForFunction(() => document.querySelector('#settings')?.disabled === false);
   const change = (id, value) => page.locator(`#${id}`).evaluate((node, value) => { node.value = String(value); node.dispatchEvent(new Event('input', { bubbles: true })); }, value);
@@ -85,7 +204,7 @@ try {
   await page.locator('#play').click();
   assert.equal(await page.locator('#play-label').textContent(), 'Воспроизвести');
   await page.locator('#reverse').click();
-  await page.waitForFunction(() => document.querySelector('#progress').value === '0');
+  await page.waitForFunction(playbackFinished, 0);
   assert.equal(await geometry(), start, 'Reverse did not restore the starting pose');
   const svg = await download('svg');
   assert.equal(svg.name, 'time.svg'); assert.match(svg.bytes.toString(), /<svg/); assert.match(svg.bytes.toString(), /#c93554/);
@@ -163,6 +282,6 @@ try {
     else assert.equal(await page.locator('#microphone svg').count(), 0, 'README must dispose its controller');
   }
   assert.deepEqual(errors, []); assert.deepEqual(failed, []);
-  await writeFile(join(output, 'receipt.json'), JSON.stringify({ errors, failed, symbols: 330, fonts, checks: ['light/dark/mobile', 'rendered Cyrillic font', 'working copied code and color', 'play/pause/scrub/reverse/reduced motion', 'SVG/Lottie/dotLottie/Kotlin downloads', 'date', 'mobile focus and async close'] }, null, 2) + '\n');
+  await writeFile(join(output, 'receipt.json'), JSON.stringify({ errors, failed, symbols: 330, fonts, playbackBoundaries, checks: ['light/dark/mobile', 'rendered Cyrillic font', 'working copied code and color', 'play/pause/scrub/reverse/reduced motion', 'SVG/Lottie/dotLottie/Kotlin downloads', 'date', 'mobile focus and async close'] }, null, 2) + '\n');
   console.log('Catalog: 330 symbols, rendered Geist, working copy, playback, four downloads, mobile focus and async close');
 } finally { await browser.close(); await new Promise(resolve => server.close(resolve)); }
