@@ -20,6 +20,7 @@ let previous: RenderIconOptions | undefined;
 let revision = 0;
 let clip: SymbolPlayback | undefined;
 let stopDriver: (() => void) | undefined;
+let position = 0;
 let colorChanged = false;
 let detailOpener: HTMLElement | undefined;
 const modules = new Map<string, Promise<IconSymbol>>();
@@ -38,7 +39,7 @@ function load(id: string) {
   if (!modules.has(id)) modules.set(id, loaders[id]().catch(error => { modules.delete(id); throw error; }));
   return modules.get(id)!;
 }
-function progress(value: number) { input('progress').value = String(value); $('progress-value').textContent = `${Math.round(value * 100)}%`; }
+function progress(value: number) { position = value; input('progress').value = String(value); $('progress-value').textContent = `${Math.round(value * 100)}%`; }
 function stop() {
   stopDriver?.(); stopDriver = undefined;
   $('play-label').textContent = 'Воспроизвести';
@@ -166,11 +167,18 @@ function prepareClip() {
   clip = animation === 'transition' ? mounted.set(options, { duration, reducedMotion }) : mounted.effect(animation, { duration, reducedMotion });
   clip.pause();
 }
+function seek(value: number) {
+  // Seeking to the end completes a playback. A later scrub or reverse needs
+  // a fresh clip; completed controls no longer write to the mounted symbol.
+  if (!clip || clip.state !== 'running' && clip.state !== 'paused') prepareClip();
+  clip?.seek(value * duration); progress(value);
+}
 function play(reverse = false) {
   if (!mounted || !select('animation').value) return;
   if (stopDriver && !reverse) { stop(); return; }
   stop();
-  let start = Number(input('progress').value), end = reverse ? 0 : 1;
+  // The range rounds to its step, including to an endpoint before the last frame.
+  let start = position, end = reverse ? 0 : 1;
   if (!clip || start === end) { clip?.stop(); prepareClip(); start = reverse ? 1 : 0; }
   if (!clip) return;
   if (clip.duration === 0) {
@@ -180,9 +188,9 @@ function play(reverse = false) {
     }
     clip = undefined; progress(end); return;
   }
-  clip.seek(start * duration); progress(start);
+  seek(start);
   const clock = motion.value(start);
-  const unsubscribe = clock.subscribe(value => { clip?.seek(value * duration); progress(value); });
+  const unsubscribe = clock.subscribe(seek);
   const controls = clock.animate(end, { duration: Math.abs(end - start) * duration, ease: 'linear', reducedMotion: 'user' });
   const release = () => { unsubscribe(); clock.dispose(); if (stopDriver === release) { stopDriver = undefined; $('play-label').textContent = 'Воспроизвести'; } };
   stopDriver = release; $('play-label').textContent = 'Пауза';
@@ -248,7 +256,7 @@ input('date').onchange = () => {
 select('animation').onchange = () => { clearClip(); if (mounted) mounted.set(options, { duration: 0 }); updateAnimationChoices(); updateDetail(); };
 input('reduce-motion').onchange = () => { if (input('reduce-motion').checked) { stop(); clip?.finish(); progress(1); } };
 $('play').onclick = () => play(); $('reverse').onclick = () => play(true);
-input('progress').oninput = () => { stop(); if (!clip) prepareClip(); const value = Number(input('progress').value); clip?.seek(value * duration); progress(value); };
+input('progress').oninput = () => { stop(); seek(Number(input('progress').value)); };
 $('reset').onclick = () => { input('size').value = '24'; input('weight').value = '400'; input('opsz').value = '24'; input('auto-optics').checked = true; $('optics-control').hidden = true; colorChanged = false; setTheme(document.documentElement.dataset.theme === 'dark'); apply({ ...options, size: 24, weight: 400, opsz: 'auto' }); };
 $('copy').onclick = async () => { try { await navigator.clipboard.writeText(code()); $('copy-status').textContent = 'Скопировано'; } catch { const selection = getSelection(), range = document.createRange(); range.selectNodeContents($('import-code')); selection?.removeAllRanges(); selection?.addRange(range); $('copy-status').textContent = 'Нажмите Ctrl+C'; } };
 $('download').onclick = () => void exportFile();
