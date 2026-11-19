@@ -1,0 +1,122 @@
+{
+  "baselineCommit": "10a994686e34e4d1c6b03af0eeb879e6c55bd029",
+  "comparisons": [
+    {
+      "file": "mic-outline-default.svg",
+      "bodyWidth": 1,
+      "equal": true,
+      "sha256": "a2bfad73d51e0894e367f3976a6046474b9fe08bbc72ee391d76c8c17b79bcb8",
+      "style": {
+        "id": "lab-ui-v2.1-capsule-width",
+        "version": 1,
+        "minimum": 0.8,
+        "sha256": "0169af56e5fdf4a667e49bc89b6f4d7a55e1c040995c59f5f8f737db86b7dd40",
+        "evidenceSha256": "e00f9cc60fb56a6ac35e94fafc0b5cdc2f7d1c9fdf9b31ec67a8ca4b77b7b3d5"
+      }
+    },
+    {
+      "file": "mic-outline-90.svg",
+      "bodyWidth": 0.9,
+      "equal": true,
+      "sha256": "228bf1bb02d7c4c39a12e715d4506dd6274cbc7a7674fa7d51cabfe82428a4d2",
+      "style": {
+        "id": "lab-ui-v2.1-capsule-width",
+        "version": 1,
+        "minimum": 0.8,
+        "sha256": "0169af56e5fdf4a667e49bc89b6f4d7a55e1c040995c59f5f8f737db86b7dd40",
+        "evidenceSha256": "e00f9cc60fb56a6ac35e94fafc0b5cdc2f7d1c9fdf9b31ec67a8ca4b77b7b3d5"
+      }
+    },
+    {
+      "file": "mic-outline-80.svg",
+      "bodyWidth": 0.8,
+      "equal": true,
+      "sha256": "950cc52f095f9891db1f91c0a4f0959ec1a78d6c4b4701b90de0e45d4bbb609b",
+      "style": {
+        "id": "lab-ui-v2.1-capsule-width",
+        "version": 1,
+        "minimum": 0.8,
+        "sha256": "0169af56e5fdf4a667e49bc89b6f4d7a55e1c040995c59f5f8f737db86b7dd40",
+        "evidenceSha256": "e00f9cc60fb56a6ac35e94fafc0b5cdc2f7d1c9fdf9b31ec67a8ca4b77b7b3d5"
+      }
+    },
+    {
+      "file": "mic-filled-default.svg",
+      "bodyWidth": 1,
+      "equal": true,
+      "sha256": "7d4e9ce2f1dfc5ba59c10ae0700ea37d0c814afe1cf4cb0c3f83508d10a9af72",
+      "style": {
+        "id": "lab-ui-v2.1-capsule-width",
+        "version": 1,
+        "minimum": 0.8,
+        "sha256": "0169af56e5fdf4a667e49bc89b6f4d7a55e1c040995c59f5f8f737db86b7dd40",
+        "evidenceSha256": "e00f9cc60fb56a6ac35e94fafc0b5cdc2f7d1c9fdf9b31ec67a8ca4b77b7b3d5"
+      }
+    },
+    {
+      "file": "mic-filled-90.svg",
+      "bodyWidth": 0.9,
+      "equal": true,
+      "sha256": "7d14f7d4a3a66e8f1ee4219f6d75a6d569e3bc6fa8a5008293df5e6a7355fab4",
+      "style": {
+        "id": "lab-ui-v2.1-capsule-width",
+        "version": 1,
+        "minimum": 0.8,
+        "sha256": "0169af56e5fdf4a667e49bc89b6f4d7a55e1c040995c59f5f8f737db86b7dd40",
+        "evidenceSha256": "e00f9cc60fb56a6ac35e94fafc0b5cdc2f7d1c9fdf9b31ec67a8ca4b77b7b3d5"
+      }
+    },
+    {
+      "file": "mic-filled-80.svg",
+      "bodyWidth": 0.8,
+      "equal": true,
+      "sha256": "490d8241b8f3b4fae4761438957e01eef48d77e2158612e7045c2f08c9e9f0cd",
+      "style": {
+        "id": "lab-ui-v2.1-capsule-width",
+        "version": 1,
+        "minimum": 0.8,
+        "sha256": "0169af56e5fdf4a667e49bc89b6f4d7a55e1c040995c59f5f8f737db86b7dd40",
+        "evidenceSha256": "e00f9cc60fb56a6ac35e94fafc0b5cdc2f7d1c9fdf9b31ec67a8ca4b77b7b3d5"
+      }
+    },
+    {
+      "file": "mic-circle-outline-default.svg",
+      "bodyWidth": 1,
+      "equal": true,
+      "sha256": "dfb2de75c07e2189f71d719e0edeed228524aa7d2e52ebb8fc76fca17af60321",
+      "style": {
+        "id": "lab-ui-v2.1-capsule-width",
+        "version": 1,
+        "minimum": 0.8,
+        "sha256": "0169af56e5fdf4a667e49bc89b6f4d7a55e1c040995c59f5f8f737db86b7dd40",
+        "evidenceSha256": "e00f9cc60fb56a6ac35e94fafc0b5cdc2f7d1c9fdf9b31ec67a8ca4b77b7b3d5"
+      }
+    },
+    {
+      "file": "mic-circle-outline-90.svg",
+      "bodyWidth": 0.9,
+      "equal": true,
+      "sha256": "cd8cd303971555d5be1cbf4c85f6b6739aa83dfd7a2c8fd3bcc7aafdcc934216",
+      "style": {
+        "id": "lab-ui-v2.1-capsule-width",
+        "version": 1,
+        "minimum": 0.8,
+        "sha256": "0169af56e5fdf4a667e49bc89b6f4d7a55e1c040995c59f5f8f737db86b7dd40",
+        "evidenceSha256": "e00f9cc60fb56a6ac35e94fafc0b5cdc2f7d1c9fdf9b31ec67a8ca4b77b7b3d5"
+      }
+    },
+    {
+      "file": "mic-circle-outline-80.svg",
+      "bodyWidth": 0.8,
+      "equal": true,
+      "sha256": "ee143713393e1b5f97860ff84fa4a00e998fb39655e69d3ecd3c60814a0f9279",
+      "style": {
+        "id": "lab-ui-v2.1-capsule-width",
+        "version": 1,
+        "minimum": 0.8,
+        "sha256": "0169af56e5fdf4a667e49bc89b6f4d7a55e1c040995c59f5f8f737db86b7dd40",
+        "evidenceSha256": "e00f9cc60fb56a6ac35e94fafc0b5cdc2f7d1c9fdf9b31ec67a8ca4b77b7b3d5"
+      }
+    }
+  ]
+}

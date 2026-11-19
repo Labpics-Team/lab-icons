@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 /**
- * Parity guard for @labpics/icons
+ * Parity guard for the frozen @labpics/icons/ir compatibility snapshot
  *
  * Verifies:
  *   1. Exactly 238 unique icon names exist in both Filled and Outline.
  *   2. Every Filled name has a matching Outline name (triple comm -3 style check).
  *   3. Exactly 476 total SVG files across both variants.
- *   4. The built dist/index.js exports exactly 476 named symbols.
+ *   4. The built dist/legacy-static.js exports exactly 476 named symbols.
  *
  * Exits non-zero on ANY discrepancy — the check bites.
  */
@@ -24,7 +24,7 @@ const ROOT = join(__dirname, '..');
 
 const FILLED_DIR = join(ROOT, 'svg', 'Filled');
 const OUTLINE_DIR = join(ROOT, 'svg', 'Outline');
-const DIST_INDEX = join(ROOT, 'dist', 'index.js');
+const DIST_INDEX = join(ROOT, 'dist', 'legacy-static.js');
 
 let errors = 0;
 
@@ -107,19 +107,19 @@ if (uniqueNames.size !== EXPECTED_ICON_NAMES) {
   ok(`Unique icon names: ${EXPECTED_ICON_NAMES}`);
 }
 
-// ── check dist/index.js export count ─────────────────────────────────────────
+// ── check dist/legacy-static.js export count ─────────────────────────────────────────
 
 if (!existsSync(DIST_INDEX)) {
-  fail(`dist/index.js not found — run 'pnpm build' first`);
+  fail(`dist/legacy-static.js not found — run 'pnpm build' first`);
 } else {
   const src = readFileSync(DIST_INDEX, 'utf8');
   // Count "export const <name> = " lines
   const matches = src.match(/^export const \w+ = /mg);
   const exportCount = matches ? matches.length : 0;
   if (exportCount !== EXPECTED_SOURCE_VARIANTS) {
-    fail(`dist/index.js export count: expected ${EXPECTED_SOURCE_VARIANTS}, got ${exportCount}`);
+    fail(`dist/legacy-static.js export count: expected ${EXPECTED_SOURCE_VARIANTS}, got ${exportCount}`);
   } else {
-    ok(`dist/index.js exports: ${EXPECTED_SOURCE_VARIANTS}`);
+    ok(`dist/legacy-static.js exports: ${EXPECTED_SOURCE_VARIANTS}`);
   }
 
   // Verify every Filled name appears as export (full set, not sampled)
@@ -132,7 +132,7 @@ if (!existsSync(DIST_INDEX)) {
       missingFilled++;
     }
   }
-  if (missingFilled === 0) ok(`All ${EXPECTED_ICON_NAMES} Filled export names verified in dist/index.js`);
+  if (missingFilled === 0) ok(`All ${EXPECTED_ICON_NAMES} Filled export names verified in dist/legacy-static.js`);
 
   // Verify every Outline name appears as export (full set, not sampled)
   let missingOutline = 0;
@@ -144,7 +144,7 @@ if (!existsSync(DIST_INDEX)) {
       missingOutline++;
     }
   }
-  if (missingOutline === 0) ok(`All ${EXPECTED_ICON_NAMES} Outline export names verified in dist/index.js`);
+  if (missingOutline === 0) ok(`All ${EXPECTED_ICON_NAMES} Outline export names verified in dist/legacy-static.js`);
 }
 
 // ── result ────────────────────────────────────────────────────────────────────

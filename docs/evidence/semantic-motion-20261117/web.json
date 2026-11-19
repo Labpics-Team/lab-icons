@@ -1,0 +1,22 @@
+{
+  "ok": true,
+  "values": 15,
+  "live": 0,
+  "groups": [
+    "selection/check",
+    "direction",
+    "loading/reload",
+    "notification",
+    "volume/progress",
+    "slash/off"
+  ],
+  "draw": "authored guide mask",
+  "interruption": "visible pose",
+  "reducedMotion": "synchronous endpoint",
+  "midframes": [
+    "current part key",
+    "rest and interrupted level phase",
+    "explicit draw endpoint",
+    "repeated draw"
+  ]
+}

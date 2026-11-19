@@ -70,7 +70,7 @@ describe('capability and design contract', () => {
       adapters: { lottie: 'not-exported', sfSymbols: 'not-exported' },
     });
     const gesture = glyphCapabilities('time', 'outline').motion.gestures[0]!;
-    expect(sampleMotionGesture(gesture, 0.5).map(({ rotation }) => rotation)).toEqual([180, 15]);
+    expect(sampleMotionGesture(gesture, 0.5).map(sample => sample.kind === 'rotate' ? sample.rotation : undefined)).toEqual([180, 15]);
   });
 
   it('exposes opsz only for variants with an independent sampled optical proof', () => {

@@ -1,0 +1,69 @@
+{
+  "status-circle-state-variation": {
+    "maxBytes": 13990,
+    "maxGzipBytes": 5282,
+    "bytes": 13964,
+    "gzipBytes": 5273,
+    "modules": [
+      "../../lab-icons-authored-replacement-20261102/<stdin>",
+      "dist/ir/annulus-geometry-runtime.js",
+      "dist/ir/state-annulus-runtime.js",
+      "dist/ir/state-runtime.js",
+      "dist/state-variations/status-circle.js",
+      "dist/states/status-circle.js"
+    ],
+    "pass": true
+  },
+  "playback-circle-state-variation": {
+    "maxBytes": 10512,
+    "maxGzipBytes": 3828,
+    "bytes": 10486,
+    "gzipBytes": 3821,
+    "modules": [
+      "../../lab-icons-authored-replacement-20261102/<stdin>",
+      "dist/ir/annulus-geometry-runtime.js",
+      "dist/ir/state-annulus-runtime.js",
+      "dist/ir/state-runtime.js",
+      "dist/state-variations/playback-circle.js",
+      "dist/states/playback-circle.js"
+    ],
+    "pass": true
+  },
+  "status-circle-enclosure-patch": {
+    "maxBytes": 4808,
+    "maxGzipBytes": 1936,
+    "bytes": 4806,
+    "gzipBytes": 1935,
+    "modules": [
+      "../../lab-icons-authored-replacement-20261102/<stdin>",
+      "dist/ir/annulus-geometry-runtime.js",
+      "dist/ir/state-annulus-runtime.js",
+      "dist/ir/state-runtime.js",
+      "dist/state-variations/status-circle.js",
+      "dist/states/status-circle.js"
+    ],
+    "pass": true
+  },
+  "playback-circle-enclosure-patch": {
+    "maxBytes": 4812,
+    "maxGzipBytes": 1935,
+    "bytes": 4812,
+    "gzipBytes": 1935,
+    "modules": [
+      "../../lab-icons-authored-replacement-20261102/<stdin>",
+      "dist/ir/annulus-geometry-runtime.js",
+      "dist/ir/state-annulus-runtime.js",
+      "dist/ir/state-runtime.js",
+      "dist/state-variations/playback-circle.js",
+      "dist/states/playback-circle.js"
+    ],
+    "pass": true
+  },
+  "runtime": {
+    "bytes": 4036,
+    "gzipBytes": 1581,
+    "modules": [
+      "src/states/runtime.ts"
+    ]
+  }
+}

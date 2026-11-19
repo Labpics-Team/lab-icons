@@ -29,6 +29,7 @@ import {
   DEFAULT_OBSERVATORY_RASTER_SIZES,
 } from './lib/quality-metrics.js';
 import { AUTO_ACCEPTANCE_DEVIATION_PCT } from './lib/quality-policy.js';
+import { writeSymbolExplorer } from './lib/symbol-explorer.js';
 
 const DEFAULT_REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
 const VARIANTS = Object.freeze(['outline', 'filled']);
@@ -417,12 +418,12 @@ function composedMarkup(entries, canvas, idPrefix, { fill = 'currentColor' } = {
   };
 }
 
-function iconSvg(entries, canvas, className, extra = '', idPrefix = 'icon') {
+export function iconSvg(entries, canvas, className, extra = '', idPrefix = 'icon') {
   const composed = composedMarkup(entries, canvas, idPrefix);
   return `<svg class="icon ${className}" viewBox="0 0 ${canvas} ${canvas}" role="img" ${extra}><defs>${composed.defs}</defs>${composed.body}</svg>`;
 }
 
-function comparisonVisual(entries, canvas, id, kind) {
+export function comparisonVisual(entries, canvas, id, kind) {
   const { originalEntries, candidateEntries } = entries;
   if (!candidateEntries) return '<div class="not-modeled">Нет модели</div>';
   const safeId = visualId(id);
@@ -656,7 +657,7 @@ export function serializeObservatoryReport(report) {
   return `${JSON.stringify(report, null, 2)}\n`;
 }
 
-export function buildObservatory({ repo = DEFAULT_REPO, outDir = join(repo, 'preview') } = {}) {
+export function buildObservatory({ repo = DEFAULT_REPO, outDir = join(repo, 'preview'), interactive = false } = {}) {
   const root = resolve(repo);
   const output = resolve(outDir);
   const { report, visuals } = createObservatoryReport({ repo: root });
@@ -668,6 +669,9 @@ export function buildObservatory({ repo = DEFAULT_REPO, outDir = join(repo, 'pre
   const htmlPath = join(output, 'observatory.html');
   writeFileSync(jsonPath, json, 'utf8');
   writeFileSync(htmlPath, html, 'utf8');
+  if (interactive) writeSymbolExplorer({
+    repo: root, outDir: output, report, visuals, canvas: grid.canvas.width, iconSvg, comparisonVisual,
+  });
   return { report, visuals, json, html, jsonPath, htmlPath };
 }
 
@@ -689,7 +693,7 @@ const isMain =
   process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href;
 if (isMain) {
   try {
-    const result = buildObservatory({ repo: DEFAULT_REPO, ...cliOptions(process.argv.slice(2)) });
+    const result = buildObservatory({ repo: DEFAULT_REPO, ...cliOptions(process.argv.slice(2)), interactive: true });
     console.log(
       `build-observatory: REPORT — ${result.report.summary.variants} variants; ` +
         `${result.report.summary.modeled} modeled; ${result.report.summary.notModeled} NOT_MODELED; ` +

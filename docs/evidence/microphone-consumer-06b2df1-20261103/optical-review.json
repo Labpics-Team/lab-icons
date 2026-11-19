@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "/root/adjacent_consumer_review",
+  "reviewedAt": "2026-11-02T21:58:27Z",
+  "axis": "Независимый оптический просмотр установленного consumer: modest capsule narrowing с сохранением узнаваемого микрофона",
+  "verdict": "PASS",
+  "scope": {
+    "icons": ["mic", "mic-circle"],
+    "variants": ["outline", "filled"],
+    "sizesPx": [16, 24, 48],
+    "bodyWidths": [1, 0.9, 0.8],
+    "motionMode": "no-preference",
+    "surface": "Светлая поверхность, четыре символа в одинаковых native Lab UI кнопках; три ряда размеров",
+    "sourceCommit": "44f9c10f6d3349ce061b56497cafc66b901f5a81",
+    "uiCommit": "06b2df1cb043175cb48a443eba377e1227e740c9",
+    "run": "41519738213",
+    "job": "125532379401"
+  },
+  "artifacts": [
+    {
+      "file": "E:\\AgentWork\\microphone-consumer-06b2df1-20261103\\microphone-default-crop.png",
+      "sha256": "3a0cf59610b9f6b3fac7e7f843edc59a9ffddb7874d06798856b376f8b6aab64",
+      "bodyWidth": 1,
+      "provenance": {
+        "sourceFile": "no-preference.png",
+        "sourceSha256": "f9f908d96112d69cd714ef4f407dd509bea5b078d395f2f4e05117c88ab4bdaf",
+        "crop": [16, 7378, 544, 417],
+        "decodedPixelsMatch": true,
+        "decoded32bppPixelSha256": "c69794678d9e64e51cb96125620f83eddb06066306c52391a78d3555401dd07a"
+      }
+    },
+    {
+      "file": "E:\\AgentWork\\microphone-consumer-06b2df1-20261103\\no-preference-microphone-width-0.9.png",
+      "sha256": "f647b2988875213b73a5bb732ac752f98a1fe27c473e4adcf6ebd0cbc702cbfd",
+      "bodyWidth": 0.9,
+      "bytes": 26264,
+      "receiptDigestMatches": true
+    },
+    {
+      "file": "E:\\AgentWork\\microphone-consumer-06b2df1-20261103\\no-preference-microphone-width-0.8.png",
+      "sha256": "33f49d31bd91b3fd5660dcaec4c09f705c16ee49ab568a0d5d348aae380a18eb",
+      "bodyWidth": 0.8,
+      "bytes": 26225,
+      "receiptDigestMatches": true
+    }
+  ],
+  "receipt": {
+    "file": "E:\\AgentWork\\microphone-consumer-06b2df1-20261103\\visual-receipt.json",
+    "sha256": "1d91bddca4f06e82b60f15cc7a1c1fdff0a079e0b8cd9fe8dab0f9e6d9d1096b",
+    "reviewerVerified": "PNG hashes и full source hash совпадают с receipt; baseline crop соответствует указанному региону full source по декодированным пикселям. Отдельного нового self-hosted запуска reviewer не выполнял."
+  },
+  "method": {
+    "skill": "E:\\AgentWork\\agents-config-lab-icons-platform-20261101\\skills\\design\\SKILL.md",
+    "visualTool": "view_image, original detail",
+    "naturalScale": "Просмотр всех трёх PNG целиком без ресэмплинга.",
+    "zoomPasses": [
+      {
+        "pass": 1,
+        "scale": "4x nearest-neighbor, все 12 specimens каждого PNG",
+        "focus": "Капсула, countershape, непрерывность краёв, высота, отношение корпуса/стойки и кругового обрамления",
+        "defects": []
+      },
+      {
+        "pass": 2,
+        "scale": "16 px при8x и24 px при6x nearest-neighbor; строки width1/0.9/0.8, столбцы mic Outline/Filled и mic-circle Outline/Filled",
+        "focus": "Сохранение маленького counter, negative capsule, антиалиасинг, apparent body width между независимыми Outline/Filled",
+        "defects": []
+      }
+    ]
+  },
+  "observations": [
+    "При0.9 и0.8 корпус сохраняет вертикальную капсулу с округлыми концами. Силуэт корпуса, U-образный держатель и ножка продолжают читаться целым микрофоном; превращения корпуса в круг или потерю смысла не вижу.",
+    "В48 px сужение0.8 заметно стройнее baseline; держатель и круг сохраняют прежнюю опору, а зазор между корпусом и держателем становится свободнее. Видимых защипов, обрыва или clipping нет.",
+    "В24 px оба сужения остаются ясными. В16 px изменение небольшое и ограничено растровым разрешением, но открытый counter Outline mic и светлый negative capsule Filled mic-circle остаются различимыми.",
+    "У mic-circle Outline чёрный внутренний корпус и у Filled светлый negative корпус воспринимаются немного различно по ширине уже в авторском baseline. Оба читаются микрофоном при всех трёх значениях. Это независимые начертания; равенство их ширин не является критерием.",
+    "Filled круг остаётся намеренно тяжелее Outline из-за заливки. Сужение светлого корпуса немного увеличивает окружающую тёмную массу, но в показанном диапазоне не разрушает визуальный баланс или читаемость."
+  ],
+  "findings": [],
+  "checks": {
+    "actualPngVisualInspection": "Да",
+    "pngReceiptDigestCheck": "Да",
+    "baselineCropPixelIdentity": "Да",
+    "newBrowserExecution": "Не было",
+    "buildOrHeavyTests": "Не было",
+    "repositoryMutation": "Не было"
+  },
+  "limits": [
+    "PASS относится только к указанным сохранённым specimens, диапазону1/0.9/0.8, размерам16/24/48, светлой поверхности и конкретным source/UI commit.",
+    "Это не приёмка нового adjacent consumer e3227a2, сравнения с question-circle/play-circle, source-state motion либо остальных семейств и осей.",
+    "Просмотр статических PNG не проверяет новый gesture, interruption, reduced-motion execution, иной DPR, тёмную тему или другой дизайн-системный контекст.",
+    "Оптический PASS здесь не заменяет полную Figma parity и глобальную оптическую приёмку платформы."
+  ]
+}

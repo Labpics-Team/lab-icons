@@ -1,0 +1,558 @@
+{
+  "capturedAt": "2026-11-17T19:53:45.821Z",
+  "baseSha": "0e551d218faa4d336eaaf088264cb161508d0285",
+  "workingTree": true,
+  "environment": {
+    "node": "v24.15.0",
+    "versions": {
+      "node": "24.15.0",
+      "acorn": "8.16.0",
+      "ada": "3.4.4",
+      "amaro": "1.1.8",
+      "ares": "1.34.6",
+      "brotli": "1.2.0",
+      "cldr": "48.0",
+      "icu": "78.2",
+      "llhttp": "9.3.1",
+      "merve": "1.2.2",
+      "modules": "137",
+      "napi": "10",
+      "nbytes": "0.1.3",
+      "ncrypto": "0.0.1",
+      "nghttp2": "1.68.0",
+      "openssl": "3.5.5",
+      "simdjson": "4.5.0",
+      "simdutf": "6.4.0",
+      "sqlite": "3.51.3",
+      "tz": "2026a",
+      "undici": "7.24.4",
+      "unicode": "17.0",
+      "uv": "1.51.0",
+      "uvwasi": "0.0.23",
+      "v8": "13.6.233.17-node.48",
+      "zlib": "1.3.1-e00f703",
+      "zstd": "1.5.7"
+    },
+    "platform": "win32",
+    "arch": "x64",
+    "cpu": "12th Gen Intel(R) Core(TM) i9-12900K",
+    "cpuCount": 24,
+    "totalMemory": 102879490048
+  },
+  "lockfileSha256": "ba80ae24ecc5d32ef90f1e1b4bf29a731d0c39674edf4993fafc3b3d53d15eb2",
+  "packageMeasurement": "fflate@0.8.3 gzipSync level=9 mtime=0 after pnpm build",
+  "consumerMeasurement": "esbuild@0.28.1 bundle+minify+treeshake es2022 browser; fflate@0.8.3 gzipSync level=9 mtime=0",
+  "reportSha256": "4915ca2384846df7595451c2ea7e4162f421d9a90e106d4bec8e88a54ee851fe",
+  "totals": {
+    "previous": {
+      "bytes": 35171381,
+      "gzipBytes": 11022650
+    },
+    "current": {
+      "bytes": 32300120,
+      "gzipBytes": 10054235
+    }
+  },
+  "changedArtifactGroups": {
+    "authoring": {
+      "count": 1,
+      "beforeBytes": 986,
+      "beforeGzipBytes": 399,
+      "bytes": 1230,
+      "gzipBytes": 461
+    },
+    "export": {
+      "count": 5,
+      "beforeBytes": 0,
+      "beforeGzipBytes": 0,
+      "bytes": 43122,
+      "gzipBytes": 16238
+    },
+    "ir": {
+      "count": 2,
+      "beforeBytes": 176512,
+      "beforeGzipBytes": 51190,
+      "bytes": 177624,
+      "gzipBytes": 51517
+    },
+    "lottie": {
+      "count": 660,
+      "beforeBytes": 3248252,
+      "beforeGzipBytes": 1133600,
+      "bytes": 227678,
+      "gzipBytes": 119412
+    },
+    "motion": {
+      "count": 2,
+      "beforeBytes": 28866,
+      "beforeGzipBytes": 10378,
+      "bytes": 34144,
+      "gzipBytes": 12223
+    },
+    "render": {
+      "count": 3,
+      "beforeBytes": 8376,
+      "beforeGzipBytes": 3158,
+      "bytes": 14121,
+      "gzipBytes": 5026
+    },
+    "states": {
+      "count": 3,
+      "beforeBytes": 568587,
+      "beforeGzipBytes": 163161,
+      "bytes": 621715,
+      "gzipBytes": 178330
+    },
+    "symbols": {
+      "count": 4,
+      "beforeBytes": 241911,
+      "beforeGzipBytes": 76522,
+      "bytes": 295095,
+      "gzipBytes": 91422
+    }
+  },
+  "retiredArtifacts": [
+    {
+      "file": "dist/ir/lottie-runtime.js",
+      "previousPolicy": {
+        "baselineBytes": 10409,
+        "baselineGzipBytes": 3724,
+        "maxBytes": 11590,
+        "maxGzipBytes": 3776,
+        "allowedModules": [
+          "src/lottie/runtime.ts"
+        ],
+        "forbiddenNeedles": [
+          "sourceMappingURL"
+        ]
+      },
+      "previousPolicySha256": "9e4de2e77de40891a1946325c8f36bdf7f7bc72dd99217dc78f2cb937cd6d556"
+    },
+    {
+      "file": "dist/ir/lottie-types.d.ts",
+      "previousPolicy": {
+        "baselineBytes": 2091,
+        "baselineGzipBytes": 912,
+        "maxBytes": 2113,
+        "maxGzipBytes": 926,
+        "allowedModules": [],
+        "forbiddenNeedles": [
+          "sourceMappingURL"
+        ]
+      },
+      "previousPolicySha256": "b206ddaa4acc6447f6d1d2b38b1b196e92eb46d957126d3778aaaa1f1e670a18"
+    }
+  ],
+  "policyDecision": "Changed/new outputs use exact measured size ceilings and actual module inclusion; unchanged output ceilings stay unchanged. Existing consumer ceilings stay unchanged when measurements fit. Old exact entry strings are preserved.",
+  "artifacts": {
+    "dist/authoring/symbol-source.d.ts": {
+      "bytes": 1230,
+      "gzipBytes": 461,
+      "modules": [],
+      "sha256": "7e0f50aa7588a4dbcb426d50dfb24e0cbbd59c44c8ce5208da4beba1032c409d",
+      "brotliBytes": 373
+    },
+    "dist/export/dotlottie.d.ts": {
+      "bytes": 378,
+      "gzipBytes": 254,
+      "modules": [],
+      "sha256": "5242ef156ff2dfa5676ba60fdae4abc7e6c726110fa86087e4b27f5d80f540b8",
+      "brotliBytes": 202
+    },
+    "dist/export/lottie.d.ts": {
+      "bytes": 356,
+      "gzipBytes": 176,
+      "modules": [],
+      "sha256": "c04f8ade3facd11dd85b3ae747ebff01c05b0ba78cbf955bfd3e956f5c73d220",
+      "brotliBytes": 151
+    },
+    "dist/export/lottie.js": {
+      "bytes": 39655,
+      "gzipBytes": 14626,
+      "modules": [
+        "src/core/calendar-date.js",
+        "src/core/optical-sampling.js",
+        "src/lottie/dotlottie.ts",
+        "src/lottie/numeric-path.ts",
+        "src/lottie/symbol-export.ts",
+        "src/motion/path-view.ts",
+        "src/motion/symbol-sampler.ts",
+        "src/render/calendar.ts",
+        "src/render/pose.ts",
+        "src/render/request.ts"
+      ],
+      "sha256": "5a9151320ee4a122bdec77fc93843731d149af634187069c6727488cc130788b",
+      "brotliBytes": 12906
+    },
+    "dist/export/symbol-export.d.ts": {
+      "bytes": 514,
+      "gzipBytes": 260,
+      "modules": [],
+      "sha256": "5359c0e46972aa217593c3d97878fd810311d8cf3be23ed588403e9f6922ff1e",
+      "brotliBytes": 192
+    },
+    "dist/export/types.d.ts": {
+      "bytes": 2219,
+      "gzipBytes": 922,
+      "modules": [],
+      "sha256": "6cc4a55e2b999235188843c741d6085286bef6fa11aa848757100dd0690c120e",
+      "brotliBytes": 745
+    },
+    "dist/ir/compiler.js": {
+      "bytes": 124600,
+      "gzipBytes": 37976,
+      "modules": [
+        "src/core/anatomy-gen.js",
+        "src/core/calendar-date.js",
+        "src/core/calendar-geometry.js",
+        "src/core/circle-dictionary.js",
+        "src/core/glyph-operators.js",
+        "src/core/icon-geometry.js",
+        "src/core/motion-sampler.js",
+        "src/core/path-data.js",
+        "src/ir/compiler.ts",
+        "src/ir/recipes.ts",
+        "src/ir/sha256.ts",
+        "src/ir/svg-assembly.ts"
+      ],
+      "sha256": "3cd76cdc8b161a86eaf78638ac7749826603b42fd77e2406ad774374f42ce4e9",
+      "brotliBytes": 32844
+    },
+    "dist/ir/recipes.js": {
+      "bytes": 53024,
+      "gzipBytes": 13541,
+      "modules": [
+        "src/core/calendar-date.js",
+        "src/core/calendar-geometry.js",
+        "src/core/glyph-operators.js",
+        "src/ir/recipes.ts"
+      ],
+      "sha256": "40c6324f3e46c89ca4e5cef56aad9bd2767b56ba4c28a0574ff3e01495e3d762",
+      "brotliBytes": 11685
+    },
+    "dist/motion/index.js": {
+      "bytes": 32917,
+      "gzipBytes": 11683,
+      "modules": [
+        "src/core/calendar-date.js",
+        "src/core/motion-sampler.js",
+        "src/core/optical-sampling.js",
+        "src/motion/effect-projection.ts",
+        "src/motion/execution.js",
+        "src/motion/index.ts",
+        "src/motion/path-view.ts",
+        "src/motion/symbol-sampler.ts",
+        "src/motion/symbol-state.ts",
+        "src/render/calendar.ts",
+        "src/render/pose.ts",
+        "src/render/request.ts"
+      ],
+      "sha256": "b3f37461b707d82e6bdb1cb80850ab2b5d1a041b13a2b13d2263341aca3877c0",
+      "brotliBytes": 10073
+    },
+    "dist/motion/symbol-state.d.ts": {
+      "bytes": 1227,
+      "gzipBytes": 540,
+      "modules": [],
+      "sha256": "5b336bb745ef4a8c293a7b98e105f692bf5a71b577bd756638ce96cdcd0686e6",
+      "brotliBytes": 437
+    },
+    "dist/render/index.d.ts": {
+      "bytes": 3713,
+      "gzipBytes": 1227,
+      "modules": [],
+      "sha256": "51d0902d72372ad00cd481eb472ae5af767d57a70c065c09b43772e9170d6f42",
+      "brotliBytes": 994
+    },
+    "dist/render/index.js": {
+      "bytes": 8990,
+      "gzipBytes": 3277,
+      "modules": [
+        "src/core/calendar-date.js",
+        "src/core/optical-sampling.js",
+        "src/render/calendar.ts",
+        "src/render/index.ts",
+        "src/render/parts.ts",
+        "src/render/request.ts"
+      ],
+      "sha256": "832da4fd9c10a9fb6cd41111c363bf34fd4e8560ace9ad4a415f232a72e0b1f4",
+      "brotliBytes": 2894
+    },
+    "dist/render/optical-grid.d.ts": {
+      "bytes": 1418,
+      "gzipBytes": 522,
+      "modules": [],
+      "sha256": "98b8125fcf22ebff68c72ba9079eac22e4645fbdc714b0059f93734179e1dd20",
+      "brotliBytes": 431
+    },
+    "dist/states/calendar.js": {
+      "bytes": 305301,
+      "gzipBytes": 83718,
+      "modules": [],
+      "sha256": "ea32e5599604241cc6d9347adf942de383c062b8915a61ccb189e27fd4a98979",
+      "brotliBytes": 46028
+    },
+    "dist/states/microphone.js": {
+      "bytes": 107742,
+      "gzipBytes": 33884,
+      "modules": [],
+      "sha256": "de843223271305c58cf6f44543114666b74fd685ff5a9e1f54c9a715a09fe4cf",
+      "brotliBytes": 24230
+    },
+    "dist/states/status.js": {
+      "bytes": 208672,
+      "gzipBytes": 60728,
+      "modules": [],
+      "sha256": "c627721c34b534692f1652bba595d6975cfc3918b3153d84bdf1893a869c9521",
+      "brotliBytes": 39119
+    },
+    "dist/symbols/calendar-number.js": {
+      "bytes": 148464,
+      "gzipBytes": 44723,
+      "modules": [],
+      "sha256": "9658685ec038b7cec11db5e530c4d342b56aeebf5f788d22f00065187e299495",
+      "brotliBytes": 33284
+    },
+    "dist/symbols/checkmark-circle.js": {
+      "bytes": 37606,
+      "gzipBytes": 13055,
+      "modules": [],
+      "sha256": "dd79430053369ffd7427eb3023308b8209682bc2b7947dac7e840adb8f26009a",
+      "brotliBytes": 9377
+    },
+    "dist/symbols/checkmark.js": {
+      "bytes": 29892,
+      "gzipBytes": 9527,
+      "modules": [],
+      "sha256": "4b0aaa1d57545f837a86c6646e78efdf4479e7ffea9f391b49af0a3f10b9095e",
+      "brotliBytes": 6827
+    },
+    "dist/symbols/mic-off.js": {
+      "bytes": 79133,
+      "gzipBytes": 24117,
+      "modules": [],
+      "sha256": "a3684115b4d5d8c036d1e0f7a4209552ca9532e774bc5d33e09d4ddca03974e5",
+      "brotliBytes": 17280
+    }
+  },
+  "consumers": {
+    "one-family-static": {
+      "bytes": 1090,
+      "gzipBytes": 553,
+      "brotliBytes": 496,
+      "modules": [
+        "<stdin>",
+        "dist/ir/author-request-runtime.js",
+        "dist/ir/request.js",
+        "dist/ir/symbol-data/plus-circle.js",
+        "dist/ir/symbol-runtime.js",
+        "dist/symbols/plus-circle.js"
+      ]
+    },
+    "one-family-lottie": {
+      "bytes": 52785,
+      "gzipBytes": 20118,
+      "brotliBytes": 16265,
+      "modules": [
+        "<stdin>",
+        "dist/export/lottie.js",
+        "dist/ir/author-request-runtime.js",
+        "dist/ir/request.js",
+        "dist/ir/symbol-runtime.js",
+        "dist/symbols/time.js"
+      ]
+    },
+    "one-family-dotlottie": {
+      "bytes": 60870,
+      "gzipBytes": 24037,
+      "brotliBytes": 19775,
+      "modules": [
+        "<stdin>",
+        "dist/export/lottie.js",
+        "dist/ir/author-request-runtime.js",
+        "dist/ir/request.js",
+        "dist/ir/symbol-runtime.js",
+        "dist/symbols/time.js"
+      ]
+    }
+  },
+  "changedConsumers": [
+    {
+      "name": "recorded-model-axis",
+      "entry": "import { glyph } from '@labpics/icons/ir';\nconsole.log(glyph({ icon: 'chevron-forward', axes: { weight: 1.1, opsz: 32 } }));\n",
+      "previous": {
+        "entry": "import { glyph } from '@labpics/icons/ir';\nconsole.log(glyph({ icon: 'chevron-forward', axes: { weight: 1.1, opsz: 32 } }));\n",
+        "baselineBytes": 839226,
+        "baselineGzipBytes": 210290,
+        "maxBytes": 853339,
+        "maxGzipBytes": 214703
+      },
+      "actual": {
+        "bytes": 839230,
+        "gzipBytes": 210291,
+        "brotliBytes": 157305,
+        "modules": [
+          "<stdin>",
+          "dist/ir/compiler.js",
+          "dist/ir/index.js",
+          "dist/ir/request.js",
+          "dist/legacy-static.js"
+        ]
+      }
+    },
+    {
+      "name": "recorded-motion",
+      "entry": "import { glyph, glyphCapabilities } from '@labpics/icons/ir';\nimport { compileSymbolEffect } from '@labpics/icons/motion';\nconsole.log(compileSymbolEffect(glyph({ icon: 'time' }), glyphCapabilities('time'), 'time.advance', { duration: 400 }));\n",
+      "previous": {
+        "entry": "import { glyph, glyphCapabilities } from '@labpics/icons/ir';\nimport { compileSymbolEffect } from '@labpics/icons/motion';\nconsole.log(compileSymbolEffect(glyph({ icon: 'time' }), glyphCapabilities('time'), 'time.advance', { duration: 400 }));\n",
+        "baselineBytes": 856431,
+        "baselineGzipBytes": 214254,
+        "maxBytes": 865952,
+        "maxGzipBytes": 217706
+      },
+      "actual": {
+        "bytes": 856452,
+        "gzipBytes": 214254,
+        "brotliBytes": 160744,
+        "modules": [
+          "<stdin>",
+          "dist/ir/compiler.js",
+          "dist/ir/contour-runtime.js",
+          "dist/ir/index.js",
+          "dist/ir/request.js",
+          "dist/legacy-static.js",
+          "dist/motion/index.js"
+        ]
+      }
+    },
+    {
+      "name": "full-ir-opt-in",
+      "entry": "import { glyph } from '@labpics/icons/ir';\nconsole.log(glyph({ icon: 'alert' }));\n",
+      "previous": {
+        "entry": "import { glyph } from '@labpics/icons/ir';\nconsole.log(glyph({ icon: 'alert' }));\n",
+        "baselineBytes": 839190,
+        "baselineGzipBytes": 210274,
+        "maxBytes": 921319,
+        "maxGzipBytes": 231011
+      },
+      "actual": {
+        "bytes": 839194,
+        "gzipBytes": 210276,
+        "brotliBytes": 157301,
+        "modules": [
+          "<stdin>",
+          "dist/ir/compiler.js",
+          "dist/ir/index.js",
+          "dist/ir/request.js",
+          "dist/legacy-static.js"
+        ]
+      }
+    },
+    {
+      "name": "recipes-only",
+      "entry": "import { buildCalendarNumberGeometry } from '@labpics/icons/ir/recipes';\nconsole.log(buildCalendarNumberGeometry);\n",
+      "previous": {
+        "entry": "import { buildCalendarNumberGeometry } from '@labpics/icons/ir/recipes';\nconsole.log(buildCalendarNumberGeometry);\n",
+        "baselineBytes": 11537,
+        "baselineGzipBytes": 4590,
+        "maxBytes": 12690,
+        "maxGzipBytes": 5049
+      },
+      "actual": {
+        "bytes": 11955,
+        "gzipBytes": 4706,
+        "brotliBytes": 4139,
+        "modules": [
+          "<stdin>",
+          "dist/ir/recipes.js"
+        ]
+      }
+    },
+    {
+      "name": "gesture-reload-ir-reference",
+      "entry": "import { glyph, glyphCapabilities } from '@labpics/icons/symbols/reload';\nimport { renderGlyphSvg } from '@labpics/icons/ir/render';\nimport { compileSymbolEffect } from '@labpics/icons/motion';\nconst value = glyph();\nconsole.log(renderGlyphSvg(value), compileSymbolEffect(value, glyphCapabilities(), 'reload.cycle', { duration: 400 }));\n",
+      "previous": {
+        "entry": "import { glyph, glyphCapabilities } from '@labpics/icons/symbols/reload';\nimport { renderGlyphSvg } from '@labpics/icons/ir/render';\nimport { compileSymbolEffect } from '@labpics/icons/motion';\nconst value = glyph();\nconsole.log(renderGlyphSvg(value), compileSymbolEffect(value, glyphCapabilities(), 'reload.cycle', { duration: 400 }));\n",
+        "baselineBytes": 26756,
+        "baselineGzipBytes": 7880,
+        "maxBytes": 31702,
+        "maxGzipBytes": 9756
+      },
+      "actual": {
+        "bytes": 26771,
+        "gzipBytes": 7887,
+        "brotliBytes": 6716,
+        "modules": [
+          "<stdin>",
+          "dist/ir/author-request-runtime.js",
+          "dist/ir/contour-runtime.js",
+          "dist/ir/render.js",
+          "dist/ir/request.js",
+          "dist/ir/symbol-runtime.js",
+          "dist/motion/index.js",
+          "dist/symbols/reload.js"
+        ]
+      }
+    },
+    {
+      "name": "gesture-refresh-ir-reference",
+      "entry": "import { glyph, glyphCapabilities } from '@labpics/icons/symbols/refresh';\nimport { renderGlyphSvg } from '@labpics/icons/ir/render';\nimport { compileSymbolEffect } from '@labpics/icons/motion';\nconst value = glyph();\nconsole.log(renderGlyphSvg(value), compileSymbolEffect(value, glyphCapabilities(), 'refresh.cycle', { duration: 400 }));\n",
+      "previous": {
+        "entry": "import { glyph, glyphCapabilities } from '@labpics/icons/symbols/refresh';\nimport { renderGlyphSvg } from '@labpics/icons/ir/render';\nimport { compileSymbolEffect } from '@labpics/icons/motion';\nconst value = glyph();\nconsole.log(renderGlyphSvg(value), compileSymbolEffect(value, glyphCapabilities(), 'refresh.cycle', { duration: 400 }));\n",
+        "baselineBytes": 28367,
+        "baselineGzipBytes": 8688,
+        "maxBytes": 33313,
+        "maxGzipBytes": 10574
+      },
+      "actual": {
+        "bytes": 28382,
+        "gzipBytes": 8690,
+        "brotliBytes": 7333,
+        "modules": [
+          "<stdin>",
+          "dist/ir/author-request-runtime.js",
+          "dist/ir/contour-runtime.js",
+          "dist/ir/render.js",
+          "dist/ir/request.js",
+          "dist/ir/symbol-runtime.js",
+          "dist/motion/index.js",
+          "dist/symbols/refresh.js"
+        ]
+      }
+    },
+    {
+      "name": "one-family-lottie",
+      "entry": "import time from '@labpics/icons/symbols/time';\nimport { exportLottie } from '@labpics/icons/lottie';\nconsole.log(exportLottie(time, { gesture: 'advance' }));\n",
+      "actual": {
+        "bytes": 52785,
+        "gzipBytes": 20118,
+        "brotliBytes": 16265,
+        "modules": [
+          "<stdin>",
+          "dist/export/lottie.js",
+          "dist/ir/author-request-runtime.js",
+          "dist/ir/request.js",
+          "dist/ir/symbol-runtime.js",
+          "dist/symbols/time.js"
+        ]
+      }
+    },
+    {
+      "name": "one-family-dotlottie",
+      "entry": "import time from '@labpics/icons/symbols/time';\nimport { exportLottie, packDotLottie } from '@labpics/icons/lottie';\nconst result = exportLottie(time, { gesture: 'advance' });\nconsole.log(result.ok && packDotLottie(result.animation));\n",
+      "actual": {
+        "bytes": 60870,
+        "gzipBytes": 24037,
+        "brotliBytes": 19775,
+        "modules": [
+          "<stdin>",
+          "dist/export/lottie.js",
+          "dist/ir/author-request-runtime.js",
+          "dist/ir/request.js",
+          "dist/ir/symbol-runtime.js",
+          "dist/symbols/time.js"
+        ]
+      }
+    }
+  ]
+}

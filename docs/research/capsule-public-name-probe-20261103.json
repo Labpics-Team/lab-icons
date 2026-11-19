@@ -1,0 +1,227 @@
+{
+  "timestamp": "2026-11-03T01:17:46.860Z",
+  "node": "v24.15.0",
+  "esbuild": "0.28.1",
+  "beforeSource": "0364b85cb45f18aae4c0596d5ba5633dab25e722",
+  "scope": "two actual author families/four masters; source-produced opt-in bundles/native controls; not packed package, browser or full release qualification",
+  "geometryControls": "28 real author poses deep-equal; fresh and partially frozen source trees frozen; call/apply/construct/prototype/length/default/axes/refusal controls passed",
+  "admissionControls": [
+    "unsupported grammar",
+    "missing command",
+    "missing point",
+    "extra point",
+    "missing rate",
+    "nonfinite rate",
+    "nonfinite coordinate",
+    "incomplete point"
+  ],
+  "preparedControls": "20 finite optical neighbors match actual physical static path; defaults preserve identity",
+  "records": [
+    {
+      "label": "before-global-keep",
+      "sourceSha256": "af14672987cdd3d2105d987c91c8cb41059c408e41b5d1478583bdfc43263c44",
+      "pathSourceSha256": "d73827abd7d351bb8d965074afef5a6cb35c33647cb7447f9f08fb2d233c0c1f",
+      "producedBytes": 9038,
+      "consumerBytes": 10353,
+      "consumerGzipBytes": 4609,
+      "consumerSha256": "e3a0432e3e1f22738ee3004b6d2be1daeaf60eafbd5da276c2afae0c696a17be",
+      "publicName": "glyph",
+      "descriptor": {
+        "value": "glyph",
+        "writable": false,
+        "enumerable": false,
+        "configurable": true
+      },
+      "namedPrivateLiterals": [
+        "freezeTree",
+        "stableJSON",
+        "refuse",
+        "prepareCapsulePath",
+        "sha256Hex",
+        "assembleGlyphFrame",
+        "assembleGlyphLayers",
+        "assembleGlyphCompound",
+        "projectedContourAreas"
+      ],
+      "retained": [
+        "compiled:capsule"
+      ]
+    },
+    {
+      "label": "before-private-minify",
+      "sourceSha256": "af14672987cdd3d2105d987c91c8cb41059c408e41b5d1478583bdfc43263c44",
+      "pathSourceSha256": "d73827abd7d351bb8d965074afef5a6cb35c33647cb7447f9f08fb2d233c0c1f",
+      "producedBytes": 8600,
+      "consumerBytes": 9924,
+      "consumerGzipBytes": 4382,
+      "consumerSha256": "b681f0c06283146f959ab8654d843c5edf51562bbd501e4df70d6687ab96d7b8",
+      "publicName": "",
+      "descriptor": {
+        "value": "",
+        "writable": false,
+        "enumerable": false,
+        "configurable": true
+      },
+      "namedPrivateLiterals": [],
+      "retained": [
+        "compiled:capsule"
+      ]
+    },
+    {
+      "label": "candidate",
+      "sourceSha256": "79de8c19fcc3bb5f6fbfa5513674599812aedc4bdf174c03d70a0ccc1bb5f2b9",
+      "pathSourceSha256": "50b3c10e4df6f9d300cb73f2b9d7779d8a3460ccc8f5caee18a62967a69e1e4e",
+      "producedBytes": 7997,
+      "consumerBytes": 8681,
+      "consumerGzipBytes": 4120,
+      "consumerSha256": "3696d6281308fe5a879170457f8ae02df1b2bf9ecb1ec7ae89b9ad89f82bc4e2",
+      "publicName": "glyph",
+      "descriptor": {
+        "value": "glyph",
+        "writable": false,
+        "enumerable": false,
+        "configurable": true
+      },
+      "namedPrivateLiterals": [],
+      "retained": [
+        "compiled:capsule"
+      ]
+    }
+  ],
+  "completeClosures": [
+    {
+      "label": "before-global-keep",
+      "icon": "mic",
+      "entry": "import { glyph } from '@labpics/icons/variations/mic';\nconsole.log(glyph({ variation: { bodyWidth: 0.9 } }));\n",
+      "bytes": 28859,
+      "gzipBytes": 9270,
+      "sha256": "0d7bc236ec45a12305bf740db9f79c8fee165dde8406f4b323d2bd2246ce06cb",
+      "graph": {
+        "closure:dist/ir/symbol-data/mic.js": 10853,
+        "closure:dist/ir/request.js": 2372,
+        "closure:dist/ir/author-request-runtime.js": 755,
+        "closure:dist/ir/symbol-runtime.js": 219,
+        "closure:dist/ir/capsule-runtime.js": 10162,
+        "closure:dist/variations/mic.js": 4454,
+        "<stdin>": 43
+      }
+    },
+    {
+      "label": "before-global-keep",
+      "icon": "mic-circle",
+      "entry": "import { glyph } from '@labpics/icons/variations/mic-circle';\nconsole.log(glyph({ variant: 'filled', variation: { bodyWidth: 0.8 } }));\n",
+      "bytes": 25959,
+      "gzipBytes": 9673,
+      "sha256": "297c914ef43ef0b178c40cbdf75950f767a21fa8e43d16f7d794008b2b08d5a4",
+      "graph": {
+        "closure:dist/ir/symbol-data/mic-circle.js": 8729,
+        "closure:dist/ir/request.js": 2374,
+        "closure:dist/ir/author-request-runtime.js": 755,
+        "closure:dist/ir/symbol-runtime.js": 219,
+        "closure:dist/ir/capsule-runtime.js": 10164,
+        "closure:dist/variations/mic-circle.js": 3657,
+        "<stdin>": 60
+      }
+    },
+    {
+      "label": "before-private-minify",
+      "icon": "mic",
+      "entry": "import { glyph } from '@labpics/icons/variations/mic';\nconsole.log(glyph({ variation: { bodyWidth: 0.9 } }));\n",
+      "bytes": 28426,
+      "gzipBytes": 9036,
+      "sha256": "7972d25978f829b7da7e79ec7bd79b44ca618a5d495d14c6278e18988e308d31",
+      "graph": {
+        "closure:dist/ir/symbol-data/mic.js": 10853,
+        "closure:dist/ir/request.js": 2370,
+        "closure:dist/ir/author-request-runtime.js": 755,
+        "closure:dist/ir/symbol-runtime.js": 219,
+        "closure:dist/ir/capsule-runtime.js": 9731,
+        "closure:dist/variations/mic.js": 4454,
+        "<stdin>": 43
+      }
+    },
+    {
+      "label": "before-private-minify",
+      "icon": "mic-circle",
+      "entry": "import { glyph } from '@labpics/icons/variations/mic-circle';\nconsole.log(glyph({ variant: 'filled', variation: { bodyWidth: 0.8 } }));\n",
+      "bytes": 25526,
+      "gzipBytes": 9435,
+      "sha256": "ba6d307ad0e5e728e47d1f69406290af7a46885247cc03a94bda7587f6f22015",
+      "graph": {
+        "closure:dist/ir/symbol-data/mic-circle.js": 8721,
+        "closure:dist/ir/request.js": 2370,
+        "closure:dist/ir/author-request-runtime.js": 755,
+        "closure:dist/ir/symbol-runtime.js": 219,
+        "closure:dist/ir/capsule-runtime.js": 9743,
+        "closure:dist/variations/mic-circle.js": 3657,
+        "<stdin>": 60
+      }
+    },
+    {
+      "label": "candidate",
+      "icon": "mic",
+      "entry": "import { glyph } from '@labpics/icons/variations/mic';\nconsole.log(glyph({ variation: { bodyWidth: 0.9 } }));\n",
+      "bytes": 27018,
+      "gzipBytes": 8749,
+      "sha256": "fd7e72b5d20adf687e5611e97e0325a829e08628cd9ca10e8096f3a2d5d80e1c",
+      "graph": {
+        "closure:dist/ir/symbol-data/mic.js": 10853,
+        "closure:dist/ir/request.js": 2370,
+        "closure:dist/ir/author-request-runtime.js": 755,
+        "closure:dist/ir/capsule-runtime.js": 8542,
+        "closure:dist/variations/mic.js": 4454,
+        "<stdin>": 43
+      }
+    },
+    {
+      "label": "candidate",
+      "icon": "mic-circle",
+      "entry": "import { glyph } from '@labpics/icons/variations/mic-circle';\nconsole.log(glyph({ variant: 'filled', variation: { bodyWidth: 0.8 } }));\n",
+      "bytes": 24118,
+      "gzipBytes": 9164,
+      "sha256": "6bbccffcec16795787095c8691db85dacf8c697969f15bd5668ae06fcf27bb93",
+      "graph": {
+        "closure:dist/ir/symbol-data/mic-circle.js": 8721,
+        "closure:dist/ir/request.js": 2370,
+        "closure:dist/ir/author-request-runtime.js": 755,
+        "closure:dist/ir/capsule-runtime.js": 8554,
+        "closure:dist/variations/mic-circle.js": 3657,
+        "<stdin>": 60
+      }
+    }
+  ],
+  "preparedArtifacts": [
+    {
+      "icon": "mic",
+      "exported": "prepareBodyWidth",
+      "bytes": 10727,
+      "gzipBytes": 4421,
+      "sha256": "3a299ccc923e0f54eed623c25f1fc0b64f4da725646f5be0830fe8a70724bd34",
+      "isolatedRepresentation": true
+    },
+    {
+      "icon": "mic",
+      "exported": "motionCapabilities",
+      "bytes": 4595,
+      "gzipBytes": 2046,
+      "sha256": "7ef16632b7e05dda22fa1431535bf000edbfa178964d58d5b86b33b4bec90cf3",
+      "isolatedRepresentation": true
+    },
+    {
+      "icon": "mic-circle",
+      "exported": "prepareBodyWidth",
+      "bytes": 13006,
+      "gzipBytes": 4646,
+      "sha256": "00e7bdeef6b187f095023bca02936240bfa72eab688c810721097d2d1c54e82b",
+      "isolatedRepresentation": true
+    },
+    {
+      "icon": "mic-circle",
+      "exported": "motionCapabilities",
+      "bytes": 4606,
+      "gzipBytes": 2141,
+      "sha256": "5d84c38c369504bf365a87934d3bf60e5610ea7a1726c4d49978391d4cfb963c",
+      "isolatedRepresentation": true
+    }
+  ]
+}

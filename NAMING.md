@@ -3,14 +3,14 @@
 ## Идентификатор и производные имена
 
 Имя глифа — kebab-case ID, например `alert-circle`. Исходные имена берутся
-из `svg/Outline/`; парность вариантов проверяется отдельно, а производный
+из ключей `symbols` в [SymbolSource](symbols/source.json); парность вариантов проверяется отдельно, а производный
 каталог не редактируется как второй независимый список.
 
 | Представление | Форма | Пример |
 |---|---|---|
 | ID | kebab-case | `alert-circle` |
-| Outline-файл | `svg/Outline/<id>.svg` | `svg/Outline/alert-circle.svg` |
-| Filled-файл | `svg/Filled/<id>_filled.svg` | `svg/Filled/alert-circle_filled.svg` |
+| Outline-master | `masters/figma/<version>/Outline/<id>.svg` | Путь из `variants.outline.provenance.master` |
+| Filled-master | `masters/figma/<version>/Filled/<id>.svg` | Путь из `variants.filled.provenance.master` |
 | Статический экспорт | lowerCamel ID + вариант | `alertCircleOutline`, `alertCircleFilled` |
 | Тип | PascalCase | `IconName` |
 | Ключ декларации анатомии | Исходный ID | `alert-circle` |
@@ -21,7 +21,9 @@
 
 ## Совместимость путей
 
-Суффиксы Outline и Filled входят в файловый контракт. При переименовании
+Версия и вариант входят в путь неизменяемого master. Прежние
+`svg/Outline/<id>.svg` и `svg/Filled/<id>_filled.svg` сохраняются как
+compatibility-снимок и не редактируются для обновления корпуса. При переименовании
 учтите потребителей и [класс совместимости](docs/semver-policy.md).
 Производные имена вычисляются из ID сборкой.
 

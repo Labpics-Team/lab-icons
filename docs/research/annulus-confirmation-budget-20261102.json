@@ -1,0 +1,124 @@
+{
+  "schemaVersion": 1,
+  "scope": "Bounded native production emit and two-family projections; not full-pack, timing or browser qualification",
+  "baseline": {
+    "sourceSha": "68312fc7323ffb9f2db08c2fc9855d916d1ca9e5",
+    "sourceControlCommit": "d1f940035924a096fbd209bcc50e824ea8800f6c",
+    "reportSha256": "c53e162fbe24e0bab7ea92cbdd6f0e2cfd5b7cf2eaa812c7ad663bfc52fea9ff",
+    "motionArtifactSha256": "054d2864765a54ebfd8dd90421f0ab7cd07cc00f8ad74849aec66a587e81ad7f",
+    "sourceSha256": {
+      "src/motion/index.ts": "d03e0dcf7aa2c988ad8c3363a1011a81b361c9294d526c13ae7999fa10d9764a",
+      "scripts/lib/author-variation.js": "2a3681f40ca8e8d1bd4f634bd493cab07e631e009c0e27663a1419880f3991b2",
+      "scripts/lib/symbol-modules.js": "80d08832720b5058bfe97e39cb0667ba255edc57177945ef10e0e4a8ac637b76",
+      "scripts/build-ir.mjs": "1955819f0127dfdbd2298d6601ed6d5b9d623d5377c871e14e69fc3f8ed34632"
+    }
+  },
+  "environment": {
+    "node": "v24.15.0",
+    "platform": "win32",
+    "arch": "x64"
+  },
+  "measurement": "production scripts/build-ir.mjs bundle; fflate gzipSync level=9 mtime=0",
+  "sourceSha256": {
+    "src/motion/index.ts": "4a102b5f4cc30a65d4becb1d5099573cd71f81c3861617c431140d85bebd2de2",
+    "src/ir/author-annulus-types.ts": "373b539e9799592073f09aa698017f12c2257040bd26845fe71b11f0acfbdffb",
+    "scripts/lib/author-variation.js": "a4b626f5b11d740335a9618106a4706623940a9377a23c2ccd8ce3c3f09887da",
+    "scripts/lib/symbol-modules.js": "80d08832720b5058bfe97e39cb0667ba255edc57177945ef10e0e4a8ac637b76",
+    "scripts/build-ir.mjs": "1955819f0127dfdbd2298d6601ed6d5b9d623d5377c871e14e69fc3f8ed34632",
+    "test/annulus-motion.test.js": "a38411c1edfba3c8d32e254274d16f5daff926bcad5b6487a2cedad01c6dcd9e"
+  },
+  "native": {
+    "baseline": {
+      "bytes": 13381,
+      "gzipBytes": 3715,
+      "sha256": "054d2864765a54ebfd8dd90421f0ab7cd07cc00f8ad74849aec66a587e81ad7f"
+    },
+    "candidate": {
+      "bytes": 13700,
+      "gzipBytes": 3783,
+      "sha256": "b6e010f29d769474262bb9a3b9fc8f4ddb025fb26399afe28cb056aff9ba07bc"
+    },
+    "limits": {
+      "maxBytes": 14620,
+      "maxGzipBytes": 3817
+    }
+  },
+  "projections": {
+    "checkmark-circle": {
+      "symbol": {
+        "baseline": {
+          "bytes": 529,
+          "gzipBytes": 222,
+          "sha256": "61e91f5f7824fc5d82aeec5f64163bf3660f7f0ddea3a9b7eda3876c966e8a4b"
+        },
+        "candidate": {
+          "bytes": 529,
+          "gzipBytes": 222,
+          "sha256": "61e91f5f7824fc5d82aeec5f64163bf3660f7f0ddea3a9b7eda3876c966e8a4b"
+        }
+      },
+      "data": {
+        "baseline": {
+          "bytes": 13451,
+          "gzipBytes": 2969,
+          "sha256": "09326d61713e7dfff028d2c9a1cef0d621c17fba1174e3bfc15e9cc3b32cf308"
+        },
+        "candidate": {
+          "bytes": 13451,
+          "gzipBytes": 2969,
+          "sha256": "09326d61713e7dfff028d2c9a1cef0d621c17fba1174e3bfc15e9cc3b32cf308"
+        }
+      },
+      "variation": {
+        "baseline": {
+          "bytes": 2157,
+          "gzipBytes": 932,
+          "sha256": "365c98061b4937a14fd3b6eba800911ccef1c243547c0453435e82328a514044"
+        },
+        "candidate": {
+          "bytes": 2167,
+          "gzipBytes": 941,
+          "sha256": "0062037c83e69ca25ce1ec19c397d6426d2d975bd43d0fa656818a8d31b42a8a"
+        }
+      }
+    },
+    "plus-circle": {
+      "symbol": {
+        "baseline": {
+          "bytes": 519,
+          "gzipBytes": 216,
+          "sha256": "2ee24ca00a7dd02717ab23e36878a1ecc62d50508f4ee7a38e217da5093fc59d"
+        },
+        "candidate": {
+          "bytes": 519,
+          "gzipBytes": 216,
+          "sha256": "2ee24ca00a7dd02717ab23e36878a1ecc62d50508f4ee7a38e217da5093fc59d"
+        }
+      },
+      "data": {
+        "baseline": {
+          "bytes": 11411,
+          "gzipBytes": 2380,
+          "sha256": "52cb819a7bd3c7c2bbcc41a149a99f267d5e097e750692ad24f12a9a5a563c70"
+        },
+        "candidate": {
+          "bytes": 11411,
+          "gzipBytes": 2380,
+          "sha256": "52cb819a7bd3c7c2bbcc41a149a99f267d5e097e750692ad24f12a9a5a563c70"
+        }
+      },
+      "variation": {
+        "baseline": {
+          "bytes": 2131,
+          "gzipBytes": 926,
+          "sha256": "84c3857bbf7d7e06c7f40774046fad329748ce136449aa5923a5dc7c831d534a"
+        },
+        "candidate": {
+          "bytes": 2141,
+          "gzipBytes": 936,
+          "sha256": "b147d68dc1ff959f21484a8fdbca7104748707cdc02a3ca356c5bb6390078cd7"
+        }
+      }
+    }
+  }
+}

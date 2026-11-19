@@ -17,6 +17,7 @@ concurrency:
 jobs:
   verify:
     name: Verify ${{ matrix.os }} / Node ${{ matrix.node }}
+    # Публичный код выполняется в стандартных изолированных GitHub-hosted runners.
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
     strategy:
@@ -140,13 +141,139 @@ jobs:
           printf 'disable-allow-rules:\n  - tests\n  - examples\n  - markdown\n' > "$dir/secret.yaml"
           scan --scanners secret --secret-config "$dir/secret.yaml" "${accepted[@]}"
 
+  # Производственный пакет устанавливается в два чистых внешних consumer.
+  # Этот job добавляет измерение к verify, не заменяя ни одну его проверку.
+  benchmark:
+    name: Чистый consumer и browser benchmark
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+        with:
+          version: 11.13.1
+          dest: ${{ runner.temp }}/setup-pnpm
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Повтор выпуска и целостность проверенного npm tarball
+        run: node --test scripts/upload-release-assets.test.mjs scripts/publish-npm.test.mjs
+
+      - name: Chromium для удалённого browser consumer
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Сравнение exact SHA с исходным baseline
+        env:
+          BENCHMARK_RUNNER_ENVIRONMENT: ${{ runner.environment }}
+        run: node scripts/bench/compare-consumers.mjs benchmark-results
+
+      - name: Каталог — реальное копирование, движение, экспорт и мобильная навигация
+        run: pnpm build && pnpm catalog:build && pnpm catalog:check
+
+      - name: Каталог для публикации
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: lab-icons-catalog-${{ github.sha }}
+          path: preview/catalog/
+          retention-days: 7
+          if-no-files-found: error
+
+      - name: Проверенный npm tarball для публикации
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: lab-icons-npm-${{ github.sha }}
+          path: benchmark-results/package/
+          retention-days: 7
+          if-no-files-found: error
+
+      - name: Сырые наблюдения и состав artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: lab-icons-consumer-${{ github.sha }}
+          path: |
+            benchmark-results/
+            !benchmark-results/package/**
+          retention-days: 1
+          if-no-files-found: error
+
+  native:
+    name: Compose — все платформы и установленный consumer
+    runs-on: macos-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Setup pnpm
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+        with:
+          version: 11.13.1
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Setup Java
+        uses: actions/setup-java@ad2b38190b15e4d6bdf0c97fb4fca8412226d287 # v5.3.0
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Android SDK
+        uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4.0.4
+        with:
+          cmdline-tools-version: '16111833'
+          packages: 'platforms;android-37.0'
+          log-accepted-android-sdk-licenses: false
+      - name: Проверка и сборка Maven для Desktop, Android и iOS
+        working-directory: native/compose
+        run: |
+          node --test scripts/seal-repository.test.mjs
+          ./gradlew desktopTest publishAllPublicationsToDistributionRepository
+      - name: Отдельный Kotlin export
+        run: node scripts/export-native-symbols.mjs --symbol plus-circle --package pics.lab.icons.consumer.generated --output native/compose/consumer/build/exported
+      - name: Установленный Maven consumer без окна
+        working-directory: native/compose
+        run: |
+          version=$(node -p "require('../../package.json').version")
+          ./gradlew -p consumer run --args=--headless "-PiconsVersion=$version" "-PiconsRepository=$PWD/build/repository" "-PexportedIconSource=$PWD/consumer/build/exported"
+      - name: Maven и результаты native
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: lab-icons-compose-${{ github.sha }}
+          path: |
+            native/compose/build/repository/
+            native/compose/build/test-results/
+            native/compose/consumer/build/native-icons-*-headless.png
+          retention-days: 7
+          if-no-files-found: error
+
   # Внешний ruleset не должен знать о составе matrix. Один стабильный check
   # разрешает менять поддерживаемые Node/OS только вместе с версионируемым CI,
   # не оставляя защиту main привязанной к устаревающим именам job.
   required:
     name: CI
     if: ${{ always() }}
-    needs: [verify, security]
+    needs: [verify, security, benchmark, native]
     runs-on: ubuntu-latest
     timeout-minutes: 2
     permissions: {}
@@ -155,7 +282,9 @@ jobs:
         env:
           MATRIX_RESULT: ${{ needs.verify.result }}
           SECURITY_RESULT: ${{ needs.security.result }}
+          BENCHMARK_RESULT: ${{ needs.benchmark.result }}
+          NATIVE_RESULT: ${{ needs.native.result }}
         shell: bash
         run: |
           set -euo pipefail
-          [[ "$MATRIX_RESULT" == 'success' && "$SECURITY_RESULT" == 'success' ]]
+          [[ "$MATRIX_RESULT" == 'success' && "$SECURITY_RESULT" == 'success' && "$BENCHMARK_RESULT" == 'success' && "$NATIVE_RESULT" == 'success' ]]

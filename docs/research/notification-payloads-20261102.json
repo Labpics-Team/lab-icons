@@ -1,0 +1,1241 @@
+{
+  "baseline": "8fbb434fb3c56b22703088c9e69b4f618bc2685f",
+  "sourceSha": "8fbb434fb3c56b22703088c9e69b4f618bc2685f",
+  "capturedAt": "2026-11-02T07:46:57.432Z",
+  "receiptSha256": "b63ab4be495f7a8b866035ae24b3c25ea33211c0c10be466163880e1413e4d91",
+  "receiptCapturedAt": "2026-11-02T07:05:03.252Z",
+  "emitterSha256": "80d08832720b5058bfe97e39cb0667ba255edc57177945ef10e0e4a8ac637b76",
+  "baselineEmitterSha256": "efc62d51fed9c7e272fcd23609d15e14bbcc22c39010a06b2cafa943feac9398",
+  "experimentSha256": "3dd406a3394f08fa907a3af554aaf195e34e3badcbf9a4faf67d03ae2a38663c",
+  "runtimeReceipts": {
+    "dist/ir/request.js": {
+      "bytes": 2356,
+      "gzipBytes": 1017,
+      "sha256": "cee50e7f82d5029e8baabf95baad569c3009abc46f8f3d44aa4c5f9888c255af"
+    },
+    "dist/ir/author-request-runtime.js": {
+      "bytes": 798,
+      "gzipBytes": 489,
+      "sha256": "4284632485b0d66cf70f316da75ebe4c45be5c94ac487bc3d29d5965b9a9e31b"
+    },
+    "dist/ir/symbol-runtime.js": {
+      "bytes": 786,
+      "gzipBytes": 354,
+      "sha256": "7a3a0226218b04c5c31da0e40eab102aef5d8908ba448da6080bc0209aeb9639"
+    }
+  },
+  "environment": {
+    "node": "v24.15.0",
+    "platform": "win32",
+    "esbuild": "0.28.1",
+    "fflate": "0.8.3",
+    "gzip": {
+      "level": 9,
+      "mtime": 0
+    }
+  },
+  "scope": "Две семьи/четыре настоящих masters; точные три runtime модуля; native JSON/identity и selective esbuild consumers. Без full build/corpus/pack, timing, памяти, browser или shipping qualification.",
+  "decision": "Product emitter устраняет повтор path strings, сохраняя пять consumer raw/gzip и все semantic controls. Старый module gzip ceiling остаётся RED; он не повышен. Другие представления не приняты.",
+  "rows": [
+    {
+      "icon": "notifications",
+      "baseline": {
+        "bytes": 24910,
+        "gzipBytes": 4661,
+        "sha256": "3fd5ac4a6212cade0f1b19e5110fe6f8f29011ca61219b41e045ffa3e25b4d4b"
+      },
+      "exactRemoteReceipt": true,
+      "ceilings": {
+        "bytes": 23951,
+        "gzipBytes": 4165
+      },
+      "baselineConsumers": {
+        "glyph": {
+          "bytes": 20965,
+          "gzipBytes": 4937,
+          "sha256": "3f6ee49c63bd8a748b049fbde72521e26a5141bda1aed3b8658d33845613e021",
+          "retainedFiles": [
+            "<stdin>",
+            "dist/ir/author-request-runtime.js",
+            "dist/ir/request.js",
+            "dist/ir/symbol-runtime.js",
+            "dist/symbols/notifications.js"
+          ]
+        },
+        "caps": {
+          "bytes": 4531,
+          "gzipBytes": 1511,
+          "sha256": "d6d17c1d159b9d0c6e46991e6aa388ab9a8f69c18f698a9a82514e9f45857322",
+          "retainedFiles": [
+            "<stdin>",
+            "dist/ir/request.js",
+            "dist/ir/symbol-runtime.js",
+            "dist/symbols/notifications.js"
+          ]
+        },
+        "both": {
+          "bytes": 23691,
+          "gzipBytes": 5520,
+          "sha256": "8dc3b3e3632d6bbc43941e22c04f6ff2fe7c4b538c8e1947b807c4e9a2ae7127",
+          "retainedFiles": [
+            "<stdin>",
+            "dist/ir/author-request-runtime.js",
+            "dist/ir/request.js",
+            "dist/ir/symbol-runtime.js",
+            "dist/symbols/notifications.js"
+          ]
+        },
+        "outline": {
+          "bytes": 2982,
+          "gzipBytes": 1483,
+          "sha256": "cf0a2f34496d7f468d9972f87815436639c00e20fb2e9deadc8e10d5fec2ee68",
+          "retainedFiles": [
+            "<stdin>",
+            "dist/symbols/notifications.js"
+          ]
+        },
+        "filled": {
+          "bytes": 1690,
+          "gzipBytes": 889,
+          "sha256": "3aea1edd8f7b6a7705c7106748e7c053a9fb8558d3cc685158265fc60edc077e",
+          "retainedFiles": [
+            "<stdin>",
+            "dist/symbols/notifications.js"
+          ]
+        }
+      },
+      "alternatives": {
+        "paths": {
+          "module": {
+            "bytes": 16660,
+            "gzipBytes": 4584,
+            "sha256": "75f4e0ec95b6fd4fb7b6c86c087312de31914e11f4c13a4d055cd465bc63820f"
+          },
+          "controls": {
+            "exactJsonAndKeyOrder": true,
+            "staticValues": true,
+            "frozenTrees": true,
+            "defaultAndVariantIdentity": true,
+            "metadataIdentity": true,
+            "functionNames": true,
+            "getterReceiver": true,
+            "refusals": true
+          },
+          "consumers": {
+            "glyph": {
+              "bytes": 12459,
+              "gzipBytes": 4812,
+              "sha256": "8beea224e20e70ff5d692a0c5dea0ad7cd10940c743689c7b58fe62a4cb1c5a3",
+              "retainedFiles": [
+                "<stdin>",
+                "dist/ir/author-request-runtime.js",
+                "dist/ir/request.js",
+                "dist/ir/symbol-runtime.js",
+                "dist/symbols/notifications.js"
+              ],
+              "resultEqual": true
+            },
+            "caps": {
+              "bytes": 4531,
+              "gzipBytes": 1511,
+              "sha256": "fb1fd11cfb3eb8d4ccc2ab3deef010bf9eb7765d98e7112a41733eaab23aca9a",
+              "retainedFiles": [
+                "<stdin>",
+                "dist/ir/request.js",
+                "dist/ir/symbol-runtime.js",
+                "dist/symbols/notifications.js"
+              ],
+              "resultEqual": true
+            },
+            "both": {
+              "bytes": 15185,
+              "gzipBytes": 5378,
+              "sha256": "0570df43991b665de185090357335ff69042e72d126d34cad9fb9c7be8a1b054",
+              "retainedFiles": [
+                "<stdin>",
+                "dist/ir/author-request-runtime.js",
+                "dist/ir/request.js",
+                "dist/ir/symbol-runtime.js",
+                "dist/symbols/notifications.js"
+              ],
+              "resultEqual": true
+            },
+            "outline": {
+              "bytes": 2982,
+              "gzipBytes": 1483,
+              "sha256": "81750d334037df64c0e74897fc5afb0d349a59c88fa83c09e9928259904a604e",
+              "retainedFiles": [
+                "<stdin>",
+                "dist/symbols/notifications.js"
+              ],
+              "resultEqual": true
+            },
+            "filled": {
+              "bytes": 1690,
+              "gzipBytes": 889,
+              "sha256": "4c72437af5aa99b80f8290ae94bda6ad4ba26181cfea4034f4ac75f28df42ee9",
+              "retainedFiles": [
+                "<stdin>",
+                "dist/symbols/notifications.js"
+              ],
+              "resultEqual": true
+            }
+          },
+          "regressions": [],
+          "admitted": false,
+          "reason": "Не закрыт неизменённый shipping gzip ceiling."
+        },
+        "staticPaths": {
+          "module": {
+            "bytes": 12504,
+            "gzipBytes": 4519,
+            "sha256": "768331baffa21a128c94eaed8ea203e5bd77271171873deb4d1ef77fea58997b"
+          },
+          "controls": {
+            "exactJsonAndKeyOrder": true,
+            "staticValues": true,
+            "frozenTrees": true,
+            "defaultAndVariantIdentity": true,
+            "metadataIdentity": true,
+            "functionNames": true,
+            "getterReceiver": true,
+            "refusals": true
+          },
+          "consumers": {
+            "glyph": {
+              "bytes": 12459,
+              "gzipBytes": 4813,
+              "sha256": "c1934002186e3716bfa7481701962de7ea8c3da5b35528caf989b6ebf5c6c114",
+              "retainedFiles": [
+                "<stdin>",
+                "dist/ir/author-request-runtime.js",
+                "dist/ir/request.js",
+                "dist/ir/symbol-runtime.js",
+                "dist/symbols/notifications.js"
+              ],
+              "resultEqual": true
+            },
+            "caps": {
+              "bytes": 4531,
+              "gzipBytes": 1509,
+              "sha256": "18e79ba8be1021bb375ae4f78370adcd824c325681d415b97fa800004d19e75f",
+              "retainedFiles": [
+                "<stdin>",
+                "dist/ir/request.js",
+                "dist/ir/symbol-runtime.js",
+                "dist/symbols/notifications.js"
+              ],
+              "resultEqual": true
+            },
+            "both": {
+              "bytes": 15185,
+              "gzipBytes": 5379,
+              "sha256": "c018bcc56afc71e4eebe7f8dbc9459fc9e99b092eca4a92939dc7a03470770b6",
+              "retainedFiles": [
+                "<stdin>",
+                "dist/ir/author-request-runtime.js",
+                "dist/ir/request.js",
+                "dist/ir/symbol-runtime.js",
+                "dist/symbols/notifications.js"
+              ],
+              "resultEqual": true
+            },
+            "outline": {
+              "bytes": 3006,
+              "gzipBytes": 1496,
+              "sha256": "7718b498a4b80e5bdcfe3fb86364d446fb78e232d79902e3365846e234997231",
+              "retainedFiles": [
+                "<stdin>",
+                "dist/symbols/notifications.js"
+              ],
+              "resultEqual": true
+            },
+            "filled": {
+              "bytes": 1714,
+              "gzipBytes": 900,
+              "sha256": "f655c458627603144ca1b49b129d1a21a97416fbd3c73d7dfb77aa3be5eaf49a",
+              "retainedFiles": [
+                "<stdin>",
+                "dist/symbols/notifications.js"
+              ],
+              "resultEqual": true
+            }
+          },
+          "regressions": [
+            "outline",
+            "filled"
+          ],
+          "admitted": false,
+          "reason": "Не закрыт неизменённый shipping gzip ceiling."
+        },
+        "primitives": {
+          "module": {
+            "bytes": 23755,
+            "gzipBytes": 4764,
+            "sha256": "a02cee8f0915904469781095be1411c193b5d667e720ce51efc2ecefa14f6736"
+          },
+          "controls": {
+            "exactJsonAndKeyOrder": true,
+            "staticValues": true,
+            "frozenTrees": true,
+            "defaultAndVariantIdentity": true,
+            "metadataIdentity": true,
+            "functionNames": true,
+            "getterReceiver": true,
+            "refusals": true
+          },
+          "consumers": {
+            "glyph": {
+              "bytes": 20005,
+              "gzipBytes": 4991,
+              "sha256": "984152c969bf5e7165b7463ab4d0403989bc01af3e133ceed3c56ec30f0bc53b",
+              "retainedFiles": [
+                "<stdin>",
+                "dist/ir/author-request-runtime.js",
+                "dist/ir/request.js",
+                "dist/ir/symbol-runtime.js",
+                "dist/symbols/notifications.js"
+              ],
+              "resultEqual": true
+            },
+            "caps": {
+              "bytes": 3461,
+              "gzipBytes": 1547,
+              "sha256": "d04adae2a1c9ef2269bfa7390f389f4d5ff918664ba83bbb2817ac6abdd7eb4a",
+              "retainedFiles": [
+                "<stdin>",
+                "dist/ir/request.js",
+                "dist/ir/symbol-runtime.js",
+                "dist/symbols/notifications.js"
+              ],
+              "resultEqual": true
+            },
+            "both": {
+              "bytes": 21857,
+              "gzipBytes": 5571,
+              "sha256": "cc6238977afe54d879a294a844c363ea41b5cdcd379b4e352e57743f155bb797",
+              "retainedFiles": [
+                "<stdin>",
+                "dist/ir/author-request-runtime.js",
+                "dist/ir/request.js",
+                "dist/ir/symbol-runtime.js",
+                "dist/symbols/notifications.js"
+              ],
+              "resultEqual": true
+            },
+            "outline": {
+              "bytes": 2982,
+              "gzipBytes": 1483,
+              "sha256": "fb6bd5625d3f3c77ab4b9524a88f32fbeb0c58a89d7d0b750f32a63e4ef9bedc",
+              "retainedFiles": [
+                "<stdin>",
+                "dist/symbols/notifications.js"
+              ],
+              "resultEqual": true
+            },
+            "filled": {
+              "bytes": 1690,
+              "gzipBytes": 886,
+              "sha256": "df7c433652398dc04bfed6e4e85dc33225bd403fc79b1832ea7a29faa23ef814",
+              "retainedFiles": [
+                "<stdin>",
+                "dist/symbols/notifications.js"
+              ],
+              "resultEqual": true
+            }
+          },
+          "regressions": [
+            "glyph",
+            "caps",
+            "both"
+          ],
+          "admitted": false,
+          "reason": "Не закрыт неизменённый shipping gzip ceiling."
+        },
+        "pathsAndPrimitives": {
+          "module": {
+            "bytes": 15505,
+            "gzipBytes": 4689,
+            "sha256": "6013dcf4b16f9d7ff67dde90198dfce972380644b0528e132b96b0cae773284f"
+          },
+          "controls": {
+            "exactJsonAndKeyOrder": true,
+            "staticValues": true,
+            "frozenTrees": true,
+            "defaultAndVariantIdentity": true,
+            "metadataIdentity": true,
+            "functionNames": true,
+            "getterReceiver": true,
+            "refusals": true
+          },
+          "consumers": {
+            "glyph": {
+              "bytes": 11495,
+              "gzipBytes": 4887,
+              "sha256": "b032a2dd51ebeefbd7c79ee22c1fe8bbfcae2c0f901da680c353ac8cad34c857",
+              "retainedFiles": [
+                "<stdin>",
+                "dist/ir/author-request-runtime.js",
+                "dist/ir/request.js",
+                "dist/ir/symbol-runtime.js",
+                "dist/symbols/notifications.js"
+              ],
+              "resultEqual": true
+            },
+            "caps": {
+              "bytes": 3461,
+              "gzipBytes": 1545,
+              "sha256": "9cd31caf46209aeed14d9e302d817bdca548f5247a630b35ea9919909099f9ca",
+              "retainedFiles": [
+                "<stdin>",
+                "dist/ir/request.js",
+                "dist/ir/symbol-runtime.js",
+                "dist/symbols/notifications.js"
+              ],
+              "resultEqual": true
+            },
+            "both": {
+              "bytes": 13355,
+              "gzipBytes": 5457,
+              "sha256": "bf2be987cf2b42812ea742e692db83b2b600fe514a8df10591e36e73c25f9fc8",
+              "retainedFiles": [
+                "<stdin>",
+                "dist/ir/author-request-runtime.js",
+                "dist/ir/request.js",
+                "dist/ir/symbol-runtime.js",
+                "dist/symbols/notifications.js"
+              ],
+              "resultEqual": true
+            },
+            "outline": {
+              "bytes": 2982,
+              "gzipBytes": 1483,
+              "sha256": "48e15d84865e373fddb248617d2c7c59f3e7b61ef051273b4ab98d1e8ea3d60a",
+              "retainedFiles": [
+                "<stdin>",
+                "dist/symbols/notifications.js"
+              ],
+              "resultEqual": true
+            },
+            "filled": {
+              "bytes": 1690,
+              "gzipBytes": 889,
+              "sha256": "4c725c3d0105f16f96326f41847135cb84b9e84f7f56880971d8da44211cb95f",
+              "retainedFiles": [
+                "<stdin>",
+                "dist/symbols/notifications.js"
+              ],
+              "resultEqual": true
+            }
+          },
+          "regressions": [
+            "caps"
+          ],
+          "admitted": false,
+          "reason": "Не закрыт неизменённый shipping gzip ceiling."
+        },
+        "withoutPure": {
+          "module": {
+            "bytes": 16604,
+            "gzipBytes": 4566,
+            "sha256": "d3fa6761d57f8e7e86f6f6fff8daeec65192d739fba3743cdf1860f59c3f9b32"
+          },
+          "controls": {
+            "exactJsonAndKeyOrder": true,
+            "staticValues": true,
+            "frozenTrees": true,
+            "defaultAndVariantIdentity": true,
+            "metadataIdentity": true,
+            "functionNames": true,
+            "getterReceiver": true,
+            "refusals": true
+          },
+          "consumers": {
+            "glyph": {
+              "bytes": 12459,
+              "gzipBytes": 4812,
+              "sha256": "8beea224e20e70ff5d692a0c5dea0ad7cd10940c743689c7b58fe62a4cb1c5a3",
+              "retainedFiles": [
+                "<stdin>",
+                "dist/ir/author-request-runtime.js",
+                "dist/ir/request.js",
+                "dist/ir/symbol-runtime.js",
+                "dist/symbols/notifications.js"
+              ],
+              "resultEqual": true
+            },
+            "caps": {
+              "bytes": 12176,
+              "gzipBytes": 4421,
+              "sha256": "033309a3d020c94c2e968d1c0690511387995737a3734996d73414626e3c8ff1",
+              "retainedFiles": [
+                "<stdin>",
+                "dist/ir/request.js",
+                "dist/ir/symbol-runtime.js",
+                "dist/symbols/notifications.js"
+              ],
+              "resultEqual": true
+            },
+            "both": {
+              "bytes": 15185,
+              "gzipBytes": 5378,
+              "sha256": "0570df43991b665de185090357335ff69042e72d126d34cad9fb9c7be8a1b054",
+              "retainedFiles": [
+                "<stdin>",
+                "dist/ir/author-request-runtime.js",
+                "dist/ir/request.js",
+                "dist/ir/symbol-runtime.js",
+                "dist/symbols/notifications.js"
+              ],
+              "resultEqual": true
+            },
+            "outline": {
+              "bytes": 12020,
+              "gzipBytes": 3674,
+              "sha256": "dce392148ab6f61b605ab1898ed9b209bcd2b39ceeca94d0966ec26d274468bd",
+              "retainedFiles": [
+                "<stdin>",
+                "dist/symbols/notifications.js"
+              ],
+              "resultEqual": true
+            },
+            "filled": {
+              "bytes": 10728,
+              "gzipBytes": 3653,
+              "sha256": "6ee7283fe7a851bfc7060b5e7c9b8f36b19dc5c229f4b468b250633e2238a9a7",
+              "retainedFiles": [
+                "<stdin>",
+                "dist/symbols/notifications.js"
+              ],
+              "resultEqual": true
+            }
+          },
+          "regressions": [
+            "caps",
+            "outline",
+            "filled"
+          ],
+          "admitted": false,
+          "reason": "Контрпример: побочные эффекты concatenation удерживают source в caps/static consumer."
+        }
+      },
+      "current": {
+        "module": {
+          "bytes": 16660,
+          "gzipBytes": 4584,
+          "sha256": "75f4e0ec95b6fd4fb7b6c86c087312de31914e11f4c13a4d055cd465bc63820f"
+        },
+        "controls": {
+          "exactJsonAndKeyOrder": true,
+          "staticValues": true,
+          "frozenTrees": true,
+          "defaultAndVariantIdentity": true,
+          "metadataIdentity": true,
+          "functionNames": true,
+          "getterReceiver": true,
+          "refusals": true
+        },
+        "consumers": {
+          "glyph": {
+            "bytes": 12459,
+            "gzipBytes": 4812,
+            "sha256": "8beea224e20e70ff5d692a0c5dea0ad7cd10940c743689c7b58fe62a4cb1c5a3",
+            "retainedFiles": [
+              "<stdin>",
+              "dist/ir/author-request-runtime.js",
+              "dist/ir/request.js",
+              "dist/ir/symbol-runtime.js",
+              "dist/symbols/notifications.js"
+            ],
+            "resultEqual": true
+          },
+          "caps": {
+            "bytes": 4531,
+            "gzipBytes": 1511,
+            "sha256": "fb1fd11cfb3eb8d4ccc2ab3deef010bf9eb7765d98e7112a41733eaab23aca9a",
+            "retainedFiles": [
+              "<stdin>",
+              "dist/ir/request.js",
+              "dist/ir/symbol-runtime.js",
+              "dist/symbols/notifications.js"
+            ],
+            "resultEqual": true
+          },
+          "both": {
+            "bytes": 15185,
+            "gzipBytes": 5378,
+            "sha256": "0570df43991b665de185090357335ff69042e72d126d34cad9fb9c7be8a1b054",
+            "retainedFiles": [
+              "<stdin>",
+              "dist/ir/author-request-runtime.js",
+              "dist/ir/request.js",
+              "dist/ir/symbol-runtime.js",
+              "dist/symbols/notifications.js"
+            ],
+            "resultEqual": true
+          },
+          "outline": {
+            "bytes": 2982,
+            "gzipBytes": 1483,
+            "sha256": "81750d334037df64c0e74897fc5afb0d349a59c88fa83c09e9928259904a604e",
+            "retainedFiles": [
+              "<stdin>",
+              "dist/symbols/notifications.js"
+            ],
+            "resultEqual": true
+          },
+          "filled": {
+            "bytes": 1690,
+            "gzipBytes": 889,
+            "sha256": "4c72437af5aa99b80f8290ae94bda6ad4ba26181cfea4034f4ac75f28df42ee9",
+            "retainedFiles": [
+              "<stdin>",
+              "dist/symbols/notifications.js"
+            ],
+            "resultEqual": true
+          }
+        },
+        "pathOccurrences": {
+          "outline": [
+            {
+              "id": "notification-bell",
+              "baseline": 4,
+              "current": 2
+            },
+            {
+              "id": "notification-clapper",
+              "baseline": 4,
+              "current": 2
+            }
+          ],
+          "filled": [
+            {
+              "id": "notification-clapper",
+              "baseline": 4,
+              "current": 2
+            },
+            {
+              "id": "notification-bell",
+              "baseline": 4,
+              "current": 2
+            }
+          ]
+        },
+        "remainingShippingGap": {
+          "bytes": 0,
+          "gzipBytes": 419
+        }
+      }
+    },
+    {
+      "icon": "notifications-unread",
+      "baseline": {
+        "bytes": 31296,
+        "gzipBytes": 5535,
+        "sha256": "90f603a2a406f2c53ccd1b67efb10650d4e103644d04a5c710fec453ab266a33"
+      },
+      "exactRemoteReceipt": true,
+      "ceilings": {
+        "bytes": 30360,
+        "gzipBytes": 5034
+      },
+      "baselineConsumers": {
+        "glyph": {
+          "bytes": 26285,
+          "gzipBytes": 5802,
+          "sha256": "5b736f58afbb16bea460db3f1564dce625c370f33bf4017376c217c95594585f",
+          "retainedFiles": [
+            "<stdin>",
+            "dist/ir/author-request-runtime.js",
+            "dist/ir/request.js",
+            "dist/ir/symbol-runtime.js",
+            "dist/symbols/notifications-unread.js"
+          ]
+        },
+        "caps": {
+          "bytes": 4668,
+          "gzipBytes": 1529,
+          "sha256": "aaf51ece02a2ae20aeef7702eb020284f57a35c3706f3dc9da115b30262aba7c",
+          "retainedFiles": [
+            "<stdin>",
+            "dist/ir/request.js",
+            "dist/ir/symbol-runtime.js",
+            "dist/symbols/notifications-unread.js"
+          ]
+        },
+        "both": {
+          "bytes": 29148,
+          "gzipBytes": 6406,
+          "sha256": "881a21088bf715f44ae29b4c3b83d69bf19419b4caa23d388635dc80ab52153d",
+          "retainedFiles": [
+            "<stdin>",
+            "dist/ir/author-request-runtime.js",
+            "dist/ir/request.js",
+            "dist/ir/symbol-runtime.js",
+            "dist/symbols/notifications-unread.js"
+          ]
+        },
+        "outline": {
+          "bytes": 3535,
+          "gzipBytes": 1716,
+          "sha256": "c8e8ecf1ed65f1ec835b115f8d48e73e024f72778d933370b086f4814106ab62",
+          "retainedFiles": [
+            "<stdin>",
+            "dist/symbols/notifications-unread.js"
+          ]
+        },
+        "filled": {
+          "bytes": 2010,
+          "gzipBytes": 1029,
+          "sha256": "52dfda0598cdc84e2ece2d3c2c3e60e133d6a3cd52258efdcca3e94b5c285730",
+          "retainedFiles": [
+            "<stdin>",
+            "dist/symbols/notifications-unread.js"
+          ]
+        }
+      },
+      "alternatives": {
+        "paths": {
+          "module": {
+            "bytes": 21576,
+            "gzipBytes": 5463,
+            "sha256": "0aafd7e7f19c5ab9b56d1f4f688579f4b3c27bfe50c0f9c5664f882d4dc16d9b"
+          },
+          "controls": {
+            "exactJsonAndKeyOrder": true,
+            "staticValues": true,
+            "frozenTrees": true,
+            "defaultAndVariantIdentity": true,
+            "metadataIdentity": true,
+            "functionNames": true,
+            "getterReceiver": true,
+            "refusals": true
+          },
+          "consumers": {
+            "glyph": {
+              "bytes": 16101,
+              "gzipBytes": 5649,
+              "sha256": "3af071db7c53e19303a928aa3e6c2614815f263eaff30f11fc63d107ab324148",
+              "retainedFiles": [
+                "<stdin>",
+                "dist/ir/author-request-runtime.js",
+                "dist/ir/request.js",
+                "dist/ir/symbol-runtime.js",
+                "dist/symbols/notifications-unread.js"
+              ],
+              "resultEqual": true
+            },
+            "caps": {
+              "bytes": 4668,
+              "gzipBytes": 1529,
+              "sha256": "83e2e8002e17196ec0bfe54ecd83b08aa929e58d8a02c2e95b5c33585ccfbf70",
+              "retainedFiles": [
+                "<stdin>",
+                "dist/ir/request.js",
+                "dist/ir/symbol-runtime.js",
+                "dist/symbols/notifications-unread.js"
+              ],
+              "resultEqual": true
+            },
+            "both": {
+              "bytes": 18964,
+              "gzipBytes": 6230,
+              "sha256": "409129cf3e21071a84b815a555260cf54da096a3d93d49a0d162bdbc003a6dba",
+              "retainedFiles": [
+                "<stdin>",
+                "dist/ir/author-request-runtime.js",
+                "dist/ir/request.js",
+                "dist/ir/symbol-runtime.js",
+                "dist/symbols/notifications-unread.js"
+              ],
+              "resultEqual": true
+            },
+            "outline": {
+              "bytes": 3535,
+              "gzipBytes": 1716,
+              "sha256": "a973b04311d0322402d6252b57a43cec520b4cf7d9727518829eea9e3294d2bc",
+              "retainedFiles": [
+                "<stdin>",
+                "dist/symbols/notifications-unread.js"
+              ],
+              "resultEqual": true
+            },
+            "filled": {
+              "bytes": 2010,
+              "gzipBytes": 1029,
+              "sha256": "1d5a5ab5b9bac2567e33fa5c898f12dc5ec34e7a0f9d33ad481cb3db5c2646b0",
+              "retainedFiles": [
+                "<stdin>",
+                "dist/symbols/notifications-unread.js"
+              ],
+              "resultEqual": true
+            }
+          },
+          "regressions": [],
+          "admitted": false,
+          "reason": "Не закрыт неизменённый shipping gzip ceiling."
+        },
+        "staticPaths": {
+          "module": {
+            "bytes": 16622,
+            "gzipBytes": 5395,
+            "sha256": "4d5b91abd5b0ec64021e038ddd0afed5db9ee940fae3d13091aa0d5e28d3d596"
+          },
+          "controls": {
+            "exactJsonAndKeyOrder": true,
+            "staticValues": true,
+            "frozenTrees": true,
+            "defaultAndVariantIdentity": true,
+            "metadataIdentity": true,
+            "functionNames": true,
+            "getterReceiver": true,
+            "refusals": true
+          },
+          "consumers": {
+            "glyph": {
+              "bytes": 16101,
+              "gzipBytes": 5649,
+              "sha256": "8eff8987831ff5279ae9f5545ba53b2ec1572ae82f8ff94c47cc3b26c330e123",
+              "retainedFiles": [
+                "<stdin>",
+                "dist/ir/author-request-runtime.js",
+                "dist/ir/request.js",
+                "dist/ir/symbol-runtime.js",
+                "dist/symbols/notifications-unread.js"
+              ],
+              "resultEqual": true
+            },
+            "caps": {
+              "bytes": 4668,
+              "gzipBytes": 1526,
+              "sha256": "1e4f6aa0c742ab3c2b935c8f3acad41df6bd431aa0b52b8b852c6b8989d252f2",
+              "retainedFiles": [
+                "<stdin>",
+                "dist/ir/request.js",
+                "dist/ir/symbol-runtime.js",
+                "dist/symbols/notifications-unread.js"
+              ],
+              "resultEqual": true
+            },
+            "both": {
+              "bytes": 18964,
+              "gzipBytes": 6232,
+              "sha256": "6eaf850b78aea83a53b4817bfacd242d203758ef7f4467fe09645ac81a7e7b27",
+              "retainedFiles": [
+                "<stdin>",
+                "dist/ir/author-request-runtime.js",
+                "dist/ir/request.js",
+                "dist/ir/symbol-runtime.js",
+                "dist/symbols/notifications-unread.js"
+              ],
+              "resultEqual": true
+            },
+            "outline": {
+              "bytes": 3589,
+              "gzipBytes": 1745,
+              "sha256": "86709c015a679be845f774d9258f16ee1d58ce8c86e16d1085d0e2b2bcc7bfbc",
+              "retainedFiles": [
+                "<stdin>",
+                "dist/symbols/notifications-unread.js"
+              ],
+              "resultEqual": true
+            },
+            "filled": {
+              "bytes": 2044,
+              "gzipBytes": 1049,
+              "sha256": "e1b91e16e565fdef271850b3b90ba0317e412b2a7c7e21de2dc48d04f80c65af",
+              "retainedFiles": [
+                "<stdin>",
+                "dist/symbols/notifications-unread.js"
+              ],
+              "resultEqual": true
+            }
+          },
+          "regressions": [
+            "outline",
+            "filled"
+          ],
+          "admitted": false,
+          "reason": "Не закрыт неизменённый shipping gzip ceiling."
+        },
+        "primitives": {
+          "module": {
+            "bytes": 29329,
+            "gzipBytes": 5672,
+            "sha256": "ecb502c5ce7a4d10625d334715c97c425f9b917741576c3776909c39a3a9657a"
+          },
+          "controls": {
+            "exactJsonAndKeyOrder": true,
+            "staticValues": true,
+            "frozenTrees": true,
+            "defaultAndVariantIdentity": true,
+            "metadataIdentity": true,
+            "functionNames": true,
+            "getterReceiver": true,
+            "refusals": true
+          },
+          "consumers": {
+            "glyph": {
+              "bytes": 24443,
+              "gzipBytes": 5880,
+              "sha256": "f2112ef449f7a8e494c2bb6120ce2c81c88c64801f8dd43bd3b090ef0d765dab",
+              "retainedFiles": [
+                "<stdin>",
+                "dist/ir/author-request-runtime.js",
+                "dist/ir/request.js",
+                "dist/ir/symbol-runtime.js",
+                "dist/symbols/notifications-unread.js"
+              ],
+              "resultEqual": true
+            },
+            "caps": {
+              "bytes": 3615,
+              "gzipBytes": 1592,
+              "sha256": "8b4d5d7d39c71eadd742caf6b4b5dc81fb5c6d0edd33bdca864e4383d8be9a29",
+              "retainedFiles": [
+                "<stdin>",
+                "dist/ir/request.js",
+                "dist/ir/symbol-runtime.js",
+                "dist/symbols/notifications-unread.js"
+              ],
+              "resultEqual": true
+            },
+            "both": {
+              "bytes": 26327,
+              "gzipBytes": 6464,
+              "sha256": "6f41363c7c879d39830bc1405e01ee6e1e966939899535dfb4574208a9ce5d17",
+              "retainedFiles": [
+                "<stdin>",
+                "dist/ir/author-request-runtime.js",
+                "dist/ir/request.js",
+                "dist/ir/symbol-runtime.js",
+                "dist/symbols/notifications-unread.js"
+              ],
+              "resultEqual": true
+            },
+            "outline": {
+              "bytes": 3535,
+              "gzipBytes": 1716,
+              "sha256": "65c2eb1ce610b54d9b6ade8bf6bb654a87e30f1da055ab99e321bc212e407a08",
+              "retainedFiles": [
+                "<stdin>",
+                "dist/symbols/notifications-unread.js"
+              ],
+              "resultEqual": true
+            },
+            "filled": {
+              "bytes": 2010,
+              "gzipBytes": 1029,
+              "sha256": "d6dfb7bb5950defb05f6c93da5f4c26d286e91368a59e687635c548d8b91462e",
+              "retainedFiles": [
+                "<stdin>",
+                "dist/symbols/notifications-unread.js"
+              ],
+              "resultEqual": true
+            }
+          },
+          "regressions": [
+            "glyph",
+            "caps",
+            "both"
+          ],
+          "admitted": false,
+          "reason": "Не закрыт неизменённый shipping gzip ceiling."
+        },
+        "pathsAndPrimitives": {
+          "module": {
+            "bytes": 19605,
+            "gzipBytes": 5602,
+            "sha256": "fcaa44823c95ac17185c8fdd121677174621dc9664ae1f1daa699b350fef49cd"
+          },
+          "controls": {
+            "exactJsonAndKeyOrder": true,
+            "staticValues": true,
+            "frozenTrees": true,
+            "defaultAndVariantIdentity": true,
+            "metadataIdentity": true,
+            "functionNames": true,
+            "getterReceiver": true,
+            "refusals": true
+          },
+          "consumers": {
+            "glyph": {
+              "bytes": 14271,
+              "gzipBytes": 5755,
+              "sha256": "98d498ffb7582961173a0502f896310339505bc73d6cb14268de4199d23bad10",
+              "retainedFiles": [
+                "<stdin>",
+                "dist/ir/author-request-runtime.js",
+                "dist/ir/request.js",
+                "dist/ir/symbol-runtime.js",
+                "dist/symbols/notifications-unread.js"
+              ],
+              "resultEqual": true
+            },
+            "caps": {
+              "bytes": 3615,
+              "gzipBytes": 1591,
+              "sha256": "292f88c1c08930a92b163f8deb02c96ab11953370bcf6b4b55d7525f761ba5a3",
+              "retainedFiles": [
+                "<stdin>",
+                "dist/ir/request.js",
+                "dist/ir/symbol-runtime.js",
+                "dist/symbols/notifications-unread.js"
+              ],
+              "resultEqual": true
+            },
+            "both": {
+              "bytes": 16163,
+              "gzipBytes": 6331,
+              "sha256": "6e8601b27cfdaddd74a4fc0a0cfe6643b93d3a8900dbbc2081935441b441f180",
+              "retainedFiles": [
+                "<stdin>",
+                "dist/ir/author-request-runtime.js",
+                "dist/ir/request.js",
+                "dist/ir/symbol-runtime.js",
+                "dist/symbols/notifications-unread.js"
+              ],
+              "resultEqual": true
+            },
+            "outline": {
+              "bytes": 3535,
+              "gzipBytes": 1716,
+              "sha256": "cfbca4681f00bfb15f5c0790078cd6209fb30025736e124e2ac8c682bacd217a",
+              "retainedFiles": [
+                "<stdin>",
+                "dist/symbols/notifications-unread.js"
+              ],
+              "resultEqual": true
+            },
+            "filled": {
+              "bytes": 2010,
+              "gzipBytes": 1029,
+              "sha256": "71fcc5a3fb1addffaabc1f277f52b4e41e96924f1a939a8e4afe112713189949",
+              "retainedFiles": [
+                "<stdin>",
+                "dist/symbols/notifications-unread.js"
+              ],
+              "resultEqual": true
+            }
+          },
+          "regressions": [
+            "caps"
+          ],
+          "admitted": false,
+          "reason": "Не закрыт неизменённый shipping gzip ceiling."
+        },
+        "withoutPure": {
+          "module": {
+            "bytes": 21520,
+            "gzipBytes": 5443,
+            "sha256": "a1ee882b45d2341467a483a893bd95f646133255eb65b264f98dcdc29157ddd4"
+          },
+          "controls": {
+            "exactJsonAndKeyOrder": true,
+            "staticValues": true,
+            "frozenTrees": true,
+            "defaultAndVariantIdentity": true,
+            "metadataIdentity": true,
+            "functionNames": true,
+            "getterReceiver": true,
+            "refusals": true
+          },
+          "consumers": {
+            "glyph": {
+              "bytes": 16101,
+              "gzipBytes": 5649,
+              "sha256": "3af071db7c53e19303a928aa3e6c2614815f263eaff30f11fc63d107ab324148",
+              "retainedFiles": [
+                "<stdin>",
+                "dist/ir/author-request-runtime.js",
+                "dist/ir/request.js",
+                "dist/ir/symbol-runtime.js",
+                "dist/symbols/notifications-unread.js"
+              ],
+              "resultEqual": true
+            },
+            "caps": {
+              "bytes": 15946,
+              "gzipBytes": 5257,
+              "sha256": "997edf7ad729be1afd406667d987f0d4609584f8507df8bb7d9a40647ab88a40",
+              "retainedFiles": [
+                "<stdin>",
+                "dist/ir/request.js",
+                "dist/ir/symbol-runtime.js",
+                "dist/symbols/notifications-unread.js"
+              ],
+              "resultEqual": true
+            },
+            "both": {
+              "bytes": 18964,
+              "gzipBytes": 6230,
+              "sha256": "409129cf3e21071a84b815a555260cf54da096a3d93d49a0d162bdbc003a6dba",
+              "retainedFiles": [
+                "<stdin>",
+                "dist/ir/author-request-runtime.js",
+                "dist/ir/request.js",
+                "dist/ir/symbol-runtime.js",
+                "dist/symbols/notifications-unread.js"
+              ],
+              "resultEqual": true
+            },
+            "outline": {
+              "bytes": 16208,
+              "gzipBytes": 4496,
+              "sha256": "977530e8abab85525ad62d963eb9e1e6ebc25f908dac9dc75e3bd136b61090ca",
+              "retainedFiles": [
+                "<stdin>",
+                "dist/symbols/notifications-unread.js"
+              ],
+              "resultEqual": true
+            },
+            "filled": {
+              "bytes": 14683,
+              "gzipBytes": 4479,
+              "sha256": "05d8ddcf29a6956a5532b5db4cda8eea7a7d4d7d727f0f0f18f83b95d4bf1244",
+              "retainedFiles": [
+                "<stdin>",
+                "dist/symbols/notifications-unread.js"
+              ],
+              "resultEqual": true
+            }
+          },
+          "regressions": [
+            "caps",
+            "outline",
+            "filled"
+          ],
+          "admitted": false,
+          "reason": "Контрпример: побочные эффекты concatenation удерживают source в caps/static consumer."
+        }
+      },
+      "current": {
+        "module": {
+          "bytes": 21576,
+          "gzipBytes": 5463,
+          "sha256": "0aafd7e7f19c5ab9b56d1f4f688579f4b3c27bfe50c0f9c5664f882d4dc16d9b"
+        },
+        "controls": {
+          "exactJsonAndKeyOrder": true,
+          "staticValues": true,
+          "frozenTrees": true,
+          "defaultAndVariantIdentity": true,
+          "metadataIdentity": true,
+          "functionNames": true,
+          "getterReceiver": true,
+          "refusals": true
+        },
+        "consumers": {
+          "glyph": {
+            "bytes": 16101,
+            "gzipBytes": 5649,
+            "sha256": "3af071db7c53e19303a928aa3e6c2614815f263eaff30f11fc63d107ab324148",
+            "retainedFiles": [
+              "<stdin>",
+              "dist/ir/author-request-runtime.js",
+              "dist/ir/request.js",
+              "dist/ir/symbol-runtime.js",
+              "dist/symbols/notifications-unread.js"
+            ],
+            "resultEqual": true
+          },
+          "caps": {
+            "bytes": 4668,
+            "gzipBytes": 1529,
+            "sha256": "83e2e8002e17196ec0bfe54ecd83b08aa929e58d8a02c2e95b5c33585ccfbf70",
+            "retainedFiles": [
+              "<stdin>",
+              "dist/ir/request.js",
+              "dist/ir/symbol-runtime.js",
+              "dist/symbols/notifications-unread.js"
+            ],
+            "resultEqual": true
+          },
+          "both": {
+            "bytes": 18964,
+            "gzipBytes": 6230,
+            "sha256": "409129cf3e21071a84b815a555260cf54da096a3d93d49a0d162bdbc003a6dba",
+            "retainedFiles": [
+              "<stdin>",
+              "dist/ir/author-request-runtime.js",
+              "dist/ir/request.js",
+              "dist/ir/symbol-runtime.js",
+              "dist/symbols/notifications-unread.js"
+            ],
+            "resultEqual": true
+          },
+          "outline": {
+            "bytes": 3535,
+            "gzipBytes": 1716,
+            "sha256": "a973b04311d0322402d6252b57a43cec520b4cf7d9727518829eea9e3294d2bc",
+            "retainedFiles": [
+              "<stdin>",
+              "dist/symbols/notifications-unread.js"
+            ],
+            "resultEqual": true
+          },
+          "filled": {
+            "bytes": 2010,
+            "gzipBytes": 1029,
+            "sha256": "1d5a5ab5b9bac2567e33fa5c898f12dc5ec34e7a0f9d33ad481cb3db5c2646b0",
+            "retainedFiles": [
+              "<stdin>",
+              "dist/symbols/notifications-unread.js"
+            ],
+            "resultEqual": true
+          }
+        },
+        "pathOccurrences": {
+          "outline": [
+            {
+              "id": "notification-bell-fragment-1",
+              "baseline": 4,
+              "current": 2
+            },
+            {
+              "id": "notification-bell-fragment-2",
+              "baseline": 4,
+              "current": 2
+            },
+            {
+              "id": "notification-bell-fragment-3",
+              "baseline": 4,
+              "current": 2
+            },
+            {
+              "id": "notification-clapper",
+              "baseline": 4,
+              "current": 2
+            },
+            {
+              "id": "notification-badge",
+              "baseline": 4,
+              "current": 2
+            }
+          ],
+          "filled": [
+            {
+              "id": "notification-clapper",
+              "baseline": 4,
+              "current": 2
+            },
+            {
+              "id": "notification-bell",
+              "baseline": 4,
+              "current": 2
+            },
+            {
+              "id": "notification-badge",
+              "baseline": 4,
+              "current": 2
+            }
+          ]
+        },
+        "remainingShippingGap": {
+          "bytes": 0,
+          "gzipBytes": 429
+        }
+      }
+    }
+  ]
+}

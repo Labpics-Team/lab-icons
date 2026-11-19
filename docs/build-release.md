@@ -42,14 +42,16 @@ pnpm exec vitest list anatomy-generation/arrows -t 'заливку'
 Проверка состоялась, только если итог показывает непустой выполненный набор.
 `vitest list` с теми же фильтрами помогает проверить выбор, но не выполняет тесты.
 
-Для визуального сравнения выполните:
+Для визуальной проверки текущего авторского корпуса выполните:
 
 ```sh
-pnpm observatory
+node scripts/build-source-atlas.mjs
 ```
 
-Откройте `preview/observatory.html` и сравните исходник с моделью, наложением
-контуров и измерениями. Решение о приёмке варианта принимается после визуального ревью.
+Откройте `preview/source-atlas.html` и сравните авторские Outline/Filled при
+16/24/48 px. Решение о приёмке варианта принимается после визуального ревью
+и проверки публичного импорта. `pnpm observatory` создаёт
+`preview/observatory.html` для сравнения прежней геометрии с compatibility-моделями.
 
 ## Сборка и упаковка
 
@@ -81,32 +83,52 @@ node scripts/check-docs-drift.js --check
 Проверка также находит известные противоречия каналу установки в README и
 вложенных документах. После генерации просмотрите diff и пояснения к изменённым полям.
 
+Точный текущий размер корпуса берите из контракта или генерируемой справки.
+Проверка различает единицу корпуса и составное имя измеряемой операции:
+`SVG writes`, `file reads`, `icon updates` описывают работу runtime. Такие
+измерения допустимы и не освобождают соседние утверждения о размере корпуса.
+
 ## Релиз
 
 Выберите коммит после успешных обязательных проверок и ревью.
 Версию определите по [политике совместимости](semver-policy.md).
 Тег исходников должен совпадать с `v<package.json#version>`.
 
-В Bash из корня проверенной рабочей копии:
+После merge дождитесь успешного CI текущего `main` и задайте его run ID
+в переменной окружения `CI_RUN_ID`. Запустите из Bash:
 
 ```sh
-set -euo pipefail
-source_commit=$(git rev-parse --verify 'HEAD^{commit}')
-version=$(git show "$source_commit:package.json" | node --input-type=module -e 'import { readFileSync } from "node:fs"; console.log(JSON.parse(readFileSync(0, "utf8")).version)')
-git tag "v$version" "$source_commit"
-git push origin "refs/tags/v$version"
+gh workflow run release-packages.yml --ref main -f "ci_run_id=${CI_RUN_ID:?Укажите ID успешного CI текущего main}"
 ```
 
-Версия читается из выбранного коммита; незакоммиченные изменения остаются
-в рабочей копии. При ошибке команда останавливается. Если push завершился
-неудачно, проверьте состояние удалённого тега перед повтором.
+Workflow продвигает уже проверенные npm, Maven и catalog artifacts этого коммита.
+Он проверяет все ссылки `.module`, SHA-256 и принадлежность файлов репозиторию;
+публикует source tag `v<version>` и отдельный parentless Maven tag
+`maven-compose-v<version>`. Бинарные файлы не добавляются в source-ветку.
+Версия берётся из выбранного коммита; чужой, незавершённый, PR-run или CI
+другого коммита не подходит. SHA запуска выпуска совпадает с проверенным SHA,
+чтобы npm provenance указывала на правильные исходники.
 
-[Workflow релиза](../.github/workflows/release-dist.yml) проверяет исходный тег
-и создаёт тег собранного пакета. Повтор допускается после сверки происхождения
-и байтов с чистой сборкой. Опубликованные теги сохраняют положение и содержимое;
-принудительное обновление запрещено.
+После публикации отдельный headless consumer устанавливает
+`pics.lab:icons-compose:<version>` по публичному адресу, с пустым Gradle cache.
+Существующий [workflow dist](../.github/workflows/release-dist.yml) выпускает
+JavaScript tag `v<version>-dist`.
+Npm Trusted Publishing публикует тот же tarball, который прошёл установленный
+browser consumer в CI. Отдельный consumer с пустым cache устанавливает публичную
+npm-версию; её integrity должна совпасть с проверенными байтами. Затем GitHub
+release получает Maven ZIP, самостоятельный каталог и `SHA256SUMS.txt`.
+Повтор сохраняет существующие теги и проверяет байты уже загруженных assets;
+несовпадающий выпуск требует новой версии.
 
-Наличие конкретной версии в npm проверьте в реестре отдельно.
+В настройках npm-пакета `@labpics/icons` Trusted Publisher должен разрешать
+`npm publish` для GitHub organization `Labpics-Team`, repository `lab-icons`,
+workflow filename `release-packages.yml`. Долгоживущий токен не требуется.
+Первую такую привязку добавляет пользователь с правами на npm-пакет;
+[инструкция npm](https://docs.npmjs.com/trusted-publishers/).
+
+Каталог распаковывается непосредственно в `/icons/`: `index.html` лежит в корне
+архива. Для native используйте Maven URL из [справки Compose](../native/compose/README.md).
+Это тот же способ доставки, что уже применяется в Motion Compose 0.1.0.
 
 ## Исправление ошибки
 

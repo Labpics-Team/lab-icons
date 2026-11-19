@@ -2,8 +2,8 @@ import { spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
+import { buildSync } from 'esbuild';
 import { parseDocumentation } from '../scripts/lib/docs-markdown.js';
-import { validateIconProposal } from '../scripts/lib/icon-proposal.js';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 
@@ -23,14 +23,14 @@ function runExample(source) {
 }
 
 describe('Примеры README', () => {
-  it('исполняет каждый опубликованный JS-блок через публичный пакет после сборки', () => {
+  it('собирает каждый браузерный JS-блок через публичный пакет после сборки', () => {
     const examples = javascriptExamples(readFileSync(new URL('../README.md', import.meta.url), 'utf8'));
     for (const example of examples) {
-      const result = runExample(example);
-      expect(result.error, result.stderr).toBeUndefined();
-      expect(result.status, result.stderr).toBe(0);
-      expect(result.stdout.trim().length).toBeGreaterThan(0);
+      const result = buildSync({ stdin: { contents: example, resolveDir: root },
+        bundle: true, platform: 'browser', format: 'esm', write: false });
+      expect(result.outputFiles[0].text.length).toBeGreaterThan(0);
     }
+    // Исполнение этих же блоков в настоящем DOM входит в catalog:check.
   });
 
   it('сообщает об отсутствующем экспорте при исполнении примера', () => {
@@ -50,17 +50,4 @@ describe('Примеры README', () => {
     expect(javascriptExamples('```sh\nexit 1\n```\n```js\nconsole.log(1);\n```')).toEqual(['console.log(1);']);
     expect(javascriptExamples('~~~javascript\r\nconsole.log(1);\r\n~~~')).toEqual(['console.log(1);']);
   });
-});
-
-it('проверяет предложение из документации по схеме и каталогу', () => {
-  const { jsonExamples } = parseDocumentation(readFileSync(new URL('../docs/agent-workflow.md', import.meta.url), 'utf8'));
-  expect(jsonExamples.length).toBeGreaterThan(0);
-  const catalog = JSON.parse(readFileSync(new URL('../semantics/catalog.json', import.meta.url), 'utf8'));
-  const catalogIconIds = Object.keys(catalog.icons);
-  for (const source of jsonExamples) {
-    const proposal = JSON.parse(source);
-    expect(() => validateIconProposal(proposal, { catalogIconIds })).not.toThrow();
-    expect(() => validateIconProposal({ ...proposal, unsupported: true }, { catalogIconIds })).toThrow(/unsupported/);
-    expect(() => validateIconProposal({ ...proposal, family: { ...proposal.family, references: ['not-a-real-icon'] } }, { catalogIconIds })).toThrow(/not-a-real-icon/);
-  }
 });

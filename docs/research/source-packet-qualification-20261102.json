@@ -1,0 +1,450 @@
+{
+  "capturedAt": "2026-11-02T11:03:38.891Z",
+  "baselineSha": "ebec9e952c795d63c7d6c8c8e72bd44cda099ba3",
+  "sourceSha": "c212c11ab8fd8b30bdfcef5952dc12f4b566ebab",
+  "emitterSha256": "be8810a7a14281e5e6aa25b2cc3f491d267288f7389b2c65181a7629cf04ec85",
+  "packetCompilerSha256": "1ba33ed1dd35d42414e685e94dd23f4010db07d43542d943d37080a8d2e64c65",
+  "packetRuntimeSha256": "488a387a0213d5764f9ed816266bc652212c798345bd60b417a4f7fd8238c505",
+  "experimentSha256": "98f85ad762a8c92fa5e698b9d44ed34312563b800970312ffcee9c467e856907",
+  "scope": "Две семьи/четыре masters, actual runtime emit/native ESM/selective bundles. Без full corpus/build/pack/browser, timing/allocations/памяти и shipping qualification.",
+  "environment": {
+    "node": "v24.15.0",
+    "platform": "win32",
+    "arch": "x64",
+    "esbuild": "0.28.1",
+    "fflate": "0.8.3",
+    "gzip": {
+      "level": 9,
+      "mtime": 0
+    },
+    "brotliQuality": 11
+  },
+  "common": {
+    "dist/ir/request.js": {
+      "bytes": 2356,
+      "gzipBytes": 1017,
+      "brotliBytes": 811,
+      "sha256": "cee50e7f82d5029e8baabf95baad569c3009abc46f8f3d44aa4c5f9888c255af"
+    },
+    "dist/ir/author-request-runtime.js": {
+      "bytes": 798,
+      "gzipBytes": 489,
+      "brotliBytes": 389,
+      "sha256": "4284632485b0d66cf70f316da75ebe4c45be5c94ac487bc3d29d5965b9a9e31b"
+    },
+    "dist/ir/symbol-runtime.js": {
+      "bytes": 786,
+      "gzipBytes": 354,
+      "brotliBytes": 290,
+      "sha256": "7a3a0226218b04c5c31da0e40eab102aef5d8908ba448da6080bc0209aeb9639"
+    }
+  },
+  "helper": {
+    "file": "dist/ir/source-packet-runtime.js",
+    "bytes": 1181,
+    "gzipBytes": 600,
+    "brotliBytes": 517,
+    "sha256": "df11fe7a01a7bbfe7e982cbe095b883abe9dd6998dbe4daaaef73d9df2fad5f5",
+    "modules": [
+      "src/ir/source-packet-runtime.ts"
+    ]
+  },
+  "rows": [
+    {
+      "icon": "notifications",
+      "baseline": {
+        "bytes": 16660,
+        "gzipBytes": 4584,
+        "brotliBytes": 3658,
+        "sha256": "75f4e0ec95b6fd4fb7b6c86c087312de31914e11f4c13a4d055cd465bc63820f"
+      },
+      "candidate": {
+        "bytes": 14070,
+        "gzipBytes": 4104,
+        "brotliBytes": 3243,
+        "sha256": "07cdfdc453f4681a326467a4de939e0da84b9bb29f7b478658d402ddcf3c81bc"
+      },
+      "ceilings": {
+        "baselineBytes": 23951,
+        "baselineGzipBytes": 4165,
+        "maxBytes": 23951,
+        "maxGzipBytes": 4165,
+        "allowedModules": [],
+        "forbiddenNeedles": [
+          "sourceMappingURL",
+          "semantics/catalog.json",
+          "anatomy.runtime.json"
+        ]
+      },
+      "baselineNative": {
+        "exactJsonAndKeyOrder": true,
+        "frozenTrees": true,
+        "authorAnatomyAlias": true,
+        "independentVariants": true,
+        "defaultIdentity": true,
+        "nativeFunctionNames": true,
+        "getterReceiver": true,
+        "authorAndVariationRefusals": true
+      },
+      "candidateNative": {
+        "exactJsonAndKeyOrder": true,
+        "frozenTrees": true,
+        "authorAnatomyAlias": true,
+        "independentVariants": true,
+        "defaultIdentity": true,
+        "nativeFunctionNames": true,
+        "getterReceiver": true,
+        "authorAndVariationRefusals": true
+      },
+      "consumers": {
+        "glyph": {
+          "baseline": {
+            "bytes": 12459,
+            "gzipBytes": 4812,
+            "brotliBytes": 3858,
+            "sha256": "8beea224e20e70ff5d692a0c5dea0ad7cd10940c743689c7b58fe62a4cb1c5a3",
+            "graph": {
+              "dist/ir/request.js": 2370,
+              "dist/ir/author-request-runtime.js": 755,
+              "dist/ir/symbol-runtime.js": 219,
+              "dist/symbols/notifications.js": 9084,
+              "<stdin>": 10
+            }
+          },
+          "candidate": {
+            "bytes": 11323,
+            "gzipBytes": 4839,
+            "brotliBytes": 3901,
+            "sha256": "f61076cb4f49fda45f799db91b891c2deb2c07b522ca815dab5c7e120dcedfb8",
+            "graph": {
+              "dist/ir/request.js": 2370,
+              "dist/ir/author-request-runtime.js": 755,
+              "dist/ir/symbol-runtime.js": 219,
+              "dist/ir/source-packet-runtime.js": 440,
+              "dist/symbols/notifications.js": 7508,
+              "<stdin>": 10
+            }
+          },
+          "exactResult": true,
+          "rawDelta": -1136,
+          "gzipDelta": 27,
+          "brotliDelta": 43
+        },
+        "caps": {
+          "baseline": {
+            "bytes": 4531,
+            "gzipBytes": 1511,
+            "brotliBytes": 1294,
+            "sha256": "fb1fd11cfb3eb8d4ccc2ab3deef010bf9eb7765d98e7112a41733eaab23aca9a",
+            "graph": {
+              "dist/ir/request.js": 271,
+              "dist/ir/symbol-runtime.js": 189,
+              "dist/symbols/notifications.js": 4040,
+              "<stdin>": 10
+            }
+          },
+          "candidate": {
+            "bytes": 3905,
+            "gzipBytes": 1493,
+            "brotliBytes": 1304,
+            "sha256": "036b1f91c9c510bfacc83f400bfaf2fd66d4a2907a1003d48e600221c32ea6c0",
+            "graph": {
+              "dist/ir/request.js": 271,
+              "dist/ir/symbol-runtime.js": 189,
+              "dist/ir/source-packet-runtime.js": 502,
+              "dist/symbols/notifications.js": 2912,
+              "<stdin>": 10
+            }
+          },
+          "exactResult": true,
+          "rawDelta": -626,
+          "gzipDelta": -18,
+          "brotliDelta": 10
+        },
+        "both": {
+          "baseline": {
+            "bytes": 15185,
+            "gzipBytes": 5378,
+            "brotliBytes": 4307,
+            "sha256": "0570df43991b665de185090357335ff69042e72d126d34cad9fb9c7be8a1b054",
+            "graph": {
+              "dist/ir/request.js": 2370,
+              "dist/ir/author-request-runtime.js": 755,
+              "dist/ir/symbol-runtime.js": 300,
+              "dist/symbols/notifications.js": 11723,
+              "<stdin>": 16
+            }
+          },
+          "candidate": {
+            "bytes": 13423,
+            "gzipBytes": 5403,
+            "brotliBytes": 4371,
+            "sha256": "7c528b9f43596f4dfaf6941ca312126d58320c179c745abbefcde7a05a17d846",
+            "graph": {
+              "dist/ir/request.js": 2370,
+              "dist/ir/author-request-runtime.js": 755,
+              "dist/ir/symbol-runtime.js": 300,
+              "dist/ir/source-packet-runtime.js": 942,
+              "dist/symbols/notifications.js": 9019,
+              "<stdin>": 16
+            }
+          },
+          "exactResult": true,
+          "rawDelta": -1762,
+          "gzipDelta": 25,
+          "brotliDelta": 64
+        },
+        "outline": {
+          "baseline": {
+            "bytes": 2982,
+            "gzipBytes": 1483,
+            "brotliBytes": 1250,
+            "sha256": "81750d334037df64c0e74897fc5afb0d349a59c88fa83c09e9928259904a604e",
+            "graph": {
+              "dist/symbols/notifications.js": 2953,
+              "<stdin>": 8
+            }
+          },
+          "candidate": {
+            "bytes": 2982,
+            "gzipBytes": 1483,
+            "brotliBytes": 1252,
+            "sha256": "fb6bd5625d3f3c77ab4b9524a88f32fbeb0c58a89d7d0b750f32a63e4ef9bedc",
+            "graph": {
+              "dist/symbols/notifications.js": 2953,
+              "<stdin>": 8
+            }
+          },
+          "exactResult": true,
+          "rawDelta": 0,
+          "gzipDelta": 0,
+          "brotliDelta": 2
+        },
+        "filled": {
+          "baseline": {
+            "bytes": 1690,
+            "gzipBytes": 889,
+            "brotliBytes": 755,
+            "sha256": "4c72437af5aa99b80f8290ae94bda6ad4ba26181cfea4034f4ac75f28df42ee9",
+            "graph": {
+              "dist/symbols/notifications.js": 1661,
+              "<stdin>": 8
+            }
+          },
+          "candidate": {
+            "bytes": 1690,
+            "gzipBytes": 886,
+            "brotliBytes": 754,
+            "sha256": "df7c433652398dc04bfed6e4e85dc33225bd403fc79b1832ea7a29faa23ef814",
+            "graph": {
+              "dist/symbols/notifications.js": 1661,
+              "<stdin>": 8
+            }
+          },
+          "exactResult": true,
+          "rawDelta": 0,
+          "gzipDelta": -3,
+          "brotliDelta": -1
+        }
+      }
+    },
+    {
+      "icon": "notifications-unread",
+      "baseline": {
+        "bytes": 21576,
+        "gzipBytes": 5463,
+        "brotliBytes": 4298,
+        "sha256": "0aafd7e7f19c5ab9b56d1f4f688579f4b3c27bfe50c0f9c5664f882d4dc16d9b"
+      },
+      "candidate": {
+        "bytes": 17595,
+        "gzipBytes": 4918,
+        "brotliBytes": 3910,
+        "sha256": "3d0cc139d2a2cdb953c1f165a6e723e3966cce99ff8608f2396a725d68f650e7"
+      },
+      "ceilings": {
+        "baselineBytes": 30360,
+        "baselineGzipBytes": 5034,
+        "maxBytes": 30360,
+        "maxGzipBytes": 5034,
+        "allowedModules": [],
+        "forbiddenNeedles": [
+          "sourceMappingURL",
+          "semantics/catalog.json",
+          "anatomy.runtime.json"
+        ]
+      },
+      "baselineNative": {
+        "exactJsonAndKeyOrder": true,
+        "frozenTrees": true,
+        "authorAnatomyAlias": true,
+        "independentVariants": true,
+        "defaultIdentity": true,
+        "nativeFunctionNames": true,
+        "getterReceiver": true,
+        "authorAndVariationRefusals": true
+      },
+      "candidateNative": {
+        "exactJsonAndKeyOrder": true,
+        "frozenTrees": true,
+        "authorAnatomyAlias": true,
+        "independentVariants": true,
+        "defaultIdentity": true,
+        "nativeFunctionNames": true,
+        "getterReceiver": true,
+        "authorAndVariationRefusals": true
+      },
+      "consumers": {
+        "glyph": {
+          "baseline": {
+            "bytes": 16101,
+            "gzipBytes": 5649,
+            "brotliBytes": 4519,
+            "sha256": "3af071db7c53e19303a928aa3e6c2614815f263eaff30f11fc63d107ab324148",
+            "graph": {
+              "dist/ir/request.js": 2370,
+              "dist/ir/author-request-runtime.js": 755,
+              "dist/ir/symbol-runtime.js": 219,
+              "dist/symbols/notifications-unread.js": 12726,
+              "<stdin>": 10
+            }
+          },
+          "candidate": {
+            "bytes": 13570,
+            "gzipBytes": 5625,
+            "brotliBytes": 4541,
+            "sha256": "bba8f2abe4c126f3b6380be95140c7a8370a3cf643362b5851c251babf33096a",
+            "graph": {
+              "dist/ir/request.js": 2370,
+              "dist/ir/author-request-runtime.js": 755,
+              "dist/ir/symbol-runtime.js": 219,
+              "dist/ir/source-packet-runtime.js": 440,
+              "dist/symbols/notifications-unread.js": 9755,
+              "<stdin>": 10
+            }
+          },
+          "exactResult": true,
+          "rawDelta": -2531,
+          "gzipDelta": -24,
+          "brotliDelta": 22
+        },
+        "caps": {
+          "baseline": {
+            "bytes": 4668,
+            "gzipBytes": 1529,
+            "brotliBytes": 1304,
+            "sha256": "83e2e8002e17196ec0bfe54ecd83b08aa929e58d8a02c2e95b5c33585ccfbf70",
+            "graph": {
+              "dist/ir/request.js": 271,
+              "dist/ir/symbol-runtime.js": 189,
+              "dist/symbols/notifications-unread.js": 4177,
+              "<stdin>": 10
+            }
+          },
+          "candidate": {
+            "bytes": 4046,
+            "gzipBytes": 1518,
+            "brotliBytes": 1300,
+            "sha256": "146879c4078160b7d5657f5380179dfcdf540702ef7678133e1c742c8e74e7c5",
+            "graph": {
+              "dist/ir/request.js": 271,
+              "dist/ir/symbol-runtime.js": 189,
+              "dist/ir/source-packet-runtime.js": 502,
+              "dist/symbols/notifications-unread.js": 3053,
+              "<stdin>": 10
+            }
+          },
+          "exactResult": true,
+          "rawDelta": -622,
+          "gzipDelta": -11,
+          "brotliDelta": -4
+        },
+        "both": {
+          "baseline": {
+            "bytes": 18964,
+            "gzipBytes": 6230,
+            "brotliBytes": 5019,
+            "sha256": "409129cf3e21071a84b815a555260cf54da096a3d93d49a0d162bdbc003a6dba",
+            "graph": {
+              "dist/ir/request.js": 2370,
+              "dist/ir/author-request-runtime.js": 755,
+              "dist/ir/symbol-runtime.js": 300,
+              "dist/symbols/notifications-unread.js": 15502,
+              "<stdin>": 16
+            }
+          },
+          "candidate": {
+            "bytes": 15811,
+            "gzipBytes": 6212,
+            "brotliBytes": 4996,
+            "sha256": "43275771dcfc691d00aa1f4846b11ebff81486c0b407b515ef71df059afc76ba",
+            "graph": {
+              "dist/ir/request.js": 2370,
+              "dist/ir/author-request-runtime.js": 755,
+              "dist/ir/symbol-runtime.js": 300,
+              "dist/ir/source-packet-runtime.js": 942,
+              "dist/symbols/notifications-unread.js": 11407,
+              "<stdin>": 16
+            }
+          },
+          "exactResult": true,
+          "rawDelta": -3153,
+          "gzipDelta": -18,
+          "brotliDelta": -23
+        },
+        "outline": {
+          "baseline": {
+            "bytes": 3535,
+            "gzipBytes": 1716,
+            "brotliBytes": 1422,
+            "sha256": "a973b04311d0322402d6252b57a43cec520b4cf7d9727518829eea9e3294d2bc",
+            "graph": {
+              "dist/symbols/notifications-unread.js": 3506,
+              "<stdin>": 8
+            }
+          },
+          "candidate": {
+            "bytes": 3535,
+            "gzipBytes": 1716,
+            "brotliBytes": 1425,
+            "sha256": "01aa491f06c44d9d83e552f550d3f3ac69aa51635d06bd67bedf3cf7edef1fe1",
+            "graph": {
+              "dist/symbols/notifications-unread.js": 3506,
+              "<stdin>": 8
+            }
+          },
+          "exactResult": true,
+          "rawDelta": 0,
+          "gzipDelta": 0,
+          "brotliDelta": 3
+        },
+        "filled": {
+          "baseline": {
+            "bytes": 2010,
+            "gzipBytes": 1029,
+            "brotliBytes": 867,
+            "sha256": "1d5a5ab5b9bac2567e33fa5c898f12dc5ec34e7a0f9d33ad481cb3db5c2646b0",
+            "graph": {
+              "dist/symbols/notifications-unread.js": 1981,
+              "<stdin>": 8
+            }
+          },
+          "candidate": {
+            "bytes": 2010,
+            "gzipBytes": 1029,
+            "brotliBytes": 866,
+            "sha256": "0f270cbdd6eade385511b93ec80da7791a87478c80c9a2adae70a19f8b2f9c44",
+            "graph": {
+              "dist/symbols/notifications-unread.js": 1981,
+              "<stdin>": 8
+            }
+          },
+          "exactResult": true,
+          "rawDelta": 0,
+          "gzipDelta": 0,
+          "brotliDelta": -1
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,465 @@
+{
+  "version": 1,
+  "scope": "authoring page -> JSON -> public compile -> SVG download",
+  "browser": "156.0.8078.4",
+  "initial": [
+    {
+      "size": 16,
+      "width": 16,
+      "height": 16,
+      "viewBox": "0 0 1 1",
+      "staticMatches": true,
+      "parts": [
+        "body",
+        "focus",
+        "signal"
+      ],
+      "paths": [
+        {
+          "d": "M0.71 0.5A0.21 0.21 0 1 0 0.29 0.5A0.21 0.21 0 1 0 0.71 0.5Z",
+          "length": 1.319944977760315,
+          "bounds": {
+            "x": 0.28999999165534973,
+            "y": 0.28992751240730286,
+            "width": 0.41999998688697815,
+            "height": 0.4201450049877167
+          },
+          "fill": "none",
+          "stroke": "rgb(25, 25, 30)",
+          "strokeWidth": 0.055,
+          "opacity": 1,
+          "visibility": "visible",
+          "display": "inline"
+        },
+        {
+          "d": "M0.555 0.5A0.055 0.055 0 1 0 0.445 0.5A0.055 0.055 0 1 0 0.555 0.5Z",
+          "length": 0.3456243574619293,
+          "bounds": {
+            "x": 0.4449999928474426,
+            "y": 0.44499996304512024,
+            "width": 0.11000001430511475,
+            "height": 0.11000004410743713
+          },
+          "fill": "rgb(25, 25, 30)",
+          "stroke": "none",
+          "strokeWidth": 1,
+          "opacity": 1,
+          "visibility": "visible",
+          "display": "inline"
+        },
+        {
+          "d": "M0.77127417 0.27372583A0.045 0.045 0 1 0 0.68127417 0.27372583A0.045 0.045 0 1 0 0.77127417 0.27372583Z",
+          "length": 0.282959520816803,
+          "bounds": {
+            "x": 0.6812740564346313,
+            "y": 0.22868189215660095,
+            "width": 0.09000003337860107,
+            "height": 0.090087890625
+          },
+          "fill": "rgb(25, 25, 30)",
+          "stroke": "none",
+          "strokeWidth": 1,
+          "opacity": 1,
+          "visibility": "visible",
+          "display": "inline"
+        }
+      ]
+    },
+    {
+      "size": 24,
+      "width": 24,
+      "height": 24,
+      "viewBox": "0 0 1 1",
+      "staticMatches": true,
+      "parts": [
+        "body",
+        "focus",
+        "signal"
+      ],
+      "paths": [
+        {
+          "d": "M0.71 0.5A0.21 0.21 0 1 0 0.29 0.5A0.21 0.21 0 1 0 0.71 0.5Z",
+          "length": 1.319944977760315,
+          "bounds": {
+            "x": 0.28999999165534973,
+            "y": 0.28992751240730286,
+            "width": 0.41999998688697815,
+            "height": 0.4201450049877167
+          },
+          "fill": "none",
+          "stroke": "rgb(25, 25, 30)",
+          "strokeWidth": 0.055,
+          "opacity": 1,
+          "visibility": "visible",
+          "display": "inline"
+        },
+        {
+          "d": "M0.555 0.5A0.055 0.055 0 1 0 0.445 0.5A0.055 0.055 0 1 0 0.555 0.5Z",
+          "length": 0.3456243574619293,
+          "bounds": {
+            "x": 0.4449999928474426,
+            "y": 0.44499996304512024,
+            "width": 0.11000001430511475,
+            "height": 0.11000004410743713
+          },
+          "fill": "rgb(25, 25, 30)",
+          "stroke": "none",
+          "strokeWidth": 1,
+          "opacity": 1,
+          "visibility": "visible",
+          "display": "inline"
+        },
+        {
+          "d": "M0.77127417 0.27372583A0.045 0.045 0 1 0 0.68127417 0.27372583A0.045 0.045 0 1 0 0.77127417 0.27372583Z",
+          "length": 0.282959520816803,
+          "bounds": {
+            "x": 0.6812740564346313,
+            "y": 0.22868189215660095,
+            "width": 0.09000003337860107,
+            "height": 0.090087890625
+          },
+          "fill": "rgb(25, 25, 30)",
+          "stroke": "none",
+          "strokeWidth": 1,
+          "opacity": 1,
+          "visibility": "visible",
+          "display": "inline"
+        }
+      ]
+    },
+    {
+      "size": 48,
+      "width": 48,
+      "height": 48,
+      "viewBox": "0 0 1 1",
+      "staticMatches": true,
+      "parts": [
+        "body",
+        "focus",
+        "signal"
+      ],
+      "paths": [
+        {
+          "d": "M0.71 0.5A0.21 0.21 0 1 0 0.29 0.5A0.21 0.21 0 1 0 0.71 0.5Z",
+          "length": 1.319944977760315,
+          "bounds": {
+            "x": 0.28999999165534973,
+            "y": 0.28992751240730286,
+            "width": 0.41999998688697815,
+            "height": 0.4201450049877167
+          },
+          "fill": "none",
+          "stroke": "rgb(25, 25, 30)",
+          "strokeWidth": 0.055,
+          "opacity": 1,
+          "visibility": "visible",
+          "display": "inline"
+        },
+        {
+          "d": "M0.555 0.5A0.055 0.055 0 1 0 0.445 0.5A0.055 0.055 0 1 0 0.555 0.5Z",
+          "length": 0.3456243574619293,
+          "bounds": {
+            "x": 0.4449999928474426,
+            "y": 0.44499996304512024,
+            "width": 0.11000001430511475,
+            "height": 0.11000004410743713
+          },
+          "fill": "rgb(25, 25, 30)",
+          "stroke": "none",
+          "strokeWidth": 1,
+          "opacity": 1,
+          "visibility": "visible",
+          "display": "inline"
+        },
+        {
+          "d": "M0.77127417 0.27372583A0.045 0.045 0 1 0 0.68127417 0.27372583A0.045 0.045 0 1 0 0.77127417 0.27372583Z",
+          "length": 0.282959520816803,
+          "bounds": {
+            "x": 0.6812740564346313,
+            "y": 0.22868189215660095,
+            "width": 0.09000003337860107,
+            "height": 0.090087890625
+          },
+          "fill": "rgb(25, 25, 30)",
+          "stroke": "none",
+          "strokeWidth": 1,
+          "opacity": 1,
+          "visibility": "visible",
+          "display": "inline"
+        }
+      ]
+    }
+  ],
+  "edited": [
+    {
+      "size": 16,
+      "width": 16,
+      "height": 16,
+      "viewBox": "0 0 1 1",
+      "staticMatches": true,
+      "parts": [
+        "body",
+        "focus",
+        "signal"
+      ],
+      "paths": [
+        {
+          "d": "M0.7 0.5A0.2 0.2 0 1 0 0.3 0.5A0.2 0.2 0 1 0 0.7 0.5Z",
+          "length": 1.2568140029907227,
+          "bounds": {
+            "x": 0.30000001192092896,
+            "y": 0.30000001192092896,
+            "width": 0.3999999761581421,
+            "height": 0.3999999761581421
+          },
+          "fill": "none",
+          "stroke": "rgb(25, 25, 30)",
+          "strokeWidth": 0.055,
+          "opacity": 1,
+          "visibility": "visible",
+          "display": "inline"
+        },
+        {
+          "d": "M0.555 0.5A0.055 0.055 0 1 0 0.445 0.5A0.055 0.055 0 1 0 0.555 0.5Z",
+          "length": 0.3456243574619293,
+          "bounds": {
+            "x": 0.4449999928474426,
+            "y": 0.44499996304512024,
+            "width": 0.11000001430511475,
+            "height": 0.11000004410743713
+          },
+          "fill": "rgb(25, 25, 30)",
+          "stroke": "none",
+          "strokeWidth": 1,
+          "opacity": 1,
+          "visibility": "visible",
+          "display": "inline"
+        },
+        {
+          "d": "M0.77127417 0.27372583A0.045 0.045 0 1 0 0.68127417 0.27372583A0.045 0.045 0 1 0 0.77127417 0.27372583Z",
+          "length": 0.282959520816803,
+          "bounds": {
+            "x": 0.6812740564346313,
+            "y": 0.22868189215660095,
+            "width": 0.09000003337860107,
+            "height": 0.090087890625
+          },
+          "fill": "rgb(25, 25, 30)",
+          "stroke": "none",
+          "strokeWidth": 1,
+          "opacity": 1,
+          "visibility": "visible",
+          "display": "inline"
+        }
+      ]
+    },
+    {
+      "size": 24,
+      "width": 24,
+      "height": 24,
+      "viewBox": "0 0 1 1",
+      "staticMatches": true,
+      "parts": [
+        "body",
+        "focus",
+        "signal"
+      ],
+      "paths": [
+        {
+          "d": "M0.7 0.5A0.2 0.2 0 1 0 0.3 0.5A0.2 0.2 0 1 0 0.7 0.5Z",
+          "length": 1.2568140029907227,
+          "bounds": {
+            "x": 0.30000001192092896,
+            "y": 0.30000001192092896,
+            "width": 0.3999999761581421,
+            "height": 0.3999999761581421
+          },
+          "fill": "none",
+          "stroke": "rgb(25, 25, 30)",
+          "strokeWidth": 0.055,
+          "opacity": 1,
+          "visibility": "visible",
+          "display": "inline"
+        },
+        {
+          "d": "M0.555 0.5A0.055 0.055 0 1 0 0.445 0.5A0.055 0.055 0 1 0 0.555 0.5Z",
+          "length": 0.3456243574619293,
+          "bounds": {
+            "x": 0.4449999928474426,
+            "y": 0.44499996304512024,
+            "width": 0.11000001430511475,
+            "height": 0.11000004410743713
+          },
+          "fill": "rgb(25, 25, 30)",
+          "stroke": "none",
+          "strokeWidth": 1,
+          "opacity": 1,
+          "visibility": "visible",
+          "display": "inline"
+        },
+        {
+          "d": "M0.77127417 0.27372583A0.045 0.045 0 1 0 0.68127417 0.27372583A0.045 0.045 0 1 0 0.77127417 0.27372583Z",
+          "length": 0.282959520816803,
+          "bounds": {
+            "x": 0.6812740564346313,
+            "y": 0.22868189215660095,
+            "width": 0.09000003337860107,
+            "height": 0.090087890625
+          },
+          "fill": "rgb(25, 25, 30)",
+          "stroke": "none",
+          "strokeWidth": 1,
+          "opacity": 1,
+          "visibility": "visible",
+          "display": "inline"
+        }
+      ]
+    },
+    {
+      "size": 48,
+      "width": 48,
+      "height": 48,
+      "viewBox": "0 0 1 1",
+      "staticMatches": true,
+      "parts": [
+        "body",
+        "focus",
+        "signal"
+      ],
+      "paths": [
+        {
+          "d": "M0.7 0.5A0.2 0.2 0 1 0 0.3 0.5A0.2 0.2 0 1 0 0.7 0.5Z",
+          "length": 1.2568140029907227,
+          "bounds": {
+            "x": 0.30000001192092896,
+            "y": 0.30000001192092896,
+            "width": 0.3999999761581421,
+            "height": 0.3999999761581421
+          },
+          "fill": "none",
+          "stroke": "rgb(25, 25, 30)",
+          "strokeWidth": 0.055,
+          "opacity": 1,
+          "visibility": "visible",
+          "display": "inline"
+        },
+        {
+          "d": "M0.555 0.5A0.055 0.055 0 1 0 0.445 0.5A0.055 0.055 0 1 0 0.555 0.5Z",
+          "length": 0.3456243574619293,
+          "bounds": {
+            "x": 0.4449999928474426,
+            "y": 0.44499996304512024,
+            "width": 0.11000001430511475,
+            "height": 0.11000004410743713
+          },
+          "fill": "rgb(25, 25, 30)",
+          "stroke": "none",
+          "strokeWidth": 1,
+          "opacity": 1,
+          "visibility": "visible",
+          "display": "inline"
+        },
+        {
+          "d": "M0.77127417 0.27372583A0.045 0.045 0 1 0 0.68127417 0.27372583A0.045 0.045 0 1 0 0.77127417 0.27372583Z",
+          "length": 0.282959520816803,
+          "bounds": {
+            "x": 0.6812740564346313,
+            "y": 0.22868189215660095,
+            "width": 0.09000003337860107,
+            "height": 0.090087890625
+          },
+          "fill": "rgb(25, 25, 30)",
+          "stroke": "none",
+          "strokeWidth": 1,
+          "opacity": 1,
+          "visibility": "visible",
+          "display": "inline"
+        }
+      ]
+    }
+  ],
+  "jsonError": "Ошибка JSON\nUnexpected end of JSON input",
+  "specError": "UNKNOWN_FIELD\nroot\nDesignSpec root: неизвестное поле <img src=x onerror=alert(1)>",
+  "download": {
+    "filename": "new-beacon-16.svg",
+    "size": 16,
+    "currentSvgMatches": true
+  },
+  "resources": {
+    "ids": [
+      "lab-symbol-authoring-stage-lab-icons-mask-354e2b7873630aba36caaac9ac921106de5bded00a00865c583235ffb1fa8d85",
+      "lab-symbol-authoring-sample-16-lab-icons-mask-354e2b7873630aba36caaac9ac921106de5bded00a00865c583235ffb1fa8d85",
+      "lab-symbol-authoring-sample-24-lab-icons-mask-354e2b7873630aba36caaac9ac921106de5bded00a00865c583235ffb1fa8d85",
+      "lab-symbol-authoring-sample-48-lab-icons-mask-354e2b7873630aba36caaac9ac921106de5bded00a00865c583235ffb1fa8d85"
+    ],
+    "references": [
+      "url(#lab-symbol-authoring-stage-lab-icons-mask-354e2b7873630aba36caaac9ac921106de5bded00a00865c583235ffb1fa8d85)",
+      "url(#lab-symbol-authoring-sample-16-lab-icons-mask-354e2b7873630aba36caaac9ac921106de5bded00a00865c583235ffb1fa8d85)",
+      "url(#lab-symbol-authoring-sample-24-lab-icons-mask-354e2b7873630aba36caaac9ac921106de5bded00a00865c583235ffb1fa8d85)",
+      "url(#lab-symbol-authoring-sample-48-lab-icons-mask-354e2b7873630aba36caaac9ac921106de5bded00a00865c583235ffb1fa8d85)"
+    ]
+  },
+  "narrowFeedback": [
+    {
+      "reducedMotion": "no-preference",
+      "before": {
+        "top": -203.234375,
+        "bottom": -184.234375,
+        "viewport": 640,
+        "focus": "authoring-spec"
+      },
+      "success": {
+        "top": 19.671875,
+        "bottom": 239.671875,
+        "viewport": 640,
+        "focus": "authoring-stage"
+      },
+      "status": {
+        "top": 486.765625,
+        "bottom": 505.765625,
+        "viewport": 640,
+        "focus": "authoring-stage"
+      },
+      "error": {
+        "top": 567.859375,
+        "bottom": 606.234375,
+        "viewport": 640,
+        "focus": "authoring-spec"
+      }
+    },
+    {
+      "reducedMotion": "reduce",
+      "before": {
+        "top": -203.234375,
+        "bottom": -184.234375,
+        "viewport": 640,
+        "focus": "authoring-spec"
+      },
+      "success": {
+        "top": 19.671875,
+        "bottom": 239.671875,
+        "viewport": 640,
+        "focus": "authoring-stage"
+      },
+      "status": {
+        "top": 486.765625,
+        "bottom": 505.765625,
+        "viewport": 640,
+        "focus": "authoring-stage"
+      },
+      "error": {
+        "top": 567.859375,
+        "bottom": 606.234375,
+        "viewport": 640,
+        "focus": "authoring-spec"
+      }
+    }
+  ],
+  "narrow": {
+    "viewport": 390,
+    "content": 390,
+    "textareaWidth": 350
+  },
+  "catalogAuthoringRequests": [],
+  "complete": true
+}

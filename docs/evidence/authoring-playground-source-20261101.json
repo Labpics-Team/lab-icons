@@ -1,0 +1,33 @@
+{
+  "scope": "bounded public source bundle; no dist, package install, corpus build or benchmark",
+  "inputs": [
+    "src/ir/sha256.ts",
+    "src/ir/svg-assembly.ts",
+    "src/core/glyph-operators.js",
+    "src/core/path-data.js",
+    "src/core/circle-dictionary.js",
+    "src/core/anatomy-gen.js",
+    "src/authoring/design-spec.ts",
+    "src/ir/render.ts",
+    "src/authoring/index.ts"
+  ],
+  "sourceSha": "0405dd4a0766cd01df3859428e21c095f5f1096f",
+  "dirty": false,
+  "tutorialSha256": "22df5fa72688c208368ea29041b3a9c025fee743eb037161736879a489859e7c",
+  "renderScope": "actual authoring page with bounded public-source runtime; catalog reference uses pre-existing Observatory assets",
+  "narrowRed": {
+    "sourceSha": "3914887a9c2da7652ed1b3dd05f190a20da6f391",
+    "viewport": [
+      390,
+      640
+    ],
+    "stage": {
+      "top": -670.328125,
+      "bottom": -450.328125
+    },
+    "status": {
+      "top": -203.234375,
+      "bottom": -184.234375
+    }
+  }
+}

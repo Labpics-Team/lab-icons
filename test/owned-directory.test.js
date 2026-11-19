@@ -71,4 +71,31 @@ describe('owned directory transaction', () => {
     expect(readFileSync(join(paths.staging, 'value'), 'utf8')).toBe('new');
     expect(existsSync(paths.backup)).toBe(false);
   });
+
+  it('после crash за commit удаляет только прежний backup', () => {
+    const paths = fixture();
+    renameSync(paths.output, paths.backup);
+    renameSync(paths.staging, paths.output);
+    expect(recoverOwnedDirectory(paths)).toBe('committed');
+    expect(readFileSync(join(paths.output, 'value'), 'utf8')).toBe('new');
+    expect(existsSync(paths.backup)).toBe(false);
+  });
+
+  it('отклоняет aliases и вложенные paths до первого filesystem effect', () => {
+    const paths = fixture();
+    let effects = 0;
+    const fs = { existsSync() { effects++; }, renameSync() { effects++; }, rmSync() { effects++; } };
+    const invalid = [
+      { ...paths, staging: `${paths.output}/.` },
+      { ...paths, staging: join(paths.output, 'staging') },
+      { ...paths, backup: join(paths.output, 'previous') },
+      { ...paths, backup: `${paths.output}/../ir` },
+      { ...paths, staging: '' },
+    ];
+    if (process.platform === 'win32') invalid.push({ ...paths, backup: paths.output.toUpperCase() });
+    for (const value of invalid) expect(() => replaceOwnedDirectory({ ...value, fs })).toThrow('соседние пути');
+    expect(() => recoverOwnedDirectory({ output: paths.output, backup: `${paths.output}/.`, fs })).toThrow('соседние пути');
+    expect(effects).toBe(0);
+    expect(readFileSync(join(paths.output, 'value'), 'utf8')).toBe('old');
+  });
 });

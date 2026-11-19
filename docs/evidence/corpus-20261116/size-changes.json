@@ -1,0 +1,119 @@
+{
+  "baseline": "06b674f868db018e52bacea655bcfa8d4d87a8b9",
+  "reason": "Root now contains all current author paths; SymbolSource projections also add a static family handle and isolate legacy IR.",
+  "consumerChanges": [
+    {
+      "name": "one-static",
+      "before": 637,
+      "after": 3046,
+      "gzipBefore": 394,
+      "gzipAfter": 1537
+    },
+    {
+      "name": "glyph-one",
+      "before": 11182,
+      "after": 11142,
+      "gzipBefore": 3158,
+      "gzipAfter": 3159
+    },
+    {
+      "name": "authored-time",
+      "before": 8380,
+      "after": 8340,
+      "gzipBefore": 3098,
+      "gzipAfter": 3099
+    },
+    {
+      "name": "recorded-model-axis",
+      "before": 841281,
+      "after": 839226,
+      "gzipBefore": 210797,
+      "gzipAfter": 210290
+    },
+    {
+      "name": "recorded-motion",
+      "before": 863417,
+      "after": 861362,
+      "gzipBefore": 216690,
+      "gzipAfter": 216164
+    },
+    {
+      "name": "full-ir-opt-in",
+      "before": 841245,
+      "after": 839190,
+      "gzipBefore": 210782,
+      "gzipAfter": 210274
+    },
+    {
+      "name": "full-catalog",
+      "before": 362391,
+      "after": 1349541,
+      "gzipBefore": 102372,
+      "gzipAfter": 478476
+    },
+    {
+      "name": "source-ellipsis-horizontal",
+      "before": 13019,
+      "after": 12975,
+      "gzipBefore": 3109,
+      "gzipAfter": 3102
+    },
+    {
+      "name": "varied-ellipsis-horizontal",
+      "before": 25811,
+      "after": 25767,
+      "gzipBefore": 6985,
+      "gzipAfter": 6976
+    },
+    {
+      "name": "source-ellipsis-vertical",
+      "before": 12960,
+      "after": 12916,
+      "gzipBefore": 3110,
+      "gzipAfter": 3103
+    },
+    {
+      "name": "varied-ellipsis-vertical",
+      "before": 25558,
+      "after": 25514,
+      "gzipBefore": 6933,
+      "gzipAfter": 6924
+    },
+    {
+      "name": "varied-microphone",
+      "before": 27018,
+      "after": 26974,
+      "gzipBefore": 8749,
+      "gzipAfter": 8742
+    },
+    {
+      "name": "varied-microphone-circle",
+      "before": 24118,
+      "after": 24074,
+      "gzipBefore": 9164,
+      "gzipAfter": 9156
+    },
+    {
+      "name": "gesture-reload-ir-reference",
+      "before": 31702,
+      "after": 31662,
+      "gzipBefore": 9756,
+      "gzipAfter": 9753
+    },
+    {
+      "name": "gesture-refresh-ir-reference",
+      "before": 33313,
+      "after": 33273,
+      "gzipBefore": 10573,
+      "gzipAfter": 10572
+    },
+    {
+      "name": "one-family-static",
+      "before": null,
+      "after": 1090,
+      "gzipBefore": null,
+      "gzipAfter": 553
+    }
+  ],
+  "changedArtifacts": 666
+}

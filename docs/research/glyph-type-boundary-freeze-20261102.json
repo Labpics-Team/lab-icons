@@ -1,0 +1,292 @@
+{
+  "baseline": "1dd91b1bf3e58af5e2f72f634fd37a506bae942d",
+  "extraction": "d5c57c041e6b4ca60ed400dd390f1b83e586ee3a",
+  "frozenSourceSha": "3a41fa2fa94f33d077623a3bf87751796fea7ca8",
+  "frozenSourceTree": "224c415f671b5917772ad5e25de2c8da1248bb4b",
+  "capturedAt": "2026-11-02T05:23:42.181Z",
+  "scope": "immutable source binding and normalized emitted JS control; no runtime timings, pack or production claim",
+  "typeEvidence": {
+    "path": "docs/research/glyph-type-boundary-20261102.json",
+    "gitBlob": "0a3bc1de5c1b0b989a5dda7e9465b768f98daeca",
+    "sha256": "e846b3792b9bbcea5fcd4e21556a9be1c9e27675f470af99209f95982c138bd4"
+  },
+  "bindings": [
+    {
+      "path": "src/authoring/design-spec.ts",
+      "measuredSourceSha256": "b0ea97c846b8c1b1be52f95e356943f0f8572cb1477c24b52d2e0d8206272bde",
+      "measuredLineEndings": "LF",
+      "frozenGitBlobSha256": "b0ea97c846b8c1b1be52f95e356943f0f8572cb1477c24b52d2e0d8206272bde",
+      "trailingBlankRemoval": false
+    },
+    {
+      "path": "src/authoring/index.ts",
+      "measuredSourceSha256": "848011af3d8e0127fca53f51aa4a3dc8d1c832708b9b3b47d6dbb0d659bb8c44",
+      "measuredLineEndings": "LF",
+      "frozenGitBlobSha256": "848011af3d8e0127fca53f51aa4a3dc8d1c832708b9b3b47d6dbb0d659bb8c44",
+      "trailingBlankRemoval": false
+    },
+    {
+      "path": "src/core/motion-sampler.d.ts",
+      "measuredSourceSha256": "73d1eff69ad352a409485fb5d89919602f3b9851bf6b3f22ca50294418b4ce67",
+      "measuredLineEndings": "LF",
+      "frozenGitBlobSha256": "73d1eff69ad352a409485fb5d89919602f3b9851bf6b3f22ca50294418b4ce67",
+      "trailingBlankRemoval": false
+    },
+    {
+      "path": "src/ir/author-catalog.generated.ts",
+      "measuredSourceSha256": "63c7491482b4376d1ae1a2e908539f99d954dc42a1cfb9c34c420366b1755b08",
+      "measuredLineEndings": "LF",
+      "frozenGitBlobSha256": "63c7491482b4376d1ae1a2e908539f99d954dc42a1cfb9c34c420366b1755b08",
+      "trailingBlankRemoval": false
+    },
+    {
+      "path": "src/ir/author-provenance.ts",
+      "measuredSourceSha256": "386c621980cd27b2af7b0e7b68e41d410709b193f0b9775ff32d89dd407f2b29",
+      "measuredLineEndings": "LF",
+      "frozenGitBlobSha256": "386c621980cd27b2af7b0e7b68e41d410709b193f0b9775ff32d89dd407f2b29",
+      "trailingBlankRemoval": false
+    },
+    {
+      "path": "src/ir/author-source.ts",
+      "measuredSourceSha256": "8795b7f50ddc29a2b5a35eab9d2d0d0f9eca6487fe6849b1a8e98f92c20ec783",
+      "measuredLineEndings": "LF",
+      "frozenGitBlobSha256": "8795b7f50ddc29a2b5a35eab9d2d0d0f9eca6487fe6849b1a8e98f92c20ec783",
+      "trailingBlankRemoval": false
+    },
+    {
+      "path": "src/ir/authored-variation.ts",
+      "measuredSourceSha256": "fa357662b2274a967adcc3e74ad4d1aa36254ff77e10b3b79bd40f347f4534eb",
+      "measuredLineEndings": "LF",
+      "frozenGitBlobSha256": "fa357662b2274a967adcc3e74ad4d1aa36254ff77e10b3b79bd40f347f4534eb",
+      "trailingBlankRemoval": false
+    },
+    {
+      "path": "src/ir/candidates.ts",
+      "measuredSourceSha256": "41fd4dc110907589e593a87c729dacf1832f214fa2eeb829ffcd5b722adcbbff",
+      "measuredLineEndings": "LF",
+      "frozenGitBlobSha256": "41fd4dc110907589e593a87c729dacf1832f214fa2eeb829ffcd5b722adcbbff",
+      "trailingBlankRemoval": false
+    },
+    {
+      "path": "src/ir/catalog.generated.ts",
+      "measuredSourceSha256": "a24b90e9254e502d12c82621aa5b0f9c38458ccd982cb82b6dd3944035f3cd32",
+      "measuredLineEndings": "LF",
+      "frozenGitBlobSha256": "a24b90e9254e502d12c82621aa5b0f9c38458ccd982cb82b6dd3944035f3cd32",
+      "trailingBlankRemoval": false
+    },
+    {
+      "path": "src/ir/compiler.ts",
+      "measuredSourceSha256": "935b7d97f7234eec7de38282191e297f7756fa9e0a4c049b0b962fc4c0b6eb7b",
+      "measuredLineEndings": "LF",
+      "frozenGitBlobSha256": "935b7d97f7234eec7de38282191e297f7756fa9e0a4c049b0b962fc4c0b6eb7b",
+      "trailingBlankRemoval": false
+    },
+    {
+      "path": "src/ir/contour-runtime.ts",
+      "measuredSourceSha256": "5d326970a78cf957aace57edb39c4b8e962841cf404a0741ed17e0ec6dc1e783",
+      "measuredLineEndings": "LF",
+      "frozenGitBlobSha256": "5d326970a78cf957aace57edb39c4b8e962841cf404a0741ed17e0ec6dc1e783",
+      "trailingBlankRemoval": false
+    },
+    {
+      "path": "src/ir/index.ts",
+      "measuredSourceSha256": "5ba9d404267f702a7834bad4a50d78f6d32262a1ac797ffa7d831c87ed7de300",
+      "measuredLineEndings": "LF",
+      "frozenGitBlobSha256": "5ba9d404267f702a7834bad4a50d78f6d32262a1ac797ffa7d831c87ed7de300",
+      "trailingBlankRemoval": false
+    },
+    {
+      "path": "src/ir/recipes.ts",
+      "measuredSourceSha256": "83c9bbef10a83f1529d704f2fdd809a20ee33f8d472fbed6dd48f3656081ccec",
+      "measuredLineEndings": "LF",
+      "frozenGitBlobSha256": "83c9bbef10a83f1529d704f2fdd809a20ee33f8d472fbed6dd48f3656081ccec",
+      "trailingBlankRemoval": false
+    },
+    {
+      "path": "src/ir/render.ts",
+      "measuredSourceSha256": "6349e98adec26ae36b419b34dcaddd615aedecb21076c686085781958bc04978",
+      "measuredLineEndings": "LF",
+      "frozenGitBlobSha256": "6349e98adec26ae36b419b34dcaddd615aedecb21076c686085781958bc04978",
+      "trailingBlankRemoval": false
+    },
+    {
+      "path": "src/ir/request.ts",
+      "measuredSourceSha256": "babec5f66357ebfd7ac8a6b42463f9f4ba06963f45d638cc5420b1a99b8e0695",
+      "measuredLineEndings": "LF",
+      "frozenGitBlobSha256": "babec5f66357ebfd7ac8a6b42463f9f4ba06963f45d638cc5420b1a99b8e0695",
+      "trailingBlankRemoval": false
+    },
+    {
+      "path": "src/ir/root-package.d.ts",
+      "measuredSourceSha256": "fa3b6436d61f39e89ad7c83a31d95c238d64adb1ffac840926c344d6a6922cad",
+      "measuredLineEndings": "LF",
+      "frozenGitBlobSha256": "fa3b6436d61f39e89ad7c83a31d95c238d64adb1ffac840926c344d6a6922cad",
+      "trailingBlankRemoval": false
+    },
+    {
+      "path": "src/ir/sha256.ts",
+      "measuredSourceSha256": "abe206e6ffda75406d724f292e361ebef7294798124884a77eb2c9301dd449e6",
+      "measuredLineEndings": "LF",
+      "frozenGitBlobSha256": "abe206e6ffda75406d724f292e361ebef7294798124884a77eb2c9301dd449e6",
+      "trailingBlankRemoval": false
+    },
+    {
+      "path": "src/ir/svg-assembly.ts",
+      "measuredSourceSha256": "a5eaf1545492ac56a34792478365912880f8cd041aacce6d15da5d6eee8b82ae",
+      "measuredLineEndings": "LF",
+      "frozenGitBlobSha256": "a5eaf1545492ac56a34792478365912880f8cd041aacce6d15da5d6eee8b82ae",
+      "trailingBlankRemoval": false
+    },
+    {
+      "path": "src/ir/symbol-runtime.ts",
+      "measuredSourceSha256": "ee41926ebb04762b14fa55e4b8592345f9c308cd28a01e76c47ad5012494411d",
+      "measuredLineEndings": "LF",
+      "frozenGitBlobSha256": "ee41926ebb04762b14fa55e4b8592345f9c308cd28a01e76c47ad5012494411d",
+      "trailingBlankRemoval": false
+    },
+    {
+      "path": "src/lottie/runtime.ts",
+      "measuredSourceSha256": "c33a74108f49aefef05a82c15ffbe6ed2518138bf80b7d97df50984aaf32b0c1",
+      "measuredLineEndings": "LF",
+      "frozenGitBlobSha256": "c33a74108f49aefef05a82c15ffbe6ed2518138bf80b7d97df50984aaf32b0c1",
+      "trailingBlankRemoval": false
+    },
+    {
+      "path": "src/lottie/types.ts",
+      "measuredSourceSha256": "857e7b76bafa0617c4d287a919b40f3eb6811b79d9032e70a325f9582ec50d49",
+      "measuredLineEndings": "LF",
+      "frozenGitBlobSha256": "857e7b76bafa0617c4d287a919b40f3eb6811b79d9032e70a325f9582ec50d49",
+      "trailingBlankRemoval": false
+    },
+    {
+      "path": "src/motion/index.ts",
+      "measuredSourceSha256": "ab6283a7bbb5a2394f499fb2e9096e81b7912f3f1d7c41e02c1d5387509ae9b5",
+      "measuredLineEndings": "LF",
+      "frozenGitBlobSha256": "ab6283a7bbb5a2394f499fb2e9096e81b7912f3f1d7c41e02c1d5387509ae9b5",
+      "trailingBlankRemoval": false
+    },
+    {
+      "path": "src/states/common-types.ts",
+      "measuredSourceSha256": "263dfde127bd844d99344ebc9c652d7eaf55cc2a2f4cb4a9595a7c7df1d5bf28",
+      "measuredLineEndings": "LF",
+      "frozenGitBlobSha256": "263dfde127bd844d99344ebc9c652d7eaf55cc2a2f4cb4a9595a7c7df1d5bf28",
+      "trailingBlankRemoval": false
+    },
+    {
+      "path": "src/states/contour-types.ts",
+      "measuredSourceSha256": "9574b211b0f1d504aaa71f4004b5fe490cd0ba392ad9004f556d53969c255e6a",
+      "measuredLineEndings": "LF",
+      "frozenGitBlobSha256": "9574b211b0f1d504aaa71f4004b5fe490cd0ba392ad9004f556d53969c255e6a",
+      "trailingBlankRemoval": false
+    },
+    {
+      "path": "src/states/runtime.ts",
+      "measuredSourceSha256": "492d875d45515beaf0d673cffcd32fd36f20c5c897943b2b0f1d61e323dd5019",
+      "measuredLineEndings": "LF",
+      "frozenGitBlobSha256": "492d875d45515beaf0d673cffcd32fd36f20c5c897943b2b0f1d61e323dd5019",
+      "trailingBlankRemoval": false
+    },
+    {
+      "path": "src/states/types.ts",
+      "measuredSourceSha256": "4d6b7bd8c6d955f4d818dae8725ef2c230f8e05d80b8a476508b1316cfe7aaaf",
+      "measuredLineEndings": "LF",
+      "frozenGitBlobSha256": "4d6b7bd8c6d955f4d818dae8725ef2c230f8e05d80b8a476508b1316cfe7aaaf",
+      "trailingBlankRemoval": false
+    },
+    {
+      "path": "src/ir/glyph-types.ts",
+      "measuredSourceSha256": "443e398379d6af15fe160c3cf540cbf616d23e19edf2c969a93b616441dc944d",
+      "measuredLineEndings": "LF",
+      "frozenGitBlobSha256": "c8dffd454c5570a85ae1dbf20f3884a618e8fba97f53a028e25be0e9b6d36c0a",
+      "trailingBlankRemoval": true
+    },
+    {
+      "path": "src/ir/paint-types.ts",
+      "measuredSourceSha256": "276e2a3d9a637b5624794d2e1842bbccd75b292d9ecb663437c2618dd58d283a",
+      "measuredLineEndings": "LF",
+      "frozenGitBlobSha256": "715740773b7630db873e5c95a2695bfe9502c6859f50322617d3f9cd1539dc9b",
+      "trailingBlankRemoval": true
+    },
+    {
+      "path": "scripts/lib/symbol-modules.js",
+      "measuredSourceSha256": "dc1fea8dd3ace43fd0aa8376abdb099d95568fdc2f10e04e10023548d02c65a6",
+      "measuredLineEndings": "LF",
+      "frozenGitBlobSha256": "dc1fea8dd3ace43fd0aa8376abdb099d95568fdc2f10e04e10023548d02c65a6",
+      "trailingBlankRemoval": false
+    }
+  ],
+  "selectedJsonUnchanged": [
+    "semantics/catalog.json",
+    "semantics/anatomy.runtime.json",
+    "semantics/grid.json"
+  ],
+  "runtimeCompiler": {
+    "name": "esbuild",
+    "version": "0.28.1",
+    "options": {
+      "loader": "ts",
+      "target": "esnext",
+      "minifyWhitespace": true,
+      "legalComments": "none"
+    }
+  },
+  "runtimeControl": [
+    {
+      "path": "src/authoring/design-spec.ts",
+      "normalizedRuntimeSha256": "1deafac769b53a533901c1ae7c4d1e78db08a8f6a62fb9ea5335be4ff5ba7853"
+    },
+    {
+      "path": "src/ir/author-source.ts",
+      "normalizedRuntimeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "src/ir/authored-variation.ts",
+      "normalizedRuntimeSha256": "89e00daa0836d59c0922884c64260a0dcbe0fc090d560a76a287a5aa898b2932"
+    },
+    {
+      "path": "src/ir/compiler.ts",
+      "normalizedRuntimeSha256": "ccf2293fc4bafe03871b5142dac74b0ff8a09b4cddc8acad6fc36ebbcaf84987"
+    },
+    {
+      "path": "src/ir/index.ts",
+      "normalizedRuntimeSha256": "af5f516c261dde6ec28b98eb990441b99d73c0f8753533b8ec06690d5eddbdef"
+    },
+    {
+      "path": "src/ir/recipes.ts",
+      "normalizedRuntimeSha256": "801d00b8c5b809ec1ee7fa756d478a95d4a7fa6cc69d8e74171cb636295e462d"
+    },
+    {
+      "path": "src/ir/render.ts",
+      "normalizedRuntimeSha256": "131a310bb1354237a80c47a0db4b35097e6bd5d664d4dc9f220b28d9f13e9042"
+    },
+    {
+      "path": "src/ir/request.ts",
+      "normalizedRuntimeSha256": "25fd63fe1431d9354e5d374a3e099cb8b3a3769312ce9d67b54dfe7d35f8f0ac"
+    },
+    {
+      "path": "src/ir/svg-assembly.ts",
+      "normalizedRuntimeSha256": "7bca86a5751e1b4ba29559b42b8c55a4ae69dfba84f252e55920988852b9ccf1"
+    },
+    {
+      "path": "src/ir/symbol-runtime.ts",
+      "normalizedRuntimeSha256": "b705b641dc220dbdddeebebdc6f3f655982fbaeff2f682c2de17be85273ec22b"
+    },
+    {
+      "path": "src/lottie/runtime.ts",
+      "normalizedRuntimeSha256": "3e4a38ecf9c463c9c0df3f6d69c8582012efa022f00b9f4966f8d37b5fd21ef1"
+    },
+    {
+      "path": "src/lottie/types.ts",
+      "normalizedRuntimeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "src/motion/index.ts",
+      "normalizedRuntimeSha256": "a64bdd17274daaafbb67496d5b633c5c366490c66f4557206ce7af9348f5473a"
+    }
+  ],
+  "pureTypeLeaves": [
+    "src/ir/glyph-types.ts",
+    "src/ir/paint-types.ts"
+  ],
+  "findings": []
+}

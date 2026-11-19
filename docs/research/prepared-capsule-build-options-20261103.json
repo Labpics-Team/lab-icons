@@ -1,0 +1,154 @@
+{
+  "recordedAt": "2026-11-02T23:30:10.765Z",
+  "node": "v24.15.0",
+  "esbuild": "0.28.1",
+  "sourceBaseline": "8e2b96e52cb65f06884a510af233865213ccf699",
+  "compression": "fflate gzipSync level=9 mtime=0 (package oracle)",
+  "scope": "two-entry diagnostic emission only; not full package/native closure or browser performance",
+  "records": [
+    {
+      "target": "motion",
+      "entry": "src/motion/index.ts",
+      "option": "whitespace",
+      "raw": 14257,
+      "gzip": 3942,
+      "outputSha256": "2105aac956f73b7ac9984376f1f7d3d8610e38075dc1c54d8c3d354fa25f4c3b",
+      "names": {
+        "compileSymbolEffect": "compileSymbolEffect",
+        "prepareContourStateEffect": "prepareContourStateEffect"
+      },
+      "modules": [
+        "src/core/motion-sampler.js",
+        "src/motion/effect-projection.ts",
+        "src/motion/index.ts"
+      ],
+      "sourceInputs": {
+        "src/core/motion-sampler.js": "2239d08ca2586fdd4c795f44c835fcb92cd9ab6cc2faccd01abcf463cc8d5093",
+        "src/motion/effect-projection.ts": "cfd1fb819ea0ff6c48c3a496a93a31d0c99a5256b0c824945984d6e0fccbf43c",
+        "src/motion/index.ts": "e39ebfe60c5f100176617d83a846842bf17d4a971b4dbccef64d82474b6b0c5e"
+      }
+    },
+    {
+      "target": "motion",
+      "entry": "src/motion/index.ts",
+      "option": "syntax",
+      "raw": 13986,
+      "gzip": 3897,
+      "outputSha256": "f6e2d8ab5d747bf75d01d28348b87bd3d9eabb0d1d8cab543c2c11a4802aecab",
+      "names": {
+        "compileSymbolEffect": "compileSymbolEffect",
+        "prepareContourStateEffect": "prepareContourStateEffect"
+      },
+      "modules": [
+        "src/core/motion-sampler.js",
+        "src/motion/effect-projection.ts",
+        "src/motion/index.ts"
+      ],
+      "sourceInputs": {
+        "src/core/motion-sampler.js": "2239d08ca2586fdd4c795f44c835fcb92cd9ab6cc2faccd01abcf463cc8d5093",
+        "src/motion/effect-projection.ts": "cfd1fb819ea0ff6c48c3a496a93a31d0c99a5256b0c824945984d6e0fccbf43c",
+        "src/motion/index.ts": "e39ebfe60c5f100176617d83a846842bf17d4a971b4dbccef64d82474b6b0c5e"
+      }
+    },
+    {
+      "target": "motion",
+      "entry": "src/motion/index.ts",
+      "option": "identifiers-keep-names",
+      "raw": 11411,
+      "gzip": 3776,
+      "outputSha256": "31a091c1a6bceb4f781d35163ae970a52dfea5cb0651fd78f5dbfaf2553e8d50",
+      "names": {
+        "compileSymbolEffect": "compileSymbolEffect",
+        "prepareContourStateEffect": "prepareContourStateEffect"
+      },
+      "modules": [
+        "src/core/motion-sampler.js",
+        "src/motion/effect-projection.ts",
+        "src/motion/index.ts"
+      ],
+      "sourceInputs": {
+        "src/core/motion-sampler.js": "2239d08ca2586fdd4c795f44c835fcb92cd9ab6cc2faccd01abcf463cc8d5093",
+        "src/motion/effect-projection.ts": "cfd1fb819ea0ff6c48c3a496a93a31d0c99a5256b0c824945984d6e0fccbf43c",
+        "src/motion/index.ts": "e39ebfe60c5f100176617d83a846842bf17d4a971b4dbccef64d82474b6b0c5e"
+      }
+    },
+    {
+      "target": "capsule-static",
+      "entry": "src/ir/author-capsule-runtime.ts",
+      "option": "whitespace",
+      "raw": 12179,
+      "gzip": 5001,
+      "outputSha256": "971051c27b925d652e79b33091471598e5e8d1637323f1020110cd5d20ed1ebb",
+      "names": {
+        "AuthoredCapsuleVariationError": "AuthoredCapsuleVariationError",
+        "createCompiledCapsuleGlyph": "createCompiledCapsuleGlyph"
+      },
+      "modules": [
+        "src/core/annulus-content-geometry.js",
+        "src/ir/author-capsule-runtime.ts",
+        "src/ir/capsule-path.ts",
+        "src/ir/sha256.ts",
+        "src/ir/svg-assembly.ts"
+      ],
+      "sourceInputs": {
+        "src/core/annulus-content-geometry.js": "1544fc1e062d9404f2e265247996137bda10fc6efbf823d961ef8c1578b52167",
+        "src/ir/author-capsule-runtime.ts": "af14672987cdd3d2105d987c91c8cb41059c408e41b5d1478583bdfc43263c44",
+        "src/ir/capsule-path.ts": "d73827abd7d351bb8d965074afef5a6cb35c33647cb7447f9f08fb2d233c0c1f",
+        "src/ir/sha256.ts": "abe206e6ffda75406d724f292e361ebef7294798124884a77eb2c9301dd449e6",
+        "src/ir/svg-assembly.ts": "d8e4eb773d8db50dc411354a19a62509ca7998320addf6506e7d242fc4693224"
+      }
+    },
+    {
+      "target": "capsule-static",
+      "entry": "src/ir/author-capsule-runtime.ts",
+      "option": "syntax",
+      "raw": 11930,
+      "gzip": 4939,
+      "outputSha256": "b067ad0cfe5026249a200be53f35f13e30eab5599609a146624820f37cb91bb3",
+      "names": {
+        "AuthoredCapsuleVariationError": "AuthoredCapsuleVariationError",
+        "createCompiledCapsuleGlyph": "createCompiledCapsuleGlyph"
+      },
+      "modules": [
+        "src/core/annulus-content-geometry.js",
+        "src/ir/author-capsule-runtime.ts",
+        "src/ir/capsule-path.ts",
+        "src/ir/sha256.ts",
+        "src/ir/svg-assembly.ts"
+      ],
+      "sourceInputs": {
+        "src/core/annulus-content-geometry.js": "1544fc1e062d9404f2e265247996137bda10fc6efbf823d961ef8c1578b52167",
+        "src/ir/author-capsule-runtime.ts": "af14672987cdd3d2105d987c91c8cb41059c408e41b5d1478583bdfc43263c44",
+        "src/ir/capsule-path.ts": "d73827abd7d351bb8d965074afef5a6cb35c33647cb7447f9f08fb2d233c0c1f",
+        "src/ir/sha256.ts": "abe206e6ffda75406d724f292e361ebef7294798124884a77eb2c9301dd449e6",
+        "src/ir/svg-assembly.ts": "d8e4eb773d8db50dc411354a19a62509ca7998320addf6506e7d242fc4693224"
+      }
+    },
+    {
+      "target": "capsule-static",
+      "entry": "src/ir/author-capsule-runtime.ts",
+      "option": "identifiers-keep-names",
+      "raw": 9186,
+      "gzip": 4623,
+      "outputSha256": "feb7ab96edc6d17c0626a967ae497bfde77690fc2fb6a871541fe912b5ba3a95",
+      "names": {
+        "AuthoredCapsuleVariationError": "AuthoredCapsuleVariationError",
+        "createCompiledCapsuleGlyph": "createCompiledCapsuleGlyph"
+      },
+      "modules": [
+        "src/core/annulus-content-geometry.js",
+        "src/ir/author-capsule-runtime.ts",
+        "src/ir/capsule-path.ts",
+        "src/ir/sha256.ts",
+        "src/ir/svg-assembly.ts"
+      ],
+      "sourceInputs": {
+        "src/core/annulus-content-geometry.js": "1544fc1e062d9404f2e265247996137bda10fc6efbf823d961ef8c1578b52167",
+        "src/ir/author-capsule-runtime.ts": "af14672987cdd3d2105d987c91c8cb41059c408e41b5d1478583bdfc43263c44",
+        "src/ir/capsule-path.ts": "d73827abd7d351bb8d965074afef5a6cb35c33647cb7447f9f08fb2d233c0c1f",
+        "src/ir/sha256.ts": "abe206e6ffda75406d724f292e361ebef7294798124884a77eb2c9301dd449e6",
+        "src/ir/svg-assembly.ts": "d8e4eb773d8db50dc411354a19a62509ca7998320addf6506e7d242fc4693224"
+      }
+    }
+  ]
+}

@@ -1,0 +1,219 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "icons": "f2582fa32a48b7dd22322ebbbcfe16ad2719016e",
+    "ui": "737a8300de2f03600752cda040f71f600f1eb292",
+    "run": "41368364762",
+    "job": 125033296669,
+    "capturedAt": "2026-11-02T00:59:30.247Z"
+  },
+  "environment": {
+    "node": "v22.19.0",
+    "versions": {
+      "node": "22.19.0",
+      "acorn": "8.15.0",
+      "ada": "2.9.2",
+      "amaro": "1.1.0",
+      "ares": "1.34.5",
+      "brotli": "1.1.0",
+      "cjs_module_lexer": "2.1.0",
+      "cldr": "47.0",
+      "icu": "77.1",
+      "llhttp": "9.3.0",
+      "modules": "127",
+      "napi": "10",
+      "nbytes": "0.1.1",
+      "ncrypto": "0.0.1",
+      "nghttp2": "1.64.0",
+      "openssl": "3.0.17",
+      "simdjson": "3.13.0",
+      "simdutf": "6.4.2",
+      "sqlite": "3.50.4",
+      "tz": "2025b",
+      "undici": "6.21.2",
+      "unicode": "16.0",
+      "uv": "1.51.0",
+      "uvwasi": "0.0.21",
+      "v8": "12.4.254.21-node.29",
+      "zlib": "1.3.1-470d3a2",
+      "zstd": "1.5.7"
+    },
+    "platform": "linux",
+    "arch": "x64",
+    "cpu": "AMD Ryzen 9 5950X 16-Core Processor",
+    "cpuCount": 12,
+    "totalMemory": 33635536896
+  },
+  "identities": {
+    "logSha256": "add695fc2dd171fbe52eae205c565ab45407acd5e5d9989aae7732a3c85808d1",
+    "reportSha256": "90e223481212c24913d31d29c54225f1eafcce7964f283b14f58d24fa481a08a",
+    "receiptSha256": "89a44fc4921512516c94b38d87965052d77c416932f531b14521bd3bfa8517aa",
+    "materialSetSha256": "932b4187694be86737f9540cdaa077d447d9e992d9bb4107cc345de1e0510fce",
+    "sourceMaterialCount": 32
+  },
+  "outcome": {
+    "delivery": "failed",
+    "browser": "passed",
+    "browserReceiptAuthenticated": true,
+    "records": 76,
+    "notificationObservations": 32,
+    "expressionObservations": 15
+  },
+  "visuals": [
+    {
+      "file": "result/no-preference.png",
+      "sha256": "19391cdfe27279926f0c02ba6c514d420b86d59c86732193926b328c3eacbdb9",
+      "bytes": 60087,
+      "width": 640,
+      "height": 1165,
+      "structureAuthenticated": true
+    },
+    {
+      "file": "result/reduce.png",
+      "sha256": "abc08f644c5fd85ee49d24756e38787e102a5418fa27c3f6d2bea04ef2b6ad05",
+      "bytes": 60036,
+      "width": 640,
+      "height": 1165,
+      "structureAuthenticated": true
+    }
+  ],
+  "consumers": {
+    "one-static": {
+      "bytes": 637,
+      "gzipBytes": 394,
+      "brotliBytes": 353,
+      "modules": [
+        "<stdin>",
+        "dist/index.js"
+      ]
+    },
+    "authored-static": {
+      "bytes": 1155,
+      "gzipBytes": 583,
+      "brotliBytes": 512,
+      "modules": [
+        "<stdin>",
+        "dist/ir/request.js",
+        "dist/ir/symbol-runtime.js",
+        "dist/symbols/time.js"
+      ]
+    },
+    "glyph-one": {
+      "bytes": 11120,
+      "gzipBytes": 3108,
+      "brotliBytes": 2589,
+      "modules": [
+        "<stdin>",
+        "dist/ir/request.js",
+        "dist/ir/symbol-runtime.js",
+        "dist/symbols/alert.js"
+      ]
+    },
+    "authored-time": {
+      "bytes": 11341,
+      "gzipBytes": 3093,
+      "brotliBytes": 2623,
+      "modules": [
+        "<stdin>",
+        "dist/ir/request.js",
+        "dist/ir/symbol-runtime.js",
+        "dist/symbols/time.js"
+      ]
+    },
+    "status-circle-state": {
+      "bytes": 13055,
+      "gzipBytes": 5517,
+      "brotliBytes": 4475,
+      "modules": [
+        "<stdin>",
+        "dist/ir/state-runtime.js",
+        "dist/states/status-circle.js"
+      ]
+    },
+    "recorded-model-axis": {
+      "bytes": 853589,
+      "gzipBytes": 214748,
+      "brotliBytes": 161089,
+      "modules": [
+        "<stdin>",
+        "dist/index.js",
+        "dist/ir/compiler.js",
+        "dist/ir/index.js",
+        "dist/ir/request.js"
+      ]
+    },
+    "recorded-motion": {
+      "bytes": 867159,
+      "gzipBytes": 217909,
+      "brotliBytes": 163454,
+      "modules": [
+        "<stdin>",
+        "dist/index.js",
+        "dist/ir/compiler.js",
+        "dist/ir/index.js",
+        "dist/ir/request.js",
+        "dist/motion/index.js"
+      ]
+    },
+    "full-ir-opt-in": {
+      "bytes": 853553,
+      "gzipBytes": 214736,
+      "brotliBytes": 161043,
+      "modules": [
+        "<stdin>",
+        "dist/index.js",
+        "dist/ir/compiler.js",
+        "dist/ir/index.js",
+        "dist/ir/request.js"
+      ]
+    },
+    "full-catalog": {
+      "bytes": 362391,
+      "gzipBytes": 102372,
+      "brotliBytes": 72054,
+      "modules": [
+        "<stdin>",
+        "dist/index.js"
+      ]
+    },
+    "recipes-only": {
+      "bytes": 11537,
+      "gzipBytes": 4590,
+      "brotliBytes": 4055,
+      "modules": [
+        "<stdin>",
+        "dist/ir/recipes.js"
+      ]
+    }
+  },
+  "selectedArtifact": {
+    "dist/symbols/component.js": {
+      "bytes": 58041,
+      "gzipBytes": 9290,
+      "modules": [],
+      "sha256": "e2ceae41a6e3a6b0f7c4890cc4500f169beec816791c7bb276d079f96c6e6860",
+      "brotliBytes": 5925
+    }
+  },
+  "violations": {
+    "ordinarySymbolDeclarations": 330,
+    "other": [
+      "dist/ir/compiler.d.ts: budget 10290 B / 2736 B gzip; measured 10534 B / 2782 B gzip",
+      "dist/ir/compiler.js: budget 154789 B / 42120 B gzip; measured 155213 B / 42175 B gzip",
+      "dist/ir/lottie-runtime.js: budget 11590 B / 3776 B gzip; measured 11878 B / 3866 B gzip",
+      "dist/ir/lottie-types.d.ts: budget 2113 B / 926 B gzip; measured 2139 B / 933 B gzip",
+      "dist/ir/request.d.ts: budget 987 B / 556 B gzip; measured 1020 B / 574 B gzip",
+      "dist/ir/state-runtime.js: budget 4936 B / 1845 B gzip; measured 4936 B / 1858 B gzip",
+      "dist/ir/symbol-runtime.js: budget 1160 B / 638 B gzip; measured 1459 B / 684 B gzip",
+      "dist/motion/index.js: budget 14620 B / 3817 B gzip; measured 15592 B / 3995 B gzip",
+      "dist/symbols/ellipsis-horizontal.js: budget 18401 B / 2920 B gzip; measured 26704 B / 4002 B gzip",
+      "dist/symbols/ellipsis-vertical.js: budget 13144 B / 2349 B gzip; measured 22142 B / 3490 B gzip",
+      "dist/symbols/notifications-unread.js: budget 30360 B / 5034 B gzip; measured 31296 B / 5535 B gzip",
+      "dist/symbols/notifications.js: budget 23951 B / 4165 B gzip; measured 24910 B / 4661 B gzip",
+      "status-circle-state: consumer budget 13175 B / 5515 B gzip; measured 13055 B / 5517 B gzip",
+      "recorded-model-axis: consumer budget 853339 B / 214703 B gzip; measured 853589 B / 214748 B gzip",
+      "recorded-motion: consumer budget 865952 B / 217706 B gzip; measured 867159 B / 217909 B gzip"
+    ]
+  },
+  "limitation": "Reduced0.6 и partial0.7 terminal matrices не записаны в raw receipt: их проверяет exact browser harness. Здесь проверены сохранённые poses/effects и source identity. Это не BENCH, npm publication или live Figma parity."
+}

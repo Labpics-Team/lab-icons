@@ -8,6 +8,9 @@ import * as operators from '../core/glyph-operators.js';
 // @ts-ignore — zero-IO JS functional core; публичную границу типизируем здесь.
 import * as calendar from '../core/calendar-geometry.js';
 
+import type { RecipeFillPaint, RecipeStrokePaint } from './paint-types.js';
+export type { RecipeFillPaint, RecipeStrokePaint } from './paint-types.js';
+
 export interface NormalizedPoint {
   readonly x: number;
   readonly y: number;
@@ -28,20 +31,6 @@ export interface ViewBoxBBox {
 export interface RecipePathGeometry {
   readonly kind: 'path';
   readonly d: string;
-}
-
-export interface RecipeStrokePaint {
-  readonly kind: 'stroke';
-  readonly fill: 'none';
-  readonly stroke: 'currentColor';
-  readonly strokeWidth: number;
-  readonly linecap: 'round' | 'butt';
-  readonly linejoin: 'round';
-}
-
-export interface RecipeFillPaint {
-  readonly kind: 'fill';
-  readonly fill: 'currentColor';
 }
 
 export interface RecipePart {

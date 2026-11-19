@@ -1,0 +1,86 @@
+{
+  "baseline": "ad56d1acc6d8a8bc3103ad280e1b19eaafc4895b",
+  "disposition": "rejected: private type aliases preserve namespace/overload semantics but do not meet existing ellipsis declaration ceilings",
+  "scope": "four generated declarations; no helper dependency, runtime, full build, package or timing qualification",
+  "environment": {
+    "node": "v24.15.0",
+    "typescript": "7.0.2",
+    "fflate": "0.8.3",
+    "brotli": "1.2.0",
+    "gzip": {
+      "level": 9,
+      "mtime": 0
+    },
+    "brotliQuality": 11
+  },
+  "rows": [
+    {
+      "icon": "time",
+      "variation": false,
+      "baseline": {
+        "bytes": 440,
+        "gzipBytes": 215,
+        "brotliBytes": 164,
+        "sha256": "931adc7baeebe87d06c1f2111cc08ededa16e6bac2c5e872a1b851a122d00529"
+      },
+      "actual": {
+        "bytes": 388,
+        "gzipBytes": 220,
+        "brotliBytes": 197,
+        "sha256": "ee5520ee6fd6f669ebcfdc4ba7212a8631c199055068a737de3921b5e9ece129"
+      },
+      "candidateDeclaration": "import type { AuthorSourceGlyph as G, AuthorSourceCapabilities as C, AuthorSymbolGlyphRequest as R } from '../ir/author-source.js';\nimport type { IconVariant as I } from '../ir/compiler.js';\nexport declare const outline: string;\nexport declare const filled: string;\nexport declare function glyph(request?: R): G<'time'>;\nexport declare function glyphCapabilities(variant?: I): C<'time'>;\n"
+    },
+    {
+      "icon": "ellipse",
+      "variation": false,
+      "baseline": {
+        "bytes": 446,
+        "gzipBytes": 216,
+        "brotliBytes": 188,
+        "sha256": "b816940296977c40e50c0fc9e42a2c403ac5ce9de291d9dd0eefdd786c7e655e"
+      },
+      "actual": {
+        "bytes": 394,
+        "gzipBytes": 222,
+        "brotliBytes": 201,
+        "sha256": "492151339d3a8dfea34aa86038d630fe7a89ec313d6799f8c0c4c64d4d44d807"
+      },
+      "candidateDeclaration": "import type { AuthorSourceGlyph as G, AuthorSourceCapabilities as C, AuthorSymbolGlyphRequest as R } from '../ir/author-source.js';\nimport type { IconVariant as I } from '../ir/compiler.js';\nexport declare const outline: string;\nexport declare const filled: string;\nexport declare function glyph(request?: R): G<'ellipse'>;\nexport declare function glyphCapabilities(variant?: I): C<'ellipse'>;\n"
+    },
+    {
+      "icon": "ellipsis-horizontal",
+      "variation": true,
+      "baseline": {
+        "bytes": 718,
+        "gzipBytes": 257,
+        "brotliBytes": 206,
+        "sha256": "65202863a9966243a6a4a999c9627b36a9c20562ad241f0820543886b4503dd9"
+      },
+      "actual": {
+        "bytes": 602,
+        "gzipBytes": 262,
+        "brotliBytes": 195,
+        "sha256": "e2a8d02818fe625e2c287af663882f4dc86a8f64b29b79aa60771d0613e40b4c"
+      },
+      "candidateDeclaration": "import type { AuthorSourceGlyph as G, AuthorSymbolGlyphRequest as R } from '../ir/author-source.js';\nimport type { AuthorVariationGlyph as V, AuthorVariationCapabilities as C, AuthorVariationGlyphRequest as Q } from '../ir/authored-variation.js';\nimport type { IconVariant as I } from '../ir/compiler.js';\nexport declare const outline: string;\nexport declare const filled: string;\nexport declare function glyph(request?: R): G<'ellipsis-horizontal'>;\nexport declare function glyph(request: Q): V<'ellipsis-horizontal'>;\nexport declare function glyphCapabilities(variant?: I): C<'ellipsis-horizontal'>;\n"
+    },
+    {
+      "icon": "ellipsis-vertical",
+      "variation": true,
+      "baseline": {
+        "bytes": 712,
+        "gzipBytes": 257,
+        "brotliBytes": 205,
+        "sha256": "24fcb499d8623b462fb93d34f9dcfa0667fa5398b94076c1e5cbe6a9ccbac6cb"
+      },
+      "actual": {
+        "bytes": 596,
+        "gzipBytes": 261,
+        "brotliBytes": 195,
+        "sha256": "31ff3f03fc4e15587c9a118657d2547ee10f97a69f55aae9f5fbb4a005989f1c"
+      },
+      "candidateDeclaration": "import type { AuthorSourceGlyph as G, AuthorSymbolGlyphRequest as R } from '../ir/author-source.js';\nimport type { AuthorVariationGlyph as V, AuthorVariationCapabilities as C, AuthorVariationGlyphRequest as Q } from '../ir/authored-variation.js';\nimport type { IconVariant as I } from '../ir/compiler.js';\nexport declare const outline: string;\nexport declare const filled: string;\nexport declare function glyph(request?: R): G<'ellipsis-vertical'>;\nexport declare function glyph(request: Q): V<'ellipsis-vertical'>;\nexport declare function glyphCapabilities(variant?: I): C<'ellipsis-vertical'>;\n"
+    }
+  ]
+}

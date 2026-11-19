@@ -4,12 +4,11 @@
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { collectExportSurface, serializeExportSurface } from './lib/export-surface.js';
+import { collectExportSurface, exportSurfaceEntryErrors, serializeExportSurface } from './lib/export-surface.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const file = join(ROOT, 'release', 'export-surface.json');
 
-const actual = serializeExportSurface(await collectExportSurface(ROOT));
 let snapshot;
 try {
   snapshot = readFileSync(file, 'utf8');
@@ -17,6 +16,14 @@ try {
   console.error('check-export-surface: release/export-surface.json отсутствует; запустить pnpm generate:export-surface');
   process.exit(1);
 }
+
+const contract = JSON.parse(readFileSync(join(ROOT, 'release', 'contract.json'), 'utf8'));
+const entryErrors = exportSurfaceEntryErrors(contract, JSON.parse(snapshot));
+if (entryErrors.length) {
+  for (const error of entryErrors) console.error(error);
+  process.exit(1);
+}
+const actual = serializeExportSurface(await collectExportSurface(ROOT));
 
 if (actual !== snapshot) {
   const actualSurface = JSON.parse(actual);

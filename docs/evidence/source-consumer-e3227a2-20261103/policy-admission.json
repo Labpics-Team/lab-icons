@@ -1,0 +1,206 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "2bf18f9903511d5b0ed703118e7134188253571a",
+  "uiCommit": "e3227a2fabc9136997f58cf710076bce614940df",
+  "run": "41530330458",
+  "job": "125568562377",
+  "reportSha256": "5152bf900c14bfd02afcb8fa4c23a6864122c0d22a053b9f92ca0f8cf4901fd7",
+  "receiptSha256": "4dcaddb845b75ba3c82124efecf45c2d6cb9efcf32bfb0057958a4d9e7c15639",
+  "artifacts": 1443,
+  "consumers": 24,
+  "browserRecords": 264,
+  "negativeTypeControls": 26,
+  "environment": {
+    "node": "v22.19.0",
+    "platform": "linux",
+    "arch": "x64",
+    "cpu": "AMD Ryzen 9 9950X 16-Core Processor",
+    "cpuCount": 8,
+    "browser": "140.0.7339.186"
+  },
+  "admissions": {
+    "package": {
+      "file": "release/package-size-ratchet.json",
+      "previousSha256": "b56069a4a7541930ef638bfc260649c2883dc25709be95e0b118a14634e6819c",
+      "nextSha256": "423246c302638d7d414d1bdeec7b805485f7a72d95a02c4ae634c4c8336b8d99",
+      "preservedEntries": 1433,
+      "preservedMaxFields": 2866,
+      "added": {
+        "dist/ir/source-state-runtime.js": {
+          "baselineBytes": 6176,
+          "baselineGzipBytes": 2038,
+          "maxBytes": 6176,
+          "maxGzipBytes": 2038,
+          "allowedModules": [
+            "src/states/runtime.ts",
+            "src/states/source-runtime.ts"
+          ],
+          "forbiddenNeedles": [
+            "sourceMappingURL"
+          ]
+        },
+        "dist/ir/source-state-types.d.ts": {
+          "baselineBytes": 1775,
+          "baselineGzipBytes": 589,
+          "maxBytes": 1775,
+          "maxGzipBytes": 589,
+          "allowedModules": [],
+          "forbiddenNeedles": [
+            "sourceMappingURL"
+          ]
+        },
+        "dist/states/microphone-filled.d.ts": {
+          "baselineBytes": 858,
+          "baselineGzipBytes": 274,
+          "maxBytes": 858,
+          "maxGzipBytes": 274,
+          "allowedModules": [],
+          "forbiddenNeedles": [
+            "sourceMappingURL",
+            "semantics/catalog.json",
+            "anatomy.runtime.json"
+          ]
+        },
+        "dist/states/microphone-filled.js": {
+          "baselineBytes": 5426,
+          "baselineGzipBytes": 2343,
+          "maxBytes": 5426,
+          "maxGzipBytes": 2343,
+          "allowedModules": [],
+          "forbiddenNeedles": [
+            "sourceMappingURL",
+            "semantics/catalog.json",
+            "anatomy.runtime.json"
+          ]
+        },
+        "dist/states/microphone.d.ts": {
+          "baselineBytes": 865,
+          "baselineGzipBytes": 273,
+          "maxBytes": 865,
+          "maxGzipBytes": 273,
+          "allowedModules": [],
+          "forbiddenNeedles": [
+            "sourceMappingURL",
+            "semantics/catalog.json",
+            "anatomy.runtime.json"
+          ]
+        },
+        "dist/states/microphone.js": {
+          "baselineBytes": 6160,
+          "baselineGzipBytes": 2710,
+          "maxBytes": 6160,
+          "maxGzipBytes": 2710,
+          "allowedModules": [],
+          "forbiddenNeedles": [
+            "sourceMappingURL",
+            "semantics/catalog.json",
+            "anatomy.runtime.json"
+          ]
+        },
+        "dist/states/visibility-filled.d.ts": {
+          "baselineBytes": 859,
+          "baselineGzipBytes": 277,
+          "maxBytes": 859,
+          "maxGzipBytes": 277,
+          "allowedModules": [],
+          "forbiddenNeedles": [
+            "sourceMappingURL",
+            "semantics/catalog.json",
+            "anatomy.runtime.json"
+          ]
+        },
+        "dist/states/visibility-filled.js": {
+          "baselineBytes": 4629,
+          "baselineGzipBytes": 2117,
+          "maxBytes": 4629,
+          "maxGzipBytes": 2117,
+          "allowedModules": [],
+          "forbiddenNeedles": [
+            "sourceMappingURL",
+            "semantics/catalog.json",
+            "anatomy.runtime.json"
+          ]
+        },
+        "dist/states/visibility.d.ts": {
+          "baselineBytes": 866,
+          "baselineGzipBytes": 277,
+          "maxBytes": 866,
+          "maxGzipBytes": 277,
+          "allowedModules": [],
+          "forbiddenNeedles": [
+            "sourceMappingURL",
+            "semantics/catalog.json",
+            "anatomy.runtime.json"
+          ]
+        },
+        "dist/states/visibility.js": {
+          "baselineBytes": 8624,
+          "baselineGzipBytes": 3929,
+          "maxBytes": 8624,
+          "maxGzipBytes": 3929,
+          "allowedModules": [],
+          "forbiddenNeedles": [
+            "sourceMappingURL",
+            "semantics/catalog.json",
+            "anatomy.runtime.json"
+          ]
+        }
+      }
+    },
+    "consumer": {
+      "file": "release/consumer-size-ratchet.json",
+      "previousSha256": "f04f0afd158ffcc339395fe01cbea4058153e6a4da7b396e14bde3f80924ce80",
+      "nextSha256": "64dbb919c711c0d7785707f3b942be2f7b3a1e955f2b9448a25bb9d5d3dbcc6a",
+      "preservedEntries": 18,
+      "preservedMaxFields": 36,
+      "added": {
+        "varied-microphone": {
+          "entry": "import { glyph } from '@labpics/icons/variations/mic';\nconsole.log(glyph({ variation: { bodyWidth: 0.9 } }));\n",
+          "baselineBytes": 27620,
+          "baselineGzipBytes": 8783,
+          "maxBytes": 27620,
+          "maxGzipBytes": 8783
+        },
+        "varied-microphone-circle": {
+          "entry": "import { glyph } from '@labpics/icons/variations/mic-circle';\nconsole.log(glyph({ variant: 'filled', variation: { bodyWidth: 0.8 } }));\n",
+          "baselineBytes": 24720,
+          "baselineGzipBytes": 9192,
+          "maxBytes": 24720,
+          "maxGzipBytes": 9192
+        },
+        "microphone-state-outline": {
+          "entry": "import { renderStateSvg, compileStateEffect } from '@labpics/icons/states/microphone';\nconsole.log(renderStateSvg('muted'), compileStateEffect('unmuted', { duration: 180 }));\n",
+          "baselineBytes": 9334,
+          "baselineGzipBytes": 3481,
+          "maxBytes": 9334,
+          "maxGzipBytes": 3481
+        },
+        "microphone-state-filled": {
+          "entry": "import { renderStateSvg, compileStateEffect } from '@labpics/icons/states/microphone-filled';\nconsole.log(renderStateSvg('muted'), compileStateEffect('unmuted', { duration: 180 }));\n",
+          "baselineBytes": 8595,
+          "baselineGzipBytes": 3126,
+          "maxBytes": 8595,
+          "maxGzipBytes": 3126
+        },
+        "visibility-state-outline": {
+          "entry": "import { renderStateSvg, compileStateEffect } from '@labpics/icons/states/visibility';\nconsole.log(renderStateSvg('hidden'), compileStateEffect('visible', { duration: 180 }));\n",
+          "baselineBytes": 11802,
+          "baselineGzipBytes": 4725,
+          "maxBytes": 11802,
+          "maxGzipBytes": 4725
+        },
+        "visibility-state-filled": {
+          "entry": "import { renderStateSvg, compileStateEffect } from '@labpics/icons/states/visibility-filled';\nconsole.log(renderStateSvg('hidden'), compileStateEffect('visible', { duration: 180 }));\n",
+          "baselineBytes": 7887,
+          "baselineGzipBytes": 2926,
+          "maxBytes": 7887,
+          "maxGzipBytes": 2926
+        }
+      }
+    }
+  },
+  "limits": [
+    "Только первые measured caps новых artifacts/scenarios; все прежние поля сохранены.",
+    "Source-pack consumer не подтверждает npm publication, exact-head Icons CI, Laborant, comparative latency или весь корпус."
+  ]
+}

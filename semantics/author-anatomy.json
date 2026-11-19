@@ -1,0 +1,1349 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "fileKey": "LuaiBd4anRi4DMZayKAnY2",
+    "version": "2416636003859748575"
+  },
+  "icons": {
+    "timer": {
+      "outline": {
+        "scope": "motion",
+        "masterSha256": "dfb433f25a8689d2a3bdd1a4f5da8bc09466efc824fdf1ed5d71da8dd5626a6a",
+        "pathFingerprintSha256": "4aac93e5a2b47f4181007f4a3e4c915037f1761e7091691b3f87f322b3304aed",
+        "parts": [
+          { "pathIndex": 0, "id": "timer-dial", "role": "container" },
+          { "pathIndex": 1, "id": "timer-hand", "role": "control", "anchor": [0.5, 0.5], "anchorMeaning": "canvas-center" }
+        ],
+        "gesture": null
+      }
+    },
+    "mic": {
+      "outline": {
+        "masterSha256": "c526c734a2225a29ec6e71f76d860546f5bccf8475bad6e1842915a75f2a5f9c",
+        "pathFingerprintSha256": "f7451fdcb743aaff3832866caea46af111a8d7ea39283472787996dc212978a6",
+        "parts": [
+          { "pathIndex": 0, "id": "microphone-support", "role": "content" },
+          { "pathIndex": 1, "id": "microphone-body", "role": "content" }
+        ],
+        "gesture": null,
+        "variation": { "law": "capsule.width", "parameter": "bodyWidth", "bodyPartId": "microphone-body" }
+      },
+      "filled": {
+        "masterSha256": "e0efa7ec88dfdd01862ffd1b508de9b0789528046fb1b9d00442b9cdac093029",
+        "pathFingerprintSha256": "1cc371d2b7a2c52310e784e36b9827c4d50a245343b8f477e307fad650a28f6f",
+        "parts": [
+          { "pathIndex": 0, "id": "microphone-support", "role": "content" },
+          { "pathIndex": 1, "id": "microphone-body", "role": "content" }
+        ],
+        "gesture": null,
+        "variation": { "law": "capsule.width", "parameter": "bodyWidth", "bodyPartId": "microphone-body" }
+      }
+    },
+    "mic-circle": {
+      "outline": {
+        "masterSha256": "86a0ac827fea4a8294c35332ec606f1f9b992f28e28660af12c72eddce3c2d32",
+        "pathFingerprintSha256": "04e69ba05e75395f552b6828dc12caf853f452bab30c81aa572392468efc2cc6",
+        "parts": [
+          { "pathIndex": 0, "id": "microphone-support", "role": "content" },
+          { "pathIndex": 1, "id": "microphone-body", "role": "content" },
+          { "pathIndex": 2, "id": "microphone-enclosure", "role": "container" }
+        ],
+        "gesture": null,
+        "variation": { "law": "capsule.width", "parameter": "bodyWidth", "bodyPartId": "microphone-body" }
+      },
+      "filled": {
+        "masterSha256": "a2b2c05074d1a8b791e1a31962c7c57658184cf7b16b737efedbed2cf792d8a7",
+        "pathFingerprintSha256": "2ab6c70b6036f654a3ef5f332a2a283509dadab0ccabd01f324a0ab3b7950ed9",
+        "composition": { "kind": "compound", "fillRule": "evenodd" },
+        "parts": [
+          { "pathIndex": 0, "contourIndices": [0], "id": "microphone-enclosure", "role": "container" },
+          { "pathIndex": 0, "contourIndices": [1], "id": "microphone-support", "role": "counter" },
+          { "pathIndex": 0, "contourIndices": [2], "id": "microphone-body", "role": "counter" }
+        ],
+        "gesture": null,
+        "variation": { "law": "capsule.width", "parameter": "bodyWidth", "bodyPartId": "microphone-body" }
+      }
+    },
+    "reload": {
+      "outline": {
+        "masterSha256": "9a6784d21805bb7374a37a62fab427be8a49b985bdb5ffc04876bfb3ed93bd80",
+        "pathFingerprintSha256": "0539b295f7e1087d3f3fb12524d578c5cdfb0a19655ea99786cee975b52b8f7c",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "cycle-body",
+            "role": "control",
+            "anchor": [
+              0.5,
+              0.5
+            ],
+            "anchorMeaning": "canvas-center"
+          }
+        ],
+        "gesture": {
+          "law": "cycle.clockwise",
+          "partId": "cycle-body"
+        }
+      },
+      "filled": {
+        "masterSha256": "3c7a57edcdac59581175696289e383f78ec43381bcbb72ed49c5034ae8ae871a",
+        "pathFingerprintSha256": "3441f62d5640362954f6229439a867913aee6aae98c463ee11a326419b958c62",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "cycle-body",
+            "role": "control",
+            "anchor": [
+              0.5,
+              0.5
+            ],
+            "anchorMeaning": "canvas-center"
+          }
+        ],
+        "gesture": {
+          "law": "cycle.clockwise",
+          "partId": "cycle-body"
+        }
+      }
+    },
+    "refresh": {
+      "outline": {
+        "masterSha256": "197a388b68b7038a978d1653f5c00a8c0676326a5ec5b74cc3b461c7c551e3af",
+        "pathFingerprintSha256": "e8d0dff9194dca19f6223ee84e9c644f99dab9b10fe92da733acac9937fe8202",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "cycle-body",
+            "role": "control",
+            "anchor": [
+              0.5,
+              0.5
+            ],
+            "anchorMeaning": "canvas-center"
+          }
+        ],
+        "gesture": {
+          "law": "cycle.clockwise",
+          "partId": "cycle-body"
+        }
+      },
+      "filled": {
+        "masterSha256": "d087792f28dbe52e5fe4937a17885a8e502e2618a03eec5d8c0323cac560227a",
+        "pathFingerprintSha256": "210a3be010a2fa6118adcb8c41b7ab792533075783fc1cac2875a04ad4505d6a",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "cycle-body",
+            "role": "control",
+            "anchor": [
+              0.5,
+              0.5
+            ],
+            "anchorMeaning": "canvas-center"
+          }
+        ],
+        "gesture": {
+          "law": "cycle.clockwise",
+          "partId": "cycle-body"
+        }
+      }
+    },
+    "ellipsis-horizontal": {
+      "outline": {
+        "masterSha256": "2d809cc6e544a60ea8d97da5c3159b780263fd9637dba833a009a85c3cc6c681",
+        "pathFingerprintSha256": "dc3453fcadbb704334e60205dfb26bf5fce12ba527079981d8900a535f89da20",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "dot-leading",
+            "role": "content"
+          },
+          {
+            "pathIndex": 1,
+            "id": "dot-middle",
+            "role": "content"
+          },
+          {
+            "pathIndex": 2,
+            "id": "dot-trailing",
+            "role": "content"
+          }
+        ],
+        "gesture": {
+          "law": "activity.triad",
+          "purpose": "loading",
+          "partIds": [
+            "dot-leading",
+            "dot-middle",
+            "dot-trailing"
+          ]
+        },
+        "variation": {
+          "law": "dots.affine",
+          "axis": "x"
+        }
+      },
+      "filled": {
+        "masterSha256": "117152d7d2fa2b9ffc41f864d1def693a238ffd50645949ecf11e49aa850142e",
+        "pathFingerprintSha256": "486b5ab9d752e8a82054c486dcf2b1db48c284878636c6ea079ea043c8797a2e",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "dot-leading",
+            "role": "content"
+          },
+          {
+            "pathIndex": 1,
+            "id": "dot-middle",
+            "role": "content"
+          },
+          {
+            "pathIndex": 2,
+            "id": "dot-trailing",
+            "role": "content"
+          }
+        ],
+        "gesture": {
+          "law": "activity.triad",
+          "purpose": "loading",
+          "partIds": [
+            "dot-leading",
+            "dot-middle",
+            "dot-trailing"
+          ]
+        },
+        "variation": {
+          "law": "dots.affine",
+          "axis": "x"
+        }
+      }
+    },
+    "chatbubble-ellipses": {
+      "outline": {
+        "masterSha256": "a3d273470c4a7e8627570166f442ce51080b506d328ed5df86d231b0a207d0e5",
+        "pathFingerprintSha256": "097b1397a15ba756bff1c18078813f11eeb6421d54f3678e07d8a86cae130590",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "dot-leading",
+            "role": "content"
+          },
+          {
+            "pathIndex": 1,
+            "id": "dot-middle",
+            "role": "content"
+          },
+          {
+            "pathIndex": 2,
+            "id": "dot-trailing",
+            "role": "content"
+          },
+          {
+            "pathIndex": 3,
+            "id": "bubble",
+            "role": "container"
+          }
+        ],
+        "gesture": {
+          "law": "activity.triad",
+          "purpose": "typing",
+          "partIds": [
+            "dot-leading",
+            "dot-middle",
+            "dot-trailing"
+          ]
+        }
+      }
+    },
+    "volume-high": {
+      "outline": {
+        "masterSha256": "085d3719de5e12a876dee1d8ad7c94da95be05e8dfe83359380da4b74d2b6311",
+        "pathFingerprintSha256": "60d830045d8c95bfa9b1ffdbc73c6cfd423e06aba3d3b039b5fc48d627789b11",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "wave-far",
+            "role": "content"
+          },
+          {
+            "pathIndex": 1,
+            "id": "wave-middle",
+            "role": "content"
+          },
+          {
+            "pathIndex": 2,
+            "id": "speaker",
+            "role": "container"
+          },
+          {
+            "pathIndex": 3,
+            "id": "wave-near",
+            "role": "content"
+          }
+        ],
+        "gesture": {
+          "law": "signal.levels",
+          "purpose": "volume",
+          "containerPartId": "speaker",
+          "partIds": [
+            "wave-near",
+            "wave-middle",
+            "wave-far"
+          ]
+        }
+      },
+      "filled": {
+        "masterSha256": "150e20c8e3d00910f58c6f6606476329aa1ebe0ae81c5ec48afffdaaea4496b6",
+        "pathFingerprintSha256": "305237029d5568f999b790ad15344a4f1b431591a0d442e6c972a7d27cc3b6d0",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "wave-far",
+            "role": "content"
+          },
+          {
+            "pathIndex": 1,
+            "id": "wave-middle",
+            "role": "content"
+          },
+          {
+            "pathIndex": 2,
+            "id": "speaker",
+            "role": "container"
+          },
+          {
+            "pathIndex": 3,
+            "id": "wave-near",
+            "role": "content"
+          }
+        ],
+        "gesture": {
+          "law": "signal.levels",
+          "purpose": "volume",
+          "containerPartId": "speaker",
+          "partIds": [
+            "wave-near",
+            "wave-middle",
+            "wave-far"
+          ]
+        }
+      }
+    },
+    "volume-middle": {
+      "filled": {
+        "masterSha256": "af1ec2b4d4ee813aaae5808022d860f6559e84d1e092114939ec2088b884ed5e",
+        "pathFingerprintSha256": "629b2ecb94b89701558cccdb68812cceaa26903cc1f9b1db65fa6b3a783d4047",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "wave-far",
+            "role": "content"
+          },
+          {
+            "pathIndex": 1,
+            "id": "speaker",
+            "role": "container"
+          },
+          {
+            "pathIndex": 2,
+            "id": "wave-near",
+            "role": "content"
+          }
+        ],
+        "gesture": {
+          "law": "signal.levels",
+          "purpose": "volume",
+          "containerPartId": "speaker",
+          "partIds": [
+            "wave-near",
+            "wave-far"
+          ]
+        }
+      }
+    },
+    "arrow-back": {
+      "outline": {
+        "masterSha256": "a1e403feb8fc7ab1913eceffd8da5c5c07ae6e1ea77d671daf420f6cec231771",
+        "pathFingerprintSha256": "edefa0fbad31b4a4d8ea25532722ab8722a0717adbe7bbf9da495a5d79c3d1c5",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "direction-body",
+            "role": "control",
+            "anchor": [
+              0.5,
+              0.5
+            ],
+            "anchorMeaning": "canvas-center"
+          }
+        ],
+        "gesture": {
+          "law": "direction.nudge",
+          "partId": "direction-body",
+          "direction": "left"
+        }
+      },
+      "filled": {
+        "masterSha256": "e3b43f67da4993fd70057cdd1a2c8cf9e5c300b8cc6c8d8ec864d78d63ba496b",
+        "pathFingerprintSha256": "1db6ca3784e429048154eed1616e4bc30611c119341ecb8067dbeef8e5c307c0",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "direction-body",
+            "role": "control",
+            "anchor": [
+              0.5,
+              0.5
+            ],
+            "anchorMeaning": "canvas-center"
+          }
+        ],
+        "gesture": {
+          "law": "direction.nudge",
+          "partId": "direction-body",
+          "direction": "left"
+        }
+      }
+    },
+    "arrow-forward": {
+      "outline": {
+        "masterSha256": "e44d4d1e0b5cab5b42dc254a8a1a39ebbca17ee59c3fc9343a5c48e563a98b1d",
+        "pathFingerprintSha256": "b21b90aaf06fcf1fc4b3213d468fa1e5ef6489776a5fd24a35714a91c0cf8522",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "direction-body",
+            "role": "control",
+            "anchor": [
+              0.5,
+              0.5
+            ],
+            "anchorMeaning": "canvas-center"
+          }
+        ],
+        "gesture": {
+          "law": "direction.nudge",
+          "partId": "direction-body",
+          "direction": "right"
+        }
+      },
+      "filled": {
+        "masterSha256": "76027d7d4b6ef86c899bb4faa0553bf5b091b157820791890c37c4d6addab15b",
+        "pathFingerprintSha256": "3248c9f712c515ea2482b750383b066d5d26c614129ac439c263500946e53473",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "direction-body",
+            "role": "control",
+            "anchor": [
+              0.5,
+              0.5
+            ],
+            "anchorMeaning": "canvas-center"
+          }
+        ],
+        "gesture": {
+          "law": "direction.nudge",
+          "partId": "direction-body",
+          "direction": "right"
+        }
+      }
+    },
+    "arrow-up": {
+      "outline": {
+        "masterSha256": "507d6321146eec1de6b2a877d1c6d0e5c82363dc299902fbb43be2709bc122df",
+        "pathFingerprintSha256": "faa5bb604d280b11586d89e0868b48ed3775403eab0fd4907c88a84cf834f582",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "direction-body",
+            "role": "control",
+            "anchor": [
+              0.5,
+              0.5
+            ],
+            "anchorMeaning": "canvas-center"
+          }
+        ],
+        "gesture": {
+          "law": "direction.nudge",
+          "partId": "direction-body",
+          "direction": "up"
+        }
+      },
+      "filled": {
+        "masterSha256": "d6ff20fb7c6029f941fbaf9d72c2c1b05333c7a2dcd6723c71a482b569ca500e",
+        "pathFingerprintSha256": "9f5786395e025a4e1665f9e4f8ea124fae3fb1bf0faccc27c7bcd4b56a7ecc33",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "direction-body",
+            "role": "control",
+            "anchor": [
+              0.5,
+              0.5
+            ],
+            "anchorMeaning": "canvas-center"
+          }
+        ],
+        "gesture": {
+          "law": "direction.nudge",
+          "partId": "direction-body",
+          "direction": "up"
+        }
+      }
+    },
+    "arrow-down": {
+      "outline": {
+        "masterSha256": "0c5e93ca32295d4fb3cd6c9fcf2dc9a1783ef465a4f5475c3561aa16ffcec8f5",
+        "pathFingerprintSha256": "43b793884b975e064b9a4940ab5c4af4cf9ff2357849797cc884cc51e5a62d47",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "direction-body",
+            "role": "control",
+            "anchor": [
+              0.5,
+              0.5
+            ],
+            "anchorMeaning": "canvas-center"
+          }
+        ],
+        "gesture": {
+          "law": "direction.nudge",
+          "partId": "direction-body",
+          "direction": "down"
+        }
+      },
+      "filled": {
+        "masterSha256": "937930bf98ca317d95439c4c1aabfdbbc65e77ec7f8cb5195080e6a664ef835e",
+        "pathFingerprintSha256": "c179d8416e5556a441d0587f55c5ea78c06d49fdfabd1662f23d7646cdcd5e55",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "direction-body",
+            "role": "control",
+            "anchor": [
+              0.5,
+              0.5
+            ],
+            "anchorMeaning": "canvas-center"
+          }
+        ],
+        "gesture": {
+          "law": "direction.nudge",
+          "partId": "direction-body",
+          "direction": "down"
+        }
+      }
+    },
+    "chevron-back": {
+      "outline": {
+        "masterSha256": "4d678dbd20a63fb971d4607b5a52b175a24c2d87b878e220fa4c66562af92aac",
+        "pathFingerprintSha256": "03bc0ac36ee41fcb13048497bb258e83d602fcfa91158cb1d30f5b0b2e8a7bda",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "direction-body",
+            "role": "control",
+            "anchor": [
+              0.5,
+              0.5
+            ],
+            "anchorMeaning": "canvas-center"
+          }
+        ],
+        "gesture": {
+          "law": "direction.nudge",
+          "partId": "direction-body",
+          "direction": "left"
+        }
+      },
+      "filled": {
+        "masterSha256": "8172c40779ddfef12f2bfd711027f2942f229716e64ab1ab70fffbda1e65bc61",
+        "pathFingerprintSha256": "ac80b0f2707f7f6b4c001b429c603f0013ba6437c4471d161d7d80a107516e0c",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "direction-body",
+            "role": "control",
+            "anchor": [
+              0.5,
+              0.5
+            ],
+            "anchorMeaning": "canvas-center"
+          }
+        ],
+        "gesture": {
+          "law": "direction.nudge",
+          "partId": "direction-body",
+          "direction": "left"
+        }
+      }
+    },
+    "chevron-forward": {
+      "outline": {
+        "masterSha256": "cd80e4cba160b97284705d2f4940d64ed7f775adc716bd72145ada4dd2e6843f",
+        "pathFingerprintSha256": "c262d82bec693c8b8be60f28b966444435076701a0c4c53ff7646a48241b2ad5",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "direction-body",
+            "role": "control",
+            "anchor": [
+              0.5,
+              0.5
+            ],
+            "anchorMeaning": "canvas-center"
+          }
+        ],
+        "gesture": {
+          "law": "direction.nudge",
+          "partId": "direction-body",
+          "direction": "right"
+        }
+      },
+      "filled": {
+        "masterSha256": "273045f9d1d71dfd6fda2ea8de0503ab808c486c9fd63e72fcc386205f87faa6",
+        "pathFingerprintSha256": "75b86620899839c4d6291a74a76267eb85775fb54f3dd6ea9dc00a818ab77ff0",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "direction-body",
+            "role": "control",
+            "anchor": [
+              0.5,
+              0.5
+            ],
+            "anchorMeaning": "canvas-center"
+          }
+        ],
+        "gesture": {
+          "law": "direction.nudge",
+          "partId": "direction-body",
+          "direction": "right"
+        }
+      }
+    },
+    "chevron-up": {
+      "outline": {
+        "masterSha256": "107044a3c02856114c6c29dd37a7babdb51992f6e9a6f319b08586d4217899da",
+        "pathFingerprintSha256": "21f21801840f578475d7fe2641c94fa9d75a1bde35e9e5f79fcffa0724a944fb",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "direction-body",
+            "role": "control",
+            "anchor": [
+              0.5,
+              0.5
+            ],
+            "anchorMeaning": "canvas-center"
+          }
+        ],
+        "gesture": {
+          "law": "direction.nudge",
+          "partId": "direction-body",
+          "direction": "up"
+        }
+      },
+      "filled": {
+        "masterSha256": "d1798c339f16ac99d6bdcf69b4c33011e4051a3854cc32fa793d9c8fc037bd7c",
+        "pathFingerprintSha256": "2336e11224c7afac65d05ca1fb2e5ad595d2c53db6e92d8d7f4759eaf8b87997",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "direction-body",
+            "role": "control",
+            "anchor": [
+              0.5,
+              0.5
+            ],
+            "anchorMeaning": "canvas-center"
+          }
+        ],
+        "gesture": {
+          "law": "direction.nudge",
+          "partId": "direction-body",
+          "direction": "up"
+        }
+      }
+    },
+    "chevron-down": {
+      "outline": {
+        "masterSha256": "9663e5889fd22fc96ef73c049f1730107fd1d087c6620a0931c960ef6519545a",
+        "pathFingerprintSha256": "f4c498c6b4cd3937299f081bb58627ed980ad79c5df650c4d2bbaa657acbcd70",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "direction-body",
+            "role": "control",
+            "anchor": [
+              0.5,
+              0.5
+            ],
+            "anchorMeaning": "canvas-center"
+          }
+        ],
+        "gesture": {
+          "law": "direction.nudge",
+          "partId": "direction-body",
+          "direction": "down"
+        }
+      },
+      "filled": {
+        "masterSha256": "235d673da7387588df6b01d83e470064d6fbc789a4c5b6eeead3554c375bbda3",
+        "pathFingerprintSha256": "ad689e3a38486c6e0bc904232580e2b0d4f25112e5ef6b37461f78f4abbbf742",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "direction-body",
+            "role": "control",
+            "anchor": [
+              0.5,
+              0.5
+            ],
+            "anchorMeaning": "canvas-center"
+          }
+        ],
+        "gesture": {
+          "law": "direction.nudge",
+          "partId": "direction-body",
+          "direction": "down"
+        }
+      }
+    },
+    "checkmark": {
+      "outline": {
+        "masterSha256": "0d35757e3ac5c23a1c1a3a3aad3d3558a354057742500fd2341ad3872d644a14",
+        "pathFingerprintSha256": "0a9ede481eec1e8a805b0396c216a71a1643fddf1e90e5fa9718ae445c4a03e1",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "confirmation-mark",
+            "role": "content"
+          }
+        ],
+        "gesture": {
+          "law": "confirmation.presence",
+          "purpose": "confirmation",
+          "partId": "confirmation-mark"
+        }
+      },
+      "filled": {
+        "masterSha256": "d44e67b12491261b5d90d40ad7c3045518a0fc15eab96b8661d63bff382385e3",
+        "pathFingerprintSha256": "6435afa2f133ae1b820f94431312bd6635039d51c9708bd7142d4a915a2a0ca0",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "confirmation-mark",
+            "role": "content"
+          }
+        ],
+        "gesture": {
+          "law": "confirmation.presence",
+          "purpose": "confirmation",
+          "partId": "confirmation-mark"
+        }
+      }
+    },
+    "checkmark-circle": {
+      "outline": {
+        "masterSha256": "e186493576bcc419ca7038013395ee021c547d91dc1b069b3ea67b24278c63c4",
+        "pathFingerprintSha256": "6afbf3a4ba0379b7dcd801901c34db3cff004da17c947f35cd8ea7000ba73527",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "confirmation-mark",
+            "role": "content"
+          },
+          {
+            "pathIndex": 1,
+            "id": "confirmation-enclosure",
+            "role": "container"
+          }
+        ],
+        "gesture": {
+          "law": "confirmation.presence",
+          "purpose": "confirmation",
+          "partId": "confirmation-mark"
+        },
+        "variation": {
+          "law": "annulus.counter-scale",
+          "parameter": "enclosureEmphasis",
+          "enclosurePartId": "confirmation-enclosure"
+        },
+        "contentVariation": {
+          "law": "annulus.content-counter-scale",
+          "parameters": [
+            "contentScale",
+            "enclosureEmphasis"
+          ],
+          "enclosurePartId": "confirmation-enclosure"
+        }
+      }
+    },
+    "cloud-checkmark": {
+      "outline": {
+        "masterSha256": "85635f0fb2e122a50aa3f7f7544e833f26985cdeefbd218c7f38ee09571c8dfb",
+        "pathFingerprintSha256": "b4c717cfe09c2822ff4cc4234af253db4bdb4f4c4b0731dfecd29bc785a6e080",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "confirmation-mark",
+            "role": "content"
+          },
+          {
+            "pathIndex": 1,
+            "id": "confirmation-enclosure",
+            "role": "container"
+          }
+        ],
+        "gesture": {
+          "law": "confirmation.presence",
+          "purpose": "confirmation",
+          "partId": "confirmation-mark"
+        }
+      }
+    },
+    "shield-checkmark": {
+      "outline": {
+        "masterSha256": "67a13aeaf153992b91feaaae23fc346d2e42741dcdd63d142567da69706d8691",
+        "pathFingerprintSha256": "85e6c88b0a59fae726e6aed8d949e5c90d1adc60a62e9144400cf104b9cb7554",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "confirmation-mark",
+            "role": "content"
+          },
+          {
+            "pathIndex": 1,
+            "id": "confirmation-enclosure",
+            "role": "container"
+          }
+        ],
+        "gesture": {
+          "law": "confirmation.presence",
+          "purpose": "confirmation",
+          "partId": "confirmation-mark"
+        }
+      }
+    },
+    "notifications": {
+      "outline": {
+        "masterSha256": "37966a60642c9e7641dcc34a3142c1f6307c5259662dce70d26a3864b36026e4",
+        "pathFingerprintSha256": "94ab10f011d61faa578d1aa4d7bcbca67fc5f1654b819bb4aa6dd5e1b7d623e5",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "notification-bell",
+            "role": "container"
+          },
+          {
+            "pathIndex": 1,
+            "id": "notification-clapper",
+            "role": "content"
+          }
+        ],
+        "gesture": {
+          "law": "notification.ring",
+          "purpose": "incoming-notification",
+          "partId": "notification-clapper"
+        }
+      },
+      "filled": {
+        "masterSha256": "10ec8dd6c76cc062e2f6844567a8639d354d3914f3d511eaf6d5628aeea5c588",
+        "pathFingerprintSha256": "28d3067272b9d8b7a57e89f3740af856d4760fbc7b2e32843e99b704f5788464",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "notification-clapper",
+            "role": "content"
+          },
+          {
+            "pathIndex": 1,
+            "id": "notification-bell",
+            "role": "container"
+          }
+        ],
+        "gesture": {
+          "law": "notification.ring",
+          "purpose": "incoming-notification",
+          "partId": "notification-clapper"
+        }
+      }
+    },
+    "notifications-unread": {
+      "outline": {
+        "masterSha256": "12d4d947a9c00ca13dec85021ebc09fef4ba4ea8d7878a90582c9a5d9d69f55a",
+        "pathFingerprintSha256": "eec5ca53ccea7df5e0ed4ef2549097355b8f6b2c10a86a297cf2ae7129351719",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "notification-bell-fragment-1",
+            "role": "container"
+          },
+          {
+            "pathIndex": 1,
+            "id": "notification-bell-fragment-2",
+            "role": "container"
+          },
+          {
+            "pathIndex": 2,
+            "id": "notification-bell-fragment-3",
+            "role": "container"
+          },
+          {
+            "pathIndex": 3,
+            "id": "notification-clapper",
+            "role": "content"
+          },
+          {
+            "pathIndex": 4,
+            "id": "notification-badge",
+            "role": "container"
+          }
+        ],
+        "gesture": {
+          "law": "notification.ring",
+          "purpose": "incoming-notification",
+          "partId": "notification-clapper"
+        }
+      },
+      "filled": {
+        "masterSha256": "c54574437cf7579985e678a0b9e464bf32a84be8ae278d521d11ef3ee3f0713f",
+        "pathFingerprintSha256": "1764e5f0087a387ea3b4618cfdbcf22bd1469f68dec2c09ec34b0c02e2f8d724",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "notification-clapper",
+            "role": "content"
+          },
+          {
+            "pathIndex": 1,
+            "id": "notification-bell",
+            "role": "container"
+          },
+          {
+            "pathIndex": 2,
+            "id": "notification-badge",
+            "role": "container"
+          }
+        ],
+        "gesture": {
+          "law": "notification.ring",
+          "purpose": "incoming-notification",
+          "partId": "notification-clapper"
+        }
+      }
+    },
+    "plus-circle": {
+      "outline": {
+        "masterSha256": "1187b32d965b0d97f97dae969f8d62c9e573757b9588341d41368657bd6dde54",
+        "pathFingerprintSha256": "052020c37b091e1697ce6f7bcae632fdcc5a220150a0ffcbaee5e2ad9a9360c2",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "increase-mark",
+            "role": "content"
+          },
+          {
+            "pathIndex": 1,
+            "id": "status-enclosure",
+            "role": "container"
+          }
+        ],
+        "gesture": null,
+        "variation": {
+          "law": "annulus.counter-scale",
+          "parameter": "enclosureEmphasis",
+          "enclosurePartId": "status-enclosure"
+        },
+        "contentVariation": {
+          "law": "annulus.content-counter-scale",
+          "parameters": [
+            "contentScale",
+            "enclosureEmphasis"
+          ],
+          "enclosurePartId": "status-enclosure"
+        }
+      }
+    },
+    "minus-circle": {
+      "outline": {
+        "masterSha256": "07be6c7e5b87e9f4ba0facd8fb3b31dbfaba03cb9a3bb9b0f6f552d16b4aaf85",
+        "pathFingerprintSha256": "29cc46dcf51cd5525021420d1f8428086bf7ba0a697527fdc1a8e4035813e508",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "decrease-mark",
+            "role": "content"
+          },
+          {
+            "pathIndex": 1,
+            "id": "status-enclosure",
+            "role": "container"
+          }
+        ],
+        "gesture": null,
+        "variation": {
+          "law": "annulus.counter-scale",
+          "parameter": "enclosureEmphasis",
+          "enclosurePartId": "status-enclosure"
+        },
+        "contentVariation": {
+          "law": "annulus.content-counter-scale",
+          "parameters": [
+            "contentScale",
+            "enclosureEmphasis"
+          ],
+          "enclosurePartId": "status-enclosure"
+        }
+      }
+    },
+    "ellipsis-vertical": {
+      "outline": {
+        "masterSha256": "c488b01da737ddf19adf1336b05a14c0c246d69d3456aea7e1c9dfe25e3ef9ed",
+        "pathFingerprintSha256": "79be5246b307c58af54f6cef91ee98a81c55e4ece84187b4d46268a7dd4200fb",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "dot-leading",
+            "role": "content"
+          },
+          {
+            "pathIndex": 1,
+            "id": "dot-middle",
+            "role": "content"
+          },
+          {
+            "pathIndex": 2,
+            "id": "dot-trailing",
+            "role": "content"
+          }
+        ],
+        "gesture": null,
+        "variation": {
+          "law": "dots.affine",
+          "axis": "y"
+        }
+      },
+      "filled": {
+        "masterSha256": "a80a27a7e4d942c07bcd2f8788d88020ab67559113fde5083c10ab7461ba98ba",
+        "pathFingerprintSha256": "fbb1d6c9b723255c4774cb04c73af98436c30204b95f05ca7bd9feb82a384b32",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "dot-leading",
+            "role": "content"
+          },
+          {
+            "pathIndex": 1,
+            "id": "dot-middle",
+            "role": "content"
+          },
+          {
+            "pathIndex": 2,
+            "id": "dot-trailing",
+            "role": "content"
+          }
+        ],
+        "gesture": null,
+        "variation": {
+          "law": "dots.affine",
+          "axis": "y"
+        }
+      }
+    },
+    "close-circle": {
+      "outline": {
+        "masterSha256": "3aa89b46e44c8d65f0ac60847d3dd1a7883d26cc58e6b2d686240ddd69276cdb",
+        "pathFingerprintSha256": "b232d89c62b9aac9da78b1cbe0ad35e7210bc910f61f1e09c1c8a1cdf0cd7d3f",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "dismissal-mark",
+            "role": "content"
+          },
+          {
+            "pathIndex": 1,
+            "id": "status-enclosure",
+            "role": "container"
+          }
+        ],
+        "gesture": null,
+        "variation": {
+          "law": "annulus.counter-scale",
+          "parameter": "enclosureEmphasis",
+          "enclosurePartId": "status-enclosure"
+        },
+        "contentVariation": {
+          "law": "annulus.content-counter-scale",
+          "parameters": [
+            "contentScale",
+            "enclosureEmphasis"
+          ],
+          "enclosurePartId": "status-enclosure"
+        }
+      }
+    },
+    "question-circle": {
+      "outline": {
+        "masterSha256": "a3fc2394714dbf91ac9fea7e92611a2348566309a5858bfd2d919b2fa9c92c7f",
+        "pathFingerprintSha256": "9b02e0ecfc6bbc7aa003c9edf01cb60c81e82095b872176b6ad383b995f5ed4f",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "question-dot",
+            "role": "content"
+          },
+          {
+            "pathIndex": 1,
+            "id": "question-stem",
+            "role": "content"
+          },
+          {
+            "pathIndex": 2,
+            "id": "status-enclosure",
+            "role": "container"
+          }
+        ],
+        "gesture": null,
+        "variation": {
+          "law": "annulus.counter-scale",
+          "parameter": "enclosureEmphasis",
+          "enclosurePartId": "status-enclosure"
+        },
+        "contentVariation": {
+          "law": "annulus.content-counter-scale",
+          "parameters": [
+            "contentScale",
+            "enclosureEmphasis"
+          ],
+          "enclosurePartId": "status-enclosure"
+        }
+      }
+    },
+    "alert-circle": {
+      "outline": {
+        "masterSha256": "bd832c1a7812efcd0f2a065acf3afcff0ea7aeab397e8df4bf44115d9df7db6d",
+        "pathFingerprintSha256": "6ed22c2281ff78106a9b54ff058433f8594fdc9080f5bead686a87530f1e84a6",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "attention-dot",
+            "role": "content"
+          },
+          {
+            "pathIndex": 1,
+            "id": "attention-stem",
+            "role": "content"
+          },
+          {
+            "pathIndex": 2,
+            "id": "status-enclosure",
+            "role": "container"
+          }
+        ],
+        "gesture": null,
+        "variation": {
+          "law": "annulus.counter-scale",
+          "parameter": "enclosureEmphasis",
+          "enclosurePartId": "status-enclosure"
+        },
+        "contentVariation": {
+          "law": "annulus.content-counter-scale",
+          "parameters": [
+            "contentScale",
+            "enclosureEmphasis"
+          ],
+          "enclosurePartId": "status-enclosure"
+        }
+      }
+    },
+    "play-circle": {
+      "outline": {
+        "masterSha256": "3e6fc6409cd6a828e171ea134289919e32615b416e8478c3208c3926fa36ffbd",
+        "pathFingerprintSha256": "bcc7c9845a74d2241809ec0ccc12b257310fc0615b71aca9ebc50423b098f3ee",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "play-mark",
+            "role": "content"
+          },
+          {
+            "pathIndex": 1,
+            "id": "playback-enclosure",
+            "role": "container"
+          }
+        ],
+        "gesture": null,
+        "variation": {
+          "law": "annulus.counter-scale",
+          "parameter": "enclosureEmphasis",
+          "enclosurePartId": "playback-enclosure"
+        },
+        "contentVariation": {
+          "law": "annulus.content-counter-scale",
+          "parameters": [
+            "contentScale",
+            "enclosureEmphasis"
+          ],
+          "enclosurePartId": "playback-enclosure"
+        }
+      }
+    },
+    "pause-circle": {
+      "outline": {
+        "masterSha256": "e25e6c6e4f5f2e7d6b797de7deb0f07462297bb939e3b9ed2a286da7b52af054",
+        "pathFingerprintSha256": "9cd5ce68d2d6f5fbda1c9a6ebfdf7d7a1be49df1d9e49bc5c5464a9ff3b151d7",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "pause-first-bar",
+            "role": "content"
+          },
+          {
+            "pathIndex": 1,
+            "id": "pause-second-bar",
+            "role": "content"
+          },
+          {
+            "pathIndex": 2,
+            "id": "playback-enclosure",
+            "role": "container"
+          }
+        ],
+        "gesture": null,
+        "variation": {
+          "law": "annulus.counter-scale",
+          "parameter": "enclosureEmphasis",
+          "enclosurePartId": "playback-enclosure"
+        },
+        "contentVariation": {
+          "law": "annulus.content-counter-scale",
+          "parameters": [
+            "contentScale",
+            "enclosureEmphasis"
+          ],
+          "enclosurePartId": "playback-enclosure"
+        }
+      }
+    },
+    "time": {
+      "outline": {
+        "masterSha256": "68a38b8c5e843eb2ea2f52b1bfb3c42cee4a3521165290a8846689960ea73036",
+        "pathFingerprintSha256": "70421c685ffbd4cf616fd7699dae0b36aa566177c25341a81a0dd4e6aa23e2c8",
+        "scope": "motion",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "clock-hands",
+            "role": "content"
+          },
+          {
+            "pathIndex": 1,
+            "id": "clock-enclosure",
+            "role": "container"
+          }
+        ],
+        "gesture": null,
+        "joint": {
+          "law": "joint.authored-elbow",
+          "purpose": "elapsed-time",
+          "pathIndex": 0,
+          "contourIndex": 0,
+          "partIds": {
+            "minute": "clock-minute",
+            "hour": "clock-hour"
+          },
+          "polarity": "positive"
+        }
+      },
+      "filled": {
+        "masterSha256": "e5ea53855b53dba61c7fb7066f25f78c9743d9a1a6bc4259c7bfd5784bb214c9",
+        "pathFingerprintSha256": "fc0afd4ba86d4dda9ec61902292f09d169b6d3f42dce13426af665a3bc552294",
+        "scope": "motion",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "clock-body",
+            "role": "container"
+          }
+        ],
+        "gesture": null,
+        "joint": {
+          "law": "joint.authored-elbow",
+          "purpose": "elapsed-time",
+          "pathIndex": 0,
+          "contourIndex": 1,
+          "partIds": {
+            "minute": "clock-minute",
+            "hour": "clock-hour"
+          },
+          "polarity": "negative"
+        }
+      }
+    },
+    "history": {
+      "outline": {
+        "masterSha256": "43b8c4debf600e9541f9fa5a5fc511aac94ed58f72214dab7f060040dbc75d44",
+        "pathFingerprintSha256": "95473b86de1a48e45452977f619d1f0b76bcdaa3e6782ffbccb9e19ad20dbf5d",
+        "scope": "motion",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "clock-enclosure",
+            "role": "container"
+          },
+          {
+            "pathIndex": 1,
+            "id": "clock-hands",
+            "role": "content"
+          }
+        ],
+        "gesture": null,
+        "joint": {
+          "law": "joint.authored-elbow",
+          "purpose": "elapsed-time",
+          "pathIndex": 1,
+          "contourIndex": 0,
+          "partIds": {
+            "minute": "clock-minute",
+            "hour": "clock-hour"
+          },
+          "polarity": "positive"
+        }
+      },
+      "filled": {
+        "masterSha256": "b8061fb8cd253e697b8b1231fbb069d0830a8f995321349865ac92a22feee1e6",
+        "pathFingerprintSha256": "699e8533748d458640d68ac4db8904020558468b5fec319e9fe66602cf48cda2",
+        "scope": "motion",
+        "parts": [
+          {
+            "pathIndex": 0,
+            "id": "clock-enclosure",
+            "role": "container"
+          },
+          {
+            "pathIndex": 1,
+            "id": "clock-hands",
+            "role": "content"
+          }
+        ],
+        "gesture": null,
+        "joint": {
+          "law": "joint.authored-elbow",
+          "purpose": "elapsed-time",
+          "pathIndex": 1,
+          "contourIndex": 0,
+          "partIds": {
+            "minute": "clock-minute",
+            "hour": "clock-hour"
+          },
+          "polarity": "positive"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "sourceCommit": "c5aa4c6d11c8ae385821d3e57800e2a40ca01665",
+  "consumerCommit": "0b6490141acd9dd808c9e6edd6a1840fe377f7ee",
+  "run": "https://github.com/Labpics-Team/labui/actions/runs/41448142385/job/125286311425",
+  "capturedAt": "2026-11-02T13:06:25.585Z",
+  "measurementSha256": "323aeb39b86f990d706744e4d1540229d206a6eb2e9d10c6ac8be36e1945e817",
+  "receiptSha256": "2d1fe42c5d15b088537be96753fb0ca1afc15566b8263deef9601bd0f448a1f6",
+  "previousPolicyCommit": "4c8f6ed39d7a002946c89fa405d18b5c4bfbfac9",
+  "packagePolicySha256": "2d7299717b413ac434b5ff76e5e4abfd8158c52db6bd5b604dda5873c9aa3d59",
+  "consumerPolicySha256": "1c12ca1029aaf78a50d24cdb00f265a20593f57dbf58423ee76289d22660fd17",
+  "preservedArtifactPolicies": 1399,
+  "measuredArtifactPolicies": 1406,
+  "preservedConsumerPolicies": 10,
+  "measuredConsumerPolicies": 14,
+  "preservedFields": ["maxBytes", "maxGzipBytes", "allowedModules", "identicalTo"],
+  "previousForbiddenNeedles": "all preserved",
+  "newArtifacts": [
+    "dist/ir/annulus-geometry-runtime.js",
+    "dist/ir/state-annulus-runtime.js",
+    "dist/ir/state-annulus-types.d.ts",
+    "dist/state-variations/playback-circle.d.ts",
+    "dist/state-variations/playback-circle.js",
+    "dist/state-variations/status-circle.d.ts",
+    "dist/state-variations/status-circle.js"
+  ],
+  "newConsumers": ["source-ellipsis-horizontal", "source-ellipsis-vertical", "varied-ellipsis-horizontal", "varied-ellipsis-vertical"],
+  "policyViolations": [],
+  "transferScope": "The subsequent four state-variation measurement entries change no emitted package source. Their own measurements remain pending. Timer and later runtime changes require fresh artifact measurements.",
+  "readback": "Authenticated job log gzip/base64 BEGIN/CHUNK/END packets; decoded length, ordering and SHA256 verified. Full report and native receipt remain recoverable from the linked job log."
+}

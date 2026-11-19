@@ -22,14 +22,23 @@ const NUM_RE = /[+-]?(?:\d*\.\d+|\d+\.?)(?:[eE][+-]?\d+)?/y;
 
 function makeScanner(d) {
   let pos = 0;
+  let previous = null;
   return {
-    /** Пропустить разделители (пробелы/запятые). */
+    /** comma-wsp допускает одну запятую только между числовыми токенами. */
     skipSep() {
-      while (pos < d.length) {
-        const ch = d[pos];
-        if (ch === ' ' || ch === ',' || ch === '\t' || ch === '\n' || ch === '\r') pos++;
-        else break;
+      while (/[\t\n\r ]/.test(d[pos] ?? '') && pos < d.length) pos++;
+      if (d[pos] === ',') {
+        if (previous !== 'number') throw new Error(`path-data: запятая без предыдущего числа на позиции ${pos}`);
+        pos++;
+        while (/[\t\n\r ]/.test(d[pos] ?? '') && pos < d.length) pos++;
+        if (!/[+\-.0-9]/.test(d[pos] ?? '')) {
+          throw new Error(`path-data: после запятой ожидалось число на позиции ${pos}`);
+        }
       }
+    },
+    end() {
+      this.skipSep();
+      if (pos !== d.length) throw new Error(`path-data: недопустимый токен на позиции ${pos}: …${d.slice(pos, pos + 16)}`);
     },
     /** Следующая буква команды или null. */
     peekCommand() {
@@ -40,7 +49,7 @@ function makeScanner(d) {
     },
     takeCommand() {
       const c = this.peekCommand();
-      if (c !== null) pos++;
+      if (c !== null) { pos++; previous = 'command'; }
       return c;
     },
     /** Есть ли впереди число (продолжение неявной команды). */
@@ -57,6 +66,7 @@ function makeScanner(d) {
         throw new Error(`path-data: ожидалось число (${what}) на позиции ${pos}: …${d.slice(pos, pos + 16)}`);
       }
       pos = NUM_RE.lastIndex;
+      previous = 'number';
       return Number(m[0]);
     },
     /** Арк-флаг: РОВНО один символ 0/1 (сжатая форма «011» = 0,1,1). */
@@ -67,6 +77,7 @@ function makeScanner(d) {
         throw new Error(`path-data: ожидался флаг 0/1 (${what}) на позиции ${pos}: …${d.slice(pos, pos + 16)}`);
       }
       pos++;
+      previous = 'number';
       return ch === '1' ? 1 : 0;
     },
   };
@@ -100,7 +111,8 @@ export function parsePathData(d) {
     if (next !== null) {
       cmd = next;
     } else if (!s.hasNumber()) {
-      break; // конец данных
+      s.end();
+      break;
     } else if (cmd === null) {
       throw new Error('path-data: данные до первой команды');
     } else if (cmd === 'M') {

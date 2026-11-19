@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Lab Icons</title>
+  <link rel="icon" href="originals/apps/outline.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="explorer.css">
+</head>
+<body>
+  <header class="topbar"><a class="brand" href="index.html">Lab Icons</a><nav class="site-nav" aria-label="Разделы"><a href="index.html" aria-current="page">Символы</a><a href="authoring.html">Создать символ</a></nav><a class="audit-link" href="observatory.html">Проверка прежних моделей</a></header>
+  <main class="workspace">
+    <section class="library" aria-label="Библиотека символов">
+      <div class="library-heading"><h1>Язык в деталях</h1><p id="corpus-count"></p></div>
+      <label class="search"><span class="sr-only">Найти символ</span><input id="symbol-search" type="search" placeholder="Найти символ" autocomplete="off"></label>
+      <div class="library-controls"><label>Начертание<select id="variant"><option value="outline">Контурное</option><option value="filled">Заливка</option></select></label><span id="visible-count" aria-live="polite"></span></div>
+      <div id="symbol-grid" class="symbol-grid"></div>
+      <button id="more-symbols" class="more" type="button">Показать ещё</button>
+      <p id="empty-search" hidden>Таких символов пока нет.</p>
+    </section>
+    <aside id="symbol-inspector" class="inspector" aria-label="Выбранный символ" aria-busy="true">
+      <div class="selection-heading"><div><p class="eyebrow">Выбранный символ</p><h2 id="symbol-name">time</h2></div><span id="model-status" class="status"></span></div>
+      <div class="segmented" role="group" aria-label="Вид геометрии"><button data-view="original" aria-pressed="true" disabled>Авторский</button><button data-view="generated" aria-pressed="false" disabled>Модель</button><button data-view="overlay" aria-pressed="false" disabled>Наложение</button><button data-view="difference" aria-pressed="false" disabled>Разница</button></div>
+      <div id="symbol-stage" class="symbol-stage" role="img" aria-label="Предпросмотр выбранного символа" aria-busy="true"></div>
+      <div class="size-samples" id="size-samples" aria-label="Символ на размерах 16, 24 и 48 пикселей"></div>
+      <div class="display-controls"><label>Размер предпросмотра<input id="display-size" type="range" min="16" max="128" value="112"><output id="display-size-value">112 px</output></label><label>Цвет<input id="display-color" type="color" value="#19191e"></label></div>
+      <p id="load-status" class="load-status" role="status" hidden></p>
+      <section class="inspector-section" aria-labelledby="gesture-title"><h3 id="gesture-title">Движение и состояние</h3><label id="state-family-control" class="field" hidden>Варианты<select id="state-family" disabled></select></label><label class="field">Жест<select id="gesture" disabled></select></label><div id="state-group-controls" class="state-group-controls" hidden><div id="state-choices" class="state-choices" role="group" aria-label="Состояние символа"></div><p id="state-choice-label" class="state-choice-label" aria-live="polite"></p></div><div class="playback"><button id="play" type="button" disabled>Вперёд</button><button id="reverse" type="button" disabled>Назад</button><button id="pause" type="button" disabled>Пауза</button></div><label id="gesture-progress-control" class="scrub"><span id="progress-label">Прогресс</span><input id="progress" type="range" min="0" max="1" step="any" value="0" disabled></label><label class="check"><input id="reduce-motion" type="checkbox">Уменьшить движение</label><p id="motion-status" aria-live="polite"></p></section>
+      <section class="inspector-section" aria-labelledby="geometry-title"><h3 id="geometry-title">Геометрия</h3><div id="axis-controls"></div><p id="axis-status" role="status" aria-live="polite"></p><details><summary>Части и контуры</summary><ul id="parts"></ul></details><details><summary>Основа и версия</summary><p id="source-status" class="source-status" role="status"></p></details></section>
+      <section class="inspector-section" aria-labelledby="export-title"><h3 id="export-title">Использовать</h3><code id="consumer-import"></code><div class="export-controls"><select id="export-format" aria-label="Формат экспорта"><option value="svg">SVG</option><option value="effect">Данные эффекта</option><option value="lottie">Lottie</option><option value="sf-symbols">SF Symbols</option></select><button id="export" type="button" disabled>Скачать</button></div><p id="export-status" aria-live="polite"></p></section>
+    </aside>
+  </main>
+  <script type="module" src="explorer.js"></script>
+</body>
+</html>

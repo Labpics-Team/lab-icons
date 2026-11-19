@@ -1,0 +1,3690 @@
+{
+  "version": 1,
+  "decision": "Ни одно проверенное семейство не закрывает оба неизменённых gzip ceiling с сохранением mandatory source values. Production emitter не изменён; native/cold/full-package qualification не заявляется.",
+  "reports": {
+    "records": {
+      "capturedAt": "2026-11-02T09:04:01.019Z",
+      "sourceSha": "fd0456119a21924772aba388bdff3ebbf5fcbcae",
+      "emitterSha256": "80d08832720b5058bfe97e39cb0667ba255edc57177945ef10e0e4a8ac637b76",
+      "experimentSha256": "be08c03c70342888c6cedc074b83d58cd899c0a678340dd8085fe9c6a57639ed",
+      "receiptSha256": "b63ab4be495f7a8b866035ae24b3c25ea33211c0c10be466163880e1413e4d91",
+      "environment": {
+        "node": "v24.15.0",
+        "esbuild": "0.28.1",
+        "fflate": "0.8.3",
+        "gzip": {
+          "level": 9,
+          "mtime": 0
+        }
+      },
+      "scope": "Две семьи; exact JSON/key-order и пять selective consumers на pinned runtime. Без native/cold/fullbuild.",
+      "mode": "fresh-record-constructors",
+      "runtimeReceipts": {
+        "dist/ir/request.js": {
+          "bytes": 2356,
+          "gzipBytes": 1017,
+          "sha256": "cee50e7f82d5029e8baabf95baad569c3009abc46f8f3d44aa4c5f9888c255af"
+        },
+        "dist/ir/author-request-runtime.js": {
+          "bytes": 798,
+          "gzipBytes": 489,
+          "sha256": "4284632485b0d66cf70f316da75ebe4c45be5c94ac487bc3d29d5965b9a9e31b"
+        },
+        "dist/ir/symbol-runtime.js": {
+          "bytes": 786,
+          "gzipBytes": 354,
+          "sha256": "7a3a0226218b04c5c31da0e40eab102aef5d8908ba448da6080bc0209aeb9639"
+        }
+      },
+      "rows": [
+        {
+          "icon": "notifications",
+          "baseline": {
+            "bytes": 16660,
+            "gzipBytes": 4584,
+            "sha256": "75f4e0ec95b6fd4fb7b6c86c087312de31914e11f4c13a4d055cd465bc63820f"
+          },
+          "baselineConsumers": {
+            "glyph": {
+              "bytes": 12459,
+              "gzipBytes": 4812,
+              "sha256": "8beea224e20e70ff5d692a0c5dea0ad7cd10940c743689c7b58fe62a4cb1c5a3"
+            },
+            "caps": {
+              "bytes": 4531,
+              "gzipBytes": 1511,
+              "sha256": "fb1fd11cfb3eb8d4ccc2ab3deef010bf9eb7765d98e7112a41733eaab23aca9a"
+            },
+            "both": {
+              "bytes": 15185,
+              "gzipBytes": 5378,
+              "sha256": "0570df43991b665de185090357335ff69042e72d126d34cad9fb9c7be8a1b054"
+            },
+            "outline": {
+              "bytes": 2982,
+              "gzipBytes": 1483,
+              "sha256": "81750d334037df64c0e74897fc5afb0d349a59c88fa83c09e9928259904a604e"
+            },
+            "filled": {
+              "bytes": 1690,
+              "gzipBytes": 889,
+              "sha256": "4c72437af5aa99b80f8290ae94bda6ad4ba26181cfea4034f4ac75f28df42ee9"
+            }
+          },
+          "alternatives": {
+            "caps": {
+              "module": {
+                "bytes": 15769,
+                "gzipBytes": 4534,
+                "sha256": "d555f5858db262e811154bf5250ff6cbc87802441e0a7d8cb40ae439bb0f04e3"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 12459,
+                  "gzipBytes": 4812,
+                  "sha256": "9f9534dcbd0dac8b01f898dd89c6892be29402bec0f65971f6c6a3564c9abd0e"
+                },
+                "caps": {
+                  "bytes": 3404,
+                  "gzipBytes": 1512,
+                  "sha256": "150c207f90c362b1dd43bd8c8c8986aee491b7e6e5e2e49afc54b822445c57ad"
+                },
+                "both": {
+                  "bytes": 14058,
+                  "gzipBytes": 5402,
+                  "sha256": "422cf184e5bcab337cf5481b4e89a9a4fff7d8b3415859d91283b44aeb540478"
+                },
+                "outline": {
+                  "bytes": 2982,
+                  "gzipBytes": 1483,
+                  "sha256": "81750d334037df64c0e74897fc5afb0d349a59c88fa83c09e9928259904a604e"
+                },
+                "filled": {
+                  "bytes": 1690,
+                  "gzipBytes": 889,
+                  "sha256": "4c72437af5aa99b80f8290ae94bda6ad4ba26181cfea4034f4ac75f28df42ee9"
+                }
+              },
+              "regressions": [
+                "caps",
+                "both"
+              ]
+            },
+            "capsIdentifiers": {
+              "module": {
+                "bytes": 15771,
+                "gzipBytes": 4545,
+                "sha256": "1f4f531c7219c0cd8aa5be1272bebae673492af5c101e7fdc36fd1b1c7afbfb0"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 12459,
+                  "gzipBytes": 4811,
+                  "sha256": "33ef5352ecd1bf0cf2e5b0a7662bac04468e7d800efd61c6eff518c3beccc982"
+                },
+                "caps": {
+                  "bytes": 3404,
+                  "gzipBytes": 1512,
+                  "sha256": "765011bdc1cb805e92238aa7ad95d094b043f95b0c8fcb373a5c611147912806"
+                },
+                "both": {
+                  "bytes": 14058,
+                  "gzipBytes": 5401,
+                  "sha256": "a11f0b20f8a516147bd465e335b657c2fd5e568f76bf9e71de3b7b75191cc412"
+                },
+                "outline": {
+                  "bytes": 2982,
+                  "gzipBytes": 1483,
+                  "sha256": "7a30df027afaa65a7b6811fa570453be1c58472fe7f9dca57e2c87e0ab7b8ef3"
+                },
+                "filled": {
+                  "bytes": 1690,
+                  "gzipBytes": 889,
+                  "sha256": "8882390c536b5c17838bc2f6ee8798a44604ef38d77125904650195a24e1be9d"
+                }
+              },
+              "regressions": [
+                "caps",
+                "both"
+              ]
+            },
+            "receipts": {
+              "module": {
+                "bytes": 16447,
+                "gzipBytes": 4521,
+                "sha256": "1b7c6c6ce9748891354f810b4735fd6aeda87a788707debe5eb43d65422f76a5"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 12305,
+                  "gzipBytes": 4846,
+                  "sha256": "3034b2a1d9e324d55f67f6e483523f6bcd6def632d559719c259e5229870e16c"
+                },
+                "caps": {
+                  "bytes": 4377,
+                  "gzipBytes": 1539,
+                  "sha256": "fbc92410159998443cdaf121a4abbb18aee3904a3877296508e0630b8687820c"
+                },
+                "both": {
+                  "bytes": 15031,
+                  "gzipBytes": 5409,
+                  "sha256": "7ece1c8914c440cee1681fd76abd99e22b33f5b369cf6c8321c68179b8aa6ad5"
+                },
+                "outline": {
+                  "bytes": 2982,
+                  "gzipBytes": 1483,
+                  "sha256": "81750d334037df64c0e74897fc5afb0d349a59c88fa83c09e9928259904a604e"
+                },
+                "filled": {
+                  "bytes": 1690,
+                  "gzipBytes": 889,
+                  "sha256": "4c72437af5aa99b80f8290ae94bda6ad4ba26181cfea4034f4ac75f28df42ee9"
+                }
+              },
+              "regressions": [
+                "glyph",
+                "caps",
+                "both"
+              ]
+            },
+            "receiptsIdentifiers": {
+              "module": {
+                "bytes": 16531,
+                "gzipBytes": 4538,
+                "sha256": "00947a07f74cdd1d634188ecb15d5833d5bb3b7c7032e79c9ae5987058ccd956"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 12305,
+                  "gzipBytes": 4846,
+                  "sha256": "e2b9662c01c2890741ea9fe6756b3347252e4b335261b91891f0cfc2086945a8"
+                },
+                "caps": {
+                  "bytes": 4377,
+                  "gzipBytes": 1539,
+                  "sha256": "17364e668ec0eb804e4e3fe8d82112fbeebf33f1954f32d4e626ef52479b133f"
+                },
+                "both": {
+                  "bytes": 15031,
+                  "gzipBytes": 5409,
+                  "sha256": "bfeeb0ce4b3af247fede24578c2b947dbc64df6e2b55185559011445d8370bb9"
+                },
+                "outline": {
+                  "bytes": 2982,
+                  "gzipBytes": 1483,
+                  "sha256": "81750d334037df64c0e74897fc5afb0d349a59c88fa83c09e9928259904a604e"
+                },
+                "filled": {
+                  "bytes": 1690,
+                  "gzipBytes": 889,
+                  "sha256": "4c72437af5aa99b80f8290ae94bda6ad4ba26181cfea4034f4ac75f28df42ee9"
+                }
+              },
+              "regressions": [
+                "glyph",
+                "caps",
+                "both"
+              ]
+            },
+            "parts": {
+              "module": {
+                "bytes": 15653,
+                "gzipBytes": 4491,
+                "sha256": "087b953bfb848fc41c73fcb5a42614ec1656dc865779c066b7794d47eb63a64d"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 11513,
+                  "gzipBytes": 4821,
+                  "sha256": "98dfcce0ddc829888e911a66e471b53254a81b82a0f3acf30c2fe07b4c28bded"
+                },
+                "caps": {
+                  "bytes": 4531,
+                  "gzipBytes": 1512,
+                  "sha256": "56319fc87c146d4970e433e0e895cda3426748ec0743eaefd03dbe78ab38325b"
+                },
+                "both": {
+                  "bytes": 14239,
+                  "gzipBytes": 5392,
+                  "sha256": "5dd42cd7178c3181fc17bcbe339858b98aac9c7444ce4de0400889ca5357759a"
+                },
+                "outline": {
+                  "bytes": 2982,
+                  "gzipBytes": 1483,
+                  "sha256": "e06563e9a6e66f8fd423219676ef22ea01aa57886d3d13a60e3b181a05709fd1"
+                },
+                "filled": {
+                  "bytes": 1690,
+                  "gzipBytes": 889,
+                  "sha256": "1809a8930e0aa30c4bad4ae9f1f13abf34ed693328d7599c42b8d050e569c209"
+                }
+              },
+              "regressions": [
+                "glyph",
+                "caps",
+                "both"
+              ]
+            },
+            "partsIdentifiers": {
+              "module": {
+                "bytes": 15661,
+                "gzipBytes": 4516,
+                "sha256": "3d108cd90e001473f9432caca925ef4685855597c66044942654dec40660a80f"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 11513,
+                  "gzipBytes": 4821,
+                  "sha256": "69665f526792b9b475dcf677c69488d219e1b5e15504520780f41aa21e091398"
+                },
+                "caps": {
+                  "bytes": 4531,
+                  "gzipBytes": 1512,
+                  "sha256": "6a71e2fb4f6040a06c6792289fb6daea307d8ff1a7eb4a9a1ec576542258b8f9"
+                },
+                "both": {
+                  "bytes": 14239,
+                  "gzipBytes": 5392,
+                  "sha256": "6520dcbe462930ee1cb3800faec331b7ed1b123d2101d37f1b27dc4f3db378b6"
+                },
+                "outline": {
+                  "bytes": 2982,
+                  "gzipBytes": 1483,
+                  "sha256": "e06563e9a6e66f8fd423219676ef22ea01aa57886d3d13a60e3b181a05709fd1"
+                },
+                "filled": {
+                  "bytes": 1690,
+                  "gzipBytes": 889,
+                  "sha256": "1809a8930e0aa30c4bad4ae9f1f13abf34ed693328d7599c42b8d050e569c209"
+                }
+              },
+              "regressions": [
+                "glyph",
+                "caps",
+                "both"
+              ]
+            },
+            "sourceAndParts": {
+              "module": {
+                "bytes": 15613,
+                "gzipBytes": 4522,
+                "sha256": "6597f99b3658c646b4b6845d0715d2d9e5efaee2899f97bd31b82be626e42c6f"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 11418,
+                  "gzipBytes": 4820,
+                  "sha256": "9f40cfb5a68ead1f9fa4c010fb4da202a958595dcbc8cb6a408a1b0a86a72c07"
+                },
+                "caps": {
+                  "bytes": 4531,
+                  "gzipBytes": 1512,
+                  "sha256": "7948a4cc6faa1ee44a5273e24cf1efc5393f1b3cd5782d81775f712a12868a3c"
+                },
+                "both": {
+                  "bytes": 14144,
+                  "gzipBytes": 5411,
+                  "sha256": "499d8d40f7c6ef084eb0c68f05107a7d0b143b80686da12748a13bfa18b3b0ea"
+                },
+                "outline": {
+                  "bytes": 2982,
+                  "gzipBytes": 1483,
+                  "sha256": "e06563e9a6e66f8fd423219676ef22ea01aa57886d3d13a60e3b181a05709fd1"
+                },
+                "filled": {
+                  "bytes": 1690,
+                  "gzipBytes": 889,
+                  "sha256": "1809a8930e0aa30c4bad4ae9f1f13abf34ed693328d7599c42b8d050e569c209"
+                }
+              },
+              "regressions": [
+                "glyph",
+                "caps",
+                "both"
+              ]
+            },
+            "sourceAndPartsIdentifiers": {
+              "module": {
+                "bytes": 15593,
+                "gzipBytes": 4538,
+                "sha256": "a4f91c64023f9fc99bb35a99997956ddd4967f1a29cce9e4b37035717d7ebf24"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 11418,
+                  "gzipBytes": 4821,
+                  "sha256": "6d9caad328562e37de116623f260218dd99e5a38d2b670f2f43602d74118f0f4"
+                },
+                "caps": {
+                  "bytes": 4531,
+                  "gzipBytes": 1512,
+                  "sha256": "6a71e2fb4f6040a06c6792289fb6daea307d8ff1a7eb4a9a1ec576542258b8f9"
+                },
+                "both": {
+                  "bytes": 14144,
+                  "gzipBytes": 5410,
+                  "sha256": "a6b5ddeff1d2c9a9b8145b2696e61d474fbbadcddca9185737c68bbc414b0e2f"
+                },
+                "outline": {
+                  "bytes": 2982,
+                  "gzipBytes": 1483,
+                  "sha256": "e06563e9a6e66f8fd423219676ef22ea01aa57886d3d13a60e3b181a05709fd1"
+                },
+                "filled": {
+                  "bytes": 1690,
+                  "gzipBytes": 889,
+                  "sha256": "1809a8930e0aa30c4bad4ae9f1f13abf34ed693328d7599c42b8d050e569c209"
+                }
+              },
+              "regressions": [
+                "glyph",
+                "caps",
+                "both"
+              ]
+            },
+            "all": {
+              "module": {
+                "bytes": 14815,
+                "gzipBytes": 4552,
+                "sha256": "713f89c678a3cb1eae0ba1c5a2aacaf202269720dd2bb2c3943cf5b5caad5414"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 11268,
+                  "gzipBytes": 4847,
+                  "sha256": "433fb96840d4c113fc3cfecbe1a47839d35fa9e31ad406136055c61f2681d5e6"
+                },
+                "caps": {
+                  "bytes": 3254,
+                  "gzipBytes": 1532,
+                  "sha256": "e7b99c3edeebff4c6b6d6a8f036c0b5044ec94db6bfd0b5a7ffcfb2f90e44b17"
+                },
+                "both": {
+                  "bytes": 12863,
+                  "gzipBytes": 5417,
+                  "sha256": "f72125b68d011df8bf9d32c0d5c6ca005e0903e700f2226d646dacede439a9f5"
+                },
+                "outline": {
+                  "bytes": 2982,
+                  "gzipBytes": 1483,
+                  "sha256": "cf0a2f34496d7f468d9972f87815436639c00e20fb2e9deadc8e10d5fec2ee68"
+                },
+                "filled": {
+                  "bytes": 1690,
+                  "gzipBytes": 889,
+                  "sha256": "3aea1edd8f7b6a7705c7106748e7c053a9fb8558d3cc685158265fc60edc077e"
+                }
+              },
+              "regressions": [
+                "glyph",
+                "caps",
+                "both"
+              ]
+            },
+            "allIdentifiers": {
+              "module": {
+                "bytes": 14681,
+                "gzipBytes": 4570,
+                "sha256": "6fb2e9600ec6a1c3fc22281eb5681ff4f4b4ed9e3ac871416edf02e6de6890e2"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 11268,
+                  "gzipBytes": 4847,
+                  "sha256": "e27284f37570259f72176e4901d20c333e71ebf14fdd4ac6722902f60e0fbdf1"
+                },
+                "caps": {
+                  "bytes": 3254,
+                  "gzipBytes": 1532,
+                  "sha256": "7e39a1eef6d1ffab1f39b2d8818bad321da10e659317fdec368df87560bbc8f6"
+                },
+                "both": {
+                  "bytes": 12863,
+                  "gzipBytes": 5418,
+                  "sha256": "09041aa3c5d9a36476766fab7eb8f6d9f6c753d6d72ec047d3d66ce8f5228daf"
+                },
+                "outline": {
+                  "bytes": 2982,
+                  "gzipBytes": 1483,
+                  "sha256": "cf0a2f34496d7f468d9972f87815436639c00e20fb2e9deadc8e10d5fec2ee68"
+                },
+                "filled": {
+                  "bytes": 1690,
+                  "gzipBytes": 889,
+                  "sha256": "3aea1edd8f7b6a7705c7106748e7c053a9fb8558d3cc685158265fc60edc077e"
+                }
+              },
+              "regressions": [
+                "glyph",
+                "caps",
+                "both"
+              ]
+            },
+            "slices": {
+              "module": {
+                "bytes": 12411,
+                "gzipBytes": 4450,
+                "sha256": "8c222fb0de6538f2d7c4c1350a1f1f81721ee2b2fae8e99780eab26a45b997c2"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 12847,
+                  "gzipBytes": 4910,
+                  "sha256": "6f06b4da1b855dd0128f94f48647c29d3dd8b6f5c164c0d6f01b787ff8a97398"
+                },
+                "caps": {
+                  "bytes": 4531,
+                  "gzipBytes": 1511,
+                  "sha256": "f4c5330c2cc933803570c148044a3f2babd1a6f1db4d491b5fb864d9099f8e19"
+                },
+                "both": {
+                  "bytes": 15573,
+                  "gzipBytes": 5476,
+                  "sha256": "537e026c14ba909dc9dc07cb922ca9fac0ddc3d79c920b4c5fb3d487c5b483d0"
+                },
+                "outline": {
+                  "bytes": 2982,
+                  "gzipBytes": 1483,
+                  "sha256": "f42eefa4ff5227f19cac80a27b8240f6aada8a91ba0470cefaaa758b38218eea"
+                },
+                "filled": {
+                  "bytes": 1690,
+                  "gzipBytes": 889,
+                  "sha256": "36ec7e43014743579ea7c4b73e46202523667458f904c68f001762dc78529291"
+                }
+              },
+              "regressions": [
+                "glyph",
+                "both"
+              ]
+            },
+            "slicesIdentifiers": {
+              "module": {
+                "bytes": 12501,
+                "gzipBytes": 4465,
+                "sha256": "a26e709699557165ee9bd833c13a6965b6c09dfb1697b331fc033f4cf62047d3"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 12847,
+                  "gzipBytes": 4911,
+                  "sha256": "c5e30de0d562f686e53822756b1a84c3ed2cb5f0fe113050b8f4b4aeafcade15"
+                },
+                "caps": {
+                  "bytes": 4531,
+                  "gzipBytes": 1511,
+                  "sha256": "629243a257f6c33cce8aeced23b45038546d1b5ca5cbcd9405253a1de7998da2"
+                },
+                "both": {
+                  "bytes": 15573,
+                  "gzipBytes": 5476,
+                  "sha256": "8b15c8721f09472e4f0135c2c9f63a62f47642c714f1d09bb375c572822e5ac0"
+                },
+                "outline": {
+                  "bytes": 2982,
+                  "gzipBytes": 1483,
+                  "sha256": "f42eefa4ff5227f19cac80a27b8240f6aada8a91ba0470cefaaa758b38218eea"
+                },
+                "filled": {
+                  "bytes": 1690,
+                  "gzipBytes": 889,
+                  "sha256": "36ec7e43014743579ea7c4b73e46202523667458f904c68f001762dc78529291"
+                }
+              },
+              "regressions": [
+                "glyph",
+                "both"
+              ]
+            },
+            "slicesParts": {
+              "module": {
+                "bytes": 11557,
+                "gzipBytes": 4469,
+                "sha256": "9fe7a44c570210d26b5e8e787b4681545f84a11a34244f809656d3b6ff24044d"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 11901,
+                  "gzipBytes": 4917,
+                  "sha256": "b43020c3bc89e636ad8d616b3629777894732c17512983ec9e7b453567622c9d"
+                },
+                "caps": {
+                  "bytes": 4531,
+                  "gzipBytes": 1511,
+                  "sha256": "53e7611acb9a9f1a18a286e29282306477cfadd1f5986124e1196d650d38f993"
+                },
+                "both": {
+                  "bytes": 14627,
+                  "gzipBytes": 5487,
+                  "sha256": "53fee874188b64ca6ce08e3250e591c4125fc81432ab8ea155e3b74f87f63570"
+                },
+                "outline": {
+                  "bytes": 2982,
+                  "gzipBytes": 1483,
+                  "sha256": "ccb4f6071b0807851e45efde246400170dc67e230cff755833a7784c241176e1"
+                },
+                "filled": {
+                  "bytes": 1690,
+                  "gzipBytes": 890,
+                  "sha256": "00b91899cd47613ed50d0608d58e13d4061a16b37a1103fefd34f285aa765998"
+                }
+              },
+              "regressions": [
+                "glyph",
+                "both",
+                "filled"
+              ]
+            },
+            "slicesPartsIdentifiers": {
+              "module": {
+                "bytes": 11555,
+                "gzipBytes": 4495,
+                "sha256": "6d377b047505c5b07ac44fd12513c3fde727e2edca3c31b49f6928de329a3d5a"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 11901,
+                  "gzipBytes": 4917,
+                  "sha256": "4c1ae483047bc34b3d4eb7753d96e5baa9b5eb706f9ae8539886c226bba183dc"
+                },
+                "caps": {
+                  "bytes": 4531,
+                  "gzipBytes": 1511,
+                  "sha256": "260476bded0b09c096ad41bda5b929fb86951f0c5fea2e8f08f41b97a5dec6b1"
+                },
+                "both": {
+                  "bytes": 14627,
+                  "gzipBytes": 5487,
+                  "sha256": "78919c7151a24848a18ceee8585d10c095bf7c1ffc8a52d9a09a32842ff4f8b7"
+                },
+                "outline": {
+                  "bytes": 2982,
+                  "gzipBytes": 1483,
+                  "sha256": "ccb4f6071b0807851e45efde246400170dc67e230cff755833a7784c241176e1"
+                },
+                "filled": {
+                  "bytes": 1690,
+                  "gzipBytes": 890,
+                  "sha256": "00b91899cd47613ed50d0608d58e13d4061a16b37a1103fefd34f285aa765998"
+                }
+              },
+              "regressions": [
+                "glyph",
+                "both",
+                "filled"
+              ]
+            },
+            "slicesAll": {
+              "module": {
+                "bytes": 10719,
+                "gzipBytes": 4522,
+                "sha256": "5de9deceaae6fbc1af6d8f8472270252636cb49346fc54eda342a563c86a85f8"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 11656,
+                  "gzipBytes": 4942,
+                  "sha256": "3e5e47f105e72e965bb3c885290d445cbcc43b0f0f082829504c8be26bd02fa5"
+                },
+                "caps": {
+                  "bytes": 3254,
+                  "gzipBytes": 1532,
+                  "sha256": "c53fa81808ba71ed1269d94a18a797e842e34065c05fbf43548c6404b1ac2eec"
+                },
+                "both": {
+                  "bytes": 13251,
+                  "gzipBytes": 5508,
+                  "sha256": "fbdf589a45310da272746337af74784864d8ab0d63307a20f22d489326041c85"
+                },
+                "outline": {
+                  "bytes": 2982,
+                  "gzipBytes": 1483,
+                  "sha256": "81750d334037df64c0e74897fc5afb0d349a59c88fa83c09e9928259904a604e"
+                },
+                "filled": {
+                  "bytes": 1690,
+                  "gzipBytes": 889,
+                  "sha256": "4c72437af5aa99b80f8290ae94bda6ad4ba26181cfea4034f4ac75f28df42ee9"
+                }
+              },
+              "regressions": [
+                "glyph",
+                "caps",
+                "both"
+              ]
+            },
+            "slicesAllIdentifiers": {
+              "module": {
+                "bytes": 10575,
+                "gzipBytes": 4544,
+                "sha256": "63c23ec9a56f3ae2fda19c043d394b36714bb0d030f77a015ba0342d7b36feaa"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 11656,
+                  "gzipBytes": 4943,
+                  "sha256": "2a91d18dafce6bd6c51c25166dd5aeb07711ac07a6f2557a18092a45355b5cae"
+                },
+                "caps": {
+                  "bytes": 3254,
+                  "gzipBytes": 1532,
+                  "sha256": "0b8fe86a1134511cf94ef4a9134708f736456162b6c739ace4caa780e2e884fa"
+                },
+                "both": {
+                  "bytes": 13251,
+                  "gzipBytes": 5510,
+                  "sha256": "f2aed793986ab71fefb046f922cec9fe98358f8b6f7bb37ab62b04ea31388c6f"
+                },
+                "outline": {
+                  "bytes": 2982,
+                  "gzipBytes": 1483,
+                  "sha256": "81750d334037df64c0e74897fc5afb0d349a59c88fa83c09e9928259904a604e"
+                },
+                "filled": {
+                  "bytes": 1690,
+                  "gzipBytes": 889,
+                  "sha256": "4c72437af5aa99b80f8290ae94bda6ad4ba26181cfea4034f4ac75f28df42ee9"
+                }
+              },
+              "regressions": [
+                "glyph",
+                "caps",
+                "both"
+              ]
+            },
+            "partProvenance": {
+              "module": {
+                "bytes": 15965,
+                "gzipBytes": 4502,
+                "sha256": "6539207d4e2f79daef80b2ef9c8bf47a00e2f527b8f14a6ef83912582fcb92be"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 11725,
+                  "gzipBytes": 4818,
+                  "sha256": "550539dfa6bf9b82a7f1480a34efdc43a52ee65501fc69e5977efc4fc9acfaad"
+                },
+                "caps": {
+                  "bytes": 4531,
+                  "gzipBytes": 1511,
+                  "sha256": "625293c524e02f140353d782907d159180215816c9b6d94c49e4576d143ee3ac"
+                },
+                "both": {
+                  "bytes": 14451,
+                  "gzipBytes": 5379,
+                  "sha256": "2d6226dc0bdd983a204453ba1ee616ef605e36c6c05cda53b475211b854666d2"
+                },
+                "outline": {
+                  "bytes": 2982,
+                  "gzipBytes": 1483,
+                  "sha256": "81750d334037df64c0e74897fc5afb0d349a59c88fa83c09e9928259904a604e"
+                },
+                "filled": {
+                  "bytes": 1690,
+                  "gzipBytes": 889,
+                  "sha256": "4c72437af5aa99b80f8290ae94bda6ad4ba26181cfea4034f4ac75f28df42ee9"
+                }
+              },
+              "regressions": [
+                "glyph",
+                "both"
+              ]
+            },
+            "partProvenanceIdentifiers": {
+              "module": {
+                "bytes": 15938,
+                "gzipBytes": 4505,
+                "sha256": "0dcbb9d0b6ef0da98f48694f92413170f7c624251e810f09ef75b577d780e833"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 11725,
+                  "gzipBytes": 4820,
+                  "sha256": "088b106dc54b5ad53e0ab313c439263c79e03c7d3532a34daadc47912354cb10"
+                },
+                "caps": {
+                  "bytes": 4531,
+                  "gzipBytes": 1512,
+                  "sha256": "0d2712fc31e8a564c9349f8172dc95afda81de2bf472950a9365e210d9f28d6c"
+                },
+                "both": {
+                  "bytes": 14451,
+                  "gzipBytes": 5379,
+                  "sha256": "f7be7b482536f0c91a66a2a5bb5c9dbbf461912c62c487a41cfeb56115e6222b"
+                },
+                "outline": {
+                  "bytes": 2982,
+                  "gzipBytes": 1483,
+                  "sha256": "81750d334037df64c0e74897fc5afb0d349a59c88fa83c09e9928259904a604e"
+                },
+                "filled": {
+                  "bytes": 1690,
+                  "gzipBytes": 889,
+                  "sha256": "4c72437af5aa99b80f8290ae94bda6ad4ba26181cfea4034f4ac75f28df42ee9"
+                }
+              },
+              "regressions": [
+                "glyph",
+                "caps",
+                "both"
+              ]
+            },
+            "partProvenancePrefix": {
+              "module": {
+                "bytes": 15971,
+                "gzipBytes": 4522,
+                "sha256": "786bf8f31e328aa216d2d5a6e8eecad6d8340db7a52809e8d1a5b947d30c8c9e"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 11721,
+                  "gzipBytes": 4823,
+                  "sha256": "68f5eabc6e3197131c36ea3f5c90456ca51b398471e9a7c751ae278fe9ea95e3"
+                },
+                "caps": {
+                  "bytes": 4531,
+                  "gzipBytes": 1511,
+                  "sha256": "bbcd9e175dae423250a9023fa20075c9258c6dfe2c1fcbe30ff9bb54ee80bbe6"
+                },
+                "both": {
+                  "bytes": 14447,
+                  "gzipBytes": 5384,
+                  "sha256": "5ec6f141171de9fc3caab0876928340b89a451016eaca74b286c2dc2f848c790"
+                },
+                "outline": {
+                  "bytes": 2982,
+                  "gzipBytes": 1483,
+                  "sha256": "81750d334037df64c0e74897fc5afb0d349a59c88fa83c09e9928259904a604e"
+                },
+                "filled": {
+                  "bytes": 1690,
+                  "gzipBytes": 889,
+                  "sha256": "4c72437af5aa99b80f8290ae94bda6ad4ba26181cfea4034f4ac75f28df42ee9"
+                }
+              },
+              "regressions": [
+                "glyph",
+                "both"
+              ]
+            },
+            "partProvenancePrefixIdentifiers": {
+              "module": {
+                "bytes": 15949,
+                "gzipBytes": 4527,
+                "sha256": "221f001fd324845d89638499a947b6ac7217b78a6cd8d1088edad40b6fcf68c9"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 11721,
+                  "gzipBytes": 4823,
+                  "sha256": "ecb16125ecf5648fc6cee85c375f37f628daa28a54c07b4c9f42be6e72343191"
+                },
+                "caps": {
+                  "bytes": 4531,
+                  "gzipBytes": 1511,
+                  "sha256": "506c14426880eabeedb97e7a72c1ba5b3b354395b9a5a839a13dd42b2a23e772"
+                },
+                "both": {
+                  "bytes": 14447,
+                  "gzipBytes": 5384,
+                  "sha256": "6f7ba5a359a93491d6a85fd22f5d90a2aa38efb39b26d372775cbf9c5536e51e"
+                },
+                "outline": {
+                  "bytes": 2982,
+                  "gzipBytes": 1483,
+                  "sha256": "81750d334037df64c0e74897fc5afb0d349a59c88fa83c09e9928259904a604e"
+                },
+                "filled": {
+                  "bytes": 1690,
+                  "gzipBytes": 889,
+                  "sha256": "4c72437af5aa99b80f8290ae94bda6ad4ba26181cfea4034f4ac75f28df42ee9"
+                }
+              },
+              "regressions": [
+                "glyph",
+                "both"
+              ]
+            },
+            "partProvenanceParts": {
+              "module": {
+                "bytes": 15635,
+                "gzipBytes": 4548,
+                "sha256": "19dd68fcaca13b6de93b27acccb37cb5edb2b3f863a85f0780f902fcc322eb59"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 11306,
+                  "gzipBytes": 4835,
+                  "sha256": "f7a1a336755ebbe60d913e05e85b8be9f24d3f85941596c29ffd7974dc9b62bc"
+                },
+                "caps": {
+                  "bytes": 4531,
+                  "gzipBytes": 1512,
+                  "sha256": "587b94b5e8006188e97cae361a2d99fce91da46b0d36275a42030897120fdfb9"
+                },
+                "both": {
+                  "bytes": 14032,
+                  "gzipBytes": 5409,
+                  "sha256": "b2a1d813ae05c3c85ea2b79148dbb2f58c7ce21fb669ee387766a57140e5d242"
+                },
+                "outline": {
+                  "bytes": 2982,
+                  "gzipBytes": 1483,
+                  "sha256": "e06563e9a6e66f8fd423219676ef22ea01aa57886d3d13a60e3b181a05709fd1"
+                },
+                "filled": {
+                  "bytes": 1690,
+                  "gzipBytes": 889,
+                  "sha256": "1809a8930e0aa30c4bad4ae9f1f13abf34ed693328d7599c42b8d050e569c209"
+                }
+              },
+              "regressions": [
+                "glyph",
+                "caps",
+                "both"
+              ]
+            },
+            "partProvenancePartsIdentifiers": {
+              "module": {
+                "bytes": 15547,
+                "gzipBytes": 4547,
+                "sha256": "6bfe09be63b7a56862a3456b8819fd9e74ec92314bf6483e1420f6a55f1293a2"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 11306,
+                  "gzipBytes": 4836,
+                  "sha256": "c85ba3833af9d3c185e31ccca5c283888d051af76425e2173ab6f29b8c4e4f96"
+                },
+                "caps": {
+                  "bytes": 4531,
+                  "gzipBytes": 1512,
+                  "sha256": "74b47202de0782bc23d715db66c50482103037d57d7877241aa914c4ff10dff4"
+                },
+                "both": {
+                  "bytes": 14032,
+                  "gzipBytes": 5409,
+                  "sha256": "33e033ba5757c87327b5ac6a5642adf2c3536a35daef7e2d20647972552f81a4"
+                },
+                "outline": {
+                  "bytes": 2982,
+                  "gzipBytes": 1483,
+                  "sha256": "e06563e9a6e66f8fd423219676ef22ea01aa57886d3d13a60e3b181a05709fd1"
+                },
+                "filled": {
+                  "bytes": 1690,
+                  "gzipBytes": 889,
+                  "sha256": "1809a8930e0aa30c4bad4ae9f1f13abf34ed693328d7599c42b8d050e569c209"
+                }
+              },
+              "regressions": [
+                "glyph",
+                "caps",
+                "both"
+              ]
+            },
+            "partProvenancePrefixParts": {
+              "module": {
+                "bytes": 15641,
+                "gzipBytes": 4570,
+                "sha256": "d8ec48c8f71603d863e306d59981d3f7442e48dbc7494429049ab20946b65836"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 11302,
+                  "gzipBytes": 4841,
+                  "sha256": "cbe83ba9bee13abe66c510b657e8d6e8b2b89cc594d6de00719f21e6bd83a4c7"
+                },
+                "caps": {
+                  "bytes": 4531,
+                  "gzipBytes": 1512,
+                  "sha256": "589b166c732cb2ec92aaf834ff19320579ce217b83c4549e4db627a80fdf3fa7"
+                },
+                "both": {
+                  "bytes": 14028,
+                  "gzipBytes": 5415,
+                  "sha256": "985cf665cb8706d1f0bfc54fa75b26a552e53cbefa7cd3b1c19dc54a5a0f4119"
+                },
+                "outline": {
+                  "bytes": 2982,
+                  "gzipBytes": 1483,
+                  "sha256": "7a30df027afaa65a7b6811fa570453be1c58472fe7f9dca57e2c87e0ab7b8ef3"
+                },
+                "filled": {
+                  "bytes": 1690,
+                  "gzipBytes": 889,
+                  "sha256": "8882390c536b5c17838bc2f6ee8798a44604ef38d77125904650195a24e1be9d"
+                }
+              },
+              "regressions": [
+                "glyph",
+                "caps",
+                "both"
+              ]
+            },
+            "partProvenancePrefixPartsIdentifiers": {
+              "module": {
+                "bytes": 15558,
+                "gzipBytes": 4568,
+                "sha256": "33ca688f432dfe6336467141e7da3ddb3627f5400f79a9e15ed63385a832e052"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 11302,
+                  "gzipBytes": 4841,
+                  "sha256": "b4236f28cc3257c886f63bb020429b553599d435825dd36f34ca0bcde0743a85"
+                },
+                "caps": {
+                  "bytes": 4531,
+                  "gzipBytes": 1512,
+                  "sha256": "74b47202de0782bc23d715db66c50482103037d57d7877241aa914c4ff10dff4"
+                },
+                "both": {
+                  "bytes": 14028,
+                  "gzipBytes": 5415,
+                  "sha256": "08f87b1ebde67005428198bf70cd3459f31d0e48218cba50bc597fad26e9a2a1"
+                },
+                "outline": {
+                  "bytes": 2982,
+                  "gzipBytes": 1483,
+                  "sha256": "e06563e9a6e66f8fd423219676ef22ea01aa57886d3d13a60e3b181a05709fd1"
+                },
+                "filled": {
+                  "bytes": 1690,
+                  "gzipBytes": 889,
+                  "sha256": "1809a8930e0aa30c4bad4ae9f1f13abf34ed693328d7599c42b8d050e569c209"
+                }
+              },
+              "regressions": [
+                "glyph",
+                "caps",
+                "both"
+              ]
+            },
+            "omittedPartProvenance": {
+              "module": {
+                "bytes": 15309,
+                "gzipBytes": 4215,
+                "sha256": "b65977c1e3efd84c8cf7b90ab0b3ce4d41637b31c841c64bc57209c203c4511b"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 11261,
+                  "gzipBytes": 4559,
+                  "sha256": "c9576351bed26fced0f6b507d5c5fb13ca122916d1d8e8db411ccf8c7b3cf3d8"
+                },
+                "caps": {
+                  "bytes": 4531,
+                  "gzipBytes": 1512,
+                  "sha256": "e5ef0bb037c6cd81d2b20a8613ec3279c25625e93d3d7885dd93587782778349"
+                },
+                "both": {
+                  "bytes": 13987,
+                  "gzipBytes": 5118,
+                  "sha256": "31fd8de4cfdf98d84b96cbafd39cbd0bf65a6742d11985b6c1b56c11a6579b77"
+                },
+                "outline": {
+                  "bytes": 2982,
+                  "gzipBytes": 1483,
+                  "sha256": "81750d334037df64c0e74897fc5afb0d349a59c88fa83c09e9928259904a604e"
+                },
+                "filled": {
+                  "bytes": 1690,
+                  "gzipBytes": 889,
+                  "sha256": "4c72437af5aa99b80f8290ae94bda6ad4ba26181cfea4034f4ac75f28df42ee9"
+                }
+              },
+              "regressions": [
+                "caps"
+              ],
+              "candidate": false,
+              "semanticMismatches": [
+                "glyph",
+                "both"
+              ]
+            },
+            "omittedPartProvenanceIdentifiers": {
+              "module": {
+                "bytes": 15357,
+                "gzipBytes": 4234,
+                "sha256": "fcd51cd1bf43205081801231cd32a5c9e64372467403a83a6796215cd5c89a09"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 11261,
+                  "gzipBytes": 4560,
+                  "sha256": "67da60c81546a0559f8514608c164eb9934ecd6c6dda1cc27f363841fd574048"
+                },
+                "caps": {
+                  "bytes": 4531,
+                  "gzipBytes": 1512,
+                  "sha256": "3536481022fc18244c64d6a278d92220139a4ec34d0b8e17f79802596c5dbb37"
+                },
+                "both": {
+                  "bytes": 13987,
+                  "gzipBytes": 5124,
+                  "sha256": "a9722b2872d47420682a6ab380aef87ca8b4d48225645b87031b5f4108302e8f"
+                },
+                "outline": {
+                  "bytes": 2982,
+                  "gzipBytes": 1483,
+                  "sha256": "fe17d98453b5a7e1dc26ad8648194c9c77156eb0696d1514620daf5b694e8e93"
+                },
+                "filled": {
+                  "bytes": 1690,
+                  "gzipBytes": 889,
+                  "sha256": "f53b01aab5f43e85dadeb0b0c8248cb9f1f2d536001db700e07721e6ab28a3e5"
+                }
+              },
+              "regressions": [
+                "caps"
+              ],
+              "candidate": false,
+              "semanticMismatches": [
+                "glyph",
+                "both"
+              ]
+            }
+          }
+        },
+        {
+          "icon": "notifications-unread",
+          "baseline": {
+            "bytes": 21576,
+            "gzipBytes": 5463,
+            "sha256": "0aafd7e7f19c5ab9b56d1f4f688579f4b3c27bfe50c0f9c5664f882d4dc16d9b"
+          },
+          "baselineConsumers": {
+            "glyph": {
+              "bytes": 16101,
+              "gzipBytes": 5649,
+              "sha256": "3af071db7c53e19303a928aa3e6c2614815f263eaff30f11fc63d107ab324148"
+            },
+            "caps": {
+              "bytes": 4668,
+              "gzipBytes": 1529,
+              "sha256": "83e2e8002e17196ec0bfe54ecd83b08aa929e58d8a02c2e95b5c33585ccfbf70"
+            },
+            "both": {
+              "bytes": 18964,
+              "gzipBytes": 6230,
+              "sha256": "409129cf3e21071a84b815a555260cf54da096a3d93d49a0d162bdbc003a6dba"
+            },
+            "outline": {
+              "bytes": 3535,
+              "gzipBytes": 1716,
+              "sha256": "a973b04311d0322402d6252b57a43cec520b4cf7d9727518829eea9e3294d2bc"
+            },
+            "filled": {
+              "bytes": 2010,
+              "gzipBytes": 1029,
+              "sha256": "1d5a5ab5b9bac2567e33fa5c898f12dc5ec34e7a0f9d33ad481cb3db5c2646b0"
+            }
+          },
+          "alternatives": {
+            "caps": {
+              "module": {
+                "bytes": 20659,
+                "gzipBytes": 5414,
+                "sha256": "cac7652a1143435eb25caad00579c85e30d6f808778a87da00975e74f43dcc8f"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 16101,
+                  "gzipBytes": 5647,
+                  "sha256": "f7bb6d0b294adbf6ac07fe487975b858d6f29d6a5a7fee28823a12856524646c"
+                },
+                "caps": {
+                  "bytes": 3525,
+                  "gzipBytes": 1542,
+                  "sha256": "80a86425ee52f644295bc34a2cfbfc50b8c98dd5df3e89f1d3fded8a7c8209e5"
+                },
+                "both": {
+                  "bytes": 17821,
+                  "gzipBytes": 6265,
+                  "sha256": "8d4db61f989df29b5bd35391488d43698082dc2aafda111f9783057833f0b3c3"
+                },
+                "outline": {
+                  "bytes": 3535,
+                  "gzipBytes": 1716,
+                  "sha256": "a973b04311d0322402d6252b57a43cec520b4cf7d9727518829eea9e3294d2bc"
+                },
+                "filled": {
+                  "bytes": 2010,
+                  "gzipBytes": 1029,
+                  "sha256": "1d5a5ab5b9bac2567e33fa5c898f12dc5ec34e7a0f9d33ad481cb3db5c2646b0"
+                }
+              },
+              "regressions": [
+                "caps",
+                "both"
+              ]
+            },
+            "capsIdentifiers": {
+              "module": {
+                "bytes": 20645,
+                "gzipBytes": 5422,
+                "sha256": "6da389b8f7534623a3ef6bb95870b9c5205b973afd3aab5fe1a3ca4e8561de2c"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 16101,
+                  "gzipBytes": 5648,
+                  "sha256": "49e9a36a413043a30cf18ca8912a9298d5e504e3dec91e5877ae3912ff952f1c"
+                },
+                "caps": {
+                  "bytes": 3525,
+                  "gzipBytes": 1541,
+                  "sha256": "0f5f02f82d5c8cebeb30f68ff62b91aa73be779214a13caf0386a2e19a8c1405"
+                },
+                "both": {
+                  "bytes": 17821,
+                  "gzipBytes": 6266,
+                  "sha256": "990c965725058716f856c4994fa83c6942e5bab0c6d3aa083c4a554aa509e8f6"
+                },
+                "outline": {
+                  "bytes": 3535,
+                  "gzipBytes": 1716,
+                  "sha256": "a973b04311d0322402d6252b57a43cec520b4cf7d9727518829eea9e3294d2bc"
+                },
+                "filled": {
+                  "bytes": 2010,
+                  "gzipBytes": 1029,
+                  "sha256": "1d5a5ab5b9bac2567e33fa5c898f12dc5ec34e7a0f9d33ad481cb3db5c2646b0"
+                }
+              },
+              "regressions": [
+                "caps",
+                "both"
+              ]
+            },
+            "receipts": {
+              "module": {
+                "bytes": 21355,
+                "gzipBytes": 5392,
+                "sha256": "684d70f2761b4ff41410c2e5f9c1c98ccd8d182e94dc39ea2e707c95b952e6cf"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 15947,
+                  "gzipBytes": 5683,
+                  "sha256": "e6844638595503009240c1ed2a4722ba19490d90f56e7befce9eecabffc8317d"
+                },
+                "caps": {
+                  "bytes": 4514,
+                  "gzipBytes": 1561,
+                  "sha256": "17ee1d31d33b3c3e74df2f31c70712da905344bead048d417ec2b6ba5e451064"
+                },
+                "both": {
+                  "bytes": 18810,
+                  "gzipBytes": 6265,
+                  "sha256": "41a29d52cab235403f799dc367f86b15346276713c60dbd73168e3d043c36322"
+                },
+                "outline": {
+                  "bytes": 3535,
+                  "gzipBytes": 1716,
+                  "sha256": "a973b04311d0322402d6252b57a43cec520b4cf7d9727518829eea9e3294d2bc"
+                },
+                "filled": {
+                  "bytes": 2010,
+                  "gzipBytes": 1029,
+                  "sha256": "1d5a5ab5b9bac2567e33fa5c898f12dc5ec34e7a0f9d33ad481cb3db5c2646b0"
+                }
+              },
+              "regressions": [
+                "glyph",
+                "caps",
+                "both"
+              ]
+            },
+            "receiptsIdentifiers": {
+              "module": {
+                "bytes": 21420,
+                "gzipBytes": 5402,
+                "sha256": "a3ed037c06ad69c01f9962899b358709280ff384bd14d34f044af2228fb6c745"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 15947,
+                  "gzipBytes": 5683,
+                  "sha256": "67272ddf8a72058e7e7f58dd10bb05e13b3953c6ed89b8efa91a8be9e9689926"
+                },
+                "caps": {
+                  "bytes": 4514,
+                  "gzipBytes": 1561,
+                  "sha256": "d499d8fd00f3d3c142435240243daf381515f76d9275b3d20f932b5d970e1b20"
+                },
+                "both": {
+                  "bytes": 18810,
+                  "gzipBytes": 6264,
+                  "sha256": "5c0fee168ab0e587c196a6d8de78b31ab3192f52019e6781ba7c7c853152a478"
+                },
+                "outline": {
+                  "bytes": 3535,
+                  "gzipBytes": 1716,
+                  "sha256": "a973b04311d0322402d6252b57a43cec520b4cf7d9727518829eea9e3294d2bc"
+                },
+                "filled": {
+                  "bytes": 2010,
+                  "gzipBytes": 1029,
+                  "sha256": "1d5a5ab5b9bac2567e33fa5c898f12dc5ec34e7a0f9d33ad481cb3db5c2646b0"
+                }
+              },
+              "regressions": [
+                "glyph",
+                "caps",
+                "both"
+              ]
+            },
+            "parts": {
+              "module": {
+                "bytes": 19317,
+                "gzipBytes": 5310,
+                "sha256": "e30edde841fedc78567773de4475301856b813d558fc53879e0e4854e4f4e746"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 13849,
+                  "gzipBytes": 5598,
+                  "sha256": "42fb17a80ad57ce470cbfc5a68d2a940d41b8a06d75f468a19c55cd8fd0a23b8"
+                },
+                "caps": {
+                  "bytes": 4668,
+                  "gzipBytes": 1528,
+                  "sha256": "ecaa3e5a1542deec5c01ea72b41331bfc1b87a432d0354917bc98967717cb342"
+                },
+                "both": {
+                  "bytes": 16712,
+                  "gzipBytes": 6188,
+                  "sha256": "891c9beeb5e645c68fe0503c8f7dcef0fb48c5c76db10ba03385e285ae896de8"
+                },
+                "outline": {
+                  "bytes": 3535,
+                  "gzipBytes": 1716,
+                  "sha256": "56413933140246337e629b7f9740e187e0af6522a7300b780c5e4047d6bf016b"
+                },
+                "filled": {
+                  "bytes": 2010,
+                  "gzipBytes": 1029,
+                  "sha256": "4824e7c9887f5da7eb3a0bb54293eb0b2011bf02d947e5a69f50eae0a3c34bab"
+                }
+              },
+              "regressions": []
+            },
+            "partsIdentifiers": {
+              "module": {
+                "bytes": 19178,
+                "gzipBytes": 5328,
+                "sha256": "b8fdeacb61105acfc22a4ca1afa9e17a0f0a130111b919367398f1c51408deb6"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 13849,
+                  "gzipBytes": 5597,
+                  "sha256": "180dd58a9d6f59aefc01d548ad507d59d6c2c4103b093b2d4c085b46ff3a5666"
+                },
+                "caps": {
+                  "bytes": 4668,
+                  "gzipBytes": 1527,
+                  "sha256": "b91012451b6d4653cb02ad39dce4f0e6a00ef2a9b0b74ef9b9b819636150e0d3"
+                },
+                "both": {
+                  "bytes": 16712,
+                  "gzipBytes": 6187,
+                  "sha256": "554d1cb9260d2f64118c6e42fd035aa223546bc9e799429065449179bafd027b"
+                },
+                "outline": {
+                  "bytes": 3535,
+                  "gzipBytes": 1716,
+                  "sha256": "56413933140246337e629b7f9740e187e0af6522a7300b780c5e4047d6bf016b"
+                },
+                "filled": {
+                  "bytes": 2010,
+                  "gzipBytes": 1029,
+                  "sha256": "4824e7c9887f5da7eb3a0bb54293eb0b2011bf02d947e5a69f50eae0a3c34bab"
+                }
+              },
+              "regressions": []
+            },
+            "sourceAndParts": {
+              "module": {
+                "bytes": 19266,
+                "gzipBytes": 5338,
+                "sha256": "73d93448862b061f81d0f90b8fc69d2b660295aa26dc7aba8165cfe74cc01b1e"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 13745,
+                  "gzipBytes": 5605,
+                  "sha256": "099d8ab3f27ff92569d320e2a7c4289c42a716fc4ee1eb314e721970c8bf88de"
+                },
+                "caps": {
+                  "bytes": 4668,
+                  "gzipBytes": 1527,
+                  "sha256": "b91012451b6d4653cb02ad39dce4f0e6a00ef2a9b0b74ef9b9b819636150e0d3"
+                },
+                "both": {
+                  "bytes": 16608,
+                  "gzipBytes": 6210,
+                  "sha256": "f28ed3c7a6328a780ccd04dfa0fb9182b80b83dae87758613bbbe65521fed0c8"
+                },
+                "outline": {
+                  "bytes": 3535,
+                  "gzipBytes": 1716,
+                  "sha256": "56413933140246337e629b7f9740e187e0af6522a7300b780c5e4047d6bf016b"
+                },
+                "filled": {
+                  "bytes": 2010,
+                  "gzipBytes": 1029,
+                  "sha256": "4824e7c9887f5da7eb3a0bb54293eb0b2011bf02d947e5a69f50eae0a3c34bab"
+                }
+              },
+              "regressions": []
+            },
+            "sourceAndPartsIdentifiers": {
+              "module": {
+                "bytes": 19099,
+                "gzipBytes": 5359,
+                "sha256": "0f53201035647550dff887c4c9c130be676b1bf5016a6a69ba37620cc75802ef"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 13745,
+                  "gzipBytes": 5605,
+                  "sha256": "0ada7239c4cc31ac30bbaef8109b5051ffc4f18d60ac00a581590b1d5788e2da"
+                },
+                "caps": {
+                  "bytes": 4668,
+                  "gzipBytes": 1527,
+                  "sha256": "b91012451b6d4653cb02ad39dce4f0e6a00ef2a9b0b74ef9b9b819636150e0d3"
+                },
+                "both": {
+                  "bytes": 16608,
+                  "gzipBytes": 6210,
+                  "sha256": "bcca08347f981609789a5652db346250e5f55c2fb42b0236ae4be4da49f06d87"
+                },
+                "outline": {
+                  "bytes": 3535,
+                  "gzipBytes": 1716,
+                  "sha256": "56413933140246337e629b7f9740e187e0af6522a7300b780c5e4047d6bf016b"
+                },
+                "filled": {
+                  "bytes": 2010,
+                  "gzipBytes": 1029,
+                  "sha256": "4824e7c9887f5da7eb3a0bb54293eb0b2011bf02d947e5a69f50eae0a3c34bab"
+                }
+              },
+              "regressions": []
+            },
+            "all": {
+              "module": {
+                "bytes": 18450,
+                "gzipBytes": 5379,
+                "sha256": "18a829ae2219fa119c3f9266e6cae3ee3c6b5b8a02dd9529587577cd06aff5e0"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 13595,
+                  "gzipBytes": 5627,
+                  "sha256": "46d1abc1806565f0fb728254b6ce5848e01298e9ab94832b18843286ac02a43d"
+                },
+                "caps": {
+                  "bytes": 3375,
+                  "gzipBytes": 1565,
+                  "sha256": "434071efe6eac215983b5fb08fefc0e2d13598d5a6bd1dcc7083409f4ed22254"
+                },
+                "both": {
+                  "bytes": 15313,
+                  "gzipBytes": 6212,
+                  "sha256": "425c4291299e1838195e2fddf92e957f81481c5bd2573785e8830896d7cd7b5e"
+                },
+                "outline": {
+                  "bytes": 3535,
+                  "gzipBytes": 1716,
+                  "sha256": "56413933140246337e629b7f9740e187e0af6522a7300b780c5e4047d6bf016b"
+                },
+                "filled": {
+                  "bytes": 2010,
+                  "gzipBytes": 1029,
+                  "sha256": "4824e7c9887f5da7eb3a0bb54293eb0b2011bf02d947e5a69f50eae0a3c34bab"
+                }
+              },
+              "regressions": [
+                "caps"
+              ]
+            },
+            "allIdentifiers": {
+              "module": {
+                "bytes": 18169,
+                "gzipBytes": 5412,
+                "sha256": "184c70c65b7a80586d829149f562bb3a6faa8eef801d210d1de341e9d5bca72f"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 13595,
+                  "gzipBytes": 5627,
+                  "sha256": "d46c016f1f7bfd548b0ee49080eb17aceea54f5904b4b8d3e0fb9dc8cfc1313b"
+                },
+                "caps": {
+                  "bytes": 3375,
+                  "gzipBytes": 1565,
+                  "sha256": "20575a25981854f4ef2fb4c3bdd507e73f841752d355faa5595d9e8c95dff674"
+                },
+                "both": {
+                  "bytes": 15313,
+                  "gzipBytes": 6211,
+                  "sha256": "e9d56e14abe4df3a953345145d2764de374422e404d2e4d4d639fd2f21b7637b"
+                },
+                "outline": {
+                  "bytes": 3535,
+                  "gzipBytes": 1716,
+                  "sha256": "56413933140246337e629b7f9740e187e0af6522a7300b780c5e4047d6bf016b"
+                },
+                "filled": {
+                  "bytes": 2010,
+                  "gzipBytes": 1029,
+                  "sha256": "4824e7c9887f5da7eb3a0bb54293eb0b2011bf02d947e5a69f50eae0a3c34bab"
+                }
+              },
+              "regressions": [
+                "caps"
+              ]
+            },
+            "slices": {
+              "module": {
+                "bytes": 16641,
+                "gzipBytes": 5325,
+                "sha256": "b705e9fe2f0661cd6da7985755abaac713848823519fd17ec40620ce91305fb0"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 16565,
+                  "gzipBytes": 5765,
+                  "sha256": "1bc6070c23d656fd62988becb4ccc367cca07e44bb29fd6b352cfe467229e7b5"
+                },
+                "caps": {
+                  "bytes": 4668,
+                  "gzipBytes": 1526,
+                  "sha256": "1b14fbe291c73c755cf49ea6580b3f3eb9206fb13f396043b1748d48a56e39a7"
+                },
+                "both": {
+                  "bytes": 19428,
+                  "gzipBytes": 6357,
+                  "sha256": "191e9134cf0e79dd23aef3bebb44167d1f966280bca512fb47683c5dc8a110c5"
+                },
+                "outline": {
+                  "bytes": 3535,
+                  "gzipBytes": 1716,
+                  "sha256": "a973b04311d0322402d6252b57a43cec520b4cf7d9727518829eea9e3294d2bc"
+                },
+                "filled": {
+                  "bytes": 2010,
+                  "gzipBytes": 1029,
+                  "sha256": "1d5a5ab5b9bac2567e33fa5c898f12dc5ec34e7a0f9d33ad481cb3db5c2646b0"
+                }
+              },
+              "regressions": [
+                "glyph",
+                "both"
+              ]
+            },
+            "slicesIdentifiers": {
+              "module": {
+                "bytes": 16701,
+                "gzipBytes": 5342,
+                "sha256": "5eacac617fef0c1a3af09ce23ba2af568668879a22839b5a72701fa322c7cfad"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 16565,
+                  "gzipBytes": 5765,
+                  "sha256": "ef2e5c3173c2691e6bbd5f6999e15b17ad27fbef452a25c29e7b14a465b3a9c5"
+                },
+                "caps": {
+                  "bytes": 4668,
+                  "gzipBytes": 1526,
+                  "sha256": "1b14fbe291c73c755cf49ea6580b3f3eb9206fb13f396043b1748d48a56e39a7"
+                },
+                "both": {
+                  "bytes": 19428,
+                  "gzipBytes": 6357,
+                  "sha256": "b6b1ae6a39e6d051884f27f4bc8789326bc7987d4b4dd24291eea2a9dd91bc02"
+                },
+                "outline": {
+                  "bytes": 3535,
+                  "gzipBytes": 1716,
+                  "sha256": "a973b04311d0322402d6252b57a43cec520b4cf7d9727518829eea9e3294d2bc"
+                },
+                "filled": {
+                  "bytes": 2010,
+                  "gzipBytes": 1029,
+                  "sha256": "1d5a5ab5b9bac2567e33fa5c898f12dc5ec34e7a0f9d33ad481cb3db5c2646b0"
+                }
+              },
+              "regressions": [
+                "glyph",
+                "both"
+              ]
+            },
+            "slicesParts": {
+              "module": {
+                "bytes": 14543,
+                "gzipBytes": 5289,
+                "sha256": "d9deae8509aaf5158cd1f8dfbab7b8d94b7635a4929877b3d4fe9d8b6a0b07de"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 14313,
+                  "gzipBytes": 5719,
+                  "sha256": "46b60870a93585ceea99c6db7e56d2a8f83b37640d37df94af550c2042e59949"
+                },
+                "caps": {
+                  "bytes": 4668,
+                  "gzipBytes": 1526,
+                  "sha256": "9dcbe4469dc00055766df019c1042a1f8a1c6abc7038976b6c2586b052da1de5"
+                },
+                "both": {
+                  "bytes": 17176,
+                  "gzipBytes": 6309,
+                  "sha256": "86765af48ef7d34db765ecbfaaec2cacb41643db89d8622b30d11c586938b028"
+                },
+                "outline": {
+                  "bytes": 3535,
+                  "gzipBytes": 1716,
+                  "sha256": "baf9d7274e2c82fbe5fb548485f1e17f67e0f55a7a5fc679fb2c8b7254182f61"
+                },
+                "filled": {
+                  "bytes": 2010,
+                  "gzipBytes": 1030,
+                  "sha256": "fbb910f0348eed949c67b9f5e8ff0b9da739c4a238ee5d035b88a0be886d3afa"
+                }
+              },
+              "regressions": [
+                "glyph",
+                "both",
+                "filled"
+              ]
+            },
+            "slicesPartsIdentifiers": {
+              "module": {
+                "bytes": 14383,
+                "gzipBytes": 5317,
+                "sha256": "49e78ac44d54518880e61b0008ce3885c8694d6e8e49960984f92eb1c12c4979"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 14313,
+                  "gzipBytes": 5718,
+                  "sha256": "f43d4d193492c6454a4cf4f7ebf15d2885e578520cd59c008e78684b8ade78fc"
+                },
+                "caps": {
+                  "bytes": 4668,
+                  "gzipBytes": 1527,
+                  "sha256": "bb2bc545609e8a907824049e2d0abce628bedc99d05df79b841b6a8b37d5b9f7"
+                },
+                "both": {
+                  "bytes": 17176,
+                  "gzipBytes": 6309,
+                  "sha256": "565bfc1cc70de93b735370b00342b81298ec2211bafa137a070ed90318c3e859"
+                },
+                "outline": {
+                  "bytes": 3535,
+                  "gzipBytes": 1716,
+                  "sha256": "baf9d7274e2c82fbe5fb548485f1e17f67e0f55a7a5fc679fb2c8b7254182f61"
+                },
+                "filled": {
+                  "bytes": 2010,
+                  "gzipBytes": 1030,
+                  "sha256": "fbb910f0348eed949c67b9f5e8ff0b9da739c4a238ee5d035b88a0be886d3afa"
+                }
+              },
+              "regressions": [
+                "glyph",
+                "both",
+                "filled"
+              ]
+            },
+            "slicesAll": {
+              "module": {
+                "bytes": 13676,
+                "gzipBytes": 5358,
+                "sha256": "96b7639656423b7320ffc36f0fb531ca3299c2d2cb4a78fe1f545d81819203c4"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 14061,
+                  "gzipBytes": 5746,
+                  "sha256": "db6c0b5b98e6cb14d10ad786b3d184aef2da96abb950b16329af1c488aa67f38"
+                },
+                "caps": {
+                  "bytes": 3375,
+                  "gzipBytes": 1564,
+                  "sha256": "45f15121db894590130fd1744a30c1750b4edbf173e17b0860e6ae3f659a524b"
+                },
+                "both": {
+                  "bytes": 15777,
+                  "gzipBytes": 6339,
+                  "sha256": "55befed1cee1d2d79980abb7c6e4f1dec6bb6e0e49fa8aff574e592187d5c875"
+                },
+                "outline": {
+                  "bytes": 3535,
+                  "gzipBytes": 1716,
+                  "sha256": "baf9d7274e2c82fbe5fb548485f1e17f67e0f55a7a5fc679fb2c8b7254182f61"
+                },
+                "filled": {
+                  "bytes": 2010,
+                  "gzipBytes": 1030,
+                  "sha256": "fbb910f0348eed949c67b9f5e8ff0b9da739c4a238ee5d035b88a0be886d3afa"
+                }
+              },
+              "regressions": [
+                "glyph",
+                "caps",
+                "both",
+                "filled"
+              ]
+            },
+            "slicesAllIdentifiers": {
+              "module": {
+                "bytes": 13374,
+                "gzipBytes": 5392,
+                "sha256": "26dbd67f074feacdb2cd0c0aaebfdda3bddb553ce252ee34bbad73669e77c2ff"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 14061,
+                  "gzipBytes": 5744,
+                  "sha256": "fdac7fdd2bbbb3c088f671586bd89f57975f7165f48e0bee77a407aee3052f9f"
+                },
+                "caps": {
+                  "bytes": 3375,
+                  "gzipBytes": 1565,
+                  "sha256": "b2cf5e317571f54d5117f8aafb2da077618620056b48dd05a8dae4148579a843"
+                },
+                "both": {
+                  "bytes": 15777,
+                  "gzipBytes": 6337,
+                  "sha256": "ac82ea704c5969f23c205d6d2fa6143d9540d55c205ab4df9db17846a442e72d"
+                },
+                "outline": {
+                  "bytes": 3535,
+                  "gzipBytes": 1716,
+                  "sha256": "baf9d7274e2c82fbe5fb548485f1e17f67e0f55a7a5fc679fb2c8b7254182f61"
+                },
+                "filled": {
+                  "bytes": 2010,
+                  "gzipBytes": 1030,
+                  "sha256": "fbb910f0348eed949c67b9f5e8ff0b9da739c4a238ee5d035b88a0be886d3afa"
+                }
+              },
+              "regressions": [
+                "glyph",
+                "caps",
+                "both",
+                "filled"
+              ]
+            },
+            "partProvenance": {
+              "module": {
+                "bytes": 20081,
+                "gzipBytes": 5341,
+                "sha256": "3a257d270e068493fd9a41a1d5d05bbd45fb9fcbfe00602afb50f3708097f041"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 14472,
+                  "gzipBytes": 5622,
+                  "sha256": "9247f1553d13137cf73afaab22a7acd43ab9c66093a7e1a44bb6487b57c8b02c"
+                },
+                "caps": {
+                  "bytes": 4668,
+                  "gzipBytes": 1528,
+                  "sha256": "708686ab949402c4c3b01f32bc037ac3983e6303f014cc0cb8680514d7f43c66"
+                },
+                "both": {
+                  "bytes": 17335,
+                  "gzipBytes": 6211,
+                  "sha256": "bbd9ce7a3cda4283b0a5ea72254dc207f4fae7a9d7d718c95a10643b8f882b3b"
+                },
+                "outline": {
+                  "bytes": 3535,
+                  "gzipBytes": 1716,
+                  "sha256": "a973b04311d0322402d6252b57a43cec520b4cf7d9727518829eea9e3294d2bc"
+                },
+                "filled": {
+                  "bytes": 2010,
+                  "gzipBytes": 1029,
+                  "sha256": "1d5a5ab5b9bac2567e33fa5c898f12dc5ec34e7a0f9d33ad481cb3db5c2646b0"
+                }
+              },
+              "regressions": []
+            },
+            "partProvenanceIdentifiers": {
+              "module": {
+                "bytes": 19956,
+                "gzipBytes": 5343,
+                "sha256": "09f942a58d28ee014e76ef62da2af0b10efb6004a50ddd5bc9db6799f8a4bdf3"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 14472,
+                  "gzipBytes": 5623,
+                  "sha256": "b8dbd225ca20fbd3732ab7b59a27112036f8bccfb1cd575a399bac785e9e4680"
+                },
+                "caps": {
+                  "bytes": 4668,
+                  "gzipBytes": 1528,
+                  "sha256": "29a8fb19ad3b4e36a60b8f12126462aa13cacfff05119b998132f941cd534ab1"
+                },
+                "both": {
+                  "bytes": 17335,
+                  "gzipBytes": 6212,
+                  "sha256": "d154a6c29892fc635d2be282a62e2116d59d44d2df44c675775704d00f5ba603"
+                },
+                "outline": {
+                  "bytes": 3535,
+                  "gzipBytes": 1716,
+                  "sha256": "a973b04311d0322402d6252b57a43cec520b4cf7d9727518829eea9e3294d2bc"
+                },
+                "filled": {
+                  "bytes": 2010,
+                  "gzipBytes": 1029,
+                  "sha256": "1d5a5ab5b9bac2567e33fa5c898f12dc5ec34e7a0f9d33ad481cb3db5c2646b0"
+                }
+              },
+              "regressions": []
+            },
+            "partProvenancePrefix": {
+              "module": {
+                "bytes": 20059,
+                "gzipBytes": 5360,
+                "sha256": "4227cdc229481ca34b2977af5ed4ea6f3f89d28ac59790a9bed783d609b8270f"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 14440,
+                  "gzipBytes": 5627,
+                  "sha256": "0ee5aa8d196adfd23cbd2aff84ac7284eb15dd099af4f3da9e94b822c80d5f51"
+                },
+                "caps": {
+                  "bytes": 4668,
+                  "gzipBytes": 1528,
+                  "sha256": "fd42c752b4e4b770665069585a1f5bb6897484c989d2c0747ddcbe5f02a7e594"
+                },
+                "both": {
+                  "bytes": 17303,
+                  "gzipBytes": 6217,
+                  "sha256": "0e0a2d51da1bd5f30ccf9d0752e555acd1efb29ececf6a03d714e52243383779"
+                },
+                "outline": {
+                  "bytes": 3535,
+                  "gzipBytes": 1716,
+                  "sha256": "a973b04311d0322402d6252b57a43cec520b4cf7d9727518829eea9e3294d2bc"
+                },
+                "filled": {
+                  "bytes": 2010,
+                  "gzipBytes": 1029,
+                  "sha256": "1d5a5ab5b9bac2567e33fa5c898f12dc5ec34e7a0f9d33ad481cb3db5c2646b0"
+                }
+              },
+              "regressions": []
+            },
+            "partProvenancePrefixIdentifiers": {
+              "module": {
+                "bytes": 19939,
+                "gzipBytes": 5359,
+                "sha256": "ef72f398a2674919b025a578a22e64c02d8a48671ef83c0287c646b09ff9f0d6"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 14440,
+                  "gzipBytes": 5628,
+                  "sha256": "8adbdc7085b4598be8db53771fe91242889af2d727c6f347519e6bbb4cbe6566"
+                },
+                "caps": {
+                  "bytes": 4668,
+                  "gzipBytes": 1528,
+                  "sha256": "29a8fb19ad3b4e36a60b8f12126462aa13cacfff05119b998132f941cd534ab1"
+                },
+                "both": {
+                  "bytes": 17303,
+                  "gzipBytes": 6216,
+                  "sha256": "5f4603eee416385a7fe72c31f64539f77dae24fa5ede79ec36b370fc71f95656"
+                },
+                "outline": {
+                  "bytes": 3535,
+                  "gzipBytes": 1716,
+                  "sha256": "a973b04311d0322402d6252b57a43cec520b4cf7d9727518829eea9e3294d2bc"
+                },
+                "filled": {
+                  "bytes": 2010,
+                  "gzipBytes": 1029,
+                  "sha256": "1d5a5ab5b9bac2567e33fa5c898f12dc5ec34e7a0f9d33ad481cb3db5c2646b0"
+                }
+              },
+              "regressions": []
+            },
+            "partProvenanceParts": {
+              "module": {
+                "bytes": 19119,
+                "gzipBytes": 5360,
+                "sha256": "9f23dbdb3eac94e281574b84388c1c59bac87d3ca7af33f709d307ce0d729eab"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 13359,
+                  "gzipBytes": 5618,
+                  "sha256": "e712d2bf50ae8314377d74078c7d2b063deecb53cc46d7c2ae2bea3609dd0728"
+                },
+                "caps": {
+                  "bytes": 4668,
+                  "gzipBytes": 1527,
+                  "sha256": "b91012451b6d4653cb02ad39dce4f0e6a00ef2a9b0b74ef9b9b819636150e0d3"
+                },
+                "both": {
+                  "bytes": 16222,
+                  "gzipBytes": 6206,
+                  "sha256": "8d25d5c041e334340ace622020a6159f94d7932983395379d5ca3a6f0df77197"
+                },
+                "outline": {
+                  "bytes": 3535,
+                  "gzipBytes": 1716,
+                  "sha256": "56413933140246337e629b7f9740e187e0af6522a7300b780c5e4047d6bf016b"
+                },
+                "filled": {
+                  "bytes": 2010,
+                  "gzipBytes": 1029,
+                  "sha256": "4824e7c9887f5da7eb3a0bb54293eb0b2011bf02d947e5a69f50eae0a3c34bab"
+                }
+              },
+              "regressions": []
+            },
+            "partProvenancePartsIdentifiers": {
+              "module": {
+                "bytes": 18845,
+                "gzipBytes": 5353,
+                "sha256": "b8bd88b3041946794116d56e252f887c0eee91fd76a688b6a30042017eea21ba"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 13359,
+                  "gzipBytes": 5617,
+                  "sha256": "1f7f63c1ea312367da4c3b2a325ecfbde57f88589a073bf29a1b373db589da14"
+                },
+                "caps": {
+                  "bytes": 4668,
+                  "gzipBytes": 1527,
+                  "sha256": "81f22638170b959018af36b81d2cc1564d258338cbf152178b185067e656caa5"
+                },
+                "both": {
+                  "bytes": 16222,
+                  "gzipBytes": 6204,
+                  "sha256": "fbdc1e1d837c3bbbdc2dbf597affcb998124deea648aad4a7c301dd3f2ee6ad6"
+                },
+                "outline": {
+                  "bytes": 3535,
+                  "gzipBytes": 1716,
+                  "sha256": "56413933140246337e629b7f9740e187e0af6522a7300b780c5e4047d6bf016b"
+                },
+                "filled": {
+                  "bytes": 2010,
+                  "gzipBytes": 1029,
+                  "sha256": "4824e7c9887f5da7eb3a0bb54293eb0b2011bf02d947e5a69f50eae0a3c34bab"
+                }
+              },
+              "regressions": []
+            },
+            "partProvenancePrefixParts": {
+              "module": {
+                "bytes": 19097,
+                "gzipBytes": 5380,
+                "sha256": "f270d27f619e68fc8dfe674a777a967dfd5f4354f5617bb3e848488ed5ce636e"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 13327,
+                  "gzipBytes": 5626,
+                  "sha256": "ad9830ca5623af08ebffcfba2f31117c31f6fd8df95de94a78fe9a0e4b4ac48a"
+                },
+                "caps": {
+                  "bytes": 4668,
+                  "gzipBytes": 1527,
+                  "sha256": "b91012451b6d4653cb02ad39dce4f0e6a00ef2a9b0b74ef9b9b819636150e0d3"
+                },
+                "both": {
+                  "bytes": 16190,
+                  "gzipBytes": 6209,
+                  "sha256": "e29441cdfb9317b0f4d2219dfaea72588a9f69c623dc7c61c6576ced54e92227"
+                },
+                "outline": {
+                  "bytes": 3535,
+                  "gzipBytes": 1716,
+                  "sha256": "56413933140246337e629b7f9740e187e0af6522a7300b780c5e4047d6bf016b"
+                },
+                "filled": {
+                  "bytes": 2010,
+                  "gzipBytes": 1029,
+                  "sha256": "4824e7c9887f5da7eb3a0bb54293eb0b2011bf02d947e5a69f50eae0a3c34bab"
+                }
+              },
+              "regressions": []
+            },
+            "partProvenancePrefixPartsIdentifiers": {
+              "module": {
+                "bytes": 18828,
+                "gzipBytes": 5365,
+                "sha256": "23a6648268deea8d67f7f8869749dedaded845c0db9c250a2bd5f920b30b0c5b"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 13327,
+                  "gzipBytes": 5627,
+                  "sha256": "8aa6ce3c5035f775d9d9e6545012e60bfa78d257df457088f7d0e704ca07be17"
+                },
+                "caps": {
+                  "bytes": 4668,
+                  "gzipBytes": 1527,
+                  "sha256": "81f22638170b959018af36b81d2cc1564d258338cbf152178b185067e656caa5"
+                },
+                "both": {
+                  "bytes": 16190,
+                  "gzipBytes": 6208,
+                  "sha256": "b3c264d165b7fb7bcba9c2b732329cdb7156cbd068918a7d89f684987a041515"
+                },
+                "outline": {
+                  "bytes": 3535,
+                  "gzipBytes": 1716,
+                  "sha256": "56413933140246337e629b7f9740e187e0af6522a7300b780c5e4047d6bf016b"
+                },
+                "filled": {
+                  "bytes": 2010,
+                  "gzipBytes": 1029,
+                  "sha256": "4824e7c9887f5da7eb3a0bb54293eb0b2011bf02d947e5a69f50eae0a3c34bab"
+                }
+              },
+              "regressions": []
+            },
+            "omittedPartProvenance": {
+              "module": {
+                "bytes": 18962,
+                "gzipBytes": 4861,
+                "sha256": "886d5f4179d6f42e2fd2b1eb5eb0b064f12a981fb1260716cf0326596bca60b0"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 13648,
+                  "gzipBytes": 5164,
+                  "sha256": "2e3982061188f2e0a9aed7ed3c99022ae9192384edc451f93b466ace494342fc"
+                },
+                "caps": {
+                  "bytes": 4668,
+                  "gzipBytes": 1528,
+                  "sha256": "4759246cfd30e88dbee4b5d2203c0577d65974a7758c8375000a0fe9708f5247"
+                },
+                "both": {
+                  "bytes": 16511,
+                  "gzipBytes": 5746,
+                  "sha256": "d0efed6282312ddc5eb2462053bde3fce0906f211756bda978818c9d5c57766c"
+                },
+                "outline": {
+                  "bytes": 3535,
+                  "gzipBytes": 1716,
+                  "sha256": "cfbca4681f00bfb15f5c0790078cd6209fb30025736e124e2ac8c682bacd217a"
+                },
+                "filled": {
+                  "bytes": 2010,
+                  "gzipBytes": 1029,
+                  "sha256": "71fcc5a3fb1addffaabc1f277f52b4e41e96924f1a939a8e4afe112713189949"
+                }
+              },
+              "regressions": [],
+              "candidate": false,
+              "semanticMismatches": [
+                "glyph",
+                "both"
+              ]
+            },
+            "omittedPartProvenanceIdentifiers": {
+              "module": {
+                "bytes": 18942,
+                "gzipBytes": 4873,
+                "sha256": "00ac133f88ad905a983e01b1040ae36466f668630d1da094e329d95eaaa6582a"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 13648,
+                  "gzipBytes": 5164,
+                  "sha256": "09ab5da61f7ad5f0696d8dd7890144668f7ddbef14936a41478f63731ca45ebf"
+                },
+                "caps": {
+                  "bytes": 4668,
+                  "gzipBytes": 1528,
+                  "sha256": "4759246cfd30e88dbee4b5d2203c0577d65974a7758c8375000a0fe9708f5247"
+                },
+                "both": {
+                  "bytes": 16511,
+                  "gzipBytes": 5743,
+                  "sha256": "faf025e47aff0c92ef7001a5646793d6cf1fc33eceb6d34811493fb13195a5c3"
+                },
+                "outline": {
+                  "bytes": 3535,
+                  "gzipBytes": 1716,
+                  "sha256": "cfbca4681f00bfb15f5c0790078cd6209fb30025736e124e2ac8c682bacd217a"
+                },
+                "filled": {
+                  "bytes": 2010,
+                  "gzipBytes": 1029,
+                  "sha256": "71fcc5a3fb1addffaabc1f277f52b4e41e96924f1a939a8e4afe112713189949"
+                }
+              },
+              "regressions": [],
+              "candidate": false,
+              "semanticMismatches": [
+                "glyph",
+                "both"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "printers": {
+      "capturedAt": "2026-11-02T09:04:00.392Z",
+      "sourceSha": "fd0456119a21924772aba388bdff3ebbf5fcbcae",
+      "emitterSha256": "80d08832720b5058bfe97e39cb0667ba255edc57177945ef10e0e4a8ac637b76",
+      "experimentSha256": "be08c03c70342888c6cedc074b83d58cd899c0a678340dd8085fe9c6a57639ed",
+      "receiptSha256": "b63ab4be495f7a8b866035ae24b3c25ea33211c0c10be466163880e1413e4d91",
+      "environment": {
+        "node": "v24.15.0",
+        "esbuild": "0.28.1",
+        "fflate": "0.8.3",
+        "gzip": {
+          "level": 9,
+          "mtime": 0
+        }
+      },
+      "scope": "Две семьи; exact JSON/key-order и пять selective consumers на pinned runtime. Без native/cold/fullbuild.",
+      "mode": "named-materializer-syntax-printer",
+      "runtimeReceipts": {
+        "dist/ir/request.js": {
+          "bytes": 2356,
+          "gzipBytes": 1017,
+          "sha256": "cee50e7f82d5029e8baabf95baad569c3009abc46f8f3d44aa4c5f9888c255af"
+        },
+        "dist/ir/author-request-runtime.js": {
+          "bytes": 798,
+          "gzipBytes": 489,
+          "sha256": "4284632485b0d66cf70f316da75ebe4c45be5c94ac487bc3d29d5965b9a9e31b"
+        },
+        "dist/ir/symbol-runtime.js": {
+          "bytes": 786,
+          "gzipBytes": 354,
+          "sha256": "7a3a0226218b04c5c31da0e40eab102aef5d8908ba448da6080bc0209aeb9639"
+        }
+      },
+      "rows": [
+        {
+          "icon": "notifications",
+          "baseline": {
+            "bytes": 16660,
+            "gzipBytes": 4584,
+            "sha256": "75f4e0ec95b6fd4fb7b6c86c087312de31914e11f4c13a4d055cd465bc63820f"
+          },
+          "baselineConsumers": {
+            "glyph": {
+              "bytes": 12459,
+              "gzipBytes": 4812,
+              "sha256": "8beea224e20e70ff5d692a0c5dea0ad7cd10940c743689c7b58fe62a4cb1c5a3"
+            },
+            "caps": {
+              "bytes": 4531,
+              "gzipBytes": 1511,
+              "sha256": "fb1fd11cfb3eb8d4ccc2ab3deef010bf9eb7765d98e7112a41733eaab23aca9a"
+            },
+            "both": {
+              "bytes": 15185,
+              "gzipBytes": 5378,
+              "sha256": "0570df43991b665de185090357335ff69042e72d126d34cad9fb9c7be8a1b054"
+            },
+            "outline": {
+              "bytes": 2982,
+              "gzipBytes": 1483,
+              "sha256": "81750d334037df64c0e74897fc5afb0d349a59c88fa83c09e9928259904a604e"
+            },
+            "filled": {
+              "bytes": 1690,
+              "gzipBytes": 889,
+              "sha256": "4c72437af5aa99b80f8290ae94bda6ad4ba26181cfea4034f4ac75f28df42ee9"
+            }
+          },
+          "alternatives": {
+            "named": {
+              "module": {
+                "bytes": 16591,
+                "gzipBytes": 4489,
+                "sha256": "d3080743e2526705b47940a4edd0728dae6206350922a1df9fae2c087adca5df"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 12483,
+                  "gzipBytes": 4830,
+                  "sha256": "8d7c1d2a846708b9e19a9b34d310f7fab4f9d4036534750fc6f244de46c46c96"
+                },
+                "caps": {
+                  "bytes": 4531,
+                  "gzipBytes": 1512,
+                  "sha256": "75b4e30b04e44662781063595f12e81474eda018ef14965cd91b3bbf0aab1936"
+                },
+                "both": {
+                  "bytes": 15209,
+                  "gzipBytes": 5393,
+                  "sha256": "7bdcf6074b3d7d1aa6fbda0141621a6114c1a049fca9f3bf6022f246108c406e"
+                },
+                "outline": {
+                  "bytes": 2982,
+                  "gzipBytes": 1483,
+                  "sha256": "81750d334037df64c0e74897fc5afb0d349a59c88fa83c09e9928259904a604e"
+                },
+                "filled": {
+                  "bytes": 1690,
+                  "gzipBytes": 889,
+                  "sha256": "4c72437af5aa99b80f8290ae94bda6ad4ba26181cfea4034f4ac75f28df42ee9"
+                }
+              },
+              "regressions": [
+                "glyph",
+                "caps",
+                "both"
+              ]
+            },
+            "namedIdentifiers": {
+              "module": {
+                "bytes": 16523,
+                "gzipBytes": 4494,
+                "sha256": "654e52a4ad49b16493c5d6e56cd7a9e50cc6559b4f1e61f00b0ce152cb246939"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 12483,
+                  "gzipBytes": 4830,
+                  "sha256": "8235c2e68724ce078c3c5f75aa34dbbca116b8d3ca22337ca9e51474720ae9c2"
+                },
+                "caps": {
+                  "bytes": 4531,
+                  "gzipBytes": 1512,
+                  "sha256": "e1ad139cc99fa37cd9676b1da53b66929880e0aeda4170a2451302777a5972d4"
+                },
+                "both": {
+                  "bytes": 15209,
+                  "gzipBytes": 5394,
+                  "sha256": "2a4280aca8fe22210111f0e2fe97cf7722e2b7554232a97e8294077597a8149b"
+                },
+                "outline": {
+                  "bytes": 2982,
+                  "gzipBytes": 1483,
+                  "sha256": "81750d334037df64c0e74897fc5afb0d349a59c88fa83c09e9928259904a604e"
+                },
+                "filled": {
+                  "bytes": 1690,
+                  "gzipBytes": 889,
+                  "sha256": "4c72437af5aa99b80f8290ae94bda6ad4ba26181cfea4034f4ac75f28df42ee9"
+                }
+              },
+              "regressions": [
+                "glyph",
+                "caps",
+                "both"
+              ]
+            },
+            "namedParts": {
+              "module": {
+                "bytes": 15737,
+                "gzipBytes": 4507,
+                "sha256": "d31a4ac05bb4e99a074c9eaa95507f0be8b66c90a7a64f4875f6d3fc7c22f77f"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 11537,
+                  "gzipBytes": 4834,
+                  "sha256": "f4b7bdb6647060e82bf6779724ef9f481d9a5540715e54176d4f3fdbaa418644"
+                },
+                "caps": {
+                  "bytes": 4531,
+                  "gzipBytes": 1512,
+                  "sha256": "56319fc87c146d4970e433e0e895cda3426748ec0743eaefd03dbe78ab38325b"
+                },
+                "both": {
+                  "bytes": 14263,
+                  "gzipBytes": 5405,
+                  "sha256": "e0f02efc8da5f0e9a45870b9fe9eefdbbbc9f75237f9156edbcdd1c9db6f8069"
+                },
+                "outline": {
+                  "bytes": 2982,
+                  "gzipBytes": 1483,
+                  "sha256": "e06563e9a6e66f8fd423219676ef22ea01aa57886d3d13a60e3b181a05709fd1"
+                },
+                "filled": {
+                  "bytes": 1690,
+                  "gzipBytes": 889,
+                  "sha256": "1809a8930e0aa30c4bad4ae9f1f13abf34ed693328d7599c42b8d050e569c209"
+                }
+              },
+              "regressions": [
+                "glyph",
+                "caps",
+                "both"
+              ]
+            },
+            "namedPartsIdentifiers": {
+              "module": {
+                "bytes": 15571,
+                "gzipBytes": 4517,
+                "sha256": "57caeb1fa7d186116427e2311b1b95cb3568342b79f78aaa7f31d93baed9f35d"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 11537,
+                  "gzipBytes": 4834,
+                  "sha256": "1208c7b2c6da94345f95410855df61ba06d1de41561b6bdf528c43fbb7f89c4d"
+                },
+                "caps": {
+                  "bytes": 4531,
+                  "gzipBytes": 1512,
+                  "sha256": "6e9cbb54d153bae311ba3651d9d1611b227d2e1926c9cbe308cfc4f59483976a"
+                },
+                "both": {
+                  "bytes": 14263,
+                  "gzipBytes": 5407,
+                  "sha256": "ef55422adfc1740a57ed6c7e3142307dda33b7b3a7e13f3d59215e9bf9d2c396"
+                },
+                "outline": {
+                  "bytes": 2982,
+                  "gzipBytes": 1483,
+                  "sha256": "e06563e9a6e66f8fd423219676ef22ea01aa57886d3d13a60e3b181a05709fd1"
+                },
+                "filled": {
+                  "bytes": 1690,
+                  "gzipBytes": 889,
+                  "sha256": "1809a8930e0aa30c4bad4ae9f1f13abf34ed693328d7599c42b8d050e569c209"
+                }
+              },
+              "regressions": [
+                "glyph",
+                "caps",
+                "both"
+              ]
+            },
+            "namedSlices": {
+              "module": {
+                "bytes": 12495,
+                "gzipBytes": 4472,
+                "sha256": "fe4b1ecfa14b933893972a087b730a12698f3d5b2458b628349eeab2f34512b7"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 12871,
+                  "gzipBytes": 4928,
+                  "sha256": "a1ccb414a41a5a011044ef0eb621b408b792b2fb6267d736ca57a5016fa9167b"
+                },
+                "caps": {
+                  "bytes": 4531,
+                  "gzipBytes": 1511,
+                  "sha256": "f4c5330c2cc933803570c148044a3f2babd1a6f1db4d491b5fb864d9099f8e19"
+                },
+                "both": {
+                  "bytes": 15597,
+                  "gzipBytes": 5492,
+                  "sha256": "c96edd58e9db0a8ad1d5988163e5c20ec0acf38d8fc1c4068a323aa4868323dd"
+                },
+                "outline": {
+                  "bytes": 2982,
+                  "gzipBytes": 1483,
+                  "sha256": "f42eefa4ff5227f19cac80a27b8240f6aada8a91ba0470cefaaa758b38218eea"
+                },
+                "filled": {
+                  "bytes": 1690,
+                  "gzipBytes": 889,
+                  "sha256": "36ec7e43014743579ea7c4b73e46202523667458f904c68f001762dc78529291"
+                }
+              },
+              "regressions": [
+                "glyph",
+                "both"
+              ]
+            },
+            "namedSlicesIdentifiers": {
+              "module": {
+                "bytes": 12313,
+                "gzipBytes": 4458,
+                "sha256": "7721d9ffd0a16c78a536c845f0f70d2682b695a05e3934cc170489dc0cf0070d"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 12871,
+                  "gzipBytes": 4925,
+                  "sha256": "16d87f5700b8f6674873b6f0b3277ff0a239b5d7876e852d84f9fcae1d847be5"
+                },
+                "caps": {
+                  "bytes": 9217,
+                  "gzipBytes": 3772,
+                  "sha256": "dda71fdca78d0eb6540f023d275e17b7522df2bcd45c231ca8193173f6e835ac"
+                },
+                "both": {
+                  "bytes": 15597,
+                  "gzipBytes": 5492,
+                  "sha256": "321ad00d217e85b0a76e95b39880f6b60269d36b8ecb76f00ecc509c86fc5651"
+                },
+                "outline": {
+                  "bytes": 4719,
+                  "gzipBytes": 2218,
+                  "sha256": "ddc6a0dcf20dae68e702dcdb04bd0c6252ce93ba5e2c00b24298f9a4b2a4b239"
+                },
+                "filled": {
+                  "bytes": 4719,
+                  "gzipBytes": 2218,
+                  "sha256": "f162f0d3f526d8567d404c06bb7cffda9d18742045ddbf5bc50b4d69d1e626b0"
+                }
+              },
+              "regressions": [
+                "glyph",
+                "caps",
+                "both",
+                "outline",
+                "filled"
+              ]
+            },
+            "namedSlicesParts": {
+              "module": {
+                "bytes": 11641,
+                "gzipBytes": 4490,
+                "sha256": "abe9158e4f1d8de2ea761ee8fec23cdf898bdd9acbc3b3b76e218abfe4b5cadd"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 11925,
+                  "gzipBytes": 4930,
+                  "sha256": "5664eaef5424fa979fe28ce94dc7c7f5af056462c5c8b169f457fe2c5424fee0"
+                },
+                "caps": {
+                  "bytes": 4531,
+                  "gzipBytes": 1511,
+                  "sha256": "53e7611acb9a9f1a18a286e29282306477cfadd1f5986124e1196d650d38f993"
+                },
+                "both": {
+                  "bytes": 14651,
+                  "gzipBytes": 5500,
+                  "sha256": "ef9ee00bbd5ae5ded6561952c2296e01baf2f0455073c6b2cec5619672554972"
+                },
+                "outline": {
+                  "bytes": 2982,
+                  "gzipBytes": 1483,
+                  "sha256": "ccb4f6071b0807851e45efde246400170dc67e230cff755833a7784c241176e1"
+                },
+                "filled": {
+                  "bytes": 1690,
+                  "gzipBytes": 890,
+                  "sha256": "00b91899cd47613ed50d0608d58e13d4061a16b37a1103fefd34f285aa765998"
+                }
+              },
+              "regressions": [
+                "glyph",
+                "both",
+                "filled"
+              ]
+            },
+            "namedSlicesPartsIdentifiers": {
+              "module": {
+                "bytes": 11361,
+                "gzipBytes": 4484,
+                "sha256": "d9c07a6e7ccfb55d72783498f44cccd876dca06e5f07c473248e6e85f4fa7790"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 11925,
+                  "gzipBytes": 4930,
+                  "sha256": "bda4418a4bb94f5c9ad37670e5e75f948015d1bb22bdb68c7214d3fa49c1c2d5"
+                },
+                "caps": {
+                  "bytes": 9221,
+                  "gzipBytes": 3775,
+                  "sha256": "80dfe4945287abb36381abb3d1368a934d99edfa328fe3d66f9ba3f6d4a26938"
+                },
+                "both": {
+                  "bytes": 14651,
+                  "gzipBytes": 5502,
+                  "sha256": "3d022d03bba29ad7300b7d4f5a65e4dd81c0d012d75658b7e87e33c370ef49cb"
+                },
+                "outline": {
+                  "bytes": 4719,
+                  "gzipBytes": 2218,
+                  "sha256": "bb9863fa6a4859d5d3f0ba8b2d7ddada132f3ffc9326669824cf264f663f97be"
+                },
+                "filled": {
+                  "bytes": 4719,
+                  "gzipBytes": 2218,
+                  "sha256": "4f15cac99fed3b98b95215531e4ff436ac5aa18b784b00afc698c977c93631dd"
+                }
+              },
+              "regressions": [
+                "glyph",
+                "caps",
+                "both",
+                "outline",
+                "filled"
+              ]
+            }
+          }
+        },
+        {
+          "icon": "notifications-unread",
+          "baseline": {
+            "bytes": 21576,
+            "gzipBytes": 5463,
+            "sha256": "0aafd7e7f19c5ab9b56d1f4f688579f4b3c27bfe50c0f9c5664f882d4dc16d9b"
+          },
+          "baselineConsumers": {
+            "glyph": {
+              "bytes": 16101,
+              "gzipBytes": 5649,
+              "sha256": "3af071db7c53e19303a928aa3e6c2614815f263eaff30f11fc63d107ab324148"
+            },
+            "caps": {
+              "bytes": 4668,
+              "gzipBytes": 1529,
+              "sha256": "83e2e8002e17196ec0bfe54ecd83b08aa929e58d8a02c2e95b5c33585ccfbf70"
+            },
+            "both": {
+              "bytes": 18964,
+              "gzipBytes": 6230,
+              "sha256": "409129cf3e21071a84b815a555260cf54da096a3d93d49a0d162bdbc003a6dba"
+            },
+            "outline": {
+              "bytes": 3535,
+              "gzipBytes": 1716,
+              "sha256": "a973b04311d0322402d6252b57a43cec520b4cf7d9727518829eea9e3294d2bc"
+            },
+            "filled": {
+              "bytes": 2010,
+              "gzipBytes": 1029,
+              "sha256": "1d5a5ab5b9bac2567e33fa5c898f12dc5ec34e7a0f9d33ad481cb3db5c2646b0"
+            }
+          },
+          "alternatives": {
+            "named": {
+              "module": {
+                "bytes": 21499,
+                "gzipBytes": 5362,
+                "sha256": "32dddb914caffc303a678849573f2bb7fab32d3620506dadfccd1de3db24c1ba"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 16125,
+                  "gzipBytes": 5667,
+                  "sha256": "d4a59c2bb824a777562df099c8a4f5f46b5036013858238911792714ae5cb3c6"
+                },
+                "caps": {
+                  "bytes": 4668,
+                  "gzipBytes": 1528,
+                  "sha256": "a83d19bfca9b1b4a47f490bf6cb76eb2ead922bca4791c28a575ce0cd2172116"
+                },
+                "both": {
+                  "bytes": 18988,
+                  "gzipBytes": 6250,
+                  "sha256": "6a39fd88647104e793ca600772c3c84594de9f63114187819144c5659a5e4181"
+                },
+                "outline": {
+                  "bytes": 3535,
+                  "gzipBytes": 1716,
+                  "sha256": "a973b04311d0322402d6252b57a43cec520b4cf7d9727518829eea9e3294d2bc"
+                },
+                "filled": {
+                  "bytes": 2010,
+                  "gzipBytes": 1029,
+                  "sha256": "1d5a5ab5b9bac2567e33fa5c898f12dc5ec34e7a0f9d33ad481cb3db5c2646b0"
+                }
+              },
+              "regressions": [
+                "glyph",
+                "both"
+              ]
+            },
+            "namedIdentifiers": {
+              "module": {
+                "bytes": 21387,
+                "gzipBytes": 5360,
+                "sha256": "a84ec9e05d85fe8574fa897b7fceb1f845fc6c153b8938f68abdd6aeaf0bf159"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 16125,
+                  "gzipBytes": 5667,
+                  "sha256": "756844bf2fb918ee31af70aa27e4725721fa51c8d218054c0703db2a5c1f0b05"
+                },
+                "caps": {
+                  "bytes": 4668,
+                  "gzipBytes": 1527,
+                  "sha256": "3b1f5f4932f27d74038849c300acce366518433806123132739aa9407e4ee308"
+                },
+                "both": {
+                  "bytes": 18988,
+                  "gzipBytes": 6251,
+                  "sha256": "4533644e921d86f89bba427dff39f58c20089ee75c8ea99585e1eda6f883409e"
+                },
+                "outline": {
+                  "bytes": 3535,
+                  "gzipBytes": 1716,
+                  "sha256": "a973b04311d0322402d6252b57a43cec520b4cf7d9727518829eea9e3294d2bc"
+                },
+                "filled": {
+                  "bytes": 2010,
+                  "gzipBytes": 1029,
+                  "sha256": "1d5a5ab5b9bac2567e33fa5c898f12dc5ec34e7a0f9d33ad481cb3db5c2646b0"
+                }
+              },
+              "regressions": [
+                "glyph",
+                "both"
+              ]
+            },
+            "namedParts": {
+              "module": {
+                "bytes": 19401,
+                "gzipBytes": 5325,
+                "sha256": "f4cda6ae382c814424436bb453a5ef59bc81fff9d34309017dc8b81af1f677dc"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 13873,
+                  "gzipBytes": 5612,
+                  "sha256": "fbdfc7cb59010fc23d56ce173e3e33c0803c744d2f80860e9aabfb58a14912ad"
+                },
+                "caps": {
+                  "bytes": 4668,
+                  "gzipBytes": 1528,
+                  "sha256": "ecaa3e5a1542deec5c01ea72b41331bfc1b87a432d0354917bc98967717cb342"
+                },
+                "both": {
+                  "bytes": 16736,
+                  "gzipBytes": 6201,
+                  "sha256": "a9c6d9b705c7803e6f0498d21500822e5b63d5de605a9bfe5f584490a50a6de2"
+                },
+                "outline": {
+                  "bytes": 3535,
+                  "gzipBytes": 1713,
+                  "sha256": "4e5b09e4f7857c223c433a34ae04d1c210949901daf5f1aae29b152cc48b536f"
+                },
+                "filled": {
+                  "bytes": 2010,
+                  "gzipBytes": 1029,
+                  "sha256": "8db62a8897365e686584d35e8dd67efd242c41dbd29716b357ea1a45d451964d"
+                }
+              },
+              "regressions": []
+            },
+            "namedPartsIdentifiers": {
+              "module": {
+                "bytes": 19060,
+                "gzipBytes": 5324,
+                "sha256": "1e7ad4083afd1862834dadc4776056c2089289d534cdaf8a3e917b8cb3390d21"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 13873,
+                  "gzipBytes": 5612,
+                  "sha256": "06a3eb47f0dfc243c53022cf3741ec714f5360daa4217c0b6da4a1b1f7004f8c"
+                },
+                "caps": {
+                  "bytes": 4668,
+                  "gzipBytes": 1528,
+                  "sha256": "ecaa3e5a1542deec5c01ea72b41331bfc1b87a432d0354917bc98967717cb342"
+                },
+                "both": {
+                  "bytes": 16736,
+                  "gzipBytes": 6201,
+                  "sha256": "06dc33313ba0a680586d34385b6380389eda69c36f57841b5fa459868cd9c85c"
+                },
+                "outline": {
+                  "bytes": 3535,
+                  "gzipBytes": 1716,
+                  "sha256": "56413933140246337e629b7f9740e187e0af6522a7300b780c5e4047d6bf016b"
+                },
+                "filled": {
+                  "bytes": 2010,
+                  "gzipBytes": 1029,
+                  "sha256": "4824e7c9887f5da7eb3a0bb54293eb0b2011bf02d947e5a69f50eae0a3c34bab"
+                }
+              },
+              "regressions": []
+            },
+            "namedSlices": {
+              "module": {
+                "bytes": 16725,
+                "gzipBytes": 5351,
+                "sha256": "6a117f384151c2ff79e83daf635255b2022a3e7c726086c72449ef4466741e91"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 16589,
+                  "gzipBytes": 5783,
+                  "sha256": "fe2025a4afb3c934a5e2307f3aeff72a6721a9f58c4512a156e34df3c89f6d26"
+                },
+                "caps": {
+                  "bytes": 4668,
+                  "gzipBytes": 1526,
+                  "sha256": "1b14fbe291c73c755cf49ea6580b3f3eb9206fb13f396043b1748d48a56e39a7"
+                },
+                "both": {
+                  "bytes": 19452,
+                  "gzipBytes": 6372,
+                  "sha256": "31b6d52675448aa934a73d5e7ed7660e58b9363e8832568818c725352eca4877"
+                },
+                "outline": {
+                  "bytes": 3535,
+                  "gzipBytes": 1716,
+                  "sha256": "a973b04311d0322402d6252b57a43cec520b4cf7d9727518829eea9e3294d2bc"
+                },
+                "filled": {
+                  "bytes": 2010,
+                  "gzipBytes": 1029,
+                  "sha256": "1d5a5ab5b9bac2567e33fa5c898f12dc5ec34e7a0f9d33ad481cb3db5c2646b0"
+                }
+              },
+              "regressions": [
+                "glyph",
+                "both"
+              ]
+            },
+            "namedSlicesIdentifiers": {
+              "module": {
+                "bytes": 16381,
+                "gzipBytes": 5329,
+                "sha256": "0de4d836799a02a5d54c6c01d8b445c14b32c8056cb1699d1a2a31c461d712f8"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 16589,
+                  "gzipBytes": 5783,
+                  "sha256": "eb6f0ef1cff8511010a31f3e955b5f160e1f3b97ec363b79d671b0b0a871726b"
+                },
+                "caps": {
+                  "bytes": 10311,
+                  "gzipBytes": 4227,
+                  "sha256": "74d77c590eda0ceefdeae74786e19a655ce95ed34b181b83dc0469f64fef3f14"
+                },
+                "both": {
+                  "bytes": 19452,
+                  "gzipBytes": 6372,
+                  "sha256": "e7a9acbd0e6fd76114a511f1ff87823bc5dabec6ea79c7beafce3f1087ca980d"
+                },
+                "outline": {
+                  "bytes": 5676,
+                  "gzipBytes": 2631,
+                  "sha256": "6e90a8fc7a7e329dac43d4495566f7f90db72e9f6459b5bf50b1c72160e5ea97"
+                },
+                "filled": {
+                  "bytes": 5676,
+                  "gzipBytes": 2631,
+                  "sha256": "ee1671b56851fd13766db19e935282b32680f0debc7c5000a07ae9e19c6cd267"
+                }
+              },
+              "regressions": [
+                "glyph",
+                "caps",
+                "both",
+                "outline",
+                "filled"
+              ]
+            },
+            "namedSlicesParts": {
+              "module": {
+                "bytes": 14627,
+                "gzipBytes": 5314,
+                "sha256": "1552b0d9bf96a45564017eb3b7349786a3f9734d26dec88ae7986b909f631f64"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 14337,
+                  "gzipBytes": 5732,
+                  "sha256": "584e5bd99eeba55b0cc6353d1e0598b95b344d717093c8b9c3a03e8446619ddc"
+                },
+                "caps": {
+                  "bytes": 4668,
+                  "gzipBytes": 1526,
+                  "sha256": "9dcbe4469dc00055766df019c1042a1f8a1c6abc7038976b6c2586b052da1de5"
+                },
+                "both": {
+                  "bytes": 17202,
+                  "gzipBytes": 6321,
+                  "sha256": "895405d83b77dfd3824771308d662494e8457504482fad4bdc0d2af202a93dcc"
+                },
+                "outline": {
+                  "bytes": 3535,
+                  "gzipBytes": 1716,
+                  "sha256": "baf9d7274e2c82fbe5fb548485f1e17f67e0f55a7a5fc679fb2c8b7254182f61"
+                },
+                "filled": {
+                  "bytes": 2010,
+                  "gzipBytes": 1030,
+                  "sha256": "fbb910f0348eed949c67b9f5e8ff0b9da739c4a238ee5d035b88a0be886d3afa"
+                }
+              },
+              "regressions": [
+                "glyph",
+                "both",
+                "filled"
+              ]
+            },
+            "namedSlicesPartsIdentifiers": {
+              "module": {
+                "bytes": 14057,
+                "gzipBytes": 5299,
+                "sha256": "cf2058c8d0b5596ca87a35758be84fd61a4a06be57fccf7f93c89dc4c6f263c8"
+              },
+              "consumers": {
+                "glyph": {
+                  "bytes": 14337,
+                  "gzipBytes": 5731,
+                  "sha256": "d110ba0c7a8bd28358e2a44494f331fe5060f70221a803b04ee8fe1097c07433"
+                },
+                "caps": {
+                  "bytes": 10315,
+                  "gzipBytes": 4231,
+                  "sha256": "1775a5da186b1a5183626c8183b274c9633d96be60e13e0b9c8cdf53365f8f74"
+                },
+                "both": {
+                  "bytes": 17202,
+                  "gzipBytes": 6325,
+                  "sha256": "c999f309f5f8f4f9da6426896e51ad37e595295fec3fab90e384802a19caa894"
+                },
+                "outline": {
+                  "bytes": 5676,
+                  "gzipBytes": 2630,
+                  "sha256": "631d5abe7dca3442ace518b1653345ee9fcd715a7c170581f2f5f3a3fb78f1af"
+                },
+                "filled": {
+                  "bytes": 5676,
+                  "gzipBytes": 2630,
+                  "sha256": "15190826dec175235c9cbede48d1aa4996518c73581ae67241cc4b372809b3f5"
+                }
+              },
+              "regressions": [
+                "glyph",
+                "caps",
+                "both",
+                "outline",
+                "filled"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "terser": {
+      "capturedAt": "2026-11-02T09:04:00.474Z",
+      "sourceSha": "fd0456119a21924772aba388bdff3ebbf5fcbcae",
+      "emitterSha256": "80d08832720b5058bfe97e39cb0667ba255edc57177945ef10e0e4a8ac637b76",
+      "experimentSha256": "be08c03c70342888c6cedc074b83d58cd899c0a678340dd8085fe9c6a57639ed",
+      "receiptSha256": "b63ab4be495f7a8b866035ae24b3c25ea33211c0c10be466163880e1413e4d91",
+      "environment": {
+        "node": "v24.15.0",
+        "esbuild": "0.28.1",
+        "fflate": "0.8.3",
+        "gzip": {
+          "level": 9,
+          "mtime": 0
+        }
+      },
+      "scope": "Только module sizes; Terser preserve_annotations, без consumer/native/cold qualification.",
+      "minifier": {
+        "name": "terser",
+        "version": "5.51.2",
+        "passes": [
+          0,
+          1,
+          3
+        ],
+        "mangle": true,
+        "format": {
+          "preserve_annotations": true,
+          "comments": false,
+          "ascii_only": [
+            false,
+            true
+          ],
+          "inline_script": false
+        },
+        "integrity": "sha512-bWnjSNscmuI+GJze6ZupnHP8G/cTcsJF+bXCeQknk2SHQsgbNJnLrqiH9jZ2W4STPVXH2mDKKRX3iwPhc9Cn/Q=="
+      },
+      "rows": [
+        {
+          "icon": "notifications",
+          "baseline": {
+            "bytes": 16660,
+            "gzipBytes": 4584,
+            "sha256": "75f4e0ec95b6fd4fb7b6c86c087312de31914e11f4c13a4d055cd465bc63820f"
+          },
+          "ceilings": {
+            "bytes": 23951,
+            "gzipBytes": 4165
+          },
+          "alternatives": {
+            "current": {
+              "bytes": 15982,
+              "gzipBytes": 4410,
+              "sha256": "dc3a9cf224e6a190054bcfd7ea09015a7ca951c516baf9efad734b9939195520",
+              "pure": 4
+            },
+            "currentCompress1": {
+              "bytes": 15934,
+              "gzipBytes": 4406,
+              "sha256": "de746c68597bf14b5eb3846d6c8e44e042dbe34f7f1240e9f6522b3d824641e6",
+              "pure": 4
+            },
+            "currentCompress3": {
+              "bytes": 15934,
+              "gzipBytes": 4406,
+              "sha256": "de746c68597bf14b5eb3846d6c8e44e042dbe34f7f1240e9f6522b3d824641e6",
+              "pure": 4
+            },
+            "currentAscii": {
+              "bytes": 16654,
+              "gzipBytes": 4390,
+              "sha256": "18070354faa2040c3cc0e7beadce97c4411cfdced843de49d8074a27ceeb952c",
+              "pure": 4
+            },
+            "currentAsciiCompress1": {
+              "bytes": 16606,
+              "gzipBytes": 4389,
+              "sha256": "36a3acedd1562aeb6ca018021f1e7eea07d9554573108320583deb76eb994fd5",
+              "pure": 4
+            },
+            "currentAsciiCompress3": {
+              "bytes": 16606,
+              "gzipBytes": 4389,
+              "sha256": "36a3acedd1562aeb6ca018021f1e7eea07d9554573108320583deb76eb994fd5",
+              "pure": 4
+            },
+            "parts": {
+              "bytes": 15102,
+              "gzipBytes": 4427,
+              "sha256": "61f900a7cff5e137dde75ae8e83f19f0360ba7e31ffd7787c3b13d6939bc56d2",
+              "pure": 8
+            },
+            "partsAscii": {
+              "bytes": 15774,
+              "gzipBytes": 4406,
+              "sha256": "fecace764843b5ea1be95d10908e6e065f90341b7d35205be1690778539f66c1",
+              "pure": 8
+            },
+            "sourceAndParts": {
+              "bytes": 15039,
+              "gzipBytes": 4451,
+              "sha256": "ae556abb5c033d97666da673d48d56ed1c1a67882826ed1635ec165a8a3684c7",
+              "pure": 10
+            },
+            "sourceAndPartsAscii": {
+              "bytes": 15711,
+              "gzipBytes": 4431,
+              "sha256": "df45fca349b026988c50c24c1a805f4ad01d2f1beb176c3fc967c3a1cd167465",
+              "pure": 10
+            },
+            "slices": {
+              "bytes": 11882,
+              "gzipBytes": 4391,
+              "sha256": "5ee9dfffdebd229f7ecfa76ed9650ca0488240099e64ea6edb6bef1b61a3f97e",
+              "pure": 8
+            },
+            "slicesAscii": {
+              "bytes": 12554,
+              "gzipBytes": 4371,
+              "sha256": "baf6874a715ce1bbc75f9676c14c9dacf0184c5b917e54bff8d3f6149785e965",
+              "pure": 8
+            },
+            "slicesParts": {
+              "bytes": 11002,
+              "gzipBytes": 4410,
+              "sha256": "dcea88868673aeb9a3093d06937f75b05542ed26829e5e6b04948b9e6efc8dd6",
+              "pure": 12
+            },
+            "slicesPartsAscii": {
+              "bytes": 11674,
+              "gzipBytes": 4388,
+              "sha256": "bfce3f5c67ea2f5d8fb7a9924d549f9419bf9bddada3b63c97cb955744d3fa00",
+              "pure": 12
+            },
+            "slicesSourceParts": {
+              "bytes": 10939,
+              "gzipBytes": 4427,
+              "sha256": "0e80879549c73f94b5536de60e10c9caf5c103036a7dae426d531b72974ebc80",
+              "pure": 14
+            },
+            "slicesSourcePartsAscii": {
+              "bytes": 11611,
+              "gzipBytes": 4407,
+              "sha256": "fc4a11c2eb73402fa8a15c6e9203a78c6a5310271e162d72805887d1f410da6e",
+              "pure": 14
+            },
+            "all": {
+              "bytes": 14202,
+              "gzipBytes": 4474,
+              "sha256": "a0fc74dcd503883334aa960f230ff44a729c6ab28b0a998e674c75fe3e9b6490",
+              "pure": 16
+            },
+            "allAscii": {
+              "bytes": 14538,
+              "gzipBytes": 4451,
+              "sha256": "96ac212ff9c256729391911751b9b2eb54684c1bf544290c4d4d558dd47c6a6e",
+              "pure": 16
+            },
+            "slicesAll": {
+              "bytes": 10102,
+              "gzipBytes": 4451,
+              "sha256": "06484f2139cb7b657bb337633677d9c417cfe74de5691d6c68e5976127ba6c4d",
+              "pure": 20
+            },
+            "slicesAllAscii": {
+              "bytes": 10438,
+              "gzipBytes": 4426,
+              "sha256": "1aea7bd6e2e35a20ccbacb0ae4102d11aca8e0750e1b8043b5497c8afeacff16",
+              "pure": 20
+            },
+            "partProvenance": {
+              "bytes": 15326,
+              "gzipBytes": 4425,
+              "sha256": "3546c26266045aa816a72e304c2859045547e0916b687ab48a70bb580d42256e",
+              "pure": 8
+            },
+            "partProvenanceAscii": {
+              "bytes": 15998,
+              "gzipBytes": 4404,
+              "sha256": "2872487be0aa376d6ec7b4a9ab9e269e82c1a9b341a7b4e1313ce3fc10f3299f",
+              "pure": 8
+            },
+            "partProvenancePrefix": {
+              "bytes": 15324,
+              "gzipBytes": 4435,
+              "sha256": "ce7ca2d8b25fbb90ce4c590cb4b36c3356d62b68e755f82a898daf94df9dacb9",
+              "pure": 8
+            },
+            "partProvenancePrefixAscii": {
+              "bytes": 15996,
+              "gzipBytes": 4416,
+              "sha256": "966669cd3400de5a046a70099b0bf23431eff9f6bc04de8289ad800856edd627",
+              "pure": 8
+            },
+            "partProvenanceParts": {
+              "bytes": 14973,
+              "gzipBytes": 4460,
+              "sha256": "fe5c8f871fae56ad29ac385538f0339be48fed0300730e61b153118ce45a3080",
+              "pure": 12
+            },
+            "partProvenancePartsAscii": {
+              "bytes": 15645,
+              "gzipBytes": 4440,
+              "sha256": "c82021504435ffdd21ef2120303a346b42e1fa92d04501a0ad06a5ebf9577ad8",
+              "pure": 12
+            },
+            "partProvenancePrefixParts": {
+              "bytes": 14971,
+              "gzipBytes": 4472,
+              "sha256": "f9fe79e68b36f9e2aa70405cd0dad5953c48a053a0352198a277e3fbb25964c1",
+              "pure": 12
+            },
+            "partProvenancePrefixPartsAscii": {
+              "bytes": 15643,
+              "gzipBytes": 4452,
+              "sha256": "5437634a435d5a4ec885a6e3349b4c75274a21cdf1ca96336ce8c54c6114b37c",
+              "pure": 12
+            }
+          },
+          "ordering": [
+            {
+              "order": [
+                "paths",
+                "static",
+                "metadata"
+              ],
+              "earlyCaps": false,
+              "original": {
+                "bytes": 16660,
+                "gzipBytes": 4584,
+                "sha256": "75f4e0ec95b6fd4fb7b6c86c087312de31914e11f4c13a4d055cd465bc63820f"
+              },
+              "terser": {
+                "bytes": 16654,
+                "gzipBytes": 4390,
+                "sha256": "18070354faa2040c3cc0e7beadce97c4411cfdced843de49d8074a27ceeb952c"
+              }
+            },
+            {
+              "order": [
+                "paths",
+                "static",
+                "metadata"
+              ],
+              "earlyCaps": true,
+              "original": {
+                "bytes": 16660,
+                "gzipBytes": 4593,
+                "sha256": "e177176b2cf0588fe54bc06b4ba9c3b8ef7f667e00988fa2adcb2e3881306e9d"
+              },
+              "terser": {
+                "bytes": 16654,
+                "gzipBytes": 4406,
+                "sha256": "f913847434c136029b0a3734f08d6d1d47fcb0024088f82e7d973f23c25447cd"
+              }
+            },
+            {
+              "order": [
+                "paths",
+                "metadata",
+                "static"
+              ],
+              "earlyCaps": false,
+              "original": {
+                "bytes": 16660,
+                "gzipBytes": 4598,
+                "sha256": "cba76315c5c77d7f7d264eb236d3a4a078621a29eeff1e6e00977c2b5fde073b"
+              },
+              "terser": {
+                "bytes": 16654,
+                "gzipBytes": 4404,
+                "sha256": "8a3daa0dfee4138b24f6b118ea31d46ed7b2e8a0d2d15613969fd7922ac97a1e"
+              }
+            },
+            {
+              "order": [
+                "paths",
+                "metadata",
+                "static"
+              ],
+              "earlyCaps": true,
+              "original": {
+                "bytes": 16660,
+                "gzipBytes": 4608,
+                "sha256": "aabee8eae5c6bf4f766e10deef515afd6cad1d6dfac57d8a15fad5d6f8f30b28"
+              },
+              "terser": {
+                "bytes": 16654,
+                "gzipBytes": 4420,
+                "sha256": "737c0ef6e4495acb5f38097fd978faa89307510eeec96b4dbf639b4c5036f30d"
+              }
+            },
+            {
+              "order": [
+                "static",
+                "paths",
+                "metadata"
+              ],
+              "earlyCaps": false,
+              "original": {
+                "bytes": 16660,
+                "gzipBytes": 4593,
+                "sha256": "5865a161c6df0eb2929874eb23bb75a9a1d8af3bdce5bef6a75095492da4f812"
+              },
+              "terser": {
+                "bytes": 16654,
+                "gzipBytes": 4401,
+                "sha256": "0125955c367df04355d779bb318babe11cc0892bce43a34abc829aff78793458"
+              }
+            },
+            {
+              "order": [
+                "static",
+                "paths",
+                "metadata"
+              ],
+              "earlyCaps": true,
+              "original": {
+                "bytes": 16660,
+                "gzipBytes": 4602,
+                "sha256": "5beffc875fecb26ccd0379a748a5feb20bfc487e8a6388f0fce9db20f578d9fa"
+              },
+              "terser": {
+                "bytes": 16654,
+                "gzipBytes": 4414,
+                "sha256": "1dc5287be820ff1d7c86236662b87f9a460efa5e0e6fc967efb0ead19fbf5686"
+              }
+            },
+            {
+              "order": [
+                "static",
+                "metadata",
+                "paths"
+              ],
+              "earlyCaps": false,
+              "original": {
+                "bytes": 16660,
+                "gzipBytes": 4608,
+                "sha256": "b1d390cf20d6e99e790ad9218dd1368d6026514429f1a0f87645d2af3d7c58ef"
+              },
+              "terser": {
+                "bytes": 16654,
+                "gzipBytes": 4409,
+                "sha256": "60435bf258617afa86f7e6e966d7cadb922c0a8c90c39effbe08728376f7a18d"
+              }
+            },
+            {
+              "order": [
+                "static",
+                "metadata",
+                "paths"
+              ],
+              "earlyCaps": true,
+              "original": {
+                "bytes": 16660,
+                "gzipBytes": 4617,
+                "sha256": "9374d8392922c84822f44aaeb9993934c6abc076c8733c3bca778d3d8929b264"
+              },
+              "terser": {
+                "bytes": 16654,
+                "gzipBytes": 4427,
+                "sha256": "d1c30b6a990638cf5eee3346b187f1bd63ced89d8e00f1f55771474ca077b6f0"
+              }
+            },
+            {
+              "order": [
+                "metadata",
+                "static",
+                "paths"
+              ],
+              "earlyCaps": false,
+              "original": {
+                "bytes": 16660,
+                "gzipBytes": 4612,
+                "sha256": "594e467bcb0d97e8ce2e2b962feab3f19a435c5160f8b63d068bab92345b5801"
+              },
+              "terser": {
+                "bytes": 16654,
+                "gzipBytes": 4416,
+                "sha256": "f365db203046c963b30af0f9c3692cbd22b4c4e6944775c246b6ecc1b796d100"
+              }
+            },
+            {
+              "order": [
+                "metadata",
+                "static",
+                "paths"
+              ],
+              "earlyCaps": true,
+              "original": {
+                "bytes": 16660,
+                "gzipBytes": 4626,
+                "sha256": "c996fb89d1c754c41d8db144c33bafcdcd3bb73d202760a17e674cfa7bf7a10c"
+              },
+              "terser": {
+                "bytes": 16654,
+                "gzipBytes": 4445,
+                "sha256": "e4880e328097b4bb68009e297d6ab8fe8c7c4e26d69a21fe5d781e55afddae30"
+              }
+            },
+            {
+              "order": [
+                "metadata",
+                "paths",
+                "static"
+              ],
+              "earlyCaps": false,
+              "original": {
+                "bytes": 16660,
+                "gzipBytes": 4600,
+                "sha256": "7c39f613796815a82106934e9e3d8e5733bf1e105f2d4a0caa96435df76a1701"
+              },
+              "terser": {
+                "bytes": 16654,
+                "gzipBytes": 4410,
+                "sha256": "1bd86eda3844dac47461fab03fd133f8e672064decb7675e4fb953bfa33753ff"
+              }
+            },
+            {
+              "order": [
+                "metadata",
+                "paths",
+                "static"
+              ],
+              "earlyCaps": true,
+              "original": {
+                "bytes": 16660,
+                "gzipBytes": 4618,
+                "sha256": "a027bec3153c6a84627b6665391092a7b12348177a08f2e7f13678b336ff40ed"
+              },
+              "terser": {
+                "bytes": 16654,
+                "gzipBytes": 4439,
+                "sha256": "cab496e0dba05edc68519c9fa99ff1e4531ae890565b2b989e53f03840f18ea7"
+              }
+            }
+          ],
+          "deliberateContractViolation": {
+            "missingRequiredField": "GlyphPart.provenance",
+            "candidate": false,
+            "original": {
+              "bytes": 15309,
+              "gzipBytes": 4215,
+              "sha256": "b65977c1e3efd84c8cf7b90ab0b3ce4d41637b31c841c64bc57209c203c4511b"
+            },
+            "terser": {
+              "bytes": 15456,
+              "gzipBytes": 4132,
+              "sha256": "a2bcab4ade92ca013c9ff6c308a6dd632cd0806e3697cbf98484673429953607"
+            }
+          }
+        },
+        {
+          "icon": "notifications-unread",
+          "baseline": {
+            "bytes": 21576,
+            "gzipBytes": 5463,
+            "sha256": "0aafd7e7f19c5ab9b56d1f4f688579f4b3c27bfe50c0f9c5664f882d4dc16d9b"
+          },
+          "ceilings": {
+            "bytes": 30360,
+            "gzipBytes": 5034
+          },
+          "alternatives": {
+            "current": {
+              "bytes": 20662,
+              "gzipBytes": 5262,
+              "sha256": "b15d7d4a897171187ff77d4e0601bc46cd7e320f83217b7b79410dc641298ce4",
+              "pure": 4
+            },
+            "currentCompress1": {
+              "bytes": 20590,
+              "gzipBytes": 5257,
+              "sha256": "cdadf7e05e707fcd752c556d14b9243076dfbb3faf5ffc918c7b304673f5e91e",
+              "pure": 4
+            },
+            "currentCompress3": {
+              "bytes": 20590,
+              "gzipBytes": 5257,
+              "sha256": "cdadf7e05e707fcd752c556d14b9243076dfbb3faf5ffc918c7b304673f5e91e",
+              "pure": 4
+            },
+            "currentAscii": {
+              "bytes": 21334,
+              "gzipBytes": 5244,
+              "sha256": "9bd2c304eb0d7427d062ae51c5e158a86ada67b762ebdeaf1a5c8cc1aa566787",
+              "pure": 4
+            },
+            "currentAsciiCompress1": {
+              "bytes": 21262,
+              "gzipBytes": 5241,
+              "sha256": "782b7ae1bd72eb6a09c9c8f3297073d4ebc53de7578de92ae1fe367152112149",
+              "pure": 4
+            },
+            "currentAsciiCompress3": {
+              "bytes": 21262,
+              "gzipBytes": 5241,
+              "sha256": "782b7ae1bd72eb6a09c9c8f3297073d4ebc53de7578de92ae1fe367152112149",
+              "pure": 4
+            },
+            "parts": {
+              "bytes": 18536,
+              "gzipBytes": 5220,
+              "sha256": "68b6a6fb9789c7837ff8c0241768ae942f9e9fcbb97156783f0805a7647f3c1d",
+              "pure": 12
+            },
+            "partsAscii": {
+              "bytes": 19208,
+              "gzipBytes": 5197,
+              "sha256": "63afbebe606ea2e016fc1e8ac0458c74b455801742ad77a349c2eebfee88f0f0",
+              "pure": 12
+            },
+            "sourceAndParts": {
+              "bytes": 18464,
+              "gzipBytes": 5241,
+              "sha256": "5612c618f04ae868c43017d3e987969c36f7b08921da154e0cc50f356026633e",
+              "pure": 14
+            },
+            "sourceAndPartsAscii": {
+              "bytes": 19136,
+              "gzipBytes": 5220,
+              "sha256": "3480cc4d5227acf55dcd5436455e25b16c9b432f7e6f3f26e3aabe67c2be71b0",
+              "pure": 14
+            },
+            "slices": {
+              "bytes": 15880,
+              "gzipBytes": 5249,
+              "sha256": "588d14ae459417af3872f0ef0d8c8d11769cb3212611dab9f614559953274397",
+              "pure": 12
+            },
+            "slicesAscii": {
+              "bytes": 16552,
+              "gzipBytes": 5233,
+              "sha256": "dbb466268179968fa1a5f2f2c3bd4d1891590297405f1528849f916158768b79",
+              "pure": 12
+            },
+            "slicesParts": {
+              "bytes": 13754,
+              "gzipBytes": 5207,
+              "sha256": "75d5362ba842eaaaa0b63c87f1e1cf9be51b345d8a5f00849c3632ce53f43df8",
+              "pure": 20
+            },
+            "slicesPartsAscii": {
+              "bytes": 14426,
+              "gzipBytes": 5187,
+              "sha256": "8868ba04a6dcbc060c45e04bf00bec20742910a1b8554477954bde5f340fb519",
+              "pure": 20
+            },
+            "slicesSourceParts": {
+              "bytes": 13682,
+              "gzipBytes": 5225,
+              "sha256": "e779fa3057b364f6ca9db9fdb06c4dab03c0225f8d091a40756198ba184e3b70",
+              "pure": 22
+            },
+            "slicesSourcePartsAscii": {
+              "bytes": 14354,
+              "gzipBytes": 5205,
+              "sha256": "a4f56bba14d6a4cef2d0ddf8bcfa536dcee6087587e9e5d0f197a522de5cc96b",
+              "pure": 22
+            },
+            "all": {
+              "bytes": 17611,
+              "gzipBytes": 5277,
+              "sha256": "35b0028d744407d5fbbd4f51209d362c75ec16a71998582786b4b6c0ef1c0482",
+              "pure": 20
+            },
+            "allAscii": {
+              "bytes": 17947,
+              "gzipBytes": 5256,
+              "sha256": "927d8b7848a735047260dd90c5a825c45bd02049c0729ad013170e1864104eed",
+              "pure": 20
+            },
+            "slicesAll": {
+              "bytes": 12829,
+              "gzipBytes": 5255,
+              "sha256": "d17486edb7de7bd2b2bf7fa65f41e2e0ab00fa57265b69e24e26728c5039c3bc",
+              "pure": 28
+            },
+            "slicesAllAscii": {
+              "bytes": 13165,
+              "gzipBytes": 5237,
+              "sha256": "50edc2244690a43aed16dae3412ffe8d6701c2a82360afc5c09f4b2fc7a4c20b",
+              "pure": 28
+            },
+            "partProvenance": {
+              "bytes": 19171,
+              "gzipBytes": 5245,
+              "sha256": "f36574fe0fd1be72bda0a870cb1f1a6e4311f9ed0bdceb3530ae1c7b62850b6b",
+              "pure": 12
+            },
+            "partProvenanceAscii": {
+              "bytes": 19843,
+              "gzipBytes": 5225,
+              "sha256": "38dfb28fb6ff387a3cd6810924bc77556071c77ce65234470a05373c9f4aa38b",
+              "pure": 12
+            },
+            "partProvenancePrefix": {
+              "bytes": 19141,
+              "gzipBytes": 5257,
+              "sha256": "1a3a3550f88bc5fe7d38fa92bffefcab939d933b68c616bcf2138b31e257a260",
+              "pure": 12
+            },
+            "partProvenancePrefixAscii": {
+              "bytes": 19813,
+              "gzipBytes": 5236,
+              "sha256": "2eca791322ec78fa1233c55afb772496ceefb7c66d4b560a0deab68f63e42a1b",
+              "pure": 12
+            },
+            "partProvenanceParts": {
+              "bytes": 18184,
+              "gzipBytes": 5249,
+              "sha256": "b09dfc8cbf447d82f140a5c88266fd344fca2d996b03530700caa14200f93593",
+              "pure": 20
+            },
+            "partProvenancePartsAscii": {
+              "bytes": 18856,
+              "gzipBytes": 5230,
+              "sha256": "119ac6e250adf06c00ba50b8919b8c94edcac2fbf4fe97783f6e6a68b1be90df",
+              "pure": 20
+            },
+            "partProvenancePrefixParts": {
+              "bytes": 18154,
+              "gzipBytes": 5262,
+              "sha256": "b1578e7d219c2edd22f6674a0de8ef670bd581e081128d510a922c67af1bc71c",
+              "pure": 20
+            },
+            "partProvenancePrefixPartsAscii": {
+              "bytes": 18826,
+              "gzipBytes": 5243,
+              "sha256": "8ba4ad242ae3f041cedcb0125a9de71dcb49df644fe388c78560a47a0da62f9a",
+              "pure": 20
+            }
+          },
+          "ordering": [
+            {
+              "order": [
+                "paths",
+                "static",
+                "metadata"
+              ],
+              "earlyCaps": false,
+              "original": {
+                "bytes": 21576,
+                "gzipBytes": 5463,
+                "sha256": "0aafd7e7f19c5ab9b56d1f4f688579f4b3c27bfe50c0f9c5664f882d4dc16d9b"
+              },
+              "terser": {
+                "bytes": 21334,
+                "gzipBytes": 5244,
+                "sha256": "9bd2c304eb0d7427d062ae51c5e158a86ada67b762ebdeaf1a5c8cc1aa566787"
+              }
+            },
+            {
+              "order": [
+                "paths",
+                "static",
+                "metadata"
+              ],
+              "earlyCaps": true,
+              "original": {
+                "bytes": 21576,
+                "gzipBytes": 5468,
+                "sha256": "c007e0e42826d08621d4aefff4b9e1f07c8f13ab1973f44a72b1b29045866a8d"
+              },
+              "terser": {
+                "bytes": 21334,
+                "gzipBytes": 5264,
+                "sha256": "2a66c22bb7738bd4e5e078fdcc10d9e6de1394b5d7ddf8fb8ea267d3eb49c1c5"
+              }
+            },
+            {
+              "order": [
+                "paths",
+                "metadata",
+                "static"
+              ],
+              "earlyCaps": false,
+              "original": {
+                "bytes": 21576,
+                "gzipBytes": 5484,
+                "sha256": "29e8bc8e0cd39ae44648b7fc941251060d6d6b411683dfa797220eeb9090a971"
+              },
+              "terser": {
+                "bytes": 21334,
+                "gzipBytes": 5268,
+                "sha256": "54f4adf31206c38a81b7916119a7b2cefd22069dcd52e170611573cf500f4166"
+              }
+            },
+            {
+              "order": [
+                "paths",
+                "metadata",
+                "static"
+              ],
+              "earlyCaps": true,
+              "original": {
+                "bytes": 21576,
+                "gzipBytes": 5490,
+                "sha256": "783940e4b24bc4ca74a9907a2ea726cd1e18f8f2c66be57c5b9ecb31f2a50aaa"
+              },
+              "terser": {
+                "bytes": 21334,
+                "gzipBytes": 5283,
+                "sha256": "3f41d64813e03b4c7b9178e8ca105a3ec56f4d694c5fcdaeaa96be4d8f974f68"
+              }
+            },
+            {
+              "order": [
+                "static",
+                "paths",
+                "metadata"
+              ],
+              "earlyCaps": false,
+              "original": {
+                "bytes": 21576,
+                "gzipBytes": 5464,
+                "sha256": "cd867c290a16990ed43ffcfe1e7290efba6d4d38d69cd9c33799ab3c2167282d"
+              },
+              "terser": {
+                "bytes": 21334,
+                "gzipBytes": 5243,
+                "sha256": "d636d6dd9ea4f7448cece7bacb08aeeab39fafc3fe78bbd6174cdd92e108bbdb"
+              }
+            },
+            {
+              "order": [
+                "static",
+                "paths",
+                "metadata"
+              ],
+              "earlyCaps": true,
+              "original": {
+                "bytes": 21576,
+                "gzipBytes": 5473,
+                "sha256": "95b0e9c651429a57616d8c55a03da60e82f68b7d709716b9aea11ceffdf3a600"
+              },
+              "terser": {
+                "bytes": 21334,
+                "gzipBytes": 5261,
+                "sha256": "e84dcacbe1e660bceb96bce3cbd42fb55708d80bd4c0348258d941fef5a974f2"
+              }
+            },
+            {
+              "order": [
+                "static",
+                "metadata",
+                "paths"
+              ],
+              "earlyCaps": false,
+              "original": {
+                "bytes": 21576,
+                "gzipBytes": 5489,
+                "sha256": "7920119b6c3612e3911c631855bbd973bae6381cc01a79298626edf4725bb90c"
+              },
+              "terser": {
+                "bytes": 21334,
+                "gzipBytes": 5267,
+                "sha256": "f7bbed0bf72c07df7c8c04a931106d8e6c19b37770994717cb3d19bacce99114"
+              }
+            },
+            {
+              "order": [
+                "static",
+                "metadata",
+                "paths"
+              ],
+              "earlyCaps": true,
+              "original": {
+                "bytes": 21576,
+                "gzipBytes": 5493,
+                "sha256": "b311d2da7998cb4c2ec22a51dfb523502ceff63b1b5b2f48ca58083986b06190"
+              },
+              "terser": {
+                "bytes": 21334,
+                "gzipBytes": 5284,
+                "sha256": "297f3ac250ef8cfd0ccf7a69af369c9df3aed47a6d51e7c9f771e067c832784d"
+              }
+            },
+            {
+              "order": [
+                "metadata",
+                "static",
+                "paths"
+              ],
+              "earlyCaps": false,
+              "original": {
+                "bytes": 21576,
+                "gzipBytes": 5490,
+                "sha256": "61149237403809f047e7668083dcfb674982c6544ae05537bfab554308eaad18"
+              },
+              "terser": {
+                "bytes": 21334,
+                "gzipBytes": 5273,
+                "sha256": "987b116ff027c96be1841da687d7ec0abc5bfec375d35ca84c016fa5ded71df9"
+              }
+            },
+            {
+              "order": [
+                "metadata",
+                "static",
+                "paths"
+              ],
+              "earlyCaps": true,
+              "original": {
+                "bytes": 21576,
+                "gzipBytes": 5497,
+                "sha256": "c2b926db56180df5dd47f6880df4c03dc680233c669d28fee90d3a759c960166"
+              },
+              "terser": {
+                "bytes": 21334,
+                "gzipBytes": 5292,
+                "sha256": "9102a806630c8a756a3252158b7feb40be8c848c0f5b4bc11404ab940a7177ea"
+              }
+            },
+            {
+              "order": [
+                "metadata",
+                "paths",
+                "static"
+              ],
+              "earlyCaps": false,
+              "original": {
+                "bytes": 21576,
+                "gzipBytes": 5488,
+                "sha256": "7db6397b701045b1011230a41f595aca4cfc6115531f1340c358d3ade07c2ea8"
+              },
+              "terser": {
+                "bytes": 21334,
+                "gzipBytes": 5273,
+                "sha256": "d4c72c97a50980824582d8a6ff173ad4c2f7b0ba75590fed49c5b6368a9d1cf7"
+              }
+            },
+            {
+              "order": [
+                "metadata",
+                "paths",
+                "static"
+              ],
+              "earlyCaps": true,
+              "original": {
+                "bytes": 21576,
+                "gzipBytes": 5496,
+                "sha256": "387682b11c72b630616719cc040d4ea141d7ae93a86a91b0bdff84a09cd7d48f"
+              },
+              "terser": {
+                "bytes": 21334,
+                "gzipBytes": 5297,
+                "sha256": "ea34e5b6f12ee67cac40a1d4e92c4ca16ea8c4798cd00571c359d5503eadd3ff"
+              }
+            }
+          ],
+          "deliberateContractViolation": {
+            "missingRequiredField": "GlyphPart.provenance",
+            "candidate": false,
+            "original": {
+              "bytes": 18962,
+              "gzipBytes": 4861,
+              "sha256": "886d5f4179d6f42e2fd2b1eb5eb0b064f12a981fb1260716cf0326596bca60b0"
+            },
+            "terser": {
+              "bytes": 18881,
+              "gzipBytes": 4760,
+              "sha256": "c97ba8bfa0f84fd8e46b28743254819f32df656a9f4effa6af139775d6aac6cf"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

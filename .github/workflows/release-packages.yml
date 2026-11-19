@@ -1,0 +1,258 @@
+name: Release Icons packages
+
+on:
+  workflow_dispatch:
+    inputs:
+      ci_run_id:
+        description: 'Successful CI run for a merged main commit'
+        type: string
+        required: true
+
+permissions: {}
+concurrency:
+  group: release-icons-packages
+  cancel-in-progress: false
+
+jobs:
+  resolve:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      sha: ${{ steps.source.outputs.sha }}
+      version: ${{ steps.source.outputs.version }}
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - id: source
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CI_RUN_ID: ${{ inputs.ci_run_id }}
+        run: |
+          set -euo pipefail
+          [[ "$GITHUB_REF" == refs/heads/main ]]
+          [[ "$CI_RUN_ID" =~ ^[1-9][0-9]*$ ]]
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$CI_RUN_ID" > "$RUNNER_TEMP/icons-ci.json"
+          node --input-type=module <<'NODE'
+          import { readFileSync, appendFileSync } from 'node:fs';
+          import { execFileSync } from 'node:child_process';
+          const run = JSON.parse(readFileSync(process.env.RUNNER_TEMP + '/icons-ci.json'));
+          if (run.repository.full_name !== process.env.GITHUB_REPOSITORY || run.path !== '.github/workflows/ci.yml' ||
+              run.event !== 'push' || run.head_branch !== 'main' || run.conclusion !== 'success' || run.head_sha !== process.env.GITHUB_SHA) {
+            throw new Error('Release requires successful main CI, including installed catalog and native consumers');
+          }
+          execFileSync('git', ['merge-base', '--is-ancestor', run.head_sha, 'origin/main']);
+          const { version } = JSON.parse(execFileSync('git', ['show', run.head_sha + ':package.json'], { encoding: 'utf8' }));
+          if (!/^\d+\.\d+\.\d+$/.test(version)) throw new Error('Invalid package version');
+          appendFileSync(process.env.GITHUB_OUTPUT, `sha=${run.head_sha}\nversion=${version}\n`);
+          NODE
+
+  publish:
+    needs: resolve
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          ref: ${{ needs.resolve.outputs.sha }}
+          fetch-depth: 0
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.ci_run_id }}
+          name: lab-icons-compose-${{ needs.resolve.outputs.sha }}
+          path: native-artifact
+      - name: Verify the complete Maven graph
+        env:
+          VERSION: ${{ needs.resolve.outputs.version }}
+          SOURCE_SHA: ${{ needs.resolve.outputs.sha }}
+        run: |
+          node --test native/compose/scripts/seal-repository.test.mjs
+          node native/compose/scripts/seal-repository.mjs native-artifact/build/repository "$VERSION" "$SOURCE_SHA"
+      - name: Publish immutable source and Maven tags
+        env:
+          VERSION: ${{ needs.resolve.outputs.version }}
+          SOURCE_SHA: ${{ needs.resolve.outputs.sha }}
+        run: |
+          set -euo pipefail
+          source_tag="v$VERSION"
+          maven_tag="maven-compose-v$VERSION"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          export GIT_INDEX_FILE="$RUNNER_TEMP/icons-maven.index"
+          git read-tree --empty
+          git --work-tree="$GITHUB_WORKSPACE/native-artifact/build/repository" add --all
+          tree=$(git write-tree)
+          unset GIT_INDEX_FILE
+          if git rev-parse --verify "refs/tags/$source_tag" >/dev/null 2>&1; then
+            [[ "$(git rev-list -n 1 "$source_tag")" == "$SOURCE_SHA" ]]
+          else
+            git tag "$source_tag" "$SOURCE_SHA"
+          fi
+          if git rev-parse --verify "refs/tags/$maven_tag" >/dev/null 2>&1; then
+            [[ "$(git rev-parse "$maven_tag^{tree}")" == "$tree" ]]
+          else
+            commit=$(printf 'Maven distribution %s from %s\n' "$VERSION" "$SOURCE_SHA" | git commit-tree "$tree")
+            git tag "$maven_tag" "$commit"
+          fi
+          git push --atomic origin "refs/tags/$source_tag" "refs/tags/$maven_tag"
+
+  javascript-dist:
+    needs: [resolve, publish]
+    permissions:
+      contents: write
+    uses: ./.github/workflows/release-dist.yml
+    with:
+      tag: v${{ needs.resolve.outputs.version }}
+
+  npm:
+    needs: [resolve, publish]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      actions: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          ref: ${{ needs.resolve.outputs.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.ci_run_id }}
+          name: lab-icons-npm-${{ needs.resolve.outputs.sha }}
+          path: npm-artifact
+      - name: Publish the tested tarball through npm Trusted Publishing
+        env:
+          VERSION: ${{ needs.resolve.outputs.version }}
+          SOURCE_SHA: ${{ needs.resolve.outputs.sha }}
+        run: node scripts/publish-npm.mjs npm-artifact "$VERSION" "$SOURCE_SHA"
+      - name: Install the public npm version in an empty consumer
+        env:
+          VERSION: ${{ needs.resolve.outputs.version }}
+          npm_config_cache: ${{ runner.temp }}/icons-public-npm-cache
+        run: |
+          set -euo pipefail
+          mkdir "$RUNNER_TEMP/icons-public-consumer"
+          cd "$RUNNER_TEMP/icons-public-consumer"
+          printf '{"name":"icons-public-consumer","private":true,"type":"module"}\n' > package.json
+          npm install "@labpics/icons@$VERSION" --ignore-scripts --no-audit --no-fund
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import { readFileSync } from 'node:fs';
+          import plus, { outline } from '@labpics/icons/symbols/plus-circle';
+          import { renderIcon } from '@labpics/icons/render';
+          import { createSymbolMotion } from '@labpics/icons/motion';
+          assert.equal(JSON.parse(readFileSync('node_modules/@labpics/icons/package.json')).version, process.env.VERSION);
+          assert(outline.startsWith('<svg'));
+          assert.equal(typeof createSymbolMotion, 'function');
+          assert.notEqual(renderIcon(plus, { size: 20, weight: 600 }), renderIcon(plus, { size: 20, weight: 300 }));
+          console.log('Public npm consumer: source SVG, optical weights and motion API passed');
+          NODE
+
+  verify-public:
+    needs: [resolve, publish]
+    runs-on: macos-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          ref: ${{ needs.resolve.outputs.sha }}
+          persist-credentials: false
+      - uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
+        with:
+          version: 11.13.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - uses: actions/setup-java@ad2b38190b15e4d6bdf0c97fb4fca8412226d287 # v5.3.0
+        with:
+          distribution: temurin
+          java-version: '21'
+      - run: pnpm install --frozen-lockfile
+      - name: Install through the public Maven endpoint without cached Icons
+        env:
+          VERSION: ${{ needs.resolve.outputs.version }}
+          GRADLE_USER_HOME: ${{ runner.temp }}/icons-public-gradle
+        run: |
+          set -euo pipefail
+          node scripts/export-native-symbols.mjs --symbol plus-circle --package pics.lab.icons.consumer.generated --output native/compose/consumer/build/exported
+          bash native/compose/gradlew -p native/compose/consumer run --args=--headless \
+            "-PiconsVersion=$VERSION" \
+            "-PiconsRepository=https://raw.githubusercontent.com/$GITHUB_REPOSITORY/maven-compose-v$VERSION/" \
+            "-PexportedIconSource=$GITHUB_WORKSPACE/native/compose/consumer/build/exported" --refresh-dependencies --console=plain
+
+  release:
+    needs: [resolve, publish, javascript-dist, npm, verify-public]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          ref: ${{ needs.resolve.outputs.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.ci_run_id }}
+          name: lab-icons-catalog-${{ needs.resolve.outputs.sha }}
+          path: catalog-artifact
+      - name: Publish catalog, Maven archive and checksums
+        env:
+          VERSION: ${{ needs.resolve.outputs.version }}
+          SOURCE_SHA: ${{ needs.resolve.outputs.sha }}
+          CI_RUN_ID: ${{ inputs.ci_run_id }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir "$RUNNER_TEMP/icons-release"
+          git archive --format=zip "maven-compose-v$VERSION" -o "$RUNNER_TEMP/icons-release/lab-icons-compose-maven-$VERSION.zip"
+          python3 - "$RUNNER_TEMP/icons-release/lab-icons-catalog-$VERSION.zip" <<'PY'
+          import pathlib, sys, zipfile
+          root = pathlib.Path('catalog-artifact')
+          assert (root / 'index.html').is_file(), 'Catalog index is absent'
+          with zipfile.ZipFile(sys.argv[1], 'w') as archive:
+              for path in sorted(root.rglob('*')):
+                  assert not path.is_symlink(), 'Catalog must contain only regular files'
+                  if path.is_file():
+                      info = zipfile.ZipInfo(path.relative_to(root).as_posix(), (1980, 1, 1, 0, 0, 0))
+                      info.compress_type = zipfile.ZIP_DEFLATED
+                      info.external_attr = 0o100644 << 16
+                      archive.writestr(info, path.read_bytes(), compresslevel=9)
+          PY
+          (cd "$RUNNER_TEMP/icons-release" && sha256sum *.zip > SHA256SUMS.txt)
+          cat > "$RUNNER_TEMP/icons-release-notes.md" <<EOF
+          Lab Icons $VERSION: оптические символы, семантическое движение, Compose, Lottie и самостоятельный каталог.
+
+          Maven repository: https://raw.githubusercontent.com/$GITHUB_REPOSITORY/maven-compose-v$VERSION/
+          Зависимость: pics.lab:icons-compose:$VERSION
+          JavaScript git distribution: v$VERSION-dist
+
+          В корне архива каталога находится index.html; архив распаковывается непосредственно в /icons/.
+          Исходники: $SOURCE_SHA. Проверенный CI: https://github.com/$GITHUB_REPOSITORY/actions/runs/$CI_RUN_ID
+          Перед выпуском отдельный headless consumer установил Maven-пакет по публичному адресу с пустым cache.
+          npm: @labpics/icons@$VERSION. Опубликован проверенный CI tarball; registry integrity и отдельная установка подтверждены.
+          EOF
+          if ! gh release view "v$VERSION" >/dev/null 2>&1; then
+            gh release create "v$VERSION" --verify-tag --title "Lab Icons $VERSION" --notes-file "$RUNNER_TEMP/icons-release-notes.md"
+          fi
+          node scripts/upload-release-assets.mjs "v$VERSION" "$RUNNER_TEMP/icons-release"

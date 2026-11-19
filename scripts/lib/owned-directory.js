@@ -1,10 +1,18 @@
 import { existsSync, renameSync, rmSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
 
 const DEFAULT_FS = Object.freeze({ existsSync, renameSync, rmSync });
 
-function assertDistinctPaths(staging, output, backup) {
-  if (!staging || !output || !backup || new Set([staging, output, backup]).size !== 3) {
-    throw new TypeError('owned directory transaction требует три разных непустых пути');
+function assertSiblingPaths(paths) {
+  if (paths.some(path => typeof path !== 'string' || !path.trim())) {
+    throw new TypeError('owned directory требует разные непустые соседние пути');
+  }
+  const normalized = paths.map(path => {
+    const absolute = resolve(path);
+    return process.platform === 'win32' ? absolute.toLowerCase() : absolute;
+  });
+  if (new Set(normalized).size !== paths.length || new Set(normalized.map(dirname)).size !== 1) {
+    throw new TypeError('owned directory требует разные непустые соседние пути');
   }
 }
 
@@ -16,9 +24,7 @@ function assertDistinctPaths(staging, output, backup) {
  * output уже установлен, а процесс не успел удалить прежний.
  */
 export function recoverOwnedDirectory({ output, backup, fs = DEFAULT_FS }) {
-  if (!output || !backup || output === backup) {
-    throw new TypeError('owned directory recovery требует два разных непустых пути');
-  }
+  assertSiblingPaths([output, backup]);
   if (!fs.existsSync(backup)) return 'clean';
   if (fs.existsSync(output)) {
     fs.rmSync(backup, { recursive: true, force: true });
@@ -34,7 +40,7 @@ export function recoverOwnedDirectory({ output, backup, fs = DEFAULT_FS }) {
  * Crash между rename чинится recoverOwnedDirectory при следующем запуске.
  */
 export function replaceOwnedDirectory({ staging, output, backup, fs = DEFAULT_FS }) {
-  assertDistinctPaths(staging, output, backup);
+  assertSiblingPaths([staging, output, backup]);
   recoverOwnedDirectory({ output, backup, fs });
 
   const hadOutput = fs.existsSync(output);

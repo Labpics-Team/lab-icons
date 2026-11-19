@@ -1,0 +1,26 @@
+{
+  "ok": true,
+  "comparisons": 216,
+  "maximumMeanChannelDifference": 0.304918130446623,
+  "coverageComparisons": 900,
+  "maximumClockAlpha": 94,
+  "live": 0,
+  "groups": [
+    "time/outline",
+    "time/filled",
+    "history/outline",
+    "history/filled"
+  ],
+  "cases": [
+    "9 optical supports",
+    "rest and 12 hours",
+    "transparent/translucent color",
+    "900 translucent poses including hand/enclosure overlap",
+    "common-pivot limb union",
+    "elapsed-hour units",
+    "reverse and interruption",
+    "next-hour continuation including interrupted reset",
+    "selection returns source pose",
+    "dispose"
+  ]
+}

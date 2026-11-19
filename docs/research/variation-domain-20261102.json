@@ -1,0 +1,379 @@
+{
+  "baseline": "633f963f5503e183f468c0d3763a24ec55c94afb",
+  "disposition": "rejected: object domain hoisting regresses selective glyph and capabilities consumers; current emitter is preserved",
+  "head": "f9e352da9e840f5bd055852d75613cee4bc4102f",
+  "candidateEmitterSha256": "afd3fa83490c2ef942e5d2f21b080e90d3b0fe09efbc44b35d6e537b0dea2e29",
+  "candidateEmitterSource": "import { compactDataLiteral, compactGeneratedModule, jsonDataLiteral, literalKey } from './generated-module.js';\n\nconst SYMBOL_NAME = /^[a-z][a-z0-9-]*$/;\n\n/** Единственная release-проекция каталога; wildcard раскрывается в точные файлы. */\nexport function symbolReleaseProjection(base, iconIds, stateGroupIds = [], variationIconIds = []) {\n  const ids = [...iconIds].sort();\n  const groups = [...stateGroupIds].sort();\n  if (new Set(variationIconIds).size !== variationIconIds.length || variationIconIds.some(id => !ids.includes(id))) {\n    throw new TypeError('symbol module projection: variation должна принадлежать авторскому каталогу');\n  }\n  if (new Set(ids).size !== ids.length || ids.some(id => !SYMBOL_NAME.test(id)) ||\n      new Set(groups).size !== groups.length || groups.some(id => !SYMBOL_NAME.test(id))) {\n    throw new TypeError('symbol module projection: невалидные или повторные имена');\n  }\n  const exports = {\n    '.': base.exports['.'],\n    './ir': base.exports['./ir'],\n    './ir/recipes': base.exports['./ir/recipes'],\n    './ir/candidates': base.exports['./ir/candidates'],\n    './ir/render': { types: './dist/ir/render.d.ts', import: './dist/ir/render.js' },\n    './authoring': { types: './dist/authoring/index.d.ts', import: './dist/authoring/index.js' },\n    './motion': { types: './dist/motion/index.d.ts', import: './dist/motion/index.js' },\n    './symbols/*': { types: './dist/symbols/*.d.ts', import: './dist/symbols/*.js' },\n    './lottie/*': { types: './dist/lottie/*.d.ts', import: './dist/lottie/*.js' },\n    ...(groups.length ? { './states/*': { types: './dist/states/*.d.ts', import: './dist/states/*.js' } } : {}),\n  };\n  const publicFiles = Object.entries(exports).flatMap(([key, conditions]) =>\n    key.includes('*')\n      ? (key === './states/*' ? groups : ids).flatMap(id => Object.values(conditions).map(target => target.replace('*', id).slice(2)))\n      : Object.values(conditions).map(target => target.slice(2)));\n  const typeDependencies = ['dist/authoring/design-spec.d.ts', 'dist/ir/author-catalog.generated.d.ts', 'dist/ir/author-provenance.d.ts', 'dist/ir/author-source.d.ts', 'dist/ir/authored-variation.d.ts', 'dist/ir/catalog.generated.d.ts', 'dist/ir/compiler.d.ts', 'dist/ir/request.d.ts', 'dist/ir/lottie-types.d.ts', 'dist/ir/state-types.d.ts'].sort();\n  const runtimeDependencies = ['dist/ir/compiler.js', 'dist/ir/contour-runtime.js', 'dist/ir/request.js', 'dist/ir/symbol-runtime.js', 'dist/ir/lottie-runtime.js'].sort();\n  if (variationIconIds.length) runtimeDependencies.push('dist/ir/variation-runtime.js');\n  if (groups.length) {\n    runtimeDependencies.push('dist/ir/state-runtime.js');\n  }\n  runtimeDependencies.sort();\n  return {\n    version: 7,\n    packageName: base.packageName,\n    primary: base.primary,\n    fallback: base.fallback,\n    files: [...new Set([...publicFiles, ...typeDependencies, ...runtimeDependencies])].sort(),\n    typeDependencies,\n    runtimeDependencies,\n    exports,\n  };\n}\n\nexport function symbolExportName(icon, variant) {\n  return `${icon.replace(/-([a-z0-9])/g, (_, char) => char.toUpperCase())}${variant === 'outline' ? 'Outline' : 'Filled'}`;\n}\n\n/** Build-only ссылки заменяют только названные поля проверенной JSON-проекции. */\nfunction renderJSONRecord(value, references, compact = false) {\n  const serialize = compact ? compactDataLiteral : jsonDataLiteral;\n  if (!references.size) return serialize(value);\n  return `{${Object.entries(value).flatMap(([key, item]) => {\n    const encoded = references.get(key) ?? serialize(item);\n    return encoded === undefined ? [] : [`${literalKey(key, compact)}:${encoded}`];\n  }).join(',')}}`;\n}\n\n/** Компактный символ собирается тем же compiler, которым проверяется общий IR. */\nexport function renderSymbolModule({ icon, source, capabilities, staticSvg, variation }) {\n  if (!SYMBOL_NAME.test(icon)) throw new TypeError('symbol module: невалидное имя');\n  const json = jsonDataLiteral;\n  const record = value => value !== null && typeof value === 'object' && !Array.isArray(value);\n  const shared = [], references = {}, domains = [];\n  for (const variant of ['outline', 'filled']) {\n    const provenance = source[variant]?.provenance, capability = capabilities[variant];\n    references[variant] = new Map();\n    for (const field of ['author', 'anatomy']) {\n      const left = provenance?.[field], right = capability?.[field];\n      // Независимые авторские варианты не объединяются даже при равных receipts.\n      // Расходящиеся или отсутствующие записи остаются исходными JSON-литералами.\n      if (!record(left) || !record(right)) continue;\n      const encoded = json(left);\n      if (encoded !== json(right)) continue;\n      const name = `${variant}${field === 'author' ? 'Author' : 'Anatomy'}`;\n      shared.push({ name, value: left });\n      references[variant].set(field, name);\n    }\n    const domain = variation?.[variant]?.domain, declaredDomain = capability?.variation?.domain;\n    if (record(domain) && record(declaredDomain) && json(domain) === json(declaredDomain)) {\n      domains.push({ name: `${variant}Domain`, variant, value: domain });\n    }\n  }\n  const emit = (compact, shareDomains = false) => {\n    const serialize = compact ? compactDataLiteral : json;\n    const sources = {}, capabilityReferences = new Map(), variationReferences = new Map();\n    for (const variant of ['outline', 'filled']) {\n      const metadata = references[variant];\n      sources[variant] = renderJSONRecord(source[variant], metadata.size\n        ? new Map([['provenance', renderJSONRecord(source[variant].provenance, metadata, compact)]]) : new Map(), compact);\n      const capabilityMetadata = new Map(metadata);\n      const domain = shareDomains && domains.find(item => item.variant === variant);\n      if (domain) {\n        const domainReference = new Map([['domain', domain.name]]);\n        capabilityMetadata.set('variation', renderJSONRecord(capabilities[variant].variation, domainReference, compact));\n        variationReferences.set(variant, renderJSONRecord(variation[variant], domainReference));\n      }\n      if (capabilityMetadata.size) capabilityReferences.set(variant, renderJSONRecord(capabilities[variant], capabilityMetadata, compact));\n    }\n    return [\n    '/** GENERATED: проверенные текущие авторские masters одного символа. */',\n    variation ? \"import { createCompiledCapabilities } from '../ir/symbol-runtime.js';\" :\n      \"import { createCompiledGlyph, createCompiledCapabilities } from '../ir/symbol-runtime.js';\",\n    ...(variation ? [\"import { createCompiledVariationGlyph } from '../ir/variation-runtime.js';\"] : []),\n    `export const outline = ${json(staticSvg.outline)};`,\n    `export const filled = ${json(staticSvg.filled)};`,\n    ...shared.map(({ name, value }) => `const ${name} = ${serialize(value)};`),\n    ...(shareDomains ? domains.map(({ name, value }) => `const ${name} = ${serialize(value)};`) : []),\n    `const outlineSource = ${sources.outline};`,\n    `const filledSource = ${sources.filled};`,\n    `export const glyph = /* @__PURE__ */ ${variation ? 'createCompiledVariationGlyph' : 'createCompiledGlyph'}(${json(icon)}, { outline: outlineSource, filled: filledSource }${variation ? `, ${renderJSONRecord(variation, variationReferences)}` : ''});`,\n    `export const glyphCapabilities = /* @__PURE__ */ createCompiledCapabilities(${renderJSONRecord(capabilities, capabilityReferences, compact)});`,\n    '',\n    ].join('\\n');\n  };\n  // Разделение domain не связывает PURE-фабрики; старые layouts остаются baseline.\n  return compactGeneratedModule([emit(false), emit(true), emit(false, true), emit(true, true)]);\n}\n\nexport function symbolModuleDeclaration(icon, variation = false) {\n  if (!SYMBOL_NAME.test(icon)) throw new TypeError('symbol declaration: невалидное имя');\n  return [\n    \"import type { AuthorSourceGlyph, AuthorSourceCapabilities, AuthorSymbolGlyphRequest } from '../ir/author-source.js';\",\n    ...(variation ? [\"import type { AuthorVariationGlyph, AuthorVariationCapabilities, AuthorVariationGlyphRequest } from '../ir/authored-variation.js';\"] : []),\n    \"import type { IconVariant } from '../ir/compiler.js';\",\n    'export declare const outline: string;',\n    'export declare const filled: string;',\n    `export declare function glyph(request?: AuthorSymbolGlyphRequest): AuthorSourceGlyph<'${icon}'>;`,\n    ...(variation ? [`export declare function glyph(request: AuthorVariationGlyphRequest): AuthorVariationGlyph<'${icon}'>;`] : []),\n    `export declare function glyphCapabilities(variant?: IconVariant): ${variation ? 'AuthorVariationCapabilities' : 'AuthorSourceCapabilities'}<'${icon}'>;`,\n    '',\n  ].join('\\n');\n}\n",
+  "baselineEmitterSha256": "a9a21155a70ffd55ceed20425f2bf098cf33576425259ac0908c9993cfd8901f",
+  "scope": "two families/four masters; generated module and ordinary selective source bundles; no full build, pack, publication, browser or timing qualification",
+  "environment": {
+    "platform": "win32",
+    "arch": "x64",
+    "node": "v24.15.0",
+    "esbuild": "0.28.1",
+    "fflate": "0.8.3",
+    "brotli": "1.2.0",
+    "gzip": {
+      "level": 9,
+      "mtime": 0
+    },
+    "brotliQuality": 11,
+    "target": "es2022"
+  },
+  "rows": [
+    {
+      "icon": "ellipsis-horizontal",
+      "module": {
+        "baseline": {
+          "bytes": 26704,
+          "gzipBytes": 4002,
+          "brotliBytes": 3175,
+          "sha256": "e7db373f5af7d873815adde143543e9a5ccaad014bf9ddc60330df84f6874cba"
+        },
+        "actual": {
+          "bytes": 23647,
+          "gzipBytes": 3990,
+          "brotliBytes": 3184,
+          "sha256": "cb263f5b669d9a5b2cca0de02238925fe61c2a0fbdf4a5efee7acada4e58557f"
+        }
+      },
+      "consumers": {
+        "glyph": {
+          "baseline": {
+            "bytes": 27284,
+            "gzipBytes": 7422,
+            "brotliBytes": 6207,
+            "sha256": "9d06971442a1a5cc37c486d4bd48cd4fcc8f7b4b56009da0f3a1de69c5a06e87",
+            "resultSha256": "68050b63ba3939fc3d4638f3d44e9d6d48a2a65f6ecce062b666f8184ec0e930",
+            "inputs": [
+              "<stdin>",
+              "src/ir/authored-variation.ts",
+              "src/ir/catalog.generated.ts",
+              "src/ir/request.ts",
+              "src/ir/sha256.ts",
+              "src/ir/svg-assembly.ts",
+              "src/ir/symbol-runtime.ts",
+              "symbol:symbol"
+            ]
+          },
+          "actual": {
+            "bytes": 27296,
+            "gzipBytes": 7439,
+            "brotliBytes": 6249,
+            "sha256": "65725ca95bbec4615108030cb6c54919f72cffb125c3e28dc389f1d0d323692e",
+            "resultSha256": "68050b63ba3939fc3d4638f3d44e9d6d48a2a65f6ecce062b666f8184ec0e930",
+            "inputs": [
+              "<stdin>",
+              "src/ir/authored-variation.ts",
+              "src/ir/catalog.generated.ts",
+              "src/ir/request.ts",
+              "src/ir/sha256.ts",
+              "src/ir/svg-assembly.ts",
+              "src/ir/symbol-runtime.ts",
+              "symbol:symbol"
+            ]
+          }
+        },
+        "capabilities": {
+          "baseline": {
+            "bytes": 10545,
+            "gzipBytes": 2160,
+            "brotliBytes": 1791,
+            "sha256": "edef4f0e27e71cbd39033d19a9560170cae4a06caa661357926f2861583520ca",
+            "resultSha256": "b6a7eb481f6a951f8b659ae03fa291dc3d8d2429701cb224750309fe06f7d6f0",
+            "inputs": [
+              "<stdin>",
+              "src/ir/authored-variation.ts",
+              "src/ir/catalog.generated.ts",
+              "src/ir/request.ts",
+              "src/ir/sha256.ts",
+              "src/ir/svg-assembly.ts",
+              "src/ir/symbol-runtime.ts",
+              "symbol:symbol"
+            ]
+          },
+          "actual": {
+            "bytes": 10553,
+            "gzipBytes": 2169,
+            "brotliBytes": 1813,
+            "sha256": "079485d20af5db7e5d7b38987ac3704969486d3ee2bf4296f15c6003f7483e3a",
+            "resultSha256": "b6a7eb481f6a951f8b659ae03fa291dc3d8d2429701cb224750309fe06f7d6f0",
+            "inputs": [
+              "<stdin>",
+              "src/ir/authored-variation.ts",
+              "src/ir/catalog.generated.ts",
+              "src/ir/request.ts",
+              "src/ir/sha256.ts",
+              "src/ir/svg-assembly.ts",
+              "src/ir/symbol-runtime.ts",
+              "symbol:symbol"
+            ]
+          }
+        },
+        "both": {
+          "baseline": {
+            "bytes": 36028,
+            "gzipBytes": 8119,
+            "brotliBytes": 6764,
+            "sha256": "3d0e1cc857494e3b3d2047092baae9a69d6af686b98fd45e174dc18ff0496c4c",
+            "resultSha256": "2c3e643dedbdd3f684daf0da6b1d17292fe9627550927c0d9462561ed97fbe5f",
+            "inputs": [
+              "<stdin>",
+              "src/ir/authored-variation.ts",
+              "src/ir/catalog.generated.ts",
+              "src/ir/request.ts",
+              "src/ir/sha256.ts",
+              "src/ir/svg-assembly.ts",
+              "src/ir/symbol-runtime.ts",
+              "symbol:symbol"
+            ]
+          },
+          "actual": {
+            "bytes": 33156,
+            "gzipBytes": 8096,
+            "brotliBytes": 6766,
+            "sha256": "cc213c421415e082eec588d4a76b4b4f47c64ecc840ff0f148bf02bfd9737f0b",
+            "resultSha256": "2c3e643dedbdd3f684daf0da6b1d17292fe9627550927c0d9462561ed97fbe5f",
+            "inputs": [
+              "<stdin>",
+              "src/ir/authored-variation.ts",
+              "src/ir/catalog.generated.ts",
+              "src/ir/request.ts",
+              "src/ir/sha256.ts",
+              "src/ir/svg-assembly.ts",
+              "src/ir/symbol-runtime.ts",
+              "symbol:symbol"
+            ]
+          }
+        },
+        "static": {
+          "baseline": {
+            "bytes": 819,
+            "gzipBytes": 339,
+            "brotliBytes": 274,
+            "sha256": "79ff59082d1e4c2f018da00eda4d3bc889042aaeae025762ffd2ba609e1a6893",
+            "resultSha256": "3c86064f87759536f42f407b16a1d5ee84ccd790af6e69892b3b63bbae35eecf",
+            "inputs": [
+              "<stdin>",
+              "src/ir/authored-variation.ts",
+              "src/ir/catalog.generated.ts",
+              "src/ir/request.ts",
+              "src/ir/sha256.ts",
+              "src/ir/svg-assembly.ts",
+              "src/ir/symbol-runtime.ts",
+              "symbol:symbol"
+            ]
+          },
+          "actual": {
+            "bytes": 819,
+            "gzipBytes": 339,
+            "brotliBytes": 274,
+            "sha256": "79ff59082d1e4c2f018da00eda4d3bc889042aaeae025762ffd2ba609e1a6893",
+            "resultSha256": "3c86064f87759536f42f407b16a1d5ee84ccd790af6e69892b3b63bbae35eecf",
+            "inputs": [
+              "<stdin>",
+              "src/ir/authored-variation.ts",
+              "src/ir/catalog.generated.ts",
+              "src/ir/request.ts",
+              "src/ir/sha256.ts",
+              "src/ir/svg-assembly.ts",
+              "src/ir/symbol-runtime.ts",
+              "symbol:symbol"
+            ]
+          }
+        }
+      },
+      "domainOccurrences": {
+        "baseline": 4,
+        "actual": 2
+      },
+      "masters": {
+        "outline": {
+          "masterSha256": "2d809cc6e544a60ea8d97da5c3159b780263fd9637dba833a009a85c3cc6c681",
+          "geometrySha256": "b5e5a1509818edf6408ae7bea885fe2056174d2f624c499511a99792c11ffe6d"
+        },
+        "filled": {
+          "masterSha256": "117152d7d2fa2b9ffc41f864d1def693a238ffd50645949ecf11e49aa850142e",
+          "geometrySha256": "e6ba9389d340e577dfffafb3d0561e798f4faaa8998f941debd424149cea05ef"
+        }
+      }
+    },
+    {
+      "icon": "ellipsis-vertical",
+      "module": {
+        "baseline": {
+          "bytes": 22142,
+          "gzipBytes": 3490,
+          "brotliBytes": 2816,
+          "sha256": "e2210ee7b36fb73f92f4061aa67442e460ec88116fe2a83195c7c435fc46f999"
+        },
+        "actual": {
+          "bytes": 19212,
+          "gzipBytes": 3490,
+          "brotliBytes": 2863,
+          "sha256": "12e13f0c8d3ad0af0b4bf4ff21a06d41dd277604ae1ad78f2cc5ae6092aa9de4"
+        }
+      },
+      "consumers": {
+        "glyph": {
+          "baseline": {
+            "bytes": 27031,
+            "gzipBytes": 7378,
+            "brotliBytes": 6206,
+            "sha256": "6521bf5d0552f1c5a703ddd65e74235b0aaae22f7a2724d03b580d6a43667b02",
+            "resultSha256": "9163dbb7a6b2c8fd1e70d61b5c9ac31d5eec0e8f5b0ef255c51f826acdc93bd4",
+            "inputs": [
+              "<stdin>",
+              "src/ir/authored-variation.ts",
+              "src/ir/catalog.generated.ts",
+              "src/ir/request.ts",
+              "src/ir/sha256.ts",
+              "src/ir/svg-assembly.ts",
+              "src/ir/symbol-runtime.ts",
+              "symbol:symbol"
+            ]
+          },
+          "actual": {
+            "bytes": 27043,
+            "gzipBytes": 7393,
+            "brotliBytes": 6237,
+            "sha256": "bf1f24af21ae74264d02ec2d8ab20c2b8483733d0b01a4efd00779a9fdeab4b4",
+            "resultSha256": "9163dbb7a6b2c8fd1e70d61b5c9ac31d5eec0e8f5b0ef255c51f826acdc93bd4",
+            "inputs": [
+              "<stdin>",
+              "src/ir/authored-variation.ts",
+              "src/ir/catalog.generated.ts",
+              "src/ir/request.ts",
+              "src/ir/sha256.ts",
+              "src/ir/svg-assembly.ts",
+              "src/ir/symbol-runtime.ts",
+              "symbol:symbol"
+            ]
+          }
+        },
+        "capabilities": {
+          "baseline": {
+            "bytes": 5760,
+            "gzipBytes": 1642,
+            "brotliBytes": 1422,
+            "sha256": "d91c32e752af95de4015c9246d8bb22fba68d1f9ecbdbdf0399a79bc4d3ad4ec",
+            "resultSha256": "63dad172d942db8edc8819557f14069280c8a99eb21fd720e0a7ba37963adff0",
+            "inputs": [
+              "<stdin>",
+              "src/ir/authored-variation.ts",
+              "src/ir/catalog.generated.ts",
+              "src/ir/request.ts",
+              "src/ir/sha256.ts",
+              "src/ir/svg-assembly.ts",
+              "src/ir/symbol-runtime.ts",
+              "symbol:symbol"
+            ]
+          },
+          "actual": {
+            "bytes": 5768,
+            "gzipBytes": 1662,
+            "brotliBytes": 1433,
+            "sha256": "09737eb38244c2860f1497090b99e5e32f9a9845f342d9a9d4d3762407da7380",
+            "resultSha256": "63dad172d942db8edc8819557f14069280c8a99eb21fd720e0a7ba37963adff0",
+            "inputs": [
+              "<stdin>",
+              "src/ir/authored-variation.ts",
+              "src/ir/catalog.generated.ts",
+              "src/ir/request.ts",
+              "src/ir/sha256.ts",
+              "src/ir/svg-assembly.ts",
+              "src/ir/symbol-runtime.ts",
+              "symbol:symbol"
+            ]
+          }
+        },
+        "both": {
+          "baseline": {
+            "bytes": 30990,
+            "gzipBytes": 7653,
+            "brotliBytes": 6429,
+            "sha256": "d96013247859f9edced108b4ab3399b7616fa0a1090a2c8fe71cf9bbbbbecd4b",
+            "resultSha256": "d66d9cebc61e51f0ecabb12e854f277e271cf179bb021543a9bbbc5ccaf1550b",
+            "inputs": [
+              "<stdin>",
+              "src/ir/authored-variation.ts",
+              "src/ir/catalog.generated.ts",
+              "src/ir/request.ts",
+              "src/ir/sha256.ts",
+              "src/ir/svg-assembly.ts",
+              "src/ir/symbol-runtime.ts",
+              "symbol:symbol"
+            ]
+          },
+          "actual": {
+            "bytes": 28245,
+            "gzipBytes": 7632,
+            "brotliBytes": 6438,
+            "sha256": "713ce0e0ecec30ee23a3a5b614da1c5d97c8a819aacbd5e6ed0d941b3bbd8974",
+            "resultSha256": "d66d9cebc61e51f0ecabb12e854f277e271cf179bb021543a9bbbc5ccaf1550b",
+            "inputs": [
+              "<stdin>",
+              "src/ir/authored-variation.ts",
+              "src/ir/catalog.generated.ts",
+              "src/ir/request.ts",
+              "src/ir/sha256.ts",
+              "src/ir/svg-assembly.ts",
+              "src/ir/symbol-runtime.ts",
+              "symbol:symbol"
+            ]
+          }
+        },
+        "static": {
+          "baseline": {
+            "bytes": 819,
+            "gzipBytes": 341,
+            "brotliBytes": 280,
+            "sha256": "94124b2ea460b3e1bab97bae0b80cfdc353144189d4a4e731f18db47ed97ae00",
+            "resultSha256": "6c6a6197d81df0166df6de074644dbaa07863917f1c761525a5190954dab05a6",
+            "inputs": [
+              "<stdin>",
+              "src/ir/authored-variation.ts",
+              "src/ir/catalog.generated.ts",
+              "src/ir/request.ts",
+              "src/ir/sha256.ts",
+              "src/ir/svg-assembly.ts",
+              "src/ir/symbol-runtime.ts",
+              "symbol:symbol"
+            ]
+          },
+          "actual": {
+            "bytes": 819,
+            "gzipBytes": 341,
+            "brotliBytes": 280,
+            "sha256": "433c69573efcd4adbb0ba0517025b5dca16ad778d03bb816e42f3ffd3947d34c",
+            "resultSha256": "6c6a6197d81df0166df6de074644dbaa07863917f1c761525a5190954dab05a6",
+            "inputs": [
+              "<stdin>",
+              "src/ir/authored-variation.ts",
+              "src/ir/catalog.generated.ts",
+              "src/ir/request.ts",
+              "src/ir/sha256.ts",
+              "src/ir/svg-assembly.ts",
+              "src/ir/symbol-runtime.ts",
+              "symbol:symbol"
+            ]
+          }
+        }
+      },
+      "domainOccurrences": {
+        "baseline": 4,
+        "actual": 2
+      },
+      "masters": {
+        "outline": {
+          "masterSha256": "c488b01da737ddf19adf1336b05a14c0c246d69d3456aea7e1c9dfe25e3ef9ed",
+          "geometrySha256": "d18a887ab1f3a39af597dc30d50e337c3d4cde54790a2137cd9ad20445a4f154"
+        },
+        "filled": {
+          "masterSha256": "a80a27a7e4d942c07bcd2f8788d88020ab67559113fde5083c10ab7461ba98ba",
+          "geometrySha256": "84fbaa25755863572f8bba7c172d4c896225d54bd049ef9e731ce7e6c8888373"
+        }
+      }
+    }
+  ]
+}

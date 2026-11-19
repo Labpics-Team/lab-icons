@@ -1,0 +1,129 @@
+{
+  "baselineSha": "581575438c00c78c1878ed7d4f580ead43d93fb5",
+  "capturedAt": "2026-11-02T16:46:36.772Z",
+  "scope": "Actual single-entry declaration emission and installed-layout public type consumers. No full build, pack, consumer install, runtime, browser or CI qualification.",
+  "sourceSha256": "bf463b5969ca099ce1575ba17da2c51a081ad20f1c2847993f60949b1b41bb49",
+  "environment": {
+    "node": "v24.15.0",
+    "platform": "win32",
+    "arch": "x64",
+    "typescript": "7.0.2",
+    "vitest": "4.1.12",
+    "gzip": {
+      "fflate": "0.8.3",
+      "level": 9,
+      "mtime": 0
+    }
+  },
+  "ceilings": {
+    "raw": 8762,
+    "gzip": 2302
+  },
+  "initialDeclarationProjections": {
+    "baseline": {
+      "raw": 9290,
+      "gzip": 2364,
+      "sha256": "e630a6ab4a6952032c9de0958e29b632476e14be6642fb18c735991cc93368ba"
+    },
+    "comments": {
+      "raw": 9052,
+      "gzip": 2240,
+      "sha256": "7eeace1dd16cea077b79d3e6584d515d7b7af6657dce9b397220adb217612911"
+    },
+    "namespaces": {
+      "raw": 9011,
+      "gzip": 2357,
+      "sha256": "094577834639efd8925d9b5e1abbfda6965a5982f93c60f0bacbf08db8a8936f"
+    },
+    "aliases": {
+      "raw": 9381,
+      "gzip": 2406,
+      "sha256": "6f2f13079287cff2723d0571fc55cf6ed6482d1315de7cf278084915d6c64d55"
+    },
+    "commentsNamespaces": {
+      "raw": 8773,
+      "gzip": 2234,
+      "sha256": "69c66afef5f304d6e77428b78743df779d4054b2ec1a6ba1a9b6f3ed23afbe68"
+    },
+    "commentsAliases": {
+      "raw": 9143,
+      "gzip": 2283,
+      "sha256": "a62c7791e084dc0e14867b1929f4e02142fb205bc5e41164488f1e21c54233ed"
+    }
+  },
+  "actualEmission": {
+    "baseline": {
+      "raw": 9290,
+      "gzip": 2364,
+      "sha256": "e630a6ab4a6952032c9de0958e29b632476e14be6642fb18c735991cc93368ba"
+    },
+    "actual": {
+      "raw": 8750,
+      "gzip": 2238,
+      "sha256": "19fa244ef6214468e95c9b42e451bfb96356e8b4f0ee4b4ab5dd45603c935034"
+    },
+    "changedDeclarations": [
+      "ir/glyph-types.d.ts"
+    ],
+    "allFilesSame": true,
+    "normalizedPublicTypeBodiesEqual": true,
+    "typeImportsSameTargets": true,
+    "closure": {
+      "baseline": {
+        "files": [
+          "ir/author-annulus-types.d.ts",
+          "ir/author-capsule-types.d.ts",
+          "ir/author-catalog.generated.d.ts",
+          "ir/author-content-types.d.ts",
+          "ir/author-provenance.d.ts",
+          "ir/author-source.d.ts",
+          "ir/authored-variation.d.ts",
+          "ir/catalog.generated.d.ts",
+          "ir/glyph-types.d.ts",
+          "ir/paint-types.d.ts"
+        ],
+        "individuallyCompressedTotals": {
+          "raw": 32927,
+          "gzip": 10435
+        }
+      },
+      "actual": {
+        "files": [
+          "ir/author-annulus-types.d.ts",
+          "ir/author-capsule-types.d.ts",
+          "ir/author-catalog.generated.d.ts",
+          "ir/author-content-types.d.ts",
+          "ir/author-provenance.d.ts",
+          "ir/author-source.d.ts",
+          "ir/authored-variation.d.ts",
+          "ir/catalog.generated.d.ts",
+          "ir/glyph-types.d.ts",
+          "ir/paint-types.d.ts"
+        ],
+        "individuallyCompressedTotals": {
+          "raw": 32387,
+          "gzip": 10309
+        }
+      }
+    }
+  },
+  "consumers": {
+    "resolutions": [
+      "Bundler",
+      "NodeNext"
+    ],
+    "skipLibCheck": false,
+    "tests": [
+      "test/capsule-width-types.test.js",
+      "test/content-optin-types.test.js",
+      "test/authored-annulus-types.test.js",
+      "test/authored-variation-types.test.js"
+    ],
+    "passed": 4,
+    "fixture": "Exact copied source/scripts/test files in an isolated E-drive fixture with its own dependencies; no junctions or dependency aliases.",
+    "harnessCorrections": [
+      "Initialize fixture-only Git to supply the existing source enumeration test.",
+      "Use 30000ms timeout for the existing 5.36s type-boundary test. The repository test/source logic was unchanged."
+    ]
+  }
+}

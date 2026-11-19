@@ -2,7 +2,8 @@
 // Фикстурный RED: модуль с утечкой (лишний runtime-экспорт) против снапшота
 // без неё обязан валить чекер; совпадение — зелёное.
 import { execFileSync } from 'node:child_process';
-import { copyFileSync, mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { copyFileSync, mkdtempSync, mkdirSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -10,6 +11,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { serializeExportSurface } from '../scripts/lib/export-surface.js';
 
 const REPO = join(dirname(fileURLToPath(import.meta.url)), '..');
+const require = createRequire(import.meta.url);
 
 const roots = [];
 afterEach(() => {
@@ -35,9 +37,14 @@ function makeFixtureRoot({ moduleSource, snapshot }) {
     'scripts/check-export-surface.js',
     'scripts/generate-export-surface.js',
     'scripts/lib/export-surface.js',
+    'scripts/lib/release-contract.js',
   ]) {
     copyFileSync(join(REPO, rel), join(root, rel));
   }
+  // Реальный expander импортирует esbuild; восстанавливаем его dependency,
+  // не подменяя production helper упрощённым test double.
+  mkdirSync(join(root, 'node_modules'));
+  symlinkSync(dirname(require.resolve('esbuild/package.json')), join(root, 'node_modules', 'esbuild'), 'junction');
   return root;
 }
 

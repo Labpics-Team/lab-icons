@@ -9,15 +9,15 @@
 
 import { parsePathData, pathBBox } from './path-data.js';
 
-const SVG_TAG_RE = /<svg\b[^>]*>/i;
-const PATH_TAG_RE = /<path\b[^>]*>/gi;
-const FILL_RULE_CONTAINER_RE = /<(?:svg|g)\b[^>]*>/gi;
+const SVG_TAG_RE = /<svg\b[^>]*>/;
+const PATH_TAG_RE = /<path\b[^>]*>/g;
+const FILL_RULE_CONTAINER_RE = /<(?:svg|g)\b[^>]*>/g;
 const CSS_WIDE_FILL_RULES = new Set(['inherit', 'unset', 'revert', 'revert-layer']);
 
 /** Значение quoted-атрибута тега; имя обязано начинаться после whitespace. */
 function attributeValue(tag, name) {
   const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const match = tag.match(new RegExp(`(?:^|\\s)${escaped}\\s*=\\s*(?:"([^"]*)"|'([^']*)')`, 'i'));
+  const match = tag.match(new RegExp(`(?:^|\\s)${escaped}\\s*=\\s*(?:"([^"]*)"|'([^']*)')`));
   return match ? (match[1] ?? match[2] ?? '') : null;
 }
 
@@ -27,6 +27,9 @@ function attributeValue(tag, name) {
  * Нормализация: m→M + явная l перед неявным относительным хвостом.
  */
 function normalizeHead(d) {
+  // Все callers, включая удаляемый viewport clip, обязаны проверить исходный
+  // язык до lowering. Нормализация не исправляет невалидный авторский ввод.
+  parsePathData(d);
   // СТРОГОЕ SVG-число: один знак, максимум одна точка, опц. экспонента —
   // жадный [\d.]+ склеивал «7.57.62.5» в одно «число» и ломал radio.
   const num = String.raw`[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?`;
@@ -269,6 +272,29 @@ export function lowerViewportIdentityClip(svgContent) {
   return `${svgTag}${renderedBody}</svg>`;
 }
 
+function openingTagAttributes(tag) {
+  const head = tag.match(/^<([a-z][\w:-]*)\b/i);
+  if (!head) throw new Error('icon-geometry: невалидный opening tag');
+  let rest = tag.slice(head[0].length).replace(/\/?\s*>$/, '');
+  const parsed = new Map();
+  while (rest.trim() !== '') {
+    const match = rest.match(/^\s+([a-z_:][\w:.-]*)\s*=\s*(?:"([^"]*)"|'([^']*)')/i);
+    if (!match) throw new Error(`icon-geometry: невалидные атрибуты <${head[1]}>`);
+    const name = match[1];
+    if (parsed.has(name)) throw new Error(`icon-geometry: повторён атрибут ${name}`);
+    parsed.set(name, match[2] ?? match[3] ?? '');
+    rest = rest.slice(match[0].length);
+  }
+  return parsed;
+}
+
+/** XML-нормализация не должна стирать невалидные атрибуты, включая IR metadata. */
+export function assertSourceAttributeSyntax(svgContent) {
+  for (const tag of svgContent.match(/<[a-z][\w:-]*\b[^>]*>/gi) ?? []) {
+    openingTagAttributes(tag);
+  }
+}
+
 /**
  * Закрытый source-язык после lowering: svg + fill-paths. Иначе fingerprint
  * path-data не является fingerprint отображения (transform/mask/stroke могли
@@ -276,7 +302,7 @@ export function lowerViewportIdentityClip(svgContent) {
  */
 function assertSupportedRenderedLanguage(svgContent, { artifact }) {
   const document = svgContent.trim();
-  const root = document.match(/^<svg\b[^>]*>([\s\S]*)<\/svg>$/i);
+  const root = document.match(/^<svg\b[^>]*>([\s\S]*)<\/svg>$/);
   const openingSvgCount = document.match(/<svg\b/gi)?.length ?? 0;
   const closingSvgCount = document.match(/<\/svg\s*>/gi)?.length ?? 0;
   if (!root || openingSvgCount !== 1 || closingSvgCount !== 1) {
@@ -293,7 +319,7 @@ function assertSupportedRenderedLanguage(svgContent, { artifact }) {
 
   const allowedTags = new Set(['svg', 'path']);
   for (const match of svgContent.matchAll(/<\/?([a-z][\w:-]*)\b[^>]*>/gi)) {
-    const tagName = match[1].toLowerCase();
+    const tagName = match[1];
     if (!allowedTags.has(tagName)) {
       throw new Error(
         `icon-geometry: <${match[1]}> вне закрытого source-языка svg+path`,
@@ -301,26 +327,10 @@ function assertSupportedRenderedLanguage(svgContent, { artifact }) {
     }
   }
 
-  const attributes = (tag) => {
-    const head = tag.match(/^<([a-z][\w:-]*)\b/i);
-    if (!head) throw new Error('icon-geometry: невалидный opening tag');
-    let rest = tag.slice(head[0].length).replace(/\/?\s*>$/, '');
-    const parsed = new Map();
-    while (rest.trim() !== '') {
-      const match = rest.match(/^\s+([a-z_:][\w:.-]*)\s*=\s*(?:"([^"]*)"|'([^']*)')/i);
-      if (!match) throw new Error(`icon-geometry: невалидные атрибуты <${head[1]}>`);
-      const name = match[1].toLowerCase();
-      if (parsed.has(name)) throw new Error(`icon-geometry: повторён атрибут ${name}`);
-      parsed.set(name, match[2] ?? match[3] ?? '');
-      rest = rest.slice(match[0].length);
-    }
-    return parsed;
-  };
-
   const svgTag = svgContent.match(SVG_TAG_RE)?.[0];
   if (!svgTag) throw new Error('icon-geometry: source обязан иметь корневой <svg>');
-  const rootAttrs = attributes(svgTag);
-  const allowedRootAttrs = new Set(['viewbox', 'xmlns', 'width', 'height', 'fill']);
+  const rootAttrs = openingTagAttributes(svgTag);
+  const allowedRootAttrs = new Set(['viewBox', 'xmlns', 'width', 'height', 'fill']);
   for (const name of rootAttrs.keys()) {
     if (!allowedRootAttrs.has(name)) {
       throw new Error(`icon-geometry: svg.${name} вне закрытого source-языка`);
@@ -328,7 +338,7 @@ function assertSupportedRenderedLanguage(svgContent, { artifact }) {
   }
   if (
     JSON.stringify(parsedViewBox(svgContent)) !== '[0,0,24,24]' ||
-    rootAttrs.get('viewbox')?.trim() !== '0 0 24 24'
+    rootAttrs.get('viewBox')?.trim() !== '0 0 24 24'
   ) {
     throw new Error('icon-geometry: source viewBox обязан быть literal 0 0 24 24');
   }
@@ -349,7 +359,7 @@ function assertSupportedRenderedLanguage(svgContent, { artifact }) {
   }
 
   for (const pathTag of svgContent.match(PATH_TAG_RE) ?? []) {
-    const pathAttrs = attributes(pathTag);
+    const pathAttrs = openingTagAttributes(pathTag);
     const allowedPathAttrs = new Set(['d', 'fill', 'fill-rule', 'clip-rule', 'style']);
     for (const name of pathAttrs.keys()) {
       if (!allowedPathAttrs.has(name)) {

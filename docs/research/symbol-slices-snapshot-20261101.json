@@ -1,0 +1,116 @@
+{
+  "algorithm": "sha256 over canonical JSON of sorted path+sha256 records",
+  "snapshot": "0979a0a9ac11c79991c5980ba83b2699203cb753218a2643e2ad89b071979758",
+  "capturedAt": "2026-11-01T02:58:26.627Z",
+  "sourceSha": "72e6c38d3fb081b4df53d47f5d3f4335c79e9d0c",
+  "files": [
+    {
+      "path": "README.md",
+      "sha256": "e1b47802b2c001c03dddd09502b5c89beb845ff30753f515b6f96bedd612de90"
+    },
+    {
+      "path": "docs/README.md",
+      "sha256": "4ea80250d89b1ef165ffede46d6ee26022ce2080f00daf3973e3016fbdd745a8"
+    },
+    {
+      "path": "docs/package.md",
+      "sha256": "7cf3da713994ddbdc044b3377f5c5422dd2ae121392f8e7b82c4b366f505d71b"
+    },
+    {
+      "path": "docs/symbol-modules.md",
+      "sha256": "dcc8a56efcee47be1f18988820aaa1cb710e7e25043f39e9a01aab93525a9436"
+    },
+    {
+      "path": "package.json",
+      "sha256": "652b85d3b130f4e9e3b757885e9eb2b0cc23d656aa4ef45a1ff23a5d4c7b2f8f"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "sha256": "7e768bf8f638239ac555ca9b1f97716525701b10fadd1089559040a4b3299a92"
+    },
+    {
+      "path": "release/contract.json",
+      "sha256": "7b4b82d3394f7d3a833be6a4b70047a5c43388803995939bed9a1ffffcb87beb"
+    },
+    {
+      "path": "scripts/build-ir.mjs",
+      "sha256": "a3f4b782480d14d291e75fcdfc2a607709b942c86c80cd6d834081bd21297cbb"
+    },
+    {
+      "path": "scripts/check-consumer-size.js",
+      "sha256": "3e56c0ca47e3ebe7a18b05b231035f1ef7e75e490e5197607886cd31d9cb9d6b"
+    },
+    {
+      "path": "scripts/check-package-artifact.js",
+      "sha256": "5826323c9b0ab5a24351b448a0dd34b0691b3e2d0d729fdf05ae33f41c11bad7"
+    },
+    {
+      "path": "scripts/generate-symbol-surface.mjs",
+      "sha256": "ce3e1ff3a81fb8ec6990df181c999b6ef6504cdf7c913a461bcbd18b759fb196"
+    },
+    {
+      "path": "scripts/lib/export-surface.js",
+      "sha256": "aa914618f4d1beb02f8557ddeb4c50b9e8a7e3e863a3920c793263470b6742d4"
+    },
+    {
+      "path": "scripts/lib/release-contract.js",
+      "sha256": "587be0577e6a2a1964e1002c5f81363b850a87995ad2571fe737b68e84265d98"
+    },
+    {
+      "path": "scripts/lib/symbol-modules.js",
+      "sha256": "d033241c11640f3543ad21bca1c4bbef97c7a07c41e0ac548ffc5ea702afbdc5"
+    },
+    {
+      "path": "scripts/measure-platform-artifacts.mjs",
+      "sha256": "b93bfc1421edf2b96b39640808d4d4679cdc3ef6786d3d8c4fd6c6073c1afe61"
+    },
+    {
+      "path": "src/ir/compiler.ts",
+      "sha256": "80fe116a109175f48fa105431c0b314fdec108f67e48fbdf93f055700910c32e"
+    },
+    {
+      "path": "src/ir/index.ts",
+      "sha256": "9b24d8fc9702b72ba0e385bfe07d7e57b0ae4d24124e03b8650f11a9b6fc980d"
+    },
+    {
+      "path": "src/ir/render.ts",
+      "sha256": "d83a2587947bad430e71be538db9a961ba37e94c4d653e2e6e9d287acbae0c43"
+    },
+    {
+      "path": "src/ir/request.ts",
+      "sha256": "bbf7d436e098196b0039169e2a5b2e167500962b2b9937e932e109eb2acff335"
+    },
+    {
+      "path": "src/ir/symbol-runtime.ts",
+      "sha256": "912bb7e7f7ee361f5b7bd60ee0e4c6080f4fe125cc23fb9fb31df1ba3f8ca9f1"
+    },
+    {
+      "path": "test/package-artifact.test.js",
+      "sha256": "519a5e328088d4513f26156c16b11b8c89d1ef6484ae36785e28b058b5cfd48d"
+    },
+    {
+      "path": "test/release-contract.test.js",
+      "sha256": "725c2c94e0a4b8bbda98c07820c7cfbd52fb5986540a81f87fa12ac8a17a7a78"
+    },
+    {
+      "path": "test/symbol-modules.test.js",
+      "sha256": "49b8d160031569ca923dfec54b2aa99f7d6209500fb69805f59c191c493efcf5"
+    },
+    {
+      "path": "test/symbol-render.test.ts",
+      "sha256": "c3226590e02f44aca92a5d876492e6c9638ab49fb8bebed69638accc067abafe"
+    },
+    {
+      "path": "test/symbol-runtime.test.ts",
+      "sha256": "41ef7df5de30a5896889ce336de739b44965680ac0850cfe509bf49cb2a36ddb"
+    },
+    {
+      "path": "tsconfig.build.json",
+      "sha256": "ddfd9ffabca8c29fe2c4a32002ea090c3ab8d17a301e06943cbdba913ffa53f1"
+    },
+    {
+      "path": "tsconfig.json",
+      "sha256": "ebc459a24dbb048f6d921a93fa0fb736acbc88b1d828037f294908a46a931912"
+    }
+  ]
+}
