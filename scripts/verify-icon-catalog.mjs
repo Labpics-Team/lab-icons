@@ -85,8 +85,45 @@ async function verifyPlaybackBoundaries(browser, base) {
     await page.clock.runFor(16);
     assert.equal(await page.evaluate(playbackFinished, 1), true);
     assert.equal(await geometry(), end, 'Forward playback must finish at the exact final pose');
+
+    await scrub(0.5);
+    await click('reduce-motion');
+    assert.equal(await geometry(), end, 'Enabling reduced motion must finish a paused clip');
+    await click('reverse');
+    assert.equal(await page.evaluate(playbackFinished, 0), true, 'Reduced reverse must use the freshly prepared clip duration');
+    assert.equal(await geometry(), start, 'Reduced reverse of a paused clip must restore the starting pose');
+    await click('reduce-motion');
+
+    await scrub(0);
+    await click('play');
+    await page.clock.runFor(400);
+    assert.notEqual(await geometry(), start, 'Reduced-motion toggle must interrupt an existing moving clip');
+    assert.notEqual(await geometry(), end, 'Reduced-motion toggle must happen before normal completion');
+    await click('reduce-motion');
+    assert.equal(await page.evaluate(playbackFinished, 1), true);
+    assert.equal(await geometry(), end, 'Enabling reduced motion must finish the existing clip');
+    await click('reverse');
+    assert.equal(await page.evaluate(playbackFinished, 0), true, 'Reduced reverse after a toggle must finish immediately');
+    assert.equal(await geometry(), start, 'Reduced reverse after a toggle must restore the starting pose');
+    await page.clock.runFor(1100);
+    assert.equal(await geometry(), start, 'The previous driver must not overwrite the reduced reverse pose');
+    await click('play');
+    assert.equal(await page.evaluate(playbackFinished, 1), true);
+    assert.equal(await geometry(), end, 'Reduced forward after a toggle must show the final pose');
+    await click('reduce-motion');
+    await click('reverse');
+    await page.clock.runFor(400);
+    assert.equal(await page.locator('#play-label').textContent(), 'Пауза');
+    assert.notEqual(await geometry(), start, 'Disabling reduced motion must restore animated reverse');
+    assert.notEqual(await geometry(), end, 'Animated reverse must leave its final pose');
+    await click('reduce-motion');
+    assert.equal(await page.evaluate(playbackFinished, 0), true, 'Enabling reduced motion during reverse must finish in reverse');
+    assert.equal(await geometry(), start, 'Reducing reverse motion must preserve its requested endpoint');
+    await page.clock.runFor(1100);
+    assert.equal(await page.evaluate(playbackFinished, 0), true);
+    assert.equal(await geometry(), start);
     assert.deepEqual(errors, []);
-    return { roundedReverse, checks: ['fractional endpoints', 'pause near both endpoints', 'scrub from completed clip', 'reverse from completed clip'] };
+    return { roundedReverse, checks: ['fractional endpoints', 'pause near both endpoints', 'scrub from completed clip', 'reverse from completed clip', 'toggle reduced motion on paused and playing clips'] };
   } finally { await context.close(); }
 }
 

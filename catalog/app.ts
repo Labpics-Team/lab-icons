@@ -19,7 +19,7 @@ let options: RenderIconOptions = { size: 24, weight: 400, opsz: 'auto', variant 
 let previous: RenderIconOptions | undefined;
 let revision = 0;
 let clip: SymbolPlayback | undefined;
-let stopDriver: (() => void) | undefined;
+let driver: Pick<SymbolPlayback, 'stop' | 'finish'> | undefined;
 let position = 0;
 let colorChanged = false;
 let detailOpener: HTMLElement | undefined;
@@ -41,7 +41,7 @@ function load(id: string) {
 }
 function progress(value: number) { position = value; input('progress').value = String(value); $('progress-value').textContent = `${Math.round(value * 100)}%`; }
 function stop() {
-  stopDriver?.(); stopDriver = undefined;
+  driver?.stop(); driver = undefined;
   $('play-label').textContent = 'Воспроизвести';
 }
 function clearClip() { stop(); clip?.stop(); clip = undefined; progress(0); }
@@ -167,19 +167,25 @@ function prepareClip() {
   clip = animation === 'transition' ? mounted.set(options, { duration, reducedMotion }) : mounted.effect(animation, { duration, reducedMotion });
   clip.pause();
 }
-function seek(value: number) {
+function ensureClip() {
   // Seeking to the end completes a playback. A later scrub or reverse needs
   // a fresh clip; completed controls no longer write to the mounted symbol.
   if (!clip || clip.state !== 'running' && clip.state !== 'paused') prepareClip();
+}
+function seek(value: number) {
+  ensureClip();
   clip?.seek(value * duration); progress(value);
 }
 function play(reverse = false) {
   if (!mounted || !select('animation').value) return;
-  if (stopDriver && !reverse) { stop(); return; }
+  if (driver && !reverse) { stop(); return; }
   stop();
   // The range rounds to its step, including to an endpoint before the last frame.
   let start = position, end = reverse ? 0 : 1;
-  if (!clip || start === end) { clip?.stop(); prepareClip(); start = reverse ? 1 : 0; }
+  if (!clip || start === end) { clip?.stop(); clip = undefined; start = reverse ? 1 : 0; }
+  // Preparation applies the current reduced-motion choice. Check that clip's
+  // timing before choosing an immediate endpoint or creating a driver.
+  ensureClip();
   if (!clip) return;
   if (clip.duration === 0) {
     if (reverse) {
@@ -192,10 +198,10 @@ function play(reverse = false) {
   const clock = motion.value(start);
   const unsubscribe = clock.subscribe(seek);
   const controls = clock.animate(end, { duration: Math.abs(end - start) * duration, ease: 'linear', reducedMotion: 'user' });
-  const release = () => { unsubscribe(); clock.dispose(); if (stopDriver === release) { stopDriver = undefined; $('play-label').textContent = 'Воспроизвести'; } };
-  stopDriver = release; $('play-label').textContent = 'Пауза';
+  const release = () => { unsubscribe(); clock.dispose(); if (driver?.stop === release) { driver = undefined; $('play-label').textContent = 'Воспроизвести'; } };
+  driver = { stop: release, finish: () => controls.finish() }; $('play-label').textContent = 'Пауза';
   void controls.finished.then(result => {
-    if (stopDriver === release && result.status === 'finished') { progress(end); clip?.seek(end * duration); clip?.stop(); clip = undefined; }
+    if (driver?.stop === release && result.status === 'finished') { progress(end); clip?.seek(end * duration); clip?.stop(); clip = undefined; }
   }).finally(release);
 }
 function download(content: string | Uint8Array, type: string, filename: string) {
@@ -254,7 +260,11 @@ input('date').onchange = () => {
   apply(input('date').value ? { ...rest, date: new Date(`${input('date').value}T12:00:00Z`), timeZone: 'UTC' } : rest);
 };
 select('animation').onchange = () => { clearClip(); if (mounted) mounted.set(options, { duration: 0 }); updateAnimationChoices(); updateDetail(); };
-input('reduce-motion').onchange = () => { if (input('reduce-motion').checked) { stop(); clip?.finish(); progress(1); } };
+input('reduce-motion').onchange = () => {
+  if (!input('reduce-motion').checked) return;
+  if (driver) driver.finish();
+  else { stop(); clip?.finish(); progress(1); }
+};
 $('play').onclick = () => play(); $('reverse').onclick = () => play(true);
 input('progress').oninput = () => { stop(); seek(Number(input('progress').value)); };
 $('reset').onclick = () => { input('size').value = '24'; input('weight').value = '400'; input('opsz').value = '24'; input('auto-optics').checked = true; $('optics-control').hidden = true; colorChanged = false; setTheme(document.documentElement.dataset.theme === 'dark'); apply({ ...options, size: 24, weight: 400, opsz: 'auto' }); };
