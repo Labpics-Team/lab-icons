@@ -342,13 +342,11 @@ RED на 419/429 B. Отрицательный результат для ост�
 full corpus/package, timing/allocations и удалённая qualification остаются
 отдельными открытыми проверками исходной задачи.
 
-Воспроизведение из этого checkout:
-
-```powershell
-node scripts/bench/notification-payloads.mjs `
-  E:/AgentWork/annulus-consumer-evidence-20261102/schema6-8fbb434-report.json `
-  docs/research/notification-payloads-20261102.json
-```
+Исторический эксперимент требует исходный authenticated report из remote run
+`41403011004` с указанным выше SHA-256. Этот входной файл не включён в
+репозиторий: одного checkout для повторного запуска `notification-payloads.mjs`
+недостаточно. Сохранённый [отчёт эксперимента](notification-payloads-20261102.json)
+позволяет изучить измерения и digests, но не заменяет исходный входной файл.
 
 ## Продолжение gzip-поиска: records и printers
 
