@@ -1,0 +1,165 @@
+{
+  "formatVersion": "1.1",
+  "component": {
+    "url": "../../icons-compose/0.4.0/icons-compose-0.4.0.module",
+    "group": "pics.lab",
+    "module": "icons-compose",
+    "version": "0.4.0",
+    "attributes": {
+      "org.gradle.status": "release"
+    }
+  },
+  "createdBy": {
+    "gradle": {
+      "version": "9.3.1"
+    }
+  },
+  "variants": [
+    {
+      "name": "desktopApiElements-published",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.jvm.environment": "standard-jvm",
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-api",
+        "org.jetbrains.kotlin.platform.type": "jvm"
+      },
+      "dependencies": [
+        {
+          "group": "org.jetbrains.compose.foundation",
+          "module": "foundation",
+          "version": {
+            "requires": "1.12.2"
+          }
+        },
+        {
+          "group": "org.jetbrains.compose.ui",
+          "module": "ui",
+          "version": {
+            "requires": "1.12.2"
+          }
+        },
+        {
+          "group": "org.jetbrains.compose.runtime",
+          "module": "runtime",
+          "version": {
+            "requires": "1.12.2"
+          }
+        },
+        {
+          "group": "pics.lab",
+          "module": "motion-compose",
+          "version": {
+            "requires": "0.1.0"
+          }
+        },
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib",
+          "version": {
+            "requires": "2.3.21"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "icons-compose-desktop-0.4.0.jar",
+          "url": "icons-compose-desktop-0.4.0.jar",
+          "size": 6557815,
+          "sha512": "919c37767238df23aefd6b172b80e7fad7b2cdc301389eb0feffaed8ef9963d2b2dc5a196d513dd054bd40d4338130412fa3294eeaac0910b48d64ba6c48c243",
+          "sha256": "90a16eed9c26e0d4295dcacbe66f67d663f809d5eed95d3a94bc7c4fe54620df",
+          "sha1": "98b925ac069c91a50bf369bf7e059fcee4df2967",
+          "md5": "64c652b1e09a194b9ee88a7e5827a1ee"
+        }
+      ]
+    },
+    {
+      "name": "desktopRuntimeElements-published",
+      "attributes": {
+        "org.gradle.category": "library",
+        "org.gradle.jvm.environment": "standard-jvm",
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-runtime",
+        "org.jetbrains.kotlin.platform.type": "jvm"
+      },
+      "dependencies": [
+        {
+          "group": "org.jetbrains.compose.foundation",
+          "module": "foundation",
+          "version": {
+            "requires": "1.12.2"
+          }
+        },
+        {
+          "group": "org.jetbrains.compose.ui",
+          "module": "ui",
+          "version": {
+            "requires": "1.12.2"
+          }
+        },
+        {
+          "group": "org.jetbrains.compose.runtime",
+          "module": "runtime",
+          "version": {
+            "requires": "1.12.2"
+          }
+        },
+        {
+          "group": "pics.lab",
+          "module": "motion-compose",
+          "version": {
+            "requires": "0.1.0"
+          }
+        },
+        {
+          "group": "org.jetbrains.kotlin",
+          "module": "kotlin-stdlib",
+          "version": {
+            "requires": "2.3.21"
+          }
+        },
+        {
+          "group": "org.jetbrains.kotlinx",
+          "module": "kotlinx-datetime",
+          "version": {
+            "requires": "0.7.1"
+          }
+        }
+      ],
+      "files": [
+        {
+          "name": "icons-compose-desktop-0.4.0.jar",
+          "url": "icons-compose-desktop-0.4.0.jar",
+          "size": 6557815,
+          "sha512": "919c37767238df23aefd6b172b80e7fad7b2cdc301389eb0feffaed8ef9963d2b2dc5a196d513dd054bd40d4338130412fa3294eeaac0910b48d64ba6c48c243",
+          "sha256": "90a16eed9c26e0d4295dcacbe66f67d663f809d5eed95d3a94bc7c4fe54620df",
+          "sha1": "98b925ac069c91a50bf369bf7e059fcee4df2967",
+          "md5": "64c652b1e09a194b9ee88a7e5827a1ee"
+        }
+      ]
+    },
+    {
+      "name": "desktopSourcesElements-published",
+      "attributes": {
+        "org.gradle.category": "documentation",
+        "org.gradle.dependency.bundling": "external",
+        "org.gradle.docstype": "sources",
+        "org.gradle.jvm.environment": "standard-jvm",
+        "org.gradle.libraryelements": "jar",
+        "org.gradle.usage": "java-runtime",
+        "org.jetbrains.kotlin.platform.type": "jvm"
+      },
+      "files": [
+        {
+          "name": "icons-compose-desktop-0.4.0-sources.jar",
+          "url": "icons-compose-desktop-0.4.0-sources.jar",
+          "size": 6006623,
+          "sha512": "c8e2253d6ffe53e3aa365f95855f8589918fb18b004cb6575f7cf0304b314179c0e897400e61ecf715ced348a1441eb468812790441d812175796394044d5c1b",
+          "sha256": "e57dc02c34b7b1079c42977f224c37a4aaac3238b18bc645d8c4cddbae8cee78",
+          "sha1": "342e0a6d017b785262129320d29b7d8307878902",
+          "md5": "f76e3585a7fc40c0ad68ae9d4c17a2d0"
+        }
+      ]
+    }
+  ]
+}
