@@ -1,0 +1,13 @@
+import type { GlyphCompiler } from './compiler.js';
+export { GlyphModelError, sampleMotionGesture } from './compiler.js';
+export type { IconId, AxisName, IconVariant, ModelMode, ModelState, FillRule, PartRole, GlyphRequest, ParsedGlyphRequest, SourcePartProvenance, ModelPartProvenance, RecipePartProvenance, PartProvenance, GlyphPart, SourceGlyphProvenance, ModelGlyphProvenance, RecipeGlyphProvenance, GlyphProvenance, GlyphIR, GlyphComposition, GlyphCapabilities, AxisContract, MotionCapabilityState, MotionGestureTrackContract, MotionGestureContract, MotionGestureSample, MotionTrackContract, MotionCapabilities, IconDesignContract, GlyphModelErrorCode, CalendarNumberGlyphInput } from './compiler.js';
+export declare function glyph(request: Parameters<GlyphCompiler['glyph']>[0]): ReturnType<GlyphCompiler['glyph']>;
+export declare function glyphCapabilities(iconValue: unknown, variantValue?: unknown): ReturnType<GlyphCompiler['glyphCapabilities']>;
+export declare function parseGlyphRequest(value: unknown): ReturnType<GlyphCompiler['parseGlyphRequest']>;
+export declare function parseIconId(value: unknown): ReturnType<GlyphCompiler['parseIconId']>;
+export declare function isIconId(value: unknown): value is ReturnType<GlyphCompiler['parseIconId']>;
+export declare function calendarNumberGlyph(input: Parameters<GlyphCompiler['calendarNumberGlyph']>[0]): ReturnType<GlyphCompiler['calendarNumberGlyph']>;
+export declare const iconIds: GlyphCompiler['iconIds'];
+export declare const axisNames: GlyphCompiler['axisNames'];
+export declare const axisContracts: GlyphCompiler['axisContracts'];
+export declare const iconDesignContract: GlyphCompiler['iconDesignContract'];

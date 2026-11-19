@@ -1,0 +1,11 @@
+import type { AuthorSourceGlyph, AuthorSourceCapabilities, AuthorSymbolGlyphRequest } from '../ir/author-source.js';
+import type { AuthorCapsuleVariationGlyph, AuthorCapsuleVariationCapabilities, AuthorCapsuleVariationGlyphRequest } from '../ir/author-capsule-types.js';
+export declare const outline: string;
+export declare const filled: string;
+export declare function glyph(request?: AuthorSymbolGlyphRequest): AuthorSourceGlyph<'mic-circle'>;
+export declare function glyph(request: AuthorCapsuleVariationGlyphRequest<'outline'>): AuthorCapsuleVariationGlyph<'mic-circle', 'outline'>;
+export declare function glyph<TVariant extends 'outline' | 'filled'>(request: AuthorCapsuleVariationGlyphRequest<TVariant> & Readonly<{variant:TVariant}>): AuthorCapsuleVariationGlyph<'mic-circle', TVariant>;
+export declare function glyph(request: AuthorCapsuleVariationGlyphRequest<'outline' | 'filled'>): AuthorCapsuleVariationGlyph<'mic-circle', 'outline' | 'filled'>;
+export declare function glyphCapabilities(variant?: 'outline'): AuthorCapsuleVariationCapabilities<'mic-circle', 'outline'>;
+export declare function glyphCapabilities(variant: 'filled'): AuthorCapsuleVariationCapabilities<'mic-circle', 'filled'>;
+export declare function glyphCapabilities(variant: 'outline' | 'filled'): AuthorCapsuleVariationCapabilities<'mic-circle', 'outline'> | AuthorCapsuleVariationCapabilities<'mic-circle', 'filled'>;
