@@ -3,6 +3,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, 
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { runInNewContext } from 'node:vm';
 import { describe, expect, it } from 'vitest';
 import { parse, stringify } from 'yaml';
 
@@ -268,6 +269,39 @@ function assertNativeGraph(files) {
 }
 
 describe('нативный итог CI', () => {
+  it('ставит матрицу нового PR в очередь независимо от порядка ревизий и повторов', () => {
+    const { concurrency, jobs } = parse(sources().get('ci.yml'));
+    const event = (event_name, run_id, run_attempt, ref, number = 0) => ({
+      workflow: 'CI', event_name, run_id, run_attempt, ref, event: { pull_request: { number } },
+    });
+    const render = (value, github, index = 0) => String(value).replace(/\$\{\{(.*?)\}\}/g, (_, expression) =>
+      runInNewContext(expression, {
+        github, strategy: { 'job-index': index },
+        format: (pattern, ...args) => pattern.replace(/\{(\d+)\}/g, (_, place) => args[Number(place)]),
+      }, { timeout: 100 })).toLowerCase();
+    const pr = (run, attempt = 1) => event('pull_request', run, attempt, 'refs/pull/7/merge', 7);
+    const keys = run => {
+      const single = [concurrency, jobs.required.concurrency, jobs.security.concurrency].filter(Boolean);
+      const variant = jobs.verify.concurrency;
+      const rows = variant ? matrix.map((_, row) => render(variant.group, run, row)) : [];
+      if (variant) expect(new Set(rows).size).toBe(matrix.length);
+      return new Set([...single.map(policy => render(policy.group, run)), ...rows]);
+    };
+    for (const order of [[pr(1), pr(2), pr(1, 2)], [pr(2), pr(1, 2), pr(1)]]) {
+      const busy = new Set();
+      for (const run of order) {
+        for (const key of keys(run)) {
+          expect(busy.has(key), key).toBe(false);
+          busy.add(key);
+        }
+      }
+    }
+    for (const [name, ref] of [['push', 'refs/heads/main'], ['merge_group', 'refs/heads/gh-readonly-queue/main/pr-7']]) {
+      expect(render(concurrency.group, event(name, 1, 1, ref))).toBe(render(concurrency.group, event(name, 2, 1, ref)));
+      expect(render(concurrency['cancel-in-progress'], event(name, 1, 1, ref))).toBe('true');
+    }
+  });
+
   it('покрывает каждую платформу единственным required check', () => {
     assertNativeGraph(sources());
   });
