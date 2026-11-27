@@ -11,7 +11,8 @@ permissions:
   contents: read
 
 concurrency:
-  group: ci-${{ github.workflow }}-${{ github.ref }}
+  # У каждой попытки PR своя группа, включая повтор старого запуска.
+  group: ci-${{ github.workflow }}-${{ github.event_name == 'pull_request' && format('pr-run-{0}-{1}', github.run_id, github.run_attempt) || github.ref }}
   cancel-in-progress: true
 
 jobs:
