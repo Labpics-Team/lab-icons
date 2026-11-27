@@ -2,11 +2,6 @@ name: Release Icons packages
 
 on:
   workflow_dispatch:
-    inputs:
-      ci_run_id:
-        description: 'Successful CI run for a merged main commit'
-        type: string
-        required: true
 
 permissions: {}
 concurrency:
@@ -22,6 +17,10 @@ jobs:
     outputs:
       sha: ${{ steps.source.outputs.sha }}
       version: ${{ steps.source.outputs.version }}
+      ci_run_id: ${{ steps.source.outputs.ci_run_id }}
+      compose_artifact: ${{ steps.source.outputs.compose_artifact }}
+      npm_artifact: ${{ steps.source.outputs.npm_artifact }}
+      catalog_artifact: ${{ steps.source.outputs.catalog_artifact }}
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
@@ -30,25 +29,7 @@ jobs:
       - id: source
         env:
           GH_TOKEN: ${{ github.token }}
-          CI_RUN_ID: ${{ inputs.ci_run_id }}
-        run: |
-          set -euo pipefail
-          [[ "$GITHUB_REF" == refs/heads/main ]]
-          [[ "$CI_RUN_ID" =~ ^[1-9][0-9]*$ ]]
-          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$CI_RUN_ID" > "$RUNNER_TEMP/icons-ci.json"
-          node --input-type=module <<'NODE'
-          import { readFileSync, appendFileSync } from 'node:fs';
-          import { execFileSync } from 'node:child_process';
-          const run = JSON.parse(readFileSync(process.env.RUNNER_TEMP + '/icons-ci.json'));
-          if (run.repository.full_name !== process.env.GITHUB_REPOSITORY || run.path !== '.github/workflows/ci.yml' ||
-              run.event !== 'push' || run.head_branch !== 'main' || run.conclusion !== 'success' || run.head_sha !== process.env.GITHUB_SHA) {
-            throw new Error('Release requires successful main CI, including installed catalog and native consumers');
-          }
-          execFileSync('git', ['merge-base', '--is-ancestor', run.head_sha, 'origin/main']);
-          const { version } = JSON.parse(execFileSync('git', ['show', run.head_sha + ':package.json'], { encoding: 'utf8' }));
-          if (!/^\d+\.\d+\.\d+$/.test(version)) throw new Error('Invalid package version');
-          appendFileSync(process.env.GITHUB_OUTPUT, `sha=${run.head_sha}\nversion=${version}\n`);
-          NODE
+        run: node scripts/resolve-release-source.mjs
 
   publish:
     needs: resolve
@@ -65,8 +46,8 @@ jobs:
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           github-token: ${{ github.token }}
-          run-id: ${{ inputs.ci_run_id }}
-          name: lab-icons-compose-${{ needs.resolve.outputs.sha }}
+          run-id: ${{ needs.resolve.outputs.ci_run_id }}
+          artifact-ids: ${{ needs.resolve.outputs.compose_artifact }}
           path: native-artifact
       - name: Verify the complete Maven graph
         env:
@@ -131,8 +112,8 @@ jobs:
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           github-token: ${{ github.token }}
-          run-id: ${{ inputs.ci_run_id }}
-          name: lab-icons-npm-${{ needs.resolve.outputs.sha }}
+          run-id: ${{ needs.resolve.outputs.ci_run_id }}
+          artifact-ids: ${{ needs.resolve.outputs.npm_artifact }}
           path: npm-artifact
       - name: Publish the tested tarball through npm Trusted Publishing
         env:
@@ -213,14 +194,14 @@ jobs:
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           github-token: ${{ github.token }}
-          run-id: ${{ inputs.ci_run_id }}
-          name: lab-icons-catalog-${{ needs.resolve.outputs.sha }}
+          run-id: ${{ needs.resolve.outputs.ci_run_id }}
+          artifact-ids: ${{ needs.resolve.outputs.catalog_artifact }}
           path: catalog-artifact
       - name: Publish catalog, Maven archive and checksums
         env:
           VERSION: ${{ needs.resolve.outputs.version }}
           SOURCE_SHA: ${{ needs.resolve.outputs.sha }}
-          CI_RUN_ID: ${{ inputs.ci_run_id }}
+          CI_RUN_ID: ${{ needs.resolve.outputs.ci_run_id }}
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
