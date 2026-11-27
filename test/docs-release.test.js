@@ -16,32 +16,33 @@ function releaseCommands() {
   return blocks[0].text;
 }
 
-function execute(runId, gh = 'printf "%s\\n" "$@"') {
+function execute(gh = 'printf "%s\\n" "$@"', extraEnv = {}) {
   const bash = process.platform === 'win32'
     ? join(process.env.ProgramFiles ?? 'C:\\Program Files', 'Git/bin/bash.exe') : 'bash';
   // Execute the published command; the gh function records the requested operation.
+  const env = { ...process.env, ...extraEnv };
+  if (!Object.hasOwn(extraEnv, 'CI_RUN_ID')) delete env.CI_RUN_ID;
   return spawnSync(bash, ['--noprofile', '--norc', '-c', `gh() { ${gh}; }\n${releaseCommands()}`], {
-    cwd: tmpdir(), env: { ...process.env, CI_RUN_ID: runId ?? '' }, encoding: 'utf8', timeout: 10_000, windowsHide: true,
+    cwd: tmpdir(), env, encoding: 'utf8', timeout: 10_000, windowsHide: true,
   });
 }
 
 describe('Инструкция выпуска', () => {
-  test('передаёт выбранный CI run штатному workflow на main', () => {
-    const result = execute('12345');
+  const dispatch = ['workflow', 'run', 'release-packages.yml', '--ref', 'main'];
+
+  test('запускает штатный выпуск main без ручного выбора CI run', () => {
+    const result = execute();
     expect(result.error).toBeUndefined();
     expect(result.status, result.stderr).toBe(0);
-    expect(result.stdout.trim().split(/\r?\n/)).toEqual([
-      'workflow', 'run', 'release-packages.yml', '--ref', 'main', '-f', 'ci_run_id=12345',
-    ]);
+    expect(result.stdout.trim().split(/\r?\n/)).toEqual(dispatch);
   });
-  test('при отсутствующем run ID не запускает выпуск', () => {
-    const result = execute();
-    expect(result.status).not.toBe(0);
-    expect(result.stdout).toBe('');
-    expect(result.stderr).toContain('CI_RUN_ID');
+  test('прежний CI_RUN_ID не становится входом выпуска', () => {
+    const result = execute(undefined, { CI_RUN_ID: '12345' });
+    expect(result.status, result.stderr).toBe(0);
+    expect(result.stdout.trim().split(/\r?\n/)).toEqual(dispatch);
   });
   test('возвращает ошибку запуска Actions', () => {
-    const result = execute('12345', 'return 17');
+    const result = execute('return 17');
     expect(result.status).toBe(17);
   });
 });
