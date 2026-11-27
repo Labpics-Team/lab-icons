@@ -172,7 +172,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Повтор выпуска и целостность проверенного npm tarball
-        run: node --test scripts/upload-release-assets.test.mjs scripts/publish-npm.test.mjs
+        run: node --test scripts/resolve-release-source.test.mjs scripts/publish-release-assets.test.mjs scripts/publish-npm.test.mjs
 
       - name: Chromium для удалённого browser consumer
         run: pnpm exec playwright install --with-deps chromium

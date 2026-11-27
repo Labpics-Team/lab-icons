@@ -94,19 +94,27 @@ node scripts/check-docs-drift.js --check
 Версию определите по [политике совместимости](semver-policy.md).
 Тег исходников должен совпадать с `v<package.json#version>`.
 
-После merge дождитесь успешного CI текущего `main` и задайте его run ID
-в переменной окружения `CI_RUN_ID`. Запустите из Bash:
+После merge дождитесь успешного CI текущего `main` и запустите выпуск
+из GitHub Actions или командой:
 
 ```sh
-gh workflow run release-packages.yml --ref main -f "ci_run_id=${CI_RUN_ID:?Укажите ID успешного CI текущего main}"
+gh workflow run release-packages.yml --ref main
 ```
+
+Номер версии читается из `package.json` точного dispatch-коммита. Последний
+push-run штатного `ci.yml` для того же SHA должен быть завершён успешно.
+До любого job с правом публикации проверяются доступность, идентичность и
+полный набор CI artifacts; выбираются их неизменяемые ID, а не произвольный
+run ID или имя из пользовательского ввода. Если CI не завершён, неуспешен
+или artifacts истекли, выпуск останавливается; повторите CI того же SHA и
+запустите workflow снова.
 
 Workflow продвигает уже проверенные npm, Maven и catalog artifacts этого коммита.
 Он проверяет все ссылки `.module`, SHA-256 и принадлежность файлов репозиторию;
 публикует source tag `v<version>` и отдельный parentless Maven tag
 `maven-compose-v<version>`. Бинарные файлы не добавляются в source-ветку.
-Версия берётся из выбранного коммита; чужой, незавершённый, PR-run или CI
-другого коммита не подходит. SHA запуска выпуска совпадает с проверенным SHA,
+Чужой, незавершённый, PR-run или CI другого коммита не подходит.
+SHA запуска выпуска совпадает с проверенным SHA,
 чтобы npm provenance указывала на правильные исходники.
 
 После публикации отдельный headless consumer устанавливает
@@ -116,9 +124,13 @@ JavaScript tag `v<version>-dist`.
 Npm Trusted Publishing публикует тот же tarball, который прошёл установленный
 browser consumer в CI. Отдельный consumer с пустым cache устанавливает публичную
 npm-версию; её integrity должна совпасть с проверенными байтами. Затем GitHub
-release получает Maven ZIP, самостоятельный каталог и `SHA256SUMS.txt`.
-Повтор сохраняет существующие теги и проверяет байты уже загруженных assets;
-несовпадающий выпуск требует новой версии.
+release сначала остаётся черновиком, получает Maven ZIP, самостоятельный каталог
+и `SHA256SUMS.txt`. Публикация черновика происходит только после сверки полного
+набора файлов и SHA-256 по GitHub API. После публикации повтор лишь сверяет
+байты: недостающие, лишние или несовпадающие assets не дополняются и не
+заменяются. Незавершённый черновик можно продолжить без повторной загрузки
+совпадающих файлов. Несовпадающий опубликованный выпуск требует новой версии.
+Такой порядок совместим со [штатной неизменяемостью GitHub Releases](https://docs.github.com/en/code-security/concepts/supply-chain-security/immutable-releases).
 
 В настройках npm-пакета `@labpics/icons` Trusted Publisher должен разрешать
 `npm publish` для GitHub organization `Labpics-Team`, repository `lab-icons`,
