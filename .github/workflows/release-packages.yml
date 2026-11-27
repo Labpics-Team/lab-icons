@@ -252,7 +252,4 @@ jobs:
           Перед выпуском отдельный headless consumer установил Maven-пакет по публичному адресу с пустым cache.
           npm: @labpics/icons@$VERSION. Опубликован проверенный CI tarball; registry integrity и отдельная установка подтверждены.
           EOF
-          if ! gh release view "v$VERSION" >/dev/null 2>&1; then
-            gh release create "v$VERSION" --verify-tag --title "Lab Icons $VERSION" --notes-file "$RUNNER_TEMP/icons-release-notes.md"
-          fi
-          node scripts/upload-release-assets.mjs "v$VERSION" "$RUNNER_TEMP/icons-release"
+          node scripts/publish-release-assets.mjs "v$VERSION" "$RUNNER_TEMP/icons-release" "$RUNNER_TEMP/icons-release-notes.md"

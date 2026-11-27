@@ -116,9 +116,13 @@ JavaScript tag `v<version>-dist`.
 Npm Trusted Publishing публикует тот же tarball, который прошёл установленный
 browser consumer в CI. Отдельный consumer с пустым cache устанавливает публичную
 npm-версию; её integrity должна совпасть с проверенными байтами. Затем GitHub
-release получает Maven ZIP, самостоятельный каталог и `SHA256SUMS.txt`.
-Повтор сохраняет существующие теги и проверяет байты уже загруженных assets;
-несовпадающий выпуск требует новой версии.
+release сначала остаётся черновиком, получает Maven ZIP, самостоятельный каталог
+и `SHA256SUMS.txt`. Публикация черновика происходит только после сверки полного
+набора файлов и SHA-256 по GitHub API. После публикации повтор лишь сверяет
+байты: недостающие, лишние или несовпадающие assets не дополняются и не
+заменяются. Незавершённый черновик можно продолжить без повторной загрузки
+совпадающих файлов. Несовпадающий опубликованный выпуск требует новой версии.
+Такой порядок совместим со [штатной неизменяемостью GitHub Releases](https://docs.github.com/en/code-security/concepts/supply-chain-security/immutable-releases).
 
 В настройках npm-пакета `@labpics/icons` Trusted Publisher должен разрешать
 `npm publish` для GitHub organization `Labpics-Team`, repository `lab-icons`,
